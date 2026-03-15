@@ -7,9 +7,8 @@
     "esModuleInterop": true,
     "skipLibCheck": true,
     "outDir": "./dist",
-    "rootDir": "./src",
     "types": ["bun-types"]
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist", "tests"]
+  "include": ["src/**/*", "tests/**/*"],
+  "exclude": ["node_modules", "dist"]
 }
