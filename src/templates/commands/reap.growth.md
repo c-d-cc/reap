@@ -17,7 +17,8 @@ description: "REAP Growth — AI+Human 협업으로 코드를 구현합니다"
 1. `.reap/life/03-planning-plan.md`에서 태스크 목록을 읽어라
 2. 이미 `04-growth-log.md`가 존재하면 읽어라 (Validation에서 복귀한 경우 — 기존 기록 유지)
 3. 미완료(`[ ]`) 태스크부터 순서대로 구현하라
-   - 각 태스크 완료 시 즉시 `04-growth-log.md`를 갱신하라 (완료 후 일괄 작성이 아닌 실시간 기록)
+   - `04-growth-log.md`를 태스크 또는 Phase 단위로 갱신하라
+   - 서브에이전트에게 구현을 위임한 경우, 위임 단위 완료 후 갱신해도 된다
    - conventions.md의 규칙을 준수하라
    - constraints.md의 기술 제약을 준수하라
 4. 명세와 다르게 구현해야 할 부분을 발견하면:

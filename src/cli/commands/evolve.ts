@@ -19,7 +19,14 @@ export async function evolve(projectRoot: string, goal: string): Promise<Generat
 export async function advanceStage(projectRoot: string): Promise<GenerationState> {
   const paths = new ReapPaths(projectRoot);
   const mgr = new GenerationManager(paths);
-  return mgr.advance();
+  const state = await mgr.advance();
+
+  // Legacy 진입 시 자동으로 lineage 아카이빙 실행
+  if (state.stage === "legacy") {
+    await mgr.complete();
+  }
+
+  return state;
 }
 
 export async function regressStage(projectRoot: string): Promise<GenerationState> {

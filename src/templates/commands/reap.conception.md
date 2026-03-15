@@ -29,11 +29,17 @@ description: "REAP Conception — 이번 Generation의 목표를 설정합니다
 
 ### 4. Genome Health Check
 - `.reap/genome/`의 모든 파일을 읽어라 (principles.md, conventions.md, constraints.md, domain/)
-- 각 파일의 건강 상태를 평가하라:
-  - **placeholder만 있는 파일** → "genome 보완 필요" 플래그
-  - **100줄 초과 파일** → "domain/으로 분리 필요" 플래그
-  - **domain/이 비어있는 경우** → "도메인 규칙 미정의" 플래그
-  - **constraints.md에 Validation Commands가 비어있는 경우** → "테스트 명령어 미정의" 플래그
+- **첫 세대인 경우** (`.reap/lineage/`가 비어있는 경우):
+  - genome이 모두 placeholder인 것은 정상이다
+  - 인간에게 "첫 세대이므로 genome 초기 구성이 필요합니다"라고 안내하라
+  - 인간과 함께 Tech Stack, Core Beliefs, Validation Commands 등을 채워라
+  - 이것은 Birth 수정 원칙의 유일한 예외이다: **첫 세대 Conception에서만 genome 직접 작성이 허용된다**
+- **이후 세대인 경우**:
+  - 각 파일의 건강 상태를 평가하라:
+    - **placeholder만 있는 파일** → "genome 보완 필요" 플래그
+    - **100줄 초과 파일** → "domain/으로 분리 필요" 플래그
+    - **domain/이 비어있는 경우** → "도메인 규칙 미정의" 플래그
+    - **constraints.md에 Validation Commands가 비어있는 경우** → "테스트 명령어 미정의" 플래그
 - genome 상태를 인간에게 보고하라
 
 ### 5. Goal 설정
