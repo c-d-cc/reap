@@ -2,6 +2,7 @@
 import { program } from "commander";
 import { initProject } from "./commands/init";
 import { evolve, advanceStage, regressStage } from "./commands/evolve";
+import { getStatus } from "./commands/status";
 import { LifeCycle } from "../core/lifecycle";
 
 program
@@ -49,6 +50,28 @@ program
       } else {
         console.error("Error: provide a goal or use --advance");
         process.exit(1);
+      }
+    } catch (e: any) {
+      console.error(`Error: ${e.message}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("status")
+  .description("Show current project and Generation status")
+  .action(async () => {
+    try {
+      const status = await getStatus(process.cwd());
+      console.log(`Project: ${status.project} (${status.entryMode})`);
+      console.log(`Completed Generations: ${status.totalGenerations}`);
+      if (status.generation) {
+        console.log(`\nActive Generation: ${status.generation.id}`);
+        console.log(`  Goal: ${status.generation.goal}`);
+        console.log(`  Stage: ${status.generation.stage} (${LifeCycle.label(status.generation.stage as any)})`);
+        console.log(`  Started: ${status.generation.startedAt}`);
+      } else {
+        console.log(`\nNo active Generation. Run 'reap evolve "<goal>"' to start one.`);
       }
     } catch (e: any) {
       console.error(`Error: ${e.message}`);
