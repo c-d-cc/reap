@@ -3,6 +3,7 @@ import { program } from "commander";
 import { initProject } from "./commands/init";
 import { evolve, advanceStage, regressStage } from "./commands/evolve";
 import { getStatus } from "./commands/status";
+import { fixProject } from "./commands/fix";
 import { LifeCycle } from "../core/lifecycle";
 
 program
@@ -72,6 +73,30 @@ program
         console.log(`  Started: ${status.generation.startedAt}`);
       } else {
         console.log(`\nNo active Generation. Run 'reap evolve "<goal>"' to start one.`);
+      }
+    } catch (e: any) {
+      console.error(`Error: ${e.message}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("fix")
+  .description("Diagnose and repair .reap/ directory structure")
+  .action(async () => {
+    try {
+      const result = await fixProject(process.cwd());
+      if (result.fixed.length === 0 && result.issues.length === 0) {
+        console.log("✓ Project is healthy. No issues found.");
+      } else {
+        if (result.fixed.length > 0) {
+          console.log("Fixed:");
+          result.fixed.forEach(f => console.log(`  ✓ ${f}`));
+        }
+        if (result.issues.length > 0) {
+          console.log("Issues (require manual intervention):");
+          result.issues.forEach(i => console.log(`  ✗ ${i}`));
+        }
       }
     } catch (e: any) {
       console.error(`Error: ${e.message}`);
