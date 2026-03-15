@@ -10,21 +10,34 @@ export class ReapPaths {
 
   get root(): string { return join(this.projectRoot, ".reap"); }
   get config(): string { return join(this.root, "config.yml"); }
+
+  // Genome (원칙/규칙/결정)
   get genome(): string { return join(this.root, "genome"); }
-  get sourceMap(): string { return join(this.genome, "source-map.json"); }
-  get cheatsheet(): string { return join(this.genome, "cheatsheet.md"); }
-  get architecture(): string { return join(this.genome, "architecture"); }
+  get principles(): string { return join(this.genome, "principles.md"); }
+  get domain(): string { return join(this.genome, "domain"); }
+  get conventions(): string { return join(this.genome, "conventions.md"); }
+  get constraints(): string { return join(this.genome, "constraints.md"); }
+
+  // Environment
   get environment(): string { return join(this.root, "environment"); }
+
+  // Life (현재 세대)
   get life(): string { return join(this.root, "life"); }
   get currentYml(): string { return join(this.life, "current.yml"); }
   get mutations(): string { return join(this.life, "mutations"); }
   get backlog(): string { return join(this.life, "backlog"); }
-  get lineage(): string { return join(this.root, "lineage"); }
-  get origins(): string { return join(this.root, "origins"); }
-  get claude(): string { return join(this.root, "claude"); }
+  artifact(name: string): string { return join(this.life, name); }
 
+  // Lineage (완료된 세대)
+  get lineage(): string { return join(this.root, "lineage"); }
   generationDir(genId: string): string { return join(this.lineage, genId); }
-  adaptationsDir(genId: string): string { return join(this.generationDir(genId), "adaptations"); }
+
+  // Commands & Templates (에이전트 독립)
+  get commands(): string { return join(this.root, "commands"); }
+  get templates(): string { return join(this.root, "templates"); }
+
+  // Claude Code integration
+  get claudeCommands(): string { return join(this.projectRoot, ".claude", "commands"); }
 
   async isReapProject(): Promise<boolean> {
     try {
