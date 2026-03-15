@@ -1,4 +1,5 @@
 import { join } from "path";
+import { stat } from "fs/promises";
 
 export class ReapPaths {
   private projectRoot: string;
@@ -26,7 +27,11 @@ export class ReapPaths {
   adaptationsDir(genId: string): string { return join(this.generationDir(genId), "adaptations"); }
 
   async isReapProject(): Promise<boolean> {
-    const file = Bun.file(this.root);
-    return file.exists();
+    try {
+      const s = await stat(this.root);
+      return s.isDirectory();
+    } catch {
+      return false;
+    }
   }
 }
