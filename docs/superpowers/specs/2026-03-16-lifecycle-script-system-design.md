@@ -175,8 +175,9 @@ AI Agent: Gate 체크 (01-conception-goal.md 존재?)
 | **Steps** | 1. `03-planning-plan.md`에서 태스크 목록 읽기 |
 | | 2. 계획에 따라 코드 구현 |
 | | 3. 명세와 다르게 구현해야 할 부분 발견 시 `.reap/life/mutations/`에 기록 |
-| | 4. 완료된 태스크를 growth log에 기록 |
-| **산출물** | `04-growth-log.md` — 완료 태스크, 발생한 mutation, 구현 메모 |
+| | 4. **mutation이 발생하여 genome 수정이 필요한 경우, 해당 mutation에 의존하는 태스크를 deferred로 마킹하고 backlog에 추가** |
+| | 5. 완료/deferred 태스크를 growth log에 기록 |
+| **산출물** | `04-growth-log.md` — 완료 태스크, deferred 태스크(사유 포함), 발생한 mutation, 구현 메모 |
 
 ### Validation (검증)
 
@@ -184,10 +185,11 @@ AI Agent: Gate 체크 (01-conception-goal.md 존재?)
 |---|---|
 | **Gate** | current.yml stage == validation, `04-growth-log.md` 존재 |
 | **Steps** | 1. `01-conception-goal.md`에서 완료 조건 읽기 |
-| | 2. 테스트 실행 |
-| | 3. goal의 완료 조건을 하나씩 점검 |
-| | 4. 문제 발견 시 `reap evolve --back`으로 Growth 복귀 가능 |
-| **산출물** | `05-validation-report.md` — 테스트 결과, 완료 조건 체크, pass/fail |
+| | 2. **deferred 태스크를 제외한 범위에서 완료 조건을 재평가** |
+| | 3. 테스트 실행 (완료된 범위에 대해서만) |
+| | 4. goal의 완료 조건을 하나씩 점검 (deferred로 인해 부분 달성도 허용) |
+| | 5. 문제 발견 시 `reap evolve --back`으로 Growth 복귀 가능 |
+| **산출물** | `05-validation-report.md` — 테스트 결과, 완료 조건 체크, deferred 항목 목록, pass/partial/fail |
 
 ### Adaptation (회고)
 
@@ -197,9 +199,10 @@ AI Agent: Gate 체크 (01-conception-goal.md 존재?)
 | **Steps** | 1. `.reap/life/mutations/` 전체 리뷰 |
 | | 2. 이번 세대에서 얻은 교훈 정리 |
 | | 3. genome에 반영할 변경 사항을 adaptation으로 기록 |
-| | 4. 다음 세대 목표 후보를 `.reap/life/backlog/`에 추가 |
-| | 5. 인간과 함께 회고 확정 |
-| **산출물** | `06-adaptation-retrospective.md` — 교훈, genome 변경 제안, 다음 세대 backlog |
+| | 4. **deferred 태스크를 다음 세대 목표로 `.reap/life/backlog/`에 추가** |
+| | 5. 그 외 다음 세대 목표 후보도 backlog에 추가 |
+| | 6. 인간과 함께 회고 확정 |
+| **산출물** | `06-adaptation-retrospective.md` — 교훈, genome 변경 제안, deferred 태스크 인계, 다음 세대 backlog |
 
 ### Birth (출산)
 
@@ -230,6 +233,24 @@ Legacy는 slash command가 아닌 CLI(`reap evolve --advance`)가 자동 처리:
    ```
 4. `.reap/life/current.yml` 초기화
 5. `.reap/life/` 산출물 및 `mutations/` 정리 (backlog/는 유지)
+
+### 태스크 Deferral (세대 간 인계)
+
+Genome 불변 원칙에 의해, 현재 세대에서 genome 수정이 필요한 태스크는 현재 세대에서 완료할 수 없다. 이런 태스크는 **deferred**로 마킹하고 다음 세대로 넘긴다.
+
+**Deferral 흐름:**
+1. Growth 중 mutation 발견 → `.reap/life/mutations/`에 기록
+2. 해당 mutation에 의존하는 태스크를 `03-planning-plan.md`에서 `[deferred]`로 마킹
+3. `04-growth-log.md`에 deferred 사유 기록
+4. Validation에서 deferred 태스크는 검증 대상에서 제외
+5. Adaptation에서 deferred 태스크를 backlog에 추가 (다음 세대 목표 후보)
+
+**태스크 상태:**
+- `[ ]` — 미완료
+- `[x]` — 완료
+- `[deferred]` — 다음 세대로 인계 (사유: mutation 의존)
+
+**부분 완료는 정상이다.** 세대의 목표를 100% 달성하지 못해도 된다. genome 수정이 필요한 부분은 Birth에서 genome을 갱신한 뒤, 다음 세대에서 이어서 진행한다. 이것이 진화의 본질이다.
 
 ### Growth ↔ Validation 루프
 
