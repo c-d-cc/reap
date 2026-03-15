@@ -26,11 +26,14 @@ export async function fixProject(projectRoot: string): Promise<FixResult> {
   // 1. Required directories
   const requiredDirs = [
     { path: paths.genome, name: "genome" },
+    { path: paths.domain, name: "genome/domain" },
     { path: paths.environment, name: "environment" },
     { path: paths.life, name: "life" },
     { path: paths.lineage, name: "lineage" },
     { path: paths.mutations, name: "life/mutations" },
     { path: paths.backlog, name: "life/backlog" },
+    { path: paths.commands, name: "commands" },
+    { path: paths.templates, name: "templates" },
   ];
 
   for (const dir of requiredDirs) {
