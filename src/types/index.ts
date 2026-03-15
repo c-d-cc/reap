@@ -32,8 +32,10 @@ export interface ReapConfig {
 export interface MutationRecord {
   id: string;
   generationId: string;
-  file: string;
+  target: string;
   description: string;
+  reason: string;
+  suggestedChange: string;
   createdAt: string;
 }
 
