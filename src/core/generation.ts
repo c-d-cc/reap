@@ -1,5 +1,6 @@
 import YAML from "yaml";
-import { readdir, mkdir } from "fs/promises";
+import { readdir, mkdir, rename } from "fs/promises";
+import { join } from "path";
 import type { GenerationState } from "../types";
 import type { ReapPaths } from "./paths";
 import { LifeCycle } from "./lifecycle";
@@ -48,11 +49,50 @@ export class GenerationManager {
     if (!state) throw new Error("No active generation");
     if (state.stage !== "legacy") throw new Error("Generation must be in legacy stage to complete");
 
-    // Move to lineage
-    const genDir = this.paths.generationDir(state.id);
+    // Generate lineage directory name
+    const goalSlug = state.goal
+      .toLowerCase().replace(/[^a-z0-9가-힣]+/g, "-").replace(/^-|-$/g, "")
+      .slice(0, 30);
+    const genDirName = `${state.id}-${goalSlug}`;
+    const genDir = this.paths.generationDir(genDirName);
     await mkdir(genDir, { recursive: true });
-    await mkdir(this.paths.adaptationsDir(state.id), { recursive: true });
-    await Bun.write(`${genDir}/summary.md`, `# ${state.id}\n\n**Goal:** ${state.goal}\n**Genome Version:** ${state.genomeVersion}\n**Started:** ${state.startedAt}\n**Completed:** ${state.completedAt}\n`);
+
+    // Move artifacts from life/ to lineage/
+    const lifeEntries = await readdir(this.paths.life);
+    for (const entry of lifeEntries) {
+      if (/^\d{2}-[a-z]+-[a-z]+\.md$/.test(entry)) {
+        await rename(
+          join(this.paths.life, entry),
+          join(genDir, entry),
+        );
+      }
+    }
+
+    // Move mutations/ to lineage
+    const mutDir = join(genDir, "mutations");
+    await mkdir(mutDir, { recursive: true });
+    try {
+      const mutEntries = await readdir(this.paths.mutations);
+      for (const entry of mutEntries) {
+        await rename(
+          join(this.paths.mutations, entry),
+          join(mutDir, entry),
+        );
+      }
+    } catch { /* no mutations */ }
+
+    // Count mutations
+    let mutCount = 0;
+    try {
+      mutCount = (await readdir(mutDir)).length;
+    } catch { /* empty */ }
+
+    // List archived files
+    const archivedFiles = await readdir(genDir);
+
+    // Generate 08-legacy-summary.md
+    const summary = `# Generation ${state.id} Summary\n- Goal: ${state.goal}\n- Started: ${state.startedAt}\n- Completed: ${state.completedAt}\n- Genome Version: ${state.genomeVersion} → ${state.genomeVersion + 1}\n- Mutations: ${mutCount}건\n- Files: ${archivedFiles.join(", ")}\n`;
+    await Bun.write(join(genDir, "08-legacy-summary.md"), summary);
 
     // Clear current
     await Bun.write(this.paths.currentYml, "");
