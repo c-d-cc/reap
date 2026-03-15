@@ -6,13 +6,25 @@ import type { ReapPaths } from "./paths";
 
 let mutCounter = 0;
 
+interface RecordMutationInput {
+  target: string;
+  description: string;
+  reason: string;
+  suggestedChange: string;
+}
+
 export class MutationManager {
   constructor(private paths: ReapPaths) {}
 
-  async record(generationId: string, file: string, description: string): Promise<MutationRecord> {
+  async record(generationId: string, input: RecordMutationInput): Promise<MutationRecord> {
     const id = `mut-${Date.now()}-${mutCounter++}`;
     const mutation: MutationRecord = {
-      id, generationId, file, description,
+      id,
+      generationId,
+      target: input.target,
+      description: input.description,
+      reason: input.reason,
+      suggestedChange: input.suggestedChange,
       createdAt: new Date().toISOString(),
     };
     await Bun.write(
