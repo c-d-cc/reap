@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ES2022",
+    "moduleResolution": "bundler",
+    "strict": true,
+    "esModuleInterop": true,
+    "skipLibCheck": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "rootDir": ".",
+    "types": ["bun"],
+    "jsx": "react-jsx"
+  },
+  "include": ["server/**/*.ts", "shared/**/*.ts", "tests/**/*.ts", "client/**/*.ts", "client/**/*.tsx"],
+  "exclude": ["node_modules", "dist"]
+}
