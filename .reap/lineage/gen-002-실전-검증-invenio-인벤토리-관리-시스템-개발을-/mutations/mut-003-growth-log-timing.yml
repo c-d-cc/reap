@@ -1,0 +1,7 @@
+id: mut-003
+generationId: gen-002
+target: src/templates/commands/reap.growth.md
+description: "Growth log 실시간 갱신이 서브에이전트 위임 시 비현실적"
+reason: "Growth 커맨드에 '각 태스크 완료 시 즉시 04-growth-log.md를 갱신하라'고 되어있으나, 실제로 서브에이전트에게 구현을 위임하면 서브에이전트는 REAP 산출물을 모른다. Growth log는 구현 완료 후 일괄 작성이 현실적."
+suggestedChange: "Growth 커맨드에서 log 갱신 시점을 유연하게 변경: '태스크 단위 또는 Phase 단위로 갱신하라. 서브에이전트 위임 시에는 위임 단위 완료 후 갱신해도 된다.'"
+createdAt: "2026-03-16"

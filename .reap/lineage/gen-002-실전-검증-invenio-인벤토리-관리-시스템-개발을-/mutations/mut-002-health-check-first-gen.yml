@@ -1,0 +1,7 @@
+id: mut-002
+generationId: gen-002
+target: src/templates/commands/reap.conception.md
+description: "Genome Health Check가 첫 세대에 무의미한 경고만 발생"
+reason: "첫 세대에서는 모든 genome이 placeholder이므로 Health Check가 전부 ⚠️를 표시. 이는 유용한 정보가 아니라 노이즈. 첫 세대와 이후 세대에서 Health Check의 목적이 다름."
+suggestedChange: "lineage가 비어있으면(첫 세대) Health Check 대신 '초기 구성 가이드'를 표시. 이후 세대에서만 placeholder/100줄 초과 등을 경고."
+createdAt: "2026-03-16"

@@ -1,0 +1,7 @@
+id: mut-004
+generationId: gen-002
+target: src/cli/commands/evolve.ts
+description: "Legacy 단계 진입 시 자동 아카이빙이 안 됨"
+reason: "advance()로 legacy에 도달하면 completedAt만 세팅되고, life/ → lineage/ 아카이빙(complete())이 호출되지 않음. 사용자가 별도로 complete()를 호출할 CLI 명령어도 없음. Legacy 슬래시 커맨드에서 '자동 아카이빙'이라 안내하지만 실제로는 수동 조작 필요."
+suggestedChange: "advance()에서 legacy 진입 시 자동으로 complete()를 호출하거나, CLI에 `reap complete` 명령어를 추가."
+createdAt: "2026-03-16"

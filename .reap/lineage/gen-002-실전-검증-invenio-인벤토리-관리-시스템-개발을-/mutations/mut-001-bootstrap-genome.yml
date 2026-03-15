@@ -1,0 +1,7 @@
+id: mut-001
+generationId: gen-002
+target: src/templates/commands/reap.conception.md
+description: "첫 세대 genome 초기 구성 모순 — Birth에서만 수정 vs Conception에서 채워야 함"
+reason: "genome 템플릿은 'Birth에서만 수정'이라 명시되어 있으나, 첫 세대에서는 Conception 시점에 genome을 채우지 않으면 이후 단계가 빈 genome을 참조하게 됨. 이 모순이 어디에도 명시되지 않아 에이전트가 혼란을 겪음."
+suggestedChange: "Conception 커맨드에 '첫 세대(lineage가 비어있는 경우) genome 초기 구성 절차'를 추가. Birth 수정 원칙의 예외로 명시."
+createdAt: "2026-03-16"
