@@ -9,10 +9,17 @@ description: "REAP Growth — AI+Human 협업으로 코드를 구현합니다"
 - `.reap/life/03-planning-plan.md`가 존재하는지 확인하라
 - 미충족 시: 사유를 알리고 중단
 
+## Context (세대 정보)
+- `.reap/life/current.yml`에서 현재 세대 정보를 읽어라 (id, goal, genomeVersion)
+- `.reap/genome/conventions.md`를 읽어라 — 구현 중 수시로 참조할 규칙
+
 ## Steps
 1. `.reap/life/03-planning-plan.md`에서 태스크 목록을 읽어라
 2. 이미 `04-growth-log.md`가 존재하면 읽어라 (Validation에서 복귀한 경우 — 기존 기록 유지)
 3. 미완료(`[ ]`) 태스크부터 순서대로 구현하라
+   - 각 태스크 완료 시 즉시 `04-growth-log.md`를 갱신하라 (완료 후 일괄 작성이 아닌 실시간 기록)
+   - conventions.md의 규칙을 준수하라
+   - constraints.md의 기술 제약을 준수하라
 4. 명세와 다르게 구현해야 할 부분을 발견하면:
    a. `.reap/life/mutations/`에 YAML 파일로 기록하라
    b. 해당 mutation에 의존하는 태스크를 `03-planning-plan.md`에서 `[deferred]`로 마킹하라

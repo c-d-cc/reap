@@ -9,13 +9,19 @@ description: "REAP Planning — 구현 계획을 수립합니다"
 - `.reap/life/02-formation-spec.md`가 존재하는지 확인하라
 - 미충족 시: 사유를 알리고 중단
 
+## Context (세대 정보)
+- `.reap/life/current.yml`에서 현재 세대 정보를 읽어라 (id, goal, genomeVersion)
+
 ## Steps
 1. `.reap/life/02-formation-spec.md`에서 요구사항을 읽어라
-2. `.reap/genome/constraints.md`에서 기술 제약을 확인하라
-3. 구현 계획을 수립하라 (아키텍처 접근법, 기술 선택)
-4. 태스크를 분해하라 (순서, 의존관계, 병렬 가능 여부)
+2. `.reap/genome/constraints.md`에서 기술 제약과 Validation Commands를 확인하라
+3. `.reap/genome/conventions.md`에서 개발 규칙과 Enforced Rules를 확인하라
+4. 구현 계획을 수립하라 (아키텍처 접근법, 기술 선택)
+   - principles.md의 Core Beliefs와 Architecture Decisions를 준수하라
+   - constraints.md의 Tech Stack 선택 사유를 존중하라
+5. 태스크를 분해하라 (순서, 의존관계, 병렬 가능 여부)
    - 태스크는 `- [ ] T001 설명` 형식의 체크리스트로 작성
-5. 인간과 함께 계획을 확정하라
+6. 인간과 함께 계획을 확정하라
 
 ## 산출물 생성
 - `.reap/templates/03-planning-plan.md`를 읽어라
