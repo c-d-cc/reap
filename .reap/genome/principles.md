@@ -24,6 +24,7 @@
 | ADR-005 | 4축 구조 (genome/environment/life/lineage) | 관심사 분리: 원칙/환경/실행/이력 | 2026-03 |
 | ADR-006 | examples/로 실전 검증 | dog-fooding: 같은 repo에서 사용자 경험 검증 가능 | 2026-03 |
 | ADR-007 | Legacy 진입 시 자동 아카이빙 | advance()에서 complete() 자동 호출, 수동 단계 제거 | 2026-03 |
+| ADR-008 | 중첩 세대 패턴 | dog-fooding 시 외부 프로젝트 세대는 현재 프로젝트 Growth 안에서 실행 | 2026-03 |
 
 ## Layer Map
 
