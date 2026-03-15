@@ -1,182 +1,215 @@
-# REAP Pipeline Architecture Design
+# REAP Workflow Architecture Design
 
-## 1. REAP의 재정의
+## 1. REAP이란
 
-REAP은 **"EA(Enterprise Application)가 무엇인지를 정의하고, AI와 인간이 협업하여 목표 단위로 점진적으로 구축하는 Development Pipeline"**이다.
+**REAP**(Recursive Evolutionary Application Pipeline)은 AI와 인간이 협업하여, 세대(Generation)를 거듭하며 Application을 점진적으로 진화시키는 Development Pipeline이다.
 
-기존의 템플릿 기반 소스 생성기에서 벗어나, 도메인에 무관한 데이터 중심 비즈니스 애플리케이션(마스터 데이터 관리, 트랜잭션 처리, 워크플로우, 리포팅)을 구축하기 위한 파이프라인을 제공한다.
+Application의 유전 정보(Genome)를 정의하고, 각 세대에서 목표를 설정하여 구현하고, 그 과정에서 발생한 변이(Mutation)와 적응(Adaptation)을 다음 세대에 반영한다. 세대를 거듭하며 축적된 산출물이 Application의 Source Code — 즉 **Civilization**이다.
+
+**REAP Workflow**는 이 파이프라인 위에서 실제로 Application을 만들어가는 개발 워크플로우를 의미한다.
 
 ## 2. 핵심 원칙
 
-### SSOT = Code
-코드가 유일한 진실의 원천이다. 마크다운 명세가 아닌 실행 가능한 코드가 시스템의 최종 진실이다.
-
-### Definitions = 개발 가이드
-`.reap/definitions/`는 AI와 인간이 시스템을 이해하고 개발하기 위한 필수 참조 문서다. 코드를 만들기 위한 의도를 담지만, 최종 진실은 코드에 있다. `reap diff`는 "가이드와 구현 사이에 차이가 있는가?"를 감지한다. 차이가 발견되면 인간이 어느 쪽을 수정할지 판단한다 — definition이 잘못된 것일 수도 있고, 구현이 가이드를 따르지 않은 것일 수도 있다.
-
-### Source Map (자동생성)
-코드 파싱으로 자동 생성되는 구조화된 인덱스. AI가 시스템을 탐색할 때 첫 진입점으로 사용한다. 백그라운드에서 수시로 자동 갱신된다.
-
-### 목표 기반 Iterate
-한번에 전체를 만들지 않는다. 목표를 설정하고, 그 목표를 달성하기 위한 정의 → 계획 → 구현 → 검증 → 회고를 반복한다.
-
-## 3. 파이프라인 흐름
+### 3 레이어 모델
 
 ```
-Bootstrap (Genesis) → Iterate #1 → Iterate #2 → ... → Iterate #N
-                          ↑
-                    reap scan (백그라운드 수시 자동)
+Genome (유전 정보)  →  Evolution (세대를 거친 진화)  →  Civilization (Source Code)
+  설계와 지식            생애주기, 변이, 적응             축적된 산출물
 ```
 
-- **Bootstrap**: `.reap/`이 없는 상태에서 최초 진입. 진입 모드에 따라 프로젝트를 초기화하고 첫 iterate를 시작한다.
-- **Iterate**: 목표 단위의 개발 사이클. 모든 작업(define, plan, build)은 iterate 안에서 일어난다.
-- **reap scan**: 파이프라인의 별도 노드가 아닌, 백그라운드 유틸리티로서 Source Map을 수시 갱신한다.
+- **Genome** — 어떻게 만들지. 아키텍처, 명세, 규칙 등 Application을 만들기 위한 설계와 지식.
+- **Evolution** — 만들어가는 과정. Generation의 반복을 통해 Genome이 진화하고 Civilization이 성장한다.
+- **Civilization** — 만들어진 것. Source Code. 세대를 거치며 축적된 산출물이다.
 
-## 4. Iterate 내부 흐름 (7단계)
+`reap diff`는 Genome과 Civilization 사이의 차이를 감지한다.
+
+### 세대 기반 진화
+세대(Generation)마다 하나의 목표를 설정하고, 그 목표를 달성하기 위한 생애주기(Life Cycle)를 거친다. 세대가 거듭될수록 Genome이 진화하고 Civilization이 성장한다.
+
+- **Genome의 진화** — 세대를 거치며 아키텍처 결정이 다듬어지고, 명세가 정교해지고, 개발 규칙이 축적된다. 처음에는 대략적이던 설계가 실제 구현 경험을 통해 구체화된다.
+- **Civilization의 성장** — 세대를 거치며 Source Code가 축적된다. 데이터 모델이 확장되고, 비즈니스 로직이 추가되고, UI가 풍부해지고, 테스트가 촘촘해진다.
+
+### Genome 불변 원칙
+현재 세대는 Genome을 직접 수정하지 않는다. 세대 중 발견한 문제는 변이(Mutation)로 기록하고, 회고에서 도출한 교훈은 적응(Adaptation)으로 기록한다. 현재 세대의 Birth 단계에서 이 diff들을 Genome에 반영하고 다음 세대의 초기 상태를 생성한다.
+
+### Environment
+Application이 대응해야 하는 외부 환경. 고객, 규제, 시장, 외부 시스템 등. 환경 변화는 진화의 압력이 되어 새로운 Generation의 목표를 만든다.
+
+## 3. 진화 메타포
+
+| 진화 개념 | REAP 매핑 | 설명 |
+|-----------|-----------|------|
+| **Genesis** | Bootstrap | 최초 탄생. 종의 기원 |
+| **Generation** | 하나의 Iterate | 한 세대. 목표를 가지고 태어나 살고 완료됨 |
+| **Genome** | 명세 + 지식 | 유전 정보. 세대를 거치며 진화함 |
+| **Life Cycle** | Generation 내부 흐름 | 한 세대의 생애주기 |
+| **Mutation** | Growth 중 발견한 명세 문제 | 세대 중 발생하는 변이. 기록만 하고 현재 Genome은 수정하지 않음 |
+| **Fitness** | Verify | 적합성 검증. 자연선택 |
+| **Adaptation** | Retrospect | 다음 세대를 위한 적응. Genome diff로 기록 |
+| **Birth** | 다음 세대 출산 | Mutation + Adaptation을 Genome에 반영하고 다음 세대의 초기 상태를 생성 |
+| **Legacy** | 완료 | 현재 세대 기록을 Lineage로 이동 |
+| **Lineage** | History | 족보. 과거 세대들의 기록 |
+| **Civilization** | Source Code | 세대를 거치며 축적된 산출물 |
+| **Environment** | 외부 환경 | Application이 대응해야 하는 비즈니스 환경. 환경 변화가 진화의 압력이 됨 |
+
+### Genome 진화 흐름
 
 ```
-목표 설정 → Define → Plan → Build → Verify → Retrospect → Complete
-                              ↑
-                        definition 수정 허용
-                        (변경 이력 추적)
+Generation #1 (Genome v1으로 시작)
+  → Growth 중 명세 문제 발견 → Mutation 기록 (Genome 수정 안 함)
+  → Fitness → 적합성 검증
+  → Adaptation → Genome diff 기록
+  → Birth → Mutation + Adaptation을 Genome에 반영 → Genome v2
+         → 다음 세대(Gen #2)의 초기 상태 생성
+  → Legacy → 현재 세대 기록을 Lineage로 이동
+  → Civilization 성장 (Source Code 축적)
+
+Generation #2 (Genome v2로 시작, 초기 상태 이미 존재)
+  → Conception부터 바로 시작
+  → ...
 ```
 
-| 단계 | 설명 |
-|------|------|
-| **목표 설정** | 이번 iterate에서 달성할 목표를 정의. iterates/current.yml에 기록. |
-| **Define** | 목표 달성에 필요한 definition을 작성하거나 보완한다. |
-| **Plan** | 구현 계획을 수립하고 작업을 분해한다. |
-| **Build** | AI+Human 협업으로 코드를 구현한다. Build 중 definition에 문제를 발견하면 수정 가능하되, 변경 이력을 추적한다. |
-| **Verify** | 테스트와 검증을 통해 목표 달성을 확인한다. Build ↔ Verify 사이에서 작은 루프 반복 가능. |
-| **Retrospect** | 회고. definition 변경량, 교훈, 다음 iterate에 반영할 사항을 기록한다. |
-| **Complete** | 완료 처리. iterate 기록이 history/로 이동한다. |
+## 4. REAP Workflow 흐름
 
-## 5. .reap/ 3단 구조
+```
+Genesis → Generation #1 → Generation #2 → ... → Generation #N
+                ↑                                       ↓
+          reap scan (백그라운드 수시 자동)         Civilization (성장)
+```
 
-`.reap/` 디렉토리는 프로젝트의 "두뇌" 역할을 하며, 3개의 핵심 축으로 구성된다:
+- **Genesis**: `.reap/`이 없는 상태에서 최초 진입. 진입 모드에 따라 프로젝트를 초기화하고 첫 Generation을 시작한다.
+- **Generation**: 목표 단위의 개발 사이클. 모든 작업은 Generation 안에서 일어난다.
+- **reap scan**: 백그라운드 유틸리티로서 Civilization의 현재 상태를 Source Map(`genome/source-map.json`)으로 갱신한다.
+
+## 5. Life Cycle (한 세대의 생애)
+
+```
+Conception → Formation → Planning → Growth → Fitness → Adaptation → Birth → Legacy
+(목표 설정)   (Define)     (Plan)    (Build)  (Verify)  (Retrospect)  (출산)  (완료)
+```
+
+| 단계 | 진화 용어 | 설명 |
+|------|-----------|------|
+| **Conception** | 수태 | 이번 세대의 목표를 정의. Environment 변화와 backlog를 참조. life/current.yml에 기록 |
+| **Formation** | 형성 | 목표 달성에 필요한 명세를 Genome으로부터 읽고 보완 계획 수립 |
+| **Planning** | 계획 | 구현 계획을 수립하고 작업을 분해 |
+| **Growth** | 성장 | AI+Human 협업으로 Civilization(코드) 구현. 명세 문제 발견 시 Mutation으로 기록 |
+| **Fitness** | 적합성 | 테스트와 검증으로 목표 달성 확인. Growth ↔ Fitness 작은 루프 가능 |
+| **Adaptation** | 적응 | 회고. Mutation 정리, 교훈 도출, Genome diff 작성 |
+| **Birth** | 출산 | Mutation + Adaptation을 Genome에 반영. 다음 세대의 초기 상태 생성 |
+| **Legacy** | 유산 | 완료. 현재 Generation 기록이 Lineage로 이동 |
+
+## 6. .reap/ 4축 구조
+
+`.reap/` 디렉토리는 진화 파이프라인을 중심으로 4개의 핵심 축으로 구성된다:
 
 | 축 | 역할 |
 |----|------|
-| **architecture/** | 시스템 레벨의 전략과 구조 |
-| **definitions/** | 모듈 레벨의 개발 가이드 |
-| **iterates/** | 목표 기반 실행과 기록 |
+| **genome/** | 유전 정보. Application을 만들기 위한 설계와 지식. 세대를 거치며 진화 |
+| **environment/** | 외부 환경. Application이 대응해야 하는 비즈니스 환경, 고객, 규제, 외부 시스템 |
+| **life/** | 현재 세대의 생애주기. 진행 중인 Generation의 상태 |
+| **lineage/** | 족보. 완료된 세대들의 기록과 적응 |
+
+Civilization(Source Code)은 `.reap/` 외부에 존재한다 — 프로젝트 루트의 코드 파일들이 곧 Civilization이다.
 
 ### 전체 디렉토리 구조
 
 ```
 my-project/
-  src/                              # SSOT (코드)
-  .reap/                            # REAP Registry
-    config.yml                      # 프로젝트 설정
-    source-map.json                 # 자동생성 (수시 갱신)
-    cheatsheet.md                   # AI 규칙서 (아래 설명 참조)
+  src/                              # Civilization (축적된 산출물)
+  .reap/                            # REAP Registry (진화 파이프라인)
+    config.yml                      # 프로젝트 설정 (유일한 루트 파일)
 
-    architecture/                   # 시스템 레벨
-      application/                  # 앱 아키텍처, 레이어, 스택, 모듈 의존성
-      infra/                        # 인프라, CI/CD, 환경 설정
-      test/                         # 테스트 전략
+    genome/                         # 유전 정보 (세대를 거치며 진화)
+      source-map.json               # Civilization 자동 인덱스 (수시 갱신)
+      cheatsheet.md                 # AI 규칙서
+      architecture/                 # 시스템 레벨 전략과 구조
+      ...                           # Genome 내부 구조는 후속 작업에서 상세 정의
 
-    definitions/                    # 모듈 레벨 (개발 가이드)
-      domain/                       # 비즈니스 개념, 모듈 의도
-        order/                      # 모듈별 폴더로 격리
-        inventory/
-      ui/                           # 화면 구성, 컴포넌트
-      logic/                        # 비즈니스 규칙, 밸리데이션
-      data/                         # 스키마, 마이그레이션, 시드 데이터
-      process/                      # 워크플로우, 상태 흐름, 스케줄링
-      auth/                         # 사용자, 역할, 권한
-      integration/                  # 외부 시스템 연동
-      program/                      # 배치 프로그램, 데이터 처리
-      scenario/                     # 테스트 시나리오 (모듈별)
+    environment/                    # 외부 환경
+      stakeholders.md               # 고객, 사용자, 이해관계자
+      regulations.md                # 규제, 컴플라이언스, 법적 요구사항
+      externals.md                  # 외부 시스템, 연동 대상, 의존성
+      market.md                     # 시장 환경, 경쟁, 비즈니스 제약
 
-    iterates/                       # 실행
-      current.yml                   # 현재 진행 중 iterate (목표+상태)
-      backlog/                      # 예정된 목표들
+    life/                           # 현재 세대의 생애주기
+      current.yml                   # 현재 Generation (목표+단계+상태)
+      mutations/                    # Growth 중 발견한 Genome 변이 기록
+      backlog/                      # 다음 세대 후보 목표들
 
-    history/                        # 완료된 iterate + retrospect (자동 기록)
+    lineage/                        # 족보 (완료된 세대들)
+      gen-001/                      # Generation 1 기록
+        summary.md                  # 세대 요약
+        adaptations/                # 다음 세대를 위한 Genome diff
+      gen-002/
+        ...
 
-    sources/                        # Migration 모드에서만 존재
-      legacy-erp/                   # as-is 시스템 N개
+    origins/                        # Migration 모드에서만: 기원 시스템들
+      legacy-erp/                   # as-is 시스템
         source-map.json             # 자동 스캔 결과
         analysis.md                 # 분석 소견
-      old-crm/
-        source-map.json
-        analysis.md
 
-    claude/                         # Claude Code 연동 (아래 설명 참조)
+    claude/                         # Claude Code 연동
 ```
 
-### cheatsheet.md
-AI가 수시로 참조하는 규칙서. "~할 때는 ~해라", "~는 ~를 봐라" 같은 프로젝트 고유의 개발 규칙을 인간이 작성한다. architecture/가 시스템의 구조적 전략을 다룬다면, cheatsheet은 일상적인 개발 작업에서 AI가 따라야 할 실무적 지침을 담는다.
+### 진화 흐름과 구조의 관계
+
+```
+1. Environment를 관찰   →  외부 환경 변화 파악 (진화의 압력)
+2. Genome을 읽고        →  설계와 지식 파악
+3. Life에서 살아가고     →  목표를 향해 Growth, Mutation 기록
+4. Birth               →  Adaptation을 Genome에 반영, 다음 세대 초기 상태 생성
+5. Legacy              →  현재 세대 기록을 Lineage로 이동
+6. Civilization 성장    →  Source Code가 세대를 거치며 축적
+```
+
+### Generation 운영 규칙
+- **한 번에 하나의 Generation만 활성화**된다 (`life/current.yml`은 단일 파일).
+- `life/backlog/`에는 인간 또는 Adaptation 단계에서 도출된 다음 목표들이 저장된다.
+- `reap evolve` 실행 시 backlog에서 선택하거나 새 목표를 입력할 수 있다.
+- 현재 단계(Life Cycle stage)는 `current.yml` 안에 추적된다.
 
 ### claude/
-Claude Code 전용 연동 계층. REAP이 자동 생성하는 CLAUDE.md, 슬래시 커맨드 등을 포함한다. 다른 AI 에이전트 지원 시 `cursor/`, `copilot/` 등 동일 레벨에 추가할 수 있다. 세부 구조는 후속 작업에서 정의한다.
+Claude Code 전용 연동 계층. REAP이 자동 생성하는 CLAUDE.md, 슬래시 커맨드 등을 포함한다. 다른 AI 에이전트 지원 시 `cursor/`, `copilot/` 등 동일 레벨에 추가할 수 있다.
 
-### Iterate 운영 규칙
-- **한 번에 하나의 iterate만 활성화**된다 (`current.yml`은 단일 파일).
-- `iterates/backlog/`에는 인간 또는 retrospect 단계에서 도출된 다음 목표들이 저장된다.
-- `reap iterate` 실행 시 backlog에서 선택하거나 새 목표를 입력할 수 있다.
-- 현재 단계는 `current.yml` 안에 추적된다.
+## 7. 진입 모드 (3가지)
 
-### Definition Aspects (9개)
-
-각 aspect 하위에 **모듈명 폴더**로 격리한다. 동일 모듈의 다른 관점은 폴더명으로 연결된다.
-
-| Aspect | 설명 | 포맷 |
-|--------|------|------|
-| domain | 비즈니스 개념, 엔티티, 관계, 모듈 의도 | YAML + Markdown |
-| ui | 화면 구성, 컴포넌트, 네비게이션 | YAML + Markdown |
-| logic | 비즈니스 규칙, 밸리데이션, 계산 | YAML + Markdown |
-| data | 스키마, 마이그레이션, 시드 데이터 | YAML + Markdown |
-| process | 워크플로우, 상태 흐름, 스케줄링 | YAML + Markdown |
-| auth | 사용자, 역할, 권한 | YAML + Markdown |
-| integration | 외부 시스템 연동 | YAML + Markdown |
-| program | 배치 프로그램, 데이터 처리, 실행 단위 작업 | YAML + Markdown |
-| scenario | 테스트 시나리오 (architecture/test 전략에 따른 모듈별 검증) | YAML + Markdown |
-
-Definition 포맷: 메타데이터 성격(스키마, 필드 목록)은 **YAML**, 서술적 내용(비즈니스 설명, 규칙)은 **Markdown**.
-
-## 6. 진입 모드 (3가지)
-
-시작점만 다르고, 일단 파이프라인에 올라타면 동일한 iterate 루프를 탄다.
+시작점만 다르고, 일단 REAP Workflow에 올라타면 동일한 Generation 루프를 탄다.
 
 ### Greenfield
-빈 상태에서 새로 구축.
+Civilization이 아직 없는 상태에서 새로 구축.
 
-Bootstrap iterate:
+Genesis:
 1. 스택 선택 + 스캐폴딩
 2. `.reap/` 생성
-3. architecture 정의
-4. 초기 definitions 작성
-5. → iterate 루프 진입
+3. 초기 Genome 구성
+4. → 첫 Generation 시작
 
 ### Migration
-N개의 as-is 시스템을 참조하여 새 시스템 구축. as-is 분석과 to-be 정의가 명확히 분리된다.
+N개의 as-is 시스템(기존 Civilization)을 참조하여 새로운 Genome을 만들고 새 시스템을 구축.
 
-Bootstrap iterate:
+Genesis:
 1. as-is 시스템 경로들 지정 (1개 이상)
-2. 각 시스템 스캔 → `sources/{name}/source-map.json`
-3. 각 시스템 분석 → `sources/{name}/analysis.md` (AI+Human, 무엇을 가져갈지/버릴지)
-4. to-be architecture 정의 (as-is 분석 참조)
-5. to-be definitions 작성 (as-is에서 가져올 것, 새로 만들 것 구분)
-6. → iterate 루프 진입
+2. 각 시스템 스캔 → `origins/{name}/source-map.json`
+3. 각 시스템 분석 → `origins/{name}/analysis.md` (AI+Human, 무엇을 가져갈지/버릴지)
+4. to-be Genome 구성 (as-is 분석 참조)
+5. → 첫 Generation 시작
 
 ### Adoption
-기존 앱을 그대로 유지한 상태에서 REAP 파이프라인을 접목.
+기존 Civilization을 그대로 유지한 상태에서 REAP Workflow를 접목.
 
-Bootstrap iterate:
-1. 현재 코드 스캔 + Source Map
+Genesis:
+1. 현재 Civilization 스캔 + Source Map
 2. `.reap/` 생성
-3. architecture/definitions 자동 추출 + 인간 보완
-4. cheatsheet 설정
-5. → iterate 루프 진입
+3. Genome 자동 추출 + 인간 보완
+4. → 첫 Generation 시작
 
-## 7. AI-Human 역할 분담
+## 8. AI-Human 역할 분담
 
-단계에 따라 주도하는 쪽이 다르다.
+Life Cycle 단계와 Application 구성 요소에 따라 주도하는 쪽이 다르다.
 
-| EA 구성 요소 | 주도 |
-|-------------|------|
+| 구성 요소 | 주도 |
+|-----------|------|
 | 비즈니스 도메인 | **Human** |
 | 데이터 모델 | **협업** |
 | 비즈니스 규칙 | **협업** |
@@ -190,35 +223,36 @@ Bootstrap iterate:
 | 문서화 및 매뉴얼 | **AI 주도** |
 | 테스트 | **AI 주도** |
 
-## 8. CLI 명령어
+## 9. CLI 명령어
 
 | 명령어 | 역할 | 비고 |
 |--------|------|------|
-| `reap init` | `.reap/` 생성 + bootstrap iterate 시작 | 최초 1회 |
-| `reap iterate` | 새 목표 설정 + iterate 시작 | 핵심 명령어 |
-| `reap scan` | Source Map 갱신 | 백그라운드 자동 + 수동 가능 |
-| `reap diff` | Definition ↔ Code 차이 감지 | 유틸리티 |
-| `reap sync` | diff 결과를 바탕으로 차이 해소. 방향은 인간이 판단 (Definition→Code 또는 Code→Definition) | 유틸리티 |
-| `reap status` | 현재 iterate + 전체 현황 | 유틸리티 |
+| `reap init` | `.reap/` 생성 + Genesis 시작 | 최초 1회 |
+| `reap evolve` | 새 목표 설정 + Generation 시작 | 핵심 명령어 |
+| `reap scan` | Civilization → Source Map 갱신 | 백그라운드 자동 + 수동 가능 |
+| `reap diff` | Genome ↔ Civilization 차이 감지 | 유틸리티 |
+| `reap sync` | diff 결과를 바탕으로 차이 해소. 방향은 인간이 판단 | 유틸리티 |
+| `reap status` | 현재 Generation + 전체 현황 | 유틸리티 |
 
-## 9. 설계 결정 사항
+## 10. 설계 결정 사항
 
 | 항목 | 결정 | 이유 |
 |------|------|------|
 | MVP 형태 | CLI 도구 | 가장 빠르게 파이프라인 로직에 집중 가능 |
 | 기술 스택 | 기본 Spring Boot + React, 확장 가능 | 기본 스택으로 깊이 확보, 구조는 개방 |
-| 모델링 | EMM(Enterprise Meta Model) = 참조 모델 (비종속) | 시니어~입문 모두 수용. 강제하지 않되 가이드 제공 |
 | AI 에이전트 | Claude Code 최적화 (MVP) | 다른 에이전트 확장은 추후 |
-| Definition 포맷 | YAML + Markdown 혼합 | 메타데이터는 YAML, 서술은 Markdown |
+| 명세 포맷 | YAML + Markdown 혼합 | 메타데이터는 YAML, 서술은 Markdown |
 
-## 10. 후속 작업
+## 11. 후속 작업
 
-이 문서는 REAP Pipeline의 큰 틀 아키텍처를 정의한다. 다음 세부 사항은 별도 iterate에서 다룬다:
+이 문서는 REAP Workflow의 큰 틀 아키텍처를 정의한다. 다음 세부 사항은 별도 Generation에서 다룬다:
 
-- Definition 파일의 구체적 포맷과 예시 (domain, ui, logic 등)
+- Genome 내부 구조 상세 설계 (아키텍처, 명세 파일 포맷, 예시)
+- Environment 파일 포맷과 활용 방식
 - Source Map의 구조와 생성 규칙
 - Cheatsheet의 구조와 내용
 - CLI 구현 기술 스택 결정
-- Claude Code 연동 방식 (슬래시 커맨드, skills 등)
-- iterate current.yml의 상세 스키마
+- Claude Code 연동 방식
+- life/current.yml의 상세 스키마
+- Mutation / Adaptation의 포맷과 Genome 반영 메커니즘
 - reap diff / sync의 동작 메커니즘
