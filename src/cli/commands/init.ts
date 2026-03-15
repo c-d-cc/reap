@@ -4,6 +4,17 @@ import { ReapPaths } from "../../core/paths";
 import { ConfigManager } from "../../core/config";
 import type { ReapConfig } from "../../types";
 
+const COMMAND_NAMES = [
+  "reap.conception", "reap.formation", "reap.planning", "reap.growth",
+  "reap.validation", "reap.adaptation", "reap.birth",
+];
+
+const ARTIFACT_NAMES = [
+  "01-conception-goal", "02-formation-spec", "03-planning-plan",
+  "04-growth-log", "05-validation-report", "06-adaptation-retrospective",
+  "07-birth-changelog",
+];
+
 export async function initProject(
   projectRoot: string,
   projectName: string,
@@ -15,13 +26,16 @@ export async function initProject(
     throw new Error(".reap/ already exists. This is already a REAP project.");
   }
 
-  // Create 4-axis directory structure
-  await mkdir(paths.root, { recursive: true });
-  await mkdir(join(paths.genome, "architecture"), { recursive: true });
+  // Create 4-axis structure + commands + templates
+  await mkdir(paths.genome, { recursive: true });
+  await mkdir(paths.domain, { recursive: true });
   await mkdir(paths.environment, { recursive: true });
+  await mkdir(paths.life, { recursive: true });
   await mkdir(paths.mutations, { recursive: true });
   await mkdir(paths.backlog, { recursive: true });
   await mkdir(paths.lineage, { recursive: true });
+  await mkdir(paths.commands, { recursive: true });
+  await mkdir(paths.templates, { recursive: true });
 
   // Write config
   const config: ReapConfig = {
@@ -31,21 +45,34 @@ export async function initProject(
   };
   await ConfigManager.write(paths, config);
 
-  // Write initial genome files
-  await Bun.write(
-    paths.cheatsheet,
-    "# Cheatsheet\n\n프로젝트 고유의 개발 규칙을 여기에 작성합니다.\nAI가 작업 시 수시로 참조합니다.\n\n## Rules\n\n- (여기에 규칙 추가)\n"
-  );
+  // Copy genome templates
+  const genomeTemplates = ["principles.md", "conventions.md", "constraints.md"];
+  for (const file of genomeTemplates) {
+    const src = join(import.meta.dir, "../../templates/genome", file);
+    const dest = join(paths.genome, file);
+    await Bun.write(dest, await Bun.file(src).text());
+  }
 
-  // Create claude commands directory and copy templates
-  const claudeCommandsDir = join(projectRoot, ".claude", "commands");
-  await mkdir(claudeCommandsDir, { recursive: true });
+  // Copy slash commands to .reap/commands/
+  for (const cmd of COMMAND_NAMES) {
+    const src = join(import.meta.dir, "../../templates/commands", `${cmd}.md`);
+    const dest = join(paths.commands, `${cmd}.md`);
+    await Bun.write(dest, await Bun.file(src).text());
+  }
 
-  const commandNames = ["conception", "formation", "planning", "growth", "validation", "adaptation", "birth"];
-  for (const cmd of commandNames) {
-    const templatePath = join(import.meta.dir, "../../templates/commands", `${cmd}.md`);
-    const destPath = join(claudeCommandsDir, `reap-${cmd}.md`);
-    const content = await Bun.file(templatePath).text();
-    await Bun.write(destPath, content);
+  // Copy artifact templates to .reap/templates/
+  for (const art of ARTIFACT_NAMES) {
+    const src = join(import.meta.dir, "../../templates/artifacts", `${art}.md`);
+    const dest = join(paths.templates, `${art}.md`);
+    await Bun.write(dest, await Bun.file(src).text());
+  }
+
+  // Copy commands to .claude/commands/ (Claude Code integration)
+  const claudeDir = paths.claudeCommands;
+  await mkdir(claudeDir, { recursive: true });
+  for (const cmd of COMMAND_NAMES) {
+    const src = join(paths.commands, `${cmd}.md`);
+    const dest = join(claudeDir, `${cmd}.md`);
+    await Bun.write(dest, await Bun.file(src).text());
   }
 }
