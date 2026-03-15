@@ -36,4 +36,16 @@ export async function initProject(
     paths.cheatsheet,
     "# Cheatsheet\n\n프로젝트 고유의 개발 규칙을 여기에 작성합니다.\nAI가 작업 시 수시로 참조합니다.\n\n## Rules\n\n- (여기에 규칙 추가)\n"
   );
+
+  // Create claude commands directory and copy templates
+  const claudeCommandsDir = join(projectRoot, ".claude", "commands");
+  await mkdir(claudeCommandsDir, { recursive: true });
+
+  const commandNames = ["conception", "formation", "planning", "growth", "validation", "adaptation", "birth"];
+  for (const cmd of commandNames) {
+    const templatePath = join(import.meta.dir, "../../templates/commands", `${cmd}.md`);
+    const destPath = join(claudeCommandsDir, `reap-${cmd}.md`);
+    const content = await Bun.file(templatePath).text();
+    await Bun.write(destPath, content);
+  }
 }
