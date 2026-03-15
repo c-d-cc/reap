@@ -1,0 +1,261 @@
+# REAP Life Cycle Script System Design
+
+## Goal
+
+REAP의 8-stage Life Cycle 각 단계에서 AI Agent가 수행할 워크플로우를 slash command + prompt template 시스템으로 정의한다. spec-kit의 스크립트+템플릿 패턴을 참고하되, REAP의 4축 구조(.reap/) 안에서 모든 산출물을 관리한다.
+
+## 핵심 결정
+
+1. **실행 주체**: AI Agent가 slash command를 통해 실행. CLI는 상태 추적기 역할만.
+2. **산출물 위치**: `.reap/life/`에 저장. 4축 구조 유지. 프로젝트 루트에 별도 디렉토리 없음.
+3. **산출물 네이밍**: `{seq}-{stage}-{file}.md` (예: `01-conception-goal.md`)
+4. **템플릿 분리**: 산출물 형식은 `.reap/templates/`에 별도 템플릿으로 관리. slash command에서 "이 템플릿을 읽고 채워서 저장하라"고 지시.
+5. **Gate 체크**: 엄격. 이전 stage 산출물이 없으면 진행 거부.
+6. **에이전트 독립**: slash command 원본은 `.reap/commands/`에 저장. `reap init` 시 `.claude/commands/`로 복사. 추후 다른 에이전트 지원 확장 가능.
+7. **Genome 재정의**: 산출물(문서, 코드)이 아닌 원칙/규칙/결정의 집합.
+8. **Plan + Tasks 통합**: spec-kit과 달리 `plan.md`와 `tasks.md`를 `03-planning-plan.md` 하나로 합침.
+
+## 디렉토리 구조
+
+```
+.reap/
+├── config.yml
+├── commands/                         # slash command 원본 (에이전트 독립)
+│   ├── reap-conception.md
+│   ├── reap-formation.md
+│   ├── reap-planning.md
+│   ├── reap-growth.md
+│   ├── reap-validation.md
+│   ├── reap-adaptation.md
+│   └── reap-birth.md
+├── templates/                        # 산출물 템플릿
+│   ├── 01-conception-goal.md
+│   ├── 02-formation-spec.md
+│   ├── 03-planning-plan.md
+│   ├── 04-growth-log.md
+│   ├── 05-validation-report.md
+│   ├── 06-adaptation-retrospective.md
+│   └── 07-birth-changelog.md
+├── genome/                           # 유전 정보 (원칙/규칙/결정)
+│   ├── principles.md                 #   아키텍처 원칙/결정 (ADR 스타일)
+│   ├── domain/                       #   비즈니스 규칙 (모듈별 분리)
+│   ├── conventions.md                #   개발 규칙/컨벤션
+│   └── constraints.md                #   기술 제약/선택
+├── environment/                      # 외부 환경/제약조건
+├── life/                             # 현재 세대 상태 + 산출물
+│   ├── current.yml
+│   ├── 01-conception-goal.md         # 템플릿에서 생성
+│   ├── 02-formation-spec.md
+│   ├── 03-planning-plan.md
+│   ├── 04-growth-log.md
+│   ├── 05-validation-report.md
+│   ├── 06-adaptation-retrospective.md
+│   ├── 07-birth-changelog.md
+│   ├── mutations/
+│   └── backlog/
+└── lineage/                          # 완료된 세대 아카이브
+    └── gen-001-user-auth/
+        ├── 01-conception-goal.md
+        ├── ...
+        ├── 07-birth-changelog.md
+        ├── 08-legacy-summary.md
+        └── mutations/
+```
+
+## 실행 모델
+
+### 역할 분리
+
+| 구성 요소 | 역할 |
+|---|---|
+| **CLI (`reap`)** | 상태 추적기. stage 전환 (`evolve --advance/--back`), generation 관리, `fix` |
+| **AI Agent** | 워크플로우 실행기. slash command를 통해 각 stage의 실제 작업 수행 |
+| **slash command** | stage별 워크플로우 정의. Gate → Steps → 산출물 생성 |
+| **template** | 산출물의 형식(format) 정의. AI가 읽고 채워서 life/에 저장 |
+
+### 흐름
+
+```
+개발자: /reap-conception (slash command 호출)
+   ↓
+AI Agent: Gate 체크 (current.yml stage == conception?)
+   ↓ 통과
+AI Agent: Steps 실행 (environment/ 읽기, genome/ 참조, 인간과 대화)
+   ↓
+AI Agent: .reap/templates/01-conception-goal.md 읽기
+   ↓
+AI Agent: 템플릿을 채워서 .reap/life/01-conception-goal.md에 저장
+   ↓
+개발자: reap evolve --advance (다음 stage로 전환)
+   ↓
+개발자: /reap-formation (다음 slash command 호출)
+   ↓
+AI Agent: Gate 체크 (01-conception-goal.md 존재?)
+   ...
+```
+
+## Slash Command 구조
+
+모든 slash command는 동일한 3단 구조를 따른다:
+
+```markdown
+# [Stage Name] ([한국어 레이블])
+
+## Gate (전제조건)
+- [ ] current.yml의 stage가 [stage]인지 확인
+- [ ] [이전 산출물]이 .reap/life/에 존재하는지 확인
+→ 미충족 시: 사유를 알리고 중단
+
+## Steps
+1. [구체적 행동 지시]
+2. [구체적 행동 지시]
+...
+
+## 산출물 생성
+- `.reap/templates/[template].md`를 읽어라
+- 위 Steps의 결과를 반영하여 채워라
+- `.reap/life/[output].md`에 저장하라
+
+## 완료
+- `reap evolve --advance`로 다음 단계로 진행
+```
+
+## Stage별 정의
+
+### Conception (목표 설정)
+
+| 항목 | 내용 |
+|---|---|
+| **Gate** | current.yml stage == conception |
+| **Steps** | 1. `.reap/environment/` 읽기 (외부 환경 변화 파악) |
+| | 2. `.reap/lineage/`에서 직전 세대 adaptation 참조 |
+| | 3. `.reap/life/backlog/`에서 예정된 목표 확인 |
+| | 4. `.reap/genome/` 현재 상태 파악 |
+| | 5. 인간과 대화하여 이번 세대의 goal 확정 |
+| **산출물** | `01-conception-goal.md` — 목표, 완료 조건, 범위, 관련 genome 영역 |
+
+### Formation (명세 정의)
+
+| 항목 | 내용 |
+|---|---|
+| **Gate** | current.yml stage == formation, `01-conception-goal.md` 존재 |
+| **Steps** | 1. `01-conception-goal.md`에서 goal과 범위 읽기 |
+| | 2. `.reap/genome/`에서 관련 명세 읽기 (principles, domain, conventions, constraints) |
+| | 3. goal 달성에 필요한 명세가 부족하면 보완 계획 수립 |
+| | 4. genome 수정이 필요한 부분 발견 시 `.reap/life/mutations/`에 기록 |
+| | 5. 인간과 함께 spec 확정 |
+| **산출물** | `02-formation-spec.md` — 기능 명세, 요구사항, 수용 기준 |
+
+### Planning (계획 수립)
+
+| 항목 | 내용 |
+|---|---|
+| **Gate** | current.yml stage == planning, `02-formation-spec.md` 존재 |
+| **Steps** | 1. `02-formation-spec.md`에서 요구사항 읽기 |
+| | 2. `.reap/genome/constraints.md`에서 기술 제약 확인 |
+| | 3. 구현 계획 수립 (아키텍처 접근법, 기술 선택) |
+| | 4. 태스크 분해 (순서, 의존관계, 병렬 가능 여부) |
+| | 5. 인간과 함께 계획 확정 |
+| **산출물** | `03-planning-plan.md` — 구현 계획 + 태스크 체크리스트 (통합) |
+
+### Growth (구현)
+
+| 항목 | 내용 |
+|---|---|
+| **Gate** | current.yml stage == growth, `03-planning-plan.md` 존재 |
+| **Steps** | 1. `03-planning-plan.md`에서 태스크 목록 읽기 |
+| | 2. 계획에 따라 코드 구현 |
+| | 3. 명세와 다르게 구현해야 할 부분 발견 시 `.reap/life/mutations/`에 기록 |
+| | 4. 완료된 태스크를 growth log에 기록 |
+| **산출물** | `04-growth-log.md` — 완료 태스크, 발생한 mutation, 구현 메모 |
+
+### Validation (검증)
+
+| 항목 | 내용 |
+|---|---|
+| **Gate** | current.yml stage == validation, `04-growth-log.md` 존재 |
+| **Steps** | 1. `01-conception-goal.md`에서 완료 조건 읽기 |
+| | 2. 테스트 실행 |
+| | 3. goal의 완료 조건을 하나씩 점검 |
+| | 4. 문제 발견 시 `reap evolve --back`으로 Growth 복귀 가능 |
+| **산출물** | `05-validation-report.md` — 테스트 결과, 완료 조건 체크, pass/fail |
+
+### Adaptation (회고)
+
+| 항목 | 내용 |
+|---|---|
+| **Gate** | current.yml stage == adaptation, `05-validation-report.md` 존재 |
+| **Steps** | 1. `.reap/life/mutations/` 전체 리뷰 |
+| | 2. 이번 세대에서 얻은 교훈 정리 |
+| | 3. genome에 반영할 변경 사항을 adaptation으로 기록 |
+| | 4. 다음 세대 목표 후보를 `.reap/life/backlog/`에 추가 |
+| | 5. 인간과 함께 회고 확정 |
+| **산출물** | `06-adaptation-retrospective.md` — 교훈, genome 변경 제안, 다음 세대 backlog |
+
+### Birth (출산)
+
+| 항목 | 내용 |
+|---|---|
+| **Gate** | current.yml stage == birth, `06-adaptation-retrospective.md` 존재 |
+| **Steps** | 1. `.reap/life/mutations/`의 mutation들을 genome에 반영 |
+| | 2. `06-adaptation-retrospective.md`의 genome 변경 제안을 반영 |
+| | 3. 변경된 genome을 인간이 확인 |
+| | 4. 변경 내역을 changelog에 기록 |
+| **산출물** | `07-birth-changelog.md` — genome에 반영한 변경 목록 (mutation/adaptation별) |
+
+### Legacy (완료)
+
+Legacy는 slash command가 아닌 CLI(`reap evolve --advance`)가 자동 처리:
+
+1. `07-birth-changelog.md` 존재 확인
+2. `.reap/life/`의 모든 산출물을 `.reap/lineage/gen-xxx-yyy/`로 이동
+3. `08-legacy-summary.md` 생성 (세대 요약)
+4. `.reap/life/current.yml` 초기화
+5. `.reap/life/mutations/` 정리
+
+## Genome 구조
+
+Genome은 Application의 **원칙, 규칙, 결정의 집합**이다. 산출물(문서, 다이어그램, 코드)이 아니라 그것들을 만들어내는 본질(essence)을 담는다.
+
+```
+.reap/genome/
+├── principles.md      # 아키텍처 원칙/결정 (ADR 스타일)
+├── domain/            # 비즈니스 규칙/도메인 정의 (모듈별 분리)
+├── conventions.md     # 개발 규칙/컨벤션
+└── constraints.md     # 기술 제약/선택
+```
+
+### Genome 불변 원칙
+
+현재 세대는 genome을 직접 수정하지 않는다:
+- Growth 중 발견한 문제 → `.reap/life/mutations/`에 기록
+- Adaptation에서 도출한 교훈 → `06-adaptation-retrospective.md`에 genome diff로 기록
+- Birth에서만 mutation + adaptation을 genome에 반영
+
+### Genome vs Civilization
+
+| | Genome (정의) | Civilization (발현) |
+|---|---|---|
+| 아키텍처 | 원칙/결정 ("레이어드 아키텍처") | 문서, 다이어그램 |
+| 비즈니스 | 규칙 ("주문은 결제 전 취소 가능") | 구현 코드 |
+| API | 계약/원칙 | 구현 코드 |
+| 개발 | 컨벤션/규칙 | 설정 파일, 린터 |
+
+## Init 변경사항
+
+`reap init` 명령이 추가로 수행할 것:
+
+1. `.reap/commands/`에 slash command 원본 저장
+2. `.reap/templates/`에 산출물 템플릿 저장
+3. `.reap/genome/` 초기 구조 생성 (principles.md, domain/, conventions.md, constraints.md)
+4. `.claude/commands/`로 slash command 복사 (Claude Code용)
+
+기존의 `source-map.json`, `architecture/` 디렉토리는 genome에서 제거.
+
+## 후속 작업
+
+- 각 산출물 템플릿의 상세 내용 정의
+- 각 slash command의 상세 프롬프트 작성
+- Legacy 자동화 로직 구현 (CLI)
+- lineage 아카이빙 시 mutation 파일 이동 로직
+- `reap init`의 기존 코드 수정
