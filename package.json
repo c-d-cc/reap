@@ -1,0 +1,20 @@
+{
+  "name": "reap",
+  "version": "0.1.0",
+  "type": "module",
+  "bin": {
+    "reap": "./src/cli/index.ts"
+  },
+  "scripts": {
+    "dev": "bun run src/cli/index.ts",
+    "test": "bun test"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "commander": "^12.0.0",
+    "yaml": "^2.0.0"
+  }
+}
