@@ -23,6 +23,7 @@ reap-wf/
         init.ts                   # reap init
         evolve.ts                 # reap evolve
         status.ts                 # reap status
+        fix.ts                    # reap fix (상태 검증 + 복구)
         scan.ts                   # reap scan (Phase 2)
         diff.ts                   # reap diff (Phase 2)
     core/
@@ -41,7 +42,7 @@ reap-wf/
         formation.md              # /reap.formation
         planning.md               # /reap.planning
         growth.md                 # /reap.growth
-        fitness.md                # /reap.fitness
+        validation.md             # /reap.validation
         adaptation.md             # /reap.adaptation
         birth.md                  # /reap.birth
       genome/                     # 초기 Genome 템플릿
@@ -60,6 +61,7 @@ reap-wf/
       init.test.ts
       evolve.test.ts
       status.test.ts
+      fix.test.ts
     helpers/
       setup.ts                   # 테스트용 임시 .reap/ 생성 유틸리티
   package.json
@@ -159,7 +161,7 @@ describe("types", () => {
   test("LifeCycleStage has all 8 stages", () => {
     const stages: LifeCycleStage[] = [
       "conception", "formation", "planning", "growth",
-      "fitness", "adaptation", "birth", "legacy"
+      "validation", "adaptation", "birth", "legacy"
     ];
     expect(stages).toHaveLength(8);
   });
@@ -194,14 +196,14 @@ export type LifeCycleStage =
   | "formation"
   | "planning"
   | "growth"
-  | "fitness"
+  | "validation"
   | "adaptation"
   | "birth"
   | "legacy";
 
 export const LIFECYCLE_ORDER: readonly LifeCycleStage[] = [
   "conception", "formation", "planning", "growth",
-  "fitness", "adaptation", "birth", "legacy",
+  "validation", "adaptation", "birth", "legacy",
 ] as const;
 
 export interface GenerationState {
@@ -457,8 +459,8 @@ describe("LifeCycle", () => {
     expect(LifeCycle.canTransition("conception", "growth")).toBe(false);
   });
 
-  test("canTransition allows growth -> fitness -> growth loop", () => {
-    expect(LifeCycle.canTransition("fitness", "growth")).toBe(true);
+  test("canTransition allows growth -> validation -> growth loop", () => {
+    expect(LifeCycle.canTransition("validation", "growth")).toBe(true);
   });
 
   test("canTransition disallows arbitrary backward", () => {
@@ -491,7 +493,7 @@ const LABELS: Record<LifeCycleStage, string> = {
   formation: "Define",
   planning: "Plan",
   growth: "Build",
-  fitness: "Verify",
+  validation: "Verify",
   adaptation: "Retrospect",
   birth: "출산",
   legacy: "완료",
@@ -505,8 +507,8 @@ export class LifeCycle {
   }
 
   static canTransition(from: LifeCycleStage, to: LifeCycleStage): boolean {
-    // Allow growth <-> fitness loop
-    if (from === "fitness" && to === "growth") return true;
+    // Allow growth <-> validation loop
+    if (from === "validation" && to === "growth") return true;
 
     const fromIdx = LIFECYCLE_ORDER.indexOf(from);
     const toIdx = LIFECYCLE_ORDER.indexOf(to);
@@ -1130,9 +1132,9 @@ export async function regressStage(projectRoot: string): Promise<GenerationState
   const current = await mgr.current();
   if (!current) throw new Error("No active Generation");
 
-  // Only fitness -> growth is allowed
-  if (current.stage !== "fitness") {
-    throw new Error(`Cannot go back from ${current.stage}. Only Fitness → Growth is supported.`);
+  // Only validation -> growth is allowed
+  if (current.stage !== "validation") {
+    throw new Error(`Cannot go back from ${current.stage}. Only Validation → Growth is supported.`);
   }
   current.stage = "growth";
   await mgr.save(current);
@@ -1152,7 +1154,7 @@ program
   .description("Start a new Generation or advance the current Life Cycle stage")
   .argument("[goal]", "Goal for the new Generation")
   .option("--advance", "Advance to the next Life Cycle stage")
-  .option("--back", "Go back to the previous stage (Growth ↔ Fitness loop)")
+  .option("--back", "Go back to the previous stage (Growth ↔ Validation loop)")
   .action(async (goal: string | undefined, options: { advance?: boolean; back?: boolean }) => {
     try {
       if (options.back) {
@@ -1328,6 +1330,254 @@ git add src/cli/commands/status.ts tests/commands/status.test.ts src/cli/index.t
 git commit -m "feat: implement reap status command"
 ```
 
+### Task 9b: reap fix 커맨드
+
+**Files:**
+- Create: `src/cli/commands/fix.ts`
+- Create: `tests/commands/fix.test.ts`
+- Modify: `src/cli/index.ts`
+
+- [ ] **Step 1: 테스트 작성**
+
+```typescript
+// tests/commands/fix.test.ts
+import { describe, expect, test, beforeEach, afterEach } from "bun:test";
+import { mkdtemp, rm, mkdir, writeFile, unlink } from "fs/promises";
+import { tmpdir } from "os";
+import { join } from "path";
+import { initProject } from "../../src/cli/commands/init";
+import { evolve } from "../../src/cli/commands/evolve";
+import { fixProject, type FixResult } from "../../src/cli/commands/fix";
+
+describe("reap fix", () => {
+  let tempDir: string;
+
+  beforeEach(async () => {
+    tempDir = await mkdtemp(join(tmpdir(), "reap-test-"));
+    await initProject(tempDir, "test-project", "greenfield");
+  });
+
+  afterEach(async () => {
+    await rm(tempDir, { recursive: true });
+  });
+
+  test("reports healthy when all directories exist", async () => {
+    const result = await fixProject(tempDir);
+    expect(result.issues).toHaveLength(0);
+    expect(result.fixed).toHaveLength(0);
+  });
+
+  test("recreates missing genome/ directory", async () => {
+    await rm(join(tempDir, ".reap", "genome"), { recursive: true });
+    const result = await fixProject(tempDir);
+    expect(result.fixed.some(f => f.includes("genome"))).toBe(true);
+  });
+
+  test("recreates missing life/ directory", async () => {
+    await rm(join(tempDir, ".reap", "life"), { recursive: true });
+    const result = await fixProject(tempDir);
+    expect(result.fixed.some(f => f.includes("life"))).toBe(true);
+  });
+
+  test("recreates missing lineage/ directory", async () => {
+    await rm(join(tempDir, ".reap", "lineage"), { recursive: true });
+    const result = await fixProject(tempDir);
+    expect(result.fixed.some(f => f.includes("lineage"))).toBe(true);
+  });
+
+  test("recreates missing environment/ directory", async () => {
+    await rm(join(tempDir, ".reap", "environment"), { recursive: true });
+    const result = await fixProject(tempDir);
+    expect(result.fixed.some(f => f.includes("environment"))).toBe(true);
+  });
+
+  test("reports invalid stage in current.yml", async () => {
+    await evolve(tempDir, "Test goal");
+    const currentPath = join(tempDir, ".reap", "life", "current.yml");
+    await writeFile(currentPath, "id: gen-001\ngoal: Test\nstage: invalid_stage\ngenomeVersion: 1\nstartedAt: '2026-01-01'\n");
+    const result = await fixProject(tempDir);
+    expect(result.issues.some(i => i.includes("stage"))).toBe(true);
+  });
+
+  test("reports corrupted current.yml and recreates as empty", async () => {
+    const currentPath = join(tempDir, ".reap", "life", "current.yml");
+    await writeFile(currentPath, "{{{{not: valid: yaml:::}}}");
+    const result = await fixProject(tempDir);
+    expect(result.fixed.some(f => f.includes("current.yml"))).toBe(true);
+  });
+
+  test("recreates missing mutations/ directory when generation is active", async () => {
+    await evolve(tempDir, "Test goal");
+    await rm(join(tempDir, ".reap", "life", "mutations"), { recursive: true });
+    const result = await fixProject(tempDir);
+    expect(result.fixed.some(f => f.includes("mutations"))).toBe(true);
+  });
+});
+```
+
+- [ ] **Step 2: 테스트 실패 확인**
+
+```bash
+bun test tests/commands/fix.test.ts
+```
+Expected: FAIL
+
+- [ ] **Step 3: 구현**
+
+```typescript
+// src/cli/commands/fix.ts
+import { mkdir, stat } from "fs/promises";
+import { join } from "path";
+import YAML from "yaml";
+import { ReapPaths } from "../../core/paths";
+import { LifeCycle } from "../../core/lifecycle";
+import type { GenerationState } from "../../types";
+
+export interface FixResult {
+  issues: string[];   // 감지했지만 자동 수정 불가한 문제
+  fixed: string[];    // 자동 수정한 항목
+}
+
+async function dirExists(path: string): Promise<boolean> {
+  try {
+    const s = await stat(path);
+    return s.isDirectory();
+  } catch {
+    return false;
+  }
+}
+
+export async function fixProject(projectRoot: string): Promise<FixResult> {
+  const paths = new ReapPaths(projectRoot);
+  const issues: string[] = [];
+  const fixed: string[] = [];
+
+  // 1. 필수 디렉토리 검증 + 복구
+  const requiredDirs = [
+    { path: paths.genome, name: "genome" },
+    { path: paths.environment, name: "environment" },
+    { path: paths.life, name: "life" },
+    { path: paths.lineage, name: "lineage" },
+    { path: join(paths.life, "mutations"), name: "life/mutations" },
+    { path: join(paths.life, "backlog"), name: "life/backlog" },
+  ];
+
+  for (const dir of requiredDirs) {
+    if (!(await dirExists(dir.path))) {
+      await mkdir(dir.path, { recursive: true });
+      fixed.push(`Recreated missing directory: ${dir.name}/`);
+    }
+  }
+
+  // 2. config.yml 검증
+  const configFile = Bun.file(paths.configYml);
+  if (!(await configFile.exists())) {
+    issues.push("config.yml is missing. Run 'reap init' to recreate the project.");
+  }
+
+  // 3. current.yml 검증
+  const currentFile = Bun.file(paths.currentYml);
+  if (await currentFile.exists()) {
+    const content = await currentFile.text();
+    if (content.trim()) {
+      try {
+        const state = YAML.parse(content) as GenerationState;
+
+        // stage 유효성 검증
+        if (!state.stage || !LifeCycle.isValid(state.stage)) {
+          issues.push(`Invalid stage "${state.stage}" in current.yml. Valid stages: ${LifeCycle.stages().join(", ")}. Manual correction required.`);
+        }
+
+        // 필수 필드 검증
+        if (!state.id) issues.push("current.yml is missing 'id' field. Manual correction required.");
+        if (!state.goal) issues.push("current.yml is missing 'goal' field. Manual correction required.");
+
+        // mutations 디렉토리 (활성 generation이 있으면 필수)
+        if (!(await dirExists(paths.mutations))) {
+          await mkdir(paths.mutations, { recursive: true });
+          fixed.push("Recreated missing mutations/ directory for active generation");
+        }
+      } catch {
+        // YAML 파싱 실패 — 파일 초기화
+        await Bun.write(paths.currentYml, "");
+        fixed.push("Reset corrupted current.yml (was not valid YAML)");
+      }
+    }
+  }
+
+  return { issues, fixed };
+}
+```
+
+- [ ] **Step 4: CLI에 fix 커맨드 등록**
+
+`src/cli/index.ts`에 추가:
+
+```typescript
+import { fixProject } from "./commands/fix";
+
+program
+  .command("fix")
+  .description("Verify and repair .reap/ state")
+  .action(async () => {
+    try {
+      const result = await fixProject(process.cwd());
+
+      if (result.fixed.length === 0 && result.issues.length === 0) {
+        console.log("✓ Everything looks good. No issues found.");
+        return;
+      }
+
+      if (result.fixed.length > 0) {
+        console.log("Fixed:");
+        for (const f of result.fixed) {
+          console.log(`  ✓ ${f}`);
+        }
+      }
+
+      if (result.issues.length > 0) {
+        console.log("\nIssues (manual fix required):");
+        for (const i of result.issues) {
+          console.log(`  ✗ ${i}`);
+        }
+        process.exit(1);
+      }
+    } catch (e: any) {
+      console.error(`Error: ${e.message}`);
+      process.exit(1);
+    }
+  });
+```
+
+- [ ] **Step 5: LifeCycle에 isValid, stages 메서드 추가**
+
+`src/core/lifecycle.ts`에 추가:
+
+```typescript
+// LifeCycle 클래스에 추가
+static isValid(stage: string): boolean {
+  return STAGES.includes(stage as LifeCycleStage);
+}
+
+static stages(): LifeCycleStage[] {
+  return [...STAGES];
+}
+```
+
+- [ ] **Step 6: 테스트 통과 확인**
+
+```bash
+bun test tests/commands/fix.test.ts
+```
+Expected: PASS
+
+- [ ] **Step 7: 커밋**
+
+```bash
+git add src/cli/commands/fix.ts tests/commands/fix.test.ts src/cli/index.ts src/core/lifecycle.ts
+git commit -m "feat: implement reap fix command for state verification and repair"
+```
+
 ---
 
 ## Chunk 5: AI Agent 커맨드 (슬래시 커맨드 프롬프트)
@@ -1339,7 +1589,7 @@ git commit -m "feat: implement reap status command"
 - Create: `src/templates/commands/formation.md`
 - Create: `src/templates/commands/planning.md`
 - Create: `src/templates/commands/growth.md`
-- Create: `src/templates/commands/fitness.md`
+- Create: `src/templates/commands/validation.md`
 - Create: `src/templates/commands/adaptation.md`
 - Create: `src/templates/commands/birth.md`
 
@@ -1428,19 +1678,19 @@ AI와 Human이 협업하여 Civilization(Source Code)을 구현하는 단계입�
 1. Planning에서 세운 계획에 따라 코드를 구현하세요
 2. 명세(Genome)와 다르게 구현해야 할 부분을 발견하면 Mutation으로 기록하세요:
    - `.reap/life/mutations/`에 YAML 파일로 기록 (id, file, description, createdAt)
-3. 구현이 완료되면 `reap evolve --advance`로 Fitness 단계로 진행하세요
-4. Fitness에서 문제가 발견되면 `reap evolve --back`으로 다시 Growth로 돌아올 수 있습니다
+3. 구현이 완료되면 `reap evolve --advance`로 Validation 단계로 진행하세요
+4. Validation에서 문제가 발견되면 `reap evolve --back`으로 다시 Growth로 돌아올 수 있습니다
 ```
 
-- [ ] **Step 5: fitness 커맨드 작성**
+- [ ] **Step 5: validation 커맨드 작성**
 
 ```markdown
-<!-- src/templates/commands/fitness.md -->
+<!-- src/templates/commands/validation.md -->
 ---
-description: "REAP Fitness — 테스트와 검증으로 목표 달성을 확인합니다"
+description: "REAP Validation — 테스트와 검증으로 목표 달성을 확인합니다"
 ---
 
-# Fitness (Verify)
+# Validation (Verify)
 
 테스트와 검증을 통해 목표 달성을 확인하는 단계입니다.
 
@@ -1448,7 +1698,7 @@ description: "REAP Fitness — 테스트와 검증으로 목표 달성을 확인
 
 1. 테스트를 실행하여 구현이 올바른지 확인하세요
 2. 목표에서 정의한 완료 조건을 점검하세요
-3. 문제가 발견되면 `reap evolve --back`으로 Growth로 돌아가세요 (Growth ↔ Fitness 루프)
+3. 문제가 발견되면 `reap evolve --back`으로 Growth로 돌아가세요 (Growth ↔ Validation 루프)
 4. 검증이 완료되면 `reap evolve --advance`로 Adaptation 단계로 진행하세요
 ```
 
@@ -1511,7 +1761,7 @@ await mkdir(claudeCommandsDir, { recursive: true });
 
 // Copy command templates
 const commandsDir = join(import.meta.dir, "../../templates/commands");
-const commands = ["conception", "formation", "planning", "growth", "fitness", "adaptation", "birth"];
+const commands = ["conception", "formation", "planning", "growth", "validation", "adaptation", "birth"];
 for (const cmd of commands) {
   const src = join(commandsDir, `${cmd}.md`);
   const dest = join(claudeCommandsDir, `reap-${cmd}.md`);
@@ -1836,11 +2086,11 @@ describe("Full Generation Lifecycle", () => {
     const mutMgr = new MutationManager(paths);
     await mutMgr.record("gen-001", "genome/architecture/application.md", "Need to add auth middleware layer");
 
-    // Advance: growth → fitness
+    // Advance: growth → validation
     await advanceStage(tempDir);
-    expect((await getStatus(tempDir)).generation!.stage).toBe("fitness");
+    expect((await getStatus(tempDir)).generation!.stage).toBe("validation");
 
-    // Advance: fitness → adaptation
+    // Advance: validation → adaptation
     await advanceStage(tempDir);
     expect((await getStatus(tempDir)).generation!.stage).toBe("adaptation");
 
@@ -1899,7 +2149,7 @@ reap status
 reap evolve --advance   # → formation
 reap evolve --advance   # → planning
 reap evolve --advance   # → growth
-reap evolve --advance   # → fitness
+reap evolve --advance   # → validation
 reap evolve --advance   # → adaptation
 reap evolve --advance   # → birth
 reap evolve --advance   # → legacy (complete)

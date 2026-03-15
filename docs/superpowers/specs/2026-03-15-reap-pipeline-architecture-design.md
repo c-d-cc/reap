@@ -44,7 +44,7 @@ Application이 대응해야 하는 외부 환경. 고객, 규제, 시장, 외부
 | **Genome** | 명세 + 지식 | 유전 정보. 세대를 거치며 진화함 |
 | **Life Cycle** | Generation 내부 흐름 | 한 세대의 생애주기 |
 | **Mutation** | Growth 중 발견한 명세 문제 | 세대 중 발생하는 변이. 기록만 하고 현재 Genome은 수정하지 않음 |
-| **Fitness** | Verify | 적합성 검증. 자연선택 |
+| **Validation** | Verify | 검증. 구현이 목표에 부합하는지 확인 |
 | **Adaptation** | Retrospect | 다음 세대를 위한 적응. Genome diff로 기록 |
 | **Birth** | 다음 세대 출산 | Mutation + Adaptation을 Genome에 반영하고 다음 세대의 초기 상태를 생성 |
 | **Legacy** | 완료 | 현재 세대 기록을 Lineage로 이동 |
@@ -57,7 +57,7 @@ Application이 대응해야 하는 외부 환경. 고객, 규제, 시장, 외부
 ```
 Generation #1 (Genome v1으로 시작)
   → Growth 중 명세 문제 발견 → Mutation 기록 (Genome 수정 안 함)
-  → Fitness → 적합성 검증
+  → Validation → 검증
   → Adaptation → Genome diff 기록
   → Birth → Mutation + Adaptation을 Genome에 반영 → Genome v2
          → 다음 세대(Gen #2)의 초기 상태 생성
@@ -84,8 +84,8 @@ Genesis → Generation #1 → Generation #2 → ... → Generation #N
 ## 5. Life Cycle (한 세대의 생애)
 
 ```
-Conception → Formation → Planning → Growth → Fitness → Adaptation → Birth → Legacy
-(목표 설정)   (Define)     (Plan)    (Build)  (Verify)  (Retrospect)  (출산)  (완료)
+Conception → Formation → Planning → Growth → Validation → Adaptation → Birth → Legacy
+(목표 설정)   (Define)     (Plan)    (Build)   (Verify)   (Retrospect)  (출산)  (완료)
 ```
 
 | 단계 | 진화 용어 | 설명 |
@@ -94,7 +94,7 @@ Conception → Formation → Planning → Growth → Fitness → Adaptation → 
 | **Formation** | 형성 | 목표 달성에 필요한 명세를 Genome으로부터 읽고 보완 계획 수립 |
 | **Planning** | 계획 | 구현 계획을 수립하고 작업을 분해 |
 | **Growth** | 성장 | AI+Human 협업으로 Civilization(코드) 구현. 명세 문제 발견 시 Mutation으로 기록 |
-| **Fitness** | 적합성 | 테스트와 검증으로 목표 달성 확인. Growth ↔ Fitness 작은 루프 가능 |
+| **Validation** | 검증 | 테스트와 검증으로 목표 달성 확인. Growth ↔ Validation 작은 루프 가능 |
 | **Adaptation** | 적응 | 회고. Mutation 정리, 교훈 도출, Genome diff 작성 |
 | **Birth** | 출산 | Mutation + Adaptation을 Genome에 반영. 다음 세대의 초기 상태 생성 |
 | **Legacy** | 유산 | 완료. 현재 Generation 기록이 Lineage로 이동 |
@@ -233,6 +233,7 @@ Life Cycle 단계와 Application 구성 요소에 따라 주도하는 쪽이 다
 | `reap diff` | Genome ↔ Civilization 차이 감지 | 유틸리티 |
 | `reap sync` | diff 결과를 바탕으로 차이 해소. 방향은 인간이 판단 | 유틸리티 |
 | `reap status` | 현재 Generation + 전체 현황 | 유틸리티 |
+| `reap fix` | .reap/ 상태 검증 + 복구 | 예기치 못한 상태에서 정상으로 복원 |
 
 ## 10. 설계 결정 사항
 
