@@ -1,6 +1,5 @@
 import { ReapPaths } from "../../core/paths";
 import { GenerationManager } from "../../core/generation";
-import { LifeCycle } from "../../core/lifecycle";
 import type { GenerationState } from "../../types";
 
 export async function evolve(projectRoot: string, goal: string): Promise<GenerationState> {
