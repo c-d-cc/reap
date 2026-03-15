@@ -4,11 +4,13 @@ import { join } from "path";
 import type { MutationRecord } from "../types";
 import type { ReapPaths } from "./paths";
 
+let mutCounter = 0;
+
 export class MutationManager {
   constructor(private paths: ReapPaths) {}
 
   async record(generationId: string, file: string, description: string): Promise<MutationRecord> {
-    const id = `mut-${Date.now()}`;
+    const id = `mut-${Date.now()}-${mutCounter++}`;
     const mutation: MutationRecord = {
       id, generationId, file, description,
       createdAt: new Date().toISOString(),

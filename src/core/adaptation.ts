@@ -4,11 +4,13 @@ import { join } from "path";
 import type { AdaptationRecord } from "../types";
 import type { ReapPaths } from "./paths";
 
+let adaptCounter = 0;
+
 export class AdaptationManager {
   constructor(private paths: ReapPaths) {}
 
   async record(generationId: string, targetFile: string, description: string, diff?: string): Promise<AdaptationRecord> {
-    const id = `adapt-${Date.now()}`;
+    const id = `adapt-${Date.now()}-${adaptCounter++}`;
     const adaptation: AdaptationRecord = {
       id, generationId, targetFile, description,
       diff: diff ?? "",
