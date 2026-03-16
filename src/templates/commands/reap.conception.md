@@ -38,7 +38,9 @@ description: "REAP Conception — 이번 Generation의 목표를 설정합니다
   - 각 파일의 건강 상태를 평가하라:
     - **placeholder만 있는 파일** → "genome 보완 필요" 플래그
     - **100줄 초과 파일** → "domain/으로 분리 필요" 플래그
-    - **domain/이 비어있는 경우** → "도메인 규칙 미정의" 플래그
+    - **domain/에 README.md가 없는 경우** → "domain 작성 가이드 미설치" 플래그
+    - **domain/에 README.md만 있고 규칙 파일이 없는 경우** → "도메인 규칙 미정의" 플래그
+    - **domain/ 파일이 100줄 초과** → "domain 파일 분리 필요" 플래그
     - **constraints.md에 Validation Commands가 비어있는 경우** → "테스트 명령어 미정의" 플래그
 - genome 상태를 인간에게 보고하라
 

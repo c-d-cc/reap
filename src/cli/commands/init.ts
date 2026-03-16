@@ -53,6 +53,11 @@ export async function initProject(
     await Bun.write(dest, await Bun.file(src).text());
   }
 
+  // Copy domain README
+  const domainReadmeSrc = join(import.meta.dir, "../../templates/genome/domain/README.md");
+  const domainReadmeDest = join(paths.domain, "README.md");
+  await Bun.write(domainReadmeDest, await Bun.file(domainReadmeSrc).text());
+
   // Copy slash commands to .reap/commands/
   for (const cmd of COMMAND_NAMES) {
     const src = join(import.meta.dir, "../../templates/commands", `${cmd}.md`);

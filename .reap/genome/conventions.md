@@ -28,8 +28,10 @@
 ## Template Conventions
 
 - Genome 템플릿: `src/templates/genome/` — init 시 `.reap/genome/`으로 복사
+- Genome domain 가이드: `src/templates/genome/domain/README.md` — init 시 `.reap/genome/domain/`으로 복사
 - 슬래시 커맨드: `src/templates/commands/` — init 시 `.reap/commands/` + `.claude/commands/`로 복사
 - 산출물 템플릿: `src/templates/artifacts/` — init 시 `.reap/templates/`로 복사
+- **새 템플릿 추가 시 반드시 `init.ts`의 복사 로직도 동기화하라**
 
 ## Enforced Rules
 
