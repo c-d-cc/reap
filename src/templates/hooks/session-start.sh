@@ -26,11 +26,11 @@ fi
 # Read current.yml
 gen_stage="none"
 if [ ! -f "$CURRENT_YML" ]; then
-  generation_context="No active Generation. Run \`/reap.evolve\` to start one."
+  generation_context="No active Generation. Run \`/reap.start\` to start one."
 else
   content=$(cat "$CURRENT_YML")
   if [ -z "$content" ]; then
-    generation_context="No active Generation. Run \`/reap.evolve\` to start one."
+    generation_context="No active Generation. Run \`/reap.start\` to start one."
   else
     # Parse YAML fields (simple grep-based, no external deps)
     gen_id=$(echo "$content" | grep "^id:" | sed 's/^id: *//')
@@ -47,7 +47,7 @@ case "${gen_stage}" in
   implementation) next_cmd="/reap.implementation" ;;
   validation)     next_cmd="/reap.validation" ;;
   completion)     next_cmd="/reap.completion" ;;
-  *)              next_cmd="/reap.evolve" ;;
+  *)              next_cmd="/reap.start" ;;
 esac
 
 # Escape for JSON
@@ -61,7 +61,7 @@ escape_for_json() {
   printf '%s' "$s"
 }
 
-reap_context="<REAP_WORKFLOW>\n${reap_guide}\n\n---\n\n## Current State\n${generation_context}\n\n## Rules\n1. ALL development work MUST follow the REAP lifecycle. Do NOT bypass it.\n2. Before writing any code, check if a Generation is active and what stage it is in.\n3. If a Generation is active, use \`${next_cmd}\` to proceed with the current stage.\n4. If no Generation is active, use \`/reap.evolve\` to start a new one.\n5. Do NOT implement features, fix bugs, or make changes outside of the REAP lifecycle unless the user explicitly asks to bypass it.\n6. When the user says \"reap evolve\", \"다음 단계\", \"proceed\", or similar — invoke the appropriate REAP skill.\n</REAP_WORKFLOW>"
+reap_context="<REAP_WORKFLOW>\n${reap_guide}\n\n---\n\n## Current State\n${generation_context}\n\n## Rules\n1. ALL development work MUST follow the REAP lifecycle. Do NOT bypass it.\n2. Before writing any code, check if a Generation is active and what stage it is in.\n3. If a Generation is active, use \`${next_cmd}\` to proceed with the current stage.\n4. If no Generation is active, use \`/reap.start\` to start a new one.\n5. Do NOT implement features, fix bugs, or make changes outside of the REAP lifecycle unless the user explicitly asks to bypass it.\n6. When the user says \"reap evolve\", \"다음 단계\", \"proceed\", or similar — invoke the appropriate REAP skill.\n</REAP_WORKFLOW>"
 
 escaped_context=$(escape_for_json "$reap_context")
 

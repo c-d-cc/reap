@@ -95,5 +95,5 @@ In the following situations, **STOP and ask the human**:
 - Add Implementation Notes at the end summarizing notable decisions
 
 ## Completion
-- "Proceed to the Validation stage with `reap evolve --advance`."
-- "If issues are found during Validation, you can return with `reap evolve --back`."
+- "Proceed to the Validation stage with `/reap.next`."
+- "If issues are found during Validation, you can return with `/reap.back`."

@@ -60,9 +60,9 @@ Do NOT make claims without evidence. This is non-negotiable.
 - Automated validations pass + some completion criteria deferred → **partial**
 - Automated validation failure or completion criteria not met → **fail**
 - If **fail**, provide regression guidance:
-  - Code issue → `reap evolve --back` (implementation)
-  - Plan issue → `reap evolve --back planning`
-  - Goal issue → `reap evolve --back objective`
+  - Code issue → `/reap.back` (implementation)
+  - Plan issue → `/reap.back planning`
+  - Goal issue → `/reap.back objective`
 
 ## Red Flags — STOP if you catch yourself thinking:
 - "It will probably pass" → Run it.
@@ -80,5 +80,5 @@ Do NOT make claims without evidence. This is non-negotiable.
 - The artifact should reflect the current validation progress at all times
 
 ## Completion
-- pass/partial: "Proceed to the Completion stage with `reap evolve --advance`."
+- pass/partial: "Proceed to the Completion stage with `/reap.next`."
 - fail: Provide regression guidance

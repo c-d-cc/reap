@@ -83,4 +83,4 @@ Before saving the artifact, verify:
 
 ## Completion
 - Show the artifact to the human and get confirmation
-- After confirmation: "Proceed to the Implementation stage with `reap evolve --advance`."
+- After confirmation: "Proceed to the Implementation stage with `/reap.next`."

@@ -11,7 +11,7 @@ If the goal is ambiguous, do NOT guess — STOP and ask the human. This is non-n
 
 ## Gate (Preconditions)
 - Read `.reap/life/current.yml` and verify that stage is `objective`
-- If not met: ERROR — "Current stage is not objective. Start a new Generation with `reap evolve` or check the current state with `reap status`." then **STOP**
+- If not met: ERROR — "Current stage is not objective. Start a new Generation with `/reap.start` or check the current state with `reap status`." then **STOP**
 
 ## Context (Generation Info)
 - Read `.reap/life/current.yml` for the current generation info (id, goal, genomeVersion)
@@ -110,4 +110,4 @@ Before saving the artifact, verify:
 
 ## Completion
 - Show the artifact to the human and get confirmation
-- After confirmation: "Proceed to the Planning stage with `reap evolve --advance`."
+- After confirmation: "Proceed to the Planning stage with `/reap.next`."

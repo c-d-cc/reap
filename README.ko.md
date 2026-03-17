@@ -2,7 +2,7 @@
 
 > For English version, see [README.md](README.md).
 
-**Recursive Evolutionary Application Pipeline** — AI와 인간이 세대(Generation)를 거듭하며 소프트웨어를 진화시키는 개발 파이프라인.
+**Recursive Evolutionary Autonomous Pipeline** — AI와 인간이 세대(Generation)를 거듭하며 소프트웨어를 진화시키는 개발 파이프라인.
 
 ```
 Genome (설계와 지식)  →  Evolution (세대를 거친 진화)  →  Civilization (Source Code)

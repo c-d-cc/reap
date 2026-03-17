@@ -2,7 +2,7 @@
 
 ## What is REAP
 
-REAP (Recursive Evolutionary Application Pipeline) is a development pipeline where AI and humans collaborate to incrementally evolve an Application across successive Generations.
+REAP (Recursive Evolutionary Autonomous Pipeline) is a development pipeline where AI and humans collaborate to incrementally evolve an Application across successive Generations.
 
 ## 3-Layer Model
 
@@ -67,7 +67,7 @@ All items to be carried forward to the next generation are stored in `.reap/life
 Tasks that depend on Genome changes cannot be completed in the current generation. Mark as `[deferred]` and add to backlog as `type: task`. Partial completion is normal.
 
 ### Micro Loop (Regression to a Previous Stage)
-Any stage can regress to a previous stage. Use `reap evolve --back` to go back one stage, or `reap evolve --back [stage]` to regress to a specific stage.
+Any stage can regress to a previous stage. Use `/reap.back` to go back one stage, or `/reap.back [stage]` to regress to a specific stage.
 
 Artifact handling rules:
 - **Before target stage**: Preserved
@@ -84,7 +84,7 @@ As generations accumulate, lineage grows. Auto-compression triggers when total e
 - **Level 1**: Generation folder → single .md (40 lines). Only goal + result + notable items preserved.
 - **Level 2**: 5 Level 1 entries → epoch .md (60 lines). Only key flow preserved.
 
-Compression runs automatically during `reap evolve --advance` (archiving after completion).
+Compression runs automatically during `/reap.next` (archiving after completion).
 
 ## Role Separation
 
@@ -97,17 +97,17 @@ Compression runs automatically during `reap evolve --advance` (archiving after c
 ## Execution Flow
 
 ```
-1. /reap.evolve → Start a new Generation
+1. /reap.start → Start a new Generation
 2. /reap.objective → Define goal + requirements
-3. reap evolve --advance
+3. /reap.next
 4. /reap.planning → Task decomposition + implementation plan
-5. reap evolve --advance
+5. /reap.next
 6. /reap.implementation → Code implementation
-7. reap evolve --advance
+7. /reap.next
 8. /reap.validation → Verification
-9. reap evolve --advance
+9. /reap.next
 10. /reap.completion → Retrospective + genome updates
-11. reap evolve --advance → Archiving, generation ends
+11. /reap.next → Archiving, generation ends
 ```
 
 Each slash command follows a 3-step structure: Gate (precondition check) → Steps (work execution) → Artifact generation.

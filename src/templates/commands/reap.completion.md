@@ -89,4 +89,4 @@ Before saving the artifact, verify:
 - The artifact should reflect the current state of completion work at all times
 
 ## Completion
-- "Finalize the generation with `reap evolve --advance`. Lineage archiving will be performed automatically."
+- "Finalize the generation with `/reap.next`. Lineage archiving will be performed automatically."
