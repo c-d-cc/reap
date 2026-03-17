@@ -49,8 +49,13 @@ bun install -g reap
 
 ```bash
 # 1. Initialize the project
-reap init my-project          # New project
-cd my-project && reap init    # Existing project (name defaults to directory name)
+
+# New project
+reap init my-project
+
+# Existing project
+cd my-project
+reap init
 
 # 2. Open Claude Code and run a full generation
 claude

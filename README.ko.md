@@ -49,8 +49,13 @@ bun install -g reap
 
 ```bash
 # 1. 프로젝트 초기화
-reap init my-project              # 새 프로젝트
-cd my-project && reap init        # 기존 프로젝트 (디렉토리 이름 자동 사용)
+
+# 새 프로젝트
+reap init my-project
+
+# 기존 프로젝트
+cd my-project
+reap init
 
 # 2. Claude Code에서 한 Generation 전체 실행
 claude
