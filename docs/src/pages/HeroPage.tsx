@@ -7,12 +7,14 @@ import { AppNavbar } from "@/components/AppNavbar";
 
 function Section({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
-    <section className="border-b border-border px-6 py-8 md:px-16">
-      <div className="max-w-3xl">
-        {title && (
-          <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">{title}</div>
-        )}
-        {children}
+    <section className="border-b border-border px-6 py-8 md:px-8">
+      <div className="max-w-4xl mx-auto">
+        <div className="max-w-3xl">
+          {title && (
+            <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">{title}</div>
+          )}
+          {children}
+        </div>
       </div>
     </section>
   );
@@ -20,12 +22,14 @@ function Section({ title, children }: { title?: string; children: React.ReactNod
 
 export function HeroPage() {
   return (
-    <div className="bg-background flex flex-col">
-      <AppNavbar />
-      <main className="flex-1 flex flex-col pt-14">
+    <div className="h-screen bg-background flex flex-col overflow-hidden">
+      <AppNavbar showGetStarted />
+      <main className="flex-1 pt-11 md:pt-14 overflow-hidden flex justify-center">
+        <div className="w-full max-w-4xl overflow-y-auto flex flex-col">
 
         {/* Header */}
-        <section className="border-b border-border px-6 py-10 md:px-16">
+        <section className="border-b border-border px-6 py-10 md:px-8">
+          <div className="max-w-4xl mx-auto">
           <div className="max-w-3xl">
             <div className="text-xs font-mono text-muted-foreground border border-border rounded px-2 py-0.5 inline-block mb-4">
               Recursive Evolutionary Autonomous Pipeline
@@ -41,11 +45,12 @@ export function HeroPage() {
               <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 h-8 px-4 text-sm">
                 <Link href="/docs/introduction">Get Started →</Link>
               </Button>
-              <a href="https://github.com" target="_blank" rel="noreferrer"
+              <a href="https://github.com/c-d-cc/reap" target="_blank" rel="noreferrer"
                 className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
                 <Github className="w-4 h-4" />GitHub
               </a>
             </div>
+          </div>
           </div>
         </section>
 
@@ -74,13 +79,13 @@ export function HeroPage() {
           <p className="text-sm text-muted-foreground mb-4">
             Every REAP project consists of three conceptual layers. The Genome defines what to build. The Evolution process builds it. The Civilization is the result.
           </p>
-          <div className="flex items-stretch border border-border rounded-md overflow-hidden text-sm mb-4">
+          <div className="flex flex-col sm:flex-row items-stretch border border-border rounded-md overflow-hidden text-sm mb-4">
             {[
               { label: "Genome", sub: "Design & Knowledge", path: ".reap/genome/", desc: "Architecture principles, business rules, conventions, technical constraints. Never modified mid-generation." },
               { label: "Evolution", sub: "Generational Process", path: ".reap/life/ → .reap/lineage/", desc: "Each Generation runs Objective → Planning → Implementation → Validation → Completion. On completion, archived to lineage." },
               { label: "Civilization", sub: "Source Code", path: "your codebase/", desc: "Everything outside .reap/. Grows and improves with each completed generation." },
             ].map((item, i, arr) => (
-              <div key={item.label} className={`flex-1 px-4 py-3 bg-card ${i < arr.length - 1 ? "border-r border-border" : ""}`}>
+              <div key={item.label} className={`flex-1 px-4 py-3 bg-card ${i < arr.length - 1 ? "border-b sm:border-b-0 sm:border-r border-border" : ""}`}>
                 <div className="font-semibold text-foreground text-sm">{item.label}</div>
                 <div className="text-xs text-primary mt-0.5 mb-1">{item.sub}</div>
                 <div className="text-xs font-mono text-muted-foreground mb-2">{item.path}</div>
@@ -148,7 +153,7 @@ reap init my-project
 
 # Existing project
 cd my-project
-reap init my-project --mode adoption`}</CodeBlock>
+reap init`}</CodeBlock>
             </div>
             <div>
               <div className="text-xs text-muted-foreground mb-1">3. Run your first generation (in Claude Code)</div>
@@ -207,7 +212,7 @@ reap init my-project --mode adoption`}</CodeBlock>
               </thead>
               <tbody className="divide-y divide-border">
                 {[
-                  ["reap init <name>", "Initialize a new REAP project. Options: --mode, --preset"],
+                  ["reap init [name]", "Initialize a REAP project. Name defaults to current directory"],
                   ["reap status", "Show project info, active generation, and completed count"],
                   ["reap update", "Sync commands/templates/hooks to latest version"],
                   ["reap fix", "Diagnose and repair the .reap/ directory structure"],
@@ -226,8 +231,9 @@ reap init my-project --mode adoption`}</CodeBlock>
         </Section>
 
         {/* Docs Links */}
-        <section className="px-6 py-8 md:px-16">
-          <div className="max-w-3xl">
+        <section className="px-6 py-8 md:px-8">
+          <div className="max-w-4xl mx-auto">
+        <div className="max-w-3xl">
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">Documentation</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {[
@@ -249,8 +255,10 @@ reap init my-project --mode adoption`}</CodeBlock>
               ))}
             </div>
           </div>
+          </div>
         </section>
 
+        </div>
       </main>
     </div>
   );

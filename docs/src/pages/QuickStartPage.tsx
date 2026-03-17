@@ -19,7 +19,7 @@ reap init my-project
 
 # Existing project
 cd my-project
-reap init my-project --mode adoption`}</CodeBlock>
+reap init`}</CodeBlock>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">Run your first generation</h2>
         <p className="text-sm text-muted-foreground mb-3">Open Claude Code in your project directory:</p>

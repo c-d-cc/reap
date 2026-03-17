@@ -9,7 +9,7 @@ export default function CLIPage() {
 
         <h2 className="text-base font-semibold text-foreground mb-2">reap init</h2>
         <p className="text-sm text-muted-foreground mb-2">Initialize a new REAP project. Creates the <code className="text-xs bg-muted px-1 rounded">.reap/</code> structure and installs slash commands and hooks to <code className="text-xs bg-muted px-1 rounded">~/.claude/</code>.</p>
-        <CodeBlock language="bash">{`reap init <name> [options]`}</CodeBlock>
+        <CodeBlock language="bash">{`reap init [name] [options]`}</CodeBlock>
         <div className="mt-3 border border-border rounded-md overflow-hidden text-sm mb-6">
           <table className="w-full">
             <thead>

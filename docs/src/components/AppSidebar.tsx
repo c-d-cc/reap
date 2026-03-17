@@ -1,16 +1,6 @@
 import { Link, useLocation } from "wouter";
-import {
-  Sidebar,
-  SidebarContent,
-  SidebarGroup,
-  SidebarGroupContent,
-  SidebarGroupLabel,
-  SidebarMenu,
-  SidebarMenuButton,
-  SidebarMenuItem,
-} from "@/components/ui/sidebar";
 
-const navGroups = [
+export const navGroups = [
   {
     label: "Getting Started",
     items: [
@@ -39,38 +29,42 @@ const navGroups = [
   }
 ];
 
-export function AppSidebar() {
+export function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const [location] = useLocation();
 
   return (
-    <Sidebar className="border-r border-border bg-sidebar fixed top-14 left-0 pt-3 h-[calc(100vh-3.5rem)] overflow-y-auto z-30" collapsible="none">
-      <SidebarContent className="pt-0">
-        {navGroups.map((group) => (
-          <SidebarGroup key={group.label} className="py-0">
-            <SidebarGroupLabel className="text-[9px] font-normal text-muted-foreground/60 tracking-wider uppercase px-3 py-0 mt-3 mb-1 h-auto rounded-none">
-              {group.label}
-            </SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => {
-                  const isActive = location === item.href;
-                  return (
-                    <SidebarMenuItem key={item.title}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive}
-                        className={`text-[13px] px-3 py-1.5 h-8 rounded-sm ${isActive ? 'text-primary font-medium bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
-                      >
-                        <Link href={item.href}>{item.title}</Link>
-                      </SidebarMenuButton>
-                    </SidebarMenuItem>
-                  );
-                })}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
-      </SidebarContent>
-    </Sidebar>
+    <>
+      {navGroups.map((group) => (
+        <div key={group.label} className="py-0 px-0">
+          <div className="text-[9px] font-normal text-muted-foreground/60 tracking-wider uppercase px-3 py-0 mt-3 mb-1">
+            {group.label}
+          </div>
+          <ul className="flex flex-col gap-0.5">
+            {group.items.map((item) => {
+              const isActive = location === item.href;
+              return (
+                <li key={item.title}>
+                  <Link
+                    href={item.href}
+                    onClick={onNavigate}
+                    className={`block text-[13px] px-3 py-1.5 rounded-none ${isActive ? 'text-primary font-medium bg-primary/10' : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'}`}
+                  >
+                    {item.title}
+                  </Link>
+                </li>
+              );
+            })}
+          </ul>
+        </div>
+      ))}
+    </>
+  );
+}
+
+export function AppSidebar() {
+  return (
+    <div className="border-r border-border border-l border-l-border/40 bg-sidebar pt-3 overflow-y-auto shrink-0 hidden md:block" style={{ width: "var(--sidebar-width)" }}>
+      <NavList />
+    </div>
   );
 }
