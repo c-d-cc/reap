@@ -34,11 +34,18 @@ description: "REAP Validation — 테스트와 검증으로 목표 달성을 확
 - deferred 태스크를 제외한 범위에서 완료 조건을 재평가하라
 - goal의 완료 조건을 하나씩 점검하라 (deferred로 인해 부분 달성도 허용)
 
-### 4. 판정
-- 모든 자동 검증 통과 + 완료 조건 충족 → **pass**
-- 자동 검증 통과 + 일부 완료 조건 deferred → **partial**
+### 4. 코드 품질 리뷰
+- 구현된 코드에서 minor fix가 필요한 항목을 식별하라:
+  - 하드코딩된 매직 넘버, 불필요한 중복, 누락된 edge case 등
+  - conventions.md 위반은 아니지만 개선 가능한 코드 품질 이슈
+- 발견된 항목을 기록하라
+
+### 5. 판정
+- 모든 자동 검증 통과 + 완료 조건 충족 + 코드 품질 이슈 없음 → **pass**
+- 자동 검증 통과 + 완료 조건 충족 + 코드 품질 minor fix 필요 → **partial (minor fix)**
+- 자동 검증 통과 + 일부 완료 조건 deferred → **partial (deferred)**
 - 자동 검증 실패 또는 완료 조건 미충족 → **fail**
-- **fail**인 경우: 개발자에게 `reap evolve --back`으로 Growth 복귀를 안내하라
+- **partial (minor fix)** 또는 **fail**인 경우: 개발자에게 `/reap.evolve`로 Growth 복귀를 안내하라
 
 ## 산출물 생성
 - `.reap/templates/05-validation-report.md`를 읽어라
@@ -47,4 +54,4 @@ description: "REAP Validation — 테스트와 검증으로 목표 달성을 확
 - `.reap/life/05-validation-report.md`에 저장하라
 
 ## 완료
-- 개발자에게 `reap evolve --advance`로 Adaptation 단계로 진행하라고 안내하라
+- `/reap.evolve`로 Adaptation 단계로 진행하라고 안내하라

@@ -26,6 +26,7 @@ export interface ReapConfig {
   version: string;
   project: string;
   stack?: string;
+  preset?: string;
   entryMode: "greenfield" | "migration" | "adoption";
 }
 

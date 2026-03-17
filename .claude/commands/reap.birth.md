@@ -27,11 +27,6 @@ description: "REAP Birth — Genome을 진화시키고 세대를 마무리합니
   - 100줄을 초과하면 상세 내용을 `domain/` 하위 파일로 분리하라
   - 에이전트가 다음 세대에서 읽었을 때 **즉시 행동 가능한 수준**으로 작성하라
   - placeholder나 모호한 표현 대신 구체적이고 검증 가능한 문장을 사용하라
-- **domain/ 파일 작성 시 `domain/README.md`의 가이드를 따르라**:
-  - 비즈니스 도메인 단위로 파일 분리 (코드 구조가 아닌 규칙 묶음 단위)
-  - 코드에서 직접 읽을 수 없는 지식을 기록 (정책 의도, 수치/조건, 상태 전이, 도메인 용어)
-  - 파일당 40~80줄 권장, 100줄 상한
-  - 파일명은 kebab-case, 비즈니스 도메인을 직관적으로 나타내는 이름
 
 ### 3. 검증
 - 변경된 genome이 기존 코드/테스트와 충돌하지 않는지 확인하라
@@ -48,5 +43,5 @@ description: "REAP Birth — Genome을 진화시키고 세대를 마무리합니
 - `.reap/life/07-birth-changelog.md`에 저장하라
 
 ## 완료
-- `/reap.evolve`로 Legacy 단계로 진행하라고 안내하라
-- Legacy 진입 시 자동으로 lineage 아카이빙이 수행됨을 안내하라
+- 개발자에게 `reap evolve --advance`로 Legacy 단계로 진행하라고 안내하라
+- Legacy 진입 시 CLI가 자동으로 lineage 아카이빙을 수행함을 안내하라

@@ -7,7 +7,6 @@ description: "REAP Growth — AI+Human 협업으로 코드를 구현합니다"
 ## Gate (전제조건)
 - `.reap/life/current.yml`을 읽고 stage가 `growth`인지 확인하라
 - `.reap/life/03-planning-plan.md`가 존재하는지 확인하라
-- git working tree가 clean인지 확인하라 (`git status`). uncommitted 변경이 있으면 인간에게 먼저 커밋하도록 안내하라.
 - 미충족 시: 사유를 알리고 중단
 
 ## Context (세대 정보)
@@ -18,8 +17,7 @@ description: "REAP Growth — AI+Human 협업으로 코드를 구현합니다"
 1. `.reap/life/03-planning-plan.md`에서 태스크 목록을 읽어라
 2. 이미 `04-growth-log.md`가 존재하면 읽어라 (Validation에서 복귀한 경우 — 기존 기록 유지)
 3. 미완료(`[ ]`) 태스크부터 순서대로 구현하라
-   - `04-growth-log.md`를 태스크 또는 Phase 단위로 갱신하라
-   - 서브에이전트에게 구현을 위임한 경우, 위임 단위 완료 후 갱신해도 된다
+   - 각 태스크 완료 시 즉시 `04-growth-log.md`를 갱신하라 (완료 후 일괄 작성이 아닌 실시간 기록)
    - conventions.md의 규칙을 준수하라
    - constraints.md의 기술 제약을 준수하라
 4. 명세와 다르게 구현해야 할 부분을 발견하면:
@@ -34,5 +32,5 @@ description: "REAP Growth — AI+Human 협업으로 코드를 구현합니다"
 - `.reap/life/04-growth-log.md`에 저장하라
 
 ## 완료
-- `/reap.evolve`로 Validation 단계로 진행하라고 안내하라
-- Validation에서 문제 발견 시 `/reap.evolve`로 Growth에 돌아올 수 있음을 안내하라
+- 개발자에게 `reap evolve --advance`로 Validation 단계로 진행하라고 안내하라
+- Validation에서 문제 발견 시 `reap evolve --back`으로 돌아올 수 있음을 안내하라

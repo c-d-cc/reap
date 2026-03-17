@@ -24,6 +24,7 @@
 - 커밋 메시지: `type: description` (feat, fix, test, chore, docs)
 - 한 커밋 = 한 논리적 변경
 - 테스트 포함 커밋 우선
+- **커밋 타이밍**: Growth 진입 전 clean state 확보, 태스크/Phase 완료 시 커밋, stage 전환 전 커밋
 
 ## Template Conventions
 

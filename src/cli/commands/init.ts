@@ -4,9 +4,9 @@ import { ReapPaths } from "../../core/paths";
 import { ConfigManager } from "../../core/config";
 import type { ReapConfig } from "../../types";
 
-const COMMAND_NAMES = [
+export const COMMAND_NAMES = [
   "reap.conception", "reap.formation", "reap.planning", "reap.growth",
-  "reap.validation", "reap.adaptation", "reap.birth",
+  "reap.validation", "reap.adaptation", "reap.birth", "reap.evolve",
 ];
 
 const ARTIFACT_NAMES = [
@@ -19,11 +19,21 @@ export async function initProject(
   projectRoot: string,
   projectName: string,
   entryMode: "greenfield" | "migration" | "adoption",
+  preset?: string,
 ): Promise<void> {
   const paths = new ReapPaths(projectRoot);
 
   if (await paths.isReapProject()) {
     throw new Error(".reap/ already exists. This is already a REAP project.");
+  }
+
+  // Validate preset if provided
+  if (preset) {
+    const presetDir = join(import.meta.dir, "../../templates/presets", preset);
+    const presetExists = await Bun.file(join(presetDir, "principles.md")).exists();
+    if (!presetExists) {
+      throw new Error(`Unknown preset: "${preset}". Available presets: bun-hono-react`);
+    }
   }
 
   // Create 4-axis structure + commands + templates
@@ -42,13 +52,17 @@ export async function initProject(
     version: "0.1.0",
     project: projectName,
     entryMode,
+    ...(preset && { preset }),
   };
   await ConfigManager.write(paths, config);
 
-  // Copy genome templates
+  // Copy genome templates (from preset or default)
   const genomeTemplates = ["principles.md", "conventions.md", "constraints.md"];
+  const genomeSourceDir = preset
+    ? join(import.meta.dir, "../../templates/presets", preset)
+    : join(import.meta.dir, "../../templates/genome");
   for (const file of genomeTemplates) {
-    const src = join(import.meta.dir, "../../templates/genome", file);
+    const src = join(genomeSourceDir, file);
     const dest = join(paths.genome, file);
     await Bun.write(dest, await Bun.file(src).text());
   }

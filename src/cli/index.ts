@@ -1,6 +1,7 @@
 #!/usr/bin/env bun
 import { program } from "commander";
 import { initProject } from "./commands/init";
+import { updateProject } from "./commands/update";
 import { evolve, advanceStage, regressStage } from "./commands/evolve";
 import { getStatus } from "./commands/status";
 import { fixProject } from "./commands/fix";
@@ -16,10 +17,11 @@ program
   .description("Initialize a new REAP project (Genesis)")
   .argument("<project-name>", "Project name")
   .option("-m, --mode <mode>", "Entry mode: greenfield, migration, adoption", "greenfield")
-  .action(async (projectName: string, options: { mode: string }) => {
+  .option("-p, --preset <preset>", "Bootstrap with a genome preset (e.g., bun-hono-react)")
+  .action(async (projectName: string, options: { mode: string; preset?: string }) => {
     try {
       const mode = options.mode as "greenfield" | "migration" | "adoption";
-      await initProject(process.cwd(), projectName, mode);
+      await initProject(process.cwd(), projectName, mode, options.preset);
       console.log(`✓ REAP project "${projectName}" initialized (${mode} mode)`);
       console.log(`  .reap/ directory created with genome, environment, life, lineage`);
       console.log(`\nNext: run 'reap evolve' to start your first Generation`);
@@ -97,6 +99,31 @@ program
           console.log("Issues (require manual intervention):");
           result.issues.forEach(i => console.log(`  ✗ ${i}`));
         }
+      }
+    } catch (e: any) {
+      console.error(`Error: ${e.message}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("update")
+  .description("Sync slash commands, templates, and domain guide to latest reap-wf version")
+  .option("--dry-run", "Show changes without applying them")
+  .action(async (options: { dryRun?: boolean }) => {
+    try {
+      const result = await updateProject(process.cwd(), options.dryRun ?? false);
+      if (options.dryRun) {
+        console.log("[dry-run] Changes that would be applied:");
+      }
+      if (result.updated.length === 0) {
+        console.log("✓ Everything is up to date.");
+      } else {
+        console.log(`${options.dryRun ? "Would update" : "Updated"}:`);
+        result.updated.forEach(f => console.log(`  ✓ ${f}`));
+      }
+      if (result.skipped.length > 0) {
+        console.log(`Unchanged: ${result.skipped.length} files`);
       }
     } catch (e: any) {
       console.error(`Error: ${e.message}`);

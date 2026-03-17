@@ -29,4 +29,4 @@ description: "REAP Planning — 구현 계획을 수립합니다"
 - `.reap/life/03-planning-plan.md`에 저장하라
 
 ## 완료
-- `/reap.evolve`로 Growth 단계로 진행하라고 안내하라
+- 개발자에게 `reap evolve --advance`로 Growth 단계로 진행하라고 안내하라
