@@ -14,7 +14,7 @@ description: "REAP Start — Start a new Generation"
 - Read all files in `.reap/life/backlog/`
 - If backlog items exist:
   - Present the list with title and priority for each item
-  - Ask: "이 중에서 선택하시겠습니까, 새 목표를 입력하시겠습니까?"
+  - Ask: "Would you like to select one of these, or enter a new goal?"
   - If the human selects a backlog item: use its title/content as the goal, then update the selected item's frontmatter to `status: consumed` and add `consumedBy: gen-XXX`
   - If the human wants a new goal: proceed to Step 1
 - If no backlog items exist: proceed to Step 1

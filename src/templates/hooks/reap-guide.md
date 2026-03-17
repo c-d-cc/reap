@@ -63,6 +63,18 @@ All items to be carried forward to the next generation are stored in `.reap/life
 - `type: environment-change` — Applied to environment during Completion (external environment changes discovered mid-generation)
 - `type: task` — Referenced as goal candidates in the next Objective (deferred tasks, tech debt, etc.)
 
+Each item also carries a `status` field:
+- `status: pending` — Not yet processed (default; absent field treated as pending)
+- `status: consumed` — Processed in the current generation (requires `consumedBy: gen-XXX`)
+
+Marking rules:
+- `/reap.start`: backlog items chosen as the generation's goal → mark `consumed`
+- `/reap.completion`: applied `genome-change` / `environment-change` items → mark `consumed`
+
+Archiving rules (`/reap.next` from completion):
+- `consumed` items → moved to lineage
+- `pending` items → copied to lineage + carried forward to the new generation's backlog
+
 ### Task Deferral
 Tasks that depend on Genome changes cannot be completed in the current generation. Mark as `[deferred]` and add to backlog as `type: task`. Partial completion is normal.
 

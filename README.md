@@ -118,6 +118,13 @@ All items to be addressed next are stored in `.reap/life/backlog/`. Each item us
 - `type: environment-change` — Applied to the Environment at Completion
 - `type: task` — Candidate goals for the next Objective (deferred tasks, tech debt, etc.)
 
+Each item also carries a `status` field:
+
+- `status: pending` — Not yet processed (default)
+- `status: consumed` — Processed in the current generation (requires `consumedBy: gen-XXX`)
+
+At archiving time (`/reap.next` from Completion), `consumed` items move to lineage while `pending` items are carried forward to the next generation's backlog.
+
 **Partial completion is normal** — Tasks that depend on Genome changes are marked `[deferred]` and handed off to the next generation.
 
 ### Four-Axis Structure

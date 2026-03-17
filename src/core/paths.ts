@@ -14,7 +14,7 @@ export class ReapPaths {
   get root(): string { return join(this.projectRoot, ".reap"); }
   get config(): string { return join(this.root, "config.yml"); }
 
-  // Genome (원칙/규칙/결정)
+  // Genome (principles/conventions/constraints)
   get genome(): string { return join(this.root, "genome"); }
   get principles(): string { return join(this.genome, "principles.md"); }
   get domain(): string { return join(this.genome, "domain"); }
@@ -24,7 +24,7 @@ export class ReapPaths {
   // Environment
   get environment(): string { return join(this.root, "environment"); }
 
-  // Life (현재 세대)
+  // Life (current generation)
   get life(): string { return join(this.root, "life"); }
   get currentYml(): string { return join(this.life, "current.yml"); }
   get backlog(): string { return join(this.life, "backlog"); }
@@ -32,7 +32,7 @@ export class ReapPaths {
   get mutations(): string { return join(this.life, "mutations"); }
   artifact(name: string): string { return join(this.life, name); }
 
-  // Lineage (완료된 세대)
+  // Lineage (completed generations)
   get lineage(): string { return join(this.root, "lineage"); }
   generationDir(genId: string): string { return join(this.lineage, genId); }
 

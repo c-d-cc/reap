@@ -1,96 +1,96 @@
-# Domain Rules — 작성 가이드
+# Domain Rules — Writing Guide
 
-> `genome/domain/`은 프로젝트의 **비즈니스 도메인 규칙**을 기록하는 공간이다.
-> `principles.md`, `conventions.md`, `constraints.md`가 "무엇을 하는가"의 맵이라면,
-> `domain/`은 "어떻게, 왜, 얼마나"의 상세를 담는다.
+> `genome/domain/` is a space for recording the **business domain rules** of the project.
+> If `principles.md`, `conventions.md`, and `constraints.md` are the map of "what to do",
+> `domain/` holds the details of "how, why, and how much".
 
-## domain/ vs 상위 genome 파일
+## domain/ vs Upper-level Genome Files
 
-| 상위 genome 파일 | domain/ 파일 |
-|------------------|-------------|
-| 아키텍처 결정 한 줄 | 그 결정의 상세 규칙·흐름·상태 전이 |
-| 기술 제약 요약 | 임계값·빈도·조건·정책 의도 |
-| 코드 패턴 이름 | 패턴의 입출력·트리거·예외 케이스 |
+| Upper-level Genome File | domain/ File |
+|-------------------------|-------------|
+| One-line architecture decision | Detailed rules, flows, and state transitions for that decision |
+| Technical constraint summary | Thresholds, frequencies, conditions, and policy intent |
+| Code pattern name | Pattern inputs/outputs, triggers, and exception cases |
 
-**예시**: constraints.md에 "모더레이션 정지 에스컬레이션: 3회/1h→30분" 한 줄
-→ domain/moderation-policy.md에 전체 파이프라인, 임계값 테이블, 상태 전이 상세
+**Example**: A one-liner in constraints.md: "Moderation suspension escalation: 3 times/1h → 30 min"
+→ domain/moderation-policy.md contains the full pipeline, threshold table, and state transition details
 
-## 파일 구성 원칙
+## File Organization Principles
 
-### 1. 비즈니스 도메인 단위로 분리
+### 1. Separate by Business Domain Unit
 
-코드 구조(파일, 디렉토리)가 아니라 **비즈니스 규칙 묶음** 단위로 파일을 나눈다.
+Split files by **business rule grouping**, not by code structure (files, directories).
 
-- **좋은 예**: `interview-protocol.md`, `billing-rules.md`, `moderation-policy.md`
-- **나쁜 예**: `api-routes.md`, `database-tables.md`, `components.md`
+- **Good examples**: `interview-protocol.md`, `billing-rules.md`, `moderation-policy.md`
+- **Bad examples**: `api-routes.md`, `database-tables.md`, `components.md`
 
-하나의 domain 파일은 하나의 "도메인 전문가에게 물어볼 주제"에 대응한다.
+Each domain file corresponds to one "topic you would ask a domain expert about".
 
-### 2. 코드에서 직접 읽을 수 없는 지식을 기록
+### 2. Record Knowledge Not Directly Readable from Code
 
-코드를 읽으면 알 수 있는 것(함수 시그니처, 타입 정의)은 적지 않는다.
-코드만으로는 파악하기 어려운 것을 기록한다:
+Do not write down things that can be learned by reading the code (function signatures, type definitions).
+Record things that are difficult to determine from code alone:
 
-- **정책 의도**: 왜 이 임계값인가, 왜 이 순서인가
-- **수치와 조건**: 빈도(20~30%), 제한(최대 2장), 에스컬레이션 단계
-- **상태 머신**: 트리거 → 상태 전이 → 결과
-- **도메인 용어 정의**: 프로젝트 고유 개념의 정확한 의미
+- **Policy intent**: Why this threshold, why this order
+- **Values and conditions**: Frequency (20–30%), limits (max 2), escalation steps
+- **State machines**: Trigger → state transition → result
+- **Domain term definitions**: Precise meaning of project-specific concepts
 
-### 3. 에이전트가 즉시 구현 가능한 수준
+### 3. Agent-Implementable Level
 
-domain 파일을 읽은 에이전트가 추가 질문 없이 해당 기능을 구현하거나 수정할 수 있어야 한다.
+An agent reading a domain file should be able to implement or modify the feature without additional questions.
 
-- 테이블/다이어그램으로 구조화
-- 구체적 수치와 조건 명시
-- 예외 케이스와 엣지 케이스 포함
-- "상황에 따라 다름" 같은 모호한 표현 금지
+- Structure with tables/diagrams
+- Specify concrete values and conditions
+- Include exception cases and edge cases
+- Prohibit vague expressions like "it depends on the situation"
 
-### 4. 파일 크기
+### 4. File Size
 
-- 권장: 40~80줄
-- 상한: 100줄 (genome 맵 원칙 동일)
-- 100줄 초과 시 하위 주제로 추가 분리
+- Recommended: 40–80 lines
+- Upper limit: 100 lines (same as the genome map principle)
+- If exceeding 100 lines, split into sub-topics
 
-### 5. Genome 총량 예산 (SessionStart 로드)
+### 5. Genome Total Budget (SessionStart Load)
 
-- **L1** (상위 genome 파일: principles, conventions, constraints): ~500줄 상한. 항상 전문 로드
-- **L2** (domain/ 파일): ~200줄 상한. 예산 내 전문 로드, 초과 시 제목+요약만 로드 (on-demand 읽기)
-- domain 파일이 많아지면 각 파일을 더 간결하게 유지하거나, 참조 빈도가 낮은 파일을 통합
+- **L1** (upper-level genome files: principles, conventions, constraints): ~500 line limit. Always loaded in full
+- **L2** (domain/ files): ~200 line limit. Loaded in full within budget; if exceeded, only titles + summaries are loaded (on-demand reading)
+- As domain files grow, keep each file more concise or consolidate files with low reference frequency
 
-## 파일 구조 템플릿
+## File Structure Template
 
 ```markdown
-# [도메인 규칙 이름]
+# [Domain Rule Name]
 
-> [한 줄 설명: 이 파일이 다루는 범위]
+> [One-line description: scope covered by this file]
 
-## [핵심 개념/흐름]
-(이 도메인의 핵심 프로세스나 개념 설명)
+## [Core Concepts/Flows]
+(Explain the core process or concepts of this domain)
 
-## [규칙/정책 테이블]
-(수치, 조건, 임계값 등을 테이블로 구조화)
+## [Rules/Policy Table]
+(Structure values, conditions, thresholds, etc. as a table)
 
-## [상태 전이 / 트리거]
-(언제 무엇이 발생하는지)
+## [State Transitions / Triggers]
+(When does what occur)
 
-## [예외/엣지 케이스]
-(일반 규칙의 예외 상황)
+## [Exceptions/Edge Cases]
+(Exceptions to the general rules)
 ```
 
-## 네이밍 규칙
+## Naming Rules
 
-- 파일명: `kebab-case.md`
-- 비즈니스 도메인을 직관적으로 나타내는 이름
-- 예: `interview-protocol.md`, `article-generation.md`, `subscription-billing.md`
+- Filename: `kebab-case.md`
+- Names that intuitively represent the business domain
+- Examples: `interview-protocol.md`, `article-generation.md`, `subscription-billing.md`
 
-## 언제 domain 파일을 만드는가
+## When to Create a Domain File
 
-- 상위 genome 파일의 한 항목이 3줄 이상의 설명이 필요할 때
-- 새로운 비즈니스 규칙이 추가되어 기존 파일 범위에 맞지 않을 때
-- 에이전트가 특정 기능을 구현하다가 "이 규칙이 어디에 있지?"라고 물을 만한 주제
+- When a single item in an upper-level genome file requires 3+ lines of explanation
+- When new business rules are added that don't fit the scope of existing files
+- When a topic is something an agent implementing a feature would ask "where is this rule?"
 
-## 언제 domain 파일을 만들지 않는가
+## When NOT to Create a Domain File
 
-- 코드를 읽으면 바로 알 수 있는 구현 세부사항
-- 일회성 작업 메모 (이것은 life/에 기록)
-- 외부 라이브러리 사용법 (이것은 공식 문서 참조)
+- Implementation details that can be understood by reading the code
+- One-off task notes (record these in life/)
+- External library usage (refer to official documentation for these)

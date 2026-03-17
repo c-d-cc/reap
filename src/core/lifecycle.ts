@@ -1,11 +1,11 @@
 import { type LifeCycleStage, LIFECYCLE_ORDER } from "../types";
 
 const LABELS: Record<LifeCycleStage, string> = {
-  objective: "목표 정의",
-  planning: "계획",
-  implementation: "구현",
-  validation: "검증",
-  completion: "완성",
+  objective: "Goal Definition",
+  planning: "Planning",
+  implementation: "Implementation",
+  validation: "Validation",
+  completion: "Completion",
 };
 
 const STAGES = LIFECYCLE_ORDER;

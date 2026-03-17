@@ -1,31 +1,31 @@
 # Architecture Principles
 
-> **작성 원칙**: 이 파일은 ~100줄 이내의 **맵(map)**이어야 한다.
-> 에이전트가 즉시 행동할 수 있는 수준으로 작성하라.
-> 상세 내용은 `domain/` 하위 파일로 분리하라.
-> Birth 단계에서만 수정된다.
+> **Writing principle**: This file should be a **map** of ~100 lines or fewer.
+> Write at a level where agents can act immediately.
+> Separate detailed content into files under `domain/`.
+> Modified only during the Birth phase.
 
 ## Core Beliefs
 
-에이전트와 인간 모두가 따라야 할 핵심 원칙을 기술한다.
-원칙은 구체적이고 검증 가능해야 한다. "좋은 코드를 작성한다" 대신
-"모든 외부 입력은 시스템 경계에서 파싱/검증한다"처럼 기술하라.
+Describe core principles that both agents and humans must follow.
+Principles should be specific and verifiable. Instead of "write good code",
+describe it as "all external inputs are parsed/validated at the system boundary".
 
-- (여기에 아키텍처 원칙 추가)
+- (Add architecture principles here)
 
 ## Architecture Decisions
 
-주요 아키텍처 결정을 ADR(Architecture Decision Record) 형식으로 기록한다.
-에이전트가 "왜 이렇게 되어 있는지"를 추론할 수 있어야 한다.
+Record major architecture decisions in ADR (Architecture Decision Record) format.
+Agents should be able to reason about "why it is this way".
 
-| ID | 결정 | 사유 | 날짜 |
-|----|------|------|------|
+| ID | Decision | Rationale | Date |
+|----|----------|-----------|------|
 | | | | |
 
 ## Layer Map
 
-프로젝트의 레이어 구조와 의존 방향을 기술한다.
-어떤 레이어가 어떤 레이어에 의존할 수 있는지 명시하라.
-상세 레이어 규칙은 `domain/` 하위 파일에 작성하라.
+Describe the project's layer structure and dependency direction.
+Specify which layers can depend on which layers.
+Write detailed layer rules in files under `domain/`.
 
-- (여기에 레이어 구조 기술)
+- (Describe layer structure here)

@@ -91,6 +91,21 @@ export default function CoreConceptsPage() {
             </div>
           ))}
         </div>
+        <p className="text-xs text-muted-foreground mb-2">Each item also carries a <code className="bg-muted px-1 rounded">status</code> field:</p>
+        <div className="space-y-2 mb-4">
+          {[
+            { type: "pending", desc: "Not yet processed. Default value — absent field is treated as pending." },
+            { type: "consumed", desc: "Processed in the current generation. Requires consumedBy: gen-XXX." },
+          ].map((item) => (
+            <div key={item.type} className="flex gap-3 text-sm">
+              <code className="text-xs bg-muted text-primary px-1.5 py-0.5 rounded h-fit mt-0.5 shrink-0">{item.type}</code>
+              <span className="text-muted-foreground text-xs">{item.desc}</span>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground mb-3">
+          At archiving time, <code className="bg-muted px-1 rounded">consumed</code> items move to lineage. <code className="bg-muted px-1 rounded">pending</code> items are carried forward to the next generation's backlog.
+        </p>
         <p className="text-sm text-muted-foreground mb-6">
           Partial completion is normal — tasks depending on Genome changes are marked <code className="text-xs bg-muted px-1 rounded">[deferred]</code> and handed to the next generation.
         </p>

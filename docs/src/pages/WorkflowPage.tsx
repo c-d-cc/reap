@@ -13,7 +13,7 @@ export default function WorkflowPage() {
 
         <h2 className="text-base font-semibold text-foreground mb-2">/reap.evolve — The Primary Way to Work</h2>
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
-          Most of the time, you run <code className="text-xs bg-muted px-1 rounded">/reap.evolve</code> and let the AI agent drive through all stages interactively. It handles starting the generation, executing each stage, advancing between them, and archiving at the end. You participate by answering questions, reviewing artifacts, and approving transitions.
+          Most of the time, you run <code className="text-xs bg-muted px-1 rounded">/reap.evolve</code> and let the AI agent drive through all stages autonomously. It handles starting the generation, executing each stage, advancing between them, and archiving at the end. Routine per-stage confirmations are skipped — the agent proceeds without pausing unless it is genuinely blocked (ambiguous goal, significant trade-off decision, genome conflict, or unexpected error).
         </p>
         <p className="text-xs text-muted-foreground mb-6">
           For fine-grained control, you can run individual stage commands. See <Link href="/docs/commands" className="text-primary hover:underline">Command Reference</Link> for details.
@@ -65,7 +65,7 @@ export default function WorkflowPage() {
           <div className="border-l-2 border-border pl-3">
             <div className="text-sm font-semibold text-foreground mb-1">5. Completion</div>
             <p className="text-xs text-muted-foreground leading-relaxed mb-1">
-              Retrospect and evolve. Extract lessons learned (max 5), apply genome-change backlog items to the genome files, run garbage collection for tech debt, hand off deferred tasks to the next generation's backlog. Genome changes require human confirmation.
+              Retrospect and evolve. Extract lessons learned (max 5), apply genome-change backlog items to the genome files, run garbage collection for tech debt, hand off deferred tasks to the next generation's backlog. When run standalone, genome changes require human confirmation; when called via <code className="bg-muted px-1 rounded">/reap.evolve</code>, the agent proceeds autonomously.
             </p>
             <p className="text-xs text-muted-foreground leading-relaxed">
               Output: <code className="bg-muted px-1 rounded">05-completion.md</code> — summary, retrospective, genome changelog. Then <code className="bg-muted px-1 rounded">/reap.next</code> archives everything to lineage.

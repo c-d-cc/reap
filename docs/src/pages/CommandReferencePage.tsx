@@ -33,7 +33,7 @@ export default function CommandReferencePage() {
             </thead>
             <tbody className="divide-y divide-border">
               {[
-                ["/reap.evolve", "Run an entire generation from start to finish. The primary command for day-to-day development. Loops through all stages interactively."],
+                ["/reap.evolve", "Run an entire generation from start to finish. The primary command for day-to-day development. Loops through all stages autonomously — skips routine confirmations and only stops when genuinely blocked."],
                 ["/reap.start", "Start a new generation. Scans backlog for pending items, asks for a goal, creates current.yml, and sets stage to objective."],
                 ["/reap.objective", "Define the generation's goal, requirements, and acceptance criteria. Scans environment, reviews backlog, checks genome health."],
                 ["/reap.planning", "Break down the objective into tasks with dependencies. Creates the implementation plan."],

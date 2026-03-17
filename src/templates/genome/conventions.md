@@ -1,35 +1,35 @@
 # Development Conventions
 
-> **작성 원칙**: 이 파일은 ~100줄 이내의 **맵(map)**이어야 한다.
-> 규칙은 가능한 한 기계적으로 검증 가능하게 작성하라.
-> "좋은 코드를 작성하라" 대신 "함수는 50줄을 초과하지 않는다"처럼 기술하라.
-> 문서로만 알리지 말고, 린터/테스트로 강제할 수 있는 규칙을 우선하라.
-> Birth 단계에서만 수정된다.
+> **Writing principle**: This file should be a **map** of ~100 lines or fewer.
+> Write rules to be mechanically verifiable whenever possible.
+> Instead of "write good code", describe it as "functions must not exceed 50 lines".
+> Prioritize rules that can be enforced via linters/tests over documentation-only rules.
+> Modified only during the Birth phase.
 
 ## Code Style
 
-코드 스타일 규칙. 린터 설정으로 강제할 수 있는 것은 린터에 위임하고,
-여기에는 린터로 잡을 수 없는 규칙만 기록하라.
+Code style rules. Delegate to linter configuration for anything the linter can enforce;
+record only rules that linters cannot catch here.
 
-- (여기에 코드 스타일 규칙 추가)
+- (Add code style rules here)
 
 ## Naming Conventions
 
-파일명, 변수명, 함수명, 클래스명 등의 네이밍 규칙.
+Naming rules for filenames, variables, functions, classes, etc.
 
-- (여기에 네이밍 규칙 추가)
+- (Add naming rules here)
 
 ## Git Conventions
 
-커밋 메시지, 브랜치 전략, PR 규칙.
+Commit messages, branching strategy, PR rules.
 
-- (여기에 커밋/브랜치 규칙 추가)
+- (Add commit/branching rules here)
 
 ## Enforced Rules
 
-기계적으로 강제되는 규칙 목록. 각 규칙은 어떤 도구로 검증되는지 명시하라.
-Validation 단계에서 자동으로 실행된다.
+List of mechanically enforced rules. Specify which tool verifies each rule.
+Automatically executed during the Validation phase.
 
-| 규칙 | 검증 도구 | 명령어 |
-|------|-----------|--------|
+| Rule | Verification Tool | Command |
+|------|-------------------|---------|
 | | | |

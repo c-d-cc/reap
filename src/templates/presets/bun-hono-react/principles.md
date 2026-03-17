@@ -1,21 +1,21 @@
 # Architecture Principles
 
-> Birth 단계에서만 수정된다.
+> Modified only during the Birth stage.
 
 ## Core Beliefs
 
-- **API-First** — Hono로 REST/RPC API를 먼저 설계하고, React는 API를 소비하는 클라이언트
-- **Type-Safe Full Stack** — 서버와 클라이언트가 동일한 TypeScript 타입을 공유
-- **Edge-Ready** — Bun 런타임으로 빠른 시작, Hono의 Web Standard API로 이식성 확보
-- **Colocation** — 관련 코드는 가까이 배치 (route + handler + schema)
+- **API-First** — Design REST/RPC APIs with Hono first; React is a client that consumes the APIs
+- **Type-Safe Full Stack** — Server and client share the same TypeScript types
+- **Edge-Ready** — Fast startup with Bun runtime, portability through Hono's Web Standard API
+- **Colocation** — Keep related code close together (route + handler + schema)
 
 ## Architecture Decisions
 
-| ID | 결정 | 사유 | 날짜 |
-|----|------|------|------|
-| ADR-001 | Bun + TypeScript | 빠른 실행, 내장 테스트, TS 네이티브 | - |
-| ADR-002 | Hono (Web Framework) | 경량, Web Standard, middleware 체계 | - |
-| ADR-003 | React (Frontend) | 생태계, 컴포넌트 모델 | - |
+| ID | Decision | Rationale | Date |
+|----|----------|-----------|------|
+| ADR-001 | Bun + TypeScript | Fast execution, built-in testing, native TS support | - |
+| ADR-002 | Hono (Web Framework) | Lightweight, Web Standard, middleware system | - |
+| ADR-003 | React (Frontend) | Ecosystem, component model | - |
 
 ## Layer Map
 
@@ -23,6 +23,6 @@
 src/
 ├── server/        → Hono API routes + middleware
 ├── client/        → React components + pages
-├── shared/        → 서버/클라이언트 공유 타입, 유틸
-└── db/            → 데이터 접근 계층
+├── shared/        → Shared types and utilities for server/client
+└── db/            → Data access layer
 ```

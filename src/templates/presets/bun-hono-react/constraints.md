@@ -1,28 +1,28 @@
 # Technical Constraints
 
-> Birth 단계에서만 수정된다.
+> Modified only during the Birth stage.
 
 ## Tech Stack
 
 - **Language**: TypeScript 5.x
 - **Runtime**: Bun 1.x
 - **Backend**: Hono — Web Standard API, middleware
-- **Frontend**: React 19 — 컴포넌트 UI
+- **Frontend**: React 19 — Component UI
 - **Package Manager**: bun
 
 ## Constraints
 
-- 서버/클라이언트 타입 공유 시 `shared/` 디렉토리 사용
-- API 응답은 항상 JSON
-- 환경 변수는 `.env`로 관리, 코드에 하드코딩 금지
+- Use `shared/` directory when sharing types between server and client
+- API responses must always be JSON
+- Environment variables are managed via `.env`; no hardcoding in source code
 
 ## Validation Commands
 
-| 용도 | 명령어 | 설명 |
-|------|--------|------|
-| 테스트 | `bun test` | 전체 테스트 |
-| 타입체크 | `bunx tsc --noEmit` | TypeScript 컴파일 검증 |
+| Purpose | Command | Description |
+|---------|---------|-------------|
+| Test | `bun test` | Run all tests |
+| Type check | `bunx tsc --noEmit` | TypeScript compilation verification |
 
 ## External Dependencies
 
-- (프로젝트에 맞게 추가)
+- (Add as needed for the project)
