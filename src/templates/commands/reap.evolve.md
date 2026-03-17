@@ -6,6 +6,11 @@ description: "REAP Evolve — Run the full lifecycle for a Generation"
 
 Run the entire Generation lifecycle from start to finish, interactively with the human.
 
+<HARD-GATE>
+NEVER modify `current.yml` directly to change the stage. ALWAYS use `/reap.next` to advance and `/reap.back` to regress.
+Direct modification skips artifact creation and breaks the lifecycle. This is non-negotiable.
+</HARD-GATE>
+
 ## Gate (Preconditions)
 - Read `.reap/life/current.yml`
 - If no active Generation exists: run `/reap.start` first to create one

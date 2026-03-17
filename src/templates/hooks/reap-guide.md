@@ -143,3 +143,9 @@ Hooks are executed by the AI agent.
 ```
 
 Each slash command follows a 3-step structure: Gate (precondition check) → Steps (work execution) → Artifact generation.
+
+## Critical Rules
+
+1. **NEVER modify `current.yml` directly.** Stage transitions MUST go through `/reap.next` (forward) or `/reap.back` (regression). Direct modification bypasses artifact creation and breaks the lifecycle.
+2. **NEVER skip a stage.** Each stage command must be executed and its artifact must exist before advancing. `/reap.next` enforces this by creating the next artifact from template.
+3. **ALL development work MUST follow the REAP lifecycle.** Do NOT bypass it unless the human explicitly asks.
