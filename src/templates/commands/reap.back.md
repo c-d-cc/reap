@@ -46,7 +46,9 @@ description: "REAP Back — Return to a previous lifecycle stage"
    ```
 
 ### Hook Execution
-7. Read `.reap/config.yml` — if `hooks.onRegression` is defined, execute each command in order
+7. Read `.reap/config.yml` — if `hooks.onRegression` is defined, execute each hook in order:
+   - If hook has `command`: run the shell command
+   - If hook has `prompt`: follow the prompt instructions (AI agent executes the described task)
 
 ## Completion
 - "Returned to [stage] stage. Proceed with `/reap.[stage]`."

@@ -88,7 +88,7 @@ Compression runs automatically during `/reap.next` (archiving after completion).
 
 ## REAP Hooks
 
-Projects can define hooks in `.reap/config.yml` to run commands at lifecycle events:
+Projects can define hooks in `.reap/config.yml` to run commands or prompts at lifecycle events:
 
 ```yaml
 hooks:
@@ -98,9 +98,16 @@ hooks:
     - command: "echo 'Stage changed'"
   onGenerationComplete:
     - command: "reap update"
+    - prompt: "Check if README needs updating based on this generation's changes."
   onRegression:
     - command: "echo 'Regressed'"
 ```
+
+Each hook entry supports two types:
+- `command` — Run a shell command in the project root directory
+- `prompt` — AI agent instruction. The agent reads and executes the described task.
+
+Only one of `command` or `prompt` should be set per entry.
 
 | Event | Trigger |
 |-------|---------|
@@ -109,7 +116,7 @@ hooks:
 | `onGenerationComplete` | After `/reap.next` archives a completed generation (after commit) |
 | `onRegression` | After `/reap.back` returns to a previous stage |
 
-Hooks are executed by the AI agent, not the CLI. Each command runs in the project root directory.
+Hooks are executed by the AI agent.
 
 ## Role Separation
 

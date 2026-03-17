@@ -31,7 +31,8 @@ export interface GenerationState {
 export type ReapHookEvent = "onGenerationStart" | "onStageTransition" | "onGenerationComplete" | "onRegression";
 
 export interface ReapHookCommand {
-  command: string;
+  command?: string;
+  prompt?: string;
 }
 
 export interface ReapHooks {

@@ -21,7 +21,9 @@ description: "REAP Next — Advance to the next lifecycle stage"
 - Immediately create the next stage's artifact file from template (empty, ready to fill)
 
 ### Hook Execution (Stage Transition)
-- Read `.reap/config.yml` — if `hooks.onStageTransition` is defined, execute each command in order
+- Read `.reap/config.yml` — if `hooks.onStageTransition` is defined, execute each hook in order:
+  - If hook has `command`: run the shell command
+  - If hook has `prompt`: follow the prompt instructions (AI agent executes the described task)
 
 ### When Advancing from Completion (Archiving)
 - Add the current timestamp to `completedAt` in `current.yml`
@@ -38,7 +40,9 @@ description: "REAP Next — Advance to the next lifecycle stage"
   - If there are no code changes (REAP-only generation), use `chore(reap): [goal summary]`
 
 ### Hook Execution (Generation Complete)
-- Read `.reap/config.yml` — if `hooks.onGenerationComplete` is defined, execute each command in order
+- Read `.reap/config.yml` — if `hooks.onGenerationComplete` is defined, execute each hook in order:
+  - If hook has `command`: run the shell command
+  - If hook has `prompt`: follow the prompt instructions (AI agent executes the described task)
   - Note: hooks run AFTER the commit, so any changes from hooks will be uncommitted
 
 ## Completion

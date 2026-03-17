@@ -153,6 +153,7 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.completion` | Retrospective + apply Genome changes |
 | `/reap.next` | Advance to the next life cycle stage |
 | `/reap.back` | Return to a previous stage (micro loop) |
+| `/reap.status` | Show current generation state and project health |
 | **`/reap.evolve`** | **Run an entire generation from start to finish (recommended)** |
 
 ### SessionStart Hook
@@ -167,7 +168,7 @@ This ensures the agent immediately understands the project context even in a bra
 
 ### REAP Hooks
 
-Projects can define hooks in `.reap/config.yml` to run commands at lifecycle events:
+Projects can define hooks in `.reap/config.yml` to run commands or AI prompts at lifecycle events:
 
 ```yaml
 hooks:
@@ -177,9 +178,12 @@ hooks:
     - command: "echo 'Stage changed'"
   onGenerationComplete:
     - command: "reap update"
+    - prompt: "Update README if this generation changed any features."
   onRegression:
     - command: "echo 'Regressed'"
 ```
+
+Each hook supports `command` (shell) or `prompt` (AI agent instruction).
 
 | Event | Trigger |
 |-------|---------|

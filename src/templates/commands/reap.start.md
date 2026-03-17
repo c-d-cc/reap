@@ -27,7 +27,9 @@ description: "REAP Start — Start a new Generation"
 5. Immediately create `.reap/life/01-objective.md` from the artifact template with the Goal section filled in
 
 ### Hook Execution
-6. Read `.reap/config.yml` — if `hooks.onGenerationStart` is defined, execute each command in order
+6. Read `.reap/config.yml` — if `hooks.onGenerationStart` is defined, execute each hook in order:
+   - If hook has `command`: run the shell command
+   - If hook has `prompt`: follow the prompt instructions (AI agent executes the described task)
 
 ## Completion
 - "Generation gen-XXX started. Proceed with `/reap.objective` to define the goal, or `/reap.evolve` to run the full lifecycle."

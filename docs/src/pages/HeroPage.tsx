@@ -219,6 +219,7 @@ reap init`}</CodeBlock>
                   ["/reap.evolve", "Run full generation lifecycle (inside Claude Code)"],
                   ["/reap.start", "Start a new generation without running it"],
                   ["/reap.next / .back", "Advance to next stage or regress to previous"],
+                  ["/reap.status", "Show current generation state and project health"],
                 ].map(([cmd, desc]) => (
                   <tr key={cmd}>
                     <td className="px-3 py-2 font-mono text-xs text-primary">{cmd}</td>

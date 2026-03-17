@@ -41,6 +41,7 @@ export default function WorkflowPage() {
                 ["/reap.completion", "Retrospective + apply Genome changes"],
                 ["/reap.next", "Advance to the next stage"],
                 ["/reap.back", "Return to a previous stage (micro loop)"],
+                ["/reap.status", "Show current generation state and project health"],
               ].map(([cmd, desc]) => (
                 <tr key={cmd}>
                   <td className="px-4 py-2 font-mono text-xs text-primary">{cmd}</td>
@@ -73,9 +74,11 @@ export default function WorkflowPage() {
     - command: "echo 'Stage changed'"
   onGenerationComplete:
     - command: "reap update"
+    - prompt: "Update README if this generation changed any features."
   onRegression:
     - command: "echo 'Regressed'"`}</CodeBlock>
-        <div className="mt-3 space-y-1 text-xs text-muted-foreground">
+        <p className="text-xs text-muted-foreground mt-3 mb-2">Each hook supports <code className="bg-muted px-1 rounded">command</code> (shell) or <code className="bg-muted px-1 rounded">prompt</code> (AI agent instruction).</p>
+        <div className="space-y-1 text-xs text-muted-foreground">
           <div className="flex gap-2"><code className="bg-muted px-1 rounded text-primary shrink-0">onGenerationStart</code> Runs when a new generation begins.</div>
           <div className="flex gap-2"><code className="bg-muted px-1 rounded text-primary shrink-0">onStageTransition</code> Runs on every stage change.</div>
           <div className="flex gap-2"><code className="bg-muted px-1 rounded text-primary shrink-0">onGenerationComplete</code> Runs after generation is archived and committed.</div>
