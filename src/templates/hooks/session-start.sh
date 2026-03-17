@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 # REAP SessionStart hook — injects REAP guide + current generation context into every Claude session
+# This script runs from the package directory but uses cwd to find the project's .reap/
 set -euo pipefail
 
-PROJECT_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")/../.." && pwd)"
+# Script directory (package-internal) for guide file
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]:-$0}")" && pwd)"
+
+# Project directory is cwd (where Claude Code session started)
+PROJECT_ROOT="$(pwd)"
 REAP_DIR="${PROJECT_ROOT}/.reap"
 CURRENT_YML="${REAP_DIR}/life/current.yml"
-GUIDE_FILE="${REAP_DIR}/hooks/reap-guide.md"
+GUIDE_FILE="${SCRIPT_DIR}/reap-guide.md"
 
 # Check if this is a REAP project
 if [ ! -d "$REAP_DIR" ]; then

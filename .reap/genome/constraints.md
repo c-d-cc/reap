@@ -2,7 +2,7 @@
 
 > **작성 원칙**: 이 파일은 ~100줄 이내의 **맵(map)**이어야 한다.
 > 기술 선택의 "무엇"뿐 아니라 "왜"를 반드시 기록하라.
-> Birth 단계에서만 수정된다.
+> Completion 단계에서만 수정된다.
 
 ## Tech Stack
 
@@ -17,7 +17,7 @@
 - Node.js API 호환 유지 (Bun 외 런타임에서도 동작 가능해야 함)
 - 외부 서비스 의존 없음 — 로컬 파일시스템만 사용
 - `.reap/` 디렉토리 구조는 init이 보장, 사용자가 수동 생성할 필요 없음
-- 템플릿 원본은 `src/templates/`에만 존재, 런타임에 복사
+- 템플릿 원본은 `src/templates/`에만 존재. 슬래시 커맨드와 hook은 user-level(`~/.claude/`)에 설치, genome은 프로젝트에 복사, artifact 템플릿은 패키지 내부에서 직접 참조
 
 ## Validation Commands
 

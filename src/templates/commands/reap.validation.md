@@ -70,11 +70,14 @@ Do NOT make claims without evidence. This is non-negotiable.
 - "It's trivial, it'll be fine" → Fix it as a minor fix and re-validate.
 - "I haven't tried the build but lint passed" → Run the build too.
 
-## Artifact Generation
-- Read `.reap/templates/04-validation.md`
-- Record automated validation results (including actual command output), completion criteria checks, deferred items, and minor fixes
-- Determine the result as pass / partial / fail
-- Save to `.reap/life/04-validation.md`
+## Artifact Generation (Progressive Recording)
+- **Immediately upon entering this stage**: Read `.reap/templates/04-validation.md` and create `.reap/life/04-validation.md` with `result: pending`
+- **Update incrementally during validation**:
+  - After EACH validation command execution → immediately record the result in Test Results
+  - After EACH completion criterion check → immediately record pass/fail/deferred in the Completion Criteria Check table
+  - After EACH minor fix → immediately record it in the Minor Fixes table, then re-run and record
+- After Step 5 (Verdict) → update the Result field to pass / partial / fail
+- The artifact should reflect the current validation progress at all times
 
 ## Completion
 - pass/partial: "Proceed to the Completion stage with `reap evolve --advance`."

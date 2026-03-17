@@ -1,4 +1,5 @@
 import { join } from "path";
+import { homedir } from "os";
 import { stat } from "fs/promises";
 
 export class ReapPaths {
@@ -33,16 +34,29 @@ export class ReapPaths {
   get lineage(): string { return join(this.root, "lineage"); }
   generationDir(genId: string): string { return join(this.lineage, genId); }
 
-  // Commands & Templates (에이전트 독립)
-  get commands(): string { return join(this.root, "commands"); }
-  get templates(): string { return join(this.root, "templates"); }
+  // User-level Claude Code integration
+  static get userClaudeDir(): string { return join(homedir(), ".claude"); }
+  static get userClaudeCommands(): string { return join(ReapPaths.userClaudeDir, "commands"); }
+  static get userClaudeHooksJson(): string { return join(ReapPaths.userClaudeDir, "hooks.json"); }
 
-  // Hooks
-  get hooks(): string { return join(this.root, "hooks"); }
+  // Package-internal template paths
+  static get packageTemplatesDir(): string { return join(import.meta.dir, "../templates"); }
+  static get packageCommandsDir(): string { return join(ReapPaths.packageTemplatesDir, "commands"); }
+  static get packageArtifactsDir(): string { return join(ReapPaths.packageTemplatesDir, "artifacts"); }
+  static get packageHooksDir(): string { return join(ReapPaths.packageTemplatesDir, "hooks"); }
+  static get packageGenomeDir(): string { return join(ReapPaths.packageTemplatesDir, "genome"); }
 
-  // Claude Code integration
-  get claudeCommands(): string { return join(this.projectRoot, ".claude", "commands"); }
-  get claudeHooksJson(): string { return join(this.projectRoot, ".claude", "hooks.json"); }
+  // Legacy paths (for migration cleanup)
+  /** @deprecated Project-level commands removed in gen-007 */
+  get legacyCommands(): string { return join(this.root, "commands"); }
+  /** @deprecated Project-level templates removed in gen-007 */
+  get legacyTemplates(): string { return join(this.root, "templates"); }
+  /** @deprecated Project-level hooks removed in gen-007 */
+  get legacyHooks(): string { return join(this.root, "hooks"); }
+  /** @deprecated Project-level .claude/commands removed in gen-007 */
+  get legacyClaudeCommands(): string { return join(this.projectRoot, ".claude", "commands"); }
+  /** @deprecated Project-level .claude/hooks.json removed in gen-007 */
+  get legacyClaudeHooksJson(): string { return join(this.projectRoot, ".claude", "hooks.json"); }
 
   async isReapProject(): Promise<boolean> {
     try {

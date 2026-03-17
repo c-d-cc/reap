@@ -82,9 +82,9 @@ async function compressLevel1(genDir: string, genName: string): Promise<string> 
   let goal = "", completionConditions = "";
   try {
     const objective = await Bun.file(join(genDir, "01-objective.md")).text();
-    const goalMatch = objective.match(/## 목표\n([\s\S]*?)(?=\n##)/);
+    const goalMatch = objective.match(/## Goal\n([\s\S]*?)(?=\n##)/);
     if (goalMatch) goal = goalMatch[1].trim();
-    const condMatch = objective.match(/## 완료 조건\n([\s\S]*?)(?=\n##)/);
+    const condMatch = objective.match(/## Completion Criteria\n([\s\S]*?)(?=\n##)/);
     if (condMatch) completionConditions = condMatch[1].trim();
   } catch { /* no objective */ }
 
@@ -92,25 +92,27 @@ async function compressLevel1(genDir: string, genName: string): Promise<string> 
   let lessons = "", genomeChanges = "", nextBacklog = "";
   try {
     const completion = await Bun.file(join(genDir, "05-completion.md")).text();
-    const lessonsMatch = completion.match(/### 교훈\n([\s\S]*?)(?=\n###)/);
+    const lessonsMatch = completion.match(/### Lessons Learned\n([\s\S]*?)(?=\n###)/);
     if (lessonsMatch) lessons = lessonsMatch[1].trim();
-    const changeMatch = completion.match(/### Genome-Change Backlog 반영\n([\s\S]*?)(?=\n###)/);
+    const changeMatch = completion.match(/### Genome-Change Backlog Applied\n([\s\S]*?)(?=\n###)/);
     if (changeMatch) genomeChanges = changeMatch[1].trim();
-    const backlogMatch = completion.match(/### 다음 세대 Backlog\n([\s\S]*?)(?=\n---|\n##|$)/);
+    const backlogMatch = completion.match(/### Next Generation Backlog\n([\s\S]*?)(?=\n---|\n##|$)/);
     if (backlogMatch) nextBacklog = backlogMatch[1].trim();
   } catch { /* no completion */ }
 
-  // Read legacy summary for metadata
+  // Read Summary section from 05-completion.md for metadata
   let metadata = "";
   try {
-    metadata = await Bun.file(join(genDir, "06-legacy.md")).text();
-  } catch { /* no legacy */ }
+    const completion = await Bun.file(join(genDir, "05-completion.md")).text();
+    const summaryMatch = completion.match(/## Summary\n([\s\S]*?)(?=\n##)/);
+    if (summaryMatch) metadata = summaryMatch[1].trim();
+  } catch { /* no completion */ }
 
   // Read validation result
   let validationResult = "";
   try {
     const validation = await Bun.file(join(genDir, "04-validation.md")).text();
-    const resultMatch = validation.match(/## 결과: (.+)/);
+    const resultMatch = validation.match(/## Result: (.+)/);
     if (resultMatch) validationResult = resultMatch[1].trim();
   } catch { /* no validation */ }
 
@@ -118,7 +120,7 @@ async function compressLevel1(genDir: string, genName: string): Promise<string> 
   let deferred = "";
   try {
     const impl = await Bun.file(join(genDir, "03-implementation.md")).text();
-    const deferredMatch = impl.match(/## Deferred 태스크\n([\s\S]*?)(?=\n##)/);
+    const deferredMatch = impl.match(/## Deferred Tasks\n([\s\S]*?)(?=\n##)/);
     if (deferredMatch) {
       const content = deferredMatch[1].trim();
       if (content && !content.match(/^\|\s*\|\s*\|\s*\|\s*\|$/)) {

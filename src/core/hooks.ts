@@ -1,74 +1,33 @@
 import { join } from "path";
-import { mkdir, chmod } from "fs/promises";
+import { mkdir } from "fs/promises";
 import { ReapPaths } from "./paths";
 
-const HOOK_FILES = ["session-start.sh", "reap-guide.md"];
-
-const REAP_HOOK_ENTRY = {
-  matcher: "",
-  hooks: [
-    {
-      type: "command",
-      command: "bash .reap/hooks/session-start.sh",
-    },
-  ],
-};
-
 /**
- * Copy hook scripts from templates to .reap/hooks/
+ * The hook command references the package-internal session-start.sh via absolute path.
+ * session-start.sh uses cwd to find the project's .reap/ directory.
  */
-export async function installHookScripts(paths: ReapPaths): Promise<void> {
-  await mkdir(paths.hooks, { recursive: true });
-
-  for (const file of HOOK_FILES) {
-    const src = join(import.meta.dir, "../templates/hooks", file);
-    const dest = join(paths.hooks, file);
-    await Bun.write(dest, await Bun.file(src).text());
-    if (file.endsWith(".sh")) await chmod(dest, 0o755);
-  }
+function getReapHookEntry() {
+  const sessionStartPath = join(ReapPaths.packageHooksDir, "session-start.sh");
+  return {
+    matcher: "",
+    hooks: [
+      {
+        type: "command",
+        command: `bash "${sessionStartPath}"`,
+      },
+    ],
+  };
 }
 
 /**
- * Sync hook scripts, returns list of changed files
- */
-export async function syncHookScripts(
-  paths: ReapPaths,
-  dryRun: boolean = false,
-): Promise<{ updated: string[]; skipped: string[] }> {
-  const result = { updated: [] as string[], skipped: [] as string[] };
-
-  await mkdir(paths.hooks, { recursive: true });
-
-  for (const file of HOOK_FILES) {
-    const src = await Bun.file(join(import.meta.dir, "../templates/hooks", file)).text();
-    const destPath = join(paths.hooks, file);
-    const existing = Bun.file(destPath);
-
-    if (await existing.exists() && (await existing.text()) === src) {
-      result.skipped.push(`.reap/hooks/${file}`);
-    } else {
-      if (!dryRun) {
-        await Bun.write(destPath, src);
-        if (file.endsWith(".sh")) await chmod(destPath, 0o755);
-      }
-      result.updated.push(`.reap/hooks/${file}`);
-    }
-  }
-
-  return result;
-}
-
-/**
- * Register REAP's SessionStart hook in .claude/hooks.json
+ * Register REAP's SessionStart hook in user-level ~/.claude/hooks.json
  * Merges with existing hooks if the file already exists
  */
 export async function registerClaudeHook(
-  paths: ReapPaths,
   dryRun: boolean = false,
 ): Promise<{ action: "created" | "updated" | "skipped" }> {
-  const hooksJsonPath = paths.claudeHooksJson;
-  const claudeDir = join(paths.claudeHooksJson, "..");
-  await mkdir(claudeDir, { recursive: true });
+  const hooksJsonPath = ReapPaths.userClaudeHooksJson;
+  await mkdir(ReapPaths.userClaudeDir, { recursive: true });
 
   const file = Bun.file(hooksJsonPath);
   let existing: Record<string, unknown> = {};
@@ -82,7 +41,7 @@ export async function registerClaudeHook(
     }
   }
 
-  // Check if REAP hook is already registered
+  // Check if REAP hook is already registered (check for session-start reference)
   const sessionStartHooks = (existing["SessionStart"] as unknown[]) ?? [];
   const hasReapHook = Array.isArray(sessionStartHooks) &&
     sessionStartHooks.some((entry: unknown) => {
@@ -92,7 +51,7 @@ export async function registerClaudeHook(
       return hooks.some((h: unknown) => {
         if (typeof h !== "object" || h === null) return false;
         const cmd = (h as Record<string, unknown>)["command"];
-        return typeof cmd === "string" && cmd.includes(".reap/hooks/session-start");
+        return typeof cmd === "string" && cmd.includes("session-start");
       });
     });
 
@@ -103,7 +62,7 @@ export async function registerClaudeHook(
   // Merge: append REAP hook to SessionStart array
   const merged = {
     ...existing,
-    SessionStart: [...(Array.isArray(sessionStartHooks) ? sessionStartHooks : []), REAP_HOOK_ENTRY],
+    SessionStart: [...(Array.isArray(sessionStartHooks) ? sessionStartHooks : []), getReapHookEntry()],
   };
 
   if (!dryRun) {
@@ -111,4 +70,65 @@ export async function registerClaudeHook(
   }
 
   return { action: Object.keys(existing).length === 0 ? "created" : "updated" };
+}
+
+/**
+ * Sync hook registration in user-level ~/.claude/hooks.json
+ * Updates the command path if it changed (e.g., after package update)
+ */
+export async function syncHookRegistration(
+  dryRun: boolean = false,
+): Promise<{ action: "updated" | "skipped" }> {
+  const hooksJsonPath = ReapPaths.userClaudeHooksJson;
+  const file = Bun.file(hooksJsonPath);
+
+  if (!(await file.exists())) {
+    await registerClaudeHook(dryRun);
+    return { action: "updated" };
+  }
+
+  let existing: Record<string, unknown>;
+  try {
+    existing = JSON.parse(await file.text());
+  } catch {
+    await registerClaudeHook(dryRun);
+    return { action: "updated" };
+  }
+
+  // Find and update existing REAP hook entry with current package path
+  const sessionStartHooks = (existing["SessionStart"] as unknown[]) ?? [];
+  if (!Array.isArray(sessionStartHooks)) {
+    await registerClaudeHook(dryRun);
+    return { action: "updated" };
+  }
+
+  const expectedEntry = getReapHookEntry();
+  let changed = false;
+
+  const updated = sessionStartHooks.map((entry: unknown) => {
+    if (typeof entry !== "object" || entry === null) return entry;
+    const hooks = (entry as Record<string, unknown>)["hooks"];
+    if (!Array.isArray(hooks)) return entry;
+    const isReap = hooks.some((h: unknown) => {
+      if (typeof h !== "object" || h === null) return false;
+      const cmd = (h as Record<string, unknown>)["command"];
+      return typeof cmd === "string" && cmd.includes("session-start");
+    });
+    if (isReap) {
+      const currentJson = JSON.stringify(entry);
+      const expectedJson = JSON.stringify(expectedEntry);
+      if (currentJson !== expectedJson) {
+        changed = true;
+        return expectedEntry;
+      }
+    }
+    return entry;
+  });
+
+  if (changed && !dryRun) {
+    existing["SessionStart"] = updated;
+    await Bun.write(hooksJsonPath, JSON.stringify(existing, null, 2) + "\n");
+  }
+
+  return { action: changed ? "updated" : "skipped" };
 }

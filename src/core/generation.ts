@@ -98,19 +98,6 @@ export class GenerationManager {
       }
     } catch { /* no mutations dir */ }
 
-    // Count backlog items
-    let backlogCount = 0;
-    try {
-      backlogCount = (await readdir(backlogDir)).length;
-    } catch { /* empty */ }
-
-    // List archived files
-    const archivedFiles = await readdir(genDir);
-
-    // Generate 08-legacy-summary.md
-    const summary = `# Generation ${state.id} Summary\n- Goal: ${state.goal}\n- Started: ${state.startedAt}\n- Completed: ${state.completedAt}\n- Genome Version: ${state.genomeVersion} → ${state.genomeVersion + 1}\n- Backlog Items: ${backlogCount}건\n- Files: ${archivedFiles.join(", ")}\n`;
-    await Bun.write(join(genDir, "06-legacy.md"), summary);
-
     // Clear current
     await Bun.write(this.paths.currentYml, "");
 

@@ -31,8 +31,6 @@ export async function fixProject(projectRoot: string): Promise<FixResult> {
     { path: paths.life, name: "life" },
     { path: paths.lineage, name: "lineage" },
     { path: paths.backlog, name: "life/backlog" },
-    { path: paths.commands, name: "commands" },
-    { path: paths.templates, name: "templates" },
   ];
 
   for (const dir of requiredDirs) {

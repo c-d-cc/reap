@@ -2,7 +2,7 @@
 
 > **작성 원칙**: 이 파일은 ~100줄 이내의 **맵(map)**이어야 한다.
 > 규칙은 가능한 한 기계적으로 검증 가능하게 작성하라.
-> Birth 단계에서만 수정된다.
+> Completion 단계에서만 수정된다.
 
 ## Code Style
 
@@ -24,15 +24,16 @@
 - 커밋 메시지: `type: description` (feat, fix, test, chore, docs)
 - 한 커밋 = 한 논리적 변경
 - 테스트 포함 커밋 우선
-- **커밋 타이밍**: Growth 진입 전 clean state 확보, 태스크/Phase 완료 시 커밋, stage 전환 전 커밋
+- **커밋 타이밍**: Generation 완료 시 코드+artifact를 함께 커밋 (1 generation = 1 commit). 커밋 메시지: `feat/fix/chore(gen-NNN): [goal]`
 
 ## Template Conventions
 
-- Genome 템플릿: `src/templates/genome/` — init 시 `.reap/genome/`으로 복사
-- Genome domain 가이드: `src/templates/genome/domain/README.md` — init 시 `.reap/genome/domain/`으로 복사
-- 슬래시 커맨드: `src/templates/commands/` — init 시 `.reap/commands/` + `.claude/commands/`로 복사
-- 산출물 템플릿: `src/templates/artifacts/` — init 시 `.reap/templates/`로 복사
-- **새 템플릿 추가 시 반드시 `init.ts`의 복사 로직도 동기화하라**
+- Genome 템플릿: `src/templates/genome/` — init 시 `.reap/genome/`으로 복사 (프로젝트 소유)
+- Genome domain 가이드: `src/templates/genome/domain/README.md` — init/update 시 동기화
+- 슬래시 커맨드: `src/templates/commands/` — init/update 시 `~/.claude/commands/`에 설치 (user-level)
+- 산출물 템플릿: `src/templates/artifacts/` — 패키지 내부에서 직접 참조 (프로젝트에 복사하지 않음)
+- Hook 스크립트: `src/templates/hooks/` — 패키지 내부에서 직접 실행, `~/.claude/hooks.json`에 등록
+- **새 템플릿 추가 시 반드시 `init.ts`의 설치 로직도 동기화하라**
 
 ## Enforced Rules
 

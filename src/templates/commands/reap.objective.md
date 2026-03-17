@@ -95,10 +95,18 @@ Before saving the artifact, verify:
 ❌ Bad completion criterion: "Stabilize the service"
 ✅ Good completion criterion: "`npm run lint` reports 0 errors, `npm run build` succeeds"
 
-## Artifact Generation
-- Read `.reap/templates/01-objective.md`
-- Fill it in with the content finalized in the Steps above
-- Save to `.reap/life/01-objective.md`
+## Artifact Generation (Progressive Recording)
+- **Immediately upon entering this stage**: Read `.reap/templates/01-objective.md` and create `.reap/life/01-objective.md` with the Goal section filled in (from `current.yml` goal)
+- **Update incrementally**: As each step progresses, update the artifact in place:
+  - After Environment Scan → update Background section
+  - After Previous Generation Reference → update Background section
+  - After Backlog Review → update Background section
+  - After Genome Health Check → update Genome Reference section
+  - After Goal + Spec Definition → update Goal, Scope sections
+  - After Genome Gap Analysis → update Backlog section
+  - After Requirements Finalization → update Requirements, Completion Criteria sections
+- The artifact should reflect the **current state of work at all times**
+- Do NOT wait until the end to write the artifact
 
 ## Completion
 - Show the artifact to the human and get confirmation

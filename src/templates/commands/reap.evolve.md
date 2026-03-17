@@ -44,6 +44,12 @@ Perform one of the following 3 actions based on the human's request:
   - Also move files from `.reap/life/backlog/` to lineage
   - Generate `06-legacy.md`
   - Clear `current.yml`
+  - **After archiving, commit all changes** (code + `.reap/` artifacts together):
+    - Stage all changed files: code changes from this generation + `.reap/` directory
+    - Commit message format: `feat(gen-NNN): [generation goal summary]`
+    - Use `feat` for feature generations, `fix` for bugfix generations, `chore` for maintenance
+    - Include both code and REAP artifacts in the same commit
+    - If there are no code changes (REAP-only generation), use `chore(reap): [goal summary]`
   - "Generation complete. Run `/reap.evolve` again to start a new generation."
 - Otherwise: "Stage transitioned to [next stage]. Proceed with `/reap.[next stage]`."
 

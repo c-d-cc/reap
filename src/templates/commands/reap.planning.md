@@ -72,10 +72,14 @@ Before saving the artifact, verify:
 - [ ] Is the target file/module specified for each task?
 - [ ] Is the Phase classification logical?
 
-## Artifact Generation
-- Read `.reap/templates/02-planning.md`
-- Fill it in with the results from the Steps above
-- Save to `.reap/life/02-planning.md`
+## Artifact Generation (Progressive Recording)
+- **Immediately upon entering this stage**: Read `.reap/templates/02-planning.md` and create `.reap/life/02-planning.md` with the Summary section filled in
+- **Update incrementally**: As each step progresses, update the artifact in place:
+  - After Genome Reference → update Technical Context section
+  - After Develop Implementation Plan → update Summary with architecture decisions
+  - After Task Decomposition → add tasks to the Tasks section as they are decomposed
+- The artifact is a **living document** during the stage — it should reflect the current state of work at all times
+- Do NOT wait until the end to write the artifact
 
 ## Completion
 - Show the artifact to the human and get confirmation
