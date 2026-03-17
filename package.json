@@ -7,16 +7,31 @@
   "author": "HiChoi <hichoi@c-d.cc> (C to D)",
   "repository": {
     "type": "git",
-    "url": "https://github.com/c-d-cc/reap.git"
+    "url": "git+https://github.com/c-d-cc/reap.git"
   },
   "homepage": "https://github.com/c-d-cc/reap",
-  "keywords": ["ai", "development", "pipeline", "evolutionary", "claude", "genome", "lifecycle"],
+  "keywords": [
+    "ai",
+    "development",
+    "pipeline",
+    "evolutionary",
+    "claude",
+    "genome",
+    "lifecycle"
+  ],
   "bin": {
-    "reap": "./src/cli/index.ts"
+    "reap": "dist/cli.js"
   },
-  "files": ["src/", "media/"],
+  "files": [
+    "dist/"
+  ],
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "bun run src/cli/index.ts",
+    "build": "bun build src/cli/index.ts --outfile dist/cli.js --target node && rm -rf dist/templates && cp -r src/templates dist/templates",
+    "prepublishOnly": "npm run build",
     "test": "bun test"
   },
   "devDependencies": {

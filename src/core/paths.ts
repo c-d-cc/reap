@@ -1,5 +1,6 @@
 import { join, dirname } from "path";
 import { homedir } from "os";
+import { existsSync } from "fs";
 import { stat } from "fs/promises";
 import { fileURLToPath } from "url";
 
@@ -46,7 +47,14 @@ export class ReapPaths {
   static get userReapTemplates(): string { return join(ReapPaths.userReapDir, "templates"); }
 
   // Package-internal template paths
-  static get packageTemplatesDir(): string { return join(dirname(fileURLToPath(import.meta.url)), "../templates"); }
+  // Dev: src/core/ → ../templates = src/templates/
+  // Dist: dist/ → templates = dist/templates/ (copied during build)
+  static get packageTemplatesDir(): string {
+    const dir = dirname(fileURLToPath(import.meta.url));
+    const distPath = join(dir, "templates");
+    if (existsSync(distPath)) return distPath;
+    return join(dir, "../templates");
+  }
   static get packageCommandsDir(): string { return join(ReapPaths.packageTemplatesDir, "commands"); }
   static get packageArtifactsDir(): string { return join(ReapPaths.packageTemplatesDir, "artifacts"); }
   static get packageHooksDir(): string { return join(ReapPaths.packageTemplatesDir, "hooks"); }

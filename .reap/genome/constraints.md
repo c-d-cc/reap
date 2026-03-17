@@ -37,7 +37,7 @@
 |------|--------|------|
 | 테스트 | `bun test` | 전체 단위/통합 테스트 |
 | 타입체크 | `bunx tsc --noEmit` | TypeScript 컴파일 검증 |
-| 빌드 | `bun build src/cli/index.ts --outfile dist/cli.js --target node` | Node.js 호환 번들 |
+| 빌드 | `npm run build` | Node.js 호환 번들 + templates 복사 |
 
 ## External Dependencies
 
