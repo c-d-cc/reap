@@ -56,6 +56,7 @@ Do NOT modify the Environment directly — if you discover a change, record it i
      ```markdown
      ---
      type: genome-change
+     status: pending
      target: genome/[relevant file]
      ---
      # [Title]
@@ -71,6 +72,7 @@ Do NOT modify the Environment directly — if you discover a change, record it i
      ```markdown
      ---
      type: task
+     status: pending
      ---
      # [Title]
      [Description of the issue and what needs to be done]

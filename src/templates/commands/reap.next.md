@@ -29,9 +29,11 @@ description: "REAP Next — Advance to the next lifecycle stage"
 - Add the current timestamp to `completedAt` in `current.yml`
 - Move artifact files (`01-*.md` through `05-*.md`) from `.reap/life/` to `.reap/lineage/[gen-id]-[goal-slug]/`
   - Goal slug: lowercase, non-alphanumeric/hangul replaced with `-`, max 30 chars
-- Also move files from `.reap/life/backlog/` to lineage
+- Process backlog files from `.reap/life/backlog/`:
+  - Files with `status: consumed` → move to lineage (history preserved)
+  - Files with `status: pending` or no status field → copy to lineage for record, then carry over to new `.reap/life/backlog/`
 - Clear `current.yml` (write empty content)
-- Recreate `.reap/life/backlog/` directory
+- Recreate `.reap/life/backlog/` directory (with carried-over pending items already in place)
 - **Commit all changes** (code + `.reap/` artifacts together):
   - Stage all changed files: code changes from this generation + `.reap/` directory
   - Commit message format: `feat(gen-NNN): [generation goal summary]`

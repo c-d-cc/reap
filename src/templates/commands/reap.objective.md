@@ -121,6 +121,7 @@ If the goal is ambiguous, do NOT guess — STOP and ask the human. This is non-n
   ```markdown
   ---
   type: genome-change
+  status: pending
   target: genome/domain/{topic}.md
   ---
   # [Title]
@@ -164,5 +165,6 @@ Before saving the artifact, verify:
 - Do NOT wait until the end to write the artifact
 
 ## Completion
-- Show the artifact to the human and get confirmation
-- After confirmation: "Proceed to the Planning stage with `/reap.next`."
+- **If called from `/reap.evolve`** (Autonomous Override active): Save the artifact and proceed automatically. Do NOT pause for human confirmation.
+- **If called standalone**: Show the artifact to the human and get confirmation.
+- After confirmation or auto-proceed: "Proceed to the Planning stage with `/reap.next`."

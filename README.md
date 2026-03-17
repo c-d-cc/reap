@@ -227,7 +227,7 @@ my-project/
 
 ~/.claude/                        # User-level (installed by reap init)
 ├── commands/                     # Slash commands (/reap.*)
-└── hooks.json                    # SessionStart hook registration
+└── settings.json                 # SessionStart hook registration
 ```
 
 ## Lineage Compression

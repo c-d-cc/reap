@@ -82,7 +82,7 @@ hooks:
           It injects the full REAP workflow guide, current generation state, and lifecycle rules into the AI agent — ensuring the agent understands the project context even in a brand-new session.
         </p>
         <p className="text-xs text-muted-foreground mb-6">
-          Registered in <code className="bg-muted px-1 rounded">~/.claude/hooks.json</code>. The hook script lives in the REAP package and reads from the project's <code className="bg-muted px-1 rounded">.reap/</code> directory.
+          Registered in <code className="bg-muted px-1 rounded">~/.claude/settings.json</code>. The hook script lives in the REAP package and reads from the project's <code className="bg-muted px-1 rounded">.reap/</code> directory.
         </p>
 
         <h2 className="text-base font-semibold text-foreground mb-3 mt-6">Execution Notes</h2>

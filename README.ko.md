@@ -228,7 +228,7 @@ my-project/
 
 ~/.claude/                        # 사용자 레벨 (reap init 시 설치)
 ├── commands/                     # Slash commands (/reap.*)
-└── hooks.json                    # SessionStart hook 등록
+└── settings.json                 # SessionStart hook 등록
 ```
 
 ## 계보 압축 (Lineage Compression)

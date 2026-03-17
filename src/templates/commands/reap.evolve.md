@@ -16,6 +16,14 @@ Direct modification skips artifact creation and breaks the lifecycle. This is no
 - If no active Generation exists: run `/reap.start` first to create one
 - If an active Generation exists: resume from the current stage
 
+## Autonomous Override
+When `/reap.evolve` calls each stage command, the following overrides apply:
+- **Skip routine human confirmations**: Do NOT pause to show artifacts and ask for approval at the end of each stage. Proceed autonomously.
+- **Skip environment/genome interactive setup questions**: Use existing data, fill in what you can, skip what's empty.
+- **STOP only when genuinely blocked**: ambiguous goal with multiple valid interpretations, uncertain technical decision with significant trade-offs, conflicts in the genome, or unexpected errors.
+- **Escalation sections still apply**: If a stage's Escalation rules trigger, STOP and ask.
+- This override does NOT apply when stages are invoked standalone (e.g., user runs `/reap.objective` directly).
+
 ## Lifecycle Loop
 
 Execute the following loop until the generation is complete:

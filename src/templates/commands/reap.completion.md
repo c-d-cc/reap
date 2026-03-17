@@ -5,7 +5,7 @@ description: "REAP Completion — Retrospect, evolve the Genome, and finalize th
 # Completion
 
 <HARD-GATE>
-Do NOT apply Genome changes without human confirmation.
+Do NOT apply Genome changes without human confirmation — UNLESS called from `/reap.evolve` (Autonomous Override active).
 Do NOT finalize Genome changes without running Validation Commands.
 </HARD-GATE>
 
@@ -45,6 +45,7 @@ Do NOT finalize Genome changes without running Validation Commands.
    ```markdown
    ---
    type: task
+   status: pending
    ---
    # [Title]
    [Description]
@@ -65,9 +66,10 @@ Do NOT finalize Genome changes without running Validation Commands.
     - **When writing domain/ files, follow the guide in `~/.reap/templates/domain-guide.md`**
 13. Apply environment-change items to the corresponding files in `.reap/environment/`
 14. **Verify**: Run the Validation Commands from constraints.md to confirm genome changes do not conflict with existing code
-15. **Human confirmation**: Show the modified genome/environment content to the human and get approval
-    - Do NOT finalize changes until the human approves
-16. Delete `type: genome-change` and `type: environment-change` backlog items that have been applied
+15. **Human confirmation**:
+    - **If called from `/reap.evolve`** (Autonomous Override active): Apply genome changes automatically after Validation Commands pass. Do NOT pause for human confirmation.
+    - **If called standalone**: Show the modified genome/environment content to the human and get approval. Do NOT finalize changes until the human approves.
+16. For each applied `type: genome-change` and `type: environment-change` backlog item, update its frontmatter to `status: consumed` and add `consumedBy: gen-XXX`
 
 ## Self-Verification
 Before saving the artifact, verify:
@@ -89,4 +91,5 @@ Before saving the artifact, verify:
 - The artifact should reflect the current state of completion work at all times
 
 ## Completion
-- "Finalize the generation with `/reap.next`. Lineage archiving will be performed automatically."
+- **If called from `/reap.evolve`** (Autonomous Override active): Proceed automatically to `/reap.next`.
+- **If called standalone**: "Finalize the generation with `/reap.next`. Lineage archiving will be performed automatically."
