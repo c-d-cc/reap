@@ -2,6 +2,7 @@ import { mkdir, stat } from "fs/promises";
 import YAML from "yaml";
 import { ReapPaths } from "../../core/paths";
 import { LifeCycle } from "../../core/lifecycle";
+import { readTextFile, fileExists, writeTextFile } from "../../core/fs";
 import type { GenerationState } from "../../types";
 
 export interface FixResult {
@@ -41,18 +42,16 @@ export async function fixProject(projectRoot: string): Promise<FixResult> {
   }
 
   // 2. config.yml
-  const configFile = Bun.file(paths.config);
-  if (!(await configFile.exists())) {
+  if (!(await fileExists(paths.config))) {
     issues.push("config.yml is missing. Run 'reap init' to recreate the project.");
   }
 
   // 3. current.yml
-  const currentFile = Bun.file(paths.currentYml);
-  if (await currentFile.exists()) {
-    const content = await currentFile.text();
-    if (content.trim()) {
+  const currentContent = await readTextFile(paths.currentYml);
+  if (currentContent !== null) {
+    if (currentContent.trim()) {
       try {
-        const state = YAML.parse(content) as GenerationState;
+        const state = YAML.parse(currentContent) as GenerationState;
         if (!state.stage || !LifeCycle.isValid(state.stage)) {
           issues.push(`Invalid stage "${state.stage}" in current.yml. Valid stages: ${LifeCycle.stages().join(", ")}. Manual correction required.`);
         }
@@ -65,7 +64,7 @@ export async function fixProject(projectRoot: string): Promise<FixResult> {
           fixed.push("Recreated missing backlog/ directory for active generation");
         }
       } catch {
-        await Bun.write(paths.currentYml, "");
+        await writeTextFile(paths.currentYml, "");
         fixed.push("Reset corrupted current.yml (was not valid YAML)");
       }
     }

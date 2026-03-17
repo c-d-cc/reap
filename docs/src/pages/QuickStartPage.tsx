@@ -8,10 +8,10 @@ export default function QuickStartPage() {
       <DocPage title="Quick Start" breadcrumb="Getting Started">
         <h2 className="text-base font-semibold text-foreground mb-2">Install</h2>
         <CodeBlock language="bash">{`# npm
-npm install -g reap
+npm install -g @c-d-cc/reap
 
 # or Bun
-bun install -g reap`}</CodeBlock>
+bun install -g @c-d-cc/reap`}</CodeBlock>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">Initialize a project</h2>
         <CodeBlock language="bash">{`# New project

@@ -3,6 +3,7 @@ import { readdir } from "fs/promises";
 import { join } from "path";
 import type { AdaptationRecord } from "../types";
 import type { ReapPaths } from "./paths";
+import { readTextFileOrThrow, writeTextFile } from "./fs";
 
 let adaptCounter = 0;
 
@@ -17,7 +18,7 @@ export class AdaptationManager {
       createdAt: new Date().toISOString(),
     };
     const dir = join(this.paths.lineage, generationId, "adaptations");
-    await Bun.write(join(dir, `${id}.yml`), YAML.stringify(adaptation));
+    await writeTextFile(join(dir, `${id}.yml`), YAML.stringify(adaptation));
     return adaptation;
   }
 
@@ -27,7 +28,7 @@ export class AdaptationManager {
       const entries = await readdir(dir);
       const adaptations: AdaptationRecord[] = [];
       for (const entry of entries.filter(e => e.endsWith(".yml"))) {
-        const content = await Bun.file(join(dir, entry)).text();
+        const content = await readTextFileOrThrow(join(dir, entry));
         adaptations.push(YAML.parse(content) as AdaptationRecord);
       }
       return adaptations.sort((a, b) => a.createdAt.localeCompare(b.createdAt));

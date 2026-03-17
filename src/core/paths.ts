@@ -1,6 +1,7 @@
-import { join } from "path";
+import { join, dirname } from "path";
 import { homedir } from "os";
 import { stat } from "fs/promises";
+import { fileURLToPath } from "url";
 
 export class ReapPaths {
   private projectRoot: string;
@@ -44,7 +45,7 @@ export class ReapPaths {
   static get userReapTemplates(): string { return join(ReapPaths.userReapDir, "templates"); }
 
   // Package-internal template paths
-  static get packageTemplatesDir(): string { return join(import.meta.dir, "../templates"); }
+  static get packageTemplatesDir(): string { return join(dirname(fileURLToPath(import.meta.url)), "../templates"); }
   static get packageCommandsDir(): string { return join(ReapPaths.packageTemplatesDir, "commands"); }
   static get packageArtifactsDir(): string { return join(ReapPaths.packageTemplatesDir, "artifacts"); }
   static get packageHooksDir(): string { return join(ReapPaths.packageTemplatesDir, "hooks"); }

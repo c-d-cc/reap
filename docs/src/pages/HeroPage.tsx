@@ -141,10 +141,10 @@ export function HeroPage() {
             <div>
               <div className="text-xs text-muted-foreground mb-1">1. Install globally</div>
               <CodeBlock language="bash">{`# npm
-npm install -g reap
+npm install -g @c-d-cc/reap
 
 # or Bun
-bun install -g reap`}</CodeBlock>
+bun install -g @c-d-cc/reap`}</CodeBlock>
             </div>
             <div>
               <div className="text-xs text-muted-foreground mb-1">2. Initialize your project</div>

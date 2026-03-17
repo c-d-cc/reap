@@ -1,10 +1,20 @@
 {
-  "name": "reap",
+  "name": "@c-d-cc/reap",
   "version": "0.1.0",
+  "description": "Recursive Evolutionary Autonomous Pipeline — AI and humans evolve software across generations",
   "type": "module",
+  "license": "MIT",
+  "author": "HiChoi <hichoi@c-d.cc> (C to D)",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/c-d-cc/reap.git"
+  },
+  "homepage": "https://github.com/c-d-cc/reap",
+  "keywords": ["ai", "development", "pipeline", "evolutionary", "claude", "genome", "lifecycle"],
   "bin": {
     "reap": "./src/cli/index.ts"
   },
+  "files": ["src/", "media/"],
   "scripts": {
     "dev": "bun run src/cli/index.ts",
     "test": "bun test"

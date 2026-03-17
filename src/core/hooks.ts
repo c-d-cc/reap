@@ -1,6 +1,7 @@
 import { join } from "path";
 import { mkdir } from "fs/promises";
 import { ReapPaths } from "./paths";
+import { readTextFile, writeTextFile } from "./fs";
 
 /**
  * The hook command references the package-internal session-start.sh via absolute path.
@@ -29,12 +30,12 @@ export async function registerClaudeHook(
   const hooksJsonPath = ReapPaths.userClaudeHooksJson;
   await mkdir(ReapPaths.userClaudeDir, { recursive: true });
 
-  const file = Bun.file(hooksJsonPath);
   let existing: Record<string, unknown> = {};
 
-  if (await file.exists()) {
+  const fileContent = await readTextFile(hooksJsonPath);
+  if (fileContent !== null) {
     try {
-      existing = JSON.parse(await file.text());
+      existing = JSON.parse(fileContent);
     } catch {
       // Corrupted file, overwrite
       existing = {};
@@ -66,7 +67,7 @@ export async function registerClaudeHook(
   };
 
   if (!dryRun) {
-    await Bun.write(hooksJsonPath, JSON.stringify(merged, null, 2) + "\n");
+    await writeTextFile(hooksJsonPath, JSON.stringify(merged, null, 2) + "\n");
   }
 
   return { action: Object.keys(existing).length === 0 ? "created" : "updated" };
@@ -80,16 +81,16 @@ export async function syncHookRegistration(
   dryRun: boolean = false,
 ): Promise<{ action: "updated" | "skipped" }> {
   const hooksJsonPath = ReapPaths.userClaudeHooksJson;
-  const file = Bun.file(hooksJsonPath);
 
-  if (!(await file.exists())) {
+  const fileContent = await readTextFile(hooksJsonPath);
+  if (fileContent === null) {
     await registerClaudeHook(dryRun);
     return { action: "updated" };
   }
 
   let existing: Record<string, unknown>;
   try {
-    existing = JSON.parse(await file.text());
+    existing = JSON.parse(fileContent);
   } catch {
     await registerClaudeHook(dryRun);
     return { action: "updated" };
@@ -127,7 +128,7 @@ export async function syncHookRegistration(
 
   if (changed && !dryRun) {
     existing["SessionStart"] = updated;
-    await Bun.write(hooksJsonPath, JSON.stringify(existing, null, 2) + "\n");
+    await writeTextFile(hooksJsonPath, JSON.stringify(existing, null, 2) + "\n");
   }
 
   return { action: changed ? "updated" : "skipped" };

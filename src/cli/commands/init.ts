@@ -3,6 +3,7 @@ import { join } from "path";
 import { ReapPaths } from "../../core/paths";
 import { ConfigManager } from "../../core/config";
 import { registerClaudeHook } from "../../core/hooks";
+import { fileExists, readTextFileOrThrow, writeTextFile } from "../../core/fs";
 import type { ReapConfig } from "../../types";
 
 export const COMMAND_NAMES = [
@@ -26,7 +27,7 @@ export async function initProject(
   // Validate preset if provided
   if (preset) {
     const presetDir = join(ReapPaths.packageTemplatesDir, "presets", preset);
-    const presetExists = await Bun.file(join(presetDir, "principles.md")).exists();
+    const presetExists = await fileExists(join(presetDir, "principles.md"));
     if (!presetExists) {
       throw new Error(`Unknown preset: "${preset}". Available presets: bun-hono-react`);
     }
@@ -57,7 +58,7 @@ export async function initProject(
   for (const file of genomeTemplates) {
     const src = join(genomeSourceDir, file);
     const dest = join(paths.genome, file);
-    await Bun.write(dest, await Bun.file(src).text());
+    await writeTextFile(dest, await readTextFileOrThrow(src));
   }
 
   // Install artifact templates + domain guide to user-level ~/.reap/templates/
@@ -66,18 +67,18 @@ export async function initProject(
   for (const file of artifactFiles) {
     const src = join(ReapPaths.packageArtifactsDir, file);
     const dest = join(ReapPaths.userReapTemplates, file);
-    await Bun.write(dest, await Bun.file(src).text());
+    await writeTextFile(dest, await readTextFileOrThrow(src));
   }
   const domainGuideSrc = join(ReapPaths.packageGenomeDir, "domain/README.md");
   const domainGuideDest = join(ReapPaths.userReapTemplates, "domain-guide.md");
-  await Bun.write(domainGuideDest, await Bun.file(domainGuideSrc).text());
+  await writeTextFile(domainGuideDest, await readTextFileOrThrow(domainGuideSrc));
 
   // Install slash commands to user-level ~/.claude/commands/
   await mkdir(ReapPaths.userClaudeCommands, { recursive: true });
   for (const cmd of COMMAND_NAMES) {
     const src = join(ReapPaths.packageCommandsDir, `${cmd}.md`);
     const dest = join(ReapPaths.userClaudeCommands, `${cmd}.md`);
-    await Bun.write(dest, await Bun.file(src).text());
+    await writeTextFile(dest, await readTextFileOrThrow(src));
   }
 
   // Register SessionStart hook in user-level ~/.claude/hooks.json

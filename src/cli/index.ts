@@ -1,4 +1,4 @@
-#!/usr/bin/env bun
+#!/usr/bin/env node
 import { program } from "commander";
 import { initProject } from "./commands/init";
 import { updateProject } from "./commands/update";

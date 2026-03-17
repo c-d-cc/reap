@@ -1,6 +1,7 @@
 import { readdir, rm } from "fs/promises";
 import { join } from "path";
 import type { ReapPaths } from "./paths";
+import { readTextFile, readTextFileOrThrow, writeTextFile } from "./fs";
 
 const LINEAGE_MAX_LINES = 10_000;
 const MIN_GENERATIONS_FOR_COMPRESSION = 5;
@@ -19,12 +20,9 @@ interface LineageEntry {
  * Count total lines in lineage directory
  */
 async function countLines(filePath: string): Promise<number> {
-  try {
-    const content = await Bun.file(filePath).text();
-    return content.split("\n").length;
-  } catch {
-    return 0;
-  }
+  const content = await readTextFile(filePath);
+  if (content === null) return 0;
+  return content.split("\n").length;
 }
 
 async function countDirLines(dirPath: string): Promise<number> {
@@ -80,54 +78,64 @@ async function compressLevel1(genDir: string, genName: string): Promise<string> 
 
   // Read objective (start)
   let goal = "", completionConditions = "";
-  try {
-    const objective = await Bun.file(join(genDir, "01-objective.md")).text();
-    const goalMatch = objective.match(/## Goal\n([\s\S]*?)(?=\n##)/);
-    if (goalMatch) goal = goalMatch[1].trim();
-    const condMatch = objective.match(/## Completion Criteria\n([\s\S]*?)(?=\n##)/);
-    if (condMatch) completionConditions = condMatch[1].trim();
-  } catch { /* no objective */ }
+  {
+    const objective = await readTextFile(join(genDir, "01-objective.md"));
+    if (objective) {
+      const goalMatch = objective.match(/## Goal\n([\s\S]*?)(?=\n##)/);
+      if (goalMatch) goal = goalMatch[1].trim();
+      const condMatch = objective.match(/## Completion Criteria\n([\s\S]*?)(?=\n##)/);
+      if (condMatch) completionConditions = condMatch[1].trim();
+    }
+  }
 
   // Read completion (end)
   let lessons = "", genomeChanges = "", nextBacklog = "";
-  try {
-    const completion = await Bun.file(join(genDir, "05-completion.md")).text();
-    const lessonsMatch = completion.match(/### Lessons Learned\n([\s\S]*?)(?=\n###)/);
-    if (lessonsMatch) lessons = lessonsMatch[1].trim();
-    const changeMatch = completion.match(/### Genome-Change Backlog Applied\n([\s\S]*?)(?=\n###)/);
-    if (changeMatch) genomeChanges = changeMatch[1].trim();
-    const backlogMatch = completion.match(/### Next Generation Backlog\n([\s\S]*?)(?=\n---|\n##|$)/);
-    if (backlogMatch) nextBacklog = backlogMatch[1].trim();
-  } catch { /* no completion */ }
+  {
+    const completion = await readTextFile(join(genDir, "05-completion.md"));
+    if (completion) {
+      const lessonsMatch = completion.match(/### Lessons Learned\n([\s\S]*?)(?=\n###)/);
+      if (lessonsMatch) lessons = lessonsMatch[1].trim();
+      const changeMatch = completion.match(/### Genome-Change Backlog Applied\n([\s\S]*?)(?=\n###)/);
+      if (changeMatch) genomeChanges = changeMatch[1].trim();
+      const backlogMatch = completion.match(/### Next Generation Backlog\n([\s\S]*?)(?=\n---|\n##|$)/);
+      if (backlogMatch) nextBacklog = backlogMatch[1].trim();
+    }
+  }
 
   // Read Summary section from 05-completion.md for metadata
   let metadata = "";
-  try {
-    const completion = await Bun.file(join(genDir, "05-completion.md")).text();
-    const summaryMatch = completion.match(/## Summary\n([\s\S]*?)(?=\n##)/);
-    if (summaryMatch) metadata = summaryMatch[1].trim();
-  } catch { /* no completion */ }
+  {
+    const completion = await readTextFile(join(genDir, "05-completion.md"));
+    if (completion) {
+      const summaryMatch = completion.match(/## Summary\n([\s\S]*?)(?=\n##)/);
+      if (summaryMatch) metadata = summaryMatch[1].trim();
+    }
+  }
 
   // Read validation result
   let validationResult = "";
-  try {
-    const validation = await Bun.file(join(genDir, "04-validation.md")).text();
-    const resultMatch = validation.match(/## Result: (.+)/);
-    if (resultMatch) validationResult = resultMatch[1].trim();
-  } catch { /* no validation */ }
+  {
+    const validation = await readTextFile(join(genDir, "04-validation.md"));
+    if (validation) {
+      const resultMatch = validation.match(/## Result: (.+)/);
+      if (resultMatch) validationResult = resultMatch[1].trim();
+    }
+  }
 
   // Read implementation for notable regressions/deferred
   let deferred = "";
-  try {
-    const impl = await Bun.file(join(genDir, "03-implementation.md")).text();
-    const deferredMatch = impl.match(/## Deferred Tasks\n([\s\S]*?)(?=\n##)/);
-    if (deferredMatch) {
-      const content = deferredMatch[1].trim();
-      if (content && !content.match(/^\|\s*\|\s*\|\s*\|\s*\|$/)) {
-        deferred = content;
+  {
+    const impl = await readTextFile(join(genDir, "03-implementation.md"));
+    if (impl) {
+      const deferredMatch = impl.match(/## Deferred Tasks\n([\s\S]*?)(?=\n##)/);
+      if (deferredMatch) {
+        const content = deferredMatch[1].trim();
+        if (content && !content.match(/^\|\s*\|\s*\|\s*\|\s*\|$/)) {
+          deferred = content;
+        }
       }
     }
-  } catch { /* no implementation */ }
+  }
 
   // Build compressed content
   const genId = genName.match(/^gen-\d+/)?.[0] ?? genName;
@@ -205,7 +213,7 @@ async function compressLevel2(
   lines.push("");
 
   for (const file of level1Files) {
-    const content = await Bun.file(file.path).text();
+    const content = await readTextFileOrThrow(file.path);
     // Extract header and goal line only
     const headerMatch = content.match(/^# (gen-\d+)/m);
     const goalMatch = content.match(/- Goal: (.+)/);
@@ -275,7 +283,7 @@ export async function compressLineageIfNeeded(
     const genId = dir.name.match(/^gen-\d+/)?.[0] ?? dir.name;
     const outPath = join(paths.lineage, `${genId}.md`);
 
-    await Bun.write(outPath, compressed);
+    await writeTextFile(outPath, compressed);
     await rm(dirPath, { recursive: true });
     result.level1.push(genId);
   }
@@ -303,7 +311,7 @@ export async function compressLineageIfNeeded(
       const compressed = await compressLevel2(files, epochNum);
       const outPath = join(paths.lineage, `epoch-${String(epochNum).padStart(3, "0")}.md`);
 
-      await Bun.write(outPath, compressed);
+      await writeTextFile(outPath, compressed);
 
       // Remove original Level 1 files
       for (const file of files) {

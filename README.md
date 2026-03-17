@@ -37,10 +37,10 @@ REAP solves these with a **generation-based evolution model**:
 
 ```bash
 # npm
-npm install -g reap
+npm install -g @c-d-cc/reap
 
 # or Bun
-bun install -g reap
+bun install -g @c-d-cc/reap
 ```
 
 > **Requirements**: [Bun](https://bun.sh) runtime, [Claude Code](https://claude.ai/claude-code) CLI

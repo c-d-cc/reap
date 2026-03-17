@@ -5,15 +5,14 @@ import type { GenerationState } from "../types";
 import type { ReapPaths } from "./paths";
 import { LifeCycle } from "./lifecycle";
 import { compressLineageIfNeeded } from "./compression";
+import { readTextFile, writeTextFile } from "./fs";
 
 export class GenerationManager {
   constructor(private paths: ReapPaths) {}
 
   async current(): Promise<GenerationState | null> {
-    const file = Bun.file(this.paths.currentYml);
-    if (!(await file.exists())) return null;
-    const content = await file.text();
-    if (!content.trim()) return null;
+    const content = await readTextFile(this.paths.currentYml);
+    if (content === null || !content.trim()) return null;
     return YAML.parse(content) as GenerationState;
   }
 
@@ -28,7 +27,7 @@ export class GenerationManager {
       startedAt: now,
       timeline: [{ stage: "objective", at: now }],
     };
-    await Bun.write(this.paths.currentYml, YAML.stringify(state));
+    await writeTextFile(this.paths.currentYml, YAML.stringify(state));
     return state;
   }
 
@@ -42,7 +41,7 @@ export class GenerationManager {
     state.stage = next;
     if (!state.timeline) state.timeline = [];
     state.timeline.push({ stage: next, at: new Date().toISOString() });
-    await Bun.write(this.paths.currentYml, YAML.stringify(state));
+    await writeTextFile(this.paths.currentYml, YAML.stringify(state));
     return state;
   }
 
@@ -99,7 +98,7 @@ export class GenerationManager {
     } catch { /* no mutations dir */ }
 
     // Clear current
-    await Bun.write(this.paths.currentYml, "");
+    await writeTextFile(this.paths.currentYml, "");
 
     // Compress lineage if needed
     const compression = await compressLineageIfNeeded(this.paths);
@@ -107,7 +106,7 @@ export class GenerationManager {
   }
 
   async save(state: GenerationState): Promise<void> {
-    await Bun.write(this.paths.currentYml, YAML.stringify(state));
+    await writeTextFile(this.paths.currentYml, YAML.stringify(state));
   }
 
   async listCompleted(): Promise<string[]> {

@@ -2,6 +2,7 @@ import { readdir, unlink, rm, mkdir } from "fs/promises";
 import { join } from "path";
 import { ReapPaths } from "../../core/paths";
 import { syncHookRegistration } from "../../core/hooks";
+import { readTextFile, readTextFileOrThrow, writeTextFile } from "../../core/fs";
 
 interface UpdateResult {
   updated: string[];
@@ -24,13 +25,13 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
   const commandFiles = await readdir(commandsDir);
   for (const file of commandFiles) {
     if (!file.endsWith(".md")) continue;
-    const src = await Bun.file(join(commandsDir, file)).text();
+    const src = await readTextFileOrThrow(join(commandsDir, file));
     const dest = join(ReapPaths.userClaudeCommands, file);
-    const existing = Bun.file(dest);
-    if (await existing.exists() && await existing.text() === src) {
+    const existingContent = await readTextFile(dest);
+    if (existingContent !== null && existingContent === src) {
       result.skipped.push(`~/.claude/commands/${file}`);
     } else {
-      if (!dryRun) await Bun.write(dest, src);
+      if (!dryRun) await writeTextFile(dest, src);
       result.updated.push(`~/.claude/commands/${file}`);
     }
   }
@@ -52,23 +53,23 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
   await mkdir(ReapPaths.userReapTemplates, { recursive: true });
   const artifactFiles = ["01-objective.md", "02-planning.md", "03-implementation.md", "04-validation.md", "05-completion.md"];
   for (const file of artifactFiles) {
-    const src = await Bun.file(join(ReapPaths.packageArtifactsDir, file)).text();
+    const src = await readTextFileOrThrow(join(ReapPaths.packageArtifactsDir, file));
     const dest = join(ReapPaths.userReapTemplates, file);
-    const existing = Bun.file(dest);
-    if (await existing.exists() && await existing.text() === src) {
+    const existingContent = await readTextFile(dest);
+    if (existingContent !== null && existingContent === src) {
       result.skipped.push(`~/.reap/templates/${file}`);
     } else {
-      if (!dryRun) await Bun.write(dest, src);
+      if (!dryRun) await writeTextFile(dest, src);
       result.updated.push(`~/.reap/templates/${file}`);
     }
   }
-  const domainGuideSrc = await Bun.file(join(ReapPaths.packageGenomeDir, "domain/README.md")).text();
+  const domainGuideSrc = await readTextFileOrThrow(join(ReapPaths.packageGenomeDir, "domain/README.md"));
   const domainGuideDest = join(ReapPaths.userReapTemplates, "domain-guide.md");
-  const domainExisting = Bun.file(domainGuideDest);
-  if (await domainExisting.exists() && await domainExisting.text() === domainGuideSrc) {
+  const domainExistingContent = await readTextFile(domainGuideDest);
+  if (domainExistingContent !== null && domainExistingContent === domainGuideSrc) {
     result.skipped.push(`~/.reap/templates/domain-guide.md`);
   } else {
-    if (!dryRun) await Bun.write(domainGuideDest, domainGuideSrc);
+    if (!dryRun) await writeTextFile(domainGuideDest, domainGuideSrc);
     result.updated.push(`~/.reap/templates/domain-guide.md`);
   }
 
@@ -119,9 +120,9 @@ async function migrateLegacyFiles(
   // Clean up .claude/hooks.json — remove project-level .reap/hooks/ references
   try {
     const legacyHooksJson = paths.legacyClaudeHooksJson;
-    const file = Bun.file(legacyHooksJson);
-    if (await file.exists()) {
-      const content = JSON.parse(await file.text());
+    const fileContent = await readTextFile(legacyHooksJson);
+    if (fileContent !== null) {
+      const content = JSON.parse(fileContent);
       const sessionStart = content["SessionStart"];
       if (Array.isArray(sessionStart)) {
         const filtered = sessionStart.filter((entry: unknown) => {
@@ -142,7 +143,7 @@ async function migrateLegacyFiles(
               result.removed.push(`.claude/hooks.json (legacy)`);
             } else {
               content["SessionStart"] = filtered;
-              await Bun.write(legacyHooksJson, JSON.stringify(content, null, 2) + "\n");
+              await writeTextFile(legacyHooksJson, JSON.stringify(content, null, 2) + "\n");
               result.removed.push(`.claude/hooks.json (legacy REAP hook entry)`);
             }
           }

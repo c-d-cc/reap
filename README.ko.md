@@ -37,10 +37,10 @@ REAP은 **세대 기반 진화 모델**로 이 문제들을 해결합니다:
 
 ```bash
 # npm
-npm install -g reap
+npm install -g @c-d-cc/reap
 
 # 또는 Bun
-bun install -g reap
+bun install -g @c-d-cc/reap
 ```
 
 > **요구사항**: [Bun](https://bun.sh) 런타임, [Claude Code](https://claude.ai/claude-code) CLI
