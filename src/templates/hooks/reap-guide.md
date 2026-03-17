@@ -149,3 +149,5 @@ Each slash command follows a 3-step structure: Gate (precondition check) → Ste
 1. **NEVER modify `current.yml` directly.** Stage transitions MUST go through `/reap.next` (forward) or `/reap.back` (regression). Direct modification bypasses artifact creation and breaks the lifecycle.
 2. **NEVER skip a stage.** Each stage command must be executed and its artifact must exist before advancing. `/reap.next` enforces this by creating the next artifact from template.
 3. **ALL development work MUST follow the REAP lifecycle.** Do NOT bypass it unless the human explicitly asks.
+4. **Genome is the authoritative source of truth.** When making any decision about architecture, conventions, constraints, or domain rules, ALWAYS consult the Genome first. If you observe code that contradicts the Genome, flag it as a potential `genome-change` backlog item. Do NOT silently ignore discrepancies.
+5. **Keep Genome fresh.** If you notice the Genome is missing information about current code patterns, or contains outdated information, inform the human and suggest `/reap.sync`. The human may choose to defer sync — respect that choice, but always flag the staleness.
