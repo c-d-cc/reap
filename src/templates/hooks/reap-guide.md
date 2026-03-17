@@ -115,7 +115,7 @@ Hooks are executed by the AI agent, not the CLI. Each command runs in the projec
 
 | Component | Role |
 |-----------|------|
-| **CLI (`reap`)** | State tracker. Stage transitions, generation management |
+| **CLI (`reap`)** | Project setup and maintenance. Init, status, update, fix |
 | **AI Agent** | Workflow executor. Performs each stage's work via slash commands |
 | **Human** | Decision maker. Sets goals, finalizes specs, reviews code, approves stage transitions |
 

@@ -45,14 +45,22 @@ npm install -g reap
 cd my-project
 reap init my-project
 
-# 2. Start the first generation
-reap evolve "Implement user authentication"
-
-# 3. Drive the workflow via slash commands in Claude Code
+# 2. Open Claude Code and run a full generation
 claude
-> /reap.objective       # Define objective + spec
-> reap evolve --advance
-> /reap.planning        # Create implementation plan
+> /reap.evolve "Implement user authentication"
+```
+
+`/reap.evolve` runs the entire generation lifecycle — from Objective through Completion — interactively with you. It automatically starts a generation, executes each stage in order, and advances between them. This is the primary command you'll use for day-to-day development.
+
+You can also drive each stage manually if you need finer control:
+
+```bash
+> /reap.start            # Start a new generation
+> /reap.objective        # Define objective + spec
+> /reap.next             # Advance to the next stage
+> /reap.planning         # Create implementation plan
+> /reap.next
+> /reap.implementation   # Build with AI + human collaboration
 > ...
 ```
 
@@ -115,10 +123,6 @@ All items to be addressed next are stored in `.reap/life/backlog/`. Each item us
 | Command | Description |
 |---------|-------------|
 | `reap init <name>` | Initialize project. Creates the `.reap/` structure |
-| `reap evolve [goal]` | Start a new generation |
-| `reap evolve --advance` | Advance to the next life cycle stage |
-| `reap evolve --back` | Return to the previous stage (micro loop) |
-| `reap evolve --back [stage]` | Return to a specific stage |
 | `reap status` | Check the current generation's status |
 | `reap update` | Sync commands/templates/hooks to the latest version |
 | `reap fix` | Diagnose and repair the `.reap/` structure |
@@ -137,12 +141,19 @@ REAP integrates with the AI agent through two Claude Code mechanisms:
 
 ### Slash Commands
 
-Slash commands corresponding to each life cycle stage are installed in `.claude/commands/`:
+Slash commands are installed in `.claude/commands/` and drive the entire workflow:
 
-```
-/reap.objective  /reap.planning  /reap.implementation
-/reap.validation /reap.completion /reap.evolve
-```
+| Command | Description |
+|---------|-------------|
+| `/reap.start` | Start a new generation |
+| `/reap.objective` | Define goal + requirements |
+| `/reap.planning` | Task decomposition + implementation plan |
+| `/reap.implementation` | Code implementation with AI + human |
+| `/reap.validation` | Run tests, verify completion criteria |
+| `/reap.completion` | Retrospective + apply Genome changes |
+| `/reap.next` | Advance to the next life cycle stage |
+| `/reap.back` | Return to a previous stage (micro loop) |
+| **`/reap.evolve`** | **Run an entire generation from start to finish (recommended)** |
 
 ### SessionStart Hook
 
@@ -153,6 +164,31 @@ Runs automatically at the start of every session, injecting the following into t
 - Rules to follow the REAP lifecycle
 
 This ensures the agent immediately understands the project context even in a brand-new session.
+
+### REAP Hooks
+
+Projects can define hooks in `.reap/config.yml` to run commands at lifecycle events:
+
+```yaml
+hooks:
+  onGenerationStart:
+    - command: "echo 'Generation started'"
+  onStageTransition:
+    - command: "echo 'Stage changed'"
+  onGenerationComplete:
+    - command: "reap update"
+  onRegression:
+    - command: "echo 'Regressed'"
+```
+
+| Event | Trigger |
+|-------|---------|
+| `onGenerationStart` | After `/reap.start` creates a new generation |
+| `onStageTransition` | After `/reap.next` advances to the next stage |
+| `onGenerationComplete` | After `/reap.next` archives a completed generation |
+| `onRegression` | After `/reap.back` returns to a previous stage |
+
+Hooks are executed by the AI agent in the project root directory.
 
 ## Project Structure After `reap init`
 

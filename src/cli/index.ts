@@ -78,7 +78,7 @@ program
 
 program
   .command("update")
-  .description("Sync slash commands, templates, and domain guide to latest reap-wf version")
+  .description("Sync slash commands, templates, and hooks to the latest version")
   .option("--dry-run", "Show changes without applying them")
   .action(async (options: { dryRun?: boolean }) => {
     try {
