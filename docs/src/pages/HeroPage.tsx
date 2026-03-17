@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import { CodeBlock } from "@/components/CodeBlock";
 import logoPath from "@assets/favicon_1773735683357.png";
 import { AppNavbar } from "@/components/AppNavbar";
+import { Footer } from "@/components/Footer";
 
 function Section({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
@@ -232,6 +233,7 @@ reap init`}</CodeBlock>
           </div>
         </section>
 
+        <Footer />
         </div>
       </main>
     </div>

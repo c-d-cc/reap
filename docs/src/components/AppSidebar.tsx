@@ -1,4 +1,5 @@
 import { Link, useLocation } from "wouter";
+import logoPath from "@assets/favicon_1773735683357.png";
 
 export const navGroups = [
   {
@@ -64,10 +65,31 @@ export function NavList({ onNavigate }: { onNavigate?: () => void }) {
   );
 }
 
+export function SidebarFooter({ expanded }: { expanded?: boolean }) {
+  return (
+    <div className="mt-auto border-t border-border px-3 py-4 flex flex-col items-center gap-1.5">
+      <div className="flex items-center gap-2">
+        {expanded && (
+          <>
+            <img src={logoPath} alt="REAP" className="w-5 h-5" />
+            <span className="text-sm font-semibold text-muted-foreground">REAP</span>
+          </>
+        )}
+        <span className="text-xs text-muted-foreground/50">made by</span>
+        <a href="https://c-d.cc" target="_blank" rel="noreferrer" className="hover:opacity-80 transition-opacity">
+          <img src="/ctod-logo.png" alt="C to D" className="h-5" />
+        </a>
+      </div>
+      <p className="text-xs text-muted-foreground/30 text-center">&copy; {new Date().getFullYear()} C to D.<br />All rights reserved.</p>
+    </div>
+  );
+}
+
 export function AppSidebar() {
   return (
-    <div className="border-r border-border border-l border-l-border/40 bg-sidebar pt-3 overflow-y-auto shrink-0 hidden md:block" style={{ width: "var(--sidebar-width)" }}>
+    <div className="border-r border-border border-l border-l-border/40 bg-sidebar pt-3 overflow-y-auto shrink-0 hidden md:flex md:flex-col" style={{ width: "var(--sidebar-width)" }}>
       <NavList />
+      <SidebarFooter />
     </div>
   );
 }

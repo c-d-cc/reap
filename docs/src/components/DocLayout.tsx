@@ -1,5 +1,5 @@
 import { ReactNode, useState } from "react";
-import { AppSidebar, NavList } from "./AppSidebar";
+import { AppSidebar, NavList, SidebarFooter } from "./AppSidebar";
 import { AppNavbar } from "./AppNavbar";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 
@@ -25,11 +25,12 @@ export function DocLayout({ children }: DocLayoutProps) {
       </div>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-64 bg-sidebar p-0 pt-4">
+        <SheetContent side="left" className="w-64 bg-sidebar p-0 pt-4 flex flex-col">
           <SheetHeader className="sr-only">
             <SheetTitle>Navigation</SheetTitle>
           </SheetHeader>
           <NavList onNavigate={() => setMobileOpen(false)} />
+          <SidebarFooter expanded />
         </SheetContent>
       </Sheet>
     </div>
