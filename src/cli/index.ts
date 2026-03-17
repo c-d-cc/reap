@@ -14,14 +14,29 @@ program
 program
   .command("init")
   .description("Initialize a new REAP project (Genesis)")
-  .argument("<project-name>", "Project name")
+  .argument("[project-name]", "Project name (defaults to current directory name)")
   .option("-m, --mode <mode>", "Entry mode: greenfield, migration, adoption", "greenfield")
   .option("-p, --preset <preset>", "Bootstrap with a genome preset (e.g., bun-hono-react)")
-  .action(async (projectName: string, options: { mode: string; preset?: string }) => {
+  .action(async (projectName: string | undefined, options: { mode: string; preset?: string }) => {
     try {
-      const mode = options.mode as "greenfield" | "migration" | "adoption";
-      await initProject(process.cwd(), projectName, mode, options.preset);
-      console.log(`✓ REAP project "${projectName}" initialized (${mode} mode)`);
+      const cwd = process.cwd();
+      const name = projectName ?? require("path").basename(cwd);
+      let mode = options.mode as "greenfield" | "migration" | "adoption";
+
+      // If no name provided and existing project signals detected, suggest adoption
+      if (!projectName && mode === "greenfield") {
+        const { existsSync } = require("fs");
+        const signals = ["package.json", "go.mod", "Cargo.toml", "pom.xml", "pyproject.toml", "Makefile", "CMakeLists.txt"];
+        const hasExistingProject = signals.some(f => existsSync(require("path").join(cwd, f)));
+        if (hasExistingProject) {
+          console.log(`Existing project detected in current directory.`);
+          console.log(`  Consider using --mode adoption to apply REAP to this codebase.`);
+          console.log(`  Proceeding with greenfield mode. Use -m adoption to change.\n`);
+        }
+      }
+
+      await initProject(cwd, name, mode, options.preset);
+      console.log(`✓ REAP project "${name}" initialized (${mode} mode)`);
       console.log(`  .reap/ directory created with genome, environment, life, lineage`);
       console.log(`\nNext: run '/reap.start' to start your first Generation`);
     } catch (e: any) {
