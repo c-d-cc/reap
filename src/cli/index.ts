@@ -5,6 +5,9 @@ import { updateProject } from "./commands/update";
 import { getStatus } from "./commands/status";
 import { fixProject } from "./commands/fix";
 import { LifeCycle } from "../core/lifecycle";
+import { ReapPaths } from "../core/paths";
+import { readTextFile } from "../core/fs";
+import { join } from "path";
 
 program
   .name("reap")
@@ -120,6 +123,34 @@ program
       console.error(`Error: ${e.message}`);
       process.exit(1);
     }
+  });
+
+program
+  .command("help")
+  .description("Show REAP commands, slash commands, and workflow overview")
+  .action(async () => {
+    // Detect user language from ~/.claude/settings.json
+    let lang = "en";
+    const settingsContent = await readTextFile(ReapPaths.userClaudeSettingsJson);
+    if (settingsContent) {
+      try {
+        const settings = JSON.parse(settingsContent);
+        if (settings.language) {
+          const l = settings.language.toLowerCase();
+          if (l === "korean" || l === "ko") lang = "ko";
+        }
+      } catch { /* ignore */ }
+    }
+
+    // Load language-specific help text
+    const helpDir = join(ReapPaths.packageTemplatesDir, "help");
+    let helpText = await readTextFile(join(helpDir, `${lang}.txt`));
+    if (!helpText) helpText = await readTextFile(join(helpDir, "en.txt"));
+    if (!helpText) {
+      console.log("Help file not found. Run 'reap update' to install templates.");
+      return;
+    }
+    console.log(helpText);
   });
 
 program.parse();
