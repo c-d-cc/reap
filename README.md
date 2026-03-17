@@ -29,11 +29,11 @@ REAP solves these with a **generation-based evolution model**:
 ## Installation
 
 ```bash
-# Bun (recommended)
-bun install -g reap
-
 # npm
 npm install -g reap
+
+# or Bun
+bun install -g reap
 ```
 
 > **Requirements**: [Bun](https://bun.sh) runtime, [Claude Code](https://claude.ai/claude-code) CLI
@@ -195,26 +195,22 @@ Hooks are executed by the AI agent in the project root directory.
 ```
 my-project/
 ├── src/                          # Civilization (your code)
-├── .reap/
-│   ├── config.yml                # Project configuration
-│   ├── genome/                   # Genetic information
-│   │   ├── principles.md
-│   │   ├── domain/
-│   │   ├── conventions.md
-│   │   └── constraints.md
-│   ├── environment/              # External context
-│   ├── life/                     # Current generation
-│   │   ├── current.yml
-│   │   └── backlog/
-│   ├── lineage/                  # Completed generation archive
-│   ├── commands/                 # Slash command sources
-│   ├── templates/                # Artifact templates
-│   └── hooks/                    # SessionStart hook
-│       ├── session-start.sh
-│       └── reap-guide.md
-└── .claude/
-    ├── commands/                 # Claude Code slash commands
-    └── hooks.json                # SessionStart hook registration
+└── .reap/
+    ├── config.yml                # Project configuration
+    ├── genome/                   # Genetic information
+    │   ├── principles.md
+    │   ├── domain/
+    │   ├── conventions.md
+    │   └── constraints.md
+    ├── environment/              # External context
+    ├── life/                     # Current generation
+    │   ├── current.yml
+    │   └── backlog/
+    └── lineage/                  # Completed generation archive
+
+~/.claude/                        # User-level (installed by reap init)
+├── commands/                     # Slash commands (/reap.*)
+└── hooks.json                    # SessionStart hook registration
 ```
 
 ## Lineage Compression
