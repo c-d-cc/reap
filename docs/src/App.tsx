@@ -20,6 +20,8 @@ import CoreConceptsPage from "@/pages/CoreConceptsPage";
 import WorkflowPage from "@/pages/WorkflowPage";
 import CLIPage from "@/pages/CLIPage";
 import AdvancedPage from "@/pages/AdvancedPage";
+import CommandReferencePage from "@/pages/CommandReferencePage";
+import HookReferencePage from "@/pages/HookReferencePage";
 
 const queryClient = new QueryClient();
 
@@ -32,6 +34,8 @@ function Router() {
       <Route path="/docs/core-concepts" component={CoreConceptsPage} />
       <Route path="/docs/workflow" component={WorkflowPage} />
       <Route path="/docs/cli" component={CLIPage} />
+      <Route path="/docs/commands" component={CommandReferencePage} />
+      <Route path="/docs/hooks" component={HookReferencePage} />
       <Route path="/docs/advanced" component={AdvancedPage} />
       <Route component={NotFound} />
     </Switch>

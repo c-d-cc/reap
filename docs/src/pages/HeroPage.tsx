@@ -200,36 +200,7 @@ reap init`}</CodeBlock>
           </div>
         </Section>
 
-        {/* CLI Quick Reference */}
-        <Section title="CLI Quick Reference">
-          <div className="border border-border rounded-md overflow-hidden text-sm mb-4">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-border bg-muted/30">
-                  <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground w-48">Command</th>
-                  <th className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground">Description</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {[
-                  ["reap init [name]", "Initialize a REAP project. Name defaults to current directory"],
-                  ["reap status", "Show project info, active generation, and completed count"],
-                  ["reap update", "Sync commands/templates/hooks to latest version"],
-                  ["reap fix", "Diagnose and repair the .reap/ directory structure"],
-                  ["/reap.evolve", "Run full generation lifecycle (inside Claude Code)"],
-                  ["/reap.start", "Start a new generation without running it"],
-                  ["/reap.next / .back", "Advance to next stage or regress to previous"],
-                  ["/reap.status", "Show current generation state and project health"],
-                ].map(([cmd, desc]) => (
-                  <tr key={cmd}>
-                    <td className="px-3 py-2 font-mono text-xs text-primary">{cmd}</td>
-                    <td className="px-3 py-2 text-xs text-muted-foreground">{desc}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </Section>
+
 
         {/* Docs Links */}
         <section className="px-6 py-8 md:px-8">
@@ -243,6 +214,8 @@ reap init`}</CodeBlock>
                 { href: "/docs/core-concepts", title: "Core Concepts", desc: "Genome, Life Cycle, Backlog & Deferral in depth." },
                 { href: "/docs/workflow", title: "Workflow", desc: "/reap.evolve, stage commands, micro loop, hooks." },
                 { href: "/docs/cli", title: "CLI Reference", desc: "reap init, status, update, fix with all options." },
+                { href: "/docs/commands", title: "Command Reference", desc: "/reap.evolve, stage commands, /reap.status — all slash commands." },
+                { href: "/docs/hooks", title: "Hook Reference", desc: "Lifecycle hooks: command and prompt types, events, SessionStart." },
                 { href: "/docs/advanced", title: "Advanced", desc: "Lineage compression, presets, entry modes, comparisons." },
               ].map((item) => (
                 <Link key={item.href} href={item.href}

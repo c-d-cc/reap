@@ -24,6 +24,8 @@ export const navGroups = [
     label: "Reference",
     items: [
       { title: "CLI Reference", href: "/docs/cli" },
+      { title: "Command Reference", href: "/docs/commands" },
+      { title: "Hook Reference", href: "/docs/hooks" },
       { title: "Advanced", href: "/docs/advanced" },
     ]
   }
