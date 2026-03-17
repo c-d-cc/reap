@@ -1,19 +1,19 @@
 # Implementation Log
 
-## 완료된 태스크
-| Task | 설명 | 완료일 |
-|------|------|--------|
+## Completed Tasks
+| Task | Description | Completed |
+|------|-------------|-----------|
 | | | |
 
-## Deferred 태스크
-| Task | 설명 | 사유 | 관련 Backlog |
-|------|------|------|-------------|
+## Deferred Tasks
+| Task | Description | Reason | Related Backlog |
+|------|-------------|--------|-----------------|
 | | | | |
 
-## Genome-Change Backlog 항목
-| Backlog 파일 | Target | 설명 |
-|-------------|--------|------|
+## Genome-Change Backlog Items
+| Backlog File | Target | Description |
+|-------------|--------|-------------|
 | | | |
 
-## 구현 메모
-[구현 중 특이 사항, 결정 사항, 참고 내용]
+## Implementation Notes
+[Notable items, decisions made, and reference material from implementation]

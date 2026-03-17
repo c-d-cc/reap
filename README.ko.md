@@ -1,0 +1,234 @@
+# REAP
+
+> For English version, see [README.md](README.md).
+
+**Recursive Evolutionary Application Pipeline** — AI와 인간이 세대(Generation)를 거듭하며 소프트웨어를 진화시키는 개발 파이프라인.
+
+```
+Genome (설계와 지식)  →  Evolution (세대를 거친 진화)  →  Civilization (Source Code)
+```
+
+REAP은 Application의 유전 정보(Genome)를 정의하고, 각 세대에서 목표를 설정하여 구현하고, 그 과정에서 발견한 Genome 결함을 다음 단계에서 반영합니다. 세대를 거듭하며 Genome이 진화하고, Source Code(Civilization)가 성장합니다.
+
+## Why REAP?
+
+AI 에이전트와 함께 개발할 때 이런 문제를 겪어본 적 있나요?
+
+- **컨텍스트 유실** — 새 세션을 열면 에이전트가 프로젝트 맥락을 잊어버림
+- **산발적 개발** — 명확한 목표 없이 여기저기 코드를 수정
+- **설계와 코드의 괴리** — 문서는 따로, 코드는 따로 놀면서 점점 벌어짐
+- **교훈의 망각** — 삽질한 경험이 다음 작업에 반영되지 않음
+
+REAP은 **세대 기반 진화 모델**로 이 문제들을 해결합니다:
+
+- 매 세대마다 하나의 목표에 집중 (Objective → Completion)
+- AI 에이전트가 매 세션 시작 시 현재 맥락을 자동으로 인식 (SessionStart Hook)
+- 구현 중 발견한 설계 문제는 backlog에 기록, Completion에서 반영
+- 회고(Completion)에서 도출한 교훈이 Genome에 축적
+
+## 설치
+
+```bash
+# Bun (권장)
+bun install -g reap
+
+# npm
+npm install -g reap
+```
+
+> **요구사항**: [Bun](https://bun.sh) 런타임, [Claude Code](https://claude.ai/claude-code) CLI
+
+## 빠른 시작
+
+```bash
+# 1. 프로젝트 초기화
+cd my-project
+reap init my-project
+
+# 2. 첫 Generation 시작
+reap evolve "사용자 인증 구현"
+
+# 3. Claude Code에서 slash command로 워크플로우 진행
+claude
+> /reap.objective       # 목표 + 명세 정의
+> reap evolve --advance
+> /reap.planning        # 구현 계획
+> ...
+```
+
+## 생애주기 (Life Cycle)
+
+한 세대(Generation)는 5단계의 생애주기를 거칩니다:
+
+```
+Objective → Planning → Implementation ⟷ Validation → Completion
+(목표 정의)   (계획)      (구현)              (검증)      (완성)
+```
+
+| 단계 | 하는 일 | 산출물 |
+|------|---------|--------|
+| **Objective** | 목표 + 요구사항 + 수용기준 정의 | `01-objective.md` |
+| **Planning** | 태스크 분해, 구현 접근법, 의존관계 | `02-planning.md` |
+| **Implementation** | AI+Human 협업으로 코드 구현 | `03-implementation.md` |
+| **Validation** | 테스트 실행, 완료 조건 점검 | `04-validation.md` |
+| **Completion** | 회고 + Genome 변경 반영 + 아카이빙 | `05-completion.md` |
+
+## 핵심 개념
+
+### Genome
+
+Application의 유전 정보 — 아키텍처 원칙, 비즈니스 규칙, 개발 컨벤션, 기술 제약의 집합.
+
+```
+.reap/genome/
+├── principles.md      # 아키텍처 원칙/결정
+├── domain/            # 비즈니스 규칙 (모듈별)
+├── conventions.md     # 개발 규칙/컨벤션
+└── constraints.md     # 기술 제약/선택
+```
+
+**Genome 불변 원칙**: 현재 세대에서는 Genome을 직접 수정하지 않습니다. 문제를 발견하면 backlog에 기록하고, Completion 단계에서만 반영합니다.
+
+**Environment 불변 원칙**: 현재 세대에서는 Environment를 직접 수정하지 않습니다. 외부 환경 변화를 발견하면 backlog에 기록하고, Completion 단계에서 반영합니다.
+
+### Backlog
+
+`.reap/life/backlog/`에 다음에 반영할 모든 항목을 저장합니다. 각 항목은 markdown + frontmatter 형식:
+
+- `type: genome-change` — Completion에서 Genome에 반영
+- `type: environment-change` — Completion에서 Environment에 반영
+- `type: task` — 다음 Objective에서 goal 후보 (deferred 태스크, 기술 부채 등)
+
+**부분 완료는 정상** — Genome 변경에 의존하는 태스크는 `[deferred]`로 마킹하고 다음 세대로 인계합니다.
+
+### 4축 구조
+
+```
+.reap/
+├── genome/        # 유전 정보 (세대를 거치며 진화)
+├── environment/   # 외부 환경 (API 문서, 인프라, 비즈니스 제약)
+├── life/          # 현재 세대의 상태와 산출물
+└── lineage/       # 완료된 세대들의 아카이브
+```
+
+## CLI 명령어
+
+| 명령어 | 설명 |
+|--------|------|
+| `reap init <name>` | 프로젝트 초기화. `.reap/` 구조 생성 |
+| `reap evolve [goal]` | 새 Generation 시작 |
+| `reap evolve --advance` | 다음 Life Cycle stage로 전진 |
+| `reap evolve --back` | 이전 stage로 복귀 (micro loop) |
+| `reap evolve --back [stage]` | 지정한 stage로 복귀 |
+| `reap status` | 현재 Generation 상태 확인 |
+| `reap update` | 커맨드/템플릿/훅을 최신 버전으로 동기화 |
+| `reap fix` | `.reap/` 구조 진단 및 복구 |
+
+### 옵션
+
+```bash
+reap init my-project --mode adoption    # 기존 프로젝트에 REAP 적용
+reap init my-project --preset bun-hono-react  # 프리셋으로 Genome 초기화
+reap update --dry-run                   # 변경사항 미리보기
+```
+
+## Claude Code 연동
+
+REAP은 Claude Code의 두 가지 메커니즘으로 AI 에이전트와 통합됩니다:
+
+### Slash Commands
+
+각 Life Cycle stage에 대응하는 slash command가 `.claude/commands/`에 설치됩니다:
+
+```
+/reap.objective  /reap.planning  /reap.implementation
+/reap.validation /reap.completion /reap.evolve
+```
+
+### SessionStart Hook
+
+매 세션 시작 시 자동으로 실행되어 AI 에이전트에게 다음을 주입합니다:
+
+- REAP 워크플로우 전체 가이드 (Genome, Life Cycle, 4축 구조 등)
+- 현재 Generation 상태 (어떤 stage인지, 다음에 뭘 해야 하는지)
+- REAP lifecycle을 따르라는 규칙
+
+이를 통해 새 세션을 열어도 에이전트가 프로젝트 맥락을 즉시 파악합니다.
+
+## `reap init` 후 프로젝트 구조
+
+```
+my-project/
+├── src/                          # Civilization (소스 코드)
+├── .reap/
+│   ├── config.yml                # 프로젝트 설정
+│   ├── genome/                   # 유전 정보
+│   │   ├── principles.md
+│   │   ├── domain/
+│   │   ├── conventions.md
+│   │   └── constraints.md
+│   ├── environment/              # 외부 환경
+│   ├── life/                     # 현재 세대
+│   │   ├── current.yml
+│   │   └── backlog/
+│   ├── lineage/                  # 완료된 세대 아카이브
+│   ├── commands/                 # Slash command 원본
+│   ├── templates/                # 산출물 템플릿
+│   └── hooks/                    # SessionStart hook
+│       ├── session-start.sh
+│       └── reap-guide.md
+└── .claude/
+    ├── commands/                 # Claude Code slash commands
+    └── hooks.json                # SessionStart hook 등록
+```
+
+## 계보 압축 (Lineage Compression)
+
+세대가 쌓이면 lineage 디렉토리가 커집니다. REAP은 자동 2단계 압축으로 이를 관리합니다:
+
+| 레벨 | 입력 | 출력 | 최대 줄 수 | 트리거 |
+|------|------|------|-----------|--------|
+| **Level 1** | 세대 폴더 (5개 산출물) | `gen-XXX.md` | 40줄 | lineage > 10,000줄 + 5세대 이상 |
+| **Level 2** | Level 1 파일 5개 | `epoch-XXX.md` | 60줄 | Level 1이 5개 이상 |
+
+압축은 세대 완료 시 자동 실행됩니다. 압축된 파일은 목표(Objective)와 결과(Completion)를 중심으로 보존하고, 중간 과정은 특이사항만 남깁니다.
+
+## 진화 흐름 (Evolution Flow)
+
+```
+Generation #1 (Genome v1)
+  → Objective: "사용자 인증 구현"
+  → Planning → Implementation
+  → Implementation 중 OAuth2 필요 발견 → backlog에 genome-change 기록
+  → Validation (partial)
+  → Completion → 회고 + genome 반영 → Genome v2 → 아카이빙
+
+Generation #2 (Genome v2)
+  → Objective: "OAuth2 연동 + 권한 관리"
+  → 이전 세대의 deferred 태스크 + 새 목표
+  → ...
+```
+
+## 프리셋 (Presets)
+
+`reap init --preset`으로 기술 스택에 맞는 Genome 초기 설정을 적용할 수 있습니다.
+
+| 프리셋 | 스택 |
+|--------|------|
+| `bun-hono-react` | Bun + Hono + React |
+
+```bash
+reap init my-project --preset bun-hono-react
+```
+
+## 진입 모드 (Entry Modes)
+
+| 모드 | 설명 |
+|------|------|
+| `greenfield` | 새 프로젝트를 처음부터 구축 (기본값) |
+| `migration` | 기존 시스템을 참조하여 새로 구축 |
+| `adoption` | 기존 코드베이스에 REAP을 적용 |
+
+## 라이선스
+
+MIT

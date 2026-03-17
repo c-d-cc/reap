@@ -1,32 +1,32 @@
 # Objective
 
-## 목표
-[이번 세대에서 달성할 목표를 구체적으로 기술]
+## Goal
+[Describe the specific goal to achieve in this generation]
 
-## 완료 조건
-- [ ] [검증 가능한 완료 조건 1]
-- [ ] [검증 가능한 완료 조건 2]
-- [ ] [검증 가능한 완료 조건 3]
+## Completion Criteria
+- [ ] [Verifiable completion criterion 1]
+- [ ] [Verifiable completion criterion 2]
+- [ ] [Verifiable completion criterion 3]
 
-## 요구사항
+## Requirements
 
-### 기능 요구사항
-- **FR-001**: [구체적 기능 요구사항]
-- **FR-002**: [구체적 기능 요구사항]
+### Functional Requirements
+- **FR-001**: [Specific functional requirement]
+- **FR-002**: [Specific functional requirement]
 
-### 비기능 요구사항
-- [성능, 보안, 접근성 등]
+### Non-Functional Requirements
+- [Performance, security, accessibility, etc.]
 
-## 범위
-- **관련 Genome 영역**: [principles.md / domain/xxx.md / conventions.md / constraints.md]
-- **예상 변경 범위**: [어떤 부분이 영향을 받는지]
-- **제외 사항**: [이번 세대에서 하지 않을 것]
+## Scope
+- **Related Genome Areas**: [principles.md / domain/xxx.md / conventions.md / constraints.md]
+- **Expected Change Scope**: [Which parts will be affected]
+- **Exclusions**: [What will not be done in this generation]
 
-## Genome 참조
-[이 objective를 만들기 위해 참조한 genome 내용 요약]
+## Genome Reference
+[Summary of genome content referenced to define this objective]
 
-## Backlog (발견된 genome 수정 필요 사항)
-[Objective 정의 중 발견한 genome 수정 필요 사항. 없으면 "없음"]
+## Backlog (Genome Modifications Discovered)
+[Genome modifications needed that were discovered during Objective definition. "None" if empty]
 
-## 배경
-[이 목표를 설정한 배경. backlog, 이전 세대, 환경 변화 등 참조]
+## Background
+[Context for setting this goal. References to backlog, previous generations, environment changes, etc.]

@@ -2,43 +2,43 @@
 
 ## Retrospective
 
-### 교훈
-#### 잘된 점
-- [이번 세대에서 잘 된 점]
+### Lessons Learned
+#### What Went Well
+- [What went well in this generation]
 
-#### 개선할 점
-- [다음 세대에서 개선할 점]
+#### Areas for Improvement
+- [What to improve in the next generation]
 
-### Genome 변경 제안
-| 대상 파일 | 변경 내용 | 사유 |
-|-----------|-----------|------|
-| [genome/xxx.md] | [어떻게 변경할지] | [왜 변경해야 하는지] |
+### Genome Change Proposals
+| Target File | Change Description | Reason |
+|-------------|-------------------|--------|
+| [genome/xxx.md] | [What to change] | [Why it should be changed] |
 
-### Deferred 태스크 인계
-| Task | 설명 | 관련 Backlog | Backlog 파일 |
-|------|------|-------------|-------------|
+### Deferred Task Handoff
+| Task | Description | Related Backlog | Backlog File |
+|------|-------------|-----------------|-------------|
 | | | | |
 
-### 다음 세대 Backlog
-[`.reap/life/backlog/`에 추가한 목표 후보 목록]
+### Next Generation Backlog
+[List of goal candidates added to `.reap/life/backlog/`]
 
 ---
 
 ## Genome Changelog
 
-### Genome-Change Backlog 반영
-| Backlog 파일 | Target | 변경 내용 | 반영 여부 |
-|-------------|--------|-----------|-----------|
+### Genome-Change Backlog Applied
+| Backlog File | Target | Change Description | Applied |
+|-------------|--------|-------------------|---------|
 | | | | |
 
-### Retrospective 제안 반영
-| 대상 파일 | 변경 내용 | 반영 여부 |
-|-----------|-----------|-----------|
+### Retrospective Proposals Applied
+| Target File | Change Description | Applied |
+|-------------|-------------------|---------|
 | | | |
 
 ### Genome Version
 - Before: v[N]
 - After: v[N+1]
 
-### 변경된 Genome 파일
-- [수정된 파일 목록]
+### Modified Genome Files
+- [List of modified files]

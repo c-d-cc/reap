@@ -1,113 +1,113 @@
 # REAP Guide
 
-## REAP이란
+## What is REAP
 
-REAP(Recursive Evolutionary Application Pipeline)은 AI와 인간이 협업하여, 세대(Generation)를 거듭하며 Application을 점진적으로 진화시키는 Development Pipeline이다.
+REAP (Recursive Evolutionary Application Pipeline) is a development pipeline where AI and humans collaborate to incrementally evolve an Application across successive Generations.
 
-## 3 레이어 모델
+## 3-Layer Model
 
 ```
-Genome (유전 정보)  →  Evolution (세대를 거친 진화)  →  Civilization (Source Code)
-  설계와 지식            생애주기, 변이, 적응             축적된 산출물
+Genome (Genetic Information)  →  Evolution (Cross-generational Evolution)  →  Civilization (Source Code)
+  Design and knowledge             Life cycle, mutation, adaptation              Accumulated artifacts
 ```
 
-- **Genome** — Application을 만들기 위한 설계와 지식. `.reap/genome/`에 저장.
-- **Evolution** — Generation의 반복을 통해 Genome이 진화하고 Civilization이 성장하는 과정.
-- **Civilization** — Source Code. `.reap/` 외부의 프로젝트 코드 전체.
+- **Genome** — Design and knowledge for building the Application. Stored in `.reap/genome/`.
+- **Evolution** — The process by which Genome evolves and Civilization grows through repeated Generations.
+- **Civilization** — Source Code. The entire project codebase outside `.reap/`.
 
-## Genome 구조
+## Genome Structure
 
 ```
 .reap/genome/
-├── principles.md      # 아키텍처 원칙/결정 (ADR 스타일)
-├── domain/            # 비즈니스 규칙 (모듈별 분리)
-├── conventions.md     # 개발 규칙/컨벤션 + Enforced Rules
-└── constraints.md     # 기술 제약/선택 + Validation Commands
+├── principles.md      # Architecture principles/decisions (ADR style)
+├── domain/            # Business rules (separated by module)
+├── conventions.md     # Development rules/conventions + Enforced Rules
+└── constraints.md     # Technical constraints/choices + Validation Commands
 ```
 
-**Genome 불변 원칙**: 현재 세대는 Genome을 직접 수정하지 않는다. Implementation 중 발견한 문제는 backlog에 `type: genome-change`로 기록하고, Completion 단계에서만 Genome에 반영한다.
+**Genome Immutability Principle**: The current generation does not modify Genome directly. Issues discovered during Implementation are recorded in the backlog as `type: genome-change` and applied to Genome only during the Completion stage.
 
-**Environment 불변 원칙**: 현재 세대는 Environment를 직접 수정하지 않는다. 세대 진행 중 외부 환경 변화를 발견하면 backlog에 `type: environment-change`로 기록하고, Completion 단계에서 반영한다.
+**Environment Immutability Principle**: The current generation does not modify Environment directly. External environment changes discovered during a generation are recorded in the backlog as `type: environment-change` and applied during the Completion stage.
 
-## .reap/ 4축 구조
+## .reap/ 4-Axis Structure
 
-| 축 | 경로 | 역할 |
-|----|------|------|
-| **Genome** | `.reap/genome/` | 유전 정보. 원칙, 규칙, 결정의 집합 |
-| **Environment** | `.reap/environment/` | 외부 환경. API 문서, 인프라 정보, 비즈니스 제약 |
-| **Life** | `.reap/life/` | 현재 세대의 생애주기. 진행 상태와 산출물 |
-| **Lineage** | `.reap/lineage/` | 족보. 완료된 세대들의 아카이브 |
+| Axis | Path | Role |
+|------|------|------|
+| **Genome** | `.reap/genome/` | Genetic information. Collection of principles, rules, and decisions |
+| **Environment** | `.reap/environment/` | External environment. API docs, infrastructure info, business constraints |
+| **Life** | `.reap/life/` | Current generation's life cycle. Progress state and artifacts |
+| **Lineage** | `.reap/lineage/` | Genealogy. Archive of completed generations |
 
-## Life Cycle (한 세대의 생애)
+## Life Cycle (A Single Generation's Lifespan)
 
 ```
 Objective → Planning → Implementation ⟷ Validation → Completion
 ```
 
-| Stage | 한국어 | 하는 일 | 산출물 |
-|-------|--------|---------|--------|
-| **Objective** | 목표 정의 | 이번 세대의 goal + 요구사항 정의. environment, backlog, genome 참조 | `01-objective.md` |
-| **Planning** | 계획 수립 | 태스크 분해, 의존관계, 구현 접근법 | `02-planning.md` |
-| **Implementation** | 구현 | AI+Human 협업으로 코드 구현. genome 결함 발견 시 backlog 기록 | `03-implementation.md` |
-| **Validation** | 검증 | 테스트 실행, 완료 조건 점검. 실패 시 Implementation으로 복귀 가능 | `04-validation.md` |
-| **Completion** | 완성 | 회고 + backlog 리뷰 + genome 변경 반영 + 아카이빙 | `05-completion.md` |
+| Stage | Description | What it does | Artifact |
+|-------|-------------|--------------|----------|
+| **Objective** | Goal definition | Define this generation's goal + requirements. Reference environment, backlog, genome | `01-objective.md` |
+| **Planning** | Plan formulation | Task decomposition, dependencies, implementation approach | `02-planning.md` |
+| **Implementation** | Implementation | AI+Human collaboration to write code. Record genome defects in backlog when found | `03-implementation.md` |
+| **Validation** | Verification | Run tests, check completion criteria. Can regress to Implementation on failure | `04-validation.md` |
+| **Completion** | Finalization | Retrospective + backlog review + apply genome changes + archiving | `05-completion.md` |
 
-## 핵심 개념
+## Key Concepts
 
 ### Generation
-한 세대. 하나의 목표를 가지고 Life Cycle을 거친다. `life/current.yml`에 상태가 추적된다.
+A single generation. Carries one goal through the Life Cycle. State is tracked in `life/current.yml`.
 
 ### Backlog
-`.reap/life/backlog/`에 다음 세대에 반영할 모든 항목을 저장한다. 각 항목은 markdown + frontmatter 형식:
-- `type: genome-change` — Completion에서 genome에 반영 (세대 중 발견한 genome 결함)
-- `type: environment-change` — Completion에서 environment에 반영 (세대 중 발견한 외부 환경 변화)
-- `type: task` — 다음 Objective에서 goal 후보로 참조 (deferred 태스크, 기술 부채 등)
+All items to be carried forward to the next generation are stored in `.reap/life/backlog/`. Each item uses markdown + frontmatter format:
+- `type: genome-change` — Applied to genome during Completion (genome defects discovered mid-generation)
+- `type: environment-change` — Applied to environment during Completion (external environment changes discovered mid-generation)
+- `type: task` — Referenced as goal candidates in the next Objective (deferred tasks, tech debt, etc.)
 
 ### Task Deferral
-Genome 변경에 의존하는 태스크는 현재 세대에서 완료할 수 없다. `[deferred]`로 마킹하고 backlog에 `type: task`로 추가한다. 부분 완료는 정상이다.
+Tasks that depend on Genome changes cannot be completed in the current generation. Mark as `[deferred]` and add to backlog as `type: task`. Partial completion is normal.
 
-### Micro Loop (이전 stage 회귀)
-어떤 stage에서든 이전 stage로 돌아갈 수 있다. `reap evolve --back`으로 바로 이전 stage로, `reap evolve --back [stage]`로 특정 stage로 회귀.
+### Micro Loop (Regression to a Previous Stage)
+Any stage can regress to a previous stage. Use `reap evolve --back` to go back one stage, or `reap evolve --back [stage]` to regress to a specific stage.
 
-산출물 처리 규칙:
-- **대상 stage 이전**: 보존
-- **대상 stage**: 덮어쓰기 (implementation만 append)
-- **대상 stage 이후**: 보존, 재진입 시 덮어쓰기
+Artifact handling rules:
+- **Before target stage**: Preserved
+- **Target stage**: Overwritten (implementation only appends)
+- **After target stage**: Preserved, overwritten upon re-entry
 
-회귀 사유는 대상 stage 산출물에 `## Regression` 섹션으로 기록한다.
+Regression reason is recorded as a `## Regression` section in the target stage's artifact.
 
 ### Minor Fix
-사소한 문제(오타, lint 에러 등)는 stage 전환 없이 현재 stage에서 직접 수정하고 산출물에 기록한다. 판단 기준: 설계 변경 없이 5분 이내에 해결 가능한 문제.
+Trivial issues (typos, lint errors, etc.) are fixed directly in the current stage without a stage transition and recorded in the artifact. Judgment criterion: resolvable within 5 minutes without design changes.
 
 ### Lineage Compression
-세대가 쌓이면 lineage가 커진다. 총 10,000줄 초과 + 5세대 이상이면 자동 압축:
-- **Level 1**: 세대 폴더 → 단일 .md (40줄). 목표+결과+특이사항만 보존.
-- **Level 2**: Level 1 5개 → epoch .md (60줄). 핵심 흐름만 보존.
+As generations accumulate, lineage grows. Auto-compression triggers when total exceeds 10,000 lines + 5 or more generations:
+- **Level 1**: Generation folder → single .md (40 lines). Only goal + result + notable items preserved.
+- **Level 2**: 5 Level 1 entries → epoch .md (60 lines). Only key flow preserved.
 
-압축은 `reap evolve --advance` (completion 후 아카이빙) 시 자동 실행.
+Compression runs automatically during `reap evolve --advance` (archiving after completion).
 
-## 역할 분리
+## Role Separation
 
-| 구성 요소 | 역할 |
+| Component | Role |
 |-----------|------|
-| **CLI (`reap`)** | 상태 추적기. stage 전환, generation 관리 |
-| **AI Agent** | 워크플로우 실행기. slash command를 통해 각 stage 작업 수행 |
-| **Human** | 의사결정자. goal 설정, spec 확정, 코드 리뷰, stage 전환 승인 |
+| **CLI (`reap`)** | State tracker. Stage transitions, generation management |
+| **AI Agent** | Workflow executor. Performs each stage's work via slash commands |
+| **Human** | Decision maker. Sets goals, finalizes specs, reviews code, approves stage transitions |
 
-## 실행 흐름
+## Execution Flow
 
 ```
-1. /reap.evolve → 새 Generation 시작
-2. /reap.objective → goal + 요구사항 정의
+1. /reap.evolve → Start a new Generation
+2. /reap.objective → Define goal + requirements
 3. reap evolve --advance
-4. /reap.planning → 태스크 분해 + 구현 계획
+4. /reap.planning → Task decomposition + implementation plan
 5. reap evolve --advance
-6. /reap.implementation → 코드 구현
+6. /reap.implementation → Code implementation
 7. reap evolve --advance
-8. /reap.validation → 검증
+8. /reap.validation → Verification
 9. reap evolve --advance
-10. /reap.completion → 회고 + genome 반영
-11. reap evolve --advance → 아카이빙, 세대 종료
+10. /reap.completion → Retrospective + genome updates
+11. reap evolve --advance → Archiving, generation ends
 ```
 
-각 slash command는 Gate(전제조건 확인) → Steps(작업 실행) → 산출물 생성의 3단 구조를 따른다.
+Each slash command follows a 3-step structure: Gate (precondition check) → Steps (work execution) → Artifact generation.
