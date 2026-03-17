@@ -24,19 +24,46 @@ if [ -f "$GUIDE_FILE" ]; then
   reap_guide=$(cat "$GUIDE_FILE")
 fi
 
-# Read Genome files
+# Read Genome files with tiered loading
+# L1 (~500 lines max): principles.md, conventions.md, constraints.md — always full load
+# L2 (~200 lines max): domain/*.md — full load if within budget, otherwise title+summary only
+L1_LIMIT=500
+L2_LIMIT=200
+
 genome_content=""
+l1_lines=0
 if [ -d "$GENOME_DIR" ]; then
   for f in "$GENOME_DIR"/principles.md "$GENOME_DIR"/conventions.md "$GENOME_DIR"/constraints.md; do
     if [ -f "$f" ]; then
-      genome_content="${genome_content}\n### $(basename "$f")\n$(cat "$f")\n"
+      file_content=$(cat "$f")
+      file_lines=$(echo "$file_content" | wc -l | tr -d ' ')
+      l1_lines=$((l1_lines + file_lines))
+      if [ "$l1_lines" -le "$L1_LIMIT" ]; then
+        genome_content="${genome_content}\n### $(basename "$f")\n${file_content}\n"
+      else
+        # L1 budget exceeded — include truncated with warning
+        genome_content="${genome_content}\n### $(basename "$f") [TRUNCATED — L1 budget exceeded, read full file directly]\n$(echo "$file_content" | head -20)\n...\n"
+      fi
     fi
   done
-  # Read domain/ files
+
+  # L2: domain/ files
   if [ -d "$GENOME_DIR/domain" ]; then
+    l2_lines=0
+    l2_overflow=false
     for f in "$GENOME_DIR"/domain/*.md; do
       if [ -f "$f" ]; then
-        genome_content="${genome_content}\n### domain/$(basename "$f")\n$(cat "$f")\n"
+        file_content=$(cat "$f")
+        file_lines=$(echo "$file_content" | wc -l | tr -d ' ')
+        l2_lines=$((l2_lines + file_lines))
+        if [ "$l2_overflow" = false ] && [ "$l2_lines" -le "$L2_LIMIT" ]; then
+          genome_content="${genome_content}\n### domain/$(basename "$f")\n${file_content}\n"
+        else
+          # L2 budget exceeded — title + first line only
+          l2_overflow=true
+          first_line=$(echo "$file_content" | grep -m1 "^>" || echo "$file_content" | head -1)
+          genome_content="${genome_content}\n### domain/$(basename "$f") [summary — read full file for details]\n${first_line}\n"
+        fi
       fi
     done
   fi
