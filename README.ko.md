@@ -11,9 +11,15 @@
 
 > For English version, see [README.md](README.md).
 
-```
-Genome (설계와 지식)  →  Evolution (세대를 거친 진화)  →  Civilization (Source Code)
-```
+<table align="center">
+<tr>
+<td align="center"><strong>Genome</strong><br><sub>설계와 지식</sub></td>
+<td align="center">→</td>
+<td align="center"><strong>Evolution</strong><br><sub>세대를 거친 진화</sub></td>
+<td align="center">→</td>
+<td align="center"><strong>Civilization</strong><br><sub>Source Code</sub></td>
+</tr>
+</table>
 
 REAP은 Application의 유전 정보(Genome)를 정의하고, 각 세대에서 목표를 설정하여 구현하고, 그 과정에서 발견한 Genome 결함을 다음 단계에서 반영합니다. 세대를 거듭하며 Genome이 진화하고, Source Code(Civilization)가 성장합니다.
 

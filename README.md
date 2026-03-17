@@ -11,9 +11,15 @@
 
 > 한국어 버전은 [README.ko.md](README.ko.md)를 참조하세요.
 
-```
-Genome (Design & Knowledge)  →  Evolution (Generational Progress)  →  Civilization (Source Code)
-```
+<table align="center">
+<tr>
+<td align="center"><strong>Genome</strong><br><sub>Design & Knowledge</sub></td>
+<td align="center">→</td>
+<td align="center"><strong>Evolution</strong><br><sub>Generational Progress</sub></td>
+<td align="center">→</td>
+<td align="center"><strong>Civilization</strong><br><sub>Source Code</sub></td>
+</tr>
+</table>
 
 REAP defines an application's genetic information (Genome), sets objectives for each generation to implement, and feeds back any Genome defects discovered along the way into subsequent stages. As generations accumulate, the Genome evolves and the Source Code (Civilization) grows.
 
