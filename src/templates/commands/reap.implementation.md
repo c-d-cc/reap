@@ -89,7 +89,7 @@ In the following situations, **STOP and ask the human**:
 - When the scope turns out to be significantly larger than expected
 
 ## Artifact Generation (Progressive Recording)
-- **Immediately upon entering this stage**: Read `.reap/templates/03-implementation.md` and create `.reap/life/03-implementation.md` with empty tables ready to fill (or preserve existing content on re-entry)
+- **Immediately upon entering this stage**: Read `~/.reap/templates/03-implementation.md` and create `.reap/life/03-implementation.md` with empty tables ready to fill (or preserve existing content on re-entry)
 - **Update continuously during Step 2**: After each task, deferral, or discovery, update the artifact immediately
 - By the time all tasks are done, the artifact should already be complete — no separate "generation" step is needed
 - Add Implementation Notes at the end summarizing notable decisions

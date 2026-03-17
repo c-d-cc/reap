@@ -73,7 +73,7 @@ Before saving the artifact, verify:
 - [ ] Is the Phase classification logical?
 
 ## Artifact Generation (Progressive Recording)
-- **Immediately upon entering this stage**: Read `.reap/templates/02-planning.md` and create `.reap/life/02-planning.md` with the Summary section filled in
+- **Immediately upon entering this stage**: Read `~/.reap/templates/02-planning.md` and create `.reap/life/02-planning.md` with the Summary section filled in
 - **Update incrementally**: As each step progresses, update the artifact in place:
   - After Genome Reference → update Technical Context section
   - After Develop Implementation Plan → update Summary with architecture decisions

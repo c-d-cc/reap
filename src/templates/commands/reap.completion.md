@@ -62,7 +62,7 @@ Do NOT finalize Genome changes without running Validation Commands.
 12. Apply genome-change items to the corresponding files in `.reap/genome/`:
     - **Map principle**: Each genome file should be **~100 lines or less**
     - If exceeding 100 lines, extract into files under `domain/`
-    - **When writing domain/ files, follow the guide in `domain/README.md`**
+    - **When writing domain/ files, follow the guide in `~/.reap/templates/domain-guide.md`**
 13. Apply environment-change items to the corresponding files in `.reap/environment/`
 14. **Verify**: Run the Validation Commands from constraints.md to confirm genome changes do not conflict with existing code
 15. **Human confirmation**: Show the modified genome/environment content to the human and get approval
@@ -80,7 +80,7 @@ Before saving the artifact, verify:
 ✅ Good lesson: "SSE streaming responses are difficult to unit test, so prioritize integration tests"
 
 ## Artifact Generation (Progressive Recording)
-- **Immediately upon entering this stage**: Read `.reap/templates/05-completion.md` and create `.reap/life/05-completion.md` with empty sections ready to fill
+- **Immediately upon entering this stage**: Read `~/.reap/templates/05-completion.md` and create `.reap/life/05-completion.md` with empty sections ready to fill
 - **Update incrementally as each phase completes**:
   - After Phase 1 (Retrospective) → fill in Lessons Learned, Genome Change Proposals
   - After Phase 2 (Garbage Collection) → update with any tech debt findings

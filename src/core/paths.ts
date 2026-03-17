@@ -39,6 +39,10 @@ export class ReapPaths {
   static get userClaudeCommands(): string { return join(ReapPaths.userClaudeDir, "commands"); }
   static get userClaudeHooksJson(): string { return join(ReapPaths.userClaudeDir, "hooks.json"); }
 
+  // User-level REAP templates
+  static get userReapDir(): string { return join(homedir(), ".reap"); }
+  static get userReapTemplates(): string { return join(ReapPaths.userReapDir, "templates"); }
+
   // Package-internal template paths
   static get packageTemplatesDir(): string { return join(import.meta.dir, "../templates"); }
   static get packageCommandsDir(): string { return join(ReapPaths.packageTemplatesDir, "commands"); }

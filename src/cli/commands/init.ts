@@ -60,10 +60,17 @@ export async function initProject(
     await Bun.write(dest, await Bun.file(src).text());
   }
 
-  // Copy domain README
-  const domainReadmeSrc = join(ReapPaths.packageGenomeDir, "domain/README.md");
-  const domainReadmeDest = join(paths.domain, "README.md");
-  await Bun.write(domainReadmeDest, await Bun.file(domainReadmeSrc).text());
+  // Install artifact templates + domain guide to user-level ~/.reap/templates/
+  await mkdir(ReapPaths.userReapTemplates, { recursive: true });
+  const artifactFiles = ["01-objective.md", "02-planning.md", "03-implementation.md", "04-validation.md", "05-completion.md"];
+  for (const file of artifactFiles) {
+    const src = join(ReapPaths.packageArtifactsDir, file);
+    const dest = join(ReapPaths.userReapTemplates, file);
+    await Bun.write(dest, await Bun.file(src).text());
+  }
+  const domainGuideSrc = join(ReapPaths.packageGenomeDir, "domain/README.md");
+  const domainGuideDest = join(ReapPaths.userReapTemplates, "domain-guide.md");
+  await Bun.write(domainGuideDest, await Bun.file(domainGuideSrc).text());
 
   // Install slash commands to user-level ~/.claude/commands/
   await mkdir(ReapPaths.userClaudeCommands, { recursive: true });

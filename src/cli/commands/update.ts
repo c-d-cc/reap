@@ -48,16 +48,28 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     }
   } catch { /* dir may not exist */ }
 
-  // 2. Sync domain guide (.reap/genome/domain/README.md)
-  const domainReadmeSrc = join(ReapPaths.packageGenomeDir, "domain/README.md");
-  const domainReadmeDest = join(paths.domain, "README.md");
-  const domainSrc = await Bun.file(domainReadmeSrc).text();
-  const domainExisting = Bun.file(domainReadmeDest);
-  if (await domainExisting.exists() && await domainExisting.text() === domainSrc) {
-    result.skipped.push(`.reap/genome/domain/README.md`);
+  // 2. Sync artifact templates + domain guide to ~/.reap/templates/
+  await mkdir(ReapPaths.userReapTemplates, { recursive: true });
+  const artifactFiles = ["01-objective.md", "02-planning.md", "03-implementation.md", "04-validation.md", "05-completion.md"];
+  for (const file of artifactFiles) {
+    const src = await Bun.file(join(ReapPaths.packageArtifactsDir, file)).text();
+    const dest = join(ReapPaths.userReapTemplates, file);
+    const existing = Bun.file(dest);
+    if (await existing.exists() && await existing.text() === src) {
+      result.skipped.push(`~/.reap/templates/${file}`);
+    } else {
+      if (!dryRun) await Bun.write(dest, src);
+      result.updated.push(`~/.reap/templates/${file}`);
+    }
+  }
+  const domainGuideSrc = await Bun.file(join(ReapPaths.packageGenomeDir, "domain/README.md")).text();
+  const domainGuideDest = join(ReapPaths.userReapTemplates, "domain-guide.md");
+  const domainExisting = Bun.file(domainGuideDest);
+  if (await domainExisting.exists() && await domainExisting.text() === domainGuideSrc) {
+    result.skipped.push(`~/.reap/templates/domain-guide.md`);
   } else {
-    if (!dryRun) await Bun.write(domainReadmeDest, domainSrc);
-    result.updated.push(`.reap/genome/domain/README.md`);
+    if (!dryRun) await Bun.write(domainGuideDest, domainGuideSrc);
+    result.updated.push(`~/.reap/templates/domain-guide.md`);
   }
 
   // 3. Sync hook registration in user-level ~/.claude/hooks.json

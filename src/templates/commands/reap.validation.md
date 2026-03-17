@@ -71,7 +71,7 @@ Do NOT make claims without evidence. This is non-negotiable.
 - "I haven't tried the build but lint passed" → Run the build too.
 
 ## Artifact Generation (Progressive Recording)
-- **Immediately upon entering this stage**: Read `.reap/templates/04-validation.md` and create `.reap/life/04-validation.md` with `result: pending`
+- **Immediately upon entering this stage**: Read `~/.reap/templates/04-validation.md` and create `.reap/life/04-validation.md` with `result: pending`
 - **Update incrementally during validation**:
   - After EACH validation command execution → immediately record the result in Test Results
   - After EACH completion criterion check → immediately record pass/fail/deferred in the Completion Criteria Check table

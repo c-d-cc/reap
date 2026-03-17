@@ -151,7 +151,7 @@ Before saving the artifact, verify:
 ✅ Good completion criterion: "`npm run lint` reports 0 errors, `npm run build` succeeds"
 
 ## Artifact Generation (Progressive Recording)
-- **Immediately upon entering this stage**: Read `.reap/templates/01-objective.md` and create `.reap/life/01-objective.md` with the Goal section filled in (from `current.yml` goal)
+- **Immediately upon entering this stage**: Read `~/.reap/templates/01-objective.md` and create `.reap/life/01-objective.md` with the Goal section filled in (from `current.yml` goal)
 - **Update incrementally**: As each step progresses, update the artifact in place:
   - After Environment Scan → update Background section
   - After Previous Generation Reference → update Background section
