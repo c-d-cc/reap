@@ -81,6 +81,16 @@ if command -v git &>/dev/null && [ -d "$PROJECT_ROOT/.git" ]; then
   fi
 fi
 
+# Read strict mode from config.yml
+strict_mode=false
+CONFIG_FILE="${REAP_DIR}/config.yml"
+if [ -f "$CONFIG_FILE" ]; then
+  strict_val=$(grep "^strict:" "$CONFIG_FILE" 2>/dev/null | sed 's/^strict: *//' | tr -d ' ' || true)
+  if [ "$strict_val" = "true" ]; then
+    strict_mode=true
+  fi
+fi
+
 # Read current.yml
 gen_stage="none"
 if [ ! -f "$CURRENT_YML" ]; then
@@ -119,13 +129,25 @@ escape_for_json() {
   printf '%s' "$s"
 }
 
+# Build strict mode section
+strict_section=""
+if [ "$strict_mode" = true ]; then
+  if [ "$gen_stage" = "implementation" ]; then
+    strict_section="\n\n## Strict Mode (ACTIVE — SCOPED MODIFICATION ALLOWED)\n<HARD-GATE>\nStrict mode is enabled. Code modification is ALLOWED only within the scope of the current Generation's plan.\n- You MUST read \`.reap/life/02-planning.md\` before writing any code.\n- You may ONLY modify files and modules listed in the plan's task list.\n- Changes outside the plan's scope are BLOCKED. If you discover out-of-scope work is needed, add it to the backlog instead of implementing it.\n- If the user explicitly requests to bypass strict mode (e.g., \"override\", \"bypass strict\"), you may proceed — but inform them that strict mode is being bypassed.\n</HARD-GATE>"
+  elif [ "$gen_stage" = "none" ]; then
+    strict_section="\n\n## Strict Mode (ACTIVE — CODE MODIFICATION BLOCKED)\n<HARD-GATE>\nStrict mode is enabled and there is NO active Generation.\nYou MUST NOT write, edit, or create any source code files.\nAllowed actions: reading files, analyzing code, answering questions, running commands.\nTo start coding, the user must first run \`/reap.start\` and advance to the implementation stage.\nIf the user explicitly requests to bypass strict mode (e.g., \"override\", \"bypass strict\", \"just do it\"), you may proceed — but inform them that strict mode is being bypassed.\n</HARD-GATE>"
+  else
+    strict_section="\n\n## Strict Mode (ACTIVE — CODE MODIFICATION BLOCKED)\n<HARD-GATE>\nStrict mode is enabled. Current stage is '${gen_stage}', which is NOT the implementation stage.\nYou MUST NOT write, edit, or create any source code files.\nAllowed actions: reading files, analyzing code, answering questions, running commands, writing REAP artifacts.\nAdvance to the implementation stage via the REAP lifecycle to unlock code modification.\nIf the user explicitly requests to bypass strict mode (e.g., \"override\", \"bypass strict\", \"just do it\"), you may proceed — but inform them that strict mode is being bypassed.\n</HARD-GATE>"
+  fi
+fi
+
 # Build staleness section
 stale_section=""
 if [ -n "$genome_stale_warning" ]; then
   stale_section="\n\n## Genome Staleness\n${genome_stale_warning}\nIf the user wants to proceed without syncing, ask: \"The Genome may be stale. Would you like to run /reap.sync now, or do it later?\" and respect their choice."
 fi
 
-reap_context="<REAP_WORKFLOW>\n${reap_guide}\n\n---\n\n## Genome (Project Knowledge — treat as authoritative source of truth)\n${genome_content}\n\n---\n\n## Current State\n${generation_context}${stale_section}\n\n## Rules\n1. ALL development work MUST follow the REAP lifecycle. Do NOT bypass it.\n2. Before writing any code, check if a Generation is active and what stage it is in.\n3. If a Generation is active, use \`${next_cmd}\` to proceed with the current stage.\n4. If no Generation is active, use \`/reap.start\` to start a new one.\n5. Do NOT implement features, fix bugs, or make changes outside of the REAP lifecycle unless the user explicitly asks to bypass it.\n6. When the user says \"reap evolve\", \"next stage\", \"proceed\", or similar — invoke the appropriate REAP skill.\n7. **Genome is the authoritative knowledge source.** When making decisions about architecture, conventions, or constraints, ALWAYS reference the Genome first. If code contradicts Genome, flag it as a potential genome-change backlog item.\n8. If you notice the Genome is outdated or missing information relevant to your current task, inform the user and suggest running \`/reap.sync\`.\n</REAP_WORKFLOW>"
+reap_context="<REAP_WORKFLOW>\n${reap_guide}\n\n---\n\n## Genome (Project Knowledge — treat as authoritative source of truth)\n${genome_content}\n\n---\n\n## Current State\n${generation_context}${stale_section}${strict_section}\n\n## Rules\n1. ALL development work MUST follow the REAP lifecycle. Do NOT bypass it.\n2. Before writing any code, check if a Generation is active and what stage it is in.\n3. If a Generation is active, use \`${next_cmd}\` to proceed with the current stage.\n4. If no Generation is active, use \`/reap.start\` to start a new one.\n5. Do NOT implement features, fix bugs, or make changes outside of the REAP lifecycle unless the user explicitly asks to bypass it.\n6. When the user says \"reap evolve\", \"next stage\", \"proceed\", or similar — invoke the appropriate REAP skill.\n7. **Genome is the authoritative knowledge source.** When making decisions about architecture, conventions, or constraints, ALWAYS reference the Genome first. If code contradicts Genome, flag it as a potential genome-change backlog item.\n8. If you notice the Genome is outdated or missing information relevant to your current task, inform the user and suggest running \`/reap.sync\`.\n</REAP_WORKFLOW>"
 
 escaped_context=$(escape_for_json "$reap_context")
 

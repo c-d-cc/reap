@@ -166,6 +166,19 @@ All REAP artifacts and user interactions MUST follow the user's configured langu
 - **Genome files**: Write in the user's configured language. When modifying genome during Completion, use the user's language.
 - **If no language is configured**: Default to English.
 
+## Strict Mode
+
+When `strict: true` is set in `.reap/config.yml`, the AI agent enforces code modification restrictions:
+
+| Condition | Code Modification | Allowed Actions |
+|-----------|------------------|-----------------|
+| No active Generation | **BLOCKED** | Read, analyze, answer questions |
+| Active Generation, not implementation stage | **BLOCKED** | Read, analyze, answer questions, write REAP artifacts |
+| Active Generation, implementation stage | **SCOPED** — only files/modules listed in 02-planning.md | Full development within plan scope |
+
+- **Escape hatch**: If the user explicitly requests to bypass strict mode (e.g., "override", "bypass strict", "just do it"), the agent may proceed but must inform the user that strict mode is being bypassed.
+- **Default**: `strict: false` (no restrictions beyond normal REAP workflow guidance).
+
 ## Critical Rules
 
 1. **NEVER modify `current.yml` directly.** Stage transitions MUST go through `/reap.next` (forward) or `/reap.back` (regression). Direct modification bypasses artifact creation and breaks the lifecycle.
