@@ -1,6 +1,7 @@
 version: 0.1.0
 project: reap
 entryMode: greenfield
+strict: true
 hooks:
   onGenerationComplete:
     - command: "~/.bun/bin/bun run src/cli/index.ts -- update"

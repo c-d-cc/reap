@@ -186,6 +186,23 @@ Runs automatically at the start of every session, injecting the following into t
 
 This ensures the agent immediately understands the project context even in a brand-new session.
 
+### Strict Mode
+
+When `strict: true` is set in `.reap/config.yml`, the AI agent is restricted from modifying code outside the REAP workflow:
+
+```yaml
+# .reap/config.yml
+strict: true   # default: false
+```
+
+| Context | Behavior |
+|---------|----------|
+| No active generation / non-implementation stage | Code modifications are fully blocked |
+| Implementation stage | Only modifications within the scope of `02-planning.md` are allowed |
+| Escape hatch | User explicitly requests "override" or "bypass strict" to allow modifications |
+
+Strict mode is disabled by default (`strict: false`).
+
 ### REAP Hooks
 
 Projects can define hooks in `.reap/config.yml` to run commands or AI prompts at lifecycle events:
