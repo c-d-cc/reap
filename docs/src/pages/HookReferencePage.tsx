@@ -55,35 +55,6 @@ export default function HookReferencePage() {
           </table>
         </div>
 
-        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">Strict Mode</h2>
-        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
-          When <code className="text-xs bg-muted px-1 rounded">strict: true</code> is set in <code className="text-xs bg-muted px-1 rounded">.reap/config.yml</code>, the AI agent is restricted from modifying code outside the REAP workflow. Defaults to <code className="text-xs bg-muted px-1 rounded">false</code>.
-        </p>
-        <CodeBlock language="yaml">{`# .reap/config.yml
-strict: true   # default: false`}</CodeBlock>
-        <div className="mt-3 border border-border rounded-md overflow-hidden text-sm mb-6">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">Context</th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">Behavior</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {[
-                ["No active generation / non-implementation stage", "Code modifications are fully blocked"],
-                ["Implementation stage", "Only modifications within the scope of 02-planning.md are allowed"],
-                ["Escape hatch", 'User explicitly requests "override" or "bypass strict" to allow modifications'],
-              ].map(([ctx, behavior]) => (
-                <tr key={ctx}>
-                  <td className="px-4 py-2 text-xs text-muted-foreground">{ctx}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground">{behavior}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-
         <h2 className="text-base font-semibold text-foreground mb-3 mt-6">Configuration</h2>
         <CodeBlock language="yaml">{`# .reap/config.yml
 hooks:
