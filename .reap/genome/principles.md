@@ -1,43 +1,43 @@
 # Architecture Principles
 
-> **Writing Principle**: This file should be a **map** within ~100 lines.
-> Write at a level where agents can act immediately.
-> Separate detailed content into `domain/` sub-files.
-> Modified only during the Completion stage.
+> **작성 원칙**: 이 파일은 ~100줄 이내의 **맵(map)**이어야 한다.
+> 에이전트가 즉시 행동할 수 있는 수준으로 작성하라.
+> 상세 내용은 `domain/` 하위 파일로 분리하라.
+> Completion 단계에서만 수정된다.
 
 ## Core Beliefs
 
-- **Genome is a living record** — Not an empty template, but a map that agents can reference immediately
-- **Map not Manual** — ~100-line short entry point, details separated into domain/
-- **domain/ is the detail of business rules** — Separated by domain unit not code structure, records policies/numbers/state transitions that cannot be read from code
-- **Mechanical enforcement first** — Prioritize rules enforceable by lint/test over document-based rules
-- **Generation-based evolution** — All changes are tracked through the generation lifecycle
-- **Dog-fooding** — REAP itself is managed by the REAP workflow
+- **Genome은 살아있는 기록이다** — 빈 템플릿이 아니라 에이전트가 즉시 참조할 수 있는 맵
+- **Map not Manual** — ~100줄 짧은 진입점, 상세는 domain/으로 분리
+- **domain/은 비즈니스 규칙의 상세** — 코드 구조가 아닌 도메인 단위 분리, 코드에서 읽을 수 없는 정책·수치·상태 전이 기록
+- **기계적 강제 우선** — 문서 규칙보다 lint/test로 강제할 수 있는 규칙을 우선
+- **세대 단위 진화** — 모든 변경은 세대 라이프사이클을 통해 추적된다
+- **자기 참조(dog-fooding)** — REAP 자체가 REAP 워크플로우로 관리된다
 
 ## Architecture Decisions
 
-| ID | Decision | Rationale | Date |
-|----|----------|-----------|------|
-| ADR-001 | TypeScript + Node.js compatible | Type safety, Bun for dev/test, deployment as Node.js bundle | 2026-03 |
-| ADR-002 | Commander.js CLI | Mature CLI framework, subcommand support | 2026-03 |
-| ADR-003 | YAML for config/state | Human-readable and easy for agents to parse | 2026-03 |
-| ADR-004 | Slash commands = ~/.claude/commands/ installation | Claude Code native integration, user-level management | 2026-03 |
-| ADR-005 | 4-axis structure (genome/environment/life/lineage) | Separation of concerns: principles/environment/execution/history | 2026-03 |
-| ADR-006 | examples/ for real-world validation | Dog-fooding: validate user experience in the same repo | 2026-03 |
-| ADR-007 | 5-stage lifecycle (objective~completion) | Simplified from 8 stages, keeping only core stages | 2026-03 |
-| ADR-008 | User-level templates (~/.reap/templates/) | Remove package path dependency, AI agents reference a fixed path | 2026-03 |
-| ADR-009 | Node.js compatible build | Bun API to fs/promises replacement, bundle for npm publish | 2026-03 |
-| ADR-010 | npm scoped package (@c-d-cc/reap) | 'reap' name occupied, deploy as scoped | 2026-03 |
+| ID | 결정 | 사유 | 날짜 |
+|----|------|------|------|
+| ADR-001 | TypeScript + Node.js 호환 | 타입 안전성, Bun은 개발/테스트용, 배포는 Node.js 번들 | 2026-03 |
+| ADR-002 | Commander.js CLI | 성숙한 CLI 프레임워크, 서브커맨드 지원 | 2026-03 |
+| ADR-003 | YAML for config/state | 사람이 읽기 쉽고 에이전트가 파싱하기 쉬움 | 2026-03 |
+| ADR-004 | 슬래시 커맨드 = ~/.claude/commands/ 설치 | Claude Code 네이티브 연동, user-level 관리 | 2026-03 |
+| ADR-005 | 4축 구조 (genome/environment/life/lineage) | 관심사 분리: 원칙/환경/실행/이력 | 2026-03 |
+| ADR-006 | examples/로 실전 검증 | dog-fooding: 같은 repo에서 사용자 경험 검증 가능 | 2026-03 |
+| ADR-007 | 5단계 lifecycle (objective~completion) | 8단계에서 간소화, 핵심 단계만 유지 | 2026-03 |
+| ADR-008 | user-level 템플릿 (~/.reap/templates/) | 패키지 경로 의존 제거, AI 에이전트가 확정 경로 참조 | 2026-03 |
+| ADR-009 | Node.js 호환 빌드 | Bun API→fs/promises 교체, npm publish용 번들 | 2026-03 |
+| ADR-010 | npm scoped package (@c-d-cc/reap) | 'reap' 이름 점유, scoped로 배포 | 2026-03 |
 
 ## Layer Map
 
 ```
 src/
-├── cli/commands/  → CLI entry points (init, status, update, fix)
-├── core/          → Business logic (generation, lifecycle, compression, hooks, fs, paths, config)
-├── templates/     → Source files copied/installed during init (genome, commands, artifacts, hooks, presets)
-└── types/         → Shared type definitions
+├── cli/commands/  → CLI 진입점 (init, status, update, fix)
+├── core/          → 비즈니스 로직 (generation, lifecycle, compression, hooks, fs, paths, config)
+├── templates/     → init 시 복사/설치되는 원본 (genome, commands, artifacts, hooks, presets)
+└── types/         → 공유 타입 정의
 ```
 
-- `cli/` → `core/` → `types/` (unidirectional dependency)
-- `templates/` is read-only at runtime (no code dependency)
+- `cli/` → `core/` → `types/` (단방향 의존)
+- `templates/`는 런타임에 읽기만 함 (코드 의존 없음)

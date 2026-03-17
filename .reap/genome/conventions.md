@@ -1,45 +1,51 @@
 # Development Conventions
 
-> **Writing Principle**: This file should be a **map** within ~100 lines.
-> Write rules to be mechanically verifiable wherever possible.
-> Modified only during the Completion stage.
+> **작성 원칙**: 이 파일은 ~100줄 이내의 **맵(map)**이어야 한다.
+> 규칙은 가능한 한 기계적으로 검증 가능하게 작성하라.
+> Completion 단계에서만 수정된다.
 
 ## Code Style
 
-- Use TypeScript strict mode
-- Functions should have single responsibility, recommended under 50 lines
-- Use `async/await` (no callbacks/then chains)
-- Errors are thrown to the caller, caught at the CLI top level
-- File I/O uses `src/core/fs.ts` utilities (readTextFile, writeTextFile, fileExists)
+- TypeScript strict mode 사용
+- 함수는 단일 책임, 50줄 이하 권장
+- `async/await` 사용 (콜백/then 체인 금지)
+- 에러는 호출자에게 throw, CLI 최상위에서 catch
+- 파일 I/O는 `src/core/fs.ts` 유틸 사용 (readTextFile, writeTextFile, fileExists)
 
 ## Naming Conventions
 
-- File names: `kebab-case.ts`
-- Classes/Interfaces: `PascalCase`
-- Functions/Variables: `camelCase`
-- Constants: `UPPER_SNAKE_CASE`
-- Test files: `tests/` mirror structure, `*.test.ts`
+- 파일명: `kebab-case.ts`
+- 클래스/인터페이스: `PascalCase`
+- 함수/변수: `camelCase`
+- 상수: `UPPER_SNAKE_CASE`
+- 테스트 파일: `tests/` 미러 구조, `*.test.ts`
 
 ## Git Conventions
 
-- Commit messages: `type: description` (feat, fix, test, chore, docs)
-- One commit = one logical change
-- Prefer commits that include tests
-- **Commit timing**: Commit code + artifact together upon Generation completion (1 generation = 1 commit). Commit message: `feat/fix/chore(gen-NNN): [goal]`
+- 커밋 메시지: `type: description` (feat, fix, test, chore, docs)
+- 한 커밋 = 한 논리적 변경
+- 테스트 포함 커밋 우선
+- **커밋 타이밍**: Generation 완료 시 코드+artifact를 함께 커밋 (1 generation = 1 commit). 커밋 메시지: `feat/fix/chore(gen-NNN): [goal]`
 
 ## Template Conventions
 
-- Genome templates: `src/templates/genome/` — copied to `.reap/genome/` during init (project-owned)
-- Slash commands: `src/templates/commands/` — installed to `~/.claude/commands/` during init/update (user-level)
-- Artifact templates: `src/templates/artifacts/` — installed to `~/.reap/templates/` during init/update (user-level)
-- Domain guide: `src/templates/genome/domain/README.md` — installed to `~/.reap/templates/domain-guide.md` during init/update
-- Hook scripts: `src/templates/hooks/` — executed directly from within the package, registered in `~/.claude/settings.json`
-- **When adding new templates, always sync COMMAND_NAMES and installation logic in `init.ts`**
+- Genome 템플릿: `src/templates/genome/` — init 시 `.reap/genome/`으로 복사 (프로젝트 소유)
+- 슬래시 커맨드: `src/templates/commands/` — init/update 시 `~/.claude/commands/`에 설치 (user-level)
+- 산출물 템플릿: `src/templates/artifacts/` — init/update 시 `~/.reap/templates/`에 설치 (user-level)
+- Domain 가이드: `src/templates/genome/domain/README.md` — init/update 시 `~/.reap/templates/domain-guide.md`에 설치
+- Hook 스크립트: `src/templates/hooks/` — 패키지 내부에서 직접 실행, `~/.claude/settings.json`에 등록
+- **새 템플릿 추가 시 반드시 `init.ts`의 COMMAND_NAMES 및 설치 로직도 동기화하라**
+
+## Language
+
+- 산출물(artifact), backlog, 사용자 인터랙션: 유저의 language 설정을 따름
+- Genome 파일: 유저의 language 설정을 따름
+- 소스 템플릿(`src/templates/`): 영어 유지 (범용)
 
 ## Enforced Rules
 
-| Rule | Verification Tool | Command |
-|------|-------------------|---------|
-| All tests pass | bun test | `bun test` |
-| TypeScript compilation | tsc | `bunx tsc --noEmit` |
-| Node.js build | bun build | `bun build src/cli/index.ts --outfile dist/cli.js --target node` |
+| 규칙 | 검증 도구 | 명령어 |
+|------|-----------|--------|
+| 전체 테스트 통과 | bun test | `bun test` |
+| TypeScript 컴파일 | tsc | `bunx tsc --noEmit` |
+| Node.js 빌드 | bun build | `bun build src/cli/index.ts --outfile dist/cli.js --target node` |
