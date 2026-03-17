@@ -4,7 +4,7 @@ import tailwindcss from "@tailwindcss/vite";
 import path from "path";
 
 export default defineConfig({
-  base: process.env.GITHUB_PAGES ? "/reap/" : "/",
+  base: "/",
   plugins: [
     react(),
     tailwindcss(),
