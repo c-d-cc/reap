@@ -156,6 +156,16 @@ Hooks are executed by the AI agent.
 
 Each slash command follows a 3-step structure: Gate (precondition check) → Steps (work execution) → Artifact generation.
 
+## Language
+
+All REAP artifacts and user interactions MUST follow the user's configured language setting (from `~/.claude/settings.json` `language` field or the system prompt's language instruction).
+
+- **Artifacts** (01-objective.md through 05-completion.md): Write in the user's language. Template section headings (Goal, Completion Criteria, etc.) may remain in English, but all content/descriptions must be in the user's language.
+- **User interactions**: Communicate with the user in their configured language — questions, status updates, confirmations, error messages.
+- **Backlog items**: Write in the user's language.
+- **Genome files**: Follow the existing language of the genome. If the genome is in English, write in English. If mixed, follow the dominant language.
+- **If no language is configured**: Default to English.
+
 ## Critical Rules
 
 1. **NEVER modify `current.yml` directly.** Stage transitions MUST go through `/reap.next` (forward) or `/reap.back` (regression). Direct modification bypasses artifact creation and breaks the lifecycle.

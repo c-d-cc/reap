@@ -71,6 +71,7 @@ Do NOT make claims without evidence. This is non-negotiable.
 - "I haven't tried the build but lint passed" → Run the build too.
 
 ## Artifact Generation (Progressive Recording)
+- **Language**: Write all artifact content in the user's configured language (see REAP Guide § Language).
 - **Immediately upon entering this stage**: Read `~/.reap/templates/04-validation.md` and create `.reap/life/04-validation.md` with `result: pending`
 - **Update incrementally during validation**:
   - After EACH validation command execution → immediately record the result in Test Results

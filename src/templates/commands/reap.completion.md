@@ -82,6 +82,7 @@ Before saving the artifact, verify:
 ✅ Good lesson: "SSE streaming responses are difficult to unit test, so prioritize integration tests"
 
 ## Artifact Generation (Progressive Recording)
+- **Language**: Write all artifact content in the user's configured language (see REAP Guide § Language).
 - **Immediately upon entering this stage**: Read `~/.reap/templates/05-completion.md` and create `.reap/life/05-completion.md` with empty sections ready to fill
 - **Update incrementally as each phase completes**:
   - After Phase 1 (Retrospective) → fill in Lessons Learned, Genome Change Proposals
