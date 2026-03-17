@@ -39,6 +39,13 @@
 | 타입체크 | `bunx tsc --noEmit` | TypeScript 컴파일 검증 |
 | 빌드 | `npm run build` | Node.js 호환 번들 + templates 복사 |
 
+## Release Pipeline
+
+- **CI**: GitHub Actions (`.github/workflows/release.yml`)
+- **트리거**: `v*` tag push
+- **Secret**: `NPM_TOKEN` (GitHub repo secret)
+- **버전 주입**: `scripts/build.js` — `package.json` 버전을 `--define`으로 번들에 주입. 소스에 버전 하드코딩 금지
+
 ## External Dependencies
 
 - 없음 (순수 로컬 CLI 도구)

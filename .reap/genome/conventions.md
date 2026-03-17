@@ -27,6 +27,13 @@
 - 테스트 포함 커밋 우선
 - **커밋 타이밍**: Generation 완료 시 코드+artifact를 함께 커밋 (1 generation = 1 commit). 커밋 메시지: `feat/fix/chore(gen-NNN): [goal]`
 
+## Release Conventions
+
+- **릴리스 파이프라인**: GitHub Actions (`release.yml`) — tag push 시 자동 실행
+- **릴리스 흐름**: `npm version patch/minor/major` → `git push && git push --tags`
+- **자동화 단계**: 테스트 → 빌드 → 버전 검증 (tag = package.json) → npm publish → GitHub Release 생성
+- **버전 주입**: `scripts/build.js`가 `package.json` 버전을 빌드 시 `--define`으로 주입 — 소스에 버전 하드코딩 금지
+
 ## Template Conventions
 
 - Genome 템플릿: `src/templates/genome/` — init 시 `.reap/genome/`으로 복사 (프로젝트 소유)
@@ -48,4 +55,4 @@
 |------|-----------|--------|
 | 전체 테스트 통과 | bun test | `bun test` |
 | TypeScript 컴파일 | tsc | `bunx tsc --noEmit` |
-| Node.js 빌드 | bun build | `bun build src/cli/index.ts --outfile dist/cli.js --target node` |
+| Node.js 빌드 | node scripts/build.js | `npm run build` |
