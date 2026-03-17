@@ -31,8 +31,13 @@ export function HeroPage() {
         <section className="border-b border-border px-6 py-10 md:px-8">
           <div className="max-w-4xl mx-auto">
           <div className="max-w-3xl">
-            <div className="text-xs font-mono text-muted-foreground border border-border rounded px-2 py-0.5 inline-block mb-4">
-              Recursive Evolutionary Autonomous Pipeline
+            <div className="flex items-center gap-2 mb-4">
+              <span className="text-xs font-mono text-muted-foreground border border-border rounded px-2 py-0.5">
+                Recursive Evolutionary Autonomous Pipeline
+              </span>
+              <span className="text-xs font-mono text-primary/80 border border-primary/30 rounded px-2 py-0.5">
+                v0.1.0
+              </span>
             </div>
             <h1 className="text-3xl font-bold text-foreground mb-2 tracking-tight flex items-center gap-3">
               <img src={logoPath} alt="REAP" className="w-8 h-8" />

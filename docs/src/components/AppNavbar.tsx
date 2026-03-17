@@ -17,6 +17,7 @@ export function AppNavbar({ onMenuClick, showGetStarted }: { onMenuClick?: () =>
           <img src={logoPath} alt="REAP Logo" className="w-5 h-5" />
           <span className="font-semibold text-lg tracking-tight text-foreground">REAP</span>
           <span className="text-muted-foreground text-sm font-medium mt-1">docs</span>
+          <span className="text-[10px] font-mono text-muted-foreground/60 bg-muted rounded px-1.5 py-0.5 mt-1">v0.1.0</span>
         </Link>
       </div>
       <div className="flex items-center gap-4">
