@@ -58,8 +58,15 @@ export default function CLIPage() {
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">reap fix</h2>
         <p className="text-sm text-muted-foreground mb-2">Diagnose and repair the <code className="text-xs bg-muted px-1 rounded">.reap/</code> directory structure.</p>
         <CodeBlock language="bash">{`reap fix`}</CodeBlock>
-        <p className="text-xs text-muted-foreground mt-2">
+        <p className="text-xs text-muted-foreground mt-2 mb-6">
           Checks for missing directories, verifies <code className="text-xs bg-muted px-1 rounded">config.yml</code> exists, validates <code className="text-xs bg-muted px-1 rounded">current.yml</code> stage, and recreates missing structure.
+        </p>
+
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">reap help</h2>
+        <p className="text-sm text-muted-foreground mb-2">Print CLI commands, slash commands, and a workflow summary.</p>
+        <CodeBlock language="bash">{`reap help`}</CodeBlock>
+        <p className="text-xs text-muted-foreground mt-2">
+          Reads <code className="text-xs bg-muted px-1 rounded">~/.claude/settings.json</code> to detect the user's language setting and outputs the help text in that language (currently <code className="text-xs bg-muted px-1 rounded">en</code> and <code className="text-xs bg-muted px-1 rounded">ko</code> supported). Falls back to English if the language file is not found.
         </p>
       </DocPage>
     </DocLayout>

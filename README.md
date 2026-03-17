@@ -145,6 +145,7 @@ At archiving time (`/reap.next` from Completion), `consumed` items move to linea
 | `reap status` | Check the current generation's status |
 | `reap update` | Sync commands/templates/hooks to the latest version |
 | `reap fix` | Diagnose and repair the `.reap/` structure |
+| `reap help` | Print CLI commands, slash commands, and workflow summary |
 
 ### Options
 
@@ -174,6 +175,7 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.back` | Return to a previous stage (micro loop) |
 | `/reap.status` | Show current generation state and project health |
 | `/reap.sync` | Synchronize Genome with current source code |
+| `/reap.help` | Contextual AI help based on current state (topic: workflow, commands, strict, genome, backlog) |
 | **`/reap.evolve`** | **Run an entire generation from start to finish (recommended)** |
 
 ### SessionStart Hook

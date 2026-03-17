@@ -11,7 +11,7 @@ export default function CommandReferencePage() {
         </p>
         <div className="border-l-2 border-primary pl-3 py-1 mb-6">
           <p className="text-xs text-muted-foreground leading-relaxed">
-            <strong className="text-foreground">CLI commands</strong> (<code className="bg-muted px-1 rounded">reap ...</code>) run in your terminal. They handle project setup and maintenance — init, status, update, fix. They do not interact with the AI agent.
+            <strong className="text-foreground">CLI commands</strong> (<code className="bg-muted px-1 rounded">reap ...</code>) run in your terminal. They handle project setup and maintenance — init, status, update, fix, help. They do not interact with the AI agent.
           </p>
           <p className="text-xs text-muted-foreground leading-relaxed mt-2">
             <strong className="text-foreground">Slash commands</strong> (<code className="bg-muted px-1 rounded">/reap.*</code>) run inside Claude Code. They drive the development workflow — the AI agent reads the prompt and executes the described task interactively with you.
@@ -44,6 +44,7 @@ export default function CommandReferencePage() {
                 ["/reap.back", "Return to a previous stage (micro loop). Records regression reason in timeline and artifact."],
                 ["/reap.status", "Show current generation state, stage progress, backlog summary, timeline, and genome health."],
                 ["/reap.sync", "Analyze source code and synchronize Genome. Direct update when no active generation; records to backlog otherwise."],
+                ["/reap.help", "Provide contextual help based on current state. Shows what to do next, lists available commands, and explains deeper topics when given a topic argument (workflow, commands, strict, genome, backlog)."],
               ].map(([cmd, desc]) => (
                 <tr key={cmd}>
                   <td className="px-4 py-2 font-mono text-xs text-primary align-top">{cmd}</td>
