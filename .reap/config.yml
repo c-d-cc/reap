@@ -1,3 +1,6 @@
 version: 0.1.0
 project: reap-wf
 entryMode: greenfield
+hooks:
+  onGenerationComplete:
+    - command: "~/.bun/bin/bun run src/cli/index.ts -- update"

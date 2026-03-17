@@ -45,5 +45,8 @@ description: "REAP Back — Return to a previous lifecycle stage"
    - **Affected**: [affected subsequent artifacts]
    ```
 
+### Hook Execution
+7. Read `.reap/config.yml` — if `hooks.onRegression` is defined, execute each command in order
+
 ## Completion
 - "Returned to [stage] stage. Proceed with `/reap.[stage]`."

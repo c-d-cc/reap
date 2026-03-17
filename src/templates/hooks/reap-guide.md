@@ -86,6 +86,31 @@ As generations accumulate, lineage grows. Auto-compression triggers when total e
 
 Compression runs automatically during `/reap.next` (archiving after completion).
 
+## REAP Hooks
+
+Projects can define hooks in `.reap/config.yml` to run commands at lifecycle events:
+
+```yaml
+hooks:
+  onGenerationStart:
+    - command: "echo 'Generation started'"
+  onStageTransition:
+    - command: "echo 'Stage changed'"
+  onGenerationComplete:
+    - command: "reap update"
+  onRegression:
+    - command: "echo 'Regressed'"
+```
+
+| Event | Trigger |
+|-------|---------|
+| `onGenerationStart` | After `/reap.start` creates a new generation |
+| `onStageTransition` | After `/reap.next` advances to the next stage |
+| `onGenerationComplete` | After `/reap.next` archives a completed generation (after commit) |
+| `onRegression` | After `/reap.back` returns to a previous stage |
+
+Hooks are executed by the AI agent, not the CLI. Each command runs in the project root directory.
+
 ## Role Separation
 
 | Component | Role |

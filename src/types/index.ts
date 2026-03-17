@@ -28,12 +28,26 @@ export interface GenerationState {
   timeline: TimelineEntry[];
 }
 
+export type ReapHookEvent = "onGenerationStart" | "onStageTransition" | "onGenerationComplete" | "onRegression";
+
+export interface ReapHookCommand {
+  command: string;
+}
+
+export interface ReapHooks {
+  onGenerationStart?: ReapHookCommand[];
+  onStageTransition?: ReapHookCommand[];
+  onGenerationComplete?: ReapHookCommand[];
+  onRegression?: ReapHookCommand[];
+}
+
 export interface ReapConfig {
   version: string;
   project: string;
   stack?: string;
   preset?: string;
   entryMode: "greenfield" | "migration" | "adoption";
+  hooks?: ReapHooks;
 }
 
 export type BacklogItemType = "genome-change" | "environment-change" | "task";

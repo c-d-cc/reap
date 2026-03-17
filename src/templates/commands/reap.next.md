@@ -20,6 +20,9 @@ description: "REAP Next — Advance to the next lifecycle stage"
   ```
 - Immediately create the next stage's artifact file from template (empty, ready to fill)
 
+### Hook Execution (Stage Transition)
+- Read `.reap/config.yml` — if `hooks.onStageTransition` is defined, execute each command in order
+
 ### When Advancing from Completion (Archiving)
 - Add the current timestamp to `completedAt` in `current.yml`
 - Move artifact files (`01-*.md` through `05-*.md`) from `.reap/life/` to `.reap/lineage/[gen-id]-[goal-slug]/`
@@ -33,6 +36,10 @@ description: "REAP Next — Advance to the next lifecycle stage"
   - Use `feat` for feature generations, `fix` for bugfix generations, `chore` for maintenance
   - Include both code and REAP artifacts in the same commit
   - If there are no code changes (REAP-only generation), use `chore(reap): [goal summary]`
+
+### Hook Execution (Generation Complete)
+- Read `.reap/config.yml` — if `hooks.onGenerationComplete` is defined, execute each command in order
+  - Note: hooks run AFTER the commit, so any changes from hooks will be uncommitted
 
 ## Completion
 - If archived: "Generation [id] complete and archived. Run `/reap.start` to begin a new generation."
