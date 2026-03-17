@@ -166,6 +166,7 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.next` | Advance to the next life cycle stage |
 | `/reap.back` | Return to a previous stage (micro loop) |
 | `/reap.status` | Show current generation state and project health |
+| `/reap.sync` | Synchronize Genome with current source code |
 | **`/reap.evolve`** | **Run an entire generation from start to finish (recommended)** |
 
 ### SessionStart Hook

@@ -43,6 +43,7 @@ export default function CommandReferencePage() {
                 ["/reap.next", "Advance to the next lifecycle stage. Creates the next artifact from template. Archives on completion."],
                 ["/reap.back", "Return to a previous stage (micro loop). Records regression reason in timeline and artifact."],
                 ["/reap.status", "Show current generation state, stage progress, backlog summary, timeline, and genome health."],
+                ["/reap.sync", "Analyze source code and synchronize Genome. Direct update when no active generation; records to backlog otherwise."],
               ].map(([cmd, desc]) => (
                 <tr key={cmd}>
                   <td className="px-4 py-2 font-mono text-xs text-primary align-top">{cmd}</td>

@@ -9,7 +9,7 @@ import type { ReapConfig } from "../../types";
 export const COMMAND_NAMES = [
   "reap.objective", "reap.planning", "reap.implementation",
   "reap.validation", "reap.completion", "reap.evolve",
-  "reap.start", "reap.next", "reap.back", "reap.status",
+  "reap.start", "reap.next", "reap.back", "reap.status", "reap.sync",
 ];
 
 export async function initProject(
