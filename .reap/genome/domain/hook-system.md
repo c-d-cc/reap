@@ -42,6 +42,7 @@ hooks:
 
 ## SessionStart Hook (별도)
 
-- Claude Code의 hooks.json에 등록 (REAP project hook과 별도)
+- Claude Code의 `~/.claude/settings.json`의 `hooks.SessionStart`에 등록 (REAP project hook과 별도)
 - 매 세션 시작 시 REAP guide + generation 상태 주입
 - `reap init`/`reap update`가 자동 관리
+- hooks.json에서 settings.json으로 migration: `reap update` 실행 시 자동 수행

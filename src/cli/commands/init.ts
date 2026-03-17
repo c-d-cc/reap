@@ -81,6 +81,6 @@ export async function initProject(
     await writeTextFile(dest, await readTextFileOrThrow(src));
   }
 
-  // Register SessionStart hook in user-level ~/.claude/hooks.json
+  // Register SessionStart hook in user-level ~/.claude/settings.json
   await registerClaudeHook();
 }

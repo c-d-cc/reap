@@ -1,7 +1,7 @@
 import { readdir, unlink, rm, mkdir } from "fs/promises";
 import { join } from "path";
 import { ReapPaths } from "../../core/paths";
-import { syncHookRegistration } from "../../core/hooks";
+import { syncHookRegistration, migrateHooksJsonToSettings } from "../../core/hooks";
 import { readTextFile, readTextFileOrThrow, writeTextFile } from "../../core/fs";
 
 interface UpdateResult {
@@ -73,15 +73,21 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     result.updated.push(`~/.reap/templates/domain-guide.md`);
   }
 
-  // 3. Sync hook registration in user-level ~/.claude/hooks.json
-  const hookReg = await syncHookRegistration(dryRun);
-  if (hookReg.action === "updated") {
-    result.updated.push(`~/.claude/hooks.json`);
-  } else {
-    result.skipped.push(`~/.claude/hooks.json`);
+  // 3. Migrate hooks.json → settings.json (if needed)
+  const migration = await migrateHooksJsonToSettings(dryRun);
+  if (migration.action === "migrated") {
+    result.updated.push(`~/.claude/settings.json (migrated from hooks.json)`);
   }
 
-  // 4. Migration: clean up legacy project-level files
+  // 4. Sync hook registration in user-level ~/.claude/settings.json
+  const hookReg = await syncHookRegistration(dryRun);
+  if (hookReg.action === "updated") {
+    result.updated.push(`~/.claude/settings.json (hooks)`);
+  } else {
+    result.skipped.push(`~/.claude/settings.json (hooks)`);
+  }
+
+  // 5. Migration: clean up legacy project-level files
   await migrateLegacyFiles(paths, dryRun, result);
 
   return result;

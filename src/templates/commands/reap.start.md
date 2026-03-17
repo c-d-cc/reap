@@ -10,6 +10,15 @@ description: "REAP Start — Start a new Generation"
 
 ## Steps
 
+### 0. Backlog Scan
+- Read all files in `.reap/life/backlog/`
+- If backlog items exist:
+  - Present the list with title and priority for each item
+  - Ask: "이 중에서 선택하시겠습니까, 새 목표를 입력하시겠습니까?"
+  - If the human selects a backlog item: use its title/content as the goal
+  - If the human wants a new goal: proceed to Step 1
+- If no backlog items exist: proceed to Step 1
+
 1. Ask the human for the goal of this generation
 2. Count existing generations in `.reap/lineage/` to determine the genomeVersion
 3. Generate the next generation ID (existing count + 1, in `gen-XXX` format)

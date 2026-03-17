@@ -1,5 +1,5 @@
 import { join } from "path";
-import { mkdir } from "fs/promises";
+import { mkdir, unlink } from "fs/promises";
 import { ReapPaths } from "./paths";
 import { readTextFile, writeTextFile } from "./fs";
 
@@ -21,84 +21,92 @@ function getReapHookEntry() {
 }
 
 /**
- * Register REAP's SessionStart hook in user-level ~/.claude/hooks.json
- * Merges with existing hooks if the file already exists
+ * Read and parse settings.json, returning the parsed object.
+ * Returns empty object if file doesn't exist or is corrupted.
+ */
+async function readSettingsJson(): Promise<Record<string, unknown>> {
+  const fileContent = await readTextFile(ReapPaths.userClaudeSettingsJson);
+  if (fileContent === null) return {};
+  try {
+    return JSON.parse(fileContent);
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Write settings.json, preserving formatting.
+ */
+async function writeSettingsJson(settings: Record<string, unknown>): Promise<void> {
+  await mkdir(ReapPaths.userClaudeDir, { recursive: true });
+  await writeTextFile(ReapPaths.userClaudeSettingsJson, JSON.stringify(settings, null, 2) + "\n");
+}
+
+/**
+ * Check if REAP hook exists in a SessionStart hooks array.
+ */
+function hasReapHookInArray(sessionStartHooks: unknown[]): boolean {
+  return sessionStartHooks.some((entry: unknown) => {
+    if (typeof entry !== "object" || entry === null) return false;
+    const hooks = (entry as Record<string, unknown>)["hooks"];
+    if (!Array.isArray(hooks)) return false;
+    return hooks.some((h: unknown) => {
+      if (typeof h !== "object" || h === null) return false;
+      const cmd = (h as Record<string, unknown>)["command"];
+      return typeof cmd === "string" && cmd.includes("session-start");
+    });
+  });
+}
+
+/**
+ * Register REAP's SessionStart hook in user-level ~/.claude/settings.json
+ * Merges with existing settings, preserving all other sections.
  */
 export async function registerClaudeHook(
   dryRun: boolean = false,
 ): Promise<{ action: "created" | "updated" | "skipped" }> {
-  const hooksJsonPath = ReapPaths.userClaudeHooksJson;
   await mkdir(ReapPaths.userClaudeDir, { recursive: true });
 
-  let existing: Record<string, unknown> = {};
+  const settings = await readSettingsJson();
 
-  const fileContent = await readTextFile(hooksJsonPath);
-  if (fileContent !== null) {
-    try {
-      existing = JSON.parse(fileContent);
-    } catch {
-      // Corrupted file, overwrite
-      existing = {};
-    }
-  }
+  // Navigate to settings.hooks.SessionStart
+  const hooks = (settings["hooks"] as Record<string, unknown>) ?? {};
+  const sessionStartHooks = (hooks["SessionStart"] as unknown[]) ?? [];
 
-  // Check if REAP hook is already registered (check for session-start reference)
-  const sessionStartHooks = (existing["SessionStart"] as unknown[]) ?? [];
-  const hasReapHook = Array.isArray(sessionStartHooks) &&
-    sessionStartHooks.some((entry: unknown) => {
-      if (typeof entry !== "object" || entry === null) return false;
-      const hooks = (entry as Record<string, unknown>)["hooks"];
-      if (!Array.isArray(hooks)) return false;
-      return hooks.some((h: unknown) => {
-        if (typeof h !== "object" || h === null) return false;
-        const cmd = (h as Record<string, unknown>)["command"];
-        return typeof cmd === "string" && cmd.includes("session-start");
-      });
-    });
-
-  if (hasReapHook) {
+  if (Array.isArray(sessionStartHooks) && hasReapHookInArray(sessionStartHooks)) {
     return { action: "skipped" };
   }
 
   // Merge: append REAP hook to SessionStart array
-  const merged = {
-    ...existing,
-    SessionStart: [...(Array.isArray(sessionStartHooks) ? sessionStartHooks : []), getReapHookEntry()],
+  const hadHooksSection = "hooks" in settings;
+  settings["hooks"] = {
+    ...hooks,
+    SessionStart: [
+      ...(Array.isArray(sessionStartHooks) ? sessionStartHooks : []),
+      getReapHookEntry(),
+    ],
   };
 
   if (!dryRun) {
-    await writeTextFile(hooksJsonPath, JSON.stringify(merged, null, 2) + "\n");
+    await writeSettingsJson(settings);
   }
 
-  return { action: Object.keys(existing).length === 0 ? "created" : "updated" };
+  return { action: hadHooksSection ? "updated" : "created" };
 }
 
 /**
- * Sync hook registration in user-level ~/.claude/hooks.json
+ * Sync hook registration in user-level ~/.claude/settings.json
  * Updates the command path if it changed (e.g., after package update)
  */
 export async function syncHookRegistration(
   dryRun: boolean = false,
 ): Promise<{ action: "updated" | "skipped" }> {
-  const hooksJsonPath = ReapPaths.userClaudeHooksJson;
+  const settings = await readSettingsJson();
 
-  const fileContent = await readTextFile(hooksJsonPath);
-  if (fileContent === null) {
-    await registerClaudeHook(dryRun);
-    return { action: "updated" };
-  }
+  const hooks = (settings["hooks"] as Record<string, unknown>) ?? {};
+  const sessionStartHooks = (hooks["SessionStart"] as unknown[]) ?? [];
 
-  let existing: Record<string, unknown>;
-  try {
-    existing = JSON.parse(fileContent);
-  } catch {
-    await registerClaudeHook(dryRun);
-    return { action: "updated" };
-  }
-
-  // Find and update existing REAP hook entry with current package path
-  const sessionStartHooks = (existing["SessionStart"] as unknown[]) ?? [];
-  if (!Array.isArray(sessionStartHooks)) {
+  if (!Array.isArray(sessionStartHooks) || !hasReapHookInArray(sessionStartHooks)) {
     await registerClaudeHook(dryRun);
     return { action: "updated" };
   }
@@ -108,9 +116,9 @@ export async function syncHookRegistration(
 
   const updated = sessionStartHooks.map((entry: unknown) => {
     if (typeof entry !== "object" || entry === null) return entry;
-    const hooks = (entry as Record<string, unknown>)["hooks"];
-    if (!Array.isArray(hooks)) return entry;
-    const isReap = hooks.some((h: unknown) => {
+    const entryHooks = (entry as Record<string, unknown>)["hooks"];
+    if (!Array.isArray(entryHooks)) return entry;
+    const isReap = entryHooks.some((h: unknown) => {
       if (typeof h !== "object" || h === null) return false;
       const cmd = (h as Record<string, unknown>)["command"];
       return typeof cmd === "string" && cmd.includes("session-start");
@@ -127,9 +135,77 @@ export async function syncHookRegistration(
   });
 
   if (changed && !dryRun) {
-    existing["SessionStart"] = updated;
-    await writeTextFile(hooksJsonPath, JSON.stringify(existing, null, 2) + "\n");
+    settings["hooks"] = { ...hooks, SessionStart: updated };
+    await writeSettingsJson(settings);
   }
 
   return { action: changed ? "updated" : "skipped" };
+}
+
+/**
+ * Migrate REAP hooks from ~/.claude/hooks.json to ~/.claude/settings.json
+ * After migration, removes the REAP entry from hooks.json (or deletes hooks.json if empty).
+ */
+export async function migrateHooksJsonToSettings(
+  dryRun: boolean = false,
+): Promise<{ action: "migrated" | "skipped" }> {
+  const hooksJsonPath = ReapPaths.userClaudeHooksJson;
+  const fileContent = await readTextFile(hooksJsonPath);
+  if (fileContent === null) return { action: "skipped" };
+
+  let hooksJson: Record<string, unknown>;
+  try {
+    hooksJson = JSON.parse(fileContent);
+  } catch {
+    return { action: "skipped" };
+  }
+
+  const sessionStartHooks = hooksJson["SessionStart"];
+  if (!Array.isArray(sessionStartHooks)) return { action: "skipped" };
+
+  // Find REAP hook entries
+  const reapEntries = sessionStartHooks.filter((entry: unknown) => {
+    if (typeof entry !== "object" || entry === null) return false;
+    const hooks = (entry as Record<string, unknown>)["hooks"];
+    if (!Array.isArray(hooks)) return false;
+    return hooks.some((h: unknown) => {
+      if (typeof h !== "object" || h === null) return false;
+      const cmd = (h as Record<string, unknown>)["command"];
+      return typeof cmd === "string" && cmd.includes("session-start");
+    });
+  });
+
+  if (reapEntries.length === 0) return { action: "skipped" };
+
+  if (!dryRun) {
+    // Ensure REAP hook is registered in settings.json
+    await registerClaudeHook(false);
+
+    // Remove REAP entries from hooks.json
+    const filtered = sessionStartHooks.filter((entry: unknown) => {
+      if (typeof entry !== "object" || entry === null) return true;
+      const hooks = (entry as Record<string, unknown>)["hooks"];
+      if (!Array.isArray(hooks)) return true;
+      return !hooks.some((h: unknown) => {
+        if (typeof h !== "object" || h === null) return false;
+        const cmd = (h as Record<string, unknown>)["command"];
+        return typeof cmd === "string" && cmd.includes("session-start");
+      });
+    });
+
+    if (filtered.length === 0) {
+      delete hooksJson["SessionStart"];
+    } else {
+      hooksJson["SessionStart"] = filtered;
+    }
+
+    // If hooks.json is now empty, delete it; otherwise rewrite
+    if (Object.keys(hooksJson).length === 0) {
+      await unlink(hooksJsonPath);
+    } else {
+      await writeTextFile(hooksJsonPath, JSON.stringify(hooksJson, null, 2) + "\n");
+    }
+  }
+
+  return { action: "migrated" };
 }
