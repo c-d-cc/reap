@@ -1,8 +1,15 @@
-# REAP
+<p align="center">
+  <img src="media/logo.png" alt="REAP" width="80" height="80" />
+</p>
+
+<h1 align="center">REAP</h1>
+
+<p align="center">
+  <strong>Recursive Evolutionary Autonomous Pipeline</strong><br>
+  AI와 인간이 세대(Generation)를 거듭하며 소프트웨어를 진화시키는 개발 파이프라인.
+</p>
 
 > For English version, see [README.md](README.md).
-
-**Recursive Evolutionary Autonomous Pipeline** — AI와 인간이 세대(Generation)를 거듭하며 소프트웨어를 진화시키는 개발 파이프라인.
 
 ```
 Genome (설계와 지식)  →  Evolution (세대를 거친 진화)  →  Civilization (Source Code)
@@ -42,8 +49,8 @@ bun install -g reap
 
 ```bash
 # 1. 프로젝트 초기화
-cd my-project
-reap init my-project
+reap init my-project              # 새 프로젝트
+cd my-project && reap init        # 기존 프로젝트 (디렉토리 이름 자동 사용)
 
 # 2. Claude Code에서 한 Generation 전체 실행
 claude
