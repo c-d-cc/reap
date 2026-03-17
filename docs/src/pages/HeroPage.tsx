@@ -49,7 +49,6 @@ export function HeroPage() {
                 className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
                 <Github className="w-4 h-4" />GitHub
               </a>
-              <span className="text-[10px] font-mono text-muted-foreground/60 bg-muted rounded px-1.5 py-0.5">v0.1.0</span>
             </div>
           </div>
           </div>
