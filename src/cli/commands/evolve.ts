@@ -27,7 +27,8 @@ export async function advanceStage(projectRoot: string): Promise<GenerationState
   if (LifeCycle.isComplete(current.stage)) {
     current.completedAt = new Date().toISOString();
     await mgr.save(current);
-    await mgr.complete();
+    const compression = await mgr.complete();
+    (current as any)._compression = compression;
     return current;
   }
 

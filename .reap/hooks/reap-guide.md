@@ -79,6 +79,13 @@ Genome 변경에 의존하는 태스크는 현재 세대에서 완료할 수 없
 ### Minor Fix
 사소한 문제(오타, lint 에러 등)는 stage 전환 없이 현재 stage에서 직접 수정하고 산출물에 기록한다. 판단 기준: 설계 변경 없이 5분 이내에 해결 가능한 문제.
 
+### Lineage Compression
+세대가 쌓이면 lineage가 커진다. 총 10,000줄 초과 + 5세대 이상이면 자동 압축:
+- **Level 1**: 세대 폴더 → 단일 .md (40줄). 목표+결과+특이사항만 보존.
+- **Level 2**: Level 1 5개 → epoch .md (60줄). 핵심 흐름만 보존.
+
+압축은 `reap evolve --advance` (completion 후 아카이빙) 시 자동 실행.
+
 ## 역할 분리
 
 | 구성 요소 | 역할 |

@@ -180,6 +180,17 @@ my-project/
     └── hooks.json                # SessionStart hook 등록
 ```
 
+## Lineage Compression
+
+세대가 쌓이면 lineage 디렉토리가 커집니다. REAP은 자동 2단계 압축으로 이를 관리합니다:
+
+| Level | 입력 | 출력 | 최대 줄 수 | 트리거 |
+|-------|------|------|-----------|--------|
+| **Level 1** | 세대 폴더 (5개 산출물) | `gen-XXX.md` | 40줄 | lineage > 10,000줄 + 5세대 이상 |
+| **Level 2** | Level 1 파일 5개 | `epoch-XXX.md` | 60줄 | Level 1이 5개 이상 |
+
+압축은 세대 완료 시 자동 실행됩니다. 압축된 파일은 목표(Objective)와 결과(Completion)를 중심으로 보존하고, 중간 과정은 특이사항만 남깁니다.
+
 ## Evolution Flow
 
 ```

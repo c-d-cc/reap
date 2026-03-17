@@ -52,6 +52,13 @@ program
         const state = await advanceStage(process.cwd());
         if (state.completedAt) {
           console.log(`✓ Generation ${state.id} completed and archived to lineage`);
+          const compression = (state as any)._compression as { level1: string[]; level2: string[] } | undefined;
+          if (compression?.level1.length) {
+            console.log(`  Compressed (L1): ${compression.level1.join(", ")}`);
+          }
+          if (compression?.level2.length) {
+            console.log(`  Compressed (L2): ${compression.level2.join(", ")}`);
+          }
         } else {
           console.log(`✓ Advanced to ${state.stage} (${LifeCycle.label(state.stage)})`);
         }

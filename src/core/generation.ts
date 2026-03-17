@@ -4,6 +4,7 @@ import { join } from "path";
 import type { GenerationState } from "../types";
 import type { ReapPaths } from "./paths";
 import { LifeCycle } from "./lifecycle";
+import { compressLineageIfNeeded } from "./compression";
 
 export class GenerationManager {
   constructor(private paths: ReapPaths) {}
@@ -45,7 +46,7 @@ export class GenerationManager {
     return state;
   }
 
-  async complete(): Promise<void> {
+  async complete(): Promise<{ level1: string[]; level2: string[] }> {
     const state = await this.current();
     if (!state) throw new Error("No active generation");
     if (state.stage !== "completion") throw new Error("Generation must be in completion stage to complete");
@@ -112,6 +113,10 @@ export class GenerationManager {
 
     // Clear current
     await Bun.write(this.paths.currentYml, "");
+
+    // Compress lineage if needed
+    const compression = await compressLineageIfNeeded(this.paths);
+    return compression;
   }
 
   async save(state: GenerationState): Promise<void> {
