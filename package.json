@@ -1,6 +1,6 @@
 {
   "name": "@c-d-cc/reap",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Recursive Evolutionary Autonomous Pipeline — AI and humans evolve software across generations",
   "type": "module",
   "license": "MIT",
@@ -30,7 +30,7 @@
   },
   "scripts": {
     "dev": "bun run src/cli/index.ts",
-    "build": "bun build src/cli/index.ts --outfile dist/cli.js --target node && rm -rf dist/templates && cp -r src/templates dist/templates",
+    "build": "node scripts/build.js",
     "prepublishOnly": "npm run build",
     "test": "bun test"
   },

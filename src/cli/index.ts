@@ -12,7 +12,7 @@ import { join } from "path";
 program
   .name("reap")
   .description("REAP — Recursive Evolutionary Autonomous Pipeline")
-  .version("0.1.0");
+  .version(process.env.__REAP_VERSION__ || "0.0.0");
 
 program
   .command("init")
