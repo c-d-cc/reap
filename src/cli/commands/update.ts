@@ -1,10 +1,12 @@
-import { readdir } from "fs/promises";
+import { readdir, unlink } from "fs/promises";
 import { join } from "path";
 import { ReapPaths } from "../../core/paths";
+import { syncHookScripts, registerClaudeHook } from "../../core/hooks";
 
 interface UpdateResult {
   updated: string[];
   skipped: string[];
+  removed: string[];
 }
 
 export async function updateProject(projectRoot: string, dryRun: boolean = false): Promise<UpdateResult> {
@@ -14,7 +16,7 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     throw new Error("Not a REAP project. Run 'reap init' first.");
   }
 
-  const result: UpdateResult = { updated: [], skipped: [] };
+  const result: UpdateResult = { updated: [], skipped: [], removed: [] };
   const templateBase = join(import.meta.dir, "../../templates");
 
   // 1. Sync slash commands (.reap/commands/ and .claude/commands/)
@@ -45,6 +47,21 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     }
   }
 
+  // 1b. Cleanup stale commands (files in project but not in templates)
+  const validCommandFiles = new Set(commandFiles);
+  for (const dir of [paths.commands, paths.claudeCommands]) {
+    try {
+      const existing = await readdir(dir);
+      for (const file of existing) {
+        if (!file.startsWith("reap.") || !file.endsWith(".md")) continue;
+        if (!validCommandFiles.has(file)) {
+          if (!dryRun) await unlink(join(dir, file));
+          result.removed.push(`${dir.includes(".claude") ? ".claude" : ".reap"}/commands/${file}`);
+        }
+      }
+    } catch { /* dir may not exist */ }
+  }
+
   // 2. Sync artifact templates (.reap/templates/)
   const artifactsDir = join(templateBase, "artifacts");
   const artifactFiles = await readdir(artifactsDir);
@@ -61,6 +78,19 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     }
   }
 
+  // 2b. Cleanup stale templates
+  const validArtifactFiles = new Set(artifactFiles);
+  try {
+    const existingTemplates = await readdir(paths.templates);
+    for (const file of existingTemplates) {
+      if (!file.endsWith(".md")) continue;
+      if (!validArtifactFiles.has(file)) {
+        if (!dryRun) await unlink(join(paths.templates, file));
+        result.removed.push(`.reap/templates/${file}`);
+      }
+    }
+  } catch { /* dir may not exist */ }
+
   // 3. Sync domain guide (.reap/genome/domain/README.md)
   const domainReadmeSrc = join(templateBase, "genome/domain/README.md");
   const domainReadmeDest = join(paths.domain, "README.md");
@@ -71,6 +101,21 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
   } else {
     if (!dryRun) await Bun.write(domainReadmeDest, domainSrc);
     result.updated.push(`.reap/genome/domain/README.md`);
+  }
+
+  // 4. Sync hook scripts (.reap/hooks/)
+  const hookResult = await syncHookScripts(paths, dryRun);
+  result.updated.push(...hookResult.updated);
+  result.skipped.push(...hookResult.skipped);
+
+  // 5. Ensure .claude/hooks.json has REAP hook registered
+  const hookReg = await registerClaudeHook(paths, dryRun);
+  if (hookReg.action === "created") {
+    result.updated.push(`.claude/hooks.json (created)`);
+  } else if (hookReg.action === "updated") {
+    result.updated.push(`.claude/hooks.json (merged)`);
+  } else {
+    result.skipped.push(`.claude/hooks.json`);
   }
 
   return result;

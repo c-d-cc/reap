@@ -2,17 +2,17 @@ import { mkdir } from "fs/promises";
 import { join } from "path";
 import { ReapPaths } from "../../core/paths";
 import { ConfigManager } from "../../core/config";
+import { installHookScripts, registerClaudeHook } from "../../core/hooks";
 import type { ReapConfig } from "../../types";
 
 export const COMMAND_NAMES = [
-  "reap.conception", "reap.formation", "reap.planning", "reap.growth",
-  "reap.validation", "reap.adaptation", "reap.birth", "reap.evolve",
+  "reap.objective", "reap.planning", "reap.implementation",
+  "reap.validation", "reap.completion", "reap.evolve",
 ];
 
 const ARTIFACT_NAMES = [
-  "01-conception-goal", "02-formation-spec", "03-planning-plan",
-  "04-growth-log", "05-validation-report", "06-adaptation-retrospective",
-  "07-birth-changelog",
+  "01-objective", "02-planning", "03-implementation",
+  "04-validation", "05-completion",
 ];
 
 export async function initProject(
@@ -41,7 +41,6 @@ export async function initProject(
   await mkdir(paths.domain, { recursive: true });
   await mkdir(paths.environment, { recursive: true });
   await mkdir(paths.life, { recursive: true });
-  await mkdir(paths.mutations, { recursive: true });
   await mkdir(paths.backlog, { recursive: true });
   await mkdir(paths.lineage, { recursive: true });
   await mkdir(paths.commands, { recursive: true });
@@ -94,4 +93,8 @@ export async function initProject(
     const dest = join(claudeDir, `${cmd}.md`);
     await Bun.write(dest, await Bun.file(src).text());
   }
+
+  // Install SessionStart hook
+  await installHookScripts(paths);
+  await registerClaudeHook(paths);
 }

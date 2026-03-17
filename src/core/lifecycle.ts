@@ -1,14 +1,11 @@
 import { type LifeCycleStage, LIFECYCLE_ORDER } from "../types";
 
 const LABELS: Record<LifeCycleStage, string> = {
-  conception: "목표 설정",
-  formation: "Define",
-  planning: "Plan",
-  growth: "Build",
-  validation: "Verify",
-  adaptation: "Retrospect",
-  birth: "출산",
-  legacy: "완료",
+  objective: "목표 정의",
+  planning: "계획",
+  implementation: "구현",
+  validation: "검증",
+  completion: "완성",
 };
 
 const STAGES = LIFECYCLE_ORDER;
@@ -21,11 +18,17 @@ export class LifeCycle {
   }
 
   static canTransition(from: LifeCycleStage, to: LifeCycleStage): boolean {
-    // Allow growth <-> validation loop
-    if (from === "validation" && to === "growth") return true;
     const fromIdx = LIFECYCLE_ORDER.indexOf(from);
     const toIdx = LIFECYCLE_ORDER.indexOf(to);
-    return toIdx === fromIdx + 1;
+    // Forward: only to next adjacent stage
+    // Backward: to any previous stage (micro loop)
+    return toIdx === fromIdx + 1 || toIdx < fromIdx;
+  }
+
+  static prev(stage: LifeCycleStage): LifeCycleStage | null {
+    const idx = LIFECYCLE_ORDER.indexOf(stage);
+    if (idx <= 0) return null;
+    return LIFECYCLE_ORDER[idx - 1];
   }
 
   static label(stage: LifeCycleStage): string {
@@ -33,7 +36,7 @@ export class LifeCycle {
   }
 
   static isComplete(stage: LifeCycleStage): boolean {
-    return stage === "legacy";
+    return stage === "completion";
   }
 
   static isValid(stage: string): boolean {

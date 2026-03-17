@@ -1,17 +1,22 @@
 export type LifeCycleStage =
-  | "conception"
-  | "formation"
+  | "objective"
   | "planning"
-  | "growth"
+  | "implementation"
   | "validation"
-  | "adaptation"
-  | "birth"
-  | "legacy";
+  | "completion";
 
 export const LIFECYCLE_ORDER: readonly LifeCycleStage[] = [
-  "conception", "formation", "planning", "growth",
-  "validation", "adaptation", "birth", "legacy",
+  "objective", "planning", "implementation",
+  "validation", "completion",
 ] as const;
+
+export interface TimelineEntry {
+  stage: LifeCycleStage;
+  at: string;
+  from?: LifeCycleStage;   // regression only
+  reason?: string;          // regression only
+  refs?: string[];          // regression only: file paths, artifact sections, code locations
+}
 
 export interface GenerationState {
   id: string;
@@ -20,6 +25,7 @@ export interface GenerationState {
   genomeVersion: number;
   startedAt: string;
   completedAt?: string;
+  timeline: TimelineEntry[];
 }
 
 export interface ReapConfig {
@@ -30,14 +36,13 @@ export interface ReapConfig {
   entryMode: "greenfield" | "migration" | "adoption";
 }
 
-export interface MutationRecord {
-  id: string;
-  generationId: string;
-  target: string;
+export type BacklogItemType = "genome-change" | "environment-change" | "task";
+
+export interface BacklogItem {
+  type: BacklogItemType;
+  target?: string;
+  title: string;
   description: string;
-  reason: string;
-  suggestedChange: string;
-  createdAt: string;
 }
 
 export interface AdaptationRecord {

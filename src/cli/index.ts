@@ -36,15 +36,25 @@ program
   .description("Start a new Generation or advance the current Life Cycle stage")
   .argument("[goal]", "Goal for the new Generation")
   .option("--advance", "Advance to the next Life Cycle stage")
-  .option("--back", "Go back to the previous stage (Growth ↔ Validation loop)")
+  .option("--back [stage]", "Go back to a previous stage (defaults to adjacent previous)")
+  .option("--reason <reason>", "Reason for regression (used with --back)")
+  .option("--ref <refs...>", "Reference paths for regression (used with --back)")
   .action(async (goal, options) => {
     try {
-      if (options.back) {
-        const state = await regressStage(process.cwd());
+      if (options.back !== undefined) {
+        const target = typeof options.back === "string" ? options.back : undefined;
+        const regression = (options.reason || options.ref)
+          ? { reason: options.reason ?? "", refs: options.ref }
+          : undefined;
+        const state = await regressStage(process.cwd(), target, regression);
         console.log(`✓ Returned to ${state.stage} (${LifeCycle.label(state.stage)})`);
       } else if (options.advance) {
         const state = await advanceStage(process.cwd());
-        console.log(`✓ Advanced to ${state.stage} (${LifeCycle.label(state.stage)})`);
+        if (state.completedAt) {
+          console.log(`✓ Generation ${state.id} completed and archived to lineage`);
+        } else {
+          console.log(`✓ Advanced to ${state.stage} (${LifeCycle.label(state.stage)})`);
+        }
       } else if (goal) {
         const state = await evolve(process.cwd(), goal);
         console.log(`✓ Generation ${state.id} started`);
@@ -116,11 +126,17 @@ program
       if (options.dryRun) {
         console.log("[dry-run] Changes that would be applied:");
       }
-      if (result.updated.length === 0) {
+      if (result.updated.length === 0 && result.removed.length === 0) {
         console.log("✓ Everything is up to date.");
       } else {
-        console.log(`${options.dryRun ? "Would update" : "Updated"}:`);
-        result.updated.forEach(f => console.log(`  ✓ ${f}`));
+        if (result.updated.length > 0) {
+          console.log(`${options.dryRun ? "Would update" : "Updated"}:`);
+          result.updated.forEach(f => console.log(`  ✓ ${f}`));
+        }
+        if (result.removed.length > 0) {
+          console.log(`${options.dryRun ? "Would remove" : "Removed"}:`);
+          result.removed.forEach(f => console.log(`  ✗ ${f}`));
+        }
       }
       if (result.skipped.length > 0) {
         console.log(`Unchanged: ${result.skipped.length} files`);

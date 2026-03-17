@@ -30,7 +30,6 @@ export async function fixProject(projectRoot: string): Promise<FixResult> {
     { path: paths.environment, name: "environment" },
     { path: paths.life, name: "life" },
     { path: paths.lineage, name: "lineage" },
-    { path: paths.mutations, name: "life/mutations" },
     { path: paths.backlog, name: "life/backlog" },
     { path: paths.commands, name: "commands" },
     { path: paths.templates, name: "templates" },
@@ -62,10 +61,10 @@ export async function fixProject(projectRoot: string): Promise<FixResult> {
         if (!state.id) issues.push("current.yml is missing 'id' field. Manual correction required.");
         if (!state.goal) issues.push("current.yml is missing 'goal' field. Manual correction required.");
 
-        // Ensure mutations dir exists for active generation
-        if (!(await dirExists(paths.mutations))) {
-          await mkdir(paths.mutations, { recursive: true });
-          fixed.push("Recreated missing mutations/ directory for active generation");
+        // Ensure backlog dir exists for active generation
+        if (!(await dirExists(paths.backlog))) {
+          await mkdir(paths.backlog, { recursive: true });
+          fixed.push("Recreated missing backlog/ directory for active generation");
         }
       } catch {
         await Bun.write(paths.currentYml, "");

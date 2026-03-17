@@ -6,11 +6,15 @@ description: "REAP Validation — 테스트와 검증으로 목표 달성을 확
 
 ## Gate (전제조건)
 - `.reap/life/current.yml`을 읽고 stage가 `validation`인지 확인하라
-- `.reap/life/04-growth-log.md`가 존재하는지 확인하라
+- `.reap/life/03-implementation.md`가 존재하는지 확인하라
 - 미충족 시: 사유를 알리고 중단
 
 ## Context (세대 정보)
 - `.reap/life/current.yml`에서 현재 세대 정보를 읽어라 (id, goal, genomeVersion)
+
+## Re-entry 확인
+- `.reap/life/04-validation.md`가 이미 존재하면 **회귀로 인한 재진입**이다
+- 이전 validation report를 참고하되, 새로 덮어쓰기하라
 
 ## Steps
 
@@ -29,22 +33,30 @@ description: "REAP Validation — 테스트와 검증으로 목표 달성을 확
 - 위반 사항을 기록하라
 
 ### 3. 완료 조건 점검
-- `.reap/life/01-conception-goal.md`에서 완료 조건을 읽어라
-- `.reap/life/04-growth-log.md`에서 deferred 태스크 목록을 확인하라
+- `.reap/life/01-objective.md`에서 완료 조건을 읽어라
+- `.reap/life/03-implementation.md`에서 deferred 태스크 목록을 확인하라
 - deferred 태스크를 제외한 범위에서 완료 조건을 재평가하라
 - goal의 완료 조건을 하나씩 점검하라 (deferred로 인해 부분 달성도 허용)
 
-### 4. 판정
+### 4. Minor Fix (사소한 문제 직접 수정)
+- 오타, lint 에러, 사소한 버그 등 **stage 전환 없이 바로 고칠 수 있는 문제**는 직접 수정하라
+- 수정한 내용을 산출물의 "Minor Fixes" 섹션에 기록하라
+- minor fix 판단 기준: 설계 변경 없이 5분 이내에 해결 가능한 문제
+
+### 5. 판정
 - 모든 자동 검증 통과 + 완료 조건 충족 → **pass**
 - 자동 검증 통과 + 일부 완료 조건 deferred → **partial**
 - 자동 검증 실패 또는 완료 조건 미충족 → **fail**
-- **fail**인 경우: 개발자에게 `reap evolve --back`으로 Growth 복귀를 안내하라
+- **fail**인 경우: 개발자에게 `/reap.evolve --back`으로 이전 stage 복귀를 안내하라
+  - 코드 문제 → `reap evolve --back` (implementation)
+  - 계획 문제 → `reap evolve --back planning`
+  - 목표 문제 → `reap evolve --back objective`
 
 ## 산출물 생성
-- `.reap/templates/05-validation-report.md`를 읽어라
+- `.reap/templates/04-validation.md`를 읽어라
 - 자동 검증 결과, 완료 조건 체크, deferred 항목 목록을 기록하라
 - 결과를 pass / partial / fail 로 판정하라
-- `.reap/life/05-validation-report.md`에 저장하라
+- `.reap/life/04-validation.md`에 저장하라
 
 ## 완료
-- 개발자에게 `reap evolve --advance`로 Adaptation 단계로 진행하라고 안내하라
+- `/reap.evolve`로 Completion 단계로 진행하라고 안내하라

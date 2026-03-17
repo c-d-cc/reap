@@ -24,8 +24,9 @@ export class ReapPaths {
   // Life (현재 세대)
   get life(): string { return join(this.root, "life"); }
   get currentYml(): string { return join(this.life, "current.yml"); }
-  get mutations(): string { return join(this.life, "mutations"); }
   get backlog(): string { return join(this.life, "backlog"); }
+  /** @deprecated Use backlog with type: genome-change instead */
+  get mutations(): string { return join(this.life, "mutations"); }
   artifact(name: string): string { return join(this.life, name); }
 
   // Lineage (완료된 세대)
@@ -36,8 +37,12 @@ export class ReapPaths {
   get commands(): string { return join(this.root, "commands"); }
   get templates(): string { return join(this.root, "templates"); }
 
+  // Hooks
+  get hooks(): string { return join(this.root, "hooks"); }
+
   // Claude Code integration
   get claudeCommands(): string { return join(this.projectRoot, ".claude", "commands"); }
+  get claudeHooksJson(): string { return join(this.projectRoot, ".claude", "hooks.json"); }
 
   async isReapProject(): Promise<boolean> {
     try {
