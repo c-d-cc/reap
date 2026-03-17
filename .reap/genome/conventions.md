@@ -10,6 +10,7 @@
 - 함수는 단일 책임, 50줄 이하 권장
 - `async/await` 사용 (콜백/then 체인 금지)
 - 에러는 호출자에게 throw, CLI 최상위에서 catch
+- 파일 I/O는 `src/core/fs.ts` 유틸 사용 (readTextFile, writeTextFile, fileExists)
 
 ## Naming Conventions
 
@@ -29,15 +30,16 @@
 ## Template Conventions
 
 - Genome 템플릿: `src/templates/genome/` — init 시 `.reap/genome/`으로 복사 (프로젝트 소유)
-- Genome domain 가이드: `src/templates/genome/domain/README.md` — init/update 시 동기화
 - 슬래시 커맨드: `src/templates/commands/` — init/update 시 `~/.claude/commands/`에 설치 (user-level)
-- 산출물 템플릿: `src/templates/artifacts/` — 패키지 내부에서 직접 참조 (프로젝트에 복사하지 않음)
+- 산출물 템플릿: `src/templates/artifacts/` — init/update 시 `~/.reap/templates/`에 설치 (user-level)
+- Domain 가이드: `src/templates/genome/domain/README.md` — init/update 시 `~/.reap/templates/domain-guide.md`에 설치
 - Hook 스크립트: `src/templates/hooks/` — 패키지 내부에서 직접 실행, `~/.claude/hooks.json`에 등록
-- **새 템플릿 추가 시 반드시 `init.ts`의 설치 로직도 동기화하라**
+- **새 템플릿 추가 시 반드시 `init.ts`의 COMMAND_NAMES 및 설치 로직도 동기화하라**
 
 ## Enforced Rules
 
 | 규칙 | 검증 도구 | 명령어 |
 |------|-----------|--------|
-| 전체 테스트 통과 | bun test | `~/.bun/bin/bun test` |
-| TypeScript 컴파일 | tsc | `~/.bun/bin/bunx tsc --noEmit` |
+| 전체 테스트 통과 | bun test | `bun test` |
+| TypeScript 컴파일 | tsc | `bunx tsc --noEmit` |
+| Node.js 빌드 | bun build | `bun build src/cli/index.ts --outfile dist/cli.js --target node` |

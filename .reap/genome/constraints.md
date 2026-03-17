@@ -7,24 +7,37 @@
 ## Tech Stack
 
 - **Language**: TypeScript 5.x — 타입 안전성 + 에이전트 친화적 코드 생성
-- **Runtime**: Bun 1.x — 빠른 실행, 내장 테스트 러너, TS 네이티브
+- **Runtime**: Node.js 호환 (Bun은 개발/테스트용) — npm publish 시 Node.js에서도 동작
 - **CLI Framework**: Commander.js — 성숙한 생태계, 서브커맨드 체인
 - **Config Format**: YAML (yaml 라이브러리) — 사람+에이전트 모두 읽기/쓰기 용이
-- **Package Manager**: bun
+- **Package Manager**: npm (배포), bun (개발)
+- **npm Package**: @c-d-cc/reap (scoped) — CLI 명령어는 `reap`
 
 ## Constraints
 
-- Node.js API 호환 유지 (Bun 외 런타임에서도 동작 가능해야 함)
+- 파일 I/O는 Node.js fs/promises 사용 (Bun API 직접 사용 금지) — `src/core/fs.ts` 유틸 경유
 - 외부 서비스 의존 없음 — 로컬 파일시스템만 사용
 - `.reap/` 디렉토리 구조는 init이 보장, 사용자가 수동 생성할 필요 없음
-- 템플릿 원본은 `src/templates/`에만 존재. 슬래시 커맨드와 hook은 user-level(`~/.claude/`)에 설치, genome은 프로젝트에 복사, artifact 템플릿은 패키지 내부에서 직접 참조
+- 슬래시 커맨드, hook → `~/.claude/` (user-level)
+- artifact 템플릿, domain 가이드 → `~/.reap/templates/` (user-level)
+- genome 파일 → `.reap/genome/` (프로젝트 소유)
+
+## Slash Commands
+
+11개: reap.objective, reap.planning, reap.implementation, reap.validation, reap.completion, reap.evolve, reap.start, reap.next, reap.back, reap.status, reap.sync
+
+## Hooks
+
+4개 event: onGenerationStart, onStageTransition, onGenerationComplete, onRegression
+2개 type: command (shell), prompt (AI agent instruction)
 
 ## Validation Commands
 
 | 용도 | 명령어 | 설명 |
 |------|--------|------|
-| 테스트 | `~/.bun/bin/bun test` | 전체 단위/통합 테스트 |
-| 타입체크 | `~/.bun/bin/bunx tsc --noEmit` | TypeScript 컴파일 검증 |
+| 테스트 | `bun test` | 전체 단위/통합 테스트 |
+| 타입체크 | `bunx tsc --noEmit` | TypeScript 컴파일 검증 |
+| 빌드 | `bun build src/cli/index.ts --outfile dist/cli.js --target node` | Node.js 호환 번들 |
 
 ## External Dependencies
 
