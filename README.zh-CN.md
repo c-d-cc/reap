@@ -49,7 +49,7 @@ npm install -g @c-d-cc/reap
 bun install -g @c-d-cc/reap
 ```
 
-> **要求**：[Node.js](https://nodejs.org) v18+，[Claude Code](https://claude.ai/claude-code) CLI。[Bun](https://bun.sh)是可选的。
+> **要求**：[Node.js](https://nodejs.org) v18+，[Claude Code](https://claude.ai/claude-code)或[OpenCode](https://opencode.ai) CLI。[Bun](https://bun.sh)是可选的。
 
 ## 快速开始
 
@@ -162,9 +162,9 @@ reap init my-project --preset bun-hono-react  # 使用预设初始化Genome
 reap update --dry-run                   # 预览变更
 ```
 
-## Claude Code集成
+## 代理集成
 
-REAP通过Claude Code的两种机制与AI代理集成：
+REAP通过斜杠命令和会话钩子与AI代理集成。当前支持的代理：**Claude Code**、**OpenCode**。
 
 ### 斜杠命令
 
@@ -183,6 +183,7 @@ REAP通过Claude Code的两种机制与AI代理集成：
 | `/reap.status` | 显示当前Generation状态和项目健康度 |
 | `/reap.sync` | 基于源代码同步Genome |
 | `/reap.help` | 基于当前状态的上下文AI帮助（topic: workflow, commands, strict, genome, backlog） |
+| `/reap.update` | 检查REAP更新并升级到最新版本 |
 | **`/reap.evolve`** | **从头到尾运行一个完整的Generation（推荐）** |
 
 ### SessionStart Hook
@@ -201,7 +202,12 @@ REAP通过Claude Code的两种机制与AI代理集成：
 
 ```yaml
 # .reap/config.yml
-strict: true   # 默认：false
+strict: true      # 默认：false
+language: korean  # 产出物和交互的语言
+autoUpdate: true  # 会话开始时自动更新
+agents:           # 检测到的代理（由reap init/update管理）
+  - claude-code
+  - opencode
 ```
 
 | 情境 | 行为 |

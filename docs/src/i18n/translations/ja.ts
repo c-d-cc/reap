@@ -67,7 +67,7 @@ export const ja: Translations = {
     concepts: [
       { label: "Genome Immutability", desc: "Generation進行中はGenomeを変更しません。Implementation中に発見された設計問題はbacklogにgenome-change項目として記録され、Completionでのみ適用されます。" },
       { label: "Backlog & Deferral", desc: ".reap/life/backlog/の項目はtype: genome-change | environment-change | taskを持ちます。部分完了は正常であり、未完了タスクは次のGenerationのObjectiveに引き継がれます。" },
-      { label: "SessionStart Hook", desc: "新しいClaudeセッションごとに自動的にGenome全体、現在のGeneration状態、ワークフロールールを注入し、セッション間のコンテキスト喪失を排除します。" },
+      { label: "SessionStart Hook", desc: "新しいAIエージェントセッションごとに自動的にGenome全体、現在のGeneration状態、ワークフロールールを注入し、セッション間のコンテキスト喪失を排除します。" },
       { label: "Lineage", desc: "完了したGenerationは.reap/lineage/に保管されます。レトロスペクティブがそこに蓄積されます。時間とともに圧縮されます（Level 1 → gen-XXX.md、Level 2 → epoch-XXX.md）。" },
       { label: "Four-Axis Structure", desc: ".reap/配下のすべてが4つの軸にマッピングされます：Genome（設計）、Environment（外部コンテキスト）、Life（現在のGeneration）、Lineage（過去のGeneration保管）。" },
     ],
@@ -129,7 +129,7 @@ export const ja: Translations = {
     prerequisiteItems: [
       { name: "Node.js", desc: "v18以上", required: true },
       { name: "npm", desc: "Node.jsに同梱", required: true },
-      { name: "Claude Code", desc: "AnthropicのClaude CLI", required: true },
+      { name: "Claude CodeまたはOpenCode", desc: "AIエージェントCLI（いずれか1つ以上必要）", required: true },
       { name: "Bun", desc: "代替パッケージマネージャ", required: false },
     ],
     required: "必須",
@@ -253,7 +253,7 @@ export const ja: Translations = {
     title: "CLIリファレンス",
     breadcrumb: "リファレンス",
     initTitle: "reap init",
-    initDesc: "新しいREAPプロジェクトを初期化します。.reap/構造を作成し、スラッシュコマンドとhooksを~/.claude/にインストールします。",
+    initDesc: "新しいREAPプロジェクトを初期化します。.reap/構造を作成し、検出されたエージェント（Claude Code、OpenCode）にスラッシュコマンドとhooksをインストールします。",
     initHeaders: ["オプション", "値", "説明"],
     initOptions: [
       ["--mode", "greenfield | migration | adoption", "プロジェクトentryモード"],
@@ -279,9 +279,9 @@ export const ja: Translations = {
     breadcrumb: "リファレンス",
     intro: "REAPには2種類のコマンドがあります：CLIコマンドとスラッシュコマンド。",
     cliCommandsDesc: "CLIコマンド（reap ...）はターミナルで実行されます。プロジェクトのセットアップと保守を担当します — init、status、update、fix、help。AIエージェントとは対話しません。",
-    slashCommandsDesc: "スラッシュコマンド（/reap.*）はClaude Code内で実行されます。開発ワークフローを主導します — AIエージェントがプロンプトを読み、ユーザーと対話的に作業を実行します。",
+    slashCommandsDesc: "スラッシュコマンド（/reap.*）はAIエージェントCLI（Claude Code、OpenCode）内で実行されます。開発ワークフローを主導します — AIエージェントがプロンプトを読み、ユーザーと対話的に作業を実行します。",
     slashTitle: "スラッシュコマンド",
-    slashIntro: "reap initで~/.claude/commands/にインストールされます。Claude Codeセッション内で使用します。",
+    slashIntro: "reap initで検出された各エージェントにインストールされます。AIエージェントセッション（Claude Code、OpenCode）内で使用します。",
     commandHeaders: ["コマンド", "説明"],
     commands: [
       ["/reap.evolve", "Generation全体を最初から最後まで実行。日常開発の主要コマンド。全ステージを自律的にループ — 日常的な確認はスキップし、本当に行き詰まった時のみ停止。"],
@@ -296,6 +296,7 @@ export const ja: Translations = {
       ["/reap.status", "現在のGeneration状態、ステージ進捗、backlog概要、タイムライン、Genome状態を表示。"],
       ["/reap.sync", "ソースコードを分析してGenomeを同期。アクティブGenerationがなければ直接更新；あればbacklogに記録。"],
       ["/reap.help", "現在の状態に基づいた状況別ヘルプを提供。次にすべきことを表示、使用可能なコマンドリスト、トピック（workflow、commands、strict、genome、backlog）で詳細説明。"],
+      ["/reap.update", "REAPのアップデートを確認し最新バージョンにアップグレード。インストール済みバージョンと公開バージョンを比較し、npmパッケージを更新し、コマンド/テンプレート/hooksを同期。"],
     ],
     lifecycleFlow: "ライフサイクルフロー",
     lifecycleFlowDesc: "/reap.evolve使用時の一般的なフロー：",
@@ -316,6 +317,9 @@ export const ja: Translations = {
       ["project", "プロジェクト名（init時に設定）"],
       ["entryMode", "REAPの初期化方式：greenfield、migration、またはadoption"],
       ["strict", "Strictモードを有効にしてコード変更を制限（下記参照）"],
+      ["language", "成果物とユーザーインタラクションの言語（例：korean、english、japanese）"],
+      ["autoUpdate", "セッション開始時の自動アップデート（デフォルト：false）"],
+      ["agents", "検出されたAIエージェント、reap init/updateで管理（例：claude-code、opencode）"],
       ["hooks", "ライフサイクルhooks（Hookリファレンス参照）"],
     ],
     strictMode: "Strictモード",
@@ -374,9 +378,9 @@ hooks:
     - command: "echo 'Regressed to previous stage'"
     - prompt: "回帰理由をトラッキングファイルに記録せよ。"`,
     sessionStart: "SessionStart Hook",
-    sessionStartDesc1: "REAPプロジェクトhooksとは別に、SessionStart hookは毎AIセッション開始時に実行されるClaude Codeメカニズムです。reap init中に登録されます。",
+    sessionStartDesc1: "REAPプロジェクトhooksとは別に、SessionStart hookは毎AIセッション開始時に実行されるエージェントメカニズムです。reap init中に検出された各エージェント（Claude Code、OpenCode）に登録されます。",
     sessionStartDesc2: "REAPワークフローガイド全体、現在のGeneration状態、ライフサイクルルールをAIエージェントに注入します — 新しいセッションでもエージェントがプロジェクトコンテキストを理解することを保証します。",
-    sessionStartNote: "~/.claude/settings.jsonに登録されます。hookスクリプトはREAPパッケージ内にあり、プロジェクトの.reap/ディレクトリから読み取ります。",
+    sessionStartNote: "エージェントの設定に登録されます（例：Claude Codeは~/.claude/settings.json、OpenCodeは~/.config/opencode/）。hookスクリプトはREAPパッケージ内にあり、プロジェクトの.reap/ディレクトリから読み取ります。",
     executionNotes: "実行に関する注意事項",
     executionItems: [
       "HooksはCLIではなくAIエージェントが実行します。エージェントが設定を読み、各hookを実行します。",

@@ -49,7 +49,7 @@ npm install -g @c-d-cc/reap
 bun install -g @c-d-cc/reap
 ```
 
-> **Requirements**: [Node.js](https://nodejs.org) v18+, [Claude Code](https://claude.ai/claude-code) CLI. [Bun](https://bun.sh) is optional.
+> **Requirements**: [Node.js](https://nodejs.org) v18+, [Claude Code](https://claude.ai/claude-code) or [OpenCode](https://opencode.ai) CLI. [Bun](https://bun.sh) is optional.
 
 ## Quick Start
 
@@ -161,9 +161,9 @@ reap init my-project --preset bun-hono-react  # Initialize Genome with a preset
 reap update --dry-run                   # Preview changes before applying
 ```
 
-## Claude Code Integration
+## Agent Integration
 
-REAP integrates with the AI agent through two Claude Code mechanisms:
+REAP integrates with AI agents through slash commands and session hooks. Currently supported agents: **Claude Code** and **OpenCode**.
 
 ### Slash Commands
 
@@ -182,6 +182,7 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.status` | Show current generation state and project health |
 | `/reap.sync` | Synchronize Genome with current source code |
 | `/reap.help` | Contextual AI help based on current state (topic: workflow, commands, strict, genome, backlog) |
+| `/reap.update` | Check for REAP updates and upgrade to the latest version |
 | **`/reap.evolve`** | **Run an entire generation from start to finish (recommended)** |
 
 ### SessionStart Hook
@@ -200,7 +201,12 @@ When `strict: true` is set in `.reap/config.yml`, the AI agent is restricted fro
 
 ```yaml
 # .reap/config.yml
-strict: true   # default: false
+strict: true      # default: false
+language: korean  # language for artifacts and interactions
+autoUpdate: true  # auto-update REAP on session start
+agents:           # detected agents (managed by reap init/update)
+  - claude-code
+  - opencode
 ```
 
 | Context | Behavior |

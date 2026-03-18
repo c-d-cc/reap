@@ -19,6 +19,10 @@ version: 0.1.0
 project: my-project
 entryMode: greenfield    # greenfield | migration | adoption
 strict: false            # enable strict mode (default: false)
+language: english        # language for artifacts and interactions
+autoUpdate: false        # auto-update REAP on session start
+agents:                  # detected agents (managed by reap init/update)
+  - claude-code
 hooks:
   onGenerationComplete:
     - command: "reap update"

@@ -80,9 +80,12 @@ export default function Introduction() {
     │   └── backlog/
     └── lineage/                  # Completed generation archive
 
-~/.claude/                        # User-level (installed by reap init)
+~/.claude/                        # Claude Code (installed by reap init)
 ├── commands/                     # Slash commands (/reap.*)
-└── hooks.json                    # SessionStart hook registration`}</CodeBlock>
+└── settings.json                 # SessionStart hook registration
+
+~/.config/opencode/               # OpenCode (if detected)
+└── plugins/                      # SessionStart plugin`}</CodeBlock>
       </DocPage>
     </DocLayout>
   );

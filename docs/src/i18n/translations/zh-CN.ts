@@ -67,7 +67,7 @@ export const zhCN: Translations = {
     concepts: [
       { label: "Genome Immutability", desc: "Generation进行中不修改Genome。Implementation中发现的设计问题记录在backlog中作为genome-change项目，仅在Completion时应用。" },
       { label: "Backlog & Deferral", desc: ".reap/life/backlog/中的项目具有type: genome-change | environment-change | task。部分完成是正常的，未完成的任务会传递到下一个Generation的Objective。" },
-      { label: "SessionStart Hook", desc: "每个新的Claude会话自动注入完整的Genome、当前Generation状态和工作流规则，消除会话间的上下文丢失。" },
+      { label: "SessionStart Hook", desc: "每个新的AI代理会话自动注入完整的Genome、当前Generation状态和工作流规则，消除会话间的上下文丢失。" },
       { label: "Lineage", desc: "已完成的Generation归档在.reap/lineage/中。回顾在那里积累。随时间推移会压缩（Level 1 → gen-XXX.md，Level 2 → epoch-XXX.md）。" },
       { label: "Four-Axis Structure", desc: ".reap/下的所有内容映射到四个轴：Genome（设计）、Environment（外部上下文）、Life（当前Generation）、Lineage（过去Generation的归档）。" },
     ],
@@ -129,7 +129,7 @@ export const zhCN: Translations = {
     prerequisiteItems: [
       { name: "Node.js", desc: "v18或更高版本", required: true },
       { name: "npm", desc: "Node.js自带", required: true },
-      { name: "Claude Code", desc: "Anthropic的Claude CLI", required: true },
+      { name: "Claude Code或OpenCode", desc: "AI代理CLI（至少需要一个）", required: true },
       { name: "Bun", desc: "可选的包管理器", required: false },
     ],
     required: "必需",
@@ -253,7 +253,7 @@ export const zhCN: Translations = {
     title: "CLI参考",
     breadcrumb: "参考",
     initTitle: "reap init",
-    initDesc: "初始化新的REAP项目。创建.reap/结构并将斜杠命令和hooks安装到~/.claude/。",
+    initDesc: "初始化新的REAP项目。创建.reap/结构并将斜杠命令和hooks安装到检测到的代理（Claude Code、OpenCode）。",
     initHeaders: ["选项", "值", "说明"],
     initOptions: [
       ["--mode", "greenfield | migration | adoption", "项目entry模式"],
@@ -279,9 +279,9 @@ export const zhCN: Translations = {
     breadcrumb: "参考",
     intro: "REAP有两种类型的命令：CLI命令和斜杠命令。",
     cliCommandsDesc: "CLI命令（reap ...）在终端中运行。负责项目设置和维护 — init、status、update、fix、help。不与AI代理交互。",
-    slashCommandsDesc: "斜杠命令（/reap.*）在Claude Code内运行。驱动开发工作流 — AI代理读取提示并与用户交互式地执行任务。",
+    slashCommandsDesc: "斜杠命令（/reap.*）在AI代理CLI（Claude Code、OpenCode）内运行。驱动开发工作流 — AI代理读取提示并与用户交互式地执行任务。",
     slashTitle: "斜杠命令",
-    slashIntro: "通过reap init安装到~/.claude/commands/。在Claude Code会话中使用。",
+    slashIntro: "通过reap init安装到检测到的各代理。在AI代理会话（Claude Code、OpenCode）中使用。",
     commandHeaders: ["命令", "说明"],
     commands: [
       ["/reap.evolve", "从头到尾运行整个Generation。日常开发的主要命令。自主循环所有阶段 — 跳过日常确认，仅在真正受阻时停止。"],
@@ -296,6 +296,7 @@ export const zhCN: Translations = {
       ["/reap.status", "显示当前Generation状态、阶段进度、backlog摘要、时间线、Genome状态。"],
       ["/reap.sync", "分析源代码并同步Genome。无活跃Generation时直接更新；有则记录到backlog。"],
       ["/reap.help", "基于当前状态提供上下文帮助。显示下一步操作、可用命令列表，传入主题（workflow、commands、strict、genome、backlog）时提供深入说明。"],
+      ["/reap.update", "检查REAP更新并升级到最新版本。比较已安装版本与发布版本，更新npm包，并同步命令/模板/hooks。"],
     ],
     lifecycleFlow: "生命周期流程",
     lifecycleFlowDesc: "使用/reap.evolve时的典型流程：",
@@ -316,6 +317,9 @@ export const zhCN: Translations = {
       ["project", "项目名称（init时设置）"],
       ["entryMode", "REAP的初始化方式：greenfield、migration或adoption"],
       ["strict", "启用Strict模式以限制代码变更（见下文）"],
+      ["language", "产出物和用户交互的语言（例如：korean、english、japanese）"],
+      ["autoUpdate", "会话开始时自动更新（默认：false）"],
+      ["agents", "检测到的AI代理，由reap init/update管理（例如：claude-code、opencode）"],
       ["hooks", "生命周期hooks（参见Hook参考）"],
     ],
     strictMode: "Strict模式",
@@ -374,9 +378,9 @@ hooks:
     - command: "echo 'Regressed to previous stage'"
     - prompt: "将回退原因记录到追踪文件中。"`,
     sessionStart: "SessionStart Hook",
-    sessionStartDesc1: "与REAP项目hooks分开，SessionStart hook是每次AI会话开始时运行的Claude Code机制。在reap init时注册。",
+    sessionStartDesc1: "与REAP项目hooks分开，SessionStart hook是每次AI会话开始时运行的代理机制。在reap init时为每个检测到的代理（Claude Code、OpenCode）注册。",
     sessionStartDesc2: "将完整的REAP工作流指南、当前Generation状态和生命周期规则注入AI代理 — 确保代理即使在全新会话中也能理解项目上下文。",
-    sessionStartNote: "注册在~/.claude/settings.json中。hook脚本位于REAP包内，从项目的.reap/目录读取。",
+    sessionStartNote: "注册在代理的设置中（例如：Claude Code为~/.claude/settings.json，OpenCode为~/.config/opencode/）。hook脚本位于REAP包内，从项目的.reap/目录读取。",
     executionNotes: "执行注意事项",
     executionItems: [
       "Hooks由AI代理而非CLI执行。代理读取配置并运行每个hook。",

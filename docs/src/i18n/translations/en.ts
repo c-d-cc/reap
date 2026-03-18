@@ -65,7 +65,7 @@ export const en = {
     concepts: [
       { label: "Genome Immutability", desc: "The Genome is never modified mid-generation. Design issues discovered during Implementation are logged to the backlog as genome-change items and applied only at Completion." },
       { label: "Backlog & Deferral", desc: "Items in .reap/life/backlog/ carry a type: genome-change | environment-change | task. Partial completion is normal — deferred tasks carry forward to the next generation's Objective." },
-      { label: "SessionStart Hook", desc: "Every new Claude session automatically injects the full Genome, current generation state, and workflow rules — eliminating context loss between sessions." },
+      { label: "SessionStart Hook", desc: "Every new AI agent session automatically injects the full Genome, current generation state, and workflow rules — eliminating context loss between sessions." },
       { label: "Lineage", desc: "Completed generations are archived in .reap/lineage/. Retrospectives accumulate there. Over time they're compressed (Level 1 → gen-XXX.md, Level 2 → epoch-XXX.md) to stay manageable." },
       { label: "Four-Axis Structure", desc: "Everything under .reap/ maps to four axes: Genome (design), Environment (external context), Life (current generation), Lineage (archive of past generations)." },
     ],
@@ -127,7 +127,7 @@ export const en = {
     prerequisiteItems: [
       { name: "Node.js", desc: "v18 or later", required: true },
       { name: "npm", desc: "included with Node.js", required: true },
-      { name: "Claude Code", desc: "Anthropic's CLI for Claude", required: true },
+      { name: "Claude Code or OpenCode", desc: "AI agent CLI (at least one required)", required: true },
       { name: "Bun", desc: "alternative package manager", required: false },
     ],
     required: "Required",
@@ -251,7 +251,7 @@ export const en = {
     title: "CLI Reference",
     breadcrumb: "Reference",
     initTitle: "reap init",
-    initDesc: "Initialize a new REAP project. Creates the .reap/ structure and installs slash commands and hooks to ~/.claude/.",
+    initDesc: "Initialize a new REAP project. Creates the .reap/ structure and installs slash commands and hooks to detected agents (Claude Code, OpenCode).",
     initHeaders: ["Option", "Values", "Description"],
     initOptions: [
       ["--mode", "greenfield | migration | adoption", "Project entry mode"],
@@ -277,9 +277,9 @@ export const en = {
     breadcrumb: "Reference",
     intro: "REAP has two types of commands: CLI commands and Slash commands.",
     cliCommandsDesc: "CLI commands (reap ...) run in your terminal. They handle project setup and maintenance — init, status, update, fix, help. They do not interact with the AI agent.",
-    slashCommandsDesc: "Slash commands (/reap.*) run inside Claude Code. They drive the development workflow — the AI agent reads the prompt and executes the described task interactively with you.",
+    slashCommandsDesc: "Slash commands (/reap.*) run inside AI agent CLIs (Claude Code, OpenCode). They drive the development workflow — the AI agent reads the prompt and executes the described task interactively with you.",
     slashTitle: "Slash Commands",
-    slashIntro: "Installed to ~/.claude/commands/ by reap init. Used inside Claude Code sessions.",
+    slashIntro: "Installed by reap init to each detected agent. Used inside AI agent sessions (Claude Code, OpenCode).",
     commandHeaders: ["Command", "Description"],
     commands: [
       ["/reap.evolve", "Run an entire generation from start to finish. The primary command for day-to-day development. Loops through all stages autonomously — skips routine confirmations and only stops when genuinely blocked."],
@@ -294,6 +294,7 @@ export const en = {
       ["/reap.status", "Show current generation state, stage progress, backlog summary, timeline, and genome health."],
       ["/reap.sync", "Analyze source code and synchronize Genome. Direct update when no active generation; records to backlog otherwise."],
       ["/reap.help", "Provide contextual help based on current state. Shows what to do next, lists available commands, and explains deeper topics when given a topic argument (workflow, commands, strict, genome, backlog)."],
+      ["/reap.update", "Check for REAP updates and upgrade to the latest version. Compares installed vs published version, updates the npm package, and syncs commands/templates/hooks."],
     ],
     lifecycleFlow: "Lifecycle Flow",
     lifecycleFlowDesc: "The typical flow when using /reap.evolve:",
@@ -314,6 +315,9 @@ export const en = {
       ["project", "Project name (set during init)"],
       ["entryMode", "How REAP was initialized: greenfield, migration, or adoption"],
       ["strict", "Enable strict mode to restrict code changes (see below)"],
+      ["language", "Language for artifacts and user interactions (e.g. korean, english, japanese)"],
+      ["autoUpdate", "Auto-update REAP on session start (default: false)"],
+      ["agents", "Detected AI agents, managed by reap init/update (e.g. claude-code, opencode)"],
       ["hooks", "Lifecycle hooks (see Hook Reference)"],
     ],
     strictMode: "Strict Mode",
@@ -372,9 +376,9 @@ hooks:
     - command: "echo 'Regressed to previous stage'"
     - prompt: "Log the regression reason to a tracking file."`,
     sessionStart: "SessionStart Hook",
-    sessionStartDesc1: "Separate from REAP project hooks, the SessionStart hook is a Claude Code mechanism that runs at the start of every AI session. REAP registers it during reap init.",
+    sessionStartDesc1: "Separate from REAP project hooks, the SessionStart hook is an agent mechanism that runs at the start of every AI session. REAP registers it during reap init for each detected agent (Claude Code, OpenCode).",
     sessionStartDesc2: "It injects the full REAP workflow guide, current generation state, and lifecycle rules into the AI agent — ensuring the agent understands the project context even in a brand-new session.",
-    sessionStartNote: "Registered in ~/.claude/settings.json. The hook script lives in the REAP package and reads from the project's .reap/ directory.",
+    sessionStartNote: "Registered in the agent's settings (e.g. ~/.claude/settings.json for Claude Code, ~/.config/opencode/ for OpenCode). The hook script lives in the REAP package and reads from the project's .reap/ directory.",
     executionNotes: "Execution Notes",
     executionItems: [
       "Hooks are executed by the AI agent, not the CLI. The agent reads the config and runs each hook.",

@@ -67,7 +67,7 @@ export const ko: Translations = {
     concepts: [
       { label: "Genome Immutability", desc: "Generation 진행 중에는 Genome을 수정하지 않습니다. Implementation 중 발견된 설계 이슈는 backlog에 genome-change 항목으로 기록되어 Completion에서만 적용됩니다." },
       { label: "Backlog & Deferral", desc: ".reap/life/backlog/의 항목은 type: genome-change | environment-change | task를 가집니다. 부분 완료는 정상적인 상황이며, 미완료 태스크는 다음 Generation의 Objective로 넘어갑니다." },
-      { label: "SessionStart Hook", desc: "매 새 Claude 세션은 자동으로 전체 Genome, 현재 Generation 상태, 워크플로우 규칙을 주입하여 세션 간 컨텍스트 손실을 제거합니다." },
+      { label: "SessionStart Hook", desc: "매 새 AI 에이전트 세션은 자동으로 전체 Genome, 현재 Generation 상태, 워크플로우 규칙을 주입하여 세션 간 컨텍스트 손실을 제거합니다." },
       { label: "Lineage", desc: "완료된 Generation은 .reap/lineage/에 보관됩니다. 회고가 그곳에 축적됩니다. 시간이 지나면 압축됩니다 (Level 1 → gen-XXX.md, Level 2 → epoch-XXX.md)." },
       { label: "Four-Axis Structure", desc: ".reap/ 하위의 모든 것은 네 개의 축으로 매핑됩니다: Genome (설계), Environment (외부 컨텍스트), Life (현재 Generation), Lineage (과거 Generation 보관)." },
     ],
@@ -129,7 +129,7 @@ export const ko: Translations = {
     prerequisiteItems: [
       { name: "Node.js", desc: "v18 이상", required: true },
       { name: "npm", desc: "Node.js에 포함", required: true },
-      { name: "Claude Code", desc: "Anthropic의 Claude CLI", required: true },
+      { name: "Claude Code 또는 OpenCode", desc: "AI 에이전트 CLI (하나 이상 필요)", required: true },
       { name: "Bun", desc: "대안 패키지 매니저", required: false },
     ],
     required: "필수",
@@ -253,7 +253,7 @@ export const ko: Translations = {
     title: "CLI 레퍼런스",
     breadcrumb: "레퍼런스",
     initTitle: "reap init",
-    initDesc: "새 REAP 프로젝트를 초기화합니다. .reap/ 구조를 생성하고 슬래시 커맨드와 hooks를 ~/.claude/에 설치합니다.",
+    initDesc: "새 REAP 프로젝트를 초기화합니다. .reap/ 구조를 생성하고 감지된 에이전트(Claude Code, OpenCode)에 슬래시 커맨드와 hooks를 설치합니다.",
     initHeaders: ["옵션", "값", "설명"],
     initOptions: [
       ["--mode", "greenfield | migration | adoption", "프로젝트 entry 모드"],
@@ -279,9 +279,9 @@ export const ko: Translations = {
     breadcrumb: "레퍼런스",
     intro: "REAP에는 두 가지 유형의 커맨드가 있습니다: CLI 커맨드와 슬래시 커맨드.",
     cliCommandsDesc: "CLI 커맨드 (reap ...)는 터미널에서 실행됩니다. 프로젝트 셋업과 유지보수를 담당합니다 — init, status, update, fix, help. AI 에이전트와 상호작용하지 않습니다.",
-    slashCommandsDesc: "슬래시 커맨드 (/reap.*)는 Claude Code 내에서 실행됩니다. 개발 워크플로우를 주도합니다 — AI 에이전트가 프롬프트를 읽고 사용자와 대화형으로 작업을 수행합니다.",
+    slashCommandsDesc: "슬래시 커맨드 (/reap.*)는 AI 에이전트 CLI (Claude Code, OpenCode) 내에서 실행됩니다. 개발 워크플로우를 주도합니다 — AI 에이전트가 프롬프트를 읽고 사용자와 대화형으로 작업을 수행합니다.",
     slashTitle: "슬래시 커맨드",
-    slashIntro: "reap init으로 ~/.claude/commands/에 설치됩니다. Claude Code 세션 내에서 사용합니다.",
+    slashIntro: "reap init으로 감지된 각 에이전트에 설치됩니다. AI 에이전트 세션(Claude Code, OpenCode) 내에서 사용합니다.",
     commandHeaders: ["커맨드", "설명"],
     commands: [
       ["/reap.evolve", "전체 Generation을 처음부터 끝까지 실행. 일상 개발의 주요 커맨드. 모든 단계를 자율적으로 순환 — 일상적 확인은 건너뛰고 정말로 막혔을 때만 멈춤."],
@@ -296,6 +296,7 @@ export const ko: Translations = {
       ["/reap.status", "현재 Generation 상태, 단계 진행, backlog 요약, 타임라인, Genome 상태 표시."],
       ["/reap.sync", "소스 코드를 분석하고 Genome 동기화. 활성 Generation이 없으면 직접 업데이트; 있으면 backlog에 기록."],
       ["/reap.help", "현재 상태에 기반한 상황별 도움말 제공. 다음 할 일 표시, 사용 가능한 커맨드 목록, 주제(workflow, commands, strict, genome, backlog) 전달 시 심화 설명."],
+      ["/reap.update", "REAP 업데이트를 확인하고 최신 버전으로 업그레이드. 설치된 버전과 게시된 버전을 비교하고, npm 패키지를 업데이트하고, 커맨드/템플릿/훅을 동기화."],
     ],
     lifecycleFlow: "라이프사이클 흐름",
     lifecycleFlowDesc: "/reap.evolve 사용 시 일반적인 흐름:",
@@ -316,6 +317,9 @@ export const ko: Translations = {
       ["project", "프로젝트 이름 (init 시 설정)"],
       ["entryMode", "REAP 초기화 방식: greenfield, migration, 또는 adoption"],
       ["strict", "Strict 모드 활성화하여 코드 변경 제한 (아래 참조)"],
+      ["language", "산출물 및 사용자 상호작용 언어 (예: korean, english, japanese)"],
+      ["autoUpdate", "세션 시작 시 자동 업데이트 (기본값: false)"],
+      ["agents", "감지된 AI 에이전트, reap init/update에서 관리 (예: claude-code, opencode)"],
       ["hooks", "라이프사이클 hooks (Hook 레퍼런스 참조)"],
     ],
     strictMode: "Strict 모드",
@@ -374,9 +378,9 @@ hooks:
     - command: "echo 'Regressed to previous stage'"
     - prompt: "회귀 사유를 트래킹 파일에 기록하라."`,
     sessionStart: "SessionStart Hook",
-    sessionStartDesc1: "REAP 프로젝트 hooks와 별개로, SessionStart hook은 매 AI 세션 시작 시 실행되는 Claude Code 메커니즘입니다. reap init 중에 등록됩니다.",
+    sessionStartDesc1: "REAP 프로젝트 hooks와 별개로, SessionStart hook은 매 AI 세션 시작 시 실행되는 에이전트 메커니즘입니다. reap init 중에 감지된 각 에이전트(Claude Code, OpenCode)에 등록됩니다.",
     sessionStartDesc2: "전체 REAP 워크플로우 가이드, 현재 Generation 상태, 라이프사이클 규칙을 AI 에이전트에 주입합니다 — 새 세션에서도 에이전트가 프로젝트 컨텍스트를 이해하도록 보장합니다.",
-    sessionStartNote: "~/.claude/settings.json에 등록됩니다. hook 스크립트는 REAP 패키지 내에 있으며 프로젝트의 .reap/ 디렉토리에서 읽습니다.",
+    sessionStartNote: "에이전트의 설정에 등록됩니다 (예: Claude Code는 ~/.claude/settings.json, OpenCode는 ~/.config/opencode/). hook 스크립트는 REAP 패키지 내에 있으며 프로젝트의 .reap/ 디렉토리에서 읽습니다.",
     executionNotes: "실행 참고사항",
     executionItems: [
       "Hooks는 CLI가 아닌 AI 에이전트가 실행합니다. 에이전트가 설정을 읽고 각 hook을 실행합니다.",
