@@ -295,7 +295,7 @@ export const zhCN: Translations = {
       ["/reap.back", "回到前一个阶段（micro loop）。在时间线和产出物中记录回退原因。"],
       ["/reap.status", "显示当前Generation状态、阶段进度、backlog摘要、时间线、Genome状态。"],
       ["/reap.sync", "分析源代码并同步Genome。无活跃Generation时直接更新；有则记录到backlog。"],
-      ["/reap.help", "提供24+主题的上下文帮助。包括REAP介绍、anti-hallucination主题守卫、详细说明（workflow、genome、backlog、strict、agents、hooks、config、evolve、regression、minor-fix、compression、author及所有命令名）。"],
+      ["/reap.help", "提供24+主题的上下文帮助。包括REAP介绍、详细说明（workflow、genome、backlog、strict、agents、hooks、config、evolve、regression、minor-fix、compression、author及所有命令名）。"],
       ["/reap.update", "检查REAP更新并升级到最新版本。比较已安装版本与发布版本，更新npm包，并同步命令/模板/hooks。"],
     ],
     lifecycleFlow: "生命周期流程",

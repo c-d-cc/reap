@@ -5,7 +5,7 @@
 - **`/reap.update` Command** — Check for REAP updates and upgrade directly from within your AI agent session.
 - **Auto-Update** — Set `autoUpdate: true` in `.reap/config.yml` to automatically update REAP on every session start.
 - **Project-Level Language** — `language` field in `config.yml` ensures consistent language across all agents.
-- **Enhanced `/reap.help`** — REAP introduction, rich topic system with 24+ topics, anti-hallucination guards, and faster response.
+- **Enhanced `/reap.help`** — REAP introduction, rich topic system with 24+ topics, and faster response.
 - **Release Notes Automation** — `onGenerationComplete` hook auto-generates `RELEASE_NOTES.md` when a version bump is detected.
 - **Init Progress** — `reap init` now shows step-by-step progress and a Getting Started guide upon completion.
 - **OpenCode Auto-Update Fix** — Resolved PATH issue in OpenCode plugin for reliable auto-updates.

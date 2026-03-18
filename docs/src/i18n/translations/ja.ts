@@ -295,7 +295,7 @@ export const ja: Translations = {
       ["/reap.back", "前のステージに回帰（micro loop）。回帰理由をタイムラインと成果物に記録。"],
       ["/reap.status", "現在のGeneration状態、ステージ進捗、backlog概要、タイムライン、Genome状態を表示。"],
       ["/reap.sync", "ソースコードを分析してGenomeを同期。アクティブGenerationがなければ直接更新；あればbacklogに記録。"],
-      ["/reap.help", "24+トピックの状況別ヘルプを提供。REAP紹介、anti-hallucinationトピックガード、詳細説明（workflow、genome、backlog、strict、agents、hooks、config、evolve、regression、minor-fix、compression、authorおよび全コマンド名）。"],
+      ["/reap.help", "24+トピックの状況別ヘルプを提供。REAP紹介、詳細説明（workflow、genome、backlog、strict、agents、hooks、config、evolve、regression、minor-fix、compression、authorおよび全コマンド名）。"],
       ["/reap.update", "REAPのアップデートを確認し最新バージョンにアップグレード。インストール済みバージョンと公開バージョンを比較し、npmパッケージを更新し、コマンド/テンプレート/hooksを同期。"],
     ],
     lifecycleFlow: "ライフサイクルフロー",
