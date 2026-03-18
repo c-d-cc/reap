@@ -317,7 +317,7 @@ reap init my-project --preset bun-hono-react
 
 ## Author
 
-**HyeonIL Choi** (At C to D) — [hichoi@c-d.cc](mailto:hichoi@c-d.cc) | [reap.cc](https://reap.cc) | [GitHub](https://github.com/c-d-cc/reap)
+**HyeonIL Choi** — [c-d.cc](https://c-d.cc) | [LinkedIn](https://www.linkedin.com/in/hichoi-dev) | [GitHub](https://github.com/c-d-cc/reap)
 
 ## License
 
