@@ -9,6 +9,7 @@
 - **Release Notes Automation** — `onGenerationComplete` hook auto-generates `RELEASE_NOTES.md` when a version bump is detected.
 - **Init Progress** — `reap init` now shows step-by-step progress and a Getting Started guide upon completion.
 - **OpenCode Auto-Update Fix** — Resolved PATH issue in OpenCode plugin for reliable auto-updates.
+- **10x Faster Session Start** — Replaced bash string escaping with Node.js `JSON.stringify` in session-start hook (12s → ~1s).
 
 ## Generations
 
