@@ -316,11 +316,6 @@ reap init my-project --preset bun-hono-react
 | `migration` | 参考现有系统进行新建 |
 | `adoption` | 将REAP应用到现有代码库 |
 
-## 性能
-
-- **10倍更快的会话启动** — 会话钩子使用Node.js `JSON.stringify`替代shell `escape_for_json`，将启动时间从约12秒缩短到约1秒。
-- **Init进度显示** — `reap init`显示逐步进度消息，完成后展示Getting Started指南。
-
 ## 作者
 
 **HyeonIL Choi** (At C to D) — [hichoi@c-d.cc](mailto:hichoi@c-d.cc) | [reap.cc](https://reap.cc) | [GitHub](https://github.com/c-d-cc/reap)

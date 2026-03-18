@@ -315,11 +315,6 @@ reap init my-project --preset bun-hono-react
 | `migration` | Build anew while referencing an existing system |
 | `adoption` | Apply REAP to an existing codebase |
 
-## Performance
-
-- **10x Faster Session Start** — Session hook uses Node.js `JSON.stringify` instead of shell `escape_for_json`, reducing startup from ~12s to ~1s.
-- **Init Progress** — `reap init` displays step-by-step progress messages and a Getting Started guide upon completion.
-
 ## Author
 
 **HyeonIL Choi** (At C to D) — [hichoi@c-d.cc](mailto:hichoi@c-d.cc) | [reap.cc](https://reap.cc) | [GitHub](https://github.com/c-d-cc/reap)

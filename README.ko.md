@@ -316,11 +316,6 @@ reap init my-project --preset bun-hono-react
 | `migration` | 기존 시스템을 참조하여 새로 구축 |
 | `adoption` | 기존 코드베이스에 REAP을 적용 |
 
-## 성능
-
-- **10x 빠른 세션 시작** — 세션 훅에서 shell `escape_for_json` 대신 Node.js `JSON.stringify`를 사용하여 시작 시간을 ~12초에서 ~1초로 단축.
-- **Init 진행 표시** — `reap init` 시 단계별 진행 메시지와 완료 후 Getting Started 안내를 표시.
-
 ## 저자
 
 **HyeonIL Choi** (At C to D) — [hichoi@c-d.cc](mailto:hichoi@c-d.cc) | [reap.cc](https://reap.cc) | [GitHub](https://github.com/c-d-cc/reap)
