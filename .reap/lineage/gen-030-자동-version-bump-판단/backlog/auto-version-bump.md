@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-030
 ---
 # Generation 실행 시 자동 version bump 판단
 
