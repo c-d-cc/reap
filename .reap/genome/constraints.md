@@ -7,7 +7,7 @@
 ## Tech Stack
 
 - **Language**: TypeScript 5.x — 타입 안전성 + 에이전트 친화적 코드 생성
-- **Runtime**: Node.js 호환 (Bun은 개발/테스트용) — npm publish 시 Node.js에서도 동작
+- **Runtime**: Node.js >=18 호환 (Bun은 개발/테스트용) — npm publish 시 Node.js에서도 동작
 - **CLI Framework**: Commander.js — 성숙한 생태계, 서브커맨드 체인
 - **Config Format**: YAML (yaml 라이브러리) — 사람+에이전트 모두 읽기/쓰기 용이
 - **Package Manager**: npm (배포), bun (개발)
@@ -21,6 +21,10 @@
 - 슬래시 커맨드, hook → AgentAdapter가 에이전트별 경로에 설치 (Claude Code: `~/.claude/`, OpenCode: `~/.config/opencode/`)
 - artifact 템플릿, domain 가이드 → `~/.reap/templates/` (user-level)
 - genome 파일 → `.reap/genome/` (프로젝트 소유)
+
+## CLI Subcommands
+
+5개: init, status, fix, update, help
 
 ## Slash Commands
 

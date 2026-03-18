@@ -42,6 +42,7 @@
 - 산출물 템플릿: `src/templates/artifacts/` — init/update 시 `~/.reap/templates/`에 설치 (user-level)
 - Domain 가이드: `src/templates/genome/domain/README.md` — init/update 시 `~/.reap/templates/domain-guide.md`에 설치
 - Hook 스크립트: `src/templates/hooks/` — 에이전트별 방식으로 등록 (Claude Code: settings.json, OpenCode: plugins/)
+- Help 텍스트: `src/templates/help/` — 언어별 CLI help 출력 (en.txt, ko.txt)
 - **새 템플릿 추가 시 반드시 `init.ts`의 COMMAND_NAMES 및 설치 로직도 동기화하라**
 
 ## Language

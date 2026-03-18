@@ -34,7 +34,7 @@
 ```
 src/
 ├── cli/commands/  → CLI 진입점 (init, status, update, fix)
-├── core/          → 비즈니스 로직 (generation, lifecycle, compression, hooks, agents, fs, paths, config)
+├── core/          → 비즈니스 로직 (generation, lifecycle, compression, hooks, agents, adaptation, fs, paths, config)
 ├── templates/     → init 시 복사/설치되는 원본 (genome, commands, artifacts, hooks, presets)
 └── types/         → 공유 타입 정의
 ```

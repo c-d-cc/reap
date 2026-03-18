@@ -109,7 +109,7 @@ genome_stale_warning=""
 if command -v git &>/dev/null && [ -d "$PROJECT_ROOT/.git" ]; then
   last_genome_commit=$(git -C "$PROJECT_ROOT" log -1 --format="%H" -- ".reap/genome/" 2>/dev/null || echo "")
   if [ -n "$last_genome_commit" ]; then
-    commits_since=$(git -C "$PROJECT_ROOT" rev-list --count "${last_genome_commit}..HEAD" 2>/dev/null || echo "0")
+    commits_since=$(git -C "$PROJECT_ROOT" rev-list --count "${last_genome_commit}..HEAD" -- src/ tests/ package.json tsconfig.json scripts/ 2>/dev/null || echo "0")
     if [ "$commits_since" -gt 10 ]; then
       genome_stale_warning="WARNING: Genome may be stale — ${commits_since} commits since last Genome update. Consider running /reap.sync to synchronize."
     fi
