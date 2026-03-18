@@ -1,40 +1,45 @@
 import { Link, useLocation } from "wouter";
 import logoPath from "@assets/favicon_1773735683357.png";
+import { useT } from "@/i18n";
 
-export const navGroups = [
-  {
-    label: "Getting Started",
-    items: [
-      { title: "Introduction", href: "/docs/introduction" },
-      { title: "Quick Start", href: "/docs/quick-start" },
-    ]
-  },
-  {
-    label: "Core Concepts",
-    items: [
-      { title: "Core Concepts", href: "/docs/core-concepts" },
-    ]
-  },
-  {
-    label: "Workflow",
-    items: [
-      { title: "Workflow", href: "/docs/workflow" },
-    ]
-  },
-  {
-    label: "Reference",
-    items: [
-      { title: "CLI Reference", href: "/docs/cli" },
-      { title: "Command Reference", href: "/docs/commands" },
-      { title: "Hook Reference", href: "/docs/hooks" },
-      { title: "Configuration", href: "/docs/configuration" },
-      { title: "Advanced", href: "/docs/advanced" },
-    ]
-  }
-];
+export function useNavGroups() {
+  const t = useT();
+  return [
+    {
+      label: t.nav.groups.gettingStarted,
+      items: [
+        { title: t.nav.items.introduction, href: "/docs/introduction" },
+        { title: t.nav.items.quickStart, href: "/docs/quick-start" },
+      ]
+    },
+    {
+      label: t.nav.groups.coreConcepts,
+      items: [
+        { title: t.nav.items.coreConcepts, href: "/docs/core-concepts" },
+      ]
+    },
+    {
+      label: t.nav.groups.workflow,
+      items: [
+        { title: t.nav.items.workflow, href: "/docs/workflow" },
+      ]
+    },
+    {
+      label: t.nav.groups.reference,
+      items: [
+        { title: t.nav.items.cliReference, href: "/docs/cli" },
+        { title: t.nav.items.commandReference, href: "/docs/commands" },
+        { title: t.nav.items.hookReference, href: "/docs/hooks" },
+        { title: t.nav.items.configuration, href: "/docs/configuration" },
+        { title: t.nav.items.advanced, href: "/docs/advanced" },
+      ]
+    }
+  ];
+}
 
 export function NavList({ onNavigate }: { onNavigate?: () => void }) {
   const [location] = useLocation();
+  const navGroups = useNavGroups();
 
   return (
     <>
@@ -47,7 +52,7 @@ export function NavList({ onNavigate }: { onNavigate?: () => void }) {
             {group.items.map((item) => {
               const isActive = location === item.href;
               return (
-                <li key={item.title}>
+                <li key={item.href}>
                   <Link
                     href={item.href}
                     onClick={onNavigate}

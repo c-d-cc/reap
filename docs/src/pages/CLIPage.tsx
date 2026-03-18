@@ -1,72 +1,71 @@
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { CodeBlock } from "@/components/CodeBlock";
+import { useT } from "@/i18n";
 
 export default function CLIPage() {
+  const t = useT();
   return (
     <DocLayout>
-      <DocPage title="CLI Reference" breadcrumb="Reference">
+      <DocPage title={t.cli.title} breadcrumb={t.cli.breadcrumb}>
 
-        <h2 className="text-base font-semibold text-foreground mb-2">reap init</h2>
-        <p className="text-sm text-muted-foreground mb-2">Initialize a new REAP project. Creates the <code className="text-xs bg-muted px-1 rounded">.reap/</code> structure and installs slash commands and hooks to <code className="text-xs bg-muted px-1 rounded">~/.claude/</code>.</p>
+        <h2 className="text-base font-semibold text-foreground mb-2">{t.cli.initTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-2">{t.cli.initDesc}</p>
         <CodeBlock language="bash">{`reap init [name] [options]`}</CodeBlock>
         <div className="mt-3 border border-border rounded-md overflow-hidden text-sm mb-6">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/30">
-                <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">Option</th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">Values</th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">Description</th>
+                {t.cli.initHeaders.map((h) => (
+                  <th key={h} className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              <tr>
-                <td className="px-4 py-2 font-mono text-xs text-primary">--mode</td>
-                <td className="px-4 py-2 font-mono text-xs text-muted-foreground">greenfield | migration | adoption</td>
-                <td className="px-4 py-2 text-xs text-muted-foreground">Project entry mode</td>
-              </tr>
-              <tr>
-                <td className="px-4 py-2 font-mono text-xs text-primary">--preset</td>
-                <td className="px-4 py-2 font-mono text-xs text-muted-foreground">e.g. bun-hono-react</td>
-                <td className="px-4 py-2 text-xs text-muted-foreground">Bootstrap Genome with a pre-configured stack</td>
-              </tr>
+              {t.cli.initOptions.map(([opt, vals, desc]) => (
+                <tr key={opt}>
+                  <td className="px-4 py-2 font-mono text-xs text-primary">{opt}</td>
+                  <td className="px-4 py-2 font-mono text-xs text-muted-foreground">{vals}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground">{desc}</td>
+                </tr>
+              ))}
             </tbody>
           </table>
         </div>
 
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">reap status</h2>
-        <p className="text-sm text-muted-foreground mb-2">Show current project and generation status.</p>
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.statusTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-2">{t.cli.statusDesc}</p>
         <CodeBlock language="bash">{`reap status`}</CodeBlock>
         <p className="text-xs text-muted-foreground mt-2 mb-6">
-          Displays project name, entry mode, active generation (id, goal, stage), and total completed generations.
+          {t.cli.statusNote}
         </p>
 
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">reap update</h2>
-        <p className="text-sm text-muted-foreground mb-2">Sync commands, templates, and hooks to the latest version.</p>
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.updateTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-2">{t.cli.updateDesc}</p>
         <CodeBlock language="bash">{`reap update [--dry-run]`}</CodeBlock>
         <div className="mt-3 border border-border rounded-md overflow-hidden text-sm mb-6">
           <table className="w-full">
             <tbody className="divide-y divide-border">
               <tr>
                 <td className="px-4 py-2 font-mono text-xs text-primary">--dry-run</td>
-                <td className="px-4 py-2 text-xs text-muted-foreground">Show what would be updated without applying changes.</td>
+                <td className="px-4 py-2 text-xs text-muted-foreground">{t.cli.dryRunDesc}</td>
               </tr>
             </tbody>
           </table>
         </div>
 
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">reap fix</h2>
-        <p className="text-sm text-muted-foreground mb-2">Diagnose and repair the <code className="text-xs bg-muted px-1 rounded">.reap/</code> directory structure.</p>
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.fixTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-2">{t.cli.fixDesc}</p>
         <CodeBlock language="bash">{`reap fix`}</CodeBlock>
         <p className="text-xs text-muted-foreground mt-2 mb-6">
-          Checks for missing directories, verifies <code className="text-xs bg-muted px-1 rounded">config.yml</code> exists, validates <code className="text-xs bg-muted px-1 rounded">current.yml</code> stage, and recreates missing structure.
+          {t.cli.fixNote}
         </p>
 
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">reap help</h2>
-        <p className="text-sm text-muted-foreground mb-2">Print CLI commands, slash commands, and a workflow summary.</p>
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.helpTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-2">{t.cli.helpDesc}</p>
         <CodeBlock language="bash">{`reap help`}</CodeBlock>
         <p className="text-xs text-muted-foreground mt-2">
-          Reads <code className="text-xs bg-muted px-1 rounded">~/.claude/settings.json</code> to detect the user's language setting and outputs the help text in that language (currently <code className="text-xs bg-muted px-1 rounded">en</code> and <code className="text-xs bg-muted px-1 rounded">ko</code> supported). Falls back to English if the language file is not found.
+          {t.cli.helpNote}
         </p>
       </DocPage>
     </DocLayout>

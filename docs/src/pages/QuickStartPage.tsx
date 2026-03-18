@@ -1,19 +1,21 @@
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { CodeBlock } from "@/components/CodeBlock";
+import { useT } from "@/i18n";
 
 export default function QuickStartPage() {
+  const t = useT();
   return (
     <DocLayout>
-      <DocPage title="Quick Start" breadcrumb="Getting Started">
-        <h2 className="text-base font-semibold text-foreground mb-2">Install</h2>
+      <DocPage title={t.quickstart.title} breadcrumb={t.quickstart.breadcrumb}>
+        <h2 className="text-base font-semibold text-foreground mb-2">{t.quickstart.install}</h2>
         <CodeBlock language="bash">{`# npm
 npm install -g @c-d-cc/reap
 
 # or Bun
 bun install -g @c-d-cc/reap`}</CodeBlock>
 
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">Initialize a project</h2>
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.quickstart.initProject}</h2>
         <CodeBlock language="bash">{`# New project
 reap init my-project
 
@@ -21,22 +23,22 @@ reap init my-project
 cd my-project
 reap init`}</CodeBlock>
 
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">Run your first generation</h2>
-        <p className="text-sm text-muted-foreground mb-3">Open Claude Code in your project directory:</p>
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.quickstart.runFirst}</h2>
+        <p className="text-sm text-muted-foreground mb-3">{t.quickstart.runFirstDesc}</p>
         <CodeBlock language="bash">{`claude
 > /reap.evolve "Implement user authentication"`}</CodeBlock>
 
         <div className="border-l-2 border-primary pl-4 py-2 mt-4 mb-6">
           <div className="text-sm font-semibold text-foreground mb-1">
-            <code className="text-primary">/reap.evolve</code> is the primary command
+            <code className="text-primary">/reap.evolve</code> {t.quickstart.evolveTitle.replace("/reap.evolve ", "")}
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
-            It runs the entire generation lifecycle — Objective, Planning, Implementation, Validation, and Completion — interactively with you. The AI agent asks questions at each stage, and you approve before advancing. This is the command you'll use most for day-to-day development.
+            {t.quickstart.evolveDesc}
           </p>
         </div>
 
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">Manual stage control</h2>
-        <p className="text-sm text-muted-foreground mb-3">You can also control each stage individually:</p>
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.quickstart.manualControl}</h2>
+        <p className="text-sm text-muted-foreground mb-3">{t.quickstart.manualControlDesc}</p>
         <CodeBlock language="bash">{`> /reap.start            # Start a new generation
 > /reap.objective        # Define objective + spec
 > /reap.planning         # Create implementation plan
@@ -46,24 +48,18 @@ reap init`}</CodeBlock>
 > /reap.next             # Advance to next stage
 > /reap.back             # Return to previous stage`}</CodeBlock>
 
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">What happens during a generation</h2>
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.quickstart.whatHappens}</h2>
         <div className="border border-border rounded-md overflow-hidden text-sm">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/30">
-                <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">Stage</th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">What happens</th>
-                <th className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">Artifact</th>
+                {t.quickstart.stageHeaders.map((h) => (
+                  <th key={h} className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
+                ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {[
-                ["Objective", "Define goal, requirements, and acceptance criteria", "01-objective.md"],
-                ["Planning", "Break down tasks, choose approach, map dependencies", "02-planning.md"],
-                ["Implementation", "Build with AI + human collaboration", "03-implementation.md"],
-                ["Validation", "Run tests, verify completion criteria", "04-validation.md"],
-                ["Completion", "Retrospective + apply Genome changes + archive", "05-completion.md"],
-              ].map(([stage, what, artifact]) => (
+              {t.quickstart.stages.map(([stage, what, artifact]) => (
                 <tr key={stage}>
                   <td className="px-4 py-2 font-mono text-xs text-primary">{stage}</td>
                   <td className="px-4 py-2 text-muted-foreground">{what}</td>
