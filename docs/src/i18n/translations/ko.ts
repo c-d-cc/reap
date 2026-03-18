@@ -295,7 +295,7 @@ export const ko: Translations = {
       ["/reap.back", "이전 단계로 복귀 (micro loop). 회귀 사유를 타임라인과 산출물에 기록."],
       ["/reap.status", "현재 Generation 상태, 단계 진행, backlog 요약, 타임라인, Genome 상태 표시."],
       ["/reap.sync", "소스 코드를 분석하고 Genome 동기화. 활성 Generation이 없으면 직접 업데이트; 있으면 backlog에 기록."],
-      ["/reap.help", "현재 상태에 기반한 상황별 도움말 제공. 다음 할 일 표시, 사용 가능한 커맨드 목록, 주제(workflow, commands, strict, genome, backlog) 전달 시 심화 설명."],
+      ["/reap.help", "24+ 주제의 상황별 도움말 제공. REAP 소개, anti-hallucination 토픽 가드, 상세 설명 (workflow, genome, backlog, strict, agents, hooks, config, evolve, regression, minor-fix, compression, author 및 모든 커맨드 이름)."],
       ["/reap.update", "REAP 업데이트를 확인하고 최신 버전으로 업그레이드. 설치된 버전과 게시된 버전을 비교하고, npm 패키지를 업데이트하고, 커맨드/템플릿/훅을 동기화."],
     ],
     lifecycleFlow: "라이프사이클 흐름",

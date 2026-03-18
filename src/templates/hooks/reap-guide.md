@@ -130,6 +130,10 @@ Only one of `command` or `prompt` should be set per entry.
 
 Hooks are executed by the AI agent.
 
+## Multi-Agent Support
+
+REAP supports multiple AI agents simultaneously through the AgentAdapter abstraction. Currently supported: **Claude Code** and **OpenCode**. Detected agents are listed in `.reap/config.yml` under the `agents` field (managed by `reap init` / `reap update`). Slash commands and session hooks are installed to each detected agent's configuration directory.
+
 ## Role Separation
 
 | Component | Role |

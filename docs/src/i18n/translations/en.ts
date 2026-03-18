@@ -293,7 +293,7 @@ export const en = {
       ["/reap.back", "Return to a previous stage (micro loop). Records regression reason in timeline and artifact."],
       ["/reap.status", "Show current generation state, stage progress, backlog summary, timeline, and genome health."],
       ["/reap.sync", "Analyze source code and synchronize Genome. Direct update when no active generation; records to backlog otherwise."],
-      ["/reap.help", "Provide contextual help based on current state. Shows what to do next, lists available commands, and explains deeper topics when given a topic argument (workflow, commands, strict, genome, backlog)."],
+      ["/reap.help", "Provide contextual help with 24+ topics, including REAP introduction, anti-hallucination topic guard, and detailed explanations (workflow, genome, backlog, strict, agents, hooks, config, evolve, regression, minor-fix, compression, author, and all command names)."],
       ["/reap.update", "Check for REAP updates and upgrade to the latest version. Compares installed vs published version, updates the npm package, and syncs commands/templates/hooks."],
     ],
     lifecycleFlow: "Lifecycle Flow",

@@ -181,7 +181,7 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.back` | Return to a previous stage (micro loop) |
 | `/reap.status` | Show current generation state and project health |
 | `/reap.sync` | Synchronize Genome with current source code |
-| `/reap.help` | Contextual AI help based on current state (topic: workflow, commands, strict, genome, backlog) |
+| `/reap.help` | Contextual AI help with 24+ topics (workflow, genome, backlog, strict, agents, hooks, config, evolve, regression, author, and all command names) |
 | `/reap.update` | Check for REAP updates and upgrade to the latest version |
 | **`/reap.evolve`** | **Run an entire generation from start to finish (recommended)** |
 
@@ -314,6 +314,15 @@ reap init my-project --preset bun-hono-react
 | `greenfield` | Build a new project from scratch (default) |
 | `migration` | Build anew while referencing an existing system |
 | `adoption` | Apply REAP to an existing codebase |
+
+## Performance
+
+- **10x Faster Session Start** — Session hook uses Node.js `JSON.stringify` instead of shell `escape_for_json`, reducing startup from ~12s to ~1s.
+- **Init Progress** — `reap init` displays step-by-step progress messages and a Getting Started guide upon completion.
+
+## Author
+
+**HyeonIL Choi** (At C to D) — [hichoi@c-d.cc](mailto:hichoi@c-d.cc) | [reap.cc](https://reap.cc) | [GitHub](https://github.com/c-d-cc/reap)
 
 ## License
 
