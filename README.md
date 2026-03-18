@@ -9,7 +9,7 @@
   A development pipeline where AI and humans evolve software across generations.
 </p>
 
-> 한국어 버전은 [README.ko.md](README.ko.md)를 참조하세요.
+> [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
 <table align="center">
 <tr>

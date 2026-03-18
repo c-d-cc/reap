@@ -9,7 +9,7 @@
   AI와 인간이 세대(Generation)를 거듭하며 소프트웨어를 진화시키는 개발 파이프라인.
 </p>
 
-> For English version, see [README.md](README.md).
+> [English](README.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
 <table align="center">
 <tr>
