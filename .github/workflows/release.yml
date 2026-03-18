@@ -23,7 +23,7 @@ jobs:
 
       - run: bun install
 
-      - run: bun test
+      - run: bun test tests/
 
       - run: npm run build
 
