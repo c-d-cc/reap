@@ -15,45 +15,59 @@ description: "REAP Help — Contextual help based on current state"
 
 ## Basic Help (no arguments)
 
-Read `.reap/life/current.yml` and `.reap/config.yml`, then output this template with values filled in:
+Read `.reap/life/current.yml` and `.reap/config.yml`, then output EXACTLY this format with values filled in. Use markdown formatting. Do NOT add extra explanation.
 
-```
-REAP — AI와 사람이 협업하여 소프트웨어를 세대(Generation) 단위로 진화시키는 개발 파이프라인.
-각 세대는 5단계를 거칩니다: Objective → Planning → Implementation → Validation → Completion
-Genome(.reap/genome/)에 프로젝트 원칙과 규칙을 기록하고, 세대를 거듭하며 진화합니다.
+---
 
-[If active generation: "🔄 {id} | {goal} | Stage: {stage} → /reap.{stage} 또는 /reap.next"]
-[If no generation: "No active Generation → /reap.start 또는 /reap.evolve"]
+**REAP** — Recursive Evolutionary Autonomous Pipeline
 
-커맨드:
-  /reap.start          새 Generation을 시작하고 goal을 설정
-  /reap.evolve       ⚡ 전체 lifecycle 자율 실행 (사람 개입 최소화)
-  /reap.objective      목표, 요구사항, 완료 기준을 정의
-  /reap.planning       태스크 분해 + 구현 계획 수립
-  /reap.implementation 계획에 따라 코드 구현
-  /reap.validation     테스트 실행, 완료 기준 검증
-  /reap.completion     회고, Genome 변경 반영, 마무리
-  /reap.next           다음 stage로 전진
-  /reap.back           이전 stage로 회귀
-  /reap.status         프로젝트 상태 + Genome 건강도
-  /reap.sync           Genome ↔ 소스코드 동기화
-  /reap.update         REAP 버전 확인 + 업그레이드
-  /reap.help           도움말. /reap.help {topic} 으로 상세 설명
+AI와 사람이 협업하여 소프트웨어를 세대(Generation) 단위로 진화시키는 개발 파이프라인입니다.
+각 세대는 5단계 lifecycle을 거칩니다:
 
-Topics: workflow, genome, backlog, strict, agents, hooks, config, evolve, regression, author 등
+`Objective` → `Planning` → `Implementation` → `Validation` → `Completion`
 
-Strict: {on/off} | Auto-Update: {on/off} | Language: {value}
-```
+Genome(`.reap/genome/`)에 프로젝트의 설계 원칙과 규칙을 기록하고, 세대를 거듭하며 점진적으로 진화합니다.
 
-Output the above as-is (not in a code block), with values substituted. Do NOT add extra explanation.
+---
+
+[If active generation exists, show:]
+> 🔄 **{id}** — {goal}
+> Stage: `{stage}` → 다음: `/reap.{stage}` 또는 `/reap.next`
+
+[If no active generation, show:]
+> No active Generation → `/reap.start` 또는 `/reap.evolve`
+
+---
+
+### 커맨드
+
+| Command | Description |
+|---------|-------------|
+| `/reap.start` | 새 Generation을 시작하고 goal을 설정 |
+| `/reap.evolve` | ⚡ 전체 lifecycle을 자율적으로 실행 (사람 개입 최소화) |
+| `/reap.objective` | 이번 Generation의 목표, 요구사항, 완료 기준을 정의 |
+| `/reap.planning` | 태스크를 분해하고 구현 계획을 수립 |
+| `/reap.implementation` | 계획에 따라 코드를 구현하고 진행 상황을 기록 |
+| `/reap.validation` | 테스트 실행, 완료 기준 충족 여부를 검증 |
+| `/reap.completion` | 회고, Genome 변경 반영, Generation 마무리 |
+| `/reap.next` | 다음 stage로 전진 (completion → archiving + commit) |
+| `/reap.back` | 이전 stage로 회귀 (regression 사유 기록) |
+| `/reap.status` | 프로젝트 상태, Generation 진행도, backlog, Genome 건강도 표시 |
+| `/reap.sync` | 현재 소스코드와 Genome 간 차이를 분석하고 동기화 |
+| `/reap.update` | REAP 최신 버전 확인 및 업그레이드 |
+| `/reap.help` | 도움말. `/reap.help {topic}`으로 주제별 상세 설명 |
+
+💡 `/reap.help {topic}` — workflow, genome, backlog, strict, agents, hooks, config, evolve, regression, author ...
+
+**Config**: Strict: {on/off} · Auto-Update: {on/off} · Language: {value}
 
 ---
 
 ## Topic Help
 
-If ARGUMENTS contains a topic, look up from the list below. **If NOT in the list, respond: "Unknown topic: '{topic}'. /reap.help 로 available topics를 확인하세요."**
+If ARGUMENTS contains a topic, look up from the list below. **If NOT in the list, respond: "Unknown topic: '{topic}'. `/reap.help`로 available topics를 확인하세요."**
 
-For command-name topics: read `reap.{name}.md` from the same directory as this file.
+For command-name topics: read `reap.{name}.md` from the same directory as this file, then explain.
 
 #### Topics
 
