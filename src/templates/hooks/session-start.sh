@@ -18,6 +18,23 @@ if [ ! -d "$REAP_DIR" ]; then
   exit 0
 fi
 
+# Auto-update check (synchronous so we can report the result)
+CONFIG_FILE="${REAP_DIR}/config.yml"
+auto_update_message=""
+if [ -f "$CONFIG_FILE" ]; then
+  auto_update=$(grep "^autoUpdate:" "$CONFIG_FILE" 2>/dev/null | sed 's/^autoUpdate: *//' | tr -d ' ' || true)
+  if [ "$auto_update" = "true" ]; then
+    installed=$(reap --version 2>/dev/null || echo "")
+    latest=$(npm view @c-d-cc/reap version 2>/dev/null || echo "")
+    if [ -n "$installed" ] && [ -n "$latest" ] && [ "$installed" != "$latest" ]; then
+      if npm update -g @c-d-cc/reap >/dev/null 2>&1; then
+        reap update >/dev/null 2>&1 || true
+        auto_update_message="REAP auto-updated: v${installed} → v${latest}"
+      fi
+    fi
+  fi
+fi
+
 # Read REAP guide
 reap_guide=""
 if [ -f "$GUIDE_FILE" ]; then
@@ -147,7 +164,13 @@ if [ -n "$genome_stale_warning" ]; then
   stale_section="\n\n## Genome Staleness\n${genome_stale_warning}\nIf the user wants to proceed without syncing, ask: \"The Genome may be stale. Would you like to run /reap.sync now, or do it later?\" and respect their choice."
 fi
 
-reap_context="<REAP_WORKFLOW>\n${reap_guide}\n\n---\n\n## Genome (Project Knowledge — treat as authoritative source of truth)\n${genome_content}\n\n---\n\n## Current State\n${generation_context}${stale_section}${strict_section}\n\n## Rules\n1. ALL development work MUST follow the REAP lifecycle. Do NOT bypass it.\n2. Before writing any code, check if a Generation is active and what stage it is in.\n3. If a Generation is active, use \`${next_cmd}\` to proceed with the current stage.\n4. If no Generation is active, use \`/reap.start\` to start a new one.\n5. Do NOT implement features, fix bugs, or make changes outside of the REAP lifecycle unless the user explicitly asks to bypass it.\n6. When the user says \"reap evolve\", \"next stage\", \"proceed\", or similar — invoke the appropriate REAP skill.\n7. **Genome is the authoritative knowledge source.** When making decisions about architecture, conventions, or constraints, ALWAYS reference the Genome first. If code contradicts Genome, flag it as a potential genome-change backlog item.\n8. If you notice the Genome is outdated or missing information relevant to your current task, inform the user and suggest running \`/reap.sync\`.\n</REAP_WORKFLOW>"
+# Build auto-update section
+update_section=""
+if [ -n "$auto_update_message" ]; then
+  update_section="\n\n## Auto-Update\n${auto_update_message}. Tell the user: \"${auto_update_message}\""
+fi
+
+reap_context="<REAP_WORKFLOW>\n${reap_guide}\n\n---\n\n## Genome (Project Knowledge — treat as authoritative source of truth)\n${genome_content}\n\n---\n\n## Current State\n${generation_context}${stale_section}${strict_section}${update_section}\n\n## Rules\n1. ALL development work MUST follow the REAP lifecycle. Do NOT bypass it.\n2. Before writing any code, check if a Generation is active and what stage it is in.\n3. If a Generation is active, use \`${next_cmd}\` to proceed with the current stage.\n4. If no Generation is active, use \`/reap.start\` to start a new one.\n5. Do NOT implement features, fix bugs, or make changes outside of the REAP lifecycle unless the user explicitly asks to bypass it.\n6. When the user says \"reap evolve\", \"next stage\", \"proceed\", or similar — invoke the appropriate REAP skill.\n7. **Genome is the authoritative knowledge source.** When making decisions about architecture, conventions, or constraints, ALWAYS reference the Genome first. If code contradicts Genome, flag it as a potential genome-change backlog item.\n8. If you notice the Genome is outdated or missing information relevant to your current task, inform the user and suggest running \`/reap.sync\`.\n</REAP_WORKFLOW>"
 
 escaped_context=$(escape_for_json "$reap_context")
 

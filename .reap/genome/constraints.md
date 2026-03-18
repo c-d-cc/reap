@@ -18,13 +18,13 @@
 - 파일 I/O는 Node.js fs/promises 사용 (Bun API 직접 사용 금지) — `src/core/fs.ts` 유틸 경유
 - 외부 서비스 의존 없음 — 로컬 파일시스템만 사용
 - `.reap/` 디렉토리 구조는 init이 보장, 사용자가 수동 생성할 필요 없음
-- 슬래시 커맨드, hook → `~/.claude/` (user-level)
+- 슬래시 커맨드, hook → AgentAdapter가 에이전트별 경로에 설치 (Claude Code: `~/.claude/`, OpenCode: `~/.config/opencode/`)
 - artifact 템플릿, domain 가이드 → `~/.reap/templates/` (user-level)
 - genome 파일 → `.reap/genome/` (프로젝트 소유)
 
 ## Slash Commands
 
-12개: reap.objective, reap.planning, reap.implementation, reap.validation, reap.completion, reap.evolve, reap.start, reap.next, reap.back, reap.status, reap.sync, reap.help
+13개: reap.objective, reap.planning, reap.implementation, reap.validation, reap.completion, reap.evolve, reap.start, reap.next, reap.back, reap.status, reap.sync, reap.update, reap.help
 
 ## Hooks
 

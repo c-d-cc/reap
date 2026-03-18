@@ -2,7 +2,7 @@ import { mkdir } from "fs/promises";
 import { join } from "path";
 import { ReapPaths } from "../../core/paths";
 import { ConfigManager } from "../../core/config";
-import { registerClaudeHook } from "../../core/hooks";
+import { AgentRegistry } from "../../core/agents";
 import { fileExists, readTextFileOrThrow, writeTextFile } from "../../core/fs";
 import type { ReapConfig } from "../../types";
 
@@ -10,6 +10,7 @@ export const COMMAND_NAMES = [
   "reap.objective", "reap.planning", "reap.implementation",
   "reap.validation", "reap.completion", "reap.evolve",
   "reap.start", "reap.next", "reap.back", "reap.status", "reap.sync", "reap.help",
+  "reap.update",
 ];
 
 export async function initProject(
@@ -17,7 +18,7 @@ export async function initProject(
   projectName: string,
   entryMode: "greenfield" | "migration" | "adoption",
   preset?: string,
-): Promise<void> {
+): Promise<{ agents: string[] }> {
   const paths = new ReapPaths(projectRoot);
 
   if (await paths.isReapProject()) {
@@ -73,14 +74,14 @@ export async function initProject(
   const domainGuideDest = join(ReapPaths.userReapTemplates, "domain-guide.md");
   await writeTextFile(domainGuideDest, await readTextFileOrThrow(domainGuideSrc));
 
-  // Install slash commands to user-level ~/.claude/commands/
-  await mkdir(ReapPaths.userClaudeCommands, { recursive: true });
-  for (const cmd of COMMAND_NAMES) {
-    const src = join(ReapPaths.packageCommandsDir, `${cmd}.md`);
-    const dest = join(ReapPaths.userClaudeCommands, `${cmd}.md`);
-    await writeTextFile(dest, await readTextFileOrThrow(src));
+  // Detect installed agents and install commands + hooks for each
+  const detectedAgents = await AgentRegistry.detectInstalled();
+  const sourceDir = ReapPaths.packageCommandsDir;
+
+  for (const adapter of detectedAgents) {
+    await adapter.installCommands(COMMAND_NAMES, sourceDir);
+    await adapter.registerSessionHook();
   }
 
-  // Register SessionStart hook in user-level ~/.claude/settings.json
-  await registerClaudeHook();
+  return { agents: detectedAgents.map(a => a.displayName) };
 }

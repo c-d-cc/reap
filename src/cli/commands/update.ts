@@ -1,8 +1,10 @@
 import { readdir, unlink, rm, mkdir } from "fs/promises";
 import { join } from "path";
 import { ReapPaths } from "../../core/paths";
-import { syncHookRegistration, migrateHooksJsonToSettings } from "../../core/hooks";
+import { AgentRegistry } from "../../core/agents";
+import { migrateHooks } from "../../core/hooks";
 import { readTextFile, readTextFileOrThrow, writeTextFile } from "../../core/fs";
+import { ConfigManager } from "../../core/config";
 
 interface UpdateResult {
   updated: string[];
@@ -19,35 +21,41 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
 
   const result: UpdateResult = { updated: [], skipped: [], removed: [] };
 
-  // 1. Sync slash commands to user-level ~/.claude/commands/
-  await mkdir(ReapPaths.userClaudeCommands, { recursive: true });
+  // Read config for agent overrides
+  const config = await ConfigManager.read(paths);
+
+  // Get active agents
+  const adapters = await AgentRegistry.getActiveAdapters(config ?? undefined);
+
+  // 1. Sync slash commands to each agent
   const commandsDir = ReapPaths.packageCommandsDir;
   const commandFiles = await readdir(commandsDir);
-  for (const file of commandFiles) {
-    if (!file.endsWith(".md")) continue;
-    const src = await readTextFileOrThrow(join(commandsDir, file));
-    const dest = join(ReapPaths.userClaudeCommands, file);
-    const existingContent = await readTextFile(dest);
-    if (existingContent !== null && existingContent === src) {
-      result.skipped.push(`~/.claude/commands/${file}`);
-    } else {
-      if (!dryRun) await writeTextFile(dest, src);
-      result.updated.push(`~/.claude/commands/${file}`);
-    }
-  }
+  for (const adapter of adapters) {
+    const agentCmdDir = adapter.getCommandsDir();
+    const label = `${adapter.displayName}`;
 
-  // 1b. Cleanup stale commands in user-level
-  const validCommandFiles = new Set(commandFiles);
-  try {
-    const existing = await readdir(ReapPaths.userClaudeCommands);
-    for (const file of existing) {
-      if (!file.startsWith("reap.") || !file.endsWith(".md")) continue;
-      if (!validCommandFiles.has(file)) {
-        if (!dryRun) await unlink(join(ReapPaths.userClaudeCommands, file));
-        result.removed.push(`~/.claude/commands/${file}`);
+    for (const file of commandFiles) {
+      if (!file.endsWith(".md")) continue;
+      const src = await readTextFileOrThrow(join(commandsDir, file));
+      const dest = join(agentCmdDir, file);
+      const existingContent = await readTextFile(dest);
+      if (existingContent !== null && existingContent === src) {
+        result.skipped.push(`[${label}] commands/${file}`);
+      } else {
+        if (!dryRun) {
+          await mkdir(agentCmdDir, { recursive: true });
+          await writeTextFile(dest, src);
+        }
+        result.updated.push(`[${label}] commands/${file}`);
       }
     }
-  } catch { /* dir may not exist */ }
+
+    // Cleanup stale commands
+    const validCommandFiles = new Set(commandFiles);
+    if (!dryRun) {
+      await adapter.removeStaleCommands(validCommandFiles);
+    }
+  }
 
   // 2. Sync artifact templates + domain guide to ~/.reap/templates/
   await mkdir(ReapPaths.userReapTemplates, { recursive: true });
@@ -73,18 +81,22 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     result.updated.push(`~/.reap/templates/domain-guide.md`);
   }
 
-  // 3. Migrate hooks.json → settings.json (if needed)
-  const migration = await migrateHooksJsonToSettings(dryRun);
-  if (migration.action === "migrated") {
-    result.updated.push(`~/.claude/settings.json (migrated from hooks.json)`);
+  // 3. Run migrations for all agents
+  const migrations = await migrateHooks(dryRun);
+  for (const m of migrations.results) {
+    if (m.action === "migrated") {
+      result.updated.push(`[${m.agent}] hooks (migrated)`);
+    }
   }
 
-  // 4. Sync hook registration in user-level ~/.claude/settings.json
-  const hookReg = await syncHookRegistration(dryRun);
-  if (hookReg.action === "updated") {
-    result.updated.push(`~/.claude/settings.json (hooks)`);
-  } else {
-    result.skipped.push(`~/.claude/settings.json (hooks)`);
+  // 4. Sync hook registration for all agents
+  for (const adapter of adapters) {
+    const hookResult = await adapter.syncSessionHook(dryRun);
+    if (hookResult.action === "updated") {
+      result.updated.push(`[${adapter.displayName}] session hook`);
+    } else {
+      result.skipped.push(`[${adapter.displayName}] session hook`);
+    }
   }
 
   // 5. Migration: clean up legacy project-level files
@@ -95,23 +107,17 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
 
 /**
  * Remove legacy project-level commands, templates, hooks that are no longer needed.
- * These were moved to user-level in gen-007.
  */
 async function migrateLegacyFiles(
   paths: ReapPaths,
   dryRun: boolean,
   result: UpdateResult,
 ): Promise<void> {
-  // Remove .reap/commands/
   await removeDirIfExists(paths.legacyCommands, ".reap/commands/", dryRun, result);
-
-  // Remove .reap/templates/
   await removeDirIfExists(paths.legacyTemplates, ".reap/templates/", dryRun, result);
-
-  // Remove .reap/hooks/
   await removeDirIfExists(paths.legacyHooks, ".reap/hooks/", dryRun, result);
 
-  // Remove .claude/commands/reap.* files (but preserve non-reap commands)
+  // Remove project-level .claude/commands/reap.* files
   try {
     const claudeCmdDir = paths.legacyClaudeCommands;
     const files = await readdir(claudeCmdDir);
@@ -123,7 +129,7 @@ async function migrateLegacyFiles(
     }
   } catch { /* dir may not exist */ }
 
-  // Clean up .claude/hooks.json — remove project-level .reap/hooks/ references
+  // Clean up .claude/hooks.json legacy references
   try {
     const legacyHooksJson = paths.legacyClaudeHooksJson;
     const fileContent = await readTextFile(legacyHooksJson);
@@ -144,7 +150,6 @@ async function migrateLegacyFiles(
         if (filtered.length !== sessionStart.length) {
           if (!dryRun) {
             if (filtered.length === 0 && Object.keys(content).length === 1) {
-              // hooks.json only had REAP hook, remove the file
               await unlink(legacyHooksJson);
               result.removed.push(`.claude/hooks.json (legacy)`);
             } else {

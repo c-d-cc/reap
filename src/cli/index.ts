@@ -6,6 +6,7 @@ import { getStatus } from "./commands/status";
 import { fixProject } from "./commands/fix";
 import { LifeCycle } from "../core/lifecycle";
 import { ReapPaths } from "../core/paths";
+import { AgentRegistry } from "../core/agents";
 import { readTextFile } from "../core/fs";
 import { join } from "path";
 
@@ -38,9 +39,14 @@ program
         }
       }
 
-      await initProject(cwd, name, mode, options.preset);
+      const initResult = await initProject(cwd, name, mode, options.preset);
       console.log(`✓ REAP project "${name}" initialized (${mode} mode)`);
       console.log(`  .reap/ directory created with genome, environment, life, lineage`);
+      if (initResult.agents.length > 0) {
+        console.log(`  Agents: ${initResult.agents.join(", ")}`);
+      } else {
+        console.log(`  No AI agents detected. Install Claude Code or OpenCode, then run 'reap update'.`);
+      }
       console.log(`\nNext: run '/reap.start' to start your first Generation`);
     } catch (e: any) {
       console.error(`Error: ${e.message}`);
@@ -129,17 +135,12 @@ program
   .command("help")
   .description("Show REAP commands, slash commands, and workflow overview")
   .action(async () => {
-    // Detect user language from ~/.claude/settings.json
+    // Detect user language from any installed agent
     let lang = "en";
-    const settingsContent = await readTextFile(ReapPaths.userClaudeSettingsJson);
-    if (settingsContent) {
-      try {
-        const settings = JSON.parse(settingsContent);
-        if (settings.language) {
-          const l = settings.language.toLowerCase();
-          if (l === "korean" || l === "ko") lang = "ko";
-        }
-      } catch { /* ignore */ }
+    const detectedLang = await AgentRegistry.readLanguage();
+    if (detectedLang) {
+      const l = detectedLang.toLowerCase();
+      if (l === "korean" || l === "ko") lang = "ko";
     }
 
     // Load language-specific help text

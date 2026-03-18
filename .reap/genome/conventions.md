@@ -33,14 +33,15 @@
 - **릴리스 흐름**: `npm version patch/minor/major` → `git push && git push --tags`
 - **자동화 단계**: 테스트 → 빌드 → 버전 검증 (tag = package.json) → npm publish → GitHub Release 생성
 - **버전 주입**: `scripts/build.js`가 `package.json` 버전을 빌드 시 `--define`으로 주입 — 소스에 버전 하드코딩 금지
+- **릴리스 노트**: `RELEASE_NOTES.md` — version bump 시 `onGenerationComplete` hook이 자동 생성. `release.yml`에서 참조 (없으면 `--generate-notes` fallback)
 
 ## Template Conventions
 
 - Genome 템플릿: `src/templates/genome/` — init 시 `.reap/genome/`으로 복사 (프로젝트 소유)
-- 슬래시 커맨드: `src/templates/commands/` — init/update 시 `~/.claude/commands/`에 설치 (user-level)
+- 슬래시 커맨드: `src/templates/commands/` — init/update 시 감지된 에이전트별 commands 경로에 설치
 - 산출물 템플릿: `src/templates/artifacts/` — init/update 시 `~/.reap/templates/`에 설치 (user-level)
 - Domain 가이드: `src/templates/genome/domain/README.md` — init/update 시 `~/.reap/templates/domain-guide.md`에 설치
-- Hook 스크립트: `src/templates/hooks/` — 패키지 내부에서 직접 실행, `~/.claude/settings.json`에 등록
+- Hook 스크립트: `src/templates/hooks/` — 에이전트별 방식으로 등록 (Claude Code: settings.json, OpenCode: plugins/)
 - **새 템플릿 추가 시 반드시 `init.ts`의 COMMAND_NAMES 및 설치 로직도 동기화하라**
 
 ## Language

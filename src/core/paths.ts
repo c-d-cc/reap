@@ -37,9 +37,13 @@ export class ReapPaths {
   generationDir(genId: string): string { return join(this.lineage, genId); }
 
   // User-level Claude Code integration
+  /** @deprecated Use ClaudeCodeAdapter instead */
   static get userClaudeDir(): string { return join(homedir(), ".claude"); }
+  /** @deprecated Use ClaudeCodeAdapter.getCommandsDir() instead */
   static get userClaudeCommands(): string { return join(ReapPaths.userClaudeDir, "commands"); }
+  /** @deprecated Use ClaudeCodeAdapter.migrate() instead */
   static get userClaudeHooksJson(): string { return join(ReapPaths.userClaudeDir, "hooks.json"); }
+  /** @deprecated Use ClaudeCodeAdapter instead */
   static get userClaudeSettingsJson(): string { return join(ReapPaths.userClaudeDir, "settings.json"); }
 
   // User-level REAP templates

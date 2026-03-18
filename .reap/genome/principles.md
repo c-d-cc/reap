@@ -21,7 +21,7 @@
 | ADR-001 | TypeScript + Node.js 호환 | 타입 안전성, Bun은 개발/테스트용, 배포는 Node.js 번들 | 2026-03 |
 | ADR-002 | Commander.js CLI | 성숙한 CLI 프레임워크, 서브커맨드 지원 | 2026-03 |
 | ADR-003 | YAML for config/state | 사람이 읽기 쉽고 에이전트가 파싱하기 쉬움 | 2026-03 |
-| ADR-004 | 슬래시 커맨드 = ~/.claude/commands/ 설치 | Claude Code 네이티브 연동, user-level 관리 | 2026-03 |
+| ADR-004 | AgentAdapter 추상화 + 멀티 에이전트 지원 | 감지된 에이전트별 commands/hooks 경로에 설치 | 2026-03 |
 | ADR-005 | 4축 구조 (genome/environment/life/lineage) | 관심사 분리: 원칙/환경/실행/이력 | 2026-03 |
 | ADR-006 | examples/로 실전 검증 | dog-fooding: 같은 repo에서 사용자 경험 검증 가능 | 2026-03 |
 | ADR-007 | 5단계 lifecycle (objective~completion) | 8단계에서 간소화, 핵심 단계만 유지 | 2026-03 |
@@ -34,7 +34,7 @@
 ```
 src/
 ├── cli/commands/  → CLI 진입점 (init, status, update, fix)
-├── core/          → 비즈니스 로직 (generation, lifecycle, compression, hooks, fs, paths, config)
+├── core/          → 비즈니스 로직 (generation, lifecycle, compression, hooks, agents, fs, paths, config)
 ├── templates/     → init 시 복사/설치되는 원본 (genome, commands, artifacts, hooks, presets)
 └── types/         → 공유 타입 정의
 ```
