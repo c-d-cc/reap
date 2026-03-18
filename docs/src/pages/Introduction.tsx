@@ -25,8 +25,8 @@ export default function Introduction() {
 
         <ul className="text-sm space-y-2 mb-8">
           {t.intro.layerItems.map((item, i) => (
-            <li key={item.label} className="flex gap-2">
-              <span className="text-primary font-mono mt-0.5 shrink-0 w-24">{item.label}</span>
+            <li key={item.label} className="flex gap-4">
+              <span className="text-primary font-mono mt-0.5 shrink-0 w-28">{item.label}</span>
               <span className="text-muted-foreground">{t.intro.layerDescs[i]}</span>
             </li>
           ))}

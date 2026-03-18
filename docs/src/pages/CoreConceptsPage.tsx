@@ -19,14 +19,15 @@ export default function CoreConceptsPage() {
 ├── conventions.md     # Development rules/conventions
 └── constraints.md     # Technical constraints/choices`}</CodeBlock>
 
-        <div className="mt-4 space-y-3 mb-6">
-          <div className="border-l-2 border-primary pl-3 py-1">
-            <div className="text-xs font-semibold text-foreground mb-0.5">{t.concepts.genomeImmutability}</div>
-            <p className="text-xs text-muted-foreground">{t.concepts.genomeImmutabilityDesc}</p>
+        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.concepts.principles}</h2>
+        <div className="space-y-3 mb-6">
+          <div className="border border-border rounded-md p-3 bg-card">
+            <div className="text-sm font-semibold text-foreground mb-1">{t.concepts.genomeImmutability}</div>
+            <p className="text-xs text-muted-foreground leading-relaxed">{t.concepts.genomeImmutabilityDesc}</p>
           </div>
-          <div className="border-l-2 border-primary pl-3 py-1">
-            <div className="text-xs font-semibold text-foreground mb-0.5">{t.concepts.envImmutability}</div>
-            <p className="text-xs text-muted-foreground">{t.concepts.envImmutabilityDesc}</p>
+          <div className="border border-border rounded-md p-3 bg-card">
+            <div className="text-sm font-semibold text-foreground mb-1">{t.concepts.envImmutability}</div>
+            <p className="text-xs text-muted-foreground leading-relaxed">{t.concepts.envImmutabilityDesc}</p>
           </div>
         </div>
 
@@ -75,22 +76,44 @@ export default function CoreConceptsPage() {
         <p className="text-sm text-muted-foreground mb-3">
           {t.concepts.backlogDesc}
         </p>
-        <div className="space-y-2 mb-4">
-          {t.concepts.backlogTypes.map((item) => (
-            <div key={item.type} className="flex gap-3 text-sm">
-              <code className="text-xs bg-muted text-primary px-1.5 py-0.5 rounded h-fit mt-0.5 shrink-0">{item.type}</code>
-              <span className="text-muted-foreground text-xs">{item.desc}</span>
-            </div>
-          ))}
+        <div className="border border-border rounded-md overflow-hidden text-sm mb-4">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border bg-muted/30">
+                {t.concepts.backlogHeaders.map((h) => (
+                  <th key={h} className={`text-left px-4 py-2 text-xs font-semibold text-muted-foreground ${h === t.concepts.backlogHeaders[0] ? "w-48" : ""}`}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {t.concepts.backlogTypes.map((item) => (
+                <tr key={item.type}>
+                  <td className="px-4 py-2 font-mono text-xs text-primary">{item.type}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground">{item.desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
         <p className="text-xs text-muted-foreground mb-2">{t.concepts.statusField}</p>
-        <div className="space-y-2 mb-4">
-          {t.concepts.statuses.map((item) => (
-            <div key={item.type} className="flex gap-3 text-sm">
-              <code className="text-xs bg-muted text-primary px-1.5 py-0.5 rounded h-fit mt-0.5 shrink-0">{item.type}</code>
-              <span className="text-muted-foreground text-xs">{item.desc}</span>
-            </div>
-          ))}
+        <div className="border border-border rounded-md overflow-hidden text-sm mb-4">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border bg-muted/30">
+                {t.concepts.statusHeaders.map((h) => (
+                  <th key={h} className={`text-left px-4 py-2 text-xs font-semibold text-muted-foreground ${h === t.concepts.statusHeaders[0] ? "w-48" : ""}`}>{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {t.concepts.statuses.map((item) => (
+                <tr key={item.type}>
+                  <td className="px-4 py-2 font-mono text-xs text-primary">{item.type}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground">{item.desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
         <p className="text-xs text-muted-foreground mb-3">
           {t.concepts.archivingNote}

@@ -4,20 +4,21 @@ export const en = {
     getStarted: "Get Started",
     groups: {
       gettingStarted: "Getting Started",
-      coreConcepts: "Core Concepts",
-      workflow: "Workflow",
+      guide: "Guide",
       reference: "Reference",
+      other: "Other",
     },
     items: {
       introduction: "Introduction",
       quickStart: "Quick Start",
       coreConcepts: "Core Concepts",
       workflow: "Workflow",
+      advanced: "Advanced",
       cliReference: "CLI Reference",
       commandReference: "Command Reference",
       hookReference: "Hook Reference",
+      comparison: "Comparison",
       configuration: "Configuration",
-      advanced: "Advanced",
     },
   },
 
@@ -25,7 +26,7 @@ export const en = {
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
     title: "REAP Documentation",
-    description: "A development pipeline where AI and humans collaborate to incrementally evolve an Application across successive Generations. Persistent context, structured lifecycle, living design docs.",
+    description: "A development pipeline where AI and humans collaborate to evolve an Application across successive Generations. Context persists between sessions, development follows a structured lifecycle, and design docs evolve with your code.",
     getStarted: "Get Started →",
     whyReap: "Why REAP?",
     whyReapDesc: "AI agents are powerful — but without structure, development becomes chaotic. Context resets every session. Code changes scatter without purpose. Design docs drift from reality. Lessons from past work vanish.",
@@ -77,7 +78,8 @@ export const en = {
       { href: "/docs/cli", title: "CLI Reference", desc: "reap init, status, update, fix with all options." },
       { href: "/docs/commands", title: "Command Reference", desc: "/reap.evolve, stage commands, /reap.status — all slash commands." },
       { href: "/docs/hooks", title: "Hook Reference", desc: "Lifecycle hooks: command and prompt types, events, SessionStart." },
-      { href: "/docs/advanced", title: "Advanced", desc: "Lineage compression, presets, entry modes, comparisons." },
+      { href: "/docs/comparison", title: "Comparison", desc: "How REAP compares to traditional spec-driven development tools." },
+      { href: "/docs/advanced", title: "Advanced", desc: "Lineage compression, presets, entry modes." },
     ],
   },
 
@@ -121,6 +123,15 @@ export const en = {
   quickstart: {
     title: "Quick Start",
     breadcrumb: "Getting Started",
+    prerequisites: "Prerequisites",
+    prerequisiteItems: [
+      { name: "Node.js", desc: "v18 or later", required: true },
+      { name: "npm", desc: "included with Node.js", required: true },
+      { name: "Claude Code", desc: "Anthropic's CLI for Claude", required: true },
+      { name: "Bun", desc: "alternative package manager", required: false },
+    ],
+    required: "Required",
+    optional: "Optional",
     install: "Install",
     initProject: "Initialize a project",
     runFirst: "Run your first generation",
@@ -146,6 +157,7 @@ export const en = {
     breadcrumb: "Concepts",
     genomeTitle: "Genome",
     genomeDesc: "The Genome is the application's genetic information — architecture principles, business rules, conventions, and technical constraints.",
+    principles: "Principles",
     genomeImmutability: "Genome Immutability Principle",
     genomeImmutabilityDesc: "The Genome is never modified directly during the current generation. Issues are recorded in the backlog and only applied at the Completion stage.",
     envImmutability: "Environment Immutability Principle",
@@ -162,12 +174,14 @@ export const en = {
     ],
     backlog: "Backlog & Deferral",
     backlogDesc: "All backlog items stored in .reap/life/backlog/ as markdown files with frontmatter:",
+    backlogHeaders: ["Type", "Description"],
     backlogTypes: [
       { type: "genome-change", desc: "Applied to Genome at Completion stage." },
       { type: "environment-change", desc: "Applied to Environment at Completion stage." },
       { type: "task", desc: "Candidate goals for the next Objective." },
     ],
     statusField: "Each item also carries a status field:",
+    statusHeaders: ["Status", "Description"],
     statuses: [
       { type: "pending", desc: "Not yet processed. Default value — absent field is treated as pending." },
       { type: "consumed", desc: "Processed in the current generation. Requires consumedBy: gen-XXX." },
@@ -341,6 +355,22 @@ export const en = {
       ["onRegression", "After /reap.back returns to a previous stage"],
     ],
     configuration: "Configuration",
+    configExample: `# .reap/config.yml
+hooks:
+  onGenerationStart:
+    - command: "echo 'Generation started'"
+  onStageTransition:
+    - command: "npm run lint"
+  onGenerationComplete:
+    - command: "reap update"
+    - prompt: |
+        Review the changes made in this generation.
+        Update README.md and docs if any features, CLI commands,
+        or slash commands were added or modified.
+        Skip if no documentation updates are needed.
+  onRegression:
+    - command: "echo 'Regressed to previous stage'"
+    - prompt: "Log the regression reason to a tracking file."`,
     sessionStart: "SessionStart Hook",
     sessionStartDesc1: "Separate from REAP project hooks, the SessionStart hook is a Claude Code mechanism that runs at the start of every AI session. REAP registers it during reap init.",
     sessionStartDesc2: "It injects the full REAP workflow guide, current generation state, and lifecycle rules into the AI agent — ensuring the agent understands the project context even in a brand-new session.",
@@ -358,7 +388,7 @@ export const en = {
   // Advanced Page
   advanced: {
     title: "Advanced",
-    breadcrumb: "Reference",
+    breadcrumb: "Guide",
     compressionTitle: "Lineage Compression",
     compressionDesc: "As generations accumulate, lineage archives are automatically compressed to manage size.",
     compressionHeaders: ["Level", "Input", "Output", "Max lines", "Trigger"],
@@ -377,9 +407,15 @@ export const en = {
       ["migration", "Build anew while referencing an existing system. Genome is seeded with analysis of the existing system."],
       ["adoption", "Apply REAP to an existing codebase. Genome starts from templates and is populated during the first generation's Objective stage."],
     ],
-    comparison: "Comparison with Other Tools",
-    comparisonDesc: "Traditional spec-driven tools (like Spec Kit) pioneered the idea of writing specifications before code. REAP builds on this concept and addresses key limitations:",
-    comparisonItems: [
+  },
+
+  // Comparison Page
+  comparison: {
+    title: "Comparison",
+    breadcrumb: "Reference",
+    heading: "Comparison with Spec Kit",
+    desc: "Spec Kit pioneered spec-driven development — writing specifications before code. REAP builds on this concept and addresses key limitations:",
+    items: [
       { title: "Static specs vs Living Genome", desc: "Traditional tools treat specs as static documents. REAP's Genome is a living system — defects found during implementation feed back through the backlog and are applied at Completion. The design evolves with the code." },
       { title: "No cross-session memory", desc: "Most AI development tools lose context between sessions. REAP's SessionStart Hook injects full project context (Genome, generation state, workflow rules) into every new session automatically." },
       { title: "Linear workflow vs Micro loops", desc: "Traditional tools follow a linear flow (spec → plan → build). REAP supports structured regression — any stage can loop back to a previous one while preserving artifacts." },

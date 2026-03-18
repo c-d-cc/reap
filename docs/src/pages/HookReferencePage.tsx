@@ -49,23 +49,7 @@ export default function HookReferencePage() {
         </div>
 
         <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.hooks.configuration}</h2>
-        <CodeBlock language="yaml">{`# .reap/config.yml
-hooks:
-  onGenerationStart:
-    - command: "echo 'Generation started'"
-  onStageTransition:
-    - command: "npm run lint"
-  onGenerationComplete:
-    - command: "reap update"
-    - prompt: |
-        Review the changes made in this generation.
-        Update README.md and docs if any features, CLI commands,
-        or slash commands were added or modified.
-        Skip if no documentation updates are needed.
-  onRegression:
-    - command: "echo 'Regressed to previous stage'"
-    - prompt: "Log the regression reason to a tracking file."
-`}</CodeBlock>
+        <CodeBlock language="yaml">{t.hooks.configExample}</CodeBlock>
 
         <h2 className="text-base font-semibold text-foreground mb-3 mt-8">{t.hooks.sessionStart}</h2>
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">

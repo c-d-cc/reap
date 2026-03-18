@@ -24,6 +24,7 @@ import AdvancedPage from "@/pages/AdvancedPage";
 import CommandReferencePage from "@/pages/CommandReferencePage";
 import HookReferencePage from "@/pages/HookReferencePage";
 import ConfigurationPage from "@/pages/ConfigurationPage";
+import ComparisonPage from "@/pages/ComparisonPage";
 
 const queryClient = new QueryClient();
 
@@ -39,6 +40,7 @@ function Router() {
       <Route path="/docs/commands" component={CommandReferencePage} />
       <Route path="/docs/hooks" component={HookReferencePage} />
       <Route path="/docs/configuration" component={ConfigurationPage} />
+      <Route path="/docs/comparison" component={ComparisonPage} />
       <Route path="/docs/advanced" component={AdvancedPage} />
       <Route component={NotFound} />
     </Switch>

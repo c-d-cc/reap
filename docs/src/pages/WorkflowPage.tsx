@@ -28,8 +28,8 @@ export default function WorkflowPage() {
         <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.workflow.stageWalkthrough}</h2>
 
         <div className="space-y-5 mb-6">
-          {t.workflow.stageDetails.map((stage, i) => (
-            <div key={stage.title} className={`border-l-2 ${i === 0 ? "border-primary" : "border-border"} pl-3`}>
+          {t.workflow.stageDetails.map((stage) => (
+            <div key={stage.title} className="border-l-2 border-border hover:border-primary transition-colors pl-3">
               <div className="text-sm font-semibold text-foreground mb-1">{stage.title}</div>
               <p className="text-xs text-muted-foreground leading-relaxed mb-1">
                 {stage.desc}

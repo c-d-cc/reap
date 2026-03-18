@@ -49,7 +49,7 @@ npm install -g @c-d-cc/reap
 bun install -g @c-d-cc/reap
 ```
 
-> **요구사항**: [Bun](https://bun.sh) 런타임, [Claude Code](https://claude.ai/claude-code) CLI
+> **요구사항**: [Node.js](https://nodejs.org) v18+, [Claude Code](https://claude.ai/claude-code) CLI. [Bun](https://bun.sh)은 선택사항.
 
 ## 빠른 시작
 

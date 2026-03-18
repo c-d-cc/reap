@@ -8,6 +8,19 @@ export default function QuickStartPage() {
   return (
     <DocLayout>
       <DocPage title={t.quickstart.title} breadcrumb={t.quickstart.breadcrumb}>
+        <h2 className="text-base font-semibold text-foreground mb-2">{t.quickstart.prerequisites}</h2>
+        <div className="space-y-1.5 mb-6">
+          {t.quickstart.prerequisiteItems.map((item) => (
+            <div key={item.name} className="flex items-center gap-2 text-sm">
+              <span className={`text-[10px] font-medium uppercase tracking-wider px-1.5 py-0.5 rounded ${item.required ? "bg-primary/15 text-primary" : "bg-muted text-muted-foreground"}`}>
+                {item.required ? t.quickstart.required : t.quickstart.optional}
+              </span>
+              <span className="font-medium text-foreground">{item.name}</span>
+              <span className="text-xs text-muted-foreground">— {item.desc}</span>
+            </div>
+          ))}
+        </div>
+
         <h2 className="text-base font-semibold text-foreground mb-2">{t.quickstart.install}</h2>
         <CodeBlock language="bash">{`# npm
 npm install -g @c-d-cc/reap
@@ -30,7 +43,7 @@ reap init`}</CodeBlock>
 
         <div className="border-l-2 border-primary pl-4 py-2 mt-4 mb-6">
           <div className="text-sm font-semibold text-foreground mb-1">
-            <code className="text-primary">/reap.evolve</code> {t.quickstart.evolveTitle.replace("/reap.evolve ", "")}
+            <code className="text-primary">/reap.evolve</code> {t.quickstart.evolveTitle.replace(/^\/?reap\.evolve\s?/, "")}
           </div>
           <p className="text-xs text-muted-foreground leading-relaxed">
             {t.quickstart.evolveDesc}

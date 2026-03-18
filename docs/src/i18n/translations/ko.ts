@@ -6,20 +6,21 @@ export const ko: Translations = {
     getStarted: "시작하기",
     groups: {
       gettingStarted: "시작하기",
-      coreConcepts: "핵심 개념",
-      workflow: "워크플로우",
+      guide: "가이드",
       reference: "레퍼런스",
+      other: "기타",
     },
     items: {
       introduction: "소개",
       quickStart: "빠른 시작",
       coreConcepts: "핵심 개념",
       workflow: "워크플로우",
+      advanced: "고급",
       cliReference: "CLI 레퍼런스",
       commandReference: "커맨드 레퍼런스",
       hookReference: "Hook 레퍼런스",
+      comparison: "비교",
       configuration: "설정",
-      advanced: "고급",
     },
   },
 
@@ -27,7 +28,7 @@ export const ko: Translations = {
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
     title: "REAP 문서",
-    description: "AI와 사람이 협업하여 연속된 Generation을 통해 애플리케이션을 점진적으로 발전시키는 개발 파이프라인. 지속적 컨텍스트, 구조화된 라이프사이클, 살아있는 설계 문서.",
+    description: "AI와 사람이 함께 Generation을 반복하며 애플리케이션을 진화시키는 개발 파이프라인. 세션 간 컨텍스트를 유지하고, 구조화된 라이프사이클로 개발하며, 설계 문서가 코드와 함께 진화합니다.",
     getStarted: "시작하기 →",
     whyReap: "왜 REAP인가?",
     whyReapDesc: "AI 에이전트는 강력하지만, 구조 없이는 개발이 혼란스러워집니다. 세션마다 컨텍스트가 초기화되고, 코드 변경이 목적 없이 흩어지며, 설계 문서는 현실과 괴리되고, 과거 작업의 교훈은 사라집니다.",
@@ -79,7 +80,8 @@ export const ko: Translations = {
       { href: "/docs/cli", title: "CLI 레퍼런스", desc: "reap init, status, update, fix의 모든 옵션." },
       { href: "/docs/commands", title: "커맨드 레퍼런스", desc: "/reap.evolve, 단계별 커맨드, /reap.status — 모든 슬래시 커맨드." },
       { href: "/docs/hooks", title: "Hook 레퍼런스", desc: "라이프사이클 hooks: command와 prompt 타입, events, SessionStart." },
-      { href: "/docs/advanced", title: "고급", desc: "Lineage 압축, 프리셋, entry 모드, 비교." },
+      { href: "/docs/comparison", title: "비교", desc: "REAP과 기존 스펙 기반 개발 도구와의 비교." },
+      { href: "/docs/advanced", title: "고급", desc: "Lineage 압축, 프리셋, entry 모드." },
     ],
   },
 
@@ -96,7 +98,7 @@ export const ko: Translations = {
     ],
     layerDescs: [
       "애플리케이션 구축을 위한 설계와 지식. 아키텍처 원칙, 비즈니스 규칙, 컨벤션, 기술 제약. .reap/genome/에 저장.",
-      "Genome이 진화하고 Civilization이 반복된 Generation을 통해 성장하는 프로세스.",
+      "Generation을 반복하며 Genome을 진화시키고 Civilization을 성장시키는 프로세스.",
       "소스 코드. .reap/ 외부의 전체 프로젝트 코드베이스.",
     ],
     whyReap: "왜 REAP인가?",
@@ -123,6 +125,15 @@ export const ko: Translations = {
   quickstart: {
     title: "빠른 시작",
     breadcrumb: "시작하기",
+    prerequisites: "요구사항",
+    prerequisiteItems: [
+      { name: "Node.js", desc: "v18 이상", required: true },
+      { name: "npm", desc: "Node.js에 포함", required: true },
+      { name: "Claude Code", desc: "Anthropic의 Claude CLI", required: true },
+      { name: "Bun", desc: "대안 패키지 매니저", required: false },
+    ],
+    required: "필수",
+    optional: "선택",
     install: "설치",
     initProject: "프로젝트 초기화",
     runFirst: "첫 번째 Generation 실행",
@@ -148,6 +159,7 @@ export const ko: Translations = {
     breadcrumb: "개념",
     genomeTitle: "Genome",
     genomeDesc: "Genome은 애플리케이션의 유전 정보입니다 — 아키텍처 원칙, 비즈니스 규칙, 컨벤션, 기술 제약.",
+    principles: "원칙",
     genomeImmutability: "Genome 불변 원칙",
     genomeImmutabilityDesc: "현재 Generation 진행 중에는 Genome을 직접 수정하지 않습니다. 이슈는 backlog에 기록되어 Completion 단계에서만 적용됩니다.",
     envImmutability: "Environment 불변 원칙",
@@ -164,12 +176,14 @@ export const ko: Translations = {
     ],
     backlog: "Backlog & Deferral",
     backlogDesc: "모든 backlog 항목은 .reap/life/backlog/에 frontmatter가 포함된 마크다운 파일로 저장됩니다:",
+    backlogHeaders: ["타입", "설명"],
     backlogTypes: [
       { type: "genome-change", desc: "Completion 단계에서 Genome에 적용." },
       { type: "environment-change", desc: "Completion 단계에서 Environment에 적용." },
       { type: "task", desc: "다음 Objective의 목표 후보." },
     ],
     statusField: "각 항목은 status 필드도 가집니다:",
+    statusHeaders: ["상태", "설명"],
     statuses: [
       { type: "pending", desc: "미처리. 기본값 — 필드가 없으면 pending으로 간주." },
       { type: "consumed", desc: "현재 Generation에서 처리 완료. consumedBy: gen-XXX 필수." },
@@ -343,6 +357,22 @@ export const ko: Translations = {
       ["onRegression", "/reap.back이 이전 단계로 복귀한 후"],
     ],
     configuration: "설정",
+    configExample: `# .reap/config.yml
+hooks:
+  onGenerationStart:
+    - command: "echo 'Generation started'"
+  onStageTransition:
+    - command: "npm run lint"
+  onGenerationComplete:
+    - command: "reap update"
+    - prompt: |
+        이번 Generation에서 변경된 내용을 검토하라.
+        기능, CLI 커맨드, 슬래시 커맨드가 추가되거나
+        수정되었다면 README.md와 docs를 업데이트하라.
+        문서 업데이트가 필요 없으면 건너뛰어라.
+  onRegression:
+    - command: "echo 'Regressed to previous stage'"
+    - prompt: "회귀 사유를 트래킹 파일에 기록하라."`,
     sessionStart: "SessionStart Hook",
     sessionStartDesc1: "REAP 프로젝트 hooks와 별개로, SessionStart hook은 매 AI 세션 시작 시 실행되는 Claude Code 메커니즘입니다. reap init 중에 등록됩니다.",
     sessionStartDesc2: "전체 REAP 워크플로우 가이드, 현재 Generation 상태, 라이프사이클 규칙을 AI 에이전트에 주입합니다 — 새 세션에서도 에이전트가 프로젝트 컨텍스트를 이해하도록 보장합니다.",
@@ -360,7 +390,7 @@ export const ko: Translations = {
   // Advanced Page
   advanced: {
     title: "고급",
-    breadcrumb: "레퍼런스",
+    breadcrumb: "가이드",
     compressionTitle: "Lineage 압축",
     compressionDesc: "Generation이 축적되면 lineage 보관소가 크기 관리를 위해 자동으로 압축됩니다.",
     compressionHeaders: ["레벨", "입력", "출력", "최대 줄 수", "트리거"],
@@ -379,9 +409,15 @@ export const ko: Translations = {
       ["migration", "기존 시스템을 참조하면서 새로 구축합니다. 기존 시스템 분석으로 Genome이 초기화됩니다."],
       ["adoption", "기존 코드베이스에 REAP을 적용합니다. Genome이 템플릿에서 시작하여 첫 Generation의 Objective 단계에서 채워집니다."],
     ],
-    comparison: "다른 도구와의 비교",
-    comparisonDesc: "기존의 스펙 기반 도구(예: Spec Kit)는 코드 작성 전에 명세를 작성하는 아이디어를 개척했습니다. REAP은 이 개념을 발전시키고 주요 한계를 해결합니다:",
-    comparisonItems: [
+  },
+
+  // Comparison Page
+  comparison: {
+    title: "비교",
+    breadcrumb: "레퍼런스",
+    heading: "Spec Kit과의 비교",
+    desc: "Spec Kit은 코드 작성 전에 명세를 작성하는 스펙 기반 개발 방식을 개척했습니다. REAP은 이 개념을 발전시키고 주요 한계를 해결합니다:",
+    items: [
       { title: "정적 스펙 vs 살아있는 Genome", desc: "기존 도구는 스펙을 정적 문서로 취급합니다. REAP의 Genome은 살아있는 시스템입니다 — 구현 중 발견된 결함이 backlog를 통해 피드백되고 Completion에서 적용됩니다. 설계가 코드와 함께 진화합니다." },
       { title: "세션 간 메모리 없음", desc: "대부분의 AI 개발 도구는 세션 간 컨텍스트를 잃습니다. REAP의 SessionStart Hook은 전체 프로젝트 컨텍스트(Genome, Generation 상태, 워크플로우 규칙)를 매 새 세션에 자동으로 주입합니다." },
       { title: "선형 워크플로우 vs Micro loops", desc: "기존 도구는 선형 흐름(스펙 → 계획 → 구현)을 따릅니다. REAP은 구조화된 회귀를 지원합니다 — 산출물을 보존하면서 어떤 단계든 이전으로 돌아갈 수 있습니다." },

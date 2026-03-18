@@ -21,14 +21,14 @@ export function LanguageSelector() {
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen(!open)}
-        className="flex items-center gap-1 text-muted-foreground hover:text-foreground transition-colors text-sm"
+        className="flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors text-sm cursor-pointer rounded px-1.5 py-1"
         aria-label="Select language"
       >
         <Globe className="w-4 h-4" />
         <span className="text-xs hidden sm:inline">{LOCALE_LABELS[locale]}</span>
       </button>
       {open && (
-        <div className="absolute right-0 top-full mt-1 bg-popover border border-border rounded-md shadow-md py-1 min-w-[120px] z-50">
+        <div className="absolute left-0 top-full mt-2 bg-popover border border-border rounded-md shadow-md py-1 min-w-[120px] z-50">
           {LOCALES.map((l: Locale) => (
             <button
               key={l}

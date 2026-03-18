@@ -49,7 +49,7 @@ export function HeroPage() {
                 <Link href="/docs/introduction">{t.hero.getStarted}</Link>
               </Button>
               <a href="https://github.com/c-d-cc/reap" target="_blank" rel="noreferrer"
-                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+                className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors cursor-pointer rounded px-2 py-1">
                 <Github className="w-4 h-4" />GitHub
               </a>
             </div>

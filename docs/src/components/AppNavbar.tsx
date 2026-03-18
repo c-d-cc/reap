@@ -24,11 +24,11 @@ export function AppNavbar({ onMenuClick, showGetStarted }: { onMenuClick?: () =>
         </Link>
       </div>
       <div className="flex items-center gap-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-4">
           <LanguageSelector />
-          <a href="https://github.com/c-d-cc/reap" target="_blank" rel="noreferrer" className="text-muted-foreground hover:text-foreground transition-colors">
-            <Github className="w-5 h-5" />
-            <span className="sr-only">GitHub</span>
+          <a href="https://github.com/c-d-cc/reap" target="_blank" rel="noreferrer" className="flex items-center gap-1 text-muted-foreground hover:text-foreground hover:bg-white/10 transition-colors text-sm cursor-pointer rounded px-1.5 py-1">
+            <Github className="w-4 h-4" />
+            <span className="text-xs hidden sm:inline">GitHub</span>
           </a>
           {showGetStarted && (
             <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">

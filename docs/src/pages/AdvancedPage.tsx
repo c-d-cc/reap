@@ -69,18 +69,6 @@ export default function AdvancedPage() {
           </table>
         </div>
 
-        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.advanced.comparison}</h2>
-        <p className="text-sm text-muted-foreground mb-4">
-          {t.advanced.comparisonDesc}
-        </p>
-        <div className="space-y-3 text-sm mb-4">
-          {t.advanced.comparisonItems.map((item) => (
-            <div key={item.title} className="border-l border-border pl-3">
-              <div className="text-xs font-semibold text-foreground mb-0.5">{item.title}</div>
-              <div className="text-xs text-muted-foreground">{item.desc}</div>
-            </div>
-          ))}
-        </div>
       </DocPage>
     </DocLayout>
   );

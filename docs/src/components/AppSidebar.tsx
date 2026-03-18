@@ -13,15 +13,11 @@ export function useNavGroups() {
       ]
     },
     {
-      label: t.nav.groups.coreConcepts,
+      label: t.nav.groups.guide,
       items: [
         { title: t.nav.items.coreConcepts, href: "/docs/core-concepts" },
-      ]
-    },
-    {
-      label: t.nav.groups.workflow,
-      items: [
         { title: t.nav.items.workflow, href: "/docs/workflow" },
+        { title: t.nav.items.advanced, href: "/docs/advanced" },
       ]
     },
     {
@@ -30,8 +26,13 @@ export function useNavGroups() {
         { title: t.nav.items.cliReference, href: "/docs/cli" },
         { title: t.nav.items.commandReference, href: "/docs/commands" },
         { title: t.nav.items.hookReference, href: "/docs/hooks" },
+        { title: t.nav.items.comparison, href: "/docs/comparison" },
+      ]
+    },
+    {
+      label: t.nav.groups.other,
+      items: [
         { title: t.nav.items.configuration, href: "/docs/configuration" },
-        { title: t.nav.items.advanced, href: "/docs/advanced" },
       ]
     }
   ];
@@ -94,6 +95,7 @@ export function AppSidebar() {
   return (
     <div className="border-r border-border border-l border-l-border/40 bg-sidebar pt-3 overflow-y-auto shrink-0 hidden md:flex md:flex-col" style={{ width: "var(--sidebar-width)" }}>
       <NavList />
+      <div className="min-h-8" />
       <SidebarFooter />
     </div>
   );

@@ -49,7 +49,7 @@ npm install -g @c-d-cc/reap
 bun install -g @c-d-cc/reap
 ```
 
-> **Requirements**: [Bun](https://bun.sh) runtime, [Claude Code](https://claude.ai/claude-code) CLI
+> **Requirements**: [Node.js](https://nodejs.org) v18+, [Claude Code](https://claude.ai/claude-code) CLI. [Bun](https://bun.sh) is optional.
 
 ## Quick Start
 
