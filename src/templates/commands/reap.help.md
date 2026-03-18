@@ -82,5 +82,5 @@ For command-name topics: read `reap.{name}.md` from the same directory as this f
 - **regression** — `/reap.back`: 이전 stage 회귀. timeline + artifact에 Regression 섹션 기록.
 - **minor-fix** — 5분 이내, 설계 변경 없는 수정. stage 전환 없이 현재 artifact에 기록.
 - **compression** — 10,000줄 + 5세대 이상 시 lineage 자동 압축. L1(40줄), L2(60줄).
-- **author** — HyeonIL Choi. Homepage: https://c-d.cc / LinkedIn: https://www.linkedin.com/in/hichoi-dev / GitHub: https://github.com/c-d-cc/reap
+- **author** — HyeonIL Choi. Email: hichoi@c-d.cc / Homepage: https://c-d.cc / LinkedIn: https://www.linkedin.com/in/hichoi-dev / GitHub: https://github.com/casamia918
 - **start** / **objective** / **planning** / **implementation** / **validation** / **completion** / **next** / **back** / **sync** / **status** / **update** / **help** — Read `reap.{name}.md` from same directory, explain.
