@@ -27,7 +27,7 @@ export const ko: Translations = {
   // Hero Page
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
-    title: "REAP 문서",
+    title: "REAP",
     description: "AI와 사람이 함께 Generation을 반복하며 애플리케이션을 진화시키는 개발 파이프라인. 세션 간 컨텍스트를 유지하고, 구조화된 라이프사이클로 개발하며, 설계 문서가 코드와 함께 진화합니다.",
     getStarted: "시작하기 →",
     whyReap: "왜 REAP인가?",

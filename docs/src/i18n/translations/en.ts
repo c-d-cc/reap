@@ -25,7 +25,7 @@ export const en = {
   // Hero Page
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
-    title: "REAP Documentation",
+    title: "REAP",
     description: "A development pipeline where AI and humans collaborate to evolve an Application across successive Generations. Context persists between sessions, development follows a structured lifecycle, and design docs evolve with your code.",
     getStarted: "Get Started →",
     whyReap: "Why REAP?",

@@ -5,10 +5,12 @@ const STORAGE_KEY = "reap-docs-lang";
 
 function detectLocale(): Locale {
   const stored = localStorage.getItem(STORAGE_KEY);
-  if (stored === "en" || stored === "ko") return stored;
+  if (stored === "en" || stored === "ko" || stored === "ja" || stored === "zh-CN") return stored;
 
   const browserLang = navigator.language.toLowerCase();
   if (browserLang.startsWith("ko")) return "ko";
+  if (browserLang.startsWith("ja")) return "ja";
+  if (browserLang.startsWith("zh")) return "zh-CN";
   return DEFAULT_LOCALE;
 }
 
