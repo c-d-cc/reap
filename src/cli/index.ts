@@ -39,15 +39,26 @@ program
         }
       }
 
-      const initResult = await initProject(cwd, name, mode, options.preset);
-      console.log(`✓ REAP project "${name}" initialized (${mode} mode)`);
-      console.log(`  .reap/ directory created with genome, environment, life, lineage`);
+      console.log(`\nInitializing REAP project "${name}" (${mode} mode)...\n`);
+      const initResult = await initProject(cwd, name, mode, options.preset, (msg) => {
+        console.log(`  ${msg}`);
+      });
+      console.log(`\n✓ REAP project "${name}" initialized successfully!\n`);
+      console.log(`  Project:  ${name} (${mode})`);
       if (initResult.agents.length > 0) {
-        console.log(`  Agents: ${initResult.agents.join(", ")}`);
+        console.log(`  Agents:   ${initResult.agents.join(", ")}`);
       } else {
-        console.log(`  No AI agents detected. Install Claude Code or OpenCode, then run 'reap update'.`);
+        console.log(`  Agents:   None detected`);
       }
-      console.log(`\nNext: run '/reap.start' to start your first Generation`);
+      console.log(`  Config:   .reap/config.yml`);
+      console.log(`  Genome:   .reap/genome/ (principles, conventions, constraints)`);
+      console.log(`\n  Getting started:`);
+      console.log(`    1. Open your AI agent (${initResult.agents[0] || "Claude Code or OpenCode"})`);
+      console.log(`    2. Run /reap.start to begin your first Generation`);
+      console.log(`    3. Or run /reap.evolve for autonomous execution`);
+      if (initResult.agents.length === 0) {
+        console.log(`\n  ⚠ No AI agents detected. Install Claude Code or OpenCode, then run 'reap update'.`);
+      }
     } catch (e: any) {
       console.error(`Error: ${e.message}`);
       process.exit(1);

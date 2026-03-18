@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-026
 ---
 # OpenCode 플러그인 autoUpdate PATH 문제 조사
 

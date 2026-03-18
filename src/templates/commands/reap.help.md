@@ -4,16 +4,12 @@ description: "REAP Help — Contextual help based on current state"
 
 # Help
 
-Provide contextual help to the user based on the current REAP state.
-
 **ARGUMENTS**: $ARGUMENTS
 
 ## IMPORTANT: File Access Rules
-- ONLY read files under the current project's `.reap/` directory, or REAP command files in the SAME directory as this command file.
-- Do NOT access global node_modules, npm root, or any path outside the project and the user-level commands directory.
-- If a file read fails or does not exist, skip it silently and continue.
-- Do NOT guess or infer file paths. Do NOT attempt to read files like `reaprc.json`, `.reaprc`, or any file not part of REAP.
-- The REAP project structure uses ONLY: `.reap/config.yml`, `.reap/life/current.yml`, `.reap/life/backlog/`, `.reap/life/0X-*.md`, `.reap/genome/`, `.reap/lineage/`
+- ONLY read files under `.reap/` or REAP command files in the SAME directory as this command file.
+- Do NOT access global node_modules or external paths.
+- If a file read fails, skip it silently. Do NOT guess file paths.
 
 ## Steps
 
@@ -21,22 +17,24 @@ Provide contextual help to the user based on the current REAP state.
 - If ARGUMENTS is provided (not empty), skip to Step 4 (Topic Help) immediately
 - If ARGUMENTS is empty, proceed with Steps 2-3
 
-### 2. Contextual Guidance
+### 2. Show REAP Introduction + Contextual Guidance
+
+First, always show this introduction:
+
+> **REAP** (Recursive Evolutionary Autonomous Pipeline) — AI와 사람이 협업하여 소프트웨어를 세대(Generation) 단위로 진화시키는 개발 파이프라인.
+> 각 세대는 5단계 lifecycle을 거칩니다: Objective → Planning → Implementation → Validation → Completion.
+> Genome(.reap/genome/)에 프로젝트의 설계 원칙과 규칙을 기록하고, 세대를 거듭하며 점진적으로 진화합니다.
+
+Then read `.reap/life/current.yml` and `.reap/config.yml`:
 
 **If no active Generation:**
-- "No active Generation. To get started:"
-- "  `/reap.start` — Start a new Generation with a goal"
-- "  `/reap.evolve` — Start and run the full lifecycle autonomously"
-- If there are items in `.reap/life/backlog/`, mention them
+- "No active Generation. `/reap.start`로 시작하거나, `/reap.evolve`로 자율 실행하세요."
 
 **If active Generation exists:**
-- Show current generation ID, goal, and stage
-- Show the next action: "Current stage is [stage]. Run `/reap.[stage]` to proceed, or `/reap.next` to advance."
-- If in implementation stage with strict mode, note the planning scope restriction
+- Show: generation ID, goal, stage
+- Show: "다음 액션 → `/reap.[stage]` 또는 `/reap.next`"
 
 ### 3. Command Reference
-
-Show available slash commands with brief descriptions:
 
 | Command | Description |
 |---------|-------------|
@@ -55,6 +53,8 @@ Show available slash commands with brief descriptions:
 | `/reap.help` | 상황별 도움말 표시. `/reap.help {topic}`으로 주제별 상세 설명 |
 
 Then show: "Tip: `/reap.help {topic}` for detailed help. Topics: workflow, lifecycle, genome, backlog, strict, agents, hooks, config, evolve, regression, minor-fix, compression, author"
+
+Then show config info from `.reap/config.yml`: Strict (on/off), Auto-Update (on/off), Language
 
 ### 4. Topic Help
 
@@ -80,10 +80,3 @@ If ARGUMENTS contains a topic, look up the topic from the list below and provide
 - **compression** — Lineage compression triggers when total exceeds 10,000 lines + 5 generations. Level 1: generation folder → single .md (40 lines). Level 2: 5 Level 1 entries → epoch .md (60 lines). Runs during `/reap.next` archiving.
 - **author** — REAP is created by HyeonIL Choi (At C to D). Email: hichoi@c-d.cc / Homepage: https://reap.cc / GitHub: https://github.com/c-d-cc/reap
 - **start** / **objective** / **planning** / **implementation** / **validation** / **completion** / **next** / **back** / **sync** / **status** / **update** / **help** — Read `reap.{name}.md` from the same directory as this file, then explain the command based on its contents.
-
-### 5. Configuration Info
-
-- **REQUIRED**: Run the shell command `reap --version`. You MUST actually execute this command, do not skip it.
-- Show "REAP: v{installed}" — do NOT run `npm view` here (slow). Users can run `/reap.update` to check for updates.
-- Show: Strict (on/off), Auto-Update (on/off), Language from `.reap/config.yml`
-- Show project name, entry mode, total completed generations

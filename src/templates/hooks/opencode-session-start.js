@@ -15,7 +15,7 @@ module.exports = async (ctx) => {
       // Check if this is a REAP project
       if (!fs.existsSync(reapDir)) return;
 
-      // Auto-update check
+      // Auto-update check (with PATH resolution for non-shell environments)
       let autoUpdateMessage = "";
       try {
         const autoConfigPath = path.join(reapDir, "config.yml");
@@ -24,11 +24,16 @@ module.exports = async (ctx) => {
           const autoUpdateMatch = configRaw.match(/^autoUpdate:\s*(.+)$/m);
           if (autoUpdateMatch && autoUpdateMatch[1].trim() === "true") {
             try {
-              const installed = execSync("reap --version 2>/dev/null", { encoding: "utf8" }).trim();
-              const latest = execSync("npm view @c-d-cc/reap version 2>/dev/null", { encoding: "utf8" }).trim();
+              // Resolve PATH: OpenCode plugin runs in Node.js context which may lack shell PATH
+              const userShell = process.env.SHELL || "/bin/bash";
+              const shellPath = execSync(`${userShell} -l -c 'echo $PATH' 2>/dev/null`, { encoding: "utf8" }).trim();
+              const execOpts = { encoding: "utf8", env: { ...process.env, PATH: shellPath || process.env.PATH } };
+
+              const installed = execSync("reap --version 2>/dev/null", execOpts).trim();
+              const latest = execSync("npm view @c-d-cc/reap version 2>/dev/null", execOpts).trim();
               if (installed && latest && installed !== latest) {
-                execSync("npm update -g @c-d-cc/reap >/dev/null 2>&1", { stdio: "ignore" });
-                execSync("reap update >/dev/null 2>&1", { stdio: "ignore" });
+                execSync("npm update -g @c-d-cc/reap >/dev/null 2>&1", { ...execOpts, stdio: "ignore" });
+                execSync("reap update >/dev/null 2>&1", { ...execOpts, stdio: "ignore" });
                 autoUpdateMessage = `REAP auto-updated: v${installed} → v${latest}`;
               }
             } catch { /* update check failed, skip */ }

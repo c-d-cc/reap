@@ -18,7 +18,9 @@ export async function initProject(
   projectName: string,
   entryMode: "greenfield" | "migration" | "adoption",
   preset?: string,
+  onProgress?: (message: string) => void,
 ): Promise<{ agents: string[] }> {
+  const log = onProgress ?? (() => {});
   const paths = new ReapPaths(projectRoot);
 
   if (await paths.isReapProject()) {
@@ -34,7 +36,8 @@ export async function initProject(
     }
   }
 
-  // Create 4-axis structure (project artifacts only)
+  // 1. Create 4-axis structure
+  log("Creating .reap/ directory structure...");
   await mkdir(paths.genome, { recursive: true });
   await mkdir(paths.domain, { recursive: true });
   await mkdir(paths.environment, { recursive: true });
@@ -42,7 +45,8 @@ export async function initProject(
   await mkdir(paths.backlog, { recursive: true });
   await mkdir(paths.lineage, { recursive: true });
 
-  // Write config
+  // 2. Write config
+  log("Writing config.yml...");
   const config: ReapConfig = {
     version: "0.1.0",
     project: projectName,
@@ -51,7 +55,8 @@ export async function initProject(
   };
   await ConfigManager.write(paths, config);
 
-  // Copy genome templates (from preset or default)
+  // 3. Copy genome templates
+  log("Setting up Genome templates...");
   const genomeTemplates = ["principles.md", "conventions.md", "constraints.md"];
   const genomeSourceDir = preset
     ? join(ReapPaths.packageTemplatesDir, "presets", preset)
@@ -62,7 +67,8 @@ export async function initProject(
     await writeTextFile(dest, await readTextFileOrThrow(src));
   }
 
-  // Install artifact templates + domain guide to user-level ~/.reap/templates/
+  // 4. Install artifact templates + domain guide
+  log("Installing artifact templates...");
   await mkdir(ReapPaths.userReapTemplates, { recursive: true });
   const artifactFiles = ["01-objective.md", "02-planning.md", "03-implementation.md", "04-validation.md", "05-completion.md"];
   for (const file of artifactFiles) {
@@ -74,13 +80,20 @@ export async function initProject(
   const domainGuideDest = join(ReapPaths.userReapTemplates, "domain-guide.md");
   await writeTextFile(domainGuideDest, await readTextFileOrThrow(domainGuideSrc));
 
-  // Detect installed agents and install commands + hooks for each
+  // 5. Detect installed agents and install commands + hooks
+  log("Detecting AI agents...");
   const detectedAgents = await AgentRegistry.detectInstalled();
   const sourceDir = ReapPaths.packageCommandsDir;
 
   for (const adapter of detectedAgents) {
+    log(`  Installing commands for ${adapter.displayName}...`);
     await adapter.installCommands(COMMAND_NAMES, sourceDir);
+    log(`  Registering session hook for ${adapter.displayName}...`);
     await adapter.registerSessionHook();
+  }
+
+  if (detectedAgents.length === 0) {
+    log("  No AI agents detected.");
   }
 
   return { agents: detectedAgents.map(a => a.displayName) };
