@@ -206,23 +206,23 @@ fi
 # Write session init log for AI to display to user
 init_log=""
 if [ -n "$auto_update_message" ]; then
-  init_log="${init_log}⬆ ${auto_update_message}\n"
+  init_log="${init_log}🟢 ${auto_update_message}\n"
 fi
-init_log="${init_log}✓ Genome loaded (L1: ${l1_lines} lines)\n"
+init_log="${init_log}🟢 Genome loaded (L1: ${l1_lines} lines)\n"
 if [ -n "$genome_stale_warning" ]; then
-  init_log="${init_log}⚠ Genome stale — ${commits_since} code commits since last update. Run /reap.sync\n"
+  init_log="${init_log}🟡 Genome stale — ${commits_since} code commits since last update. Run /reap.sync\n"
 else
-  init_log="${init_log}✓ Genome in sync\n"
+  init_log="${init_log}🟢 Genome in sync\n"
 fi
 if [ -n "$sourcemap_drift_warning" ]; then
-  init_log="${init_log}⚠ Source-map drift — ${documented} documented vs ${actual} actual. Run /reap.sync\n"
+  init_log="${init_log}🟡 Source-map drift — ${documented} documented vs ${actual} actual. Run /reap.sync\n"
 elif [ -f "$SOURCEMAP_FILE" ]; then
-  init_log="${init_log}✓ Source-map in sync (${actual} components)\n"
+  init_log="${init_log}🟢 Source-map in sync (${actual} components)\n"
 fi
 if [ "$gen_stage" = "none" ]; then
-  init_log="${init_log}○ No active Generation\n"
+  init_log="${init_log}⚪ No active Generation\n"
 else
-  init_log="${init_log}● Active: ${gen_id} — stage: ${gen_stage}\n"
+  init_log="${init_log}🟢 Active: ${gen_id} — stage: ${gen_stage}\n"
 fi
 printf "%b" "$init_log" > "${REAP_DIR}/life/.session-init.log"
 
