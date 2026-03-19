@@ -271,6 +271,48 @@ export class MergeGenerationManager {
 
 // ── Merge utilities ─────────────────────────────────────────
 
+export interface FastForwardResult {
+  fastForward: boolean;
+  reason: string;
+}
+
+/**
+ * Check if a pull from targetBranch can be a fast-forward.
+ * Fast-forward is possible when the local HEAD generation is an ancestor
+ * of the target branch's latest generation (i.e., target already includes local).
+ */
+export function canFastForward(
+  localLatestId: string,
+  remoteLatestId: string,
+  allMetas: GenerationMeta[],
+): FastForwardResult {
+  if (localLatestId === remoteLatestId) {
+    return { fastForward: true, reason: "Already up to date — same generation on both branches." };
+  }
+
+  // Check if local is an ancestor of remote (remote includes local's work)
+  const metaMap = new Map<string, GenerationMeta>();
+  for (const m of allMetas) metaMap.set(m.id, m);
+
+  const remoteAncestors = new Set<string>();
+  const queue = [remoteLatestId];
+  while (queue.length > 0) {
+    const id = queue.shift()!;
+    if (remoteAncestors.has(id)) continue;
+    remoteAncestors.add(id);
+    const meta = metaMap.get(id);
+    if (meta?.parents) {
+      for (const p of meta.parents) queue.push(p);
+    }
+  }
+
+  if (remoteAncestors.has(localLatestId)) {
+    return { fastForward: true, reason: `Local generation ${localLatestId} is already included in remote ${remoteLatestId}. Fast-forward possible.` };
+  }
+
+  return { fastForward: false, reason: "Branches have diverged — full merge required." };
+}
+
 /** Find the common ancestor of two generations using BFS on DAG */
 export function findCommonAncestor(
   idA: string,

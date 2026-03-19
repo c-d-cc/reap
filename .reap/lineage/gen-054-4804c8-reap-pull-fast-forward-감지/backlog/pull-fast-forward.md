@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-054-4804c8
 priority: high
 title: reap.pull fast-forward 감지 — 이미 merged된 branch pull 시 full lifecycle 스킵
 ---
