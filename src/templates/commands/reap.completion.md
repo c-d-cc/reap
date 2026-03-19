@@ -71,6 +71,39 @@ Do NOT finalize Genome changes without running Validation Commands.
     - **If called standalone**: Show the modified genome/environment content to the human and get approval. Do NOT finalize changes until the human approves.
 16. For each applied `type: genome-change` and `type: environment-change` backlog item, update its frontmatter to `status: consumed` and add `consumedBy: gen-XXX`
 
+### Phase 5: Hook Suggestion
+
+17. Read the last 3 completed generations from `.reap/lineage/` (sorted by gen number, most recent first)
+    - For each: read `03-implementation.md` (Implementation Notes) and `05-completion.md` (Retrospective)
+    - Identify **manual tasks that were repeated across 2+ generations**
+    - Examples: docs update, lint fix, dependency sync, test data setup, specific file regeneration
+18. If a repeated pattern is found, engage the human with a step-by-step confirmation:
+    a. **Describe the pattern**: "최근 N개 generation에서 '[작업 설명]'이 반복적으로 수행되었습니다."
+    b. **Ask if it should be a hook**: "이 작업을 hook으로 자동화할까요? (yes/no)"
+    c. If yes, ask **event**: "어떤 이벤트에서 실행할까요?"
+       - `onGenerationComplete` — generation 완료 후
+       - `onStageTransition` — stage 전환 시
+       - `onGenerationStart` — generation 시작 시
+       - `onRegression` — stage 회귀 시
+    d. Ask **condition**: "실행 조건은 무엇인가요?"
+       - `always` — 항상
+       - `has-code-changes` — src/ 변경이 있을 때
+       - `version-bumped` — version bump가 있을 때
+       - Custom — 유저가 직접 기술
+    e. Ask **hook name**: "hook 이름을 지어주세요 (예: lint-fix, docs-sync)"
+    f. **Preview**: 생성될 hook 파일 내용을 보여주고 확인:
+       ```
+       파일: .reap/hooks/{event}.{name}.md
+       ---
+       condition: {condition}
+       order: 50
+       ---
+       {작업 내용}
+       ```
+    g. 유저 확인 후 `.reap/hooks/{event}.{name}.md` 생성
+19. 반복 패턴이 없으면 skip — "반복 패턴이 감지되지 않았습니다."
+20. **Limit**: 한 번에 최대 2개까지만 제안 (과부하 방지)
+
 ## Self-Verification
 Before saving the artifact, verify:
 - [ ] Are lessons concrete and applicable to the next generation? (No vague "do better next time")

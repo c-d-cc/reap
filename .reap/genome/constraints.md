@@ -33,7 +33,7 @@
 ## Hooks
 
 4개 event: onGenerationStart, onStageTransition, onGenerationComplete, onRegression
-2개 type: command (shell), prompt (AI agent instruction)
+파일 기반: `.reap/hooks/{event}.{name}.{md|sh}`. frontmatter: condition, order
 
 ## Validation Commands
 

@@ -116,6 +116,17 @@ if command -v git &>/dev/null && [ -d "$PROJECT_ROOT/.git" ]; then
   fi
 fi
 
+# Detect source-map drift — compare documented components vs actual files
+sourcemap_drift_warning=""
+SOURCEMAP_FILE="${GENOME_DIR}/source-map.md"
+if [ -f "$SOURCEMAP_FILE" ] && [ -d "${PROJECT_ROOT}/src/core" ]; then
+  documented=$(grep -c 'Component(' "$SOURCEMAP_FILE" 2>/dev/null || echo "0")
+  actual=$(ls "${PROJECT_ROOT}"/src/core/*.ts 2>/dev/null | wc -l | tr -d ' ')
+  if [ "$documented" != "0" ] && [ "$actual" != "0" ] && [ "$documented" != "$actual" ]; then
+    sourcemap_drift_warning="WARNING: source-map.md drift — ${documented} components documented, ${actual} core files found. Consider running /reap.sync."
+  fi
+fi
+
 # Read strict mode from config.yml
 strict_mode=false
 CONFIG_FILE="${REAP_DIR}/config.yml"
@@ -174,6 +185,9 @@ fi
 stale_section=""
 if [ -n "$genome_stale_warning" ]; then
   stale_section="\n\n## Genome Staleness\n${genome_stale_warning}\nIf the user wants to proceed without syncing, ask: \"The Genome may be stale. Would you like to run /reap.sync now, or do it later?\" and respect their choice."
+fi
+if [ -n "$sourcemap_drift_warning" ]; then
+  stale_section="${stale_section}\n${sourcemap_drift_warning}"
 fi
 
 # Build auto-update section
