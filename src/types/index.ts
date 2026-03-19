@@ -12,14 +12,15 @@ export const LIFECYCLE_ORDER: readonly LifeCycleStage[] = [
 
 export type MergeStage =
   | "detect"
-  | "genome-resolve"
-  | "source-resolve"
-  | "sync-test"
+  | "mate"
+  | "merge"
+  | "sync"
+  | "validation"
   | "completion";
 
 export const MERGE_LIFECYCLE_ORDER: readonly MergeStage[] = [
-  "detect", "genome-resolve", "source-resolve",
-  "sync-test", "completion",
+  "detect", "mate", "merge",
+  "sync", "validation", "completion",
 ] as const;
 
 /** Any stage type (normal or merge) */

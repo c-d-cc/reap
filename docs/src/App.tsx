@@ -25,6 +25,9 @@ import CommandReferencePage from "@/pages/CommandReferencePage";
 import HookReferencePage from "@/pages/HookReferencePage";
 import ConfigurationPage from "@/pages/ConfigurationPage";
 import ComparisonPage from "@/pages/ComparisonPage";
+import DistributedOverviewPage from "@/pages/DistributedOverviewPage";
+import MergeLifecyclePage from "@/pages/MergeLifecyclePage";
+import MergeCommandsPage from "@/pages/MergeCommandsPage";
 
 const queryClient = new QueryClient();
 
@@ -41,6 +44,9 @@ function Router() {
       <Route path="/docs/hooks" component={HookReferencePage} />
       <Route path="/docs/configuration" component={ConfigurationPage} />
       <Route path="/docs/comparison" component={ComparisonPage} />
+      <Route path="/docs/distributed-workflow" component={DistributedOverviewPage} />
+      <Route path="/docs/merge-lifecycle" component={MergeLifecyclePage} />
+      <Route path="/docs/merge-commands" component={MergeCommandsPage} />
       <Route path="/docs/advanced" component={AdvancedPage} />
       <Route component={NotFound} />
     </Switch>

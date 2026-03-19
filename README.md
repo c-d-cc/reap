@@ -1,3 +1,5 @@
+> [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
+
 <p align="center">
   <img src="media/logo.png" alt="REAP" width="80" height="80" />
 </p>
@@ -8,8 +10,6 @@
   <strong>Recursive Evolutionary Autonomous Pipeline</strong><br>
   A development pipeline where AI and humans evolve software across generations.
 </p>
-
-> [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
 
 <table align="center">
 <tr>
@@ -23,6 +23,22 @@
 
 REAP defines an application's genetic information (Genome), sets objectives for each generation to implement, and feeds back any Genome defects discovered along the way into subsequent stages. As generations accumulate, the Genome evolves and the Source Code (Civilization) grows.
 
+## Table of Contents
+
+- [Why REAP?](#why-reap)
+- [Installation](#installation)
+- [Quick Start](#quick-start)
+- [Life Cycle](#life-cycle)
+- [Core Concepts](#core-concepts)
+- [Distributed Workflow for Parallel Development](#distributed-workflow-for-parallel-development)
+- [CLI Commands](#cli-commands)
+- [Agent Integration](#agent-integration)
+- [Project Structure](#project-structure-after-reap-init)
+- [Lineage Compression](#lineage-compression)
+- [Evolution Flow](#evolution-flow)
+- [Presets](#presets)
+- [Entry Modes](#entry-modes)
+
 ## Why REAP?
 
 Have you ever run into these problems when developing with AI agents?
@@ -31,6 +47,7 @@ Have you ever run into these problems when developing with AI agents?
 - **Scattered development** — Code gets modified here and there with no clear goal
 - **Design–code drift** — Documentation and code diverge over time
 - **Forgotten lessons** — Hard-won insights from past struggles never carry forward
+- **Collaboration chaos** — Multiple developers or agents working in parallel leads to conflicting changes and merge nightmares
 
 REAP solves these with a **generation-based evolution model**:
 
@@ -39,6 +56,7 @@ REAP solves these with a **generation-based evolution model**:
 - Design issues discovered during implementation are logged in the backlog and addressed at Completion
 - Lessons drawn from retrospectives (Completion) accumulate in the Genome
 - Repeated manual tasks are automatically detected across generations, with user-confirmed hook creation
+- Parallel work across branches is reconciled through a genome-first merge workflow — design conflicts are resolved before code conflicts
 
 ## Installation
 
@@ -145,6 +163,52 @@ At archiving time (`/reap.next` from Completion), `consumed` items move to linea
 └── lineage/       # Archive of completed generations
 ```
 
+## Distributed Workflow for Parallel Development
+
+REAP supports distributed collaboration where multiple developers or AI agents work on the same project in parallel — without a central server. Git is the only transport layer.
+
+### How It Works
+
+```
+Machine A: branch-a — gen-046-a (authentication)    → /reap.push
+Machine B: branch-b — gen-046-b (search)            → /reap.push
+
+Machine A:
+  /reap.pull branch-b   → Fetch + full merge generation lifecycle
+```
+
+Each machine works independently on its own branch and generation. When it's time to combine, REAP orchestrates the merge with a **genome-first** strategy:
+
+1. **Detect** — Identify divergence by scanning the remote branch's genome and lineage via git refs
+2. **Mate** — Resolve genome conflicts first (human decides)
+3. **Merge** — Merge source code guided by the finalized genome (`git merge --no-commit`)
+4. **Sync** — AI compares genome and source for consistency; user confirms any inconsistencies
+5. **Validation** — Run mechanical testing (bun test, tsc, build) — same as normal generation
+6. **Completion** — Commit the merged result and archive
+
+### Slash Commands for Distributed Workflow
+
+All distributed operations run through your AI agent:
+
+```bash
+/reap.pull <branch>        # Fetch + run full merge generation (the distributed /reap.evolve)
+/reap.push                 # Validate REAP state + push current branch
+/reap.merge.start          # Start a merge generation (for step-by-step control)
+/reap.merge.detect         # Analyze divergence
+/reap.merge.mate           # Resolve genome conflicts
+/reap.merge.merge          # Merge source code
+/reap.merge.sync           # Verify genome–source consistency
+/reap.merge.validation     # Run mechanical testing (bun test, tsc, build)
+/reap.merge.evolve         # Run merge lifecycle from current stage
+```
+
+### Key Principles
+
+- **Opt-in** — `git pull`/`push` always work normally. REAP commands are additive.
+- **Genome-first** — Genome conflicts are resolved before source merge. Like amending the constitution before updating the laws.
+- **No server** — Everything is local + Git. No external services.
+- **DAG lineage** — Each generation references its parents via a hash-based ID (`gen-046-a3f8c2`), forming a directed acyclic graph that naturally supports parallel work.
+
 ## CLI Commands
 
 | Command | Description |
@@ -186,6 +250,15 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.help` | Contextual AI help with 24+ topics (workflow, genome, backlog, strict, agents, hooks, config, evolve, regression, author, and all command names) |
 | `/reap.update` | Check for REAP updates and upgrade to the latest version |
 | **`/reap.evolve`** | **Run an entire generation from start to finish (recommended)** |
+| **`/reap.pull <branch>`** | **Fetch + run full merge generation (distributed `/reap.evolve`)** |
+| `/reap.push` | Validate REAP state and push current branch |
+| `/reap.merge.start` | Start a merge generation to combine divergent branches |
+| `/reap.merge.detect` | Analyze divergence between branches |
+| `/reap.merge.mate` | Resolve genome conflicts before source merge |
+| `/reap.merge.merge` | Merge source code with resolved genome as guide |
+| `/reap.merge.sync` | Verify genome–source consistency (AI compares, user confirms) |
+| `/reap.merge.validation` | Run mechanical testing (bun test, tsc, build) |
+| **`/reap.merge.evolve`** | **Run the full merge lifecycle automatically** |
 
 ### SessionStart Hook
 
@@ -252,6 +325,9 @@ order: 10                     # execution order (lower runs first)
 | `onStageTransition` | After `/reap.next` advances to the next stage |
 | `onGenerationComplete` | After `/reap.next` archives a completed generation |
 | `onRegression` | After `/reap.back` returns to a previous stage |
+| `onMergeStart` | After `/reap.merge.start` creates a merge generation |
+| `onGenomeResolved` | After genome conflicts are resolved in a merge |
+| `onMergeComplete` | After a merge generation is archived |
 
 Hooks are executed by the AI agent in the project root directory. The `onGenerationComplete` hooks include automatic version bump judgment — patch-level bumps are applied automatically, while minor/major bumps require user confirmation.
 

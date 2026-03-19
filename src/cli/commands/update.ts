@@ -85,7 +85,7 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
   // 2b. Sync merge artifact templates to ~/.reap/templates/merge/
   const mergeTemplatesDir = join(ReapPaths.userReapTemplates, "merge");
   await mkdir(mergeTemplatesDir, { recursive: true });
-  const mergeArtifactFiles = ["01-detect.md", "02-genome-resolve.md", "03-source-resolve.md", "04-sync-test.md", "05-completion.md"];
+  const mergeArtifactFiles = ["01-detect.md", "02-mate.md", "03-merge.md", "04-sync.md", "05-validation.md", "06-completion.md"];
   const mergeSourceDir = join(ReapPaths.packageArtifactsDir, "merge");
   for (const file of mergeArtifactFiles) {
     const src = await readTextFileOrThrow(join(mergeSourceDir, file));

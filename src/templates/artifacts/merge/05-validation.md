@@ -1,12 +1,11 @@
-# Sync Test
+# Validation
 
-## Validation Results
+## Result: pending
+
+## Validation Commands
 
 | Command | Result | Output |
 |---------|--------|--------|
 | | | |
-
-## Genome-Source Consistency
-
 
 ## Issues Found

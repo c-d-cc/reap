@@ -10,6 +10,7 @@ export function useNavGroups() {
       items: [
         { title: t.nav.items.introduction, href: "/docs/introduction" },
         { title: t.nav.items.quickStart, href: "/docs/quick-start" },
+        { title: t.nav.items.comparison, href: "/docs/comparison" },
       ]
     },
     {
@@ -21,12 +22,19 @@ export function useNavGroups() {
       ]
     },
     {
+      label: t.nav.groups.collaboration,
+      items: [
+        { title: t.nav.items.collaborationOverview, href: "/docs/distributed-workflow" },
+        { title: t.nav.items.mergeLifecycle, href: "/docs/merge-lifecycle" },
+        { title: t.nav.items.mergeCommands, href: "/docs/merge-commands" },
+      ]
+    },
+    {
       label: t.nav.groups.reference,
       items: [
         { title: t.nav.items.cliReference, href: "/docs/cli" },
         { title: t.nav.items.commandReference, href: "/docs/commands" },
         { title: t.nav.items.hookReference, href: "/docs/hooks" },
-        { title: t.nav.items.comparison, href: "/docs/comparison" },
       ]
     },
     {

@@ -11,9 +11,10 @@ export const COMMAND_NAMES = [
   "reap.validation", "reap.completion", "reap.evolve",
   "reap.start", "reap.next", "reap.back", "reap.status", "reap.sync", "reap.help",
   "reap.update",
-  "reap.merge.start", "reap.merge.detect", "reap.merge.genome-resolve",
-  "reap.merge.source-resolve", "reap.merge.sync-test", "reap.merge.completion",
-  "reap.merge.evolve",
+  "reap.merge.start", "reap.merge.detect", "reap.merge.mate",
+  "reap.merge.merge", "reap.merge.sync", "reap.merge.validation",
+  "reap.merge.completion", "reap.merge.evolve",
+  "reap.pull", "reap.push",
 ];
 
 export async function initProject(
@@ -86,7 +87,7 @@ export async function initProject(
   // Install merge artifact templates
   const mergeTemplatesDir = join(ReapPaths.userReapTemplates, "merge");
   await mkdir(mergeTemplatesDir, { recursive: true });
-  const mergeArtifactFiles = ["01-detect.md", "02-genome-resolve.md", "03-source-resolve.md", "04-sync-test.md", "05-completion.md"];
+  const mergeArtifactFiles = ["01-detect.md", "02-mate.md", "03-merge.md", "04-sync.md", "05-validation.md", "06-completion.md"];
   const mergeSourceDir = join(ReapPaths.packageArtifactsDir, "merge");
   for (const file of mergeArtifactFiles) {
     const src = join(mergeSourceDir, file);

@@ -2,9 +2,10 @@ import { type MergeStage, MERGE_LIFECYCLE_ORDER } from "../types";
 
 const LABELS: Record<MergeStage, string> = {
   "detect": "Divergence Detection",
-  "genome-resolve": "Genome Resolution",
-  "source-resolve": "Source Resolution",
-  "sync-test": "Sync Test",
+  "mate": "Genome Mating",
+  "merge": "Source Merge",
+  "sync": "Genome-Source Sync",
+  "validation": "Validation",
   "completion": "Completion",
 };
 

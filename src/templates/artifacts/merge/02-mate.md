@@ -1,4 +1,4 @@
-# Genome Resolve
+# Mate (Genome Mating)
 
 ## Conflicts
 

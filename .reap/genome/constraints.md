@@ -25,18 +25,20 @@
 
 ## CLI Subcommands
 
-8개: init, status, fix, update, help, pull, push, merge (pull/push/merge는 미구현)
+5개: init, status, fix, update, help
 
 ## Slash Commands
 
 ### Normal (13개)
 reap.objective, reap.planning, reap.implementation, reap.validation, reap.completion, reap.evolve, reap.start, reap.next, reap.back, reap.status, reap.sync, reap.update, reap.help
 
-### Merge (7개, 미구현)
-reap.merge.start, reap.merge.detect, reap.merge.genome-resolve, reap.merge.source-resolve, reap.merge.sync-test, reap.merge.completion, reap.merge.evolve
+### Collaboration (10개)
+reap.pull, reap.push, reap.merge.start, reap.merge.detect, reap.merge.mate, reap.merge.merge, reap.merge.sync, reap.merge.validation, reap.merge.completion, reap.merge.evolve
 
-- `reap.merge.start` — merge generation 생성 (parents 2개 지정)
-- `reap.merge.detect` ~ `reap.merge.completion` — 각 merge stage 실행
+- `reap.pull` — fetch + full merge generation lifecycle (distributed /reap.evolve)
+- `reap.push` — REAP 상태 검증 + git push
+- `reap.merge.start` — merge generation 생성 (branch 지정)
+- `reap.merge.detect` ~ `reap.merge.completion` — 각 merge stage 실행 (6단계)
 - `reap.merge.evolve` — merge full lifecycle 자동 실행
 - `reap.next`/`reap.back`은 type: merge에서도 동작 (stage 분기)
 
