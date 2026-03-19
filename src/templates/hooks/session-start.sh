@@ -209,60 +209,57 @@ if [ -n "$auto_update_message" ]; then
   init_log="${init_log}🟢 ${auto_update_message}\n"
 fi
 
-# Genome status — single line (load + structure + sync)
+# Genome status (load + structure + sync + source-map → single line)
 genome_issues=""
+genome_severity="ok"
 if [ "$l1_lines" -eq 0 ]; then
   genome_issues="empty"
+  genome_severity="danger"
 fi
-genome_missing=""
 for required_file in principles.md conventions.md constraints.md source-map.md; do
   if [ ! -f "${GENOME_DIR}/${required_file}" ]; then
-    genome_missing="${genome_missing} ${required_file}"
+    genome_issues="${genome_issues}${genome_issues:+, }missing ${required_file}"
+    genome_severity="danger"
   fi
 done
 if [ ! -d "${GENOME_DIR}/domain" ]; then
-  genome_missing="${genome_missing} domain/"
+  genome_issues="${genome_issues}${genome_issues:+, }missing domain/"
+  genome_severity="danger"
 fi
-if [ -n "$genome_missing" ]; then
-  genome_issues="${genome_issues}${genome_issues:+, }missing:${genome_missing}"
-fi
-if [ -n "$genome_stale_warning" ] && [ "$commits_since" -gt 30 ]; then
-  genome_issues="${genome_issues}${genome_issues:+, }severely stale (${commits_since} commits)"
-elif [ -n "$genome_stale_warning" ]; then
-  genome_issues="${genome_issues}${genome_issues:+, }stale (${commits_since} commits)"
-fi
-
-if [ -z "$genome_issues" ]; then
-  init_log="${init_log}🟢 Genome OK (${l1_lines} lines, in sync)\n"
-elif echo "$genome_issues" | grep -qE "empty|missing|severely"; then
-  init_log="${init_log}🔴 Genome — ${genome_issues}. Run \`reap fix\` or /reap.sync\n"
-else
-  init_log="${init_log}🟡 Genome — ${genome_issues}. Run /reap.sync\n"
-fi
-
-# Config status
 if [ ! -f "${REAP_DIR}/config.yml" ]; then
-  init_log="${init_log}🔴 config.yml missing — run \`reap fix\`\n"
+  genome_issues="${genome_issues}${genome_issues:+, }no config.yml"
+  genome_severity="danger"
 fi
-
-# Source-map status
 if [ -n "$sourcemap_drift_warning" ]; then
   drift_diff=$(( documented > actual ? documented - actual : actual - documented ))
   if [ "$drift_diff" -gt 3 ]; then
-    init_log="${init_log}🔴 Source-map severely out of date — ${documented} documented vs ${actual} actual. Run /reap.sync immediately\n"
+    genome_issues="${genome_issues}${genome_issues:+, }source-map drift (${documented}→${actual})"
+    [ "$genome_severity" = "ok" ] && genome_severity="danger"
   else
-    init_log="${init_log}🟡 Source-map drift — ${documented} documented vs ${actual} actual. Run /reap.sync\n"
+    genome_issues="${genome_issues}${genome_issues:+, }source-map drift (${documented}→${actual})"
+    [ "$genome_severity" = "ok" ] && genome_severity="warn"
   fi
-elif [ -f "$SOURCEMAP_FILE" ]; then
-  init_log="${init_log}🟢 Source-map in sync (${actual} components)\n"
+fi
+if [ -n "$genome_stale_warning" ] && [ "$commits_since" -gt 30 ]; then
+  genome_issues="${genome_issues}${genome_issues:+, }severely stale (${commits_since} commits)"
+  [ "$genome_severity" != "danger" ] && genome_severity="danger"
+elif [ -n "$genome_stale_warning" ]; then
+  genome_issues="${genome_issues}${genome_issues:+, }stale (${commits_since} commits)"
+  [ "$genome_severity" = "ok" ] && genome_severity="warn"
 fi
 
-# current.yml integrity
+case "$genome_severity" in
+  ok)     init_log="${init_log}🟢 Genome OK\n" ;;
+  warn)   init_log="${init_log}🟡 Genome — ${genome_issues}. /reap.sync\n" ;;
+  danger) init_log="${init_log}🔴 Genome — ${genome_issues}. \`reap fix\` or /reap.sync\n" ;;
+esac
+
+# Generation status
 if [ -f "$CURRENT_YML" ] && [ -n "$(cat "$CURRENT_YML" 2>/dev/null | tr -d '[:space:]')" ]; then
   if [ -z "$gen_id" ] || [ -z "$gen_stage" ]; then
-    init_log="${init_log}🔴 current.yml corrupted — run \`reap fix\`\n"
+    init_log="${init_log}🔴 Generation — current.yml corrupted. \`reap fix\`\n"
   else
-    init_log="${init_log}🟢 Active: ${gen_id} — stage: ${gen_stage}\n"
+    init_log="${init_log}🟢 Generation ${gen_id} — ${gen_stage}\n"
   fi
 else
   init_log="${init_log}⚪ No active Generation\n"
