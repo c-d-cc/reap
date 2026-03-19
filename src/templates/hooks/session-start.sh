@@ -209,14 +209,11 @@ if [ -n "$auto_update_message" ]; then
   init_log="${init_log}🟢 ${auto_update_message}\n"
 fi
 
-# Genome loading status
+# Genome status — single line (load + structure + sync)
+genome_issues=""
 if [ "$l1_lines" -eq 0 ]; then
-  init_log="${init_log}🔴 Genome empty — no genome files found. Run \`reap init\` or check .reap/genome/\n"
-else
-  init_log="${init_log}🟢 Genome loaded (L1: ${l1_lines} lines)\n"
+  genome_issues="empty"
 fi
-
-# Genome structure check — required files
 genome_missing=""
 for required_file in principles.md conventions.md constraints.md source-map.md; do
   if [ ! -f "${GENOME_DIR}/${required_file}" ]; then
@@ -227,23 +224,25 @@ if [ ! -d "${GENOME_DIR}/domain" ]; then
   genome_missing="${genome_missing} domain/"
 fi
 if [ -n "$genome_missing" ]; then
-  init_log="${init_log}🔴 Genome structure incomplete — missing:${genome_missing}. Run \`reap fix\` or \`reap init\`\n"
+  genome_issues="${genome_issues}${genome_issues:+, }missing:${genome_missing}"
+fi
+if [ -n "$genome_stale_warning" ] && [ "$commits_since" -gt 30 ]; then
+  genome_issues="${genome_issues}${genome_issues:+, }severely stale (${commits_since} commits)"
+elif [ -n "$genome_stale_warning" ]; then
+  genome_issues="${genome_issues}${genome_issues:+, }stale (${commits_since} commits)"
+fi
+
+if [ -z "$genome_issues" ]; then
+  init_log="${init_log}🟢 Genome OK (${l1_lines} lines, in sync)\n"
+elif echo "$genome_issues" | grep -qE "empty|missing|severely"; then
+  init_log="${init_log}🔴 Genome — ${genome_issues}. Run \`reap fix\` or /reap.sync\n"
+else
+  init_log="${init_log}🟡 Genome — ${genome_issues}. Run /reap.sync\n"
 fi
 
 # Config status
 if [ ! -f "${REAP_DIR}/config.yml" ]; then
   init_log="${init_log}🔴 config.yml missing — run \`reap fix\`\n"
-fi
-
-# Genome sync status
-if [ -n "$genome_stale_warning" ]; then
-  if [ "$commits_since" -gt 30 ]; then
-    init_log="${init_log}🔴 Genome severely stale — ${commits_since} code commits since last update. Run /reap.sync immediately\n"
-  else
-    init_log="${init_log}🟡 Genome stale — ${commits_since} code commits since last update. Run /reap.sync\n"
-  fi
-else
-  init_log="${init_log}🟢 Genome in sync\n"
 fi
 
 # Source-map status
