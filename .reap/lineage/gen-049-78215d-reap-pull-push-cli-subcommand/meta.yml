@@ -1,0 +1,8 @@
+id: gen-049-78215d
+type: normal
+parents:
+  - gen-048-8a836c
+goal: "reap pull / reap push CLI subcommand"
+genomeHash: e057bc17
+startedAt: "2026-03-19T13:06:40.320Z"
+completedAt: "2026-03-19T13:15:00.000Z"

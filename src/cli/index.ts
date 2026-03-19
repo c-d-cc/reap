@@ -9,6 +9,8 @@ import { ReapPaths } from "../core/paths";
 import { AgentRegistry } from "../core/agents";
 import { readTextFile } from "../core/fs";
 import { mergeCommand } from "./commands/merge";
+import { pullCommand } from "./commands/pull";
+import { pushCommand } from "./commands/push";
 import { join } from "path";
 
 program
@@ -137,6 +139,33 @@ program
       if (result.skipped.length > 0) {
         console.log(`Unchanged: ${result.skipped.length} files`);
       }
+    } catch (e: any) {
+      console.error(`Error: ${e.message}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("pull")
+  .description("Fetch remote and scan for new generations on remote branches")
+  .option("-r, --remote <remote>", "Remote name", "origin")
+  .action(async (options: { remote?: string }) => {
+    try {
+      await pullCommand(options);
+    } catch (e: any) {
+      console.error(`Error: ${e.message}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("push")
+  .description("Validate REAP state and push current branch")
+  .option("-r, --remote <remote>", "Remote name", "origin")
+  .option("-f, --force", "Push even if a generation is in progress")
+  .action(async (options: { remote?: string; force?: boolean }) => {
+    try {
+      await pushCommand(options);
     } catch (e: any) {
       console.error(`Error: ${e.message}`);
       process.exit(1);

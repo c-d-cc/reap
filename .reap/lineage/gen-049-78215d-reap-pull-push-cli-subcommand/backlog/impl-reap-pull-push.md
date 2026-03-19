@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-049-78215d
 priority: medium
 title: reap pull / reap push CLI subcommand 구현
 ---
