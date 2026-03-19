@@ -18,7 +18,7 @@
 - 클래스/인터페이스: `PascalCase`
 - 함수/변수: `camelCase`
 - 상수: `UPPER_SNAKE_CASE`
-- 테스트 파일: `tests/` 미러 구조, `*.test.ts`
+- 테스트 파일: `tests/` (private submodule) 미러 구조, `*.test.ts`
 
 ## Git Conventions
 
