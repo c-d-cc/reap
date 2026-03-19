@@ -1,0 +1,11 @@
+id: gen-009-ff61db
+type: normal
+parents:
+  - gen-008-5b811d
+goal: |-
+  1) 06-legacy.md를 제거하고 05-completion.md에 Summary 섹션으로 통합한다.
+  2) Generation 완료 시 코드 + artifact를 함께 커밋하도록 command 스크립트에 지시를 추가한다.
+  3) Implementation 진입 시 uncommitted 변경이 많으면 사용자에게 커밋 여부를 묻도록 한다.
+genomeHash: legacy
+startedAt: legacy-9
+completedAt: legacy-9

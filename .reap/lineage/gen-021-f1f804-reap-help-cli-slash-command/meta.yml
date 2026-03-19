@@ -1,0 +1,8 @@
+id: gen-021-f1f804
+type: normal
+parents:
+  - gen-021-0d038f
+goal: reap help CLI 명령어 + /reap.help 슬래시 커맨드 추가
+genomeHash: legacy
+startedAt: legacy-21
+completedAt: legacy-21

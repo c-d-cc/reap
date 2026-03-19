@@ -1,0 +1,9 @@
+id: gen-011-5fb4b8
+type: normal
+parents:
+  - gen-010-2e53f9
+goal: REAP lifecycle 이벤트에 프로젝트별 hook을 정의할 수 있는 시스템을 추가한다. 이를 활용하여 reap-wf 프로젝트에서
+  generation 완료 시 자동으로 `reap update`를 실행하도록 한다.
+genomeHash: legacy
+startedAt: legacy-11
+completedAt: legacy-11

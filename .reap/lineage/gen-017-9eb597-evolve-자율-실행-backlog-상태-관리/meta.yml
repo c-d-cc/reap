@@ -1,0 +1,8 @@
+id: gen-017-9eb597
+type: normal
+parents:
+  - gen-016-af8597
+goal: evolve 자율 실행 모드 + backlog 상태 관리 체계 도입
+genomeHash: legacy
+startedAt: legacy-17
+completedAt: legacy-17

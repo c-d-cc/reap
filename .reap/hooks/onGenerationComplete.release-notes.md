@@ -17,7 +17,7 @@ Release note 생성 여부를 판단하라:
       - [주요 변경 2]
 
       ## Generations
-      - **gen-XXX**: [goal summary]
+      - **gen-XXX-{hash}**: [goal summary]
       - **gen-YYY**: [goal summary]
 
       ## Breaking Changes

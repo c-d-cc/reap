@@ -130,7 +130,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 每个项目还有`status`字段：
 
 - `status: pending` — 未处理项目（默认）
-- `status: consumed` — 在当前世代中已处理（需要`consumedBy: gen-XXX`）
+- `status: consumed` — 在当前世代中已处理（需要`consumedBy: gen-XXX-{hash}`）
 
 归档时（`/reap.next` from Completion），`consumed`项目移至lineage，`pending`项目结转到下一个世代的backlog。
 
@@ -287,7 +287,7 @@ my-project/
 
 | 级别 | 输入 | 输出 | 最大行数 | 触发条件 |
 |------|------|------|----------|----------|
-| **Level 1** | 世代文件夹（5个产出物） | `gen-XXX.md` | 40行 | lineage > 5,000行 + 5个以上世代 |
+| **Level 1** | 世代文件夹（5个产出物） | `gen-XXX-{hash}.md` | 40行 | lineage > 5,000行 + 5个以上世代 |
 | **Level 2** | 5个Level 1文件 | `epoch-XXX.md` | 60行 | Level 1达到5个以上 |
 
 压缩在世代完成时自动执行。最近3个世代始终受到保护，不会被压缩。压缩后的文件以目标（Objective）和结果（Completion）为中心保存，中间过程仅保留特别事项。

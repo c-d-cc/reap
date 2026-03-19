@@ -68,7 +68,7 @@ export const ja: Translations = {
       { label: "Genome Immutability", desc: "Generation進行中はGenomeを変更しません。Implementation中に発見された設計問題はbacklogにgenome-change項目として記録され、Completionでのみ適用されます。" },
       { label: "Backlog & Deferral", desc: ".reap/life/backlog/の項目はtype: genome-change | environment-change | taskを持ちます。部分完了は正常であり、未完了タスクは次のGenerationのObjectiveに引き継がれます。" },
       { label: "SessionStart Hook", desc: "新しいAIエージェントセッションごとに自動的にGenome全体、現在のGeneration状態、ワークフロールールを注入し、セッション間のコンテキスト喪失を排除します。" },
-      { label: "Lineage", desc: "完了したGenerationは.reap/lineage/に保管されます。レトロスペクティブがそこに蓄積されます。時間とともに圧縮されます（Level 1 → gen-XXX.md、Level 2 → epoch-XXX.md）。" },
+      { label: "Lineage", desc: "完了したGenerationは.reap/lineage/に保管されます。レトロスペクティブがそこに蓄積されます。時間とともに圧縮されます（Level 1 → gen-XXX-{hash}.md、Level 2 → epoch-XXX.md）。" },
       { label: "Four-Axis Structure", desc: ".reap/配下のすべてが4つの軸にマッピングされます：Genome（設計）、Environment（外部コンテキスト）、Life（現在のGeneration）、Lineage（過去のGeneration保管）。" },
     ],
     documentation: "ドキュメント",
@@ -186,7 +186,7 @@ export const ja: Translations = {
     statusHeaders: ["ステータス", "説明"],
     statuses: [
       { type: "pending", desc: "未処理。デフォルト値 — フィールドがなければpendingとみなす。" },
-      { type: "consumed", desc: "現在のGenerationで処理完了。consumedBy: gen-XXX必須。" },
+      { type: "consumed", desc: "現在のGenerationで処理完了。consumedBy: gen-XXX-{hash}必須。" },
     ],
     archivingNote: "アーカイブ時、consumed項目はlineageに移動します。pending項目は次のGenerationのbacklogに繰り越されます。",
     deferralNote: "部分完了は正常です — Genome変更に依存するタスクは[deferred]とマークされ、次のGenerationに引き継がれます。",
@@ -418,7 +418,7 @@ export const ja: Translations = {
     compressionDesc: "Generationが蓄積されると、lineageアーカイブはサイズ管理のために自動的に圧縮されます。",
     compressionHeaders: ["レベル", "入力", "出力", "最大行数", "トリガー"],
     compressionItems: [
-      ["Level 1", "Generationフォルダ（成果物5個）", "gen-XXX.md", "40", "lineage > 5,000行 + 5個以上のGeneration"],
+      ["Level 1", "Generationフォルダ（成果物5個）", "gen-XXX-{hash}.md", "40", "lineage > 5,000行 + 5個以上のGeneration"],
       ["Level 2", "Level 1ファイル5個", "epoch-XXX.md", "60", "Level 1ファイルが5個以上存在"],
     ],
     compressionProtection: "最新の3世代は常に圧縮から保護され、最近のコンテキストの完全な詳細が維持されます。",

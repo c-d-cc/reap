@@ -1,0 +1,8 @@
+id: gen-020-594bcb
+type: normal
+parents:
+  - gen-019-c442e8
+goal: strict 모드 — REAP workflow 없이 소스 수정 방지
+genomeHash: legacy
+startedAt: legacy-20
+completedAt: legacy-20

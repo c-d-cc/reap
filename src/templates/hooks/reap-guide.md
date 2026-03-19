@@ -66,7 +66,7 @@ All items to be carried forward to the next generation are stored in `.reap/life
 
 Each item also carries a `status` field:
 - `status: pending` — Not yet processed (default; absent field treated as pending)
-- `status: consumed` — Processed in the current generation (requires `consumedBy: gen-XXX`)
+- `status: consumed` — Processed in the current generation (requires `consumedBy: gen-XXX-{hash}`)
 
 Marking rules:
 - `/reap.start`: backlog items chosen as the generation's goal → mark `consumed`

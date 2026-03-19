@@ -130,7 +130,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 各項目は`status`フィールドも持ちます：
 
 - `status: pending` — 未処理項目（デフォルト）
-- `status: consumed` — 現在の世代で処理完了（`consumedBy: gen-XXX`必須）
+- `status: consumed` — 現在の世代で処理完了（`consumedBy: gen-XXX-{hash}`必須）
 
 アーカイブ時点（`/reap.next` from Completion）で`consumed`項目はlineageに移動し、`pending`項目は次の世代のbacklogに繰り越されます。
 
@@ -287,7 +287,7 @@ my-project/
 
 | レベル | 入力 | 出力 | 最大行数 | トリガー |
 |--------|------|------|----------|----------|
-| **Level 1** | 世代フォルダ（5つの成果物） | `gen-XXX.md` | 40行 | lineage > 5,000行 + 5世代以上 |
+| **Level 1** | 世代フォルダ（5つの成果物） | `gen-XXX-{hash}.md` | 40行 | lineage > 5,000行 + 5世代以上 |
 | **Level 2** | Level 1ファイル5つ | `epoch-XXX.md` | 60行 | Level 1が5つ以上 |
 
 圧縮は世代完了時に自動実行されます。直近3世代は常に圧縮から保護されます。圧縮されたファイルは目標（Objective）と結果（Completion）を中心に保存し、中間過程は特記事項のみを残します。

@@ -1,0 +1,8 @@
+id: gen-033-ceea92
+type: normal
+parents:
+  - gen-032-68799c
+goal: Hook suggestion 로직 + stale genome 수정 + sync Level 1 기계적 체크
+genomeHash: legacy
+startedAt: legacy-33
+completedAt: legacy-33

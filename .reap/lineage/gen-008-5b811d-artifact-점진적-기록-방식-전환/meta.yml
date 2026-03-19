@@ -1,0 +1,12 @@
+id: gen-008-5b811d
+type: normal
+parents:
+  - gen-007-d50dfb
+goal: >-
+  1) Artifact를 stage 완료 시 한번에 작성하는 방식에서, stage 진입 시 생성 + 작업 중 점진적 업데이트 방식으로
+  전환한다.
+
+  2) Old 7-stage lifecycle 테스트 17개 실패 + 2 errors를 현재 5단계에 맞게 수정한다.
+genomeHash: legacy
+startedAt: legacy-8
+completedAt: legacy-8

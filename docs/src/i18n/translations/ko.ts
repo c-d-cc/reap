@@ -68,7 +68,7 @@ export const ko: Translations = {
       { label: "Genome Immutability", desc: "Generation 진행 중에는 Genome을 수정하지 않습니다. Implementation 중 발견된 설계 이슈는 backlog에 genome-change 항목으로 기록되어 Completion에서만 적용됩니다." },
       { label: "Backlog & Deferral", desc: ".reap/life/backlog/의 항목은 type: genome-change | environment-change | task를 가집니다. 부분 완료는 정상적인 상황이며, 미완료 태스크는 다음 Generation의 Objective로 넘어갑니다." },
       { label: "SessionStart Hook", desc: "매 새 AI 에이전트 세션은 자동으로 전체 Genome, 현재 Generation 상태, 워크플로우 규칙을 주입하여 세션 간 컨텍스트 손실을 제거합니다." },
-      { label: "Lineage", desc: "완료된 Generation은 .reap/lineage/에 보관됩니다. 회고가 그곳에 축적됩니다. 시간이 지나면 압축됩니다 (Level 1 → gen-XXX.md, Level 2 → epoch-XXX.md)." },
+      { label: "Lineage", desc: "완료된 Generation은 .reap/lineage/에 보관됩니다. 회고가 그곳에 축적됩니다. 시간이 지나면 압축됩니다 (Level 1 → gen-XXX-{hash}.md, Level 2 → epoch-XXX.md)." },
       { label: "Four-Axis Structure", desc: ".reap/ 하위의 모든 것은 네 개의 축으로 매핑됩니다: Genome (설계), Environment (외부 컨텍스트), Life (현재 Generation), Lineage (과거 Generation 보관)." },
     ],
     documentation: "문서",
@@ -186,7 +186,7 @@ export const ko: Translations = {
     statusHeaders: ["상태", "설명"],
     statuses: [
       { type: "pending", desc: "미처리. 기본값 — 필드가 없으면 pending으로 간주." },
-      { type: "consumed", desc: "현재 Generation에서 처리 완료. consumedBy: gen-XXX 필수." },
+      { type: "consumed", desc: "현재 Generation에서 처리 완료. consumedBy: gen-XXX-{hash} 필수." },
     ],
     archivingNote: "보관 시, consumed 항목은 lineage로 이동합니다. pending 항목은 다음 Generation의 backlog로 이월됩니다.",
     deferralNote: "부분 완료는 정상입니다 — Genome 변경에 의존하는 태스크는 [deferred]로 표시되어 다음 Generation으로 넘어갑니다.",
@@ -418,7 +418,7 @@ export const ko: Translations = {
     compressionDesc: "Generation이 축적되면 lineage 보관소가 크기 관리를 위해 자동으로 압축됩니다.",
     compressionHeaders: ["레벨", "입력", "출력", "최대 줄 수", "트리거"],
     compressionItems: [
-      ["Level 1", "Generation 폴더 (산출물 5개)", "gen-XXX.md", "40", "lineage > 5,000줄 + 5개 이상 Generation"],
+      ["Level 1", "Generation 폴더 (산출물 5개)", "gen-XXX-{hash}.md", "40", "lineage > 5,000줄 + 5개 이상 Generation"],
       ["Level 2", "Level 1 파일 5개", "epoch-XXX.md", "60", "Level 1 파일 5개 이상 존재"],
     ],
     compressionProtection: "가장 최근 3개 Generation은 항상 압축에서 보호되어 최근 컨텍스트의 전체 세부사항이 유지됩니다.",

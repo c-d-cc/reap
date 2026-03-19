@@ -1,0 +1,13 @@
+id: gen-025-a62349
+type: normal
+parents:
+  - gen-024-748b43
+goal: >-
+  CLI 에이전트 추상화 레이어(AgentAdapter) 구축 + OpenCode 지원 추가
+
+
+  CLI client(Claude Code, OpenCode, Codex CLI 등)를 추상화하여, 다양한 AI 코딩 에이전트를 플러그인
+  방식으로 지원하는 구조로 리팩토링한다. 버전 0.2.0 릴리스.
+genomeHash: legacy
+startedAt: legacy-25
+completedAt: legacy-25

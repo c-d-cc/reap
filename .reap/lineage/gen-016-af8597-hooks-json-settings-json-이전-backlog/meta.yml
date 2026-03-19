@@ -1,0 +1,9 @@
+id: gen-016-af8597
+type: normal
+parents:
+  - gen-015-18a6c3
+goal: SessionStart hook 등록을 hooks.json → settings.json으로 이전 + /reap.start에
+  backlog 스캔 단계 추가
+genomeHash: legacy
+startedAt: legacy-16
+completedAt: legacy-16

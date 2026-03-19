@@ -43,7 +43,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 
 - 모든 backlog 항목은 frontmatter에 `status` 필드를 가진다
 - `status: pending` — 미처리 항목 (기본값, 없으면 pending으로 간주)
-- `status: consumed` — 처리 완료 항목 (`consumedBy: gen-XXX` 필수)
+- `status: consumed` — 처리 완료 항목 (`consumedBy: gen-XXX-{hash}` 필수)
 - **마킹 시점**:
   - `/reap.start`: goal로 선택된 backlog → consumed
   - `/reap.completion`: 적용된 genome-change/environment-change → consumed

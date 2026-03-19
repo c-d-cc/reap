@@ -1,0 +1,8 @@
+id: gen-019-c442e8
+type: normal
+parents:
+  - gen-018-3638f9
+goal: npm publish 준비 — 빌드 파이프라인 + 경로 해석 + package.json 정비
+genomeHash: legacy
+startedAt: legacy-19
+completedAt: legacy-19

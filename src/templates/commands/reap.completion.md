@@ -69,7 +69,7 @@ Do NOT finalize Genome changes without running Validation Commands.
 15. **Human confirmation**:
     - **If called from `/reap.evolve`** (Autonomous Override active): Apply genome changes automatically after Validation Commands pass. Do NOT pause for human confirmation.
     - **If called standalone**: Show the modified genome/environment content to the human and get approval. Do NOT finalize changes until the human approves.
-16. For each applied `type: genome-change` and `type: environment-change` backlog item, update its frontmatter to `status: consumed` and add `consumedBy: gen-XXX`
+16. For each applied `type: genome-change` and `type: environment-change` backlog item, update its frontmatter to `status: consumed` and add `consumedBy: gen-XXX-{hash}`
 
 ### Phase 5: Hook Suggestion
 

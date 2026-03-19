@@ -15,16 +15,16 @@ description: "REAP Start — Start a new Generation"
 - If backlog items exist:
   - Present the list with title and priority for each item
   - Ask: "Would you like to select one of these, or enter a new goal?"
-  - If the human selects a backlog item: use its title/content as the goal, then update the selected item's frontmatter to `status: consumed` and add `consumedBy: gen-XXX`
+  - If the human selects a backlog item: use its title/content as the goal, then update the selected item's frontmatter to `status: consumed` and add `consumedBy: gen-XXX-{hash}`
   - If the human wants a new goal: proceed to Step 1
 - If no backlog items exist: proceed to Step 1
 
 1. Ask the human for the goal of this generation
 2. Count existing generations in `.reap/lineage/` to determine the genomeVersion
-3. Generate the next generation ID (existing count + 1, in `gen-XXX` format)
+3. Generate the next generation ID (existing count + 1, in `gen-XXX-{hash}` format where `{hash}` is a short content hash)
 4. Write the following to `current.yml`:
    ```yaml
-   id: gen-XXX
+   id: gen-XXX-{hash}
    goal: [goal provided by the human]
    stage: objective
    genomeVersion: [generation count + 1]
@@ -49,4 +49,4 @@ description: "REAP Start — Start a new Generation"
         - `.sh`: run as shell script in the project root directory
 
 ## Completion
-- "Generation gen-XXX started. Proceed with `/reap.objective` to define the goal, or `/reap.evolve` to run the full lifecycle."
+- "Generation gen-XXX-{hash} started. Proceed with `/reap.objective` to define the goal, or `/reap.evolve` to run the full lifecycle."

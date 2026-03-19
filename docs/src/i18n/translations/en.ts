@@ -66,7 +66,7 @@ export const en = {
       { label: "Genome Immutability", desc: "The Genome is never modified mid-generation. Design issues discovered during Implementation are logged to the backlog as genome-change items and applied only at Completion." },
       { label: "Backlog & Deferral", desc: "Items in .reap/life/backlog/ carry a type: genome-change | environment-change | task. Partial completion is normal — deferred tasks carry forward to the next generation's Objective." },
       { label: "SessionStart Hook", desc: "Every new AI agent session automatically injects the full Genome, current generation state, and workflow rules — eliminating context loss between sessions." },
-      { label: "Lineage", desc: "Completed generations are archived in .reap/lineage/. Retrospectives accumulate there. Over time they're compressed (Level 1 → gen-XXX.md, Level 2 → epoch-XXX.md) to stay manageable." },
+      { label: "Lineage", desc: "Completed generations are archived in .reap/lineage/. Retrospectives accumulate there. Over time they're compressed (Level 1 → gen-XXX-{hash}.md, Level 2 → epoch-XXX.md) to stay manageable." },
       { label: "Four-Axis Structure", desc: "Everything under .reap/ maps to four axes: Genome (design), Environment (external context), Life (current generation), Lineage (archive of past generations)." },
     ],
     documentation: "Documentation",
@@ -184,7 +184,7 @@ export const en = {
     statusHeaders: ["Status", "Description"],
     statuses: [
       { type: "pending", desc: "Not yet processed. Default value — absent field is treated as pending." },
-      { type: "consumed", desc: "Processed in the current generation. Requires consumedBy: gen-XXX." },
+      { type: "consumed", desc: "Processed in the current generation. Requires consumedBy: gen-XXX-{hash}." },
     ],
     archivingNote: "At archiving time, consumed items move to lineage. pending items are carried forward to the next generation's backlog.",
     deferralNote: "Partial completion is normal — tasks depending on Genome changes are marked [deferred] and handed to the next generation.",
@@ -416,7 +416,7 @@ export const en = {
     compressionDesc: "As generations accumulate, lineage archives are automatically compressed to manage size.",
     compressionHeaders: ["Level", "Input", "Output", "Max lines", "Trigger"],
     compressionItems: [
-      ["Level 1", "Generation folder (5 artifacts)", "gen-XXX.md", "40", "lineage > 5,000 lines + 5+ generations"],
+      ["Level 1", "Generation folder (5 artifacts)", "gen-XXX-{hash}.md", "40", "lineage > 5,000 lines + 5+ generations"],
       ["Level 2", "5 Level 1 files", "epoch-XXX.md", "60", "5+ Level 1 files exist"],
     ],
     compressionProtection: "The most recent 3 generations are always protected from compression, preserving full detail for recent context.",

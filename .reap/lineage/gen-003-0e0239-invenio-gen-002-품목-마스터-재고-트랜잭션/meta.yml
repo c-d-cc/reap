@@ -1,0 +1,8 @@
+id: gen-003-0e0239
+type: normal
+parents:
+  - gen-002-68295b
+goal: invenio gen 002 품목 마스터 재고 트랜잭션
+genomeHash: legacy
+startedAt: legacy-3
+completedAt: legacy-3

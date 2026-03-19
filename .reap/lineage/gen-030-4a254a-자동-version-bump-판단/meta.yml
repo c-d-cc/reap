@@ -1,0 +1,8 @@
+id: gen-030-4a254a
+type: normal
+parents:
+  - gen-029-96b9b1
+goal: Generation complete 시 자동 version bump 판단 — patch는 AI 자동, minor/major는 유저 확인
+genomeHash: legacy
+startedAt: legacy-30
+completedAt: legacy-30

@@ -1,0 +1,9 @@
+id: gen-041-c7b6c0
+type: normal
+parents:
+  - gen-040-308d77
+goal: "`npm install -g @c-d-cc/reap` 실행 시 postinstall 스크립트로 slash commands를
+  `~/.claude/commands/`에 자동 설치"
+genomeHash: legacy
+startedAt: legacy-41
+completedAt: legacy-41

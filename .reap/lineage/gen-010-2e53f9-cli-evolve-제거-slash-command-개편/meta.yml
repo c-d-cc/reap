@@ -1,0 +1,9 @@
+id: gen-010-2e53f9
+type: normal
+parents:
+  - gen-009-ff61db
+goal: CLI에서 `reap evolve` 명령어를 제거하고, stage 전환과 generation 관리를 slash command로
+  이전한다. `/reap.evolve`는 전체 lifecycle 순회 명령어로 재정의한다.
+genomeHash: legacy
+startedAt: legacy-10
+completedAt: legacy-10

@@ -1,0 +1,8 @@
+id: gen-031-577bcc
+type: normal
+parents:
+  - gen-030-4a254a
+goal: Compression 임계값 조정 + Hooks 파일 분리/condition 구조 리팩토링 + Genome source-map.md 추가
+genomeHash: legacy
+startedAt: legacy-31
+completedAt: legacy-31

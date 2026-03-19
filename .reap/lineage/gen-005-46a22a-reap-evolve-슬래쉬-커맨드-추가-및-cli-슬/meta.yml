@@ -1,0 +1,8 @@
+id: gen-005-46a22a
+type: normal
+parents:
+  - gen-004-04e465
+goal: reap evolve 슬래쉬 커맨드 추가 및 cli 슬
+genomeHash: legacy
+startedAt: legacy-5
+completedAt: legacy-5

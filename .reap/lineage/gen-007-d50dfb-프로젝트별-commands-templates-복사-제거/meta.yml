@@ -1,0 +1,10 @@
+id: gen-007-d50dfb
+type: normal
+parents:
+  - gen-006-d9ca51
+goal: 프로젝트별 commands/templates 복사를 제거하고, user-level 설치(`~/.claude/commands/`)로
+  전환한다. consumer 프로젝트의 `.reap/`에는 프로젝트 산출물(genome, life, lineage, environment)만
+  존재하도록 한다.
+genomeHash: legacy
+startedAt: legacy-7
+completedAt: legacy-7

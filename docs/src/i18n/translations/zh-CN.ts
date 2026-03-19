@@ -68,7 +68,7 @@ export const zhCN: Translations = {
       { label: "Genome Immutability", desc: "Generation进行中不修改Genome。Implementation中发现的设计问题记录在backlog中作为genome-change项目，仅在Completion时应用。" },
       { label: "Backlog & Deferral", desc: ".reap/life/backlog/中的项目具有type: genome-change | environment-change | task。部分完成是正常的，未完成的任务会传递到下一个Generation的Objective。" },
       { label: "SessionStart Hook", desc: "每个新的AI代理会话自动注入完整的Genome、当前Generation状态和工作流规则，消除会话间的上下文丢失。" },
-      { label: "Lineage", desc: "已完成的Generation归档在.reap/lineage/中。回顾在那里积累。随时间推移会压缩（Level 1 → gen-XXX.md，Level 2 → epoch-XXX.md）。" },
+      { label: "Lineage", desc: "已完成的Generation归档在.reap/lineage/中。回顾在那里积累。随时间推移会压缩（Level 1 → gen-XXX-{hash}.md，Level 2 → epoch-XXX.md）。" },
       { label: "Four-Axis Structure", desc: ".reap/下的所有内容映射到四个轴：Genome（设计）、Environment（外部上下文）、Life（当前Generation）、Lineage（过去Generation的归档）。" },
     ],
     documentation: "文档",
@@ -186,7 +186,7 @@ export const zhCN: Translations = {
     statusHeaders: ["状态", "说明"],
     statuses: [
       { type: "pending", desc: "未处理。默认值 — 字段缺失则视为pending。" },
-      { type: "consumed", desc: "在当前Generation中已处理。需要consumedBy: gen-XXX。" },
+      { type: "consumed", desc: "在当前Generation中已处理。需要consumedBy: gen-XXX-{hash}。" },
     ],
     archivingNote: "归档时，consumed项目移至lineage。pending项目结转到下一个Generation的backlog。",
     deferralNote: "部分完成是正常的 — 依赖Genome变更的任务标记为[deferred]并传递到下一个Generation。",
@@ -418,7 +418,7 @@ export const zhCN: Translations = {
     compressionDesc: "随着Generation的积累，lineage归档会自动压缩以管理大小。",
     compressionHeaders: ["级别", "输入", "输出", "最大行数", "触发条件"],
     compressionItems: [
-      ["Level 1", "Generation文件夹（5个产出物）", "gen-XXX.md", "40", "lineage > 5,000行 + 5个以上Generation"],
+      ["Level 1", "Generation文件夹（5个产出物）", "gen-XXX-{hash}.md", "40", "lineage > 5,000行 + 5个以上Generation"],
       ["Level 2", "5个Level 1文件", "epoch-XXX.md", "60", "存在5个以上Level 1文件"],
     ],
     compressionProtection: "最近3个Generation始终受到压缩保护，保留最近上下文的完整细节。",

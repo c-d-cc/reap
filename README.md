@@ -129,7 +129,7 @@ All items to be addressed next are stored in `.reap/life/backlog/`. Each item us
 Each item also carries a `status` field:
 
 - `status: pending` — Not yet processed (default)
-- `status: consumed` — Processed in the current generation (requires `consumedBy: gen-XXX`)
+- `status: consumed` — Processed in the current generation (requires `consumedBy: gen-XXX-{hash}`)
 
 At archiving time (`/reap.next` from Completion), `consumed` items move to lineage while `pending` items are carried forward to the next generation's backlog.
 
@@ -286,7 +286,7 @@ As generations accumulate, the lineage directory grows. REAP manages this with a
 
 | Level | Input | Output | Max lines | Trigger |
 |-------|-------|--------|-----------|---------|
-| **Level 1** | Generation folder (5 artifacts) | `gen-XXX.md` | 40 lines | lineage > 5,000 lines + 5+ generations |
+| **Level 1** | Generation folder (5 artifacts) | `gen-XXX-{hash}.md` | 40 lines | lineage > 5,000 lines + 5+ generations |
 | **Level 2** | 5 Level 1 files | `epoch-XXX.md` | 60 lines | 5+ Level 1 files |
 
 Compression runs automatically when a generation completes. The most recent 3 generations are always protected from compression. Compressed files preserve objectives and completion results while retaining only notable findings from intermediate stages.
