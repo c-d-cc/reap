@@ -1,3 +1,7 @@
+---
+condition: has-code-changes
+order: 10
+---
 Version bump 필요 여부를 판단하라:
 1. 방금 완료된 generation의 lineage artifacts를 읽어 변경 내용을 파악
    (`.reap/lineage/`에서 가장 최근 폴더의 01-objective.md, 05-completion.md)

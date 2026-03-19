@@ -21,15 +21,16 @@ description: "REAP Next — Advance to the next lifecycle stage"
 - Immediately create the next stage's artifact file from template (empty, ready to fill)
 
 ### Hook Execution (Stage Transition)
-- Read `.reap/config.yml` — if `hooks.onStageTransition` is defined, execute each hook in order:
-  - First, evaluate the `condition` field (skip if condition is not met):
-    - `always` or absent: always execute
-    - `has-code-changes`: execute only if src/ files were changed in this generation (check `git diff` or implementation artifact)
-    - `version-bumped`: execute only if `package.json` version ≠ `git describe --tags --abbrev=0`
-  - Then execute:
-    - If hook has `command`: run the shell command
-    - If hook has `execute` (file path): read the file and follow its instructions (.md = AI prompt, .sh = shell script)
-    - If hook has `prompt` (legacy): follow the prompt instructions directly
+- Scan `.reap/hooks/` for files matching `onStageTransition.*`
+- For each matched file (sorted by `order` from frontmatter, then alphabetically):
+  1. Read the frontmatter (`condition`, `order`)
+  2. Evaluate `condition` (skip if not met):
+     - `always` or absent: always execute
+     - `has-code-changes`: execute only if src/ files were changed in this generation
+     - `version-bumped`: execute only if `package.json` version ≠ `git describe --tags --abbrev=0`
+  3. Execute based on file extension:
+     - `.md`: read the file content (after frontmatter) as AI prompt and follow the instructions
+     - `.sh`: run as shell script in the project root directory
 
 ### When Advancing from Completion (Archiving)
 - Add the current timestamp to `completedAt` in `current.yml`
@@ -49,16 +50,17 @@ description: "REAP Next — Advance to the next lifecycle stage"
   - If there are no code changes (REAP-only generation), use `chore(reap): [goal summary]`
 
 ### Hook Execution (Generation Complete)
-- Read `.reap/config.yml` — if `hooks.onGenerationComplete` is defined, execute each hook in order:
-  - First, evaluate the `condition` field (skip if condition is not met):
-    - `always` or absent: always execute
-    - `has-code-changes`: execute only if src/ files were changed in this generation (check `git diff` or implementation artifact)
-    - `version-bumped`: execute only if `package.json` version ≠ `git describe --tags --abbrev=0`
-  - Then execute:
-    - If hook has `command`: run the shell command
-    - If hook has `execute` (file path): read the file and follow its instructions (.md = AI prompt, .sh = shell script)
-    - If hook has `prompt` (legacy): follow the prompt instructions directly
-  - Note: hooks run AFTER the commit, so any changes from hooks will be uncommitted
+- Scan `.reap/hooks/` for files matching `onGenerationComplete.*`
+- For each matched file (sorted by `order` from frontmatter, then alphabetically):
+  1. Read the frontmatter (`condition`, `order`)
+  2. Evaluate `condition` (skip if not met):
+     - `always` or absent: always execute
+     - `has-code-changes`: execute only if src/ files were changed in this generation
+     - `version-bumped`: execute only if `package.json` version ≠ `git describe --tags --abbrev=0`
+  3. Execute based on file extension:
+     - `.md`: read the file content (after frontmatter) as AI prompt and follow the instructions
+     - `.sh`: run as shell script in the project root directory
+- Note: hooks run AFTER the commit, so any changes from hooks will be uncommitted
 
 ## Completion
 - If archived: "Generation [id] complete and archived. Run `/reap.start` to begin a new generation."

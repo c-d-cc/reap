@@ -4,7 +4,7 @@
 > Write rules to be mechanically verifiable whenever possible.
 > Instead of "write good code", describe it as "functions must not exceed 50 lines".
 > Prioritize rules that can be enforced via linters/tests over documentation-only rules.
-> Modified only during the Birth phase.
+> Modified only during the Completion stage.
 
 ## Code Style
 

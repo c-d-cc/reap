@@ -1,3 +1,7 @@
+---
+condition: version-bumped
+order: 40
+---
 Release note 생성 여부를 판단하라:
 1. `git describe --tags --abbrev=0` 으로 마지막 릴리스 태그를 확인
 2. `package.json`의 현재 version과 비교

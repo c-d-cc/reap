@@ -68,7 +68,7 @@ L2_LIMIT=200
 genome_content=""
 l1_lines=0
 if [ -d "$GENOME_DIR" ]; then
-  for f in "$GENOME_DIR"/principles.md "$GENOME_DIR"/conventions.md "$GENOME_DIR"/constraints.md; do
+  for f in "$GENOME_DIR"/principles.md "$GENOME_DIR"/conventions.md "$GENOME_DIR"/constraints.md "$GENOME_DIR"/source-map.md; do
     if [ -f "$f" ]; then
       file_content=$(cat "$f")
       file_lines=$(echo "$file_content" | wc -l | tr -d ' ')

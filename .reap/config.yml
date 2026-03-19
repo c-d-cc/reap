@@ -4,13 +4,3 @@ entryMode: greenfield
 strict: true
 language: korean
 autoUpdate: true
-hooks:
-  onGenerationComplete:
-    - condition: "has-code-changes"
-      execute: ".reap/hooks/version-bump.md"
-    - condition: "always"
-      command: "~/.bun/bin/bun run src/cli/index.ts -- update"
-    - condition: "has-code-changes"
-      execute: ".reap/hooks/docs-update.md"
-    - condition: "version-bumped"
-      execute: ".reap/hooks/release-notes.md"

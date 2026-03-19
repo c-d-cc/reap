@@ -3,7 +3,7 @@
 > **Writing principle**: This file should be a **map** of ~100 lines or fewer.
 > Write at a level where agents can act immediately.
 > Separate detailed content into files under `domain/`.
-> Modified only during the Birth phase.
+> Modified only during the Completion stage.
 
 ## Core Beliefs
 
@@ -22,10 +22,6 @@ Agents should be able to reason about "why it is this way".
 |----|----------|-----------|------|
 | | | | |
 
-## Layer Map
+## Source Map
 
-Describe the project's layer structure and dependency direction.
-Specify which layers can depend on which layers.
-Write detailed layer rules in files under `domain/`.
-
-- (Describe layer structure here)
+→ See `genome/source-map.md` for C4 Container + Component level Mermaid diagrams.

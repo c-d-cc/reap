@@ -35,16 +35,17 @@ description: "REAP Start — Start a new Generation"
    ```
 5. Immediately create `.reap/life/01-objective.md` from the artifact template with the Goal section filled in
 
-### Hook Execution
-6. Read `.reap/config.yml` — if `hooks.onGenerationStart` is defined, execute each hook in order:
-   - First, evaluate the `condition` field (skip if condition is not met):
-     - `always` or absent: always execute
-     - `has-code-changes`: execute only if src/ files were changed in this generation (check `git diff` or implementation artifact)
-     - `version-bumped`: execute only if `package.json` version ≠ `git describe --tags --abbrev=0`
-   - Then execute:
-     - If hook has `command`: run the shell command
-     - If hook has `execute` (file path): read the file and follow its instructions (.md = AI prompt, .sh = shell script)
-     - If hook has `prompt` (legacy): follow the prompt instructions directly
+### Hook Execution (Generation Start)
+6. Scan `.reap/hooks/` for files matching `onGenerationStart.*`
+   - For each matched file (sorted by `order` from frontmatter, then alphabetically):
+     1. Read the frontmatter (`condition`, `order`)
+     2. Evaluate `condition` (skip if not met):
+        - `always` or absent: always execute
+        - `has-code-changes`: execute only if src/ files were changed in this generation
+        - `version-bumped`: execute only if `package.json` version ≠ `git describe --tags --abbrev=0`
+     3. Execute based on file extension:
+        - `.md`: read the file content (after frontmatter) as AI prompt and follow the instructions
+        - `.sh`: run as shell script in the project root directory
 
 ## Completion
 - "Generation gen-XXX started. Proceed with `/reap.objective` to define the goal, or `/reap.evolve` to run the full lifecycle."

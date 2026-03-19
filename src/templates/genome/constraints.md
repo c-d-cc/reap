@@ -3,7 +3,7 @@
 > **Writing principle**: This file should be a **map** of ~100 lines or fewer.
 > Record not only the "what" but also the "why" of each technical choice.
 > Agents refer to this file when making technical decisions.
-> Modified only during the Birth phase.
+> Modified only during the Completion stage.
 
 ## Tech Stack
 

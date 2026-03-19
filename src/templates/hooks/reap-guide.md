@@ -100,28 +100,23 @@ Compression runs automatically during `/reap.next` (archiving after completion).
 
 ## REAP Hooks
 
-Projects can define hooks in `.reap/config.yml` to run commands or prompts at lifecycle events:
+Hooks are defined as individual files in `.reap/hooks/` with the naming convention `{event}.{name}.{md|sh}`:
 
-```yaml
-hooks:
-  onGenerationComplete:
-    - condition: "has-code-changes"
-      execute: ".reap/hooks/version-bump.md"
-    - condition: "always"
-      command: "reap update"
-    - condition: "has-code-changes"
-      execute: ".reap/hooks/docs-update.md"
-    - condition: "version-bumped"
-      execute: ".reap/hooks/release-notes.md"
+```
+.reap/hooks/
+├── onGenerationComplete.version-bump.md
+├── onGenerationComplete.reap-update.sh
+├── onGenerationComplete.docs-update.md
+└── onGenerationComplete.release-notes.md
 ```
 
-Each hook entry supports:
-- `command` — Run a shell command in the project root directory
-- `execute` — File path to read and execute (.md = AI prompt, .sh = shell script)
-- `condition` — Condition to evaluate before execution:
-  - `always` or absent: always execute
-  - `has-code-changes`: execute only if src/ files were changed in this generation
-  - `version-bumped`: execute only if package.json version ≠ last git tag
+File naming: `{event}.{name}.{extension}`
+- Event: onGenerationStart, onStageTransition, onGenerationComplete, onRegression
+- Extension: `.md` (AI prompt) or `.sh` (shell script)
+
+Frontmatter (`.md` files) or comment headers (`.sh` files):
+- `condition`: always (default), has-code-changes, version-bumped
+- `order`: execution order within the same event (default: 50, lower runs first)
 
 | Event | Trigger |
 |-------|---------|
@@ -130,7 +125,7 @@ Each hook entry supports:
 | `onGenerationComplete` | After `/reap.next` archives a completed generation (after commit) |
 | `onRegression` | After `/reap.back` returns to a previous stage |
 
-Hooks are executed by the AI agent.
+Hooks are executed by the AI agent by scanning `.reap/hooks/` for files matching the current event.
 
 ## Multi-Agent Support
 

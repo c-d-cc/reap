@@ -57,7 +57,7 @@ export async function initProject(
 
   // 3. Copy genome templates
   log("Setting up Genome templates...");
-  const genomeTemplates = ["principles.md", "conventions.md", "constraints.md"];
+  const genomeTemplates = ["principles.md", "conventions.md", "constraints.md", "source-map.md"];
   const genomeSourceDir = preset
     ? join(ReapPaths.packageTemplatesDir, "presets", preset)
     : ReapPaths.packageGenomeDir;
