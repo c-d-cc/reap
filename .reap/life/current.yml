@@ -1,1 +1,10 @@
-
+id: gen-045
+goal: "테스트 소스 private 분리 (git submodule + reap-test repo)"
+stage: implementation
+genomeVersion: 44
+startedAt: 2026-03-19T11:38:22Z
+timeline:
+  - stage: objective
+    at: 2026-03-19T11:38:22Z
+  - stage: implementation
+    at: 2026-03-19T11:38:22Z
