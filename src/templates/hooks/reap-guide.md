@@ -115,8 +115,19 @@ File naming: `{event}.{name}.{extension}`
 - Extension: `.md` (AI prompt) or `.sh` (shell script)
 
 Frontmatter (`.md` files) or comment headers (`.sh` files):
-- `condition`: always (default), has-code-changes, version-bumped
+- `condition`: name of a script in `.reap/hooks/conditions/` (default: `always`)
 - `order`: execution order within the same event (default: 50, lower runs first)
+
+### Conditions
+
+Conditions are executable scripts in `.reap/hooks/conditions/`. Exit code 0 = condition met, non-zero = skip.
+
+Default conditions (installed by `reap init`):
+- `always.sh` — always true
+- `has-code-changes.sh` — true if src/ files were changed in the last commit
+- `version-bumped.sh` — true if package.json version ≠ last git tag
+
+Custom conditions: add any `.sh` script to `.reap/hooks/conditions/`. The hook's `condition` field matches the filename (without `.sh`).
 
 | Event | Trigger |
 |-------|---------|

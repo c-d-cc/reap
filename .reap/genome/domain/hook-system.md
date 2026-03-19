@@ -44,9 +44,14 @@ order: 10
 
 ## Conditions
 
-- `always` (기본값) — 항상 실행
-- `has-code-changes` — src/ 파일이 이번 generation에서 변경됨
-- `version-bumped` — package.json version ≠ 마지막 git tag
+`.reap/hooks/conditions/` 디렉토리의 실행 가능한 스크립트. exit 0 = true, non-zero = false.
+
+기본 제공 (reap init 시 설치):
+- `always.sh` — 항상 true
+- `has-code-changes.sh` — src/ 파일이 마지막 커밋에서 변경됨
+- `version-bumped.sh` — package.json version ≠ 마지막 git tag
+
+커스텀: `.reap/hooks/conditions/`에 `.sh` 파일 추가만으로 동작. hook frontmatter의 condition 값이 파일명(확장자 제외)과 매핑.
 
 ## Execution Rules
 

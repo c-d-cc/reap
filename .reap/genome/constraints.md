@@ -34,6 +34,7 @@
 
 4개 event: onGenerationStart, onStageTransition, onGenerationComplete, onRegression
 파일 기반: `.reap/hooks/{event}.{name}.{md|sh}`. frontmatter: condition, order
+Conditions: `.reap/hooks/conditions/{name}.sh` (exit 0=true). 기본 3개 + 유저 커스텀
 
 ## Validation Commands
 

@@ -1,4 +1,4 @@
-import { mkdir } from "fs/promises";
+import { mkdir, readdir, chmod } from "fs/promises";
 import { join } from "path";
 import { ReapPaths } from "../../core/paths";
 import { ConfigManager } from "../../core/config";
@@ -80,7 +80,21 @@ export async function initProject(
   const domainGuideDest = join(ReapPaths.userReapTemplates, "domain-guide.md");
   await writeTextFile(domainGuideDest, await readTextFileOrThrow(domainGuideSrc));
 
-  // 5. Detect installed agents and install commands + hooks
+  // 5. Install hook condition scripts
+  log("Installing hook conditions...");
+  const conditionsSourceDir = join(ReapPaths.packageTemplatesDir, "conditions");
+  const conditionsDestDir = join(paths.hooks, "conditions");
+  await mkdir(conditionsDestDir, { recursive: true });
+  const conditionFiles = await readdir(conditionsSourceDir);
+  for (const file of conditionFiles) {
+    if (!file.endsWith(".sh")) continue;
+    const src = join(conditionsSourceDir, file);
+    const dest = join(conditionsDestDir, file);
+    await writeTextFile(dest, await readTextFileOrThrow(src));
+    await chmod(dest, 0o755);
+  }
+
+  // 6. Detect installed agents and install commands + hooks
   log("Detecting AI agents...");
   const detectedAgents = await AgentRegistry.detectInstalled();
   const sourceDir = ReapPaths.packageCommandsDir;
