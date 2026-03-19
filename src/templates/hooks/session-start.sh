@@ -216,6 +216,20 @@ else
   init_log="${init_log}🟢 Genome loaded (L1: ${l1_lines} lines)\n"
 fi
 
+# Genome structure check — required files
+genome_missing=""
+for required_file in principles.md conventions.md constraints.md source-map.md; do
+  if [ ! -f "${GENOME_DIR}/${required_file}" ]; then
+    genome_missing="${genome_missing} ${required_file}"
+  fi
+done
+if [ ! -d "${GENOME_DIR}/domain" ]; then
+  genome_missing="${genome_missing} domain/"
+fi
+if [ -n "$genome_missing" ]; then
+  init_log="${init_log}🔴 Genome structure incomplete — missing:${genome_missing}. Run \`reap fix\` or \`reap init\`\n"
+fi
+
 # Config status
 if [ ! -f "${REAP_DIR}/config.yml" ]; then
   init_log="${init_log}🔴 config.yml missing — run \`reap fix\`\n"
