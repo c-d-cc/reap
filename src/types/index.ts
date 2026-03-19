@@ -18,6 +18,8 @@ export interface TimelineEntry {
   refs?: string[];          // regression only: file paths, artifact sections, code locations
 }
 
+export type GenerationType = "normal" | "merge";
+
 export interface GenerationState {
   id: string;
   goal: string;
@@ -26,6 +28,23 @@ export interface GenerationState {
   startedAt: string;
   completedAt?: string;
   timeline: TimelineEntry[];
+  /** Generation type: normal (default) or merge */
+  type?: GenerationType;
+  /** Parent generation IDs (DAG structure) */
+  parents?: string[];
+  /** Genome content hash at generation start */
+  genomeHash?: string;
+}
+
+/** Metadata stored in lineage/{gen-dir}/meta.yml */
+export interface GenerationMeta {
+  id: string;
+  type: GenerationType;
+  parents: string[];
+  goal: string;
+  genomeHash: string;
+  startedAt: string;
+  completedAt: string;
 }
 
 export type ReapHookEvent = "onGenerationStart" | "onStageTransition" | "onGenerationComplete" | "onRegression";

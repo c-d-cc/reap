@@ -10,6 +10,12 @@ const LEVEL2_MAX_LINES = 60;
 const LEVEL2_BATCH_SIZE = 5;
 const RECENT_PROTECTED_COUNT = 3;
 
+/** Extract generation number from directory/file name (supports both gen-NNN and gen-NNN-hash formats) */
+function extractGenNum(name: string): number {
+  const match = name.match(/^gen-(\d{3})/);
+  return match ? parseInt(match[1], 10) : 0;
+}
+
 interface LineageEntry {
   name: string;
   type: "dir" | "level1" | "level2";
@@ -53,11 +59,11 @@ async function scanLineage(paths: ReapPaths): Promise<LineageEntry[]> {
       const fullPath = join(paths.lineage, item.name);
 
       if (item.isDirectory() && item.name.startsWith("gen-")) {
-        const genNum = parseInt(item.name.replace("gen-", ""), 10);
+        const genNum = extractGenNum(item.name);
         const lines = await countDirLines(fullPath);
         entries.push({ name: item.name, type: "dir", lines, genNum });
       } else if (item.isFile() && item.name.startsWith("gen-") && item.name.endsWith(".md")) {
-        const genNum = parseInt(item.name.replace("gen-", ""), 10);
+        const genNum = extractGenNum(item.name);
         const lines = await countLines(fullPath);
         entries.push({ name: item.name, type: "level1", lines, genNum });
       } else if (item.isFile() && item.name.startsWith("epoch-") && item.name.endsWith(".md")) {
@@ -139,7 +145,7 @@ async function compressLevel1(genDir: string, genName: string): Promise<string> 
   }
 
   // Build compressed content
-  const genId = genName.match(/^gen-\d+/)?.[0] ?? genName;
+  const genId = genName.match(/^gen-\d{3}(?:-[a-f0-9]{6})?/)?.[0] ?? genName;
 
   lines.push(`# ${genId}`);
   if (metadata) {
@@ -206,7 +212,7 @@ async function compressLevel2(
   epochNum: number,
 ): Promise<string> {
   const lines: string[] = [];
-  const genIds = level1Files.map(f => f.name.replace(".md", "").match(/^gen-\d+/)?.[0] ?? f.name);
+  const genIds = level1Files.map(f => f.name.replace(".md", "").match(/^gen-\d{3}(?:-[a-f0-9]{6})?/)?.[0] ?? f.name);
   const first = genIds[0];
   const last = genIds[genIds.length - 1];
 
@@ -216,7 +222,7 @@ async function compressLevel2(
   for (const file of level1Files) {
     const content = await readTextFileOrThrow(file.path);
     // Extract header and goal line only
-    const headerMatch = content.match(/^# (gen-\d+)/m);
+    const headerMatch = content.match(/^# (gen-\d{3}(?:-[a-f0-9]{6})?)/m);
     const goalMatch = content.match(/- Goal: (.+)/);
     const periodMatch = content.match(/- (?:Started|Period): (.+)/);
     const genomeMatch = content.match(/- Genome.*: (.+)/);
@@ -282,7 +288,7 @@ export async function compressLineageIfNeeded(
 
     const dirPath = join(paths.lineage, dir.name);
     const compressed = await compressLevel1(dirPath, dir.name);
-    const genId = dir.name.match(/^gen-\d+/)?.[0] ?? dir.name;
+    const genId = dir.name.match(/^gen-\d{3}(?:-[a-f0-9]{6})?/)?.[0] ?? dir.name;
     const outPath = join(paths.lineage, `${genId}.md`);
 
     await writeTextFile(outPath, compressed);

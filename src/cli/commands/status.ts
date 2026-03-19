@@ -11,6 +11,9 @@ export interface ProjectStatus {
     stage: string;
     genomeVersion: number;
     startedAt: string;
+    type?: string;
+    parents?: string[];
+    genomeHash?: string;
   } | null;
   totalGenerations: number;
 }
@@ -32,6 +35,9 @@ export async function getStatus(projectRoot: string): Promise<ProjectStatus> {
       stage: current.stage,
       genomeVersion: current.genomeVersion,
       startedAt: current.startedAt,
+      type: current.type,
+      parents: current.parents,
+      genomeHash: current.genomeHash,
     } : null,
     totalGenerations: completedGens.length,
   };

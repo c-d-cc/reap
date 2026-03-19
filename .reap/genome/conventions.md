@@ -25,7 +25,7 @@
 - 커밋 메시지: `type: description` (feat, fix, test, chore, docs)
 - 한 커밋 = 한 논리적 변경
 - 테스트 포함 커밋 우선
-- **커밋 타이밍**: Generation 완료 시 코드+artifact를 함께 커밋 (1 generation = 1 commit). 커밋 메시지: `feat/fix/chore(gen-NNN): [goal]`
+- **커밋 타이밍**: Generation 완료 시 코드+artifact를 함께 커밋 (1 generation = 1 commit). 커밋 메시지: `feat/fix/chore(gen-NNN-hash): [goal]`
 
 ## Release Conventions
 

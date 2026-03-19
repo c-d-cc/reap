@@ -32,7 +32,7 @@ C4Container
 
   Container(cli, "CLI Layer", "src/cli/", "Commander.js 진입점. init, status, fix, update, help")
   Container(core, "Core Layer", "src/core/", "비즈니스 로직. 아래 Component 참조")
-  Container(types, "Types", "src/types/index.ts", "공유 타입 정의 (~110줄)")
+  Container(types, "Types", "src/types/index.ts", "공유 타입 정의 (~120줄). GenerationType, GenerationMeta 추가")
   Container(templates, "Templates", "src/templates/", "commands(13), artifacts(5), genome, hooks, help, presets")
 
   Rel(cli, core, "uses")
@@ -50,13 +50,14 @@ C4Component
   title Core Layer Components
 
   Component(lifecycle, "LifeCycle", "lifecycle.ts", "5-stage 상태 머신. next/prev/canTransition")
-  Component(generation, "GenerationManager", "generation.ts", "current/create/advance/complete. lineage 아카이빙")
+  Component(generation, "GenerationManager", "generation.ts", "current/create/advance/complete. hash ID, DAG lineage, meta.yml")
   Component(config, "ConfigManager", "config.ts", "YAML config read/write")
   Component(paths, "ReapPaths", "paths.ts", "경로 해석. project/user/package 레벨")
   Component(hooks, "Hooks", "hooks.ts", "SessionStart hook 등록/동기화/마이그레이션")
   Component(agents, "AgentRegistry", "agents/", "어댑터 추상화. Claude Code + OpenCode")
   Component(compression, "Compression", "compression.ts", "Lineage 자동 압축. L1(dir→md), L2(5×L1→epoch)")
   Component(adaptation, "AdaptationManager", "adaptation.ts", "Generation adaptation 기록")
+  Component(migration, "Migration", "migration.ts", "legacy lineage → DAG 변환. needsMigration, migrateLineage")
   Component(fs, "FS Utils", "fs.ts", "readTextFile, writeTextFile, fileExists")
 
   Rel(generation, lifecycle, "stage transitions")

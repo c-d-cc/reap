@@ -5,6 +5,7 @@ import { AgentRegistry } from "../../core/agents";
 import { migrateHooks } from "../../core/hooks";
 import { readTextFile, readTextFileOrThrow, writeTextFile } from "../../core/fs";
 import { ConfigManager } from "../../core/config";
+import { needsMigration, migrateLineage } from "../../core/migration";
 
 interface UpdateResult {
   updated: string[];
@@ -101,6 +102,21 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
 
   // 5. Migration: clean up legacy project-level files
   await migrateLegacyFiles(paths, dryRun, result);
+
+  // 6. Migration: lineage to DAG format (v0.4.0+)
+  if (await needsMigration(paths)) {
+    if (!dryRun) {
+      const migrationResult = await migrateLineage(paths);
+      for (const m of migrationResult.migrated) {
+        result.updated.push(`[lineage] ${m}`);
+      }
+      for (const e of migrationResult.errors) {
+        result.removed.push(`[lineage error] ${e}`);
+      }
+    } else {
+      result.updated.push("[lineage] DAG migration pending (dry-run)");
+    }
+  }
 
   return result;
 }
