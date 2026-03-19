@@ -47,7 +47,7 @@ Display a comprehensive overview of the current REAP project state.
 ### 6. Genome Health
 - Quick check of `.reap/genome/` files:
   - Any files that are still placeholder-only?
-  - Any files exceeding their line limit? (default: 100 lines, source-map.md: 150 lines)
+  - Any files exceeding their line limit? (default: ~100 lines. For source-map.md, read the file's own header to find its adaptive line limit.)
   - Is `domain/` empty (no rule files)?
 
 ## Output Format
