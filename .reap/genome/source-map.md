@@ -49,8 +49,12 @@ C4Container
 C4Component
   title Core Layer Components
 
-  Component(lifecycle, "LifeCycle", "lifecycle.ts", "5-stage 상태 머신. next/prev/canTransition")
-  Component(generation, "GenerationManager", "generation.ts", "current/create/advance/complete. hash ID, DAG lineage, meta.yml")
+  Component(lifecycle, "LifeCycle", "lifecycle.ts", "Normal 5-stage 상태 머신. next/prev/canTransition")
+  Component(mergeLifecycle, "MergeLifeCycle", "merge-lifecycle.ts", "Merge 5-stage 상태 머신. detect→completion")
+  Component(generation, "GenerationManager", "generation.ts", "Normal generation. create/advance/complete")
+  Component(mergeGeneration, "MergeGenerationManager", "merge-generation.ts", "Merge generation. create/advance/complete + findCommonAncestor")
+  Component(lineage, "Lineage Utils", "lineage.ts", "공유 lineage 조회. listMeta/readMeta/nextSeq/resolveParents")
+  Component(merge, "Merge Logic", "merge.ts", "genome diff, conflict 분류, sync test")
   Component(config, "ConfigManager", "config.ts", "YAML config read/write")
   Component(paths, "ReapPaths", "paths.ts", "경로 해석. project/user/package 레벨")
   Component(hooks, "Hooks", "hooks.ts", "SessionStart hook 등록/동기화/마이그레이션")
@@ -61,8 +65,13 @@ C4Component
   Component(fs, "FS Utils", "fs.ts", "readTextFile, writeTextFile, fileExists")
 
   Rel(generation, lifecycle, "stage transitions")
+  Rel(generation, lineage, "lineage 조회 위임")
   Rel(generation, compression, "archiving 시 호출")
   Rel(generation, paths, "경로 조회")
+  Rel(mergeGeneration, mergeLifecycle, "merge stage transitions")
+  Rel(mergeGeneration, lineage, "lineage 조회")
+  Rel(mergeGeneration, merge, "conflict detection")
+  Rel(mergeGeneration, compression, "archiving 시 호출")
   Rel(hooks, agents, "에이전트별 hook 등록")
   Rel(agents, paths, "에이전트별 경로")
   Rel(config, paths, "config 경로")

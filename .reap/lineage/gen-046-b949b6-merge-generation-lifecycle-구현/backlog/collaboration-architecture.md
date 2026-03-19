@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-046-b949b6
 priority: high
 title: 멀티머신 협업 아키텍처 도입
 ---

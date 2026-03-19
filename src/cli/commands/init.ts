@@ -80,6 +80,17 @@ export async function initProject(
   const domainGuideDest = join(ReapPaths.userReapTemplates, "domain-guide.md");
   await writeTextFile(domainGuideDest, await readTextFileOrThrow(domainGuideSrc));
 
+  // Install merge artifact templates
+  const mergeTemplatesDir = join(ReapPaths.userReapTemplates, "merge");
+  await mkdir(mergeTemplatesDir, { recursive: true });
+  const mergeArtifactFiles = ["01-detect.md", "02-genome-resolve.md", "03-source-resolve.md", "04-sync-test.md", "05-completion.md"];
+  const mergeSourceDir = join(ReapPaths.packageArtifactsDir, "merge");
+  for (const file of mergeArtifactFiles) {
+    const src = join(mergeSourceDir, file);
+    const dest = join(mergeTemplatesDir, file);
+    await writeTextFile(dest, await readTextFileOrThrow(src));
+  }
+
   // 5. Install hook condition scripts
   log("Installing hook conditions...");
   const conditionsSourceDir = join(ReapPaths.packageTemplatesDir, "conditions");

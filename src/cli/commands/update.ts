@@ -82,6 +82,23 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     result.updated.push(`~/.reap/templates/domain-guide.md`);
   }
 
+  // 2b. Sync merge artifact templates to ~/.reap/templates/merge/
+  const mergeTemplatesDir = join(ReapPaths.userReapTemplates, "merge");
+  await mkdir(mergeTemplatesDir, { recursive: true });
+  const mergeArtifactFiles = ["01-detect.md", "02-genome-resolve.md", "03-source-resolve.md", "04-sync-test.md", "05-completion.md"];
+  const mergeSourceDir = join(ReapPaths.packageArtifactsDir, "merge");
+  for (const file of mergeArtifactFiles) {
+    const src = await readTextFileOrThrow(join(mergeSourceDir, file));
+    const dest = join(mergeTemplatesDir, file);
+    const existing = await readTextFile(dest);
+    if (existing !== null && existing === src) {
+      result.skipped.push(`~/.reap/templates/merge/${file}`);
+    } else {
+      if (!dryRun) await writeTextFile(dest, src);
+      result.updated.push(`~/.reap/templates/merge/${file}`);
+    }
+  }
+
   // 3. Run migrations for all agents
   const migrations = await migrateHooks(dryRun);
   for (const m of migrations.results) {

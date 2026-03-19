@@ -3,12 +3,13 @@ import { createHash } from "crypto";
 import { hostname } from "os";
 import { readdir, mkdir, rename } from "fs/promises";
 import { join } from "path";
-import type { GenerationState, GenerationMeta } from "../types";
+import type { GenerationState, GenerationMeta, LifeCycleStage } from "../types";
 import type { ReapPaths } from "./paths";
 import { LifeCycle } from "./lifecycle";
 import { compressLineageIfNeeded } from "./compression";
 import { readTextFile, writeTextFile } from "./fs";
 import { parseFrontmatter } from "./compression";
+import * as lineageUtils from "./lineage";
 
 // ── Hash utilities ──────────────────────────────────────────
 
@@ -122,7 +123,7 @@ export class GenerationManager {
     const state = await this.current();
     if (!state) throw new Error("No active generation");
 
-    const next = LifeCycle.next(state.stage);
+    const next = LifeCycle.next(state.stage as LifeCycleStage);
     if (!next) throw new Error(`Cannot advance from ${state.stage}`);
 
     state.stage = next;
@@ -212,82 +213,24 @@ export class GenerationManager {
   }
 
   async listCompleted(): Promise<string[]> {
-    try {
-      const entries = await readdir(this.paths.lineage);
-      return entries.filter(e => e.startsWith("gen-")).sort();
-    } catch {
-      return [];
-    }
+    return lineageUtils.listCompleted(this.paths);
   }
 
-  /** Read meta.yml from a lineage directory */
   async readMeta(lineageDirName: string): Promise<GenerationMeta | null> {
-    const metaPath = join(this.paths.lineage, lineageDirName, "meta.yml");
-    const content = await readTextFile(metaPath);
-    if (content === null) return null;
-    return YAML.parse(content) as GenerationMeta;
+    return lineageUtils.readMeta(this.paths, lineageDirName);
   }
 
-  /** List all generation metadata (DAG-aware, reads both directories and compressed .md) */
   async listMeta(): Promise<GenerationMeta[]> {
-    const metas: GenerationMeta[] = [];
-    try {
-      const entries = await readdir(this.paths.lineage, { withFileTypes: true });
-      for (const entry of entries) {
-        if (entry.isDirectory() && entry.name.startsWith("gen-")) {
-          const meta = await this.readMeta(entry.name);
-          if (meta) metas.push(meta);
-        } else if (entry.isFile() && entry.name.startsWith("gen-") && entry.name.endsWith(".md")) {
-          // Compressed .md — read frontmatter
-          const content = await readTextFile(join(this.paths.lineage, entry.name));
-          if (content) {
-            const meta = parseFrontmatter(content);
-            if (meta) metas.push(meta);
-          }
-        }
-      }
-    } catch { /* lineage dir may not exist */ }
-    return metas;
+    return lineageUtils.listMeta(this.paths);
   }
 
-  /** Resolve parent generation IDs for a new generation */
   private async resolveParents(): Promise<string[]> {
-    // Find the most recently completed generation
-    const metas = await this.listMeta();
-    if (metas.length > 0) {
-      // Sort by completedAt descending
-      const sorted = metas.sort((a, b) =>
-        new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-      );
-      return [sorted[0].id];
-    }
-    // Fallback: check lineage dirs for legacy entries (no meta.yml)
-    const dirs = await this.listCompleted();
-    if (dirs.length > 0) {
-      const lastDir = dirs[dirs.length - 1];
-      const legacyId = lastDir.match(/^(gen-\d{3}(?:-[a-f0-9]{6})?)/)?.[1];
-      if (legacyId) return [legacyId];
-    }
-    return [];
+    return lineageUtils.resolveParents(this.paths);
   }
 
-  /** Calculate next sequence number */
   async nextSeq(): Promise<number> {
-    const genDirs = await this.listCompleted();
-    if (genDirs.length === 0) {
-      const current = await this.current();
-      if (current) {
-        return parseGenSeq(current.id) + 1;
-      }
-      return 1;
-    }
-    // Find the highest seq number across all entries
-    let maxSeq = 0;
-    for (const dir of genDirs) {
-      const seq = parseGenSeq(dir);
-      if (seq > maxSeq) maxSeq = seq;
-    }
-    return maxSeq + 1;
+    const current = await this.current();
+    return lineageUtils.nextSeq(this.paths, current?.id);
   }
 
   /**

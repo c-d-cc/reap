@@ -10,10 +10,25 @@ export const LIFECYCLE_ORDER: readonly LifeCycleStage[] = [
   "validation", "completion",
 ] as const;
 
+export type MergeStage =
+  | "detect"
+  | "genome-resolve"
+  | "source-resolve"
+  | "sync-test"
+  | "completion";
+
+export const MERGE_LIFECYCLE_ORDER: readonly MergeStage[] = [
+  "detect", "genome-resolve", "source-resolve",
+  "sync-test", "completion",
+] as const;
+
+/** Any stage type (normal or merge) */
+export type AnyStage = LifeCycleStage | MergeStage;
+
 export interface TimelineEntry {
-  stage: LifeCycleStage;
+  stage: AnyStage;
   at: string;
-  from?: LifeCycleStage;   // regression only
+  from?: AnyStage;          // regression only
   reason?: string;          // regression only
   refs?: string[];          // regression only: file paths, artifact sections, code locations
 }
@@ -23,7 +38,7 @@ export type GenerationType = "normal" | "merge";
 export interface GenerationState {
   id: string;
   goal: string;
-  stage: LifeCycleStage;
+  stage: AnyStage;
   genomeVersion: number;
   startedAt: string;
   completedAt?: string;
@@ -34,6 +49,8 @@ export interface GenerationState {
   parents?: string[];
   /** Genome content hash at generation start */
   genomeHash?: string;
+  /** Common ancestor generation ID (merge only) */
+  commonAncestor?: string;
 }
 
 /** Metadata stored in lineage/{gen-dir}/meta.yml */
