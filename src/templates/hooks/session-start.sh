@@ -121,7 +121,7 @@ sourcemap_drift_warning=""
 SOURCEMAP_FILE="${GENOME_DIR}/source-map.md"
 if [ -f "$SOURCEMAP_FILE" ] && [ -d "${PROJECT_ROOT}/src/core" ]; then
   documented=$(grep -c 'Component(' "$SOURCEMAP_FILE" 2>/dev/null || echo "0")
-  actual=$(ls "${PROJECT_ROOT}"/src/core/*.ts 2>/dev/null | wc -l | tr -d ' ')
+  actual=$(( $(ls "${PROJECT_ROOT}"/src/core/*.ts 2>/dev/null | wc -l) + $(ls -d "${PROJECT_ROOT}"/src/core/*/ 2>/dev/null | wc -l) ))
   if [ "$documented" != "0" ] && [ "$actual" != "0" ] && [ "$documented" != "$actual" ]; then
     sourcemap_drift_warning="WARNING: source-map.md drift — ${documented} components documented, ${actual} core files found. Consider running /reap.sync."
     echo "[REAP]   ⚠ Source-map drift: ${documented} documented vs ${actual} actual" >&2
