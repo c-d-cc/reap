@@ -2,6 +2,30 @@ import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { useT } from "@/i18n";
 
+function CommandTable({ headers, commands }: { headers: string[]; commands: string[][] }) {
+  return (
+    <div className="border border-border rounded-md overflow-hidden text-sm mb-6">
+      <table className="w-full">
+        <thead>
+          <tr className="border-b border-border bg-muted/30">
+            {headers.map((h, i) => (
+              <th key={h} className={`text-left px-4 py-2 text-xs font-semibold text-muted-foreground ${i === 0 ? "w-52" : ""}`}>{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {commands.map(([cmd, desc]) => (
+            <tr key={cmd}>
+              <td className="px-4 py-2 font-mono text-xs text-primary align-top">{cmd}</td>
+              <td className="px-4 py-2 text-xs text-muted-foreground">{desc}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function CommandReferencePage() {
   const t = useT();
   return (
@@ -25,27 +49,16 @@ export default function CommandReferencePage() {
           {t.commands.slashIntro}
         </p>
 
-        <div className="border border-border rounded-md overflow-hidden text-sm mb-6">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                {t.commands.commandHeaders.map((h) => (
-                  <th key={h} className={`text-left px-4 py-2 text-xs font-semibold text-muted-foreground ${h === t.commands.commandHeaders[0] ? "w-48" : ""}`}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {t.commands.commands.map(([cmd, desc]) => (
-                <tr key={cmd}>
-                  <td className="px-4 py-2 font-mono text-xs text-primary align-top">{cmd}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground">{desc}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{t.commands.normalTitle}</h3>
+        <CommandTable headers={t.commands.commandHeaders} commands={t.commands.normalCommands} />
 
-        <h3 className="text-sm font-semibold text-foreground mb-2">{t.commands.lifecycleFlow}</h3>
+        <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{t.commands.mergeTitle}</h3>
+        <CommandTable headers={t.commands.commandHeaders} commands={t.commands.mergeCommands} />
+
+        <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{t.commands.generalTitle}</h3>
+        <CommandTable headers={t.commands.commandHeaders} commands={t.commands.generalCommands} />
+
+        <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{t.commands.lifecycleFlow}</h3>
         <p className="text-xs text-muted-foreground mb-3">
           {t.commands.lifecycleFlowDesc}
         </p>

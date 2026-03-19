@@ -19,9 +19,9 @@ export default function WorkflowPage() {
         </p>
         <p className="text-xs text-muted-foreground mb-6">
           {t.workflow.evolveNote.includes("Command Reference") ? (
-            <>{t.workflow.evolveNote.split("Command Reference")[0]}<Link href="/docs/commands" className="text-primary hover:underline">Command Reference</Link>{t.workflow.evolveNote.split("Command Reference")[1]}</>
+            <>{t.workflow.evolveNote.split("Command Reference")[0]}<Link href="/docs/command-reference" className="text-primary hover:underline">Command Reference</Link>{t.workflow.evolveNote.split("Command Reference")[1]}</>
           ) : (
-            <>{t.workflow.evolveNote.split("커맨드 레퍼런스")[0]}<Link href="/docs/commands" className="text-primary hover:underline">커맨드 레퍼런스</Link>{t.workflow.evolveNote.split("커맨드 레퍼런스")[1]}</>
+            <>{t.workflow.evolveNote.split("커맨드 레퍼런스")[0]}<Link href="/docs/command-reference" className="text-primary hover:underline">커맨드 레퍼런스</Link>{t.workflow.evolveNote.split("커맨드 레퍼런스")[1]}</>
           )}
         </p>
 

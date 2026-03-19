@@ -6,7 +6,7 @@ export default function MergeCommandsPage() {
   const t = useT();
   return (
     <DocLayout>
-      <DocPage title={t.mergeCommands.title} breadcrumb={t.mergeCommands.breadcrumb}>
+      <DocPage title={t.mergeCommands.title} breadcrumb={t.mergeCommands.breadcrumb} badge="Need User Feedback">
 
         <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
           {t.mergeCommands.intro}

@@ -17,8 +17,8 @@ export const zhCN: Translations = {
       coreConcepts: "核心概念",
       workflow: "工作流",
       advanced: "进阶",
-      collaborationOverview: "概述",
-      mergeLifecycle: "合并生命周期",
+      collaborationOverview: "分布式工作流",
+      mergeGeneration: "合并世代",
       mergeCommands: "合并命令",
       cliReference: "CLI参考",
       commandReference: "命令参考",
@@ -83,9 +83,9 @@ export const zhCN: Translations = {
       { href: "/docs/quick-start", title: "快速开始", desc: "安装并逐步运行第一个Generation。" },
       { href: "/docs/core-concepts", title: "核心概念", desc: "Genome、生命周期、Backlog & Deferral深入解析。" },
       { href: "/docs/workflow", title: "工作流", desc: "/reap.evolve、阶段命令、micro loop、hooks。" },
-      { href: "/docs/cli", title: "CLI参考", desc: "reap init、status、update、fix的所有选项。" },
-      { href: "/docs/commands", title: "命令参考", desc: "/reap.evolve、阶段命令、/reap.status — 所有斜杠命令。" },
-      { href: "/docs/hooks", title: "Hook参考", desc: "生命周期hooks：command和prompt类型、events、SessionStart。" },
+      { href: "/docs/cli-reference", title: "CLI参考", desc: "reap init、status、update、fix的所有选项。" },
+      { href: "/docs/command-reference", title: "命令参考", desc: "/reap.evolve、阶段命令、/reap.status — 所有斜杠命令。" },
+      { href: "/docs/hook-reference", title: "Hook参考", desc: "生命周期hooks：command和prompt类型、events、SessionStart。" },
       { href: "/docs/comparison", title: "对比", desc: "REAP与现有规格驱动开发工具的对比。" },
       { href: "/docs/advanced", title: "进阶", desc: "Lineage压缩、预设、entry模式。" },
     ],
@@ -290,7 +290,8 @@ export const zhCN: Translations = {
     slashTitle: "斜杠命令",
     slashIntro: "通过reap init安装到检测到的各代理。在AI代理会话（Claude Code、OpenCode）中使用。",
     commandHeaders: ["命令", "说明"],
-    commands: [
+    normalTitle: "Normal Generation",
+    normalCommands: [
       ["/reap.evolve", "从头到尾运行整个Generation。日常开发的主要命令。自主循环所有阶段 — 跳过日常确认，仅在真正受阻时停止。"],
       ["/reap.start", "开始新的Generation。扫描backlog中的待处理项目，请求目标，创建current.yml，将阶段设为objective。"],
       ["/reap.objective", "定义Generation的目标、需求和完成标准。扫描Environment，检查backlog，检查Genome状态。"],
@@ -300,11 +301,11 @@ export const zhCN: Translations = {
       ["/reap.completion", "回顾，应用backlog中的Genome变更，清理，最终化。"],
       ["/reap.next", "前进到下一个生命周期阶段。从模板创建下一个产出物。完成时归档。"],
       ["/reap.back", "回到前一个阶段（micro loop）。在时间线和产出物中记录回退原因。"],
-      ["/reap.status", "显示当前Generation状态、阶段进度、backlog摘要、时间线、Genome状态。"],
-      ["/reap.sync", "分析源代码并同步Genome。无活跃Generation时直接更新；有则记录到backlog。"],
-      ["/reap.help", "提供24+主题的上下文帮助。包括REAP介绍、详细说明（workflow、genome、backlog、strict、agents、hooks、config、evolve、regression、minor-fix、compression、author及所有命令名）。"],
-      ["/reap.update", "检查REAP更新并升级到最新版本。比较已安装版本与发布版本，更新npm包，并同步命令/模板/hooks。"],
+    ],
+    mergeTitle: "Merge Generation",
+    mergeCommands: [
       ["/reap.pull <branch>", "拉取远程，检测新的Generation，并运行完整的合并Generation生命周期。/reap.evolve的分布式版本。"],
+      ["/reap.merge <branch>", "为本地分支运行完整的merge generation。无需fetch — 非常适合基于worktree的并行开发。/reap.pull的本地版本。"],
       ["/reap.push", "验证REAP状态（如有进行中的Generation则警告）并将当前分支推送到远程。"],
       ["/reap.merge.start", "启动合并Generation以合并分歧的分支。创建合并Generation并运行detect。"],
       ["/reap.merge.detect", "通过git refs分析当前分支与目标分支之间的分歧。"],
@@ -313,6 +314,13 @@ export const zhCN: Translations = {
       ["/reap.merge.sync", "AI比较Genome和源代码的一致性。发现不一致时由用户确认。"],
       ["/reap.merge.validation", "运行机械化测试命令（bun test、tsc、build）— 与正常Generation相同。"],
       ["/reap.merge.evolve", "从当前阶段到完成运行合并生命周期。自主模式适用。"],
+    ],
+    generalTitle: "通用",
+    generalCommands: [
+      ["/reap.status", "显示当前Generation状态、阶段进度、backlog摘要、时间线、Genome状态。"],
+      ["/reap.sync", "分析源代码并同步Genome。无活跃Generation时直接更新；有则记录到backlog。"],
+      ["/reap.help", "提供24+主题的上下文帮助。包括REAP介绍、详细说明（workflow、genome、backlog、strict、agents、hooks、config、evolve、regression、minor-fix、compression、author及所有命令名）。"],
+      ["/reap.update", "检查REAP更新并升级到最新版本。比较已安装版本与发布版本，更新npm包，并同步命令/模板/hooks。"],
     ],
     lifecycleFlow: "生命周期流程",
     lifecycleFlowDesc: "使用/reap.evolve时的典型流程：",
@@ -332,21 +340,32 @@ export const zhCN: Translations = {
       ["version", "配置模式版本"],
       ["project", "项目名称（init时设置）"],
       ["entryMode", "REAP的初始化方式：greenfield、migration或adoption"],
-      ["strict", "启用Strict模式以限制代码变更（见下文）"],
+      ["strict", "Strict模式：boolean（简写）或 { edit, merge } 进行细粒度控制（见下文）"],
       ["language", "产出物和用户交互的语言（例如：korean、english、japanese）"],
       ["autoUpdate", "会话开始时自动更新（默认：false）"],
       ["agents", "检测到的AI代理，由reap init/update管理（例如：claude-code、opencode）"],
       ["hooks", "生命周期hooks（参见Hook参考）"],
     ],
     strictMode: "Strict模式",
-    strictModeDesc: "设置strict: true后，AI代理被限制在REAP工作流之外修改代码。这确保所有变更都经过结构化的生命周期。",
+    strictModeDesc: "Strict模式控制AI代理被允许执行的操作。它支持两种形式：",
+    strictConfigExample: `# Shorthand — enables both edit and merge restrictions
+strict: true
+
+# Granular control
+strict:
+  edit: true    # Restrict code changes to REAP lifecycle
+  merge: false  # Restrict raw git pull/push/merge`,
+    strictEditTitle: "strict.edit — 代码修改控制",
+    strictEditDesc: "启用后，AI代理无法在REAP工作流之外修改代码。",
     strictHeaders: ["情境", "行为"],
     strictRules: [
       ["无活跃Generation / 非Implementation阶段", "代码修改完全阻止"],
       ["Implementation阶段", "仅允许02-planning.md范围内的修改"],
       ["逃生舱", '用户明确请求 "override" 或 "bypass strict" 时允许修改'],
     ],
-    strictNote: "Strict模式默认禁用。读取文件、分析代码和回答问题无论strict模式如何都始终允许。",
+    strictMergeTitle: "strict.merge — Git命令控制",
+    strictMergeDesc: "启用后，直接的git pull、git push和git merge命令将被限制。代理会引导用户使用REAP斜杠命令（/reap.pull、/reap.push、/reap.merge）。",
+    strictNote: "两者默认都禁用。strict: true会同时启用两者。读取文件、分析代码和回答问题无论strict模式如何都始终允许。",
     entryModes: "Entry模式",
     entryModeHeaders: ["模式", "用途"],
     entryModeItems: [
@@ -457,8 +476,11 @@ export const zhCN: Translations = {
   // Distributed Workflow - Overview
   collaboration: {
     title: "分布式工作流",
-    breadcrumb: "Distributed Workflow",
+    breadcrumb: "协作",
     intro: "REAP支持多个开发者或AI代理在同一项目上并行工作的分布式协作 — 无需中央服务器。Git是唯一的传输层。",
+    caution: "分布式工作流目前处于早期阶段，需要进一步测试。请在生产环境中谨慎使用。我们正在积极收集用户反馈 — 请在以下地址提交问题或建议：",
+    cautionLink: "GitHub Issues",
+    cautionUrl: "https://github.com/c-d-cc/reap/issues",
     howItWorks: "工作原理",
     howItWorksDesc: "每个开发者或代理在自己的分支和Generation上独立工作。当需要合并时，REAP以Genome优先策略来协调合并。",
     flowSteps: [
@@ -489,10 +511,18 @@ export const zhCN: Translations = {
   },
 
   // Distributed Workflow - Merge Lifecycle
-  mergeLifecycle: {
-    title: "合并生命周期",
-    breadcrumb: "Distributed Workflow",
-    intro: "当分支分歧时，REAP使用专门的6阶段合并生命周期 — 与正常的Generation生命周期分开。核心原则：先解决Genome冲突，再合并源代码。",
+  mergeGeneration: {
+    title: "合并世代",
+    breadcrumb: "协作",
+    intro: "当分歧的分支需要合并时，REAP会运行一个称为Merge Generation的专门6阶段生命周期 — 与正常的Generation生命周期分开。核心原则：先对齐Genome，再合并源代码。",
+    whyLonger: "Merge Generation与普通git merge有什么不同？",
+    whyLongerDesc: "普通的git merge只解决源代码冲突。但当两个分支独立进化时 — 各自拥有自己的Generation、Genome变更和设计决策 — 仅合并源代码是不够的。Genome（架构原则、约定、约束、业务规则）也可能已经分歧。Merge Generation在源码合并之前增加了三个关键步骤：检测Genome分歧、Mating（解决Genome冲突）以及合并后验证Genome与源代码的一致性。这确保了合并后的代码库不仅能编译通过，而且在设计上也保持一致。",
+    whyGenomeFirst: "为什么Genome对齐优先",
+    whyGenomeFirstDesc: "解决源代码冲突并不能保证不存在语义冲突。两段代码可以完全没有git冲突地干净合并，但在意图、架构或业务逻辑上相互矛盾。只有基于Genome的推理才能检测到这些不可见的冲突：合并后的代码是否仍然遵循架构原则？约定是否一致？业务规则是否对齐？这就是REAP在触碰源代码之前先对齐Genome的原因。一旦Genome确定，它就成为解决源代码冲突的权威指南 — 不仅在语法上，还在语义上。",
+    whyLongerPoints: [
+      { label: "普通git merge", desc: "源码冲突 → 解决 → 提交。不检查设计一致性。语义冲突未被检测。" },
+      { label: "Merge Generation", desc: "Genome对齐优先 → 基于Genome的源码合并 → 验证Genome-源码一致性 → 验证 → 提交。捕获不可见的语义冲突。" },
+    ],
     stageOrder: "阶段顺序",
     stages: [
       { name: "Detect", desc: "通过git refs扫描目标分支。使用DAG BFS找到共同祖先。提取Genome差异。将冲突分类为WRITE-WRITE或CROSS-FILE。", artifact: "01-detect.md" },
@@ -509,6 +539,7 @@ export const zhCN: Translations = {
       ["WRITE-WRITE", "两个分支修改了同一Genome文件", "人类决定：保留A、保留B或合并"],
       ["CROSS-FILE", "修改了不同的Genome文件，但两个分支都更改了Genome", "人类审查逻辑兼容性"],
       ["源码冲突", "Git合并冲突发生在源代码中", "根据已确定的Genome解决"],
+      ["语义冲突", "代码干净合并但与Genome（架构、约定、业务规则）矛盾", "在Sync阶段检测 — AI比较Genome和源代码，用户确认解决方案"],
       ["无冲突", "无Genome或源码冲突", "自动进行"],
     ],
     regression: "合并回退",
@@ -519,11 +550,12 @@ export const zhCN: Translations = {
   // Distributed Workflow - Merge Commands
   mergeCommands: {
     title: "合并命令",
-    breadcrumb: "Distributed Workflow",
+    breadcrumb: "协作",
     intro: "所有分布式工作流操作都是由AI代理执行的斜杠命令。没有用于合并的CLI命令 — AI代理对于Genome冲突解决和源码合并指导至关重要。",
     primaryCommands: "主要命令",
     primaryItems: [
       { cmd: "/reap.pull <branch>", desc: "分布式合并的一站式命令。拉取远程，检测目标分支上的新Generation，创建合并Generation，并运行完整的合并生命周期。这是/reap.evolve的分布式版本。" },
+      { cmd: "/reap.merge <branch>", desc: "为本地分支运行完整的merge generation。无需fetch — 非常适合基于worktree的并行开发。/reap.pull的本地版本。" },
       { cmd: "/reap.push", desc: "验证REAP状态（如有进行中的Generation则警告）并推送当前分支。在完成Generation后使用。" },
     ],
     stageCommands: "阶段命令（精细控制）",
@@ -550,7 +582,7 @@ export const zhCN: Translations = {
   // Comparison Page
   comparison: {
     title: "对比",
-    breadcrumb: "参考",
+    breadcrumb: "入门",
     heading: "与Spec Kit的对比",
     desc: "Spec Kit开创了在编写代码前编写规格的规格驱动开发方式。REAP在此概念上发展并解决了主要局限性：",
     items: [

@@ -165,7 +165,9 @@ At archiving time (`/reap.next` from Completion), `consumed` items move to linea
 
 ## Distributed Workflow for Parallel Development
 
-REAP supports distributed collaboration where multiple developers or AI agents work on the same project in parallel — without a central server. Git is the only transport layer.
+> **⚠ Early Stage** — The distributed workflow requires further testing. Use with caution in production. We're collecting feedback — [open an issue](https://github.com/c-d-cc/reap/issues).
+
+REAP supports a distributed workflow for collaboration environments where multiple developers or AI agents work on the same project in parallel — without a central server. Git is the only transport layer.
 
 ### How It Works
 
@@ -177,7 +179,7 @@ Machine A:
   /reap.pull branch-b   → Fetch + full merge generation lifecycle
 ```
 
-Each machine works independently on its own branch and generation. When it's time to combine, REAP orchestrates the merge with a **genome-first** strategy:
+Each machine works independently on its own branch and generation. When it's time to combine, REAP orchestrates the merge with a **genome-first** strategy ([learn more](https://reap.cc/docs/merge-generation)):
 
 1. **Detect** — Identify divergence by scanning the remote branch's genome and lineage via git refs
 2. **Mate** — Resolve genome conflicts first (human decides)
@@ -192,6 +194,7 @@ All distributed operations run through your AI agent:
 
 ```bash
 /reap.pull <branch>        # Fetch + run full merge generation (the distributed /reap.evolve)
+/reap.merge <branch>       # Run full merge generation for a local branch (no fetch)
 /reap.push                 # Validate REAP state + push current branch
 /reap.merge.start          # Start a merge generation (for step-by-step control)
 /reap.merge.detect         # Analyze divergence
@@ -251,6 +254,7 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.update` | Check for REAP updates and upgrade to the latest version |
 | **`/reap.evolve`** | **Run an entire generation from start to finish (recommended)** |
 | **`/reap.pull <branch>`** | **Fetch + run full merge generation (distributed `/reap.evolve`)** |
+| **`/reap.merge <branch>`** | **Run full merge generation for a local branch (no fetch)** |
 | `/reap.push` | Validate REAP state and push current branch |
 | `/reap.merge.start` | Start a merge generation to combine divergent branches |
 | `/reap.merge.detect` | Analyze divergence between branches |
@@ -274,23 +278,29 @@ This ensures the agent immediately understands the project context even in a bra
 
 ### Strict Mode
 
-When `strict: true` is set in `.reap/config.yml`, the AI agent is restricted from modifying code outside the REAP workflow:
+Strict mode controls what the AI agent is allowed to do. It supports two granular options:
 
 ```yaml
 # .reap/config.yml
-strict: true      # default: false
-language: korean  # language for artifacts and interactions
-autoUpdate: true  # auto-update REAP on session start
-agents:           # detected agents (managed by reap init/update)
-  - claude-code
-  - opencode
+strict: true              # shorthand: enables both edit and merge
+
+# Or granular control:
+strict:
+  edit: true              # restrict code changes to REAP lifecycle
+  merge: false            # restrict raw git pull/push/merge
 ```
+
+**`strict.edit`** — Code modification control:
 
 | Context | Behavior |
 |---------|----------|
 | No active generation / non-implementation stage | Code modifications are fully blocked |
 | Implementation stage | Only modifications within the scope of `02-planning.md` are allowed |
 | Escape hatch | User explicitly requests "override" or "bypass strict" to allow modifications |
+
+**`strict.merge`** — Git command control: when enabled, direct `git pull`/`push`/`merge` are restricted. The agent guides users to use `/reap.pull`, `/reap.push`, `/reap.merge` instead.
+
+Both are disabled by default. `strict: true` enables both.
 
 Strict mode is disabled by default (`strict: false`).
 

@@ -16,7 +16,7 @@ export const en = {
       workflow: "Workflow",
       advanced: "Advanced",
       collaborationOverview: "Distributed Workflow",
-      mergeLifecycle: "Merge Lifecycle",
+      mergeGeneration: "Merge Generation",
       mergeCommands: "Merge Commands",
       cliReference: "CLI Reference",
       commandReference: "Command Reference",
@@ -81,9 +81,9 @@ export const en = {
       { href: "/docs/quick-start", title: "Quick Start", desc: "Install and run your first generation step by step." },
       { href: "/docs/core-concepts", title: "Core Concepts", desc: "Genome, Life Cycle, Backlog & Deferral in depth." },
       { href: "/docs/workflow", title: "Workflow", desc: "/reap.evolve, stage commands, micro loop, hooks." },
-      { href: "/docs/cli", title: "CLI Reference", desc: "reap init, status, update, fix with all options." },
-      { href: "/docs/commands", title: "Command Reference", desc: "/reap.evolve, stage commands, /reap.status — all slash commands." },
-      { href: "/docs/hooks", title: "Hook Reference", desc: "Lifecycle hooks: command and prompt types, events, SessionStart." },
+      { href: "/docs/cli-reference", title: "CLI Reference", desc: "reap init, status, update, fix with all options." },
+      { href: "/docs/command-reference", title: "Command Reference", desc: "/reap.evolve, stage commands, /reap.status — all slash commands." },
+      { href: "/docs/hook-reference", title: "Hook Reference", desc: "Lifecycle hooks: command and prompt types, events, SessionStart." },
       { href: "/docs/comparison", title: "Comparison", desc: "How REAP compares to traditional spec-driven development tools." },
       { href: "/docs/advanced", title: "Advanced", desc: "Lineage compression, presets, entry modes." },
     ],
@@ -288,7 +288,8 @@ export const en = {
     slashTitle: "Slash Commands",
     slashIntro: "Installed by reap init to each detected agent. Used inside AI agent sessions (Claude Code, OpenCode).",
     commandHeaders: ["Command", "Description"],
-    commands: [
+    normalTitle: "Normal Generation",
+    normalCommands: [
       ["/reap.evolve", "Run an entire generation from start to finish. The primary command for day-to-day development. Loops through all stages autonomously — skips routine confirmations and only stops when genuinely blocked."],
       ["/reap.start", "Start a new generation. Scans backlog for pending items, asks for a goal, creates current.yml, and sets stage to objective."],
       ["/reap.objective", "Define the generation's goal, requirements, and acceptance criteria. Scans environment, reviews backlog, checks genome health."],
@@ -298,11 +299,11 @@ export const en = {
       ["/reap.completion", "Retrospective, apply genome changes from backlog, garbage collection, finalize."],
       ["/reap.next", "Advance to the next lifecycle stage. Creates the next artifact from template. Archives on completion."],
       ["/reap.back", "Return to a previous stage (micro loop). Records regression reason in timeline and artifact."],
-      ["/reap.status", "Show current generation state, stage progress, backlog summary, timeline, and genome health."],
-      ["/reap.sync", "Analyze source code and synchronize Genome. Direct update when no active generation; records to backlog otherwise."],
-      ["/reap.help", "Provide contextual help with 24+ topics, including REAP introduction and detailed explanations (workflow, genome, backlog, strict, agents, hooks, config, evolve, regression, minor-fix, compression, author, and all command names)."],
-      ["/reap.update", "Check for REAP updates and upgrade to the latest version. Compares installed vs published version, updates the npm package, and syncs commands/templates/hooks."],
+    ],
+    mergeTitle: "Merge Generation",
+    mergeCommands: [
       ["/reap.pull <branch>", "Fetch remote, detect new generations, and run a full merge generation lifecycle. The distributed equivalent of /reap.evolve."],
+      ["/reap.merge <branch>", "Run a full merge generation for a local branch. The local/worktree equivalent of /reap.pull — no fetch needed."],
       ["/reap.push", "Validate REAP state (warn if generation in progress) and push the current branch to remote."],
       ["/reap.merge.start", "Start a merge generation to combine divergent branches. Creates merge generation and runs detect."],
       ["/reap.merge.detect", "Analyze divergence between current branch and target branch via git refs."],
@@ -311,6 +312,13 @@ export const en = {
       ["/reap.merge.sync", "AI compares genome and source for consistency. User confirms any inconsistencies."],
       ["/reap.merge.validation", "Run mechanical testing commands (bun test, tsc, build) — same as normal generation."],
       ["/reap.merge.evolve", "Run the merge lifecycle from current stage to completion. Autonomous override applies."],
+    ],
+    generalTitle: "General",
+    generalCommands: [
+      ["/reap.status", "Show current generation state, stage progress, backlog summary, timeline, and genome health."],
+      ["/reap.sync", "Analyze source code and synchronize Genome. Direct update when no active generation; records to backlog otherwise."],
+      ["/reap.help", "Provide contextual help with 24+ topics, including REAP introduction and detailed explanations (workflow, genome, backlog, strict, agents, hooks, config, evolve, regression, minor-fix, compression, author, and all command names)."],
+      ["/reap.update", "Check for REAP updates and upgrade to the latest version. Compares installed vs published version, updates the npm package, and syncs commands/templates/hooks."],
     ],
     lifecycleFlow: "Lifecycle Flow",
     lifecycleFlowDesc: "The typical flow when using /reap.evolve:",
@@ -330,21 +338,32 @@ export const en = {
       ["version", "Config schema version"],
       ["project", "Project name (set during init)"],
       ["entryMode", "How REAP was initialized: greenfield, migration, or adoption"],
-      ["strict", "Enable strict mode to restrict code changes (see below)"],
+      ["strict", "Strict mode: boolean (shorthand) or { edit, merge } for granular control (see below)"],
       ["language", "Language for artifacts and user interactions (e.g. korean, english, japanese)"],
       ["autoUpdate", "Auto-update REAP on session start (default: false)"],
       ["agents", "Detected AI agents, managed by reap init/update (e.g. claude-code, opencode)"],
       ["hooks", "Lifecycle hooks (see Hook Reference)"],
     ],
     strictMode: "Strict Mode",
-    strictModeDesc: "When strict: true is set, the AI agent is restricted from modifying code outside the REAP workflow. This ensures all changes go through the structured lifecycle.",
+    strictModeDesc: "Strict mode controls what the AI agent is allowed to do. It supports two forms:",
+    strictConfigExample: `# Shorthand — enables both edit and merge restrictions
+strict: true
+
+# Granular control
+strict:
+  edit: true    # Restrict code changes to REAP lifecycle
+  merge: false  # Restrict raw git pull/push/merge`,
+    strictEditTitle: "strict.edit — Code Modification Control",
+    strictEditDesc: "When enabled, the AI agent cannot modify code outside the REAP workflow.",
     strictHeaders: ["Context", "Behavior"],
     strictRules: [
       ["No active generation / non-implementation stage", "Code modifications are fully blocked"],
       ["Implementation stage", "Only modifications within the scope of 02-planning.md are allowed"],
       ["Escape hatch", 'User explicitly requests "override" or "bypass strict" to allow modifications'],
     ],
-    strictNote: "Strict mode is disabled by default. Reading files, analyzing code, and answering questions are always allowed regardless of strict mode.",
+    strictMergeTitle: "strict.merge — Git Command Control",
+    strictMergeDesc: "When enabled, direct git pull, git push, and git merge commands are restricted. The agent will guide users to use REAP slash commands instead (/reap.pull, /reap.push, /reap.merge).",
+    strictNote: "Both are disabled by default. strict: true enables both. Reading files, analyzing code, and answering questions are always allowed regardless of strict mode.",
     entryModes: "Entry Modes",
     entryModeHeaders: ["Mode", "Use case"],
     entryModeItems: [
@@ -455,8 +474,11 @@ export const en = {
   // Distributed Workflow - Overview
   collaboration: {
     title: "Distributed Workflow",
-    breadcrumb: "Distributed Workflow",
-    intro: "REAP supports distributed collaboration where multiple developers or AI agents work on the same project in parallel — without a central server. Git is the only transport layer.",
+    breadcrumb: "Collaboration",
+    intro: "REAP supports a distributed workflow for collaboration environments where multiple developers or AI agents work on the same project in parallel — without a central server. Git is the only transport layer.",
+    caution: "The distributed workflow is currently in early stages and requires further testing. Use with caution in production environments. We are actively collecting user feedback — please report issues or suggestions at",
+    cautionLink: "GitHub Issues",
+    cautionUrl: "https://github.com/c-d-cc/reap/issues",
     howItWorks: "How It Works",
     howItWorksDesc: "Each developer or agent works independently on their own branch and generation. When it's time to combine, REAP orchestrates the merge with a genome-first strategy.",
     flowSteps: [
@@ -487,10 +509,18 @@ export const en = {
   },
 
   // Distributed Workflow - Merge Lifecycle
-  mergeLifecycle: {
-    title: "Merge Lifecycle",
-    breadcrumb: "Distributed Workflow",
-    intro: "When branches diverge, REAP uses a specialized 6-stage merge lifecycle — separate from the normal generation lifecycle. The core principle: resolve genome conflicts first, then merge source code.",
+  mergeGeneration: {
+    title: "Merge Generation",
+    breadcrumb: "Collaboration",
+    intro: "When diverged branches need to be merged, REAP runs a specialized 6-stage lifecycle called Merge Generation — separate from the normal generation lifecycle. The core principle: align the genome first, then merge source code.",
+    whyLonger: "Why is Merge Generation different from a regular git merge?",
+    whyLongerDesc: "A regular git merge only resolves source code conflicts. But when two branches evolve independently — each with their own generations, genome changes, and design decisions — merging source code alone isn't enough. The genome (architecture principles, conventions, constraints, business rules) may have diverged too. Merge Generation adds three critical steps before the source merge: detecting genome divergence, mating (resolving genome conflicts), and verifying genome-source consistency after the merge. This ensures that the merged codebase isn't just compile-clean, but also design-consistent.",
+    whyGenomeFirst: "Why genome alignment comes first",
+    whyGenomeFirstDesc: "Resolving source code conflicts does not guarantee the absence of semantic conflicts. Two pieces of code can merge cleanly — no git conflicts at all — yet contradict each other in intent, architecture, or business logic. Only genome-based reasoning can detect these invisible conflicts: does the merged code still follow the architecture principles? Are the conventions consistent? Do the business rules align? This is why REAP aligns the genome before touching source code. Once the genome is settled, it becomes the authoritative guide for resolving source conflicts — not just syntactically, but semantically.",
+    whyLongerPoints: [
+      { label: "Regular git merge", desc: "Source conflicts → resolve → commit. Design consistency is not checked. Semantic conflicts go undetected." },
+      { label: "Merge Generation", desc: "Genome align first → source merge guided by genome → verify genome-source consistency → validate → commit. Invisible semantic conflicts are caught." },
+    ],
     stageOrder: "Stage Order",
     stages: [
       { name: "Detect", desc: "Scan the target branch via git refs. Find the common ancestor using DAG BFS. Extract genome diffs. Classify conflicts as WRITE-WRITE or CROSS-FILE.", artifact: "01-detect.md" },
@@ -507,6 +537,7 @@ export const en = {
       ["WRITE-WRITE", "Same genome file modified on both branches", "Human decides: keep A, keep B, or merge"],
       ["CROSS-FILE", "Different genome files modified, but both branches changed genome", "Human reviews for logical compatibility"],
       ["Source conflict", "Git merge conflict in source code", "Resolved guided by finalized genome"],
+      ["Semantic conflict", "Code merges cleanly but contradicts the genome (architecture, conventions, business rules)", "Detected in Sync stage — AI compares genome and source, user confirms resolution"],
       ["No conflict", "No genome or source conflicts", "Proceeds automatically"],
     ],
     regression: "Merge Regression",
@@ -517,11 +548,12 @@ export const en = {
   // Distributed Workflow - Merge Commands
   mergeCommands: {
     title: "Merge Commands",
-    breadcrumb: "Distributed Workflow",
+    breadcrumb: "Collaboration",
     intro: "All distributed workflow operations are slash commands executed by the AI agent. There are no CLI commands for merge — the AI agent is essential for genome conflict resolution and source merge guidance.",
     primaryCommands: "Primary Commands",
     primaryItems: [
       { cmd: "/reap.pull <branch>", desc: "The one-stop command for distributed merging. Fetches the remote, detects new generations on the target branch, creates a merge generation, and runs the full merge lifecycle. This is the distributed equivalent of /reap.evolve." },
+      { cmd: "/reap.merge <branch>", desc: "Run a full merge generation for a local branch. No fetch — ideal for worktree-based parallel development. The local equivalent of /reap.pull." },
       { cmd: "/reap.push", desc: "Validates REAP state (warns if a generation is in progress) and pushes the current branch. Use after completing a generation." },
     ],
     stageCommands: "Stage Commands (Fine-Grained Control)",
@@ -548,7 +580,7 @@ export const en = {
   // Comparison Page
   comparison: {
     title: "Comparison",
-    breadcrumb: "Reference",
+    breadcrumb: "Getting Started",
     heading: "Comparison with Spec Kit",
     desc: "Spec Kit pioneered spec-driven development — writing specifications before code. REAP builds on this concept and addresses key limitations:",
     items: [

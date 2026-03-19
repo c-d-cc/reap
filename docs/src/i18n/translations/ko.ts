@@ -17,9 +17,9 @@ export const ko: Translations = {
       coreConcepts: "핵심 개념",
       workflow: "워크플로우",
       advanced: "고급",
-      collaborationOverview: "개요",
-      mergeLifecycle: "병합 라이프사이클",
-      mergeCommands: "병합 커맨드",
+      collaborationOverview: "분산 워크플로우",
+      mergeGeneration: "Merge Generation",
+      mergeCommands: "Merge Commands",
       cliReference: "CLI 레퍼런스",
       commandReference: "커맨드 레퍼런스",
       hookReference: "Hook 레퍼런스",
@@ -83,9 +83,9 @@ export const ko: Translations = {
       { href: "/docs/quick-start", title: "빠른 시작", desc: "설치하고 첫 번째 Generation을 단계별로 실행하기." },
       { href: "/docs/core-concepts", title: "핵심 개념", desc: "Genome, 라이프 사이클, Backlog & Deferral 심화." },
       { href: "/docs/workflow", title: "워크플로우", desc: "/reap.evolve, 단계별 커맨드, micro loop, hooks." },
-      { href: "/docs/cli", title: "CLI 레퍼런스", desc: "reap init, status, update, fix의 모든 옵션." },
-      { href: "/docs/commands", title: "커맨드 레퍼런스", desc: "/reap.evolve, 단계별 커맨드, /reap.status — 모든 슬래시 커맨드." },
-      { href: "/docs/hooks", title: "Hook 레퍼런스", desc: "라이프사이클 hooks: command와 prompt 타입, events, SessionStart." },
+      { href: "/docs/cli-reference", title: "CLI 레퍼런스", desc: "reap init, status, update, fix의 모든 옵션." },
+      { href: "/docs/command-reference", title: "커맨드 레퍼런스", desc: "/reap.evolve, 단계별 커맨드, /reap.status — 모든 슬래시 커맨드." },
+      { href: "/docs/hook-reference", title: "Hook 레퍼런스", desc: "라이프사이클 hooks: command와 prompt 타입, events, SessionStart." },
       { href: "/docs/comparison", title: "비교", desc: "REAP과 기존 스펙 기반 개발 도구와의 비교." },
       { href: "/docs/advanced", title: "고급", desc: "Lineage 압축, 프리셋, entry 모드." },
     ],
@@ -290,7 +290,8 @@ export const ko: Translations = {
     slashTitle: "슬래시 커맨드",
     slashIntro: "reap init으로 감지된 각 에이전트에 설치됩니다. AI 에이전트 세션(Claude Code, OpenCode) 내에서 사용합니다.",
     commandHeaders: ["커맨드", "설명"],
-    commands: [
+    normalTitle: "Normal Generation",
+    normalCommands: [
       ["/reap.evolve", "전체 Generation을 처음부터 끝까지 실행. 일상 개발의 주요 커맨드. 모든 단계를 자율적으로 순환 — 일상적 확인은 건너뛰고 정말로 막혔을 때만 멈춤."],
       ["/reap.start", "새 Generation 시작. backlog에서 대기 항목 스캔, 목표 요청, current.yml 생성, 단계를 objective로 설정."],
       ["/reap.objective", "Generation의 목표, 요구사항, 완료 기준 정의. Environment 스캔, backlog 검토, Genome 상태 확인."],
@@ -300,11 +301,11 @@ export const ko: Translations = {
       ["/reap.completion", "회고, backlog의 Genome 변경 적용, 정리, 최종화."],
       ["/reap.next", "다음 라이프사이클 단계로 전진. 템플릿에서 다음 산출물 생성. 완료 시 보관."],
       ["/reap.back", "이전 단계로 복귀 (micro loop). 회귀 사유를 타임라인과 산출물에 기록."],
-      ["/reap.status", "현재 Generation 상태, 단계 진행, backlog 요약, 타임라인, Genome 상태 표시."],
-      ["/reap.sync", "소스 코드를 분석하고 Genome 동기화. 활성 Generation이 없으면 직접 업데이트; 있으면 backlog에 기록."],
-      ["/reap.help", "24+ 주제의 상황별 도움말 제공. REAP 소개, 상세 설명 (workflow, genome, backlog, strict, agents, hooks, config, evolve, regression, minor-fix, compression, author 및 모든 커맨드 이름)."],
-      ["/reap.update", "REAP 업데이트를 확인하고 최신 버전으로 업그레이드. 설치된 버전과 게시된 버전을 비교하고, npm 패키지를 업데이트하고, 커맨드/템플릿/훅을 동기화."],
+    ],
+    mergeTitle: "Merge Generation",
+    mergeCommands: [
       ["/reap.pull <branch>", "원격을 가져오고, 새 Generation을 감지하고, 전체 병합 Generation 라이프사이클을 실행. /reap.evolve의 분산 버전."],
+      ["/reap.merge <branch>", "로컬 브랜치에 대한 전체 merge generation을 실행합니다. fetch 없이 — worktree 기반 병렬 개발에 적합. /reap.pull의 로컬 버전."],
       ["/reap.push", "REAP 상태를 검증(진행 중인 Generation이 있으면 경고)하고 현재 브랜치를 원격에 푸시."],
       ["/reap.merge.start", "분기된 브랜치를 결합하기 위한 병합 Generation을 시작. 병합 Generation을 생성하고 detect를 실행."],
       ["/reap.merge.detect", "git refs를 통해 현재 브랜치와 대상 브랜치 간의 분기를 분석."],
@@ -313,6 +314,13 @@ export const ko: Translations = {
       ["/reap.merge.sync", "AI가 Genome과 소스를 비교하여 일관성 확인. 불일치 시 사용자 확인."],
       ["/reap.merge.validation", "기계적 테스트 커맨드(bun test, tsc, build) 실행 — 일반 Generation과 동일."],
       ["/reap.merge.evolve", "현재 단계에서 완료까지 병합 라이프사이클을 실행. 자율 모드가 적용됨."],
+    ],
+    generalTitle: "일반",
+    generalCommands: [
+      ["/reap.status", "현재 Generation 상태, 단계 진행, backlog 요약, 타임라인, Genome 상태 표시."],
+      ["/reap.sync", "소스 코드를 분석하고 Genome 동기화. 활성 Generation이 없으면 직접 업데이트; 있으면 backlog에 기록."],
+      ["/reap.help", "24+ 주제의 상황별 도움말 제공. REAP 소개, 상세 설명 (workflow, genome, backlog, strict, agents, hooks, config, evolve, regression, minor-fix, compression, author 및 모든 커맨드 이름)."],
+      ["/reap.update", "REAP 업데이트를 확인하고 최신 버전으로 업그레이드. 설치된 버전과 게시된 버전을 비교하고, npm 패키지를 업데이트하고, 커맨드/템플릿/훅을 동기화."],
     ],
     lifecycleFlow: "라이프사이클 흐름",
     lifecycleFlowDesc: "/reap.evolve 사용 시 일반적인 흐름:",
@@ -332,21 +340,32 @@ export const ko: Translations = {
       ["version", "설정 스키마 버전"],
       ["project", "프로젝트 이름 (init 시 설정)"],
       ["entryMode", "REAP 초기화 방식: greenfield, migration, 또는 adoption"],
-      ["strict", "Strict 모드 활성화하여 코드 변경 제한 (아래 참조)"],
+      ["strict", "Strict 모드: boolean (단축형) 또는 { edit, merge }로 세분화 제어 (아래 참조)"],
       ["language", "산출물 및 사용자 상호작용 언어 (예: korean, english, japanese)"],
       ["autoUpdate", "세션 시작 시 자동 업데이트 (기본값: false)"],
       ["agents", "감지된 AI 에이전트, reap init/update에서 관리 (예: claude-code, opencode)"],
       ["hooks", "라이프사이클 hooks (Hook 레퍼런스 참조)"],
     ],
     strictMode: "Strict 모드",
-    strictModeDesc: "strict: true로 설정하면 AI 에이전트는 REAP 워크플로우 외부에서 코드를 수정할 수 없습니다. 이를 통해 모든 변경이 구조화된 라이프사이클을 거치도록 보장합니다.",
+    strictModeDesc: "Strict 모드는 AI 에이전트가 할 수 있는 것을 제어합니다. 두 가지 형식을 지원합니다:",
+    strictConfigExample: `# Shorthand — enables both edit and merge restrictions
+strict: true
+
+# Granular control
+strict:
+  edit: true    # Restrict code changes to REAP lifecycle
+  merge: false  # Restrict raw git pull/push/merge`,
+    strictEditTitle: "strict.edit — 코드 수정 제어",
+    strictEditDesc: "활성화하면 AI 에이전트는 REAP 워크플로우 외부에서 코드를 수정할 수 없습니다.",
     strictHeaders: ["상황", "동작"],
     strictRules: [
       ["활성 Generation 없음 / Implementation 단계가 아닌 경우", "코드 수정 완전 차단"],
       ["Implementation 단계", "02-planning.md 범위 내의 수정만 허용"],
       ["탈출구", '사용자가 명시적으로 "override" 또는 "bypass strict"를 요청하면 수정 허용'],
     ],
-    strictNote: "Strict 모드는 기본적으로 비활성화됩니다. 파일 읽기, 코드 분석, 질문 답변은 strict 모드와 관계없이 항상 허용됩니다.",
+    strictMergeTitle: "strict.merge — Git 명령 제어",
+    strictMergeDesc: "활성화하면 직접적인 git pull, git push, git merge 명령이 제한됩니다. 에이전트는 사용자에게 REAP 슬래시 커맨드(/reap.pull, /reap.push, /reap.merge)를 사용하도록 안내합니다.",
+    strictNote: "두 옵션 모두 기본적으로 비활성화됩니다. strict: true는 둘 다 활성화합니다. 파일 읽기, 코드 분석, 질문 답변은 strict 모드와 관계없이 항상 허용됩니다.",
     entryModes: "Entry 모드",
     entryModeHeaders: ["모드", "용도"],
     entryModeItems: [
@@ -457,8 +476,11 @@ export const ko: Translations = {
   // Distributed Workflow - Overview
   collaboration: {
     title: "분산 워크플로우",
-    breadcrumb: "Distributed Workflow",
+    breadcrumb: "협업",
     intro: "REAP은 여러 개발자 또는 AI 에이전트가 동일한 프로젝트에서 병렬로 작업하는 분산 협업을 지원합니다 — 중앙 서버 없이. Git이 유일한 전송 계층입니다.",
+    caution: "분산 워크플로우는 현재 초기 단계이며 추가 테스트가 필요합니다. 프로덕션 환경에서는 주의하여 사용해 주세요. 사용자 피드백을 적극적으로 수집하고 있습니다 — 이슈나 제안은 다음에서 보내주세요:",
+    cautionLink: "GitHub Issues",
+    cautionUrl: "https://github.com/c-d-cc/reap/issues",
     howItWorks: "작동 방식",
     howItWorksDesc: "각 개발자 또는 에이전트가 자신의 브랜치와 Generation에서 독립적으로 작업합니다. 결합할 때가 되면 REAP이 Genome 우선 전략으로 병합을 조율합니다.",
     flowSteps: [
@@ -489,10 +511,18 @@ export const ko: Translations = {
   },
 
   // Distributed Workflow - Merge Lifecycle
-  mergeLifecycle: {
-    title: "병합 라이프사이클",
-    breadcrumb: "Distributed Workflow",
-    intro: "브랜치가 분기되면 REAP은 일반 Generation 라이프사이클과 별도인 특화된 6단계 병합 라이프사이클을 사용합니다. 핵심 원칙: Genome 충돌을 먼저 해결한 후 소스 코드를 병합합니다.",
+  mergeGeneration: {
+    title: "Merge Generation",
+    breadcrumb: "협업",
+    intro: "분기된 브랜치를 병합해야 할 때, REAP은 일반 Generation 라이프사이클과 별도인 6단계 특수 라이프사이클, Merge Generation을 실행합니다. 핵심 원칙: Genome을 먼저 정렬한 후 소스 코드를 병합합니다.",
+    whyLonger: "Merge Generation은 일반 git merge와 어떻게 다른가요?",
+    whyLongerDesc: "일반 git merge는 소스 코드 충돌만 해결합니다. 하지만 두 브랜치가 독립적으로 진화하면 — 각각 고유한 Generation, Genome 변경, 설계 결정을 가지고 — 소스 코드만 병합하는 것으로는 충분하지 않습니다. Genome(아키텍처 원칙, 컨벤션, 제약, 비즈니스 규칙)도 분기되었을 수 있습니다. Merge Generation은 소스 병합 전에 세 가지 핵심 단계를 추가합니다: Genome 분기 감지, Mating(Genome 충돌 해결), 병합 후 Genome-소스 일관성 검증. 이를 통해 병합된 코드베이스가 단순히 컴파일만 되는 것이 아니라 설계적으로도 일관성을 유지하도록 보장합니다.",
+    whyGenomeFirst: "왜 Genome 정렬이 먼저인가",
+    whyGenomeFirstDesc: "소스 코드 충돌을 해결하는 것이 시맨틱 충돌의 부재를 보장하지는 않습니다. 두 코드가 git 충돌 없이 깨끗하게 병합될 수 있지만, 의도, 아키텍처, 비즈니스 로직에서 서로 모순될 수 있습니다. Genome 기반 추론만이 이러한 보이지 않는 충돌을 감지할 수 있습니다: 병합된 코드가 여전히 아키텍처 원칙을 따르는가? 컨벤션이 일관적인가? 비즈니스 규칙이 정렬되는가? 이것이 REAP이 소스 코드를 건드리기 전에 Genome을 먼저 정렬하는 이유입니다. Genome이 확정되면, 그것이 소스 충돌을 해결하는 권위 있는 가이드가 됩니다 — 구문적으로만이 아니라 의미적으로도.",
+    whyLongerPoints: [
+      { label: "일반 git merge", desc: "소스 충돌 → 해결 → 커밋. 설계 일관성 미확인. 시맨틱 충돌 미감지." },
+      { label: "Merge Generation", desc: "Genome 정렬 우선 → Genome 기반 소스 병합 → Genome-소스 일관성 검증 → 유효성 검사 → 커밋. 보이지 않는 시맨틱 충돌 포착." },
+    ],
     stageOrder: "단계 순서",
     stages: [
       { name: "Detect", desc: "git refs를 통해 대상 브랜치를 스캔합니다. DAG BFS로 공통 조상을 찾습니다. Genome diff를 추출합니다. 충돌을 WRITE-WRITE 또는 CROSS-FILE로 분류합니다.", artifact: "01-detect.md" },
@@ -509,6 +539,7 @@ export const ko: Translations = {
       ["WRITE-WRITE", "양쪽 브랜치에서 동일한 Genome 파일을 수정", "사람이 결정: A 유지, B 유지, 또는 병합"],
       ["CROSS-FILE", "다른 Genome 파일을 수정했지만 양쪽 모두 Genome을 변경", "사람이 논리적 호환성을 검토"],
       ["소스 충돌", "Git 병합 충돌 발생", "확정된 Genome을 기반으로 해결"],
+      ["시맨틱 충돌", "코드는 깨끗하게 병합되지만 Genome(아키텍처, 컨벤션, 비즈니스 규칙)과 모순", "Sync 단계에서 감지 — AI가 Genome과 소스를 비교, 사용자가 해결 방법 확인"],
       ["충돌 없음", "Genome 또는 소스 충돌 없음", "자동으로 진행"],
     ],
     regression: "병합 회귀",
@@ -518,12 +549,13 @@ export const ko: Translations = {
 
   // Distributed Workflow - Merge Commands
   mergeCommands: {
-    title: "병합 커맨드",
-    breadcrumb: "Distributed Workflow",
+    title: "Merge Commands",
+    breadcrumb: "협업",
     intro: "모든 분산 워크플로우 작업은 AI 에이전트가 실행하는 슬래시 커맨드입니다. 병합을 위한 CLI 커맨드는 없습니다 — Genome 충돌 해결과 소스 병합 가이드에 AI 에이전트가 필수적입니다.",
     primaryCommands: "기본 커맨드",
     primaryItems: [
       { cmd: "/reap.pull <branch>", desc: "분산 병합을 위한 원스톱 커맨드. 원격을 가져오고, 대상 브랜치의 새 Generation을 감지하고, 병합 Generation을 생성하고, 전체 병합 라이프사이클을 실행합니다. /reap.evolve의 분산 버전입니다." },
+      { cmd: "/reap.merge <branch>", desc: "로컬 브랜치에 대한 전체 merge generation을 실행합니다. fetch 없이 — worktree 기반 병렬 개발에 적합. /reap.pull의 로컬 버전." },
       { cmd: "/reap.push", desc: "REAP 상태를 검증(진행 중인 Generation이 있으면 경고)하고 현재 브랜치를 푸시합니다. Generation 완료 후 사용합니다." },
     ],
     stageCommands: "단계별 커맨드 (세밀한 제어)",
@@ -550,7 +582,7 @@ export const ko: Translations = {
   // Comparison Page
   comparison: {
     title: "비교",
-    breadcrumb: "레퍼런스",
+    breadcrumb: "시작하기",
     heading: "Spec Kit과의 비교",
     desc: "Spec Kit은 코드 작성 전에 명세를 작성하는 스펙 기반 개발 방식을 개척했습니다. REAP은 이 개념을 발전시키고 주요 한계를 해결합니다:",
     items: [

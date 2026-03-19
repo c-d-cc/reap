@@ -25,16 +25,16 @@ export function useNavGroups() {
       label: t.nav.groups.collaboration,
       items: [
         { title: t.nav.items.collaborationOverview, href: "/docs/distributed-workflow" },
-        { title: t.nav.items.mergeLifecycle, href: "/docs/merge-lifecycle" },
+        { title: t.nav.items.mergeGeneration, href: "/docs/merge-generation" },
         { title: t.nav.items.mergeCommands, href: "/docs/merge-commands" },
       ]
     },
     {
       label: t.nav.groups.reference,
       items: [
-        { title: t.nav.items.cliReference, href: "/docs/cli" },
-        { title: t.nav.items.commandReference, href: "/docs/commands" },
-        { title: t.nav.items.hookReference, href: "/docs/hooks" },
+        { title: t.nav.items.cliReference, href: "/docs/cli-reference" },
+        { title: t.nav.items.commandReference, href: "/docs/command-reference" },
+        { title: t.nav.items.hookReference, href: "/docs/hook-reference" },
       ]
     },
     {

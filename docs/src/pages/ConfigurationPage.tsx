@@ -18,7 +18,7 @@ export default function ConfigurationPage() {
 version: 0.1.0
 project: my-project
 entryMode: greenfield    # greenfield | migration | adoption
-strict: false            # enable strict mode (default: false)
+strict: false            # boolean or { edit, merge } (default: false)
 language: english        # language for artifacts and interactions
 autoUpdate: false        # auto-update REAP on session start
 agents:                  # detected agents (managed by reap init/update)
@@ -54,9 +54,13 @@ hooks:
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
           {t.config.strictModeDesc}
         </p>
-        <CodeBlock language="yaml">{`# Enable strict mode
-strict: true   # default: false`}</CodeBlock>
-        <div className="mt-3 border border-border rounded-md overflow-hidden text-sm mb-6">
+        <CodeBlock language="yaml">{t.config.strictConfigExample}</CodeBlock>
+
+        <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{t.config.strictEditTitle}</h3>
+        <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+          {t.config.strictEditDesc}
+        </p>
+        <div className="border border-border rounded-md overflow-hidden text-sm mb-6">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/30">
@@ -75,6 +79,12 @@ strict: true   # default: false`}</CodeBlock>
             </tbody>
           </table>
         </div>
+
+        <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{t.config.strictMergeTitle}</h3>
+        <p className="text-xs text-muted-foreground mb-3 leading-relaxed">
+          {t.config.strictMergeDesc}
+        </p>
+
         <p className="text-xs text-muted-foreground mb-6">
           {t.config.strictNote}
         </p>

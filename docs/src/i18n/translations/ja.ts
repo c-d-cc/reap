@@ -17,8 +17,8 @@ export const ja: Translations = {
       coreConcepts: "コアコンセプト",
       workflow: "ワークフロー",
       advanced: "上級",
-      collaborationOverview: "概要",
-      mergeLifecycle: "マージライフサイクル",
+      collaborationOverview: "分散ワークフロー",
+      mergeGeneration: "マージGeneration",
       mergeCommands: "マージコマンド",
       cliReference: "CLIリファレンス",
       commandReference: "コマンドリファレンス",
@@ -83,9 +83,9 @@ export const ja: Translations = {
       { href: "/docs/quick-start", title: "クイックスタート", desc: "インストールして最初のGenerationをステップバイステップで実行。" },
       { href: "/docs/core-concepts", title: "コアコンセプト", desc: "Genome、ライフサイクル、Backlog & Deferralの詳細。" },
       { href: "/docs/workflow", title: "ワークフロー", desc: "/reap.evolve、ステージコマンド、micro loop、hooks。" },
-      { href: "/docs/cli", title: "CLIリファレンス", desc: "reap init、status、update、fixの全オプション。" },
-      { href: "/docs/commands", title: "コマンドリファレンス", desc: "/reap.evolve、ステージコマンド、/reap.status — 全スラッシュコマンド。" },
-      { href: "/docs/hooks", title: "Hookリファレンス", desc: "ライフサイクルhooks：commandとpromptタイプ、events、SessionStart。" },
+      { href: "/docs/cli-reference", title: "CLIリファレンス", desc: "reap init、status、update、fixの全オプション。" },
+      { href: "/docs/command-reference", title: "コマンドリファレンス", desc: "/reap.evolve、ステージコマンド、/reap.status — 全スラッシュコマンド。" },
+      { href: "/docs/hook-reference", title: "Hookリファレンス", desc: "ライフサイクルhooks：commandとpromptタイプ、events、SessionStart。" },
       { href: "/docs/comparison", title: "比較", desc: "REAPと既存のスペック駆動開発ツールとの比較。" },
       { href: "/docs/advanced", title: "上級", desc: "Lineage圧縮、プリセット、entryモード。" },
     ],
@@ -290,7 +290,8 @@ export const ja: Translations = {
     slashTitle: "スラッシュコマンド",
     slashIntro: "reap initで検出された各エージェントにインストールされます。AIエージェントセッション（Claude Code、OpenCode）内で使用します。",
     commandHeaders: ["コマンド", "説明"],
-    commands: [
+    normalTitle: "Normal Generation",
+    normalCommands: [
       ["/reap.evolve", "Generation全体を最初から最後まで実行。日常開発の主要コマンド。全ステージを自律的にループ — 日常的な確認はスキップし、本当に行き詰まった時のみ停止。"],
       ["/reap.start", "新しいGenerationを開始。backlogで待機項目をスキャン、目標を要求、current.ymlを作成、ステージをobjectiveに設定。"],
       ["/reap.objective", "Generationの目標、要件、完了基準を定義。Environmentスキャン、backlog確認、Genome状態チェック。"],
@@ -300,11 +301,11 @@ export const ja: Translations = {
       ["/reap.completion", "レトロスペクティブ、backlogのGenome変更を適用、整理、最終化。"],
       ["/reap.next", "次のライフサイクルステージに前進。テンプレートから次の成果物を作成。完了時にアーカイブ。"],
       ["/reap.back", "前のステージに回帰（micro loop）。回帰理由をタイムラインと成果物に記録。"],
-      ["/reap.status", "現在のGeneration状態、ステージ進捗、backlog概要、タイムライン、Genome状態を表示。"],
-      ["/reap.sync", "ソースコードを分析してGenomeを同期。アクティブGenerationがなければ直接更新；あればbacklogに記録。"],
-      ["/reap.help", "24+トピックの状況別ヘルプを提供。REAP紹介、詳細説明（workflow、genome、backlog、strict、agents、hooks、config、evolve、regression、minor-fix、compression、authorおよび全コマンド名）。"],
-      ["/reap.update", "REAPのアップデートを確認し最新バージョンにアップグレード。インストール済みバージョンと公開バージョンを比較し、npmパッケージを更新し、コマンド/テンプレート/hooksを同期。"],
+    ],
+    mergeTitle: "Merge Generation",
+    mergeCommands: [
       ["/reap.pull <branch>", "リモートを取得し、新しいGenerationを検出し、完全なマージGenerationライフサイクルを実行。/reap.evolveの分散版。"],
+      ["/reap.merge <branch>", "ローカルブランチの完全なmerge generationを実行します。fetchなし — worktreeベースの並行開発に最適。/reap.pullのローカル版。"],
       ["/reap.push", "REAP状態を検証（進行中のGenerationがあれば警告）し、現在のブランチをリモートにプッシュ。"],
       ["/reap.merge.start", "分岐したブランチを統合するマージGenerationを開始。マージGenerationを作成しdetectを実行。"],
       ["/reap.merge.detect", "git refsを通じて現在のブランチとターゲットブランチ間の分岐を分析。"],
@@ -313,6 +314,13 @@ export const ja: Translations = {
       ["/reap.merge.sync", "AIがGenomeとソースの整合性を比較。不整合があればユーザーが確認。"],
       ["/reap.merge.validation", "機械的テストコマンド（bun test、tsc、build）を実行 — 通常のGenerationと同様。"],
       ["/reap.merge.evolve", "現在のステージから完了までマージライフサイクルを実行。自律モードが適用。"],
+    ],
+    generalTitle: "一般",
+    generalCommands: [
+      ["/reap.status", "現在のGeneration状態、ステージ進捗、backlog概要、タイムライン、Genome状態を表示。"],
+      ["/reap.sync", "ソースコードを分析してGenomeを同期。アクティブGenerationがなければ直接更新；あればbacklogに記録。"],
+      ["/reap.help", "24+トピックの状況別ヘルプを提供。REAP紹介、詳細説明（workflow、genome、backlog、strict、agents、hooks、config、evolve、regression、minor-fix、compression、authorおよび全コマンド名）。"],
+      ["/reap.update", "REAPのアップデートを確認し最新バージョンにアップグレード。インストール済みバージョンと公開バージョンを比較し、npmパッケージを更新し、コマンド/テンプレート/hooksを同期。"],
     ],
     lifecycleFlow: "ライフサイクルフロー",
     lifecycleFlowDesc: "/reap.evolve使用時の一般的なフロー：",
@@ -332,21 +340,32 @@ export const ja: Translations = {
       ["version", "設定スキーマバージョン"],
       ["project", "プロジェクト名（init時に設定）"],
       ["entryMode", "REAPの初期化方式：greenfield、migration、またはadoption"],
-      ["strict", "Strictモードを有効にしてコード変更を制限（下記参照）"],
+      ["strict", "Strictモード：boolean（省略形）または { edit, merge } で細かく制御（下記参照）"],
       ["language", "成果物とユーザーインタラクションの言語（例：korean、english、japanese）"],
       ["autoUpdate", "セッション開始時の自動アップデート（デフォルト：false）"],
       ["agents", "検出されたAIエージェント、reap init/updateで管理（例：claude-code、opencode）"],
       ["hooks", "ライフサイクルhooks（Hookリファレンス参照）"],
     ],
     strictMode: "Strictモード",
-    strictModeDesc: "strict: trueに設定すると、AIエージェントはREAPワークフロー外でコードを変更できなくなります。これにより、すべての変更が構造化されたライフサイクルを経ることが保証されます。",
+    strictModeDesc: "StrictモードはAIエージェントが許可される操作を制御します。2つの形式をサポートします：",
+    strictConfigExample: `# Shorthand — enables both edit and merge restrictions
+strict: true
+
+# Granular control
+strict:
+  edit: true    # Restrict code changes to REAP lifecycle
+  merge: false  # Restrict raw git pull/push/merge`,
+    strictEditTitle: "strict.edit — コード変更制御",
+    strictEditDesc: "有効にすると、AIエージェントはREAPワークフロー外でコードを変更できなくなります。",
     strictHeaders: ["状況", "動作"],
     strictRules: [
       ["アクティブGenerationなし / Implementationステージ以外", "コード変更は完全にブロック"],
       ["Implementationステージ", "02-planning.mdの範囲内の変更のみ許可"],
       ["エスケープハッチ", "ユーザーが明示的に「override」または「bypass strict」を要求すると変更許可"],
     ],
-    strictNote: "Strictモードはデフォルトで無効です。ファイルの読み取り、コード分析、質問への回答はstrictモードに関係なく常に許可されます。",
+    strictMergeTitle: "strict.merge — Gitコマンド制御",
+    strictMergeDesc: "有効にすると、直接的なgit pull、git push、git mergeコマンドが制限されます。エージェントはユーザーにREAPスラッシュコマンド（/reap.pull、/reap.push、/reap.merge）の使用を案内します。",
+    strictNote: "どちらもデフォルトで無効です。strict: trueは両方を有効にします。ファイルの読み取り、コード分析、質問への回答はstrictモードに関係なく常に許可されます。",
     entryModes: "Entryモード",
     entryModeHeaders: ["モード", "用途"],
     entryModeItems: [
@@ -457,8 +476,11 @@ export const ja: Translations = {
   // Distributed Workflow - Overview
   collaboration: {
     title: "分散ワークフロー",
-    breadcrumb: "Distributed Workflow",
+    breadcrumb: "コラボレーション",
     intro: "REAPは複数の開発者やAIエージェントが同じプロジェクトで並行して作業する分散コラボレーションをサポートします — 中央サーバー不要。Gitが唯一のトランスポート層です。",
+    caution: "分散ワークフローは現在初期段階であり、さらなるテストが必要です。本番環境でのご使用にはご注意ください。ユーザーフィードバックを積極的に収集しています — 問題や提案は以下からお寄せください：",
+    cautionLink: "GitHub Issues",
+    cautionUrl: "https://github.com/c-d-cc/reap/issues",
     howItWorks: "仕組み",
     howItWorksDesc: "各開発者やエージェントは自分のブランチとGenerationで独立して作業します。統合する時が来たら、REAPがGenomeファースト戦略でマージを調整します。",
     flowSteps: [
@@ -489,10 +511,18 @@ export const ja: Translations = {
   },
 
   // Distributed Workflow - Merge Lifecycle
-  mergeLifecycle: {
-    title: "マージライフサイクル",
-    breadcrumb: "Distributed Workflow",
-    intro: "ブランチが分岐した場合、REAPは通常のGenerationライフサイクルとは別の、特化した6ステージのマージライフサイクルを使用します。核心原則：Genome衝突を先に解決してからソースコードをマージします。",
+  mergeGeneration: {
+    title: "マージGeneration",
+    breadcrumb: "コラボレーション",
+    intro: "分岐したブランチをマージする必要がある場合、REAPは通常のGenerationライフサイクルとは別の、Merge Generationと呼ばれる特化した6ステージライフサイクルを実行します。核心原則：まずGenomeを整合させてから、ソースコードをマージします。",
+    whyLonger: "Merge Generationは通常のgit mergeとどう違うのか？",
+    whyLongerDesc: "通常のgit mergeはソースコードの衝突のみを解決します。しかし、2つのブランチが独立して進化した場合 — それぞれ独自のGeneration、Genome変更、設計決定を持つ — ソースコードだけをマージするのでは不十分です。Genome（アーキテクチャ原則、コンベンション、制約、ビジネスルール）も分岐している可能性があります。Merge Generationはソースマージの前に3つの重要なステップを追加します：Genome分岐の検出、Mating（Genome衝突の解決）、マージ後のGenome-ソース整合性の検証。これにより、マージされたコードベースが単にコンパイルが通るだけでなく、設計的にも一貫性を保つことが保証されます。",
+    whyGenomeFirst: "なぜGenomeの整合が先なのか",
+    whyGenomeFirstDesc: "ソースコードの衝突を解決しても、セマンティック衝突がないことは保証されません。2つのコードがgit衝突なしにきれいにマージできても、意図、アーキテクチャ、ビジネスロジックで互いに矛盾する可能性があります。Genomeベースの推論だけがこれらの見えない衝突を検出できます：マージされたコードはまだアーキテクチャ原則に従っているか？コンベンションは一貫しているか？ビジネスルールは整合しているか？これがREAPがソースコードに触れる前にGenomeを先に整合させる理由です。Genomeが確定すると、それがソース衝突を解決するための権威あるガイドとなります — 構文的にだけでなく、意味的にも。",
+    whyLongerPoints: [
+      { label: "通常のgit merge", desc: "ソース衝突 → 解決 → コミット。設計の一貫性未チェック。セマンティック衝突は未検出。" },
+      { label: "Merge Generation", desc: "Genome整合優先 → Genomeベースのソースマージ → Genome-ソース整合性の検証 → バリデーション → コミット。見えないセマンティック衝突を捕捉。" },
+    ],
     stageOrder: "ステージ順序",
     stages: [
       { name: "Detect", desc: "git refs経由でターゲットブランチをスキャン。DAG BFSで共通祖先を特定。Genomediffを抽出。衝突をWRITE-WRITEまたはCROSS-FILEに分類。", artifact: "01-detect.md" },
@@ -509,7 +539,8 @@ export const ja: Translations = {
       ["WRITE-WRITE", "両ブランチで同じGenomeファイルを変更", "人間が決定: A維持、B維持、またはマージ"],
       ["CROSS-FILE", "異なるGenomeファイルを変更したが、両ブランチともGenomeを変更", "人間が論理的互換性をレビュー"],
       ["ソース衝突", "Gitマージ衝突がソースコードで発生", "確定したGenomeに基づいて解決"],
-      ["衝突なし", "GenomeまたはソースKonflikte衝突なし", "自動的に進行"],
+      ["セマンティック衝突", "コードはきれいにマージされるがGenome（アーキテクチャ、コンベンション、ビジネスルール）と矛盾", "Syncステージで検出 — AIがGenomeとソースを比較、ユーザーが解決方法を確認"],
+      ["衝突なし", "Genomeまたはソース衝突なし", "自動的に進行"],
     ],
     regression: "マージ回帰",
     regressionDesc: "ValidationまたはSync失敗はMergeまたはMateに回帰できます。MergeでGenome問題が発見された場合、Mateに回帰できます。回帰ルールは通常のGenerationと同じパターンに従います — 理由がタイムラインと成果物に記録されます。",
@@ -519,11 +550,12 @@ export const ja: Translations = {
   // Distributed Workflow - Merge Commands
   mergeCommands: {
     title: "マージコマンド",
-    breadcrumb: "Distributed Workflow",
+    breadcrumb: "コラボレーション",
     intro: "すべての分散ワークフロー操作はAIエージェントが実行するスラッシュコマンドです。マージ用のCLIコマンドはありません — Genome衝突解決とソースマージガイダンスにAIエージェントが不可欠です。",
     primaryCommands: "プライマリコマンド",
     primaryItems: [
       { cmd: "/reap.pull <branch>", desc: "分散マージのワンストップコマンド。リモートを取得し、ターゲットブランチの新しいGenerationを検出し、マージGenerationを作成し、完全なマージライフサイクルを実行します。/reap.evolveの分散版です。" },
+      { cmd: "/reap.merge <branch>", desc: "ローカルブランチの完全なmerge generationを実行します。fetchなし — worktreeベースの並行開発に最適。/reap.pullのローカル版。" },
       { cmd: "/reap.push", desc: "REAP状態を検証（進行中のGenerationがあれば警告）し、現在のブランチをプッシュします。Generation完了後に使用します。" },
     ],
     stageCommands: "ステージコマンド（細かい制御）",
@@ -550,7 +582,7 @@ export const ja: Translations = {
   // Comparison Page
   comparison: {
     title: "比較",
-    breadcrumb: "リファレンス",
+    breadcrumb: "はじめに",
     heading: "Spec Kitとの比較",
     desc: "Spec Kitはコード作成前に仕様を記述するスペック駆動開発方式を開拓しました。REAPはこのコンセプトを発展させ、主要な制限を解決します：",
     items: [

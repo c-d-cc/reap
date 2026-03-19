@@ -39,13 +39,13 @@ function Router() {
       <Route path="/docs/quick-start" component={QuickStartPage} />
       <Route path="/docs/core-concepts" component={CoreConceptsPage} />
       <Route path="/docs/workflow" component={WorkflowPage} />
-      <Route path="/docs/cli" component={CLIPage} />
-      <Route path="/docs/commands" component={CommandReferencePage} />
-      <Route path="/docs/hooks" component={HookReferencePage} />
+      <Route path="/docs/cli-reference" component={CLIPage} />
+      <Route path="/docs/command-reference" component={CommandReferencePage} />
+      <Route path="/docs/hook-reference" component={HookReferencePage} />
       <Route path="/docs/configuration" component={ConfigurationPage} />
       <Route path="/docs/comparison" component={ComparisonPage} />
       <Route path="/docs/distributed-workflow" component={DistributedOverviewPage} />
-      <Route path="/docs/merge-lifecycle" component={MergeLifecyclePage} />
+      <Route path="/docs/merge-generation" component={MergeLifecyclePage} />
       <Route path="/docs/merge-commands" component={MergeCommandsPage} />
       <Route path="/docs/advanced" component={AdvancedPage} />
       <Route component={NotFound} />
