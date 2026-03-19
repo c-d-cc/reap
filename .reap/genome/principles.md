@@ -29,15 +29,6 @@
 | ADR-009 | Node.js 호환 빌드 | Bun API→fs/promises 교체, npm publish용 번들 | 2026-03 |
 | ADR-010 | npm scoped package (@c-d-cc/reap) | 'reap' 이름 점유, scoped로 배포 | 2026-03 |
 
-## Layer Map
+## Source Map
 
-```
-src/
-├── cli/commands/  → CLI 진입점 (init, status, update, fix)
-├── core/          → 비즈니스 로직 (generation, lifecycle, compression, hooks, agents, adaptation, fs, paths, config)
-├── templates/     → init 시 복사/설치되는 원본 (genome, commands, artifacts, hooks, presets)
-└── types/         → 공유 타입 정의
-```
-
-- `cli/` → `core/` → `types/` (단방향 의존)
-- `templates/`는 런타임에 읽기만 함 (코드 의존 없음)
+→ `genome/source-map.md` 참조 (C4 Container + Component 수준 Mermaid 다이어그램)

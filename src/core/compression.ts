@@ -3,11 +3,12 @@ import { join } from "path";
 import type { ReapPaths } from "./paths";
 import { readTextFile, readTextFileOrThrow, writeTextFile } from "./fs";
 
-const LINEAGE_MAX_LINES = 10_000;
+const LINEAGE_MAX_LINES = 5_000;
 const MIN_GENERATIONS_FOR_COMPRESSION = 5;
 const LEVEL1_MAX_LINES = 40;
 const LEVEL2_MAX_LINES = 60;
 const LEVEL2_BATCH_SIZE = 5;
+const RECENT_PROTECTED_COUNT = 3;
 
 interface LineageEntry {
   name: string;
@@ -273,7 +274,8 @@ export async function compressLineageIfNeeded(
   }
 
   // Level 1: compress oldest uncompressed directories
-  const dirs = entries.filter(e => e.type === "dir").sort((a, b) => a.genNum - b.genNum);
+  const allDirs = entries.filter(e => e.type === "dir").sort((a, b) => a.genNum - b.genNum);
+  const dirs = allDirs.slice(0, Math.max(0, allDirs.length - RECENT_PROTECTED_COUNT));
   for (const dir of dirs) {
     const currentTotal = await countDirLines(paths.lineage);
     if (currentTotal <= LINEAGE_MAX_LINES) break;

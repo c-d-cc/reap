@@ -115,7 +115,7 @@ async function migrateLegacyFiles(
 ): Promise<void> {
   await removeDirIfExists(paths.legacyCommands, ".reap/commands/", dryRun, result);
   await removeDirIfExists(paths.legacyTemplates, ".reap/templates/", dryRun, result);
-  await removeDirIfExists(paths.legacyHooks, ".reap/hooks/", dryRun, result);
+  // .reap/hooks/ is now used for hook execute files (gen-031+), do NOT remove
 
   // Remove project-level .claude/commands/reap.* files
   try {

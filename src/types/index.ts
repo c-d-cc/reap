@@ -33,6 +33,8 @@ export type ReapHookEvent = "onGenerationStart" | "onStageTransition" | "onGener
 export interface ReapHookCommand {
   command?: string;
   prompt?: string;
+  execute?: string;     // file path (.md = prompt, .sh = command)
+  condition?: string;   // condition to evaluate before execution
 }
 
 export interface ReapHooks {

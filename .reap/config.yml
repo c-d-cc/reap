@@ -6,48 +6,11 @@ language: korean
 autoUpdate: true
 hooks:
   onGenerationComplete:
-    - prompt: |
-        Version bump 필요 여부를 판단하라:
-        1. 방금 완료된 generation의 lineage artifacts를 읽어 변경 내용을 파악
-           (`.reap/lineage/`에서 가장 최근 폴더의 01-objective.md, 05-completion.md)
-        2. 변경 유형을 분류:
-           - **patch**: bugfix, 성능 개선, 내부 리팩토링, 설정 변경, 문서 수정
-           - **minor**: 새로운 기능 추가, 기존 기능 확장 (하위 호환)
-           - **major**: breaking change, API 변경, 대규모 구조 변경
-        3. patch인 경우:
-           - `npm version patch --no-git-tag-version` 자동 실행
-           - "Version bumped to v{new}" 메시지 출력
-        4. minor 또는 major인 경우:
-           - 유저에게 "이번 변경은 {minor/major} 수준으로 판단됩니다. version bump를 진행할까요?" 확인
-           - 유저가 동의하면 `npm version {type} --no-git-tag-version` 실행
-           - 유저가 거부하면 skip
-        5. 변경 내용이 docs-only이거나 REAP artifacts만 변경된 경우: version bump skip
-    - command: "~/.bun/bin/bun run src/cli/index.ts -- update"
-    - prompt: |
-        이번 Generation에서 변경된 기능/CLI/slash commands를 파악하고,
-        README.md, README.ko.md, src/templates/hooks/reap-guide.md,
-        docs/src/pages/ 의 관련 문서 페이지를 업데이트하라.
-        변경이 없으면 skip.
-    - prompt: |
-        Release note 생성 여부를 판단하라:
-        1. `git describe --tags --abbrev=0` 으로 마지막 릴리스 태그를 확인
-        2. `package.json`의 현재 version과 비교
-        3. 버전이 동일하면 skip
-        4. 버전이 다르면 (version bump가 있었으면):
-           a. 마지막 태그 이후의 `.reap/lineage/` 폴더들을 시간순으로 스캔
-           b. 각 generation의 01-objective.md (Goal)과 05-completion.md (Summary)를 읽어
-              변경 내용을 파악
-           c. RELEASE_NOTES.md를 프로젝트 루트에 생성. 형식:
-              ```
-              ## What's New
-              - [주요 변경 1]
-              - [주요 변경 2]
-
-              ## Generations
-              - **gen-XXX**: [goal summary]
-              - **gen-YYY**: [goal summary]
-
-              ## Breaking Changes
-              [있으면 기술, 없으면 섹션 제거]
-              ```
-           d. RELEASE_NOTES.md를 git에 커밋
+    - condition: "has-code-changes"
+      execute: ".reap/hooks/version-bump.md"
+    - condition: "always"
+      command: "~/.bun/bin/bun run src/cli/index.ts -- update"
+    - condition: "has-code-changes"
+      execute: ".reap/hooks/docs-update.md"
+    - condition: "version-bumped"
+      execute: ".reap/hooks/release-notes.md"

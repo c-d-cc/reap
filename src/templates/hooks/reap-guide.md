@@ -92,7 +92,7 @@ Regression reason is recorded as a `## Regression` section in the target stage's
 Trivial issues (typos, lint errors, etc.) are fixed directly in the current stage without a stage transition and recorded in the artifact. Judgment criterion: resolvable within 5 minutes without design changes.
 
 ### Lineage Compression
-As generations accumulate, lineage grows. Auto-compression triggers when total exceeds 10,000 lines + 5 or more generations:
+As generations accumulate, lineage grows. Auto-compression triggers when total exceeds 5,000 lines + 5 or more generations (most recent 3 generations are protected):
 - **Level 1**: Generation folder → single .md (40 lines). Only goal + result + notable items preserved.
 - **Level 2**: 5 Level 1 entries → epoch .md (60 lines). Only key flow preserved.
 
@@ -104,22 +104,24 @@ Projects can define hooks in `.reap/config.yml` to run commands or prompts at li
 
 ```yaml
 hooks:
-  onGenerationStart:
-    - command: "echo 'Generation started'"
-  onStageTransition:
-    - command: "echo 'Stage changed'"
   onGenerationComplete:
-    - command: "reap update"
-    - prompt: "Check if README needs updating based on this generation's changes."
-  onRegression:
-    - command: "echo 'Regressed'"
+    - condition: "has-code-changes"
+      execute: ".reap/hooks/version-bump.md"
+    - condition: "always"
+      command: "reap update"
+    - condition: "has-code-changes"
+      execute: ".reap/hooks/docs-update.md"
+    - condition: "version-bumped"
+      execute: ".reap/hooks/release-notes.md"
 ```
 
-Each hook entry supports two types:
+Each hook entry supports:
 - `command` — Run a shell command in the project root directory
-- `prompt` — AI agent instruction. The agent reads and executes the described task.
-
-Only one of `command` or `prompt` should be set per entry.
+- `execute` — File path to read and execute (.md = AI prompt, .sh = shell script)
+- `condition` — Condition to evaluate before execution:
+  - `always` or absent: always execute
+  - `has-code-changes`: execute only if src/ files were changed in this generation
+  - `version-bumped`: execute only if package.json version ≠ last git tag
 
 | Event | Trigger |
 |-------|---------|

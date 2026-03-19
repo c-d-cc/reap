@@ -47,8 +47,14 @@ description: "REAP Back — Return to a previous lifecycle stage"
 
 ### Hook Execution
 7. Read `.reap/config.yml` — if `hooks.onRegression` is defined, execute each hook in order:
-   - If hook has `command`: run the shell command
-   - If hook has `prompt`: follow the prompt instructions (AI agent executes the described task)
+   - First, evaluate the `condition` field (skip if condition is not met):
+     - `always` or absent: always execute
+     - `has-code-changes`: execute only if src/ files were changed in this generation (check `git diff` or implementation artifact)
+     - `version-bumped`: execute only if `package.json` version ≠ `git describe --tags --abbrev=0`
+   - Then execute:
+     - If hook has `command`: run the shell command
+     - If hook has `execute` (file path): read the file and follow its instructions (.md = AI prompt, .sh = shell script)
+     - If hook has `prompt` (legacy): follow the prompt instructions directly
 
 ## Completion
 - "Returned to [stage] stage. Proceed with `/reap.[stage]`."

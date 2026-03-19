@@ -69,8 +69,8 @@ export class ReapPaths {
   get legacyCommands(): string { return join(this.root, "commands"); }
   /** @deprecated Project-level templates removed in gen-007 */
   get legacyTemplates(): string { return join(this.root, "templates"); }
-  /** @deprecated Project-level hooks removed in gen-007 */
-  get legacyHooks(): string { return join(this.root, "hooks"); }
+  // .reap/hooks/ is now used for hook execute files (gen-031+), no longer legacy
+  get hooks(): string { return join(this.root, "hooks"); }
   /** @deprecated Project-level .claude/commands removed in gen-007 */
   get legacyClaudeCommands(): string { return join(this.projectRoot, ".claude", "commands"); }
   /** @deprecated Project-level .claude/hooks.json removed in gen-007 */
