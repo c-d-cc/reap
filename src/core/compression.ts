@@ -1,6 +1,8 @@
+import YAML from "yaml";
 import { readdir, rm } from "fs/promises";
 import { join } from "path";
 import type { ReapPaths } from "./paths";
+import type { GenerationMeta } from "../types";
 import { readTextFile, readTextFileOrThrow, writeTextFile } from "./fs";
 
 const LINEAGE_MAX_LINES = 5_000;
@@ -21,11 +23,30 @@ interface LineageEntry {
   type: "dir" | "level1" | "level2";
   lines: number;
   genNum: number;
+  completedAt: string;  // ISO date or "" if unknown
+  genId: string;        // gen-NNN or gen-NNN-hash
 }
 
-/**
- * Count total lines in lineage directory
- */
+// ── Frontmatter utilities ───────────────────────────────────
+
+/** Parse YAML frontmatter from a markdown string. Returns null if no frontmatter. */
+export function parseFrontmatter(content: string): GenerationMeta | null {
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return null;
+  try {
+    return YAML.parse(match[1]) as GenerationMeta;
+  } catch {
+    return null;
+  }
+}
+
+/** Build YAML frontmatter string from GenerationMeta */
+function buildFrontmatter(meta: GenerationMeta): string {
+  return `---\n${YAML.stringify(meta).trim()}\n---\n`;
+}
+
+// ── Line counting ───────────────────────────────────────────
+
 async function countLines(filePath: string): Promise<number> {
   const content = await readTextFile(filePath);
   if (content === null) return 0;
@@ -48,9 +69,22 @@ async function countDirLines(dirPath: string): Promise<number> {
   return total;
 }
 
-/**
- * Scan lineage entries and classify them
- */
+// ── Scanning ────────────────────────────────────────────────
+
+/** Read meta from a lineage directory's meta.yml */
+async function readDirMeta(dirPath: string): Promise<GenerationMeta | null> {
+  const content = await readTextFile(join(dirPath, "meta.yml"));
+  if (content === null) return null;
+  try { return YAML.parse(content) as GenerationMeta; } catch { return null; }
+}
+
+/** Read meta from a compressed .md file's frontmatter */
+async function readFileMeta(filePath: string): Promise<GenerationMeta | null> {
+  const content = await readTextFile(filePath);
+  if (content === null) return null;
+  return parseFrontmatter(content);
+}
+
 async function scanLineage(paths: ReapPaths): Promise<LineageEntry[]> {
   const entries: LineageEntry[] = [];
   try {
@@ -61,27 +95,89 @@ async function scanLineage(paths: ReapPaths): Promise<LineageEntry[]> {
       if (item.isDirectory() && item.name.startsWith("gen-")) {
         const genNum = extractGenNum(item.name);
         const lines = await countDirLines(fullPath);
-        entries.push({ name: item.name, type: "dir", lines, genNum });
+        const meta = await readDirMeta(fullPath);
+        const genId = meta?.id ?? item.name.match(/^gen-\d{3}(?:-[a-f0-9]{6})?/)?.[0] ?? item.name;
+        entries.push({
+          name: item.name, type: "dir", lines, genNum,
+          completedAt: meta?.completedAt ?? "",
+          genId,
+        });
       } else if (item.isFile() && item.name.startsWith("gen-") && item.name.endsWith(".md")) {
         const genNum = extractGenNum(item.name);
         const lines = await countLines(fullPath);
-        entries.push({ name: item.name, type: "level1", lines, genNum });
+        const meta = await readFileMeta(fullPath);
+        const genId = meta?.id ?? item.name.replace(".md", "").match(/^gen-\d{3}(?:-[a-f0-9]{6})?/)?.[0] ?? item.name;
+        entries.push({
+          name: item.name, type: "level1", lines, genNum,
+          completedAt: meta?.completedAt ?? "",
+          genId,
+        });
       } else if (item.isFile() && item.name.startsWith("epoch-") && item.name.endsWith(".md")) {
         const lines = await countLines(fullPath);
-        entries.push({ name: item.name, type: "level2", lines, genNum: 0 });
+        entries.push({
+          name: item.name, type: "level2", lines, genNum: 0,
+          completedAt: "", genId: "",
+        });
       }
     }
   } catch { /* lineage doesn't exist */ }
 
-  return entries.sort((a, b) => a.genNum - b.genNum);
+  // Sort by completedAt if available, fallback to genNum
+  return entries.sort((a, b) => {
+    if (a.completedAt && b.completedAt) {
+      return a.completedAt.localeCompare(b.completedAt);
+    }
+    return a.genNum - b.genNum;
+  });
 }
 
-/**
- * Level 1 compression: generation directory → single markdown file
- * Focus on start (objective) and end (completion), with notable middle events
- */
+// ── DAG-aware protection ────────────────────────────────────
+
+/** Find generation IDs that are NOT referenced as parents by any other generation (leaf nodes) */
+async function findLeafNodes(paths: ReapPaths, entries: LineageEntry[]): Promise<Set<string>> {
+  const allIds = new Set<string>();
+  const referencedAsParent = new Set<string>();
+
+  for (const entry of entries) {
+    if (entry.type === "level2") continue;
+
+    let meta: GenerationMeta | null = null;
+    const fullPath = join(paths.lineage, entry.name);
+    if (entry.type === "dir") {
+      meta = await readDirMeta(fullPath);
+    } else {
+      meta = await readFileMeta(fullPath);
+    }
+
+    if (meta) {
+      allIds.add(meta.id);
+      for (const parent of meta.parents) {
+        referencedAsParent.add(parent);
+      }
+    } else {
+      allIds.add(entry.genId);
+    }
+  }
+
+  const leaves = new Set<string>();
+  for (const id of allIds) {
+    if (!referencedAsParent.has(id)) {
+      leaves.add(id);
+    }
+  }
+  return leaves;
+}
+
+// ── Level 1 compression ────────────────────────────────────
+
 async function compressLevel1(genDir: string, genName: string): Promise<string> {
   const lines: string[] = [];
+
+  // Read meta.yml for DAG frontmatter
+  const meta = await readDirMeta(genDir);
+  if (meta) {
+    lines.push(buildFrontmatter(meta));
+  }
 
   // Read objective (start)
   let goal = "", completionConditions = "";
@@ -110,12 +206,12 @@ async function compressLevel1(genDir: string, genName: string): Promise<string> 
   }
 
   // Read Summary section from 05-completion.md for metadata
-  let metadata = "";
+  let summaryText = "";
   {
     const completion = await readTextFile(join(genDir, "05-completion.md"));
     if (completion) {
       const summaryMatch = completion.match(/## Summary\n([\s\S]*?)(?=\n##)/);
-      if (summaryMatch) metadata = summaryMatch[1].trim();
+      if (summaryMatch) summaryText = summaryMatch[1].trim();
     }
   }
 
@@ -148,8 +244,8 @@ async function compressLevel1(genDir: string, genName: string): Promise<string> 
   const genId = genName.match(/^gen-\d{3}(?:-[a-f0-9]{6})?/)?.[0] ?? genName;
 
   lines.push(`# ${genId}`);
-  if (metadata) {
-    lines.push(metadata.replace(/^# .+\n/, "").trim());
+  if (summaryText) {
+    lines.push(summaryText.replace(/^# .+\n/, "").trim());
   }
   lines.push("");
 
@@ -194,7 +290,7 @@ async function compressLevel1(genDir: string, genName: string): Promise<string> 
     lines.push("");
   }
 
-  // Truncate to max lines
+  // Truncate to max lines (frontmatter doesn't count toward limit)
   let result = lines.join("\n");
   const resultLines = result.split("\n");
   if (resultLines.length > LEVEL1_MAX_LINES) {
@@ -204,9 +300,8 @@ async function compressLevel1(genDir: string, genName: string): Promise<string> 
   return result;
 }
 
-/**
- * Level 2 compression: multiple Level 1 files → single epoch file
- */
+// ── Level 2 compression ────────────────────────────────────
+
 async function compressLevel2(
   level1Files: { name: string; path: string }[],
   epochNum: number,
@@ -221,12 +316,14 @@ async function compressLevel2(
 
   for (const file of level1Files) {
     const content = await readTextFileOrThrow(file.path);
-    // Extract header and goal line only
-    const headerMatch = content.match(/^# (gen-\d{3}(?:-[a-f0-9]{6})?)/m);
-    const goalMatch = content.match(/- Goal: (.+)/);
-    const periodMatch = content.match(/- (?:Started|Period): (.+)/);
-    const genomeMatch = content.match(/- Genome.*: (.+)/);
-    const resultMatch = content.match(/## Result: (.+)/);
+    // Strip frontmatter before parsing content
+    const bodyContent = content.replace(/^---\n[\s\S]*?\n---\n?/, "");
+
+    const headerMatch = bodyContent.match(/^# (gen-\d{3}(?:-[a-f0-9]{6})?)/m);
+    const goalMatch = bodyContent.match(/- Goal: (.+)/);
+    const periodMatch = bodyContent.match(/- (?:Started|Period): (.+)/);
+    const genomeMatch = bodyContent.match(/- Genome.*: (.+)/);
+    const resultMatch = bodyContent.match(/## Result: (.+)/);
 
     const genId = headerMatch?.[1] ?? "unknown";
     const goal = goalMatch?.[1] ?? "";
@@ -238,7 +335,7 @@ async function compressLevel2(
     if (result) lines.push(`- Result: ${result}`);
 
     // Include genome changes if any (most important for traceability)
-    const changeSection = content.match(/## Genome Changes\n([\s\S]*?)(?=\n##|$)/);
+    const changeSection = bodyContent.match(/## Genome Changes\n([\s\S]*?)(?=\n##|$)/);
     if (changeSection && !changeSection[1].match(/^\|\s*\|\s*\|\s*\|\s*\|$/)) {
       lines.push(`- Genome Changes: ${changeSection[1].trim().split("\n")[0]}`);
     }
@@ -256,10 +353,8 @@ async function compressLevel2(
   return result;
 }
 
-/**
- * Run lineage compression if needed
- * Called after generation archiving
- */
+// ── Main compression entry point ────────────────────────────
+
 export async function compressLineageIfNeeded(
   paths: ReapPaths,
 ): Promise<{ level1: string[]; level2: string[] }> {
@@ -268,21 +363,31 @@ export async function compressLineageIfNeeded(
   const entries = await scanLineage(paths);
   const totalEntries = entries.filter(e => e.type === "dir" || e.type === "level1").length;
 
-  // Must have at least MIN_GENERATIONS before compressing
   if (totalEntries < MIN_GENERATIONS_FOR_COMPRESSION) {
     return result;
   }
 
-  // Check total lineage size
   const totalLines = entries.reduce((sum, e) => sum + e.lines, 0);
   if (totalLines <= LINEAGE_MAX_LINES) {
     return result;
   }
 
+  // Find leaf nodes — these must be protected regardless of age
+  const leafNodes = await findLeafNodes(paths, entries);
+
   // Level 1: compress oldest uncompressed directories
-  const allDirs = entries.filter(e => e.type === "dir").sort((a, b) => a.genNum - b.genNum);
-  const dirs = allDirs.slice(0, Math.max(0, allDirs.length - RECENT_PROTECTED_COUNT));
-  for (const dir of dirs) {
+  // Protected: recent N entries by completedAt + all leaf nodes
+  const allDirs = entries.filter(e => e.type === "dir");
+  // Already sorted by completedAt/genNum from scanLineage
+  const recentIds = new Set(
+    allDirs.slice(Math.max(0, allDirs.length - RECENT_PROTECTED_COUNT)).map(e => e.genId)
+  );
+
+  const compressibleDirs = allDirs.filter(dir =>
+    !recentIds.has(dir.genId) && !leafNodes.has(dir.genId)
+  );
+
+  for (const dir of compressibleDirs) {
     const currentTotal = await countDirLines(paths.lineage);
     if (currentTotal <= LINEAGE_MAX_LINES) break;
 
@@ -298,16 +403,13 @@ export async function compressLineageIfNeeded(
 
   // Level 2: if 5+ Level 1 files exist, batch into epochs
   const level1s = (await scanLineage(paths))
-    .filter(e => e.type === "level1")
-    .sort((a, b) => a.genNum - b.genNum);
+    .filter(e => e.type === "level1");
+  // Already sorted by completedAt/genNum from scanLineage
 
   if (level1s.length >= LEVEL2_BATCH_SIZE) {
-    // Find existing epoch count
     const existingEpochs = (await scanLineage(paths)).filter(e => e.type === "level2");
     let epochNum = existingEpochs.length + 1;
 
-    // Batch level 1 files in groups of LEVEL2_BATCH_SIZE
-    // Keep the last batch un-epoched if it's incomplete
     const batchCount = Math.floor(level1s.length / LEVEL2_BATCH_SIZE);
     for (let i = 0; i < batchCount; i++) {
       const batch = level1s.slice(i * LEVEL2_BATCH_SIZE, (i + 1) * LEVEL2_BATCH_SIZE);
@@ -321,7 +423,6 @@ export async function compressLineageIfNeeded(
 
       await writeTextFile(outPath, compressed);
 
-      // Remove original Level 1 files
       for (const file of files) {
         await rm(file.path);
       }

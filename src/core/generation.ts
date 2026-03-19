@@ -8,6 +8,7 @@ import type { ReapPaths } from "./paths";
 import { LifeCycle } from "./lifecycle";
 import { compressLineageIfNeeded } from "./compression";
 import { readTextFile, writeTextFile } from "./fs";
+import { parseFrontmatter } from "./compression";
 
 // ── Hash utilities ──────────────────────────────────────────
 
@@ -227,15 +228,25 @@ export class GenerationManager {
     return YAML.parse(content) as GenerationMeta;
   }
 
-  /** List all generation metadata (DAG-aware) */
+  /** List all generation metadata (DAG-aware, reads both directories and compressed .md) */
   async listMeta(): Promise<GenerationMeta[]> {
-    const dirs = await this.listCompleted();
     const metas: GenerationMeta[] = [];
-    for (const dir of dirs) {
-      // Only directories (not compressed .md files)
-      const meta = await this.readMeta(dir);
-      if (meta) metas.push(meta);
-    }
+    try {
+      const entries = await readdir(this.paths.lineage, { withFileTypes: true });
+      for (const entry of entries) {
+        if (entry.isDirectory() && entry.name.startsWith("gen-")) {
+          const meta = await this.readMeta(entry.name);
+          if (meta) metas.push(meta);
+        } else if (entry.isFile() && entry.name.startsWith("gen-") && entry.name.endsWith(".md")) {
+          // Compressed .md — read frontmatter
+          const content = await readTextFile(join(this.paths.lineage, entry.name));
+          if (content) {
+            const meta = parseFrontmatter(content);
+            if (meta) metas.push(meta);
+          }
+        }
+      }
+    } catch { /* lineage dir may not exist */ }
     return metas;
   }
 

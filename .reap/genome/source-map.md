@@ -55,7 +55,7 @@ C4Component
   Component(paths, "ReapPaths", "paths.ts", "경로 해석. project/user/package 레벨")
   Component(hooks, "Hooks", "hooks.ts", "SessionStart hook 등록/동기화/마이그레이션")
   Component(agents, "AgentRegistry", "agents/", "어댑터 추상화. Claude Code + OpenCode")
-  Component(compression, "Compression", "compression.ts", "Lineage 자동 압축. L1(dir→md), L2(5×L1→epoch)")
+  Component(compression, "Compression", "compression.ts", "Lineage 자동 압축. L1(dir→md+frontmatter), L2(5×L1→epoch). DAG leaf 보호")
   Component(adaptation, "AdaptationManager", "adaptation.ts", "Generation adaptation 기록")
   Component(migration, "Migration", "migration.ts", "legacy lineage → DAG 변환. needsMigration, migrateLineage")
   Component(fs, "FS Utils", "fs.ts", "readTextFile, writeTextFile, fileExists")
