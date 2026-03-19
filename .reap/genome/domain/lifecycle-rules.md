@@ -31,7 +31,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 
 - 어떤 stage에서든 이전 stage로 회귀 가능
 - 회귀 사유는 timeline에 기록 + target artifact에 `## Regression` 섹션 추가
-- Artifact 처리: target 이전 보존, target은 덮어쓰기 (implementation은 append), target 이후 보존 → 재진입 시 덮어쓰기
+- Artifact 처리: target 이전 보존, target은 덮어쓰기 (planning과 implementation은 append), target 이후 보존 → 재진입 시 덮어쓰기
 
 ## Immutability Principles
 

@@ -62,11 +62,11 @@ const { genomeStaleWarning, commitsSince } = gl.detectStaleness(projectRoot);
 
 // Step 5: Read generation state
 log('Reading generation state...');
-const { strictMode } = gl.parseConfig(configFile);
+const { strictEdit, strictMerge } = gl.parseConfig(configFile);
 const { genStage, genId, generationContext, nextCmd } = gl.parseCurrentYml(currentYml);
 
 // Build strict mode section
-const strictSection = gl.buildStrictSection(strictMode, genStage);
+const strictSection = gl.buildStrictSection(strictEdit, strictMerge, genStage);
 
 // Build staleness section
 let staleSection = '';

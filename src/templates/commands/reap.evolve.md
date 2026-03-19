@@ -9,6 +9,13 @@ Run the entire Generation lifecycle from start to finish, interactively with the
 <HARD-GATE>
 NEVER modify `current.yml` directly to change the stage. ALWAYS use `/reap.next` to advance and `/reap.back` to regress.
 Direct modification skips artifact creation and breaks the lifecycle. This is non-negotiable.
+
+Specifically PROHIBITED:
+- Running `node -e` or any script that writes to `current.yml`
+- Using YAML.stringify() to update the stage field
+- Any method other than invoking `/reap.next` or `/reap.back` slash commands
+
+The ONLY legitimate way to change the stage is through `/reap.next` (forward) or `/reap.back` (regression).
 </HARD-GATE>
 
 ## Gate (Preconditions)

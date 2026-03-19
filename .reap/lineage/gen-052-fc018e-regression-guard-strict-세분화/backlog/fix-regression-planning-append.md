@@ -1,6 +1,7 @@
 ---
 type: genome-change
-status: pending
+status: consumed
+consumedBy: gen-052-fc018e
 target: genome/domain/lifecycle-rules.md
 ---
 

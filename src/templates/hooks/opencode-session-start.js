@@ -87,11 +87,11 @@ module.exports = async (ctx) => {
       // Parse config and generation state via shared module
       const configFile = path.join(reapDir, "config.yml");
       const currentYml = path.join(reapDir, "life", "current.yml");
-      const { strictMode, language } = gl.parseConfig(configFile);
+      const { strictEdit, strictMerge, language } = gl.parseConfig(configFile);
       const { genStage, generationContext, nextCmd } = gl.parseCurrentYml(currentYml);
 
       // Build strict mode section via shared module
-      const strictSection = gl.buildStrictSection(strictMode, genStage);
+      const strictSection = gl.buildStrictSection(strictEdit, strictMerge, genStage);
 
       // Detect staleness via shared module
       let staleSection = "";

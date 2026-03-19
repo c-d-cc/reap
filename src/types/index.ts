@@ -99,6 +99,14 @@ export interface ReapConfig {
   language?: string;
   /** Auto-update REAP on session start. Default: false */
   autoUpdate?: boolean;
+  /** Strict mode: boolean (shorthand) or granular { edit, merge } */
+  strict?: boolean | { edit?: boolean; merge?: boolean };
+}
+
+/** Resolved strict mode (always object form) */
+export interface StrictMode {
+  edit: boolean;
+  merge: boolean;
 }
 
 // Agent adapter types

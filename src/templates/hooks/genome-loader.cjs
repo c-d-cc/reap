@@ -88,19 +88,31 @@ function loadGenome(genomeDir) {
 
 /**
  * Parse config.yml for strict mode and other settings.
+ * strict supports: boolean (true/false) or object ({ edit: true, merge: false })
  * @param {string} configFile - path to .reap/config.yml
- * @returns {{ strictMode: boolean, language: string, configContent: string|null }}
+ * @returns {{ strictEdit: boolean, strictMerge: boolean, language: string, configContent: string|null }}
  */
 function parseConfig(configFile) {
   const configContent = readFile(configFile);
-  let strictMode = false;
+  let strictEdit = false;
+  let strictMerge = false;
   let language = '';
   if (configContent) {
-    strictMode = /^strict:\s*true/m.test(configContent);
+    // Check for boolean shorthand: strict: true
+    if (/^strict:\s*true$/m.test(configContent)) {
+      strictEdit = true;
+      strictMerge = true;
+    }
+    // Check for object form: strict:\n  edit: true\n  merge: true
+    const editMatch = configContent.match(/^\s+edit:\s*(true|false)/m);
+    const mergeMatch = configContent.match(/^\s+merge:\s*(true|false)/m);
+    if (editMatch) strictEdit = editMatch[1] === 'true';
+    if (mergeMatch) strictMerge = mergeMatch[1] === 'true';
+
     const langMatch = configContent.match(/^language:\s*(.+)$/m);
     if (langMatch) language = langMatch[1].trim();
   }
-  return { strictMode, language, configContent };
+  return { strictEdit, strictMerge, language, configContent };
 }
 
 /**
@@ -151,19 +163,29 @@ function detectStaleness(projectRoot) {
 
 /**
  * Build strict mode section for context injection.
- * @param {boolean} strictMode
+ * @param {boolean} strictEdit
+ * @param {boolean} strictMerge
  * @param {string} genStage
  * @returns {string}
  */
-function buildStrictSection(strictMode, genStage) {
-  if (!strictMode) return '';
-  if (genStage === 'implementation') {
-    return "\n\n## Strict Mode (ACTIVE — SCOPED MODIFICATION ALLOWED)\n<HARD-GATE>\nStrict mode is enabled. Code modification is ALLOWED only within the scope of the current Generation's plan.\n- You MUST read `.reap/life/02-planning.md` before writing any code.\n- You may ONLY modify files and modules listed in the plan's task list.\n- Changes outside the plan's scope are BLOCKED. If you discover out-of-scope work is needed, add it to the backlog instead of implementing it.\n- If the user explicitly requests to bypass strict mode (e.g., \"override\", \"bypass strict\"), you may proceed — but inform them that strict mode is being bypassed.\n</HARD-GATE>";
+function buildStrictSection(strictEdit, strictMerge, genStage) {
+  let sections = '';
+
+  if (strictEdit) {
+    if (genStage === 'implementation') {
+      sections += "\n\n## Strict Mode — Edit (ACTIVE — SCOPED MODIFICATION ALLOWED)\n<HARD-GATE>\nStrict mode is enabled. Code modification is ALLOWED only within the scope of the current Generation's plan.\n- You MUST read `.reap/life/02-planning.md` before writing any code.\n- You may ONLY modify files and modules listed in the plan's task list.\n- Changes outside the plan's scope are BLOCKED. If you discover out-of-scope work is needed, add it to the backlog instead of implementing it.\n- If the user explicitly requests to bypass strict mode (e.g., \"override\", \"bypass strict\"), you may proceed — but inform them that strict mode is being bypassed.\n</HARD-GATE>";
+    } else if (genStage === 'none') {
+      sections += "\n\n## Strict Mode — Edit (ACTIVE — CODE MODIFICATION BLOCKED)\n<HARD-GATE>\nStrict mode is enabled and there is NO active Generation.\nYou MUST NOT write, edit, or create any source code files.\nAllowed actions: reading files, analyzing code, answering questions, running commands.\nTo start coding, the user must first run `/reap.start` and advance to the implementation stage.\nIf the user explicitly requests to bypass strict mode (e.g., \"override\", \"bypass strict\", \"just do it\"), you may proceed — but inform them that strict mode is being bypassed.\n</HARD-GATE>";
+    } else {
+      sections += `\n\n## Strict Mode — Edit (ACTIVE — CODE MODIFICATION BLOCKED)\n<HARD-GATE>\nStrict mode is enabled. Current stage is '${genStage}', which is NOT the implementation stage.\nYou MUST NOT write, edit, or create any source code files.\nAllowed actions: reading files, analyzing code, answering questions, running commands, writing REAP artifacts.\nAdvance to the implementation stage via the REAP lifecycle to unlock code modification.\nIf the user explicitly requests to bypass strict mode (e.g., \"override\", \"bypass strict\", \"just do it\"), you may proceed — but inform them that strict mode is being bypassed.\n</HARD-GATE>`;
+    }
   }
-  if (genStage === 'none') {
-    return "\n\n## Strict Mode (ACTIVE — CODE MODIFICATION BLOCKED)\n<HARD-GATE>\nStrict mode is enabled and there is NO active Generation.\nYou MUST NOT write, edit, or create any source code files.\nAllowed actions: reading files, analyzing code, answering questions, running commands.\nTo start coding, the user must first run `/reap.start` and advance to the implementation stage.\nIf the user explicitly requests to bypass strict mode (e.g., \"override\", \"bypass strict\", \"just do it\"), you may proceed — but inform them that strict mode is being bypassed.\n</HARD-GATE>";
+
+  if (strictMerge) {
+    sections += "\n\n## Strict Mode — Merge (ACTIVE)\nDirect git pull, git push, and git merge commands are restricted.\nUse REAP slash commands instead: `/reap.pull`, `/reap.push`, `/reap.merge.start`.\nThis ensures genome-first conflict resolution and proper lineage tracking.\nIf the user explicitly requests to bypass (e.g., \"override\", \"bypass strict\"), you may proceed — but inform them that strict merge mode is being bypassed.";
   }
-  return `\n\n## Strict Mode (ACTIVE — CODE MODIFICATION BLOCKED)\n<HARD-GATE>\nStrict mode is enabled. Current stage is '${genStage}', which is NOT the implementation stage.\nYou MUST NOT write, edit, or create any source code files.\nAllowed actions: reading files, analyzing code, answering questions, running commands, writing REAP artifacts.\nAdvance to the implementation stage via the REAP lifecycle to unlock code modification.\nIf the user explicitly requests to bypass strict mode (e.g., \"override\", \"bypass strict\", \"just do it\"), you may proceed — but inform them that strict mode is being bypassed.\n</HARD-GATE>`;
+
+  return sections;
 }
 
 /**

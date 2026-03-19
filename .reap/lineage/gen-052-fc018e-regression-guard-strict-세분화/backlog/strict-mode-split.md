@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-052-fc018e
 priority: medium
 title: strict 모드 세분화 — strictEdit + strictMerge
 ---

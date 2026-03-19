@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-052-fc018e
 priority: high
 title: current.yml 직접 수정 방지 — 자가 분석 + 가드 강화
 ---

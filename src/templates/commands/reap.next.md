@@ -4,6 +4,8 @@ description: "REAP Next — Advance to the next lifecycle stage"
 
 # Next Stage
 
+This command is the **ONLY legitimate way** to advance the lifecycle stage. All stage transitions MUST go through this command. Direct modification of `current.yml` is strictly prohibited.
+
 ## Gate (Preconditions)
 - Read `.reap/life/current.yml`
 - If no active Generation: ERROR — "No active Generation. Run `/reap.start` first." **STOP**
