@@ -215,7 +215,7 @@ if (genomeStaleWarning && commitsSince > 30) {
   if (severity === 'ok') severity = 'warn';
 }
 
-if (severity === 'ok') initLines.push('🟢 Genome OK');
+if (severity === 'ok') initLines.push(`🟢 Genome — loaded (${l1Lines} lines), synced`);
 else if (severity === 'warn') initLines.push(`🟡 Genome — ${issues.join(', ')}. /reap.sync`);
 else initLines.push(`🔴 Genome — ${issues.join(', ')}. \`reap fix\` or /reap.sync`);
 
