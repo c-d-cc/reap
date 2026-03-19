@@ -221,20 +221,22 @@ export function parseValidationCommands(content: string): string[] {
   const lines = content.split("\n");
   let inTable = false;
 
+  let foundRows = false;
   for (const line of lines) {
     if (line.includes("Validation Commands") || line.includes("검증 명령어")) {
       inTable = true;
       continue;
     }
     if (inTable) {
-      // Table row: | 용도 | 명령어 | 설명 |
+      // Table row: | 용도 | `명령어` | 설명 |
       const match = line.match(/^\|\s*[^|]+\s*\|\s*`([^`]+)`\s*\|/);
       if (match) {
         commands.push(match[1]);
+        foundRows = true;
       }
-      // End of table
-      if (inTable && line.trim() === "") break;
-      if (inTable && line.startsWith("#")) break;
+      // End of table — only break after we've seen at least one row
+      if (foundRows && line.trim() === "") break;
+      if (foundRows && line.startsWith("#")) break;
     }
   }
 

@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-056-0f3ff3
 priority: high
 title: 테스트 커버리지 + E2E 테스트 검토
 ---

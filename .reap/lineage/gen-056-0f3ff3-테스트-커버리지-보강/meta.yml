@@ -1,0 +1,8 @@
+id: gen-056-0f3ff3
+type: normal
+parents:
+  - gen-055-e10ec9
+goal: "테스트 커버리지 보강 — merge 관련 모듈 unit test 추가"
+genomeHash: e057bc17
+startedAt: "2026-03-19T23:24:18.644Z"
+completedAt: "2026-03-20T08:45:00.000Z"
