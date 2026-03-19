@@ -230,7 +230,7 @@ if (currentContent && currentContent.trim()) {
   initLines.push('⚪ No active Generation');
 }
 
-const initSummary = `**REAP Session Initialized** — ${initLines.join(' | ')}`;
+const initSummary = `**REAP Session Initialized**\n${initLines.join('\n')}`;
 
 // Step 6: Output JSON
 log('Done. Injecting context.');
