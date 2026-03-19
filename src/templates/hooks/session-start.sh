@@ -6,10 +6,13 @@ set -euo pipefail
 # Timing (node is guaranteed since REAP is an npm package)
 _reap_ms() { node -e 'process.stdout.write(String(Date.now()))'; }
 _reap_start_time=$(_reap_ms)
+_reap_step=0
+_reap_total=6
 _reap_log() {
   local now=$(_reap_ms)
   local elapsed=$(( now - _reap_start_time ))
-  echo "[REAP hook +${elapsed}ms] $1" >&2
+  _reap_step=$(( _reap_step + 1 ))
+  echo "[REAP ${_reap_step}/${_reap_total} +${elapsed}ms] $1" >&2
 }
 
 # Script directory (package-internal) for guide file
@@ -22,17 +25,14 @@ CURRENT_YML="${REAP_DIR}/life/current.yml"
 GUIDE_FILE="${SCRIPT_DIR}/reap-guide.md"
 GENOME_DIR="${REAP_DIR}/genome"
 
-_reap_log "Starting..."
-
 # Check if this is a REAP project
 if [ ! -d "$REAP_DIR" ]; then
-  _reap_log "Not a REAP project, exiting"
+  echo "[REAP] Not a REAP project, skipping" >&2
   exit 0
 fi
 
-_reap_log "REAP project detected"
-
-_reap_log "Checking auto-update..."
+# Step 1: Auto-update check
+_reap_log "Checking for updates..."
 CONFIG_FILE="${REAP_DIR}/config.yml"
 auto_update_message=""
 if [ -f "$CONFIG_FILE" ]; then
@@ -49,18 +49,17 @@ if [ -f "$CONFIG_FILE" ]; then
   fi
 fi
 
-_reap_log "Auto-update check done"
-
-# Read REAP guide
+# Step 2: Loading REAP guide
 _reap_log "Loading REAP guide..."
 reap_guide=""
 if [ -f "$GUIDE_FILE" ]; then
   reap_guide=$(cat "$GUIDE_FILE")
 fi
 
-_reap_log "Loading Genome..."
+# Step 3: Loading Genome
+_reap_log "Loading Genome (principles, conventions, constraints, source-map, domain)..."
 # Read Genome files with tiered loading
-# L1 (~500 lines max): principles.md, conventions.md, constraints.md — always full load
+# L1 (~500 lines max): principles.md, conventions.md, constraints.md, source-map.md — always full load
 # L2 (~200 lines max): domain/*.md — full load if within budget, otherwise title+summary only
 L1_LIMIT=500
 L2_LIMIT=200
@@ -104,7 +103,8 @@ if [ -d "$GENOME_DIR" ]; then
   fi
 fi
 
-# Detect Genome staleness — count commits since last Genome modification
+# Step 4: Checking Genome & source-map sync
+_reap_log "Checking Genome & source-map sync..."
 genome_stale_warning=""
 if command -v git &>/dev/null && [ -d "$PROJECT_ROOT/.git" ]; then
   last_genome_commit=$(git -C "$PROJECT_ROOT" log -1 --format="%H" -- ".reap/genome/" 2>/dev/null || echo "")
@@ -112,11 +112,11 @@ if command -v git &>/dev/null && [ -d "$PROJECT_ROOT/.git" ]; then
     commits_since=$(git -C "$PROJECT_ROOT" rev-list --count "${last_genome_commit}..HEAD" -- src/ tests/ package.json tsconfig.json scripts/ 2>/dev/null || echo "0")
     if [ "$commits_since" -gt 10 ]; then
       genome_stale_warning="WARNING: Genome may be stale — ${commits_since} commits since last Genome update. Consider running /reap.sync to synchronize."
+      echo "[REAP]   ⚠ Genome stale: ${commits_since} code commits since last update" >&2
     fi
   fi
 fi
 
-# Detect source-map drift — compare documented components vs actual files
 sourcemap_drift_warning=""
 SOURCEMAP_FILE="${GENOME_DIR}/source-map.md"
 if [ -f "$SOURCEMAP_FILE" ] && [ -d "${PROJECT_ROOT}/src/core" ]; then
@@ -124,9 +124,16 @@ if [ -f "$SOURCEMAP_FILE" ] && [ -d "${PROJECT_ROOT}/src/core" ]; then
   actual=$(ls "${PROJECT_ROOT}"/src/core/*.ts 2>/dev/null | wc -l | tr -d ' ')
   if [ "$documented" != "0" ] && [ "$actual" != "0" ] && [ "$documented" != "$actual" ]; then
     sourcemap_drift_warning="WARNING: source-map.md drift — ${documented} components documented, ${actual} core files found. Consider running /reap.sync."
+    echo "[REAP]   ⚠ Source-map drift: ${documented} documented vs ${actual} actual" >&2
+  else
+    echo "[REAP]   ✓ Source-map in sync (${actual} components)" >&2
   fi
+else
+  echo "[REAP]   - Source-map check skipped (no source-map.md or src/core/)" >&2
 fi
 
+# Step 5: Reading generation state
+_reap_log "Reading generation state..."
 # Read strict mode from config.yml
 strict_mode=false
 CONFIG_FILE="${REAP_DIR}/config.yml"
@@ -196,11 +203,12 @@ if [ -n "$auto_update_message" ]; then
   update_section="\n\n## Auto-Update\n${auto_update_message}. Tell the user: \"${auto_update_message}\""
 fi
 
+# Step 6: Building context
+_reap_log "Done. Injecting context."
+
 reap_context="<REAP_WORKFLOW>\n${reap_guide}\n\n---\n\n## Genome (Project Knowledge — treat as authoritative source of truth)\n${genome_content}\n\n---\n\n## Current State\n${generation_context}${stale_section}${strict_section}${update_section}\n\n## Rules\n1. ALL development work MUST follow the REAP lifecycle. Do NOT bypass it.\n2. Before writing any code, check if a Generation is active and what stage it is in.\n3. If a Generation is active, use \`${next_cmd}\` to proceed with the current stage.\n4. If no Generation is active, use \`/reap.start\` to start a new one.\n5. Do NOT implement features, fix bugs, or make changes outside of the REAP lifecycle unless the user explicitly asks to bypass it.\n6. When the user says \"reap evolve\", \"next stage\", \"proceed\", or similar — invoke the appropriate REAP skill.\n7. **Genome is the authoritative knowledge source.** When making decisions about architecture, conventions, or constraints, ALWAYS reference the Genome first. If code contradicts Genome, flag it as a potential genome-change backlog item.\n8. If you notice the Genome is outdated or missing information relevant to your current task, inform the user and suggest running \`/reap.sync\`.\n</REAP_WORKFLOW>"
 
-_reap_log "Building context..."
 escaped_context=$(escape_for_json "$reap_context")
-_reap_log "Done. Outputting JSON."
 
 cat <<EOF
 {
