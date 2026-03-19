@@ -39,7 +39,7 @@ export const en = {
     threeLayer: "3-Layer Model",
     threeLayerDesc: "Every REAP project consists of three conceptual layers. The Genome defines what to build. The Evolution process builds it. The Civilization is the result.",
     layers: [
-      { label: "Genome", sub: "Design & Knowledge", path: ".reap/genome/", desc: "Architecture principles, business rules, conventions, technical constraints. Never modified mid-generation." },
+      { label: "Genome", sub: "Design & Knowledge", path: ".reap/genome/", desc: "Architecture principles, business rules, conventions, technical constraints, and source maps (C4 diagrams). Never modified mid-generation." },
       { label: "Evolution", sub: "Generational Process", path: ".reap/life/ → .reap/lineage/", desc: "Each Generation runs Objective → Planning → Implementation → Validation → Completion. On completion, archived to lineage." },
       { label: "Civilization", sub: "Source Code", path: "your codebase/", desc: "Everything outside .reap/. Grows and improves with each completed generation." },
     ],
@@ -95,7 +95,7 @@ export const en = {
       { label: "Civilization", sub: "Source Code", path: "your codebase/" },
     ],
     layerDescs: [
-      "Design and knowledge for building the Application. Architecture principles, business rules, conventions, and technical constraints. Stored in .reap/genome/.",
+      "Design and knowledge for building the Application. Architecture principles, business rules, conventions, technical constraints, and source maps (C4 Container/Component Mermaid diagrams). Stored in .reap/genome/.",
       "The process by which the Genome evolves and Civilization grows through repeated Generations.",
       "Source Code. The entire project codebase outside .reap/.",
     ],
@@ -111,7 +111,7 @@ export const en = {
     fourAxis: "Four-Axis Structure",
     fourAxisDesc: "REAP organizes everything under .reap/ into four axes:",
     axes: [
-      { axis: "Genome", path: ".reap/genome/", desc: "Genetic information. Principles, rules, architecture decisions." },
+      { axis: "Genome", path: ".reap/genome/", desc: "Genetic information. Principles, rules, architecture decisions, source maps (C4 Container/Component Mermaid diagrams)." },
       { axis: "Environment", path: ".reap/environment/", desc: "External context. API docs, infrastructure, business constraints." },
       { axis: "Life", path: ".reap/life/", desc: "Current generation's lifecycle. Progress state and artifacts." },
       { axis: "Lineage", path: ".reap/lineage/", desc: "Archive of completed generations." },
@@ -156,7 +156,7 @@ export const en = {
     title: "Core Concepts",
     breadcrumb: "Concepts",
     genomeTitle: "Genome",
-    genomeDesc: "The Genome is the application's genetic information — architecture principles, business rules, conventions, and technical constraints.",
+    genomeDesc: "The Genome is the application's genetic information — architecture principles, business rules, conventions, technical constraints, and source maps.",
     principles: "Principles",
     genomeImmutability: "Genome Immutability Principle",
     genomeImmutabilityDesc: "The Genome is never modified directly during the current generation. Issues are recorded in the backlog and only applied at the Completion stage.",
@@ -223,7 +223,7 @@ export const en = {
       },
       {
         title: "5. Completion",
-        desc: 'Retrospect and evolve. Extract lessons learned (max 5), apply genome-change backlog items to the genome files, run garbage collection for tech debt, hand off deferred tasks to the next generation\'s backlog. When run standalone, genome changes require human confirmation; when called via /reap.evolve, the agent proceeds autonomously.',
+        desc: 'Retrospect and evolve. Extract lessons learned (max 5), apply genome-change backlog items to the genome files, run garbage collection for tech debt, hand off deferred tasks to the next generation\'s backlog. Phase 5 (Hook Suggestion) detects repeated patterns across generations and suggests hook creation with user confirmation. When run standalone, genome changes require human confirmation; when called via /reap.evolve, the agent proceeds autonomously.',
         output: "05-completion.md — summary, retrospective, genome changelog. Then /reap.next archives everything to lineage.",
       },
     ],
@@ -342,14 +342,22 @@ export const en = {
   hooks: {
     title: "Hook Reference",
     breadcrumb: "Reference",
-    intro: "REAP hooks let you run automation at key lifecycle events. Define them in .reap/config.yml and the AI agent executes them at the right moment.",
+    intro: "REAP hooks let you run automation at key lifecycle events. Hooks are stored as individual files in .reap/hooks/ and the AI agent executes them at the right moment.",
     hookTypes: "Hook Types",
-    hookTypesIntro: "Each hook entry supports one of two types:",
-    commandType: "command",
-    commandTypeDesc: "A shell command. Executed in the project root directory by the AI agent. Use for scripts, CLI tools, build commands.",
-    promptType: "prompt",
-    promptTypeDesc: "An AI agent instruction. The agent reads the prompt and performs the described task — code analysis, file modifications, documentation updates, etc. Use for tasks that require judgment.",
-    hookTypeNote: "Only one of command or prompt per entry. Multiple entries per event are executed in order.",
+    hookTypesIntro: "Each hook file supports one of two types based on its extension:",
+    commandType: "command (.sh)",
+    commandTypeDesc: "A shell script. Executed in the project root directory by the AI agent. Use for scripts, CLI tools, build commands.",
+    promptType: "prompt (.md)",
+    promptTypeDesc: "An AI agent instruction in Markdown. The agent reads the prompt and performs the described task — code analysis, file modifications, documentation updates, etc. Use for tasks that require judgment.",
+    hookTypeNote: "Each hook is a single file. Multiple hooks per event are executed in the order specified by frontmatter.",
+    fileNaming: "File Naming",
+    fileNamingDesc: "Hook files follow the pattern: .reap/hooks/{event}.{name}.{md|sh}",
+    fileNamingFrontmatter: "Each hook file supports optional YAML frontmatter:",
+    frontmatterHeaders: ["Field", "Description"],
+    frontmatterItems: [
+      ["condition", "Expression that must be true for the hook to run (e.g. stage == 'implementation')"],
+      ["order", "Numeric execution order when multiple hooks exist for the same event (default: 0)"],
+    ],
     events: "Events",
     eventHeaders: ["Event", "When it fires"],
     eventItems: [
@@ -359,22 +367,33 @@ export const en = {
       ["onRegression", "After /reap.back returns to a previous stage"],
     ],
     configuration: "Configuration",
-    configExample: `# .reap/config.yml
-hooks:
-  onGenerationStart:
-    - command: "echo 'Generation started'"
-  onStageTransition:
-    - command: "npm run lint"
-  onGenerationComplete:
-    - command: "reap update"
-    - prompt: |
-        Review the changes made in this generation.
-        Update README.md and docs if any features, CLI commands,
-        or slash commands were added or modified.
-        Skip if no documentation updates are needed.
-  onRegression:
-    - command: "echo 'Regressed to previous stage'"
-    - prompt: "Log the regression reason to a tracking file."`,
+    configExample: `# .reap/hooks/ directory structure
+#
+# .reap/hooks/
+# ├── onGenerationStart.notify.sh
+# ├── onStageTransition.lint.sh
+# ├── onGenerationComplete.update.sh
+# ├── onGenerationComplete.docs-review.md
+# └── onRegression.log.md
+#
+# Example: onGenerationComplete.docs-review.md
+# ---
+# condition: stage == 'completion'
+# order: 10
+# ---
+# Review the changes made in this generation.
+# Update README.md and docs if any features, CLI commands,
+# or slash commands were added or modified.
+# Skip if no documentation updates are needed.
+#
+# Example: onStageTransition.lint.sh
+# ---
+# order: 0
+# ---
+# #!/bin/bash
+# npm run lint`,
+    hookSuggestion: "Automatic Hook Suggestion",
+    hookSuggestionDesc: "During the Completion stage (Phase 5: Hook Suggestion), REAP detects repeated patterns across generations — such as recurring manual steps, repeated commands, or consistent post-stage actions. When a pattern is detected, REAP suggests creating a hook to automate it. Hook creation always requires user confirmation before being applied.",
     sessionStart: "SessionStart Hook",
     sessionStartDesc1: "Separate from REAP project hooks, the SessionStart hook is an agent mechanism that runs at the start of every AI session. REAP registers it during reap init for each detected agent (Claude Code, OpenCode).",
     sessionStartDesc2: "It injects the full REAP workflow guide, current generation state, and lifecycle rules into the AI agent — ensuring the agent understands the project context even in a brand-new session.",
@@ -397,9 +416,10 @@ hooks:
     compressionDesc: "As generations accumulate, lineage archives are automatically compressed to manage size.",
     compressionHeaders: ["Level", "Input", "Output", "Max lines", "Trigger"],
     compressionItems: [
-      ["Level 1", "Generation folder (5 artifacts)", "gen-XXX.md", "40", "lineage > 10,000 lines + 5+ generations"],
+      ["Level 1", "Generation folder (5 artifacts)", "gen-XXX.md", "40", "lineage > 5,000 lines + 5+ generations"],
       ["Level 2", "5 Level 1 files", "epoch-XXX.md", "60", "5+ Level 1 files exist"],
     ],
+    compressionProtection: "The most recent 3 generations are always protected from compression, preserving full detail for recent context.",
     presetsTitle: "Presets",
     presetsDesc: "Presets provide pre-configured Genome and project scaffolding for common stacks.",
     presetsNote: "The bun-hono-react preset configures Genome with conventions for a Bun + Hono + React stack, including appropriate architecture principles, conventions, and constraints.",

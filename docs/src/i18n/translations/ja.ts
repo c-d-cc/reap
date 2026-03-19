@@ -41,7 +41,7 @@ export const ja: Translations = {
     threeLayer: "3-Layerモデル",
     threeLayerDesc: "すべてのREAPプロジェクトは3つの概念的レイヤーで構成されます。Genomeは何を作るかを定義し、Evolutionプロセスがそれを構築し、Civilizationがその成果物です。",
     layers: [
-      { label: "Genome", sub: "設計 & ナレッジ", path: ".reap/genome/", desc: "アーキテクチャ原則、ビジネスルール、コンベンション、技術制約。Generation進行中は変更しない。" },
+      { label: "Genome", sub: "設計 & ナレッジ", path: ".reap/genome/", desc: "アーキテクチャ原則、ビジネスルール、コンベンション、技術制約、ソースマップ（C4ダイアグラム）。Generation進行中は変更しない。" },
       { label: "Evolution", sub: "世代プロセス", path: ".reap/life/ → .reap/lineage/", desc: "各GenerationはObjective → Planning → Implementation → Validation → Completionを実行。完了時にlineageへ保管。" },
       { label: "Civilization", sub: "ソースコード", path: "your codebase/", desc: ".reap/以外のすべて。各Generationの完了とともに成長し改善される。" },
     ],
@@ -97,7 +97,7 @@ export const ja: Translations = {
       { label: "Civilization", sub: "ソースコード", path: "your codebase/" },
     ],
     layerDescs: [
-      "アプリケーション構築のための設計とナレッジ。アーキテクチャ原則、ビジネスルール、コンベンション、技術制約。.reap/genome/に保存。",
+      "アプリケーション構築のための設計とナレッジ。アーキテクチャ原則、ビジネスルール、コンベンション、技術制約、ソースマップ（C4 Container/Component Mermaidダイアグラム）。.reap/genome/に保存。",
       "Generationを繰り返してGenomeを進化させ、Civilizationを成長させるプロセス。",
       "ソースコード。.reap/以外のプロジェクト全体のコードベース。",
     ],
@@ -113,7 +113,7 @@ export const ja: Translations = {
     fourAxis: "Four-Axis構造",
     fourAxisDesc: "REAPは.reap/配下のすべてを4つの軸で構成します：",
     axes: [
-      { axis: "Genome", path: ".reap/genome/", desc: "遺伝情報。原則、ルール、アーキテクチャ決定。" },
+      { axis: "Genome", path: ".reap/genome/", desc: "遺伝情報。原則、ルール、アーキテクチャ決定、ソースマップ（C4 Container/Component Mermaidダイアグラム）。" },
       { axis: "Environment", path: ".reap/environment/", desc: "外部コンテキスト。APIドキュメント、インフラ、ビジネス制約。" },
       { axis: "Life", path: ".reap/life/", desc: "現在のGenerationのライフサイクル。進捗状態と成果物。" },
       { axis: "Lineage", path: ".reap/lineage/", desc: "完了したGenerationのアーカイブ。" },
@@ -158,7 +158,7 @@ export const ja: Translations = {
     title: "コアコンセプト",
     breadcrumb: "コンセプト",
     genomeTitle: "Genome",
-    genomeDesc: "Genomeはアプリケーションの遺伝情報です — アーキテクチャ原則、ビジネスルール、コンベンション、技術制約。",
+    genomeDesc: "Genomeはアプリケーションの遺伝情報です — アーキテクチャ原則、ビジネスルール、コンベンション、技術制約、ソースマップ。",
     principles: "原則",
     genomeImmutability: "Genome不変原則",
     genomeImmutabilityDesc: "現在のGeneration進行中はGenomeを直接変更しません。問題はbacklogに記録され、Completionステージでのみ適用されます。",
@@ -225,7 +225,7 @@ export const ja: Translations = {
       },
       {
         title: "5. Completion",
-        desc: "レトロスペクティブを行い進化します。教訓の抽出（最大5個）、genome-change backlog項目をGenomeファイルに適用、技術的負債の整理、未完了タスクを次のGenerationのbacklogに引き継ぎ。単独実行時はGenome変更に人間の確認が必要；/reap.evolve経由時はエージェントが自律的に進行。",
+        desc: 'レトロスペクティブを行い進化します。教訓の抽出（最大5個）、genome-change backlog項目をGenomeファイルに適用、技術的負債の整理、未完了タスクを次のGenerationのbacklogに引き継ぎ。Phase 5（Hook Suggestion）ではGeneration間の繰り返しパターンを検出し、ユーザー確認のもとhook作成を提案します。単独実行時はGenome変更に人間の確認が必要；/reap.evolve経由時はエージェントが自律的に進行。',
         output: "05-completion.md — サマリー、レトロスペクティブ、Genome変更ログ。その後/reap.nextがすべてをlineageに保管。",
       },
     ],
@@ -344,14 +344,22 @@ export const ja: Translations = {
   hooks: {
     title: "Hookリファレンス",
     breadcrumb: "リファレンス",
-    intro: "REAP hooksは主要なライフサイクルイベントで自動化を実行できるようにします。.reap/config.ymlに定義すると、AIエージェントが適切なタイミングで実行します。",
+    intro: "REAP hooksは主要なライフサイクルイベントで自動化を実行できるようにします。Hookは.reap/hooks/に個別ファイルとして保存され、AIエージェントが適切なタイミングで実行します。",
     hookTypes: "Hookタイプ",
-    hookTypesIntro: "各hook項目は2つのタイプのいずれかをサポートします：",
-    commandType: "command",
-    commandTypeDesc: "シェルコマンド。AIエージェントがプロジェクトルートディレクトリで実行します。スクリプト、CLIツール、ビルドコマンドに使用。",
-    promptType: "prompt",
-    promptTypeDesc: "AIエージェントへの指示。エージェントがプロンプトを読み、コード分析、ファイル変更、ドキュメント更新などの作業を実行します。判断が必要な作業に使用。",
-    hookTypeNote: "項目ごとにcommandまたはpromptのいずれか一方のみ使用。同じイベント内の複数項目は定義順に実行されます。",
+    hookTypesIntro: "各hookファイルは拡張子に基づいて2つのタイプのいずれかをサポートします：",
+    commandType: "command (.sh)",
+    commandTypeDesc: "シェルスクリプト。AIエージェントがプロジェクトルートディレクトリで実行します。スクリプト、CLIツール、ビルドコマンドに使用。",
+    promptType: "prompt (.md)",
+    promptTypeDesc: "Markdown形式のAIエージェントへの指示。エージェントがプロンプトを読み、コード分析、ファイル変更、ドキュメント更新などの作業を実行します。判断が必要な作業に使用。",
+    hookTypeNote: "各hookは単一のファイルです。同じイベントに複数のhookがある場合、frontmatterで指定された順序で実行されます。",
+    fileNaming: "ファイル命名",
+    fileNamingDesc: "Hookファイルは次のパターンに従います: .reap/hooks/{event}.{name}.{md|sh}",
+    fileNamingFrontmatter: "各hookファイルはオプションのYAML frontmatterをサポートします：",
+    frontmatterHeaders: ["フィールド", "説明"],
+    frontmatterItems: [
+      ["condition", "hookが実行されるために真でなければならない式（例: stage == 'implementation'）"],
+      ["order", "同じイベントに複数のhookがある場合の実行順序（デフォルト: 0）"],
+    ],
     events: "Events",
     eventHeaders: ["Event", "発火タイミング"],
     eventItems: [
@@ -361,22 +369,33 @@ export const ja: Translations = {
       ["onRegression", "/reap.backが前のステージに回帰した後"],
     ],
     configuration: "設定",
-    configExample: `# .reap/config.yml
-hooks:
-  onGenerationStart:
-    - command: "echo 'Generation started'"
-  onStageTransition:
-    - command: "npm run lint"
-  onGenerationComplete:
-    - command: "reap update"
-    - prompt: |
-        今回のGenerationで変更された内容を確認せよ。
-        機能、CLIコマンド、スラッシュコマンドが追加または
-        変更された場合はREADME.mdとdocsを更新せよ。
-        ドキュメント更新が不要ならスキップせよ。
-  onRegression:
-    - command: "echo 'Regressed to previous stage'"
-    - prompt: "回帰理由をトラッキングファイルに記録せよ。"`,
+    configExample: `# .reap/hooks/ ディレクトリ構造
+#
+# .reap/hooks/
+# ├── onGenerationStart.notify.sh
+# ├── onStageTransition.lint.sh
+# ├── onGenerationComplete.update.sh
+# ├── onGenerationComplete.docs-review.md
+# └── onRegression.log.md
+#
+# 例: onGenerationComplete.docs-review.md
+# ---
+# condition: stage == 'completion'
+# order: 10
+# ---
+# 今回のGenerationで変更された内容を確認せよ。
+# 機能、CLIコマンド、スラッシュコマンドが追加または
+# 変更された場合はREADME.mdとdocsを更新せよ。
+# ドキュメント更新が不要ならスキップせよ。
+#
+# 例: onStageTransition.lint.sh
+# ---
+# order: 0
+# ---
+# #!/bin/bash
+# npm run lint`,
+    hookSuggestion: "自動Hook提案",
+    hookSuggestionDesc: "Completionステージ（Phase 5: Hook Suggestion）で、REAPはGeneration間の繰り返しパターン（繰り返される手動ステップ、繰り返されるコマンド、一貫したステージ後アクションなど）を検出します。パターンが検出されると、REAPはそれを自動化するhookの作成を提案します。Hookの作成は適用前に必ずユーザーの確認が必要です。",
     sessionStart: "SessionStart Hook",
     sessionStartDesc1: "REAPプロジェクトhooksとは別に、SessionStart hookは毎AIセッション開始時に実行されるエージェントメカニズムです。reap init中に検出された各エージェント（Claude Code、OpenCode）に登録されます。",
     sessionStartDesc2: "REAPワークフローガイド全体、現在のGeneration状態、ライフサイクルルールをAIエージェントに注入します — 新しいセッションでもエージェントがプロジェクトコンテキストを理解することを保証します。",
@@ -399,9 +418,10 @@ hooks:
     compressionDesc: "Generationが蓄積されると、lineageアーカイブはサイズ管理のために自動的に圧縮されます。",
     compressionHeaders: ["レベル", "入力", "出力", "最大行数", "トリガー"],
     compressionItems: [
-      ["Level 1", "Generationフォルダ（成果物5個）", "gen-XXX.md", "40", "lineage > 10,000行 + 5個以上のGeneration"],
+      ["Level 1", "Generationフォルダ（成果物5個）", "gen-XXX.md", "40", "lineage > 5,000行 + 5個以上のGeneration"],
       ["Level 2", "Level 1ファイル5個", "epoch-XXX.md", "60", "Level 1ファイルが5個以上存在"],
     ],
+    compressionProtection: "最新の3世代は常に圧縮から保護され、最近のコンテキストの完全な詳細が維持されます。",
     presetsTitle: "プリセット",
     presetsDesc: "プリセットは一般的な技術スタック向けに事前設定されたGenomeとプロジェクトスキャフォールディングを提供します。",
     presetsNote: "bun-hono-reactプリセットはBun + Hono + Reactスタック向けのアーキテクチャ原則、コンベンション、制約を含めてGenomeを構成します。",

@@ -27,6 +27,29 @@ export default function HookReferencePage() {
         </div>
         <p className="text-xs text-muted-foreground mb-6">{t.hooks.hookTypeNote}</p>
 
+        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.hooks.fileNaming}</h2>
+        <p className="text-sm text-muted-foreground mb-3">{t.hooks.fileNamingDesc}</p>
+        <p className="text-sm text-muted-foreground mb-3">{t.hooks.fileNamingFrontmatter}</p>
+        <div className="border border-border rounded-md overflow-hidden text-sm mb-6">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border bg-muted/30">
+                {t.hooks.frontmatterHeaders.map((h) => (
+                  <th key={h} className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {t.hooks.frontmatterItems.map(([field, desc]) => (
+                <tr key={field}>
+                  <td className="px-4 py-2 font-mono text-xs text-primary">{field}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground">{desc}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
         <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.hooks.events}</h2>
         <div className="border border-border rounded-md overflow-hidden text-sm mb-6">
           <table className="w-full">
@@ -60,6 +83,11 @@ export default function HookReferencePage() {
         </p>
         <p className="text-xs text-muted-foreground mb-6">
           {t.hooks.sessionStartNote}
+        </p>
+
+        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.hooks.hookSuggestion}</h2>
+        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
+          {t.hooks.hookSuggestionDesc}
         </p>
 
         <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.hooks.executionNotes}</h2>

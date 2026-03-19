@@ -41,7 +41,7 @@ export const ko: Translations = {
     threeLayer: "3-Layer 모델",
     threeLayerDesc: "모든 REAP 프로젝트는 세 개의 개념적 레이어로 구성됩니다. Genome은 무엇을 만들지 정의하고, Evolution 프로세스가 이를 만들며, Civilization이 그 결과물입니다.",
     layers: [
-      { label: "Genome", sub: "설계 & 지식", path: ".reap/genome/", desc: "아키텍처 원칙, 비즈니스 규칙, 컨벤션, 기술 제약. Generation 진행 중에는 수정하지 않음." },
+      { label: "Genome", sub: "설계 & 지식", path: ".reap/genome/", desc: "아키텍처 원칙, 비즈니스 규칙, 컨벤션, 기술 제약, source map (C4 다이어그램). Generation 진행 중에는 수정하지 않음." },
       { label: "Evolution", sub: "세대별 프로세스", path: ".reap/life/ → .reap/lineage/", desc: "각 Generation은 Objective → Planning → Implementation → Validation → Completion을 수행. 완료 시 lineage로 보관." },
       { label: "Civilization", sub: "소스 코드", path: "your codebase/", desc: ".reap/ 외부의 모든 것. 각 Generation이 완료될 때마다 성장하고 개선됨." },
     ],
@@ -97,7 +97,7 @@ export const ko: Translations = {
       { label: "Civilization", sub: "소스 코드", path: "your codebase/" },
     ],
     layerDescs: [
-      "애플리케이션 구축을 위한 설계와 지식. 아키텍처 원칙, 비즈니스 규칙, 컨벤션, 기술 제약. .reap/genome/에 저장.",
+      "애플리케이션 구축을 위한 설계와 지식. 아키텍처 원칙, 비즈니스 규칙, 컨벤션, 기술 제약, source map (C4 Container/Component Mermaid 다이어그램). .reap/genome/에 저장.",
       "Generation을 반복하며 Genome을 진화시키고 Civilization을 성장시키는 프로세스.",
       "소스 코드. .reap/ 외부의 전체 프로젝트 코드베이스.",
     ],
@@ -113,7 +113,7 @@ export const ko: Translations = {
     fourAxis: "Four-Axis 구조",
     fourAxisDesc: "REAP은 .reap/ 하위의 모든 것을 네 개의 축으로 구성합니다:",
     axes: [
-      { axis: "Genome", path: ".reap/genome/", desc: "유전 정보. 원칙, 규칙, 아키텍처 결정." },
+      { axis: "Genome", path: ".reap/genome/", desc: "유전 정보. 원칙, 규칙, 아키텍처 결정, source map (C4 Container/Component Mermaid 다이어그램)." },
       { axis: "Environment", path: ".reap/environment/", desc: "외부 컨텍스트. API 문서, 인프라, 비즈니스 제약." },
       { axis: "Life", path: ".reap/life/", desc: "현재 Generation의 라이프사이클. 진행 상태와 산출물." },
       { axis: "Lineage", path: ".reap/lineage/", desc: "완료된 Generation의 보관소." },
@@ -158,7 +158,7 @@ export const ko: Translations = {
     title: "핵심 개념",
     breadcrumb: "개념",
     genomeTitle: "Genome",
-    genomeDesc: "Genome은 애플리케이션의 유전 정보입니다 — 아키텍처 원칙, 비즈니스 규칙, 컨벤션, 기술 제약.",
+    genomeDesc: "Genome은 애플리케이션의 유전 정보입니다 — 아키텍처 원칙, 비즈니스 규칙, 컨벤션, 기술 제약, source map.",
     principles: "원칙",
     genomeImmutability: "Genome 불변 원칙",
     genomeImmutabilityDesc: "현재 Generation 진행 중에는 Genome을 직접 수정하지 않습니다. 이슈는 backlog에 기록되어 Completion 단계에서만 적용됩니다.",
@@ -225,7 +225,7 @@ export const ko: Translations = {
       },
       {
         title: "5. Completion",
-        desc: "회고하고 진화합니다. 교훈 추출 (최대 5개), genome-change backlog 항목을 Genome 파일에 적용, 기술 부채 정리, 미완료 태스크를 다음 Generation의 backlog로 인계. 독립 실행 시 Genome 변경에 사람의 확인 필요; /reap.evolve 경유 시 에이전트가 자율적으로 진행.",
+        desc: '회고하고 진화합니다. 교훈 추출 (최대 5개), genome-change backlog 항목을 Genome 파일에 적용, 기술 부채 정리, 미완료 태스크를 다음 Generation의 backlog로 인계. Phase 5 (Hook Suggestion)에서 Generation 간 반복 패턴을 감지하고 사용자 확인을 거쳐 hook 생성을 제안합니다. 독립 실행 시 Genome 변경에 사람의 확인 필요; /reap.evolve 경유 시 에이전트가 자율적으로 진행.',
         output: "05-completion.md — 요약, 회고, Genome 변경 로그. 이후 /reap.next가 모든 것을 lineage로 보관.",
       },
     ],
@@ -344,14 +344,22 @@ export const ko: Translations = {
   hooks: {
     title: "Hook 레퍼런스",
     breadcrumb: "레퍼런스",
-    intro: "REAP hooks는 주요 라이프사이클 이벤트에서 자동화를 실행할 수 있게 합니다. .reap/config.yml에 정의하면 AI 에이전트가 적절한 시점에 실행합니다.",
+    intro: "REAP hooks는 주요 라이프사이클 이벤트에서 자동화를 실행할 수 있게 합니다. Hook은 .reap/hooks/에 개별 파일로 저장되며 AI 에이전트가 적절한 시점에 실행합니다.",
     hookTypes: "Hook 타입",
-    hookTypesIntro: "각 hook 항목은 두 가지 타입 중 하나를 지원합니다:",
-    commandType: "command",
-    commandTypeDesc: "쉘 커맨드. AI 에이전트가 프로젝트 루트 디렉토리에서 실행합니다. 스크립트, CLI 도구, 빌드 커맨드에 사용.",
-    promptType: "prompt",
-    promptTypeDesc: "AI 에이전트 지시사항. 에이전트가 프롬프트를 읽고 코드 분석, 파일 수정, 문서 업데이트 등의 작업을 수행합니다. 판단이 필요한 작업에 사용.",
-    hookTypeNote: "항목당 command 또는 prompt 중 하나만 사용. 같은 이벤트 내 여러 항목은 정의된 순서대로 실행됩니다.",
+    hookTypesIntro: "각 hook 파일은 확장자에 따라 두 가지 타입 중 하나를 지원합니다:",
+    commandType: "command (.sh)",
+    commandTypeDesc: "쉘 스크립트. AI 에이전트가 프로젝트 루트 디렉토리에서 실행합니다. 스크립트, CLI 도구, 빌드 커맨드에 사용.",
+    promptType: "prompt (.md)",
+    promptTypeDesc: "Markdown 형식의 AI 에이전트 지시사항. 에이전트가 프롬프트를 읽고 코드 분석, 파일 수정, 문서 업데이트 등의 작업을 수행합니다. 판단이 필요한 작업에 사용.",
+    hookTypeNote: "각 hook은 하나의 파일입니다. 같은 이벤트에 여러 hook이 있으면 frontmatter에 지정된 순서대로 실행됩니다.",
+    fileNaming: "파일 명명",
+    fileNamingDesc: "Hook 파일은 다음 패턴을 따릅니다: .reap/hooks/{event}.{name}.{md|sh}",
+    fileNamingFrontmatter: "각 hook 파일은 선택적 YAML frontmatter를 지원합니다:",
+    frontmatterHeaders: ["필드", "설명"],
+    frontmatterItems: [
+      ["condition", "hook이 실행되기 위해 참이어야 하는 표현식 (예: stage == 'implementation')"],
+      ["order", "같은 이벤트에 여러 hook이 있을 때 실행 순서 (기본값: 0)"],
+    ],
     events: "Events",
     eventHeaders: ["Event", "발생 시점"],
     eventItems: [
@@ -361,22 +369,33 @@ export const ko: Translations = {
       ["onRegression", "/reap.back이 이전 단계로 복귀한 후"],
     ],
     configuration: "설정",
-    configExample: `# .reap/config.yml
-hooks:
-  onGenerationStart:
-    - command: "echo 'Generation started'"
-  onStageTransition:
-    - command: "npm run lint"
-  onGenerationComplete:
-    - command: "reap update"
-    - prompt: |
-        이번 Generation에서 변경된 내용을 검토하라.
-        기능, CLI 커맨드, 슬래시 커맨드가 추가되거나
-        수정되었다면 README.md와 docs를 업데이트하라.
-        문서 업데이트가 필요 없으면 건너뛰어라.
-  onRegression:
-    - command: "echo 'Regressed to previous stage'"
-    - prompt: "회귀 사유를 트래킹 파일에 기록하라."`,
+    configExample: `# .reap/hooks/ 디렉토리 구조
+#
+# .reap/hooks/
+# ├── onGenerationStart.notify.sh
+# ├── onStageTransition.lint.sh
+# ├── onGenerationComplete.update.sh
+# ├── onGenerationComplete.docs-review.md
+# └── onRegression.log.md
+#
+# 예시: onGenerationComplete.docs-review.md
+# ---
+# condition: stage == 'completion'
+# order: 10
+# ---
+# 이번 Generation에서 변경된 내용을 검토하라.
+# 기능, CLI 커맨드, 슬래시 커맨드가 추가되거나
+# 수정되었다면 README.md와 docs를 업데이트하라.
+# 문서 업데이트가 필요 없으면 건너뛰어라.
+#
+# 예시: onStageTransition.lint.sh
+# ---
+# order: 0
+# ---
+# #!/bin/bash
+# npm run lint`,
+    hookSuggestion: "자동 Hook 제안",
+    hookSuggestionDesc: "Completion 단계 (Phase 5: Hook Suggestion)에서 REAP은 Generation 간 반복되는 패턴(반복적인 수동 단계, 반복되는 커맨드, 일관된 단계 후 작업 등)을 감지합니다. 패턴이 감지되면 REAP이 이를 자동화하는 hook 생성을 제안합니다. Hook 생성은 항상 적용 전에 사용자 확인이 필요합니다.",
     sessionStart: "SessionStart Hook",
     sessionStartDesc1: "REAP 프로젝트 hooks와 별개로, SessionStart hook은 매 AI 세션 시작 시 실행되는 에이전트 메커니즘입니다. reap init 중에 감지된 각 에이전트(Claude Code, OpenCode)에 등록됩니다.",
     sessionStartDesc2: "전체 REAP 워크플로우 가이드, 현재 Generation 상태, 라이프사이클 규칙을 AI 에이전트에 주입합니다 — 새 세션에서도 에이전트가 프로젝트 컨텍스트를 이해하도록 보장합니다.",
@@ -399,9 +418,10 @@ hooks:
     compressionDesc: "Generation이 축적되면 lineage 보관소가 크기 관리를 위해 자동으로 압축됩니다.",
     compressionHeaders: ["레벨", "입력", "출력", "최대 줄 수", "트리거"],
     compressionItems: [
-      ["Level 1", "Generation 폴더 (산출물 5개)", "gen-XXX.md", "40", "lineage > 10,000줄 + 5개 이상 Generation"],
+      ["Level 1", "Generation 폴더 (산출물 5개)", "gen-XXX.md", "40", "lineage > 5,000줄 + 5개 이상 Generation"],
       ["Level 2", "Level 1 파일 5개", "epoch-XXX.md", "60", "Level 1 파일 5개 이상 존재"],
     ],
+    compressionProtection: "가장 최근 3개 Generation은 항상 압축에서 보호되어 최근 컨텍스트의 전체 세부사항이 유지됩니다.",
     presetsTitle: "프리셋",
     presetsDesc: "프리셋은 일반적인 기술 스택에 대해 사전 구성된 Genome과 프로젝트 스캐폴딩을 제공합니다.",
     presetsNote: "bun-hono-react 프리셋은 Bun + Hono + React 스택에 맞는 아키텍처 원칙, 컨벤션, 제약을 포함하여 Genome을 구성합니다.",

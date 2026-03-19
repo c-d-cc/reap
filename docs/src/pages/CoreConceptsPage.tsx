@@ -17,7 +17,8 @@ export default function CoreConceptsPage() {
 ├── principles.md      # Architecture principles/decisions
 ├── domain/            # Business rules (per module)
 ├── conventions.md     # Development rules/conventions
-└── constraints.md     # Technical constraints/choices`}</CodeBlock>
+├── constraints.md     # Technical constraints/choices
+└── source-map.md      # C4 Container/Component diagrams`}</CodeBlock>
 
         <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.concepts.principles}</h2>
         <div className="space-y-3 mb-6">

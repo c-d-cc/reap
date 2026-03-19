@@ -35,6 +35,9 @@ export default function AdvancedPage() {
             </tbody>
           </table>
         </div>
+        <p className="text-xs text-muted-foreground mb-6">
+          {t.advanced.compressionProtection}
+        </p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.advanced.presetsTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3">

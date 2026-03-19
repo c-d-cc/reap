@@ -41,7 +41,7 @@ export const zhCN: Translations = {
     threeLayer: "3-Layer模型",
     threeLayerDesc: "每个REAP项目由三个概念层组成。Genome定义要构建什么，Evolution过程进行构建，Civilization是成果。",
     layers: [
-      { label: "Genome", sub: "设计与知识", path: ".reap/genome/", desc: "架构原则、业务规则、约定、技术约束。Generation进行中不修改。" },
+      { label: "Genome", sub: "设计与知识", path: ".reap/genome/", desc: "架构原则、业务规则、约定、技术约束和源码映射（C4图表）。Generation进行中不修改。" },
       { label: "Evolution", sub: "代际过程", path: ".reap/life/ → .reap/lineage/", desc: "每个Generation执行Objective → Planning → Implementation → Validation → Completion。完成后归档到lineage。" },
       { label: "Civilization", sub: "源代码", path: "your codebase/", desc: ".reap/之外的所有内容。随着每个Generation的完成而成长和改进。" },
     ],
@@ -97,7 +97,7 @@ export const zhCN: Translations = {
       { label: "Civilization", sub: "源代码", path: "your codebase/" },
     ],
     layerDescs: [
-      "构建应用程序的设计和知识。架构原则、业务规则、约定、技术约束。存储在.reap/genome/中。",
+      "构建应用程序的设计和知识。架构原则、业务规则、约定、技术约束和源码映射（C4 Container/Component Mermaid图表）。存储在.reap/genome/中。",
       "通过反复迭代Generation来进化Genome并成长Civilization的过程。",
       "源代码。.reap/之外的整个项目代码库。",
     ],
@@ -113,7 +113,7 @@ export const zhCN: Translations = {
     fourAxis: "Four-Axis结构",
     fourAxisDesc: "REAP将.reap/下的所有内容组织为四个轴：",
     axes: [
-      { axis: "Genome", path: ".reap/genome/", desc: "遗传信息。原则、规则、架构决策。" },
+      { axis: "Genome", path: ".reap/genome/", desc: "遗传信息。原则、规则、架构决策、源码映射（C4 Container/Component Mermaid图表）。" },
       { axis: "Environment", path: ".reap/environment/", desc: "外部上下文。API文档、基础设施、业务约束。" },
       { axis: "Life", path: ".reap/life/", desc: "当前Generation的生命周期。进度状态和产出物。" },
       { axis: "Lineage", path: ".reap/lineage/", desc: "已完成Generation的归档。" },
@@ -158,7 +158,7 @@ export const zhCN: Translations = {
     title: "核心概念",
     breadcrumb: "概念",
     genomeTitle: "Genome",
-    genomeDesc: "Genome是应用程序的遗传信息 — 架构原则、业务规则、约定、技术约束。",
+    genomeDesc: "Genome是应用程序的遗传信息 — 架构原则、业务规则、约定、技术约束和源码映射。",
     principles: "原则",
     genomeImmutability: "Genome不变原则",
     genomeImmutabilityDesc: "当前Generation进行中不直接修改Genome。问题记录在backlog中，仅在Completion阶段应用。",
@@ -225,7 +225,7 @@ export const zhCN: Translations = {
       },
       {
         title: "5. Completion",
-        desc: "回顾并进化。提取经验教训（最多5条），将genome-change backlog项目应用到Genome文件，清理技术债务，将未完成任务交接到下一个Generation的backlog。独立运行时Genome变更需要人工确认；通过/reap.evolve调用时代理自主进行。",
+        desc: '回顾并进化。提取经验教训（最多5条），将genome-change backlog项目应用到Genome文件，清理技术债务，将未完成任务交接到下一个Generation的backlog。Phase 5（Hook Suggestion）检测跨Generation的重复模式，并在用户确认后建议创建hook。独立运行时Genome变更需要人工确认；通过/reap.evolve调用时代理自主进行。',
         output: "05-completion.md — 摘要、回顾、Genome变更日志。之后/reap.next将所有内容归档到lineage。",
       },
     ],
@@ -344,14 +344,22 @@ export const zhCN: Translations = {
   hooks: {
     title: "Hook参考",
     breadcrumb: "参考",
-    intro: "REAP hooks允许在关键的生命周期事件中运行自动化。在.reap/config.yml中定义，AI代理会在适当的时机执行。",
+    intro: "REAP hooks允许在关键的生命周期事件中运行自动化。Hook以独立文件存储在.reap/hooks/中，AI代理会在适当的时机执行。",
     hookTypes: "Hook类型",
-    hookTypesIntro: "每个hook条目支持两种类型之一：",
-    commandType: "command",
-    commandTypeDesc: "Shell命令。由AI代理在项目根目录中执行。用于脚本、CLI工具、构建命令。",
-    promptType: "prompt",
-    promptTypeDesc: "AI代理指令。代理读取提示并执行代码分析、文件修改、文档更新等任务。用于需要判断的任务。",
-    hookTypeNote: "每个条目只能使用command或prompt之一。同一事件内的多个条目按定义顺序执行。",
+    hookTypesIntro: "每个hook文件根据其扩展名支持两种类型之一：",
+    commandType: "command (.sh)",
+    commandTypeDesc: "Shell脚本。由AI代理在项目根目录中执行。用于脚本、CLI工具、构建命令。",
+    promptType: "prompt (.md)",
+    promptTypeDesc: "Markdown格式的AI代理指令。代理读取提示并执行代码分析、文件修改、文档更新等任务。用于需要判断的任务。",
+    hookTypeNote: "每个hook是一个独立文件。同一事件的多个hook按frontmatter中指定的顺序执行。",
+    fileNaming: "文件命名",
+    fileNamingDesc: "Hook文件遵循以下模式: .reap/hooks/{event}.{name}.{md|sh}",
+    fileNamingFrontmatter: "每个hook文件支持可选的YAML frontmatter：",
+    frontmatterHeaders: ["字段", "说明"],
+    frontmatterItems: [
+      ["condition", "hook运行前必须为真的表达式（例如: stage == 'implementation'）"],
+      ["order", "同一事件有多个hook时的执行顺序（默认: 0）"],
+    ],
     events: "Events",
     eventHeaders: ["Event", "触发时机"],
     eventItems: [
@@ -361,22 +369,33 @@ export const zhCN: Translations = {
       ["onRegression", "/reap.back回到前一阶段之后"],
     ],
     configuration: "配置",
-    configExample: `# .reap/config.yml
-hooks:
-  onGenerationStart:
-    - command: "echo 'Generation started'"
-  onStageTransition:
-    - command: "npm run lint"
-  onGenerationComplete:
-    - command: "reap update"
-    - prompt: |
-        检查本Generation中的变更内容。
-        如果添加或修改了功能、CLI命令或斜杠命令，
-        则更新README.md和docs。
-        如果不需要文档更新则跳过。
-  onRegression:
-    - command: "echo 'Regressed to previous stage'"
-    - prompt: "将回退原因记录到追踪文件中。"`,
+    configExample: `# .reap/hooks/ 目录结构
+#
+# .reap/hooks/
+# ├── onGenerationStart.notify.sh
+# ├── onStageTransition.lint.sh
+# ├── onGenerationComplete.update.sh
+# ├── onGenerationComplete.docs-review.md
+# └── onRegression.log.md
+#
+# 示例: onGenerationComplete.docs-review.md
+# ---
+# condition: stage == 'completion'
+# order: 10
+# ---
+# 检查本Generation中的变更内容。
+# 如果添加或修改了功能、CLI命令或斜杠命令，
+# 则更新README.md和docs。
+# 如果不需要文档更新则跳过。
+#
+# 示例: onStageTransition.lint.sh
+# ---
+# order: 0
+# ---
+# #!/bin/bash
+# npm run lint`,
+    hookSuggestion: "自动Hook建议",
+    hookSuggestionDesc: "在Completion阶段（Phase 5: Hook Suggestion），REAP会检测跨Generation的重复模式（如反复的手动步骤、重复的命令、一致的阶段后操作等）。当检测到模式时，REAP会建议创建hook来自动化。Hook创建始终需要用户确认后才能应用。",
     sessionStart: "SessionStart Hook",
     sessionStartDesc1: "与REAP项目hooks分开，SessionStart hook是每次AI会话开始时运行的代理机制。在reap init时为每个检测到的代理（Claude Code、OpenCode）注册。",
     sessionStartDesc2: "将完整的REAP工作流指南、当前Generation状态和生命周期规则注入AI代理 — 确保代理即使在全新会话中也能理解项目上下文。",
@@ -399,9 +418,10 @@ hooks:
     compressionDesc: "随着Generation的积累，lineage归档会自动压缩以管理大小。",
     compressionHeaders: ["级别", "输入", "输出", "最大行数", "触发条件"],
     compressionItems: [
-      ["Level 1", "Generation文件夹（5个产出物）", "gen-XXX.md", "40", "lineage > 10,000行 + 5个以上Generation"],
+      ["Level 1", "Generation文件夹（5个产出物）", "gen-XXX.md", "40", "lineage > 5,000行 + 5个以上Generation"],
       ["Level 2", "5个Level 1文件", "epoch-XXX.md", "60", "存在5个以上Level 1文件"],
     ],
+    compressionProtection: "最近3个Generation始终受到压缩保护，保留最近上下文的完整细节。",
     presetsTitle: "预设",
     presetsDesc: "预设为常见技术栈提供预配置的Genome和项目脚手架。",
     presetsNote: "bun-hono-react预设配置了Bun + Hono + React技术栈的架构原则、约定和约束的Genome。",

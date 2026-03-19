@@ -38,6 +38,7 @@ REAP solves these with a **generation-based evolution model**:
 - The AI agent automatically picks up current context at every session start (SessionStart Hook)
 - Design issues discovered during implementation are logged in the backlog and addressed at Completion
 - Lessons drawn from retrospectives (Completion) accumulate in the Genome
+- Repeated manual tasks are automatically detected across generations, with user-confirmed hook creation
 
 ## Installation
 
@@ -96,7 +97,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 | **Planning** | Break down tasks, choose approach, map dependencies | `02-planning.md` |
 | **Implementation** | Build with AI + human collaboration | `03-implementation.md` |
 | **Validation** | Run tests, verify completion criteria | `04-validation.md` |
-| **Completion** | Retrospective + apply Genome changes + archive | `05-completion.md` |
+| **Completion** | Retrospective + apply Genome changes + hook suggestion + archive | `05-completion.md` |
 
 ## Core Concepts
 
@@ -109,7 +110,8 @@ The application's genetic information — a collection of architecture principle
 ├── principles.md      # Architecture principles/decisions
 ├── domain/            # Business rules (per module)
 ├── conventions.md     # Development rules/conventions
-└── constraints.md     # Technical constraints/choices
+├── constraints.md     # Technical constraints/choices
+└── source-map.md      # C4 Container/Component diagram (Mermaid)
 ```
 
 **Genome Immutability Principle**: The Genome is never modified directly during the current generation. When an issue is found, it is recorded in the backlog and only applied at the Completion stage.
@@ -192,6 +194,8 @@ Runs automatically at the start of every session, injecting the following into t
 - The full REAP workflow guide (Genome, Life Cycle, Four-Axis Structure, etc.)
 - Current generation state (which stage you're in, what to do next)
 - Rules to follow the REAP lifecycle
+- Genome staleness detection — checks if code-related commits (`src/`, `tests/`, `package.json`, `tsconfig.json`, `scripts/`) have occurred since the last Genome update (docs-only changes are excluded)
+- Source-map drift detection — compares documented components in `source-map.md` against actual files in the project
 
 This ensures the agent immediately understands the project context even in a brand-new session.
 
@@ -219,22 +223,28 @@ Strict mode is disabled by default (`strict: false`).
 
 ### REAP Hooks
 
-Projects can define hooks in `.reap/config.yml` to run commands or AI prompts at lifecycle events:
+Hooks are file-based and stored in `.reap/hooks/`. Each hook is a file named `{event}.{name}.{md|sh}`:
 
-```yaml
-hooks:
-  onGenerationStart:
-    - command: "echo 'Generation started'"
-  onStageTransition:
-    - command: "echo 'Stage changed'"
-  onGenerationComplete:
-    - command: "reap update"
-    - prompt: "Update README if this generation changed any features."
-  onRegression:
-    - command: "echo 'Regressed'"
+- `.md` files contain AI prompts (executed by the AI agent)
+- `.sh` files contain shell scripts (executed directly)
+
+```
+.reap/hooks/
+├── onGenerationStart.context-load.md
+├── onGenerationComplete.version-bump.md
+├── onGenerationComplete.readme-update.md
+├── onStageTransition.notify.sh
+└── onRegression.alert.sh
 ```
 
-Each hook supports `command` (shell) or `prompt` (AI agent instruction).
+Each hook file supports frontmatter with the following fields:
+
+```yaml
+---
+condition: has-code-changes   # always | has-code-changes | version-bumped
+order: 10                     # execution order (lower runs first)
+---
+```
 
 | Event | Trigger |
 |-------|---------|
@@ -243,7 +253,7 @@ Each hook supports `command` (shell) or `prompt` (AI agent instruction).
 | `onGenerationComplete` | After `/reap.next` archives a completed generation |
 | `onRegression` | After `/reap.back` returns to a previous stage |
 
-Hooks are executed by the AI agent in the project root directory.
+Hooks are executed by the AI agent in the project root directory. The `onGenerationComplete` hooks include automatic version bump judgment — patch-level bumps are applied automatically, while minor/major bumps require user confirmation.
 
 ## Project Structure After `reap init`
 
@@ -256,7 +266,9 @@ my-project/
     │   ├── principles.md
     │   ├── domain/
     │   ├── conventions.md
-    │   └── constraints.md
+    │   ├── constraints.md
+    │   └── source-map.md
+    ├── hooks/                    # Lifecycle hooks (.md/.sh)
     ├── environment/              # External context
     ├── life/                     # Current generation
     │   ├── current.yml
@@ -274,10 +286,10 @@ As generations accumulate, the lineage directory grows. REAP manages this with a
 
 | Level | Input | Output | Max lines | Trigger |
 |-------|-------|--------|-----------|---------|
-| **Level 1** | Generation folder (5 artifacts) | `gen-XXX.md` | 40 lines | lineage > 10,000 lines + 5+ generations |
+| **Level 1** | Generation folder (5 artifacts) | `gen-XXX.md` | 40 lines | lineage > 5,000 lines + 5+ generations |
 | **Level 2** | 5 Level 1 files | `epoch-XXX.md` | 60 lines | 5+ Level 1 files |
 
-Compression runs automatically when a generation completes. Compressed files preserve objectives and completion results while retaining only notable findings from intermediate stages.
+Compression runs automatically when a generation completes. The most recent 3 generations are always protected from compression. Compressed files preserve objectives and completion results while retaining only notable findings from intermediate stages.
 
 ## Evolution Flow
 
