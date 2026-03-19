@@ -20,9 +20,10 @@ Genome (Genetic Information)  →  Evolution (Cross-generational Evolution)  →
 ```
 .reap/genome/
 ├── principles.md      # Architecture principles/decisions (ADR style)
-├── domain/            # Business rules (separated by module)
 ├── conventions.md     # Development rules/conventions + Enforced Rules
-└── constraints.md     # Technical constraints/choices + Validation Commands
+├── constraints.md     # Technical constraints/choices + Validation Commands
+├── source-map.md      # C4 Container/Component diagram (Mermaid)
+└── domain/            # Business rules (separated by module)
 ```
 
 **Genome Immutability Principle**: The current generation does not modify Genome directly. Issues discovered during Implementation are recorded in the backlog as `type: genome-change` and applied to Genome only during the Completion stage.
