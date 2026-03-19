@@ -186,10 +186,10 @@ export class ClaudeCodeAdapter implements AgentAdapter {
   // --- Private helpers ---
 
   private getHookEntry() {
-    const sessionStartPath = join(ReapPaths.packageHooksDir, "session-start.sh");
+    const sessionStartPath = join(ReapPaths.packageHooksDir, "session-start.cjs");
     return {
       matcher: "",
-      hooks: [{ type: "command", command: `bash "${sessionStartPath}"` }],
+      hooks: [{ type: "command", command: `node "${sessionStartPath}"` }],
     };
   }
 
