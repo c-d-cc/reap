@@ -56,9 +56,9 @@ const reapGuide = gl.readFile(guideFile) || '';
 log('Loading Genome...');
 const { content: genomeContent, l1Lines } = gl.loadGenome(genomeDir);
 
-// Step 4: Check Genome & source-map sync
+// Step 4: Check Genome staleness
 log('Checking sync...');
-const { genomeStaleWarning, sourcemapDriftWarning, commitsSince, documented, actual } = gl.detectStaleness(projectRoot, genomeDir, l1Lines);
+const { genomeStaleWarning, commitsSince } = gl.detectStaleness(projectRoot);
 
 // Step 5: Read generation state
 log('Reading generation state...');
@@ -73,9 +73,6 @@ let staleSection = '';
 if (genomeStaleWarning) {
   staleSection = `\n\n## Genome Staleness\n${genomeStaleWarning}\nIf the user wants to proceed without syncing, ask: "The Genome may be stale. Would you like to run /reap.sync now, or do it later?" and respect their choice.`;
 }
-if (sourcemapDriftWarning) {
-  staleSection += `\n${sourcemapDriftWarning}`;
-}
 
 // Build auto-update section
 let updateSection = '';
@@ -88,7 +85,7 @@ const initLines = [];
 if (autoUpdateMessage) initLines.push(`🟢 ${autoUpdateMessage}`);
 
 // Genome health
-const health = gl.buildGenomeHealth({ l1Lines, genomeDir, configFile, sourcemapDriftWarning, genomeStaleWarning, commitsSince, documented, actual });
+const health = gl.buildGenomeHealth({ l1Lines, genomeDir, configFile, genomeStaleWarning, commitsSince });
 initLines.push(...health.initLines);
 
 // Generation status

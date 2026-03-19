@@ -129,13 +129,11 @@ function parseCurrentYml(currentYml) {
 }
 
 /**
- * Detect Genome staleness and source-map drift.
+ * Detect Genome staleness.
  * @param {string} projectRoot
- * @param {string} genomeDir
- * @param {number} l1Lines - total L1 lines loaded
- * @returns {{ genomeStaleWarning: string, sourcemapDriftWarning: string, commitsSince: number, documented: number, actual: number }}
+ * @returns {{ genomeStaleWarning: string, commitsSince: number }}
  */
-function detectStaleness(projectRoot, genomeDir, l1Lines) {
+function detectStaleness(projectRoot) {
   let genomeStaleWarning = '';
   let commitsSince = 0;
   if (dirExists(path.join(projectRoot, '.git'))) {
@@ -148,22 +146,7 @@ function detectStaleness(projectRoot, genomeDir, l1Lines) {
     }
   }
 
-  let sourcemapDriftWarning = '';
-  let documented = 0, actual = 0;
-  const sourcemapFile = path.join(genomeDir, 'source-map.md');
-  const srcCoreDir = path.join(projectRoot, 'src', 'core');
-  if (fileExists(sourcemapFile) && dirExists(srcCoreDir)) {
-    const smContent = readFile(sourcemapFile) || '';
-    documented = (smContent.match(/Component\(/g) || []).length;
-    const coreEntries = fs.readdirSync(srcCoreDir);
-    actual = coreEntries.filter(e => e.endsWith('.ts')).length
-      + coreEntries.filter(e => { try { return fs.statSync(path.join(srcCoreDir, e)).isDirectory(); } catch { return false; } }).length;
-    if (documented > 0 && actual > 0 && documented !== actual) {
-      sourcemapDriftWarning = `WARNING: source-map.md drift — ${documented} components documented, ${actual} core files found. Consider running /reap.sync.`;
-    }
-  }
-
-  return { genomeStaleWarning, sourcemapDriftWarning, commitsSince, documented, actual };
+  return { genomeStaleWarning, commitsSince };
 }
 
 /**
@@ -188,7 +171,7 @@ function buildStrictSection(strictMode, genStage) {
  * @param {object} params
  * @returns {{ initLines: string[], severity: string }}
  */
-function buildGenomeHealth({ l1Lines, genomeDir, configFile, sourcemapDriftWarning, genomeStaleWarning, commitsSince, documented, actual }) {
+function buildGenomeHealth({ l1Lines, genomeDir, configFile, genomeStaleWarning, commitsSince }) {
   const issues = [];
   let severity = 'ok';
   if (l1Lines === 0) { issues.push('empty'); severity = 'danger'; }
@@ -197,12 +180,6 @@ function buildGenomeHealth({ l1Lines, genomeDir, configFile, sourcemapDriftWarni
     if (!check) { issues.push(`missing ${f}`); severity = 'danger'; }
   }
   if (!fileExists(configFile)) { issues.push('no config.yml'); severity = 'danger'; }
-  if (sourcemapDriftWarning) {
-    const diff = Math.abs(documented - actual);
-    issues.push(`source-map drift (${documented}→${actual})`);
-    if (diff > 3) { if (severity === 'ok') severity = 'danger'; }
-    else { if (severity === 'ok') severity = 'warn'; }
-  }
   if (genomeStaleWarning && commitsSince > 30) {
     issues.push(`severely stale (${commitsSince} commits)`);
     if (severity !== 'danger') severity = 'danger';

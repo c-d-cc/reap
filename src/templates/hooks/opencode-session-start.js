@@ -95,12 +95,9 @@ module.exports = async (ctx) => {
 
       // Detect staleness via shared module
       let staleSection = "";
-      const staleness = gl.detectStaleness(projectRoot, genomeDir, 0);
+      const staleness = gl.detectStaleness(projectRoot);
       if (staleness.genomeStaleWarning) {
         staleSection = `\n\n## Genome Staleness\n${staleness.genomeStaleWarning}\nIf the user wants to proceed without syncing, ask: "The Genome may be stale. Would you like to run /reap.sync now, or do it later?" and respect their choice.`;
-      }
-      if (staleness.sourcemapDriftWarning) {
-        staleSection += `\n${staleness.sourcemapDriftWarning}`;
       }
 
       // Build language instruction
