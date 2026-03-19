@@ -37,8 +37,19 @@ This command is the **ONLY legitimate way** to advance the lifecycle stage. All 
 
 ### When Advancing from Completion (Archiving)
 - Add the current timestamp to `completedAt` in `current.yml`
-- Move artifact files (`01-*.md` through `05-*.md`) from `.reap/life/` to `.reap/lineage/[gen-id]-[goal-slug]/`
+- Create the lineage directory: `.reap/lineage/[gen-id]-[goal-slug]/`
   - Goal slug: lowercase, non-alphanumeric/hangul replaced with `-`, max 30 chars
+- **Write `meta.yml`** in the lineage directory with DAG metadata:
+  ```yaml
+  id: [gen-id]
+  type: [normal or merge]
+  parents: [parent generation IDs from current.yml]
+  goal: [goal from current.yml]
+  genomeHash: [genomeHash from current.yml, or compute from .reap/genome/]
+  startedAt: [startedAt from current.yml]
+  completedAt: [current ISO 8601]
+  ```
+- Move artifact files (`01-*.md` through `05-*.md`) from `.reap/life/` to the lineage directory
 - Process backlog files from `.reap/life/backlog/`:
   - Create `.reap/lineage/[gen-id]-[goal-slug]/backlog/` directory
   - Files with `status: consumed` → move to `.reap/lineage/[gen-id]-[goal-slug]/backlog/`

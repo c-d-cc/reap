@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-053-eb8151
 priority: high
 title: Merge E2E 테스트 — 실제 git repo에서 merge 시나리오 검증
 ---

@@ -1,0 +1,8 @@
+id: gen-053-eb8151
+type: normal
+parents:
+  - gen-052-fc018e
+goal: "Merge E2E 테스트 — OpenShell sandbox + Claude Code 전체 자동화"
+genomeHash: e057bc17
+startedAt: "2026-03-19T17:00:02.708Z"
+completedAt: "2026-03-20T03:30:00.000Z"
