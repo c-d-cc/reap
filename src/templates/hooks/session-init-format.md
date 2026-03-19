@@ -1,2 +1,2 @@
-**REAP Session Initialized**
+**REAP (v{{VERSION}}) Session Initialized**{{UPDATE_AVAILABLE}}
 {{SESSION_INIT_LINES}}

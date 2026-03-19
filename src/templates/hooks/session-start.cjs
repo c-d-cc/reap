@@ -45,22 +45,23 @@ if (!dirExists(reapDir)) {
   process.exit(0);
 }
 
-// Step 1: Auto-update
+// Step 1: Version check + Auto-update
 log('Checking for updates...');
 let autoUpdateMessage = '';
+let updateAvailableMessage = '';
 const configContent = readFile(configFile);
-if (configContent) {
-  const autoUpdate = /^autoUpdate:\s*true/m.test(configContent);
+const installed = exec('reap --version');
+const latest = exec('npm view @c-d-cc/reap version');
+if (installed && latest && installed !== latest) {
+  const autoUpdate = configContent ? /^autoUpdate:\s*true/m.test(configContent) : false;
   if (autoUpdate) {
-    const installed = exec('reap --version');
-    const latest = exec('npm view @c-d-cc/reap version');
-    if (installed && latest && installed !== latest) {
-      const updated = exec('npm update -g @c-d-cc/reap');
-      if (updated !== null) {
-        exec('reap update');
-        autoUpdateMessage = `REAP auto-updated: v${installed} → v${latest}`;
-      }
+    const updated = exec('npm update -g @c-d-cc/reap');
+    if (updated !== null) {
+      exec('reap update');
+      autoUpdateMessage = `REAP auto-updated: v${installed} → v${latest}`;
     }
+  } else {
+    updateAvailableMessage = `update available: v${installed} → v${latest}`;
   }
 }
 
@@ -235,7 +236,13 @@ const initSummary = initLines.join('\n');
 // Load session-init format template and render
 const initFormatFile = path.join(scriptDir, 'session-init-format.md');
 const initFormat = readFile(initFormatFile) || '{{SESSION_INIT_LINES}}';
-const sessionInitDisplay = initFormat.replace('{{SESSION_INIT_LINES}}', initSummary).trim();
+const currentVersion = installed || exec('reap --version') || '?';
+const updateBadge = updateAvailableMessage ? ` — ${updateAvailableMessage}` : '';
+const sessionInitDisplay = initFormat
+  .replace('{{VERSION}}', currentVersion)
+  .replace('{{UPDATE_AVAILABLE}}', updateBadge)
+  .replace('{{SESSION_INIT_LINES}}', initSummary)
+  .trim();
 
 // Step 6: Output JSON
 log('Done. Injecting context.');
