@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-050-caf64b
 priority: low
 title: Merge hook event 등록 로직 구현
 ---

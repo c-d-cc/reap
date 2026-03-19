@@ -11,6 +11,9 @@ export const COMMAND_NAMES = [
   "reap.validation", "reap.completion", "reap.evolve",
   "reap.start", "reap.next", "reap.back", "reap.status", "reap.sync", "reap.help",
   "reap.update",
+  "reap.merge.start", "reap.merge.detect", "reap.merge.genome-resolve",
+  "reap.merge.source-resolve", "reap.merge.sync-test", "reap.merge.completion",
+  "reap.merge.evolve",
 ];
 
 export async function initProject(

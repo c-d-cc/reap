@@ -64,7 +64,9 @@ export interface GenerationMeta {
   completedAt: string;
 }
 
-export type ReapHookEvent = "onGenerationStart" | "onStageTransition" | "onGenerationComplete" | "onRegression";
+export type ReapHookEvent =
+  | "onGenerationStart" | "onStageTransition" | "onGenerationComplete" | "onRegression"
+  | "onMergeStart" | "onGenomeResolved" | "onMergeComplete";
 
 export interface ReapHookCommand {
   command?: string;
@@ -78,6 +80,9 @@ export interface ReapHooks {
   onStageTransition?: ReapHookCommand[];
   onGenerationComplete?: ReapHookCommand[];
   onRegression?: ReapHookCommand[];
+  onMergeStart?: ReapHookCommand[];
+  onGenomeResolved?: ReapHookCommand[];
+  onMergeComplete?: ReapHookCommand[];
 }
 
 export interface ReapConfig {
