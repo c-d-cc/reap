@@ -58,35 +58,4 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 
 ## Merge Generation Lifecycle
 
-별도 lifecycle. Normal과 완전 분리.
-
-### Stage Order
-
-```
-Detect → Genome Resolve → Source Resolve → Sync Test → Completion
-```
-
-### Merge Artifact Rules
-
-| Stage | Artifact | Gate |
-|-------|----------|------|
-| Detect | 01-detect.md | - |
-| Genome Resolve | 02-genome-resolve.md | 01-detect.md |
-| Source Resolve | 03-source-resolve.md | 02-genome-resolve.md |
-| Sync Test | 04-sync-test.md | 03-source-resolve.md |
-| Completion | 05-completion.md | 04-sync-test.md |
-
-### Merge 핵심 순서
-
-Genome 먼저 확정 → Source를 맞춤 → Sync Test로 검증
-
-### 분리 원칙
-
-- `GenerationManager` — normal 전용
-- `MergeGenerationManager` — merge 전용
-- `lineage.ts` — 공유 lineage 조회 유틸 (읽기 전용)
-
-### Merge Regression
-
-- Sync Test 실패 → Source Resolve 또는 Genome Resolve로 회귀 가능
-- 회귀 규칙은 normal과 동일 (timeline 기록, artifact 처리)
+→ `domain/merge-lifecycle.md` 참조

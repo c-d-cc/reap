@@ -59,6 +59,18 @@ order: 10
 - condition이 충족되지 않으면 skip
 - onGenerationComplete hook은 커밋 이후 실행 → 변경사항은 별도 커밋
 
+## Merge Hook Events
+
+| Event | Trigger | Timing |
+|-------|---------|--------|
+| onMergeStart | `reap.merge.start` 후 | merge generation 생성 직후 |
+| onGenomeResolved | genome-resolve → source-resolve 전환 시 | genome 확정 직후, source merge 전 |
+| onMergeComplete | merge generation archiving 후 | git commit 이후 |
+
+- 기존 `onStageTransition`은 merge stage 전환에서도 발동
+- 기존 `onRegression`은 merge regression에서도 발동
+- `onMergeComplete`는 `onGenerationComplete`와 별도 — merge 특유의 후처리 (예: genome diff 리포트) 가능
+
 ## Hook Suggestion
 
 - Completion Phase 5에서 최근 3개 generation 분석

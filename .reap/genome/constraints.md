@@ -25,15 +25,26 @@
 
 ## CLI Subcommands
 
-5개: init, status, fix, update, help
+8개: init, status, fix, update, help, pull, push, merge (pull/push/merge는 미구현)
 
 ## Slash Commands
 
-13개: reap.objective, reap.planning, reap.implementation, reap.validation, reap.completion, reap.evolve, reap.start, reap.next, reap.back, reap.status, reap.sync, reap.update, reap.help
+### Normal (13개)
+reap.objective, reap.planning, reap.implementation, reap.validation, reap.completion, reap.evolve, reap.start, reap.next, reap.back, reap.status, reap.sync, reap.update, reap.help
+
+### Merge (7개, 미구현)
+reap.merge.start, reap.merge.detect, reap.merge.genome-resolve, reap.merge.source-resolve, reap.merge.sync-test, reap.merge.completion, reap.merge.evolve
+
+- `reap.merge.start` — merge generation 생성 (parents 2개 지정)
+- `reap.merge.detect` ~ `reap.merge.completion` — 각 merge stage 실행
+- `reap.merge.evolve` — merge full lifecycle 자동 실행
+- `reap.next`/`reap.back`은 type: merge에서도 동작 (stage 분기)
 
 ## Hooks
 
-4개 event: onGenerationStart, onStageTransition, onGenerationComplete, onRegression
+7개 event (merge 3개 추가):
+- Normal: onGenerationStart, onStageTransition, onGenerationComplete, onRegression
+- Merge: onMergeStart, onGenomeResolved, onMergeComplete
 파일 기반: `.reap/hooks/{event}.{name}.{md|sh}`. frontmatter: condition, order
 Conditions: `.reap/hooks/conditions/{name}.sh` (exit 0=true). 기본 3개 + 유저 커스텀
 

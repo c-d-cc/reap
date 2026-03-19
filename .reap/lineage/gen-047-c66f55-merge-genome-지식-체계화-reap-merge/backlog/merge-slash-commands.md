@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-047-c66f55
 priority: high
 title: Merge generation용 slash command 템플릿 작성
 ---
