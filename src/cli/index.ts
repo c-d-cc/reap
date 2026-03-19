@@ -8,6 +8,7 @@ import { LifeCycle } from "../core/lifecycle";
 import { ReapPaths } from "../core/paths";
 import { AgentRegistry } from "../core/agents";
 import { readTextFile } from "../core/fs";
+import { mergeCommand } from "./commands/merge";
 import { join } from "path";
 
 program
@@ -136,6 +137,19 @@ program
       if (result.skipped.length > 0) {
         console.log(`Unchanged: ${result.skipped.length} files`);
       }
+    } catch (e: any) {
+      console.error(`Error: ${e.message}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("merge")
+  .description("Start a merge generation to combine divergent branches")
+  .argument("<branch>", "Target branch to merge")
+  .action(async (branch: string) => {
+    try {
+      await mergeCommand(branch);
     } catch (e: any) {
       console.error(`Error: ${e.message}`);
       process.exit(1);

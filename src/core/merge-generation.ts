@@ -7,7 +7,10 @@ import { MergeLifeCycle } from "./merge-lifecycle";
 import { compressLineageIfNeeded } from "./compression";
 import { readTextFile, writeTextFile } from "./fs";
 import { generateGenHash, getMachineId, computeGenomeHash, formatGenId } from "./generation";
+import { gitShow, gitLsTree, gitRefExists, gitCurrentBranch } from "./git";
+import { detectDivergenceFromRefs, type DivergenceReport } from "./merge";
 import * as lineageUtils from "./lineage";
+import { parseFrontmatter } from "./compression";
 
 export class MergeGenerationManager {
   constructor(private paths: ReapPaths) {}
@@ -53,6 +56,139 @@ export class MergeGenerationManager {
     };
     await writeTextFile(this.paths.currentYml, YAML.stringify(state));
     return state;
+  }
+
+  /** Create a merge generation from a target branch, using git refs for detection */
+  async createFromBranch(
+    targetBranch: string,
+    projectRoot: string,
+  ): Promise<{ state: GenerationState; report: DivergenceReport }> {
+    const currentBranch = gitCurrentBranch(projectRoot);
+    if (!currentBranch) throw new Error("Cannot determine current branch");
+    if (!gitRefExists(targetBranch, projectRoot)) {
+      throw new Error(`Branch "${targetBranch}" does not exist. Run "git fetch" first.`);
+    }
+
+    // Read lineage from both branches to find parent generation IDs
+    const localParent = await this.resolveLatestGenId(currentBranch, projectRoot);
+    const remoteParent = this.resolveLatestGenIdFromRef(targetBranch, projectRoot);
+
+    if (!localParent) throw new Error("No completed generation found on current branch");
+    if (!remoteParent) throw new Error(`No completed generation found on branch "${targetBranch}"`);
+
+    const parents = [localParent, remoteParent];
+
+    // Collect all metas from both branches for LCA search
+    const localMetas = await lineageUtils.listMeta(this.paths);
+    const remoteMetas = this.listMetaFromRef(targetBranch, projectRoot);
+    const allMetas = this.mergeMetaLists(localMetas, remoteMetas);
+
+    const commonAncestor = findCommonAncestor(localParent, remoteParent, allMetas);
+
+    // Find the common ancestor's ref (it should exist on both branches)
+    const ancestorRef = commonAncestor ? this.findRefForGeneration(commonAncestor, currentBranch, targetBranch, projectRoot) : currentBranch;
+
+    // Run detect using git refs
+    const genomePath = ".reap/genome";
+    const report = detectDivergenceFromRefs(
+      ancestorRef, currentBranch, targetBranch,
+      genomePath, projectRoot,
+      commonAncestor, localParent, remoteParent,
+    );
+
+    // Create the merge generation state
+    const currentState = await this.current();
+    const seq = await lineageUtils.nextSeq(this.paths, currentState?.id);
+    const now = new Date().toISOString();
+    const genomeHash = await computeGenomeHash(this.paths.genome);
+    const machineId = getMachineId();
+    const hash = generateGenHash(parents, `merge ${currentBranch} + ${targetBranch}`, genomeHash, machineId, now);
+    const id = formatGenId(seq, hash);
+    const goal = `Merge ${currentBranch} + ${targetBranch}`;
+
+    const state: GenerationState = {
+      id,
+      goal,
+      stage: "detect",
+      genomeVersion: allMetas.length + 1,
+      startedAt: now,
+      timeline: [{ stage: "detect", at: now }],
+      type: "merge",
+      parents,
+      genomeHash,
+      commonAncestor: commonAncestor ?? undefined,
+    };
+    await writeTextFile(this.paths.currentYml, YAML.stringify(state));
+    return { state, report };
+  }
+
+  /** Resolve the latest generation ID from local lineage */
+  private async resolveLatestGenId(branch: string, cwd: string): Promise<string | null> {
+    const metas = await lineageUtils.listMeta(this.paths);
+    if (metas.length === 0) return null;
+    const sorted = metas.sort((a, b) =>
+      new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+    );
+    return sorted[0].id;
+  }
+
+  /** Resolve the latest generation ID from a remote branch's lineage via git ref */
+  private resolveLatestGenIdFromRef(ref: string, cwd: string): string | null {
+    const metas = this.listMetaFromRef(ref, cwd);
+    if (metas.length === 0) return null;
+    const sorted = metas.sort((a, b) =>
+      new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+    );
+    return sorted[0].id;
+  }
+
+  /** List generation metadata from a git ref */
+  private listMetaFromRef(ref: string, cwd: string): GenerationMeta[] {
+    const metas: GenerationMeta[] = [];
+    const entries = gitLsTree(ref, ".reap/lineage", cwd);
+    // Find meta.yml files
+    const metaFiles = entries.filter(e => e.endsWith("/meta.yml"));
+    for (const metaFile of metaFiles) {
+      const content = gitShow(ref, metaFile, cwd);
+      if (content) {
+        try {
+          const meta = YAML.parse(content) as GenerationMeta;
+          if (meta?.id) metas.push(meta);
+        } catch { /* invalid yaml */ }
+      }
+    }
+    // Also check compressed .md files
+    const mdFiles = entries.filter(e =>
+      e.startsWith(".reap/lineage/gen-") && e.endsWith(".md") && !e.includes("/")
+    );
+    for (const mdFile of mdFiles) {
+      const content = gitShow(ref, mdFile, cwd);
+      if (content) {
+        const meta = parseFrontmatter(content);
+        if (meta) metas.push(meta);
+      }
+    }
+    return metas;
+  }
+
+  /** Merge two meta lists, deduplicating by id */
+  private mergeMetaLists(a: GenerationMeta[], b: GenerationMeta[]): GenerationMeta[] {
+    const map = new Map<string, GenerationMeta>();
+    for (const m of a) map.set(m.id, m);
+    for (const m of b) map.set(m.id, m);
+    return Array.from(map.values());
+  }
+
+  /** Find which ref contains a generation (for common ancestor lookup) */
+  private findRefForGeneration(genId: string, refA: string, refB: string, cwd: string): string {
+    // Check refA first
+    const entriesA = gitLsTree(refA, ".reap/lineage", cwd);
+    if (entriesA.some(e => e.includes(genId))) return refA;
+    // Then refB
+    const entriesB = gitLsTree(refB, ".reap/lineage", cwd);
+    if (entriesB.some(e => e.includes(genId))) return refB;
+    // Fallback to refA
+    return refA;
   }
 
   async advance(): Promise<GenerationState> {

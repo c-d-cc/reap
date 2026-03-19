@@ -2,6 +2,7 @@ import { readdir } from "fs/promises";
 import { join } from "path";
 import { execSync } from "child_process";
 import { readTextFile } from "./fs";
+import { gitShow, gitLsTree } from "./git";
 
 // ── Types ───────────────────────────────────────────────────
 
@@ -50,16 +51,57 @@ async function readGenomeFiles(genomePath: string): Promise<Map<string, string>>
   return files;
 }
 
-/** Extract genome diffs between ancestor and descendant */
-export async function extractGenomeDiff(
-  ancestorGenomePath: string,
-  currentGenomePath: string,
-): Promise<GenomeDiff[]> {
-  const ancestorFiles = await readGenomeFiles(ancestorGenomePath);
-  const currentFiles = await readGenomeFiles(currentGenomePath);
-  const diffs: GenomeDiff[] = [];
+/** Read all genome files from a git ref into a map */
+export function readGenomeFilesFromRef(
+  ref: string,
+  genomePath: string,
+  cwd: string,
+): Map<string, string> {
+  const files = new Map<string, string>();
+  const entries = gitLsTree(ref, genomePath, cwd);
+  for (const entry of entries) {
+    const relativePath = entry.replace(genomePath + "/", "");
+    const content = gitShow(ref, entry, cwd);
+    if (content !== null) files.set(relativePath, content);
+  }
+  return files;
+}
 
-  // Check modified and removed files
+/** Extract genome diffs between ancestor and descendant using git refs */
+export function extractGenomeDiffFromRefs(
+  ancestorRef: string,
+  currentRef: string,
+  genomePath: string,
+  cwd: string,
+): GenomeDiff[] {
+  const ancestorFiles = readGenomeFilesFromRef(ancestorRef, genomePath, cwd);
+  const currentFiles = readGenomeFilesFromRef(currentRef, genomePath, cwd);
+  return diffGenomeMaps(ancestorFiles, currentFiles);
+}
+
+/** Generate a full divergence report using git refs */
+export function detectDivergenceFromRefs(
+  ancestorRef: string,
+  refA: string,
+  refB: string,
+  genomePath: string,
+  cwd: string,
+  commonAncestor: string | null,
+  parentA: string,
+  parentB: string,
+): DivergenceReport {
+  const genomeDiffsA = extractGenomeDiffFromRefs(ancestorRef, refA, genomePath, cwd);
+  const genomeDiffsB = extractGenomeDiffFromRefs(ancestorRef, refB, genomePath, cwd);
+  const conflicts = classifyConflicts(genomeDiffsA, genomeDiffsB);
+  return { commonAncestor, parentA, parentB, genomeDiffsA, genomeDiffsB, conflicts };
+}
+
+/** Diff two genome file maps (shared logic for filesystem and git ref) */
+function diffGenomeMaps(
+  ancestorFiles: Map<string, string>,
+  currentFiles: Map<string, string>,
+): GenomeDiff[] {
+  const diffs: GenomeDiff[] = [];
   for (const [file, ancestorContent] of ancestorFiles) {
     const currentContent = currentFiles.get(file);
     if (currentContent === undefined) {
@@ -68,15 +110,22 @@ export async function extractGenomeDiff(
       diffs.push({ file, added: false, removed: false, modified: true, content: currentContent });
     }
   }
-
-  // Check added files
   for (const file of currentFiles.keys()) {
     if (!ancestorFiles.has(file)) {
       diffs.push({ file, added: true, removed: false, modified: false, content: currentFiles.get(file) });
     }
   }
-
   return diffs;
+}
+
+/** Extract genome diffs between ancestor and descendant (filesystem) */
+export async function extractGenomeDiff(
+  ancestorGenomePath: string,
+  currentGenomePath: string,
+): Promise<GenomeDiff[]> {
+  const ancestorFiles = await readGenomeFiles(ancestorGenomePath);
+  const currentFiles = await readGenomeFiles(currentGenomePath);
+  return diffGenomeMaps(ancestorFiles, currentFiles);
 }
 
 /** Classify conflicts between two sets of diffs */

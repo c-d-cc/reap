@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-048-8a836c
 priority: high
 title: merge.ts git ref 기반 리팩터 + reap merge CLI
 ---
