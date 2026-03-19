@@ -1,0 +1,8 @@
+id: gen-044-782053
+type: normal
+parents:
+  - gen-043-078edf
+goal: Git worktree 기반 multi-branch DAG 테스트 추가
+genomeHash: legacy
+startedAt: legacy-44
+completedAt: legacy-44
