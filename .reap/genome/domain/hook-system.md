@@ -70,3 +70,4 @@ order: 10
 - Claude Code의 `~/.claude/settings.json`의 `hooks.SessionStart`에 등록
 - 매 세션 시작 시 REAP guide + generation 상태 주입
 - `reap init`/`reap update`가 자동 관리
+- **공유 모듈**: `genome-loader.cjs`가 Genome 로딩, config 파싱, staleness 감지, strict mode 빌드를 공통 처리. `session-start.cjs`(Claude Code)와 `opencode-session-start.js`(OpenCode)가 이를 require

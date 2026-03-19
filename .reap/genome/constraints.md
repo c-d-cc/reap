@@ -19,6 +19,7 @@
 - 외부 서비스 의존 없음 — 로컬 파일시스템만 사용
 - `.reap/` 디렉토리 구조는 init이 보장, 사용자가 수동 생성할 필요 없음
 - 슬래시 커맨드, hook → AgentAdapter가 에이전트별 경로에 설치 (Claude Code: `~/.claude/`, OpenCode: `~/.config/opencode/`)
+- **postinstall**: `npm install -g` 시 `scripts/postinstall.cjs`가 감지된 에이전트에 slash commands 자동 설치 (graceful failure)
 - artifact 템플릿, domain 가이드 → `~/.reap/templates/` (user-level)
 - genome 파일 → `.reap/genome/` (프로젝트 소유)
 

@@ -100,6 +100,6 @@ User/Agent → slash command → AI reads template → AI executes steps
 |----------|-------|----------|
 | LINEAGE_MAX_LINES | 5,000 | compression.ts |
 | RECENT_PROTECTED_COUNT | 3 | compression.ts |
-| L1_LIMIT (hook) | 500 | session-start.cjs |
-| L2_LIMIT (hook) | 200 | session-start.cjs |
-| Staleness threshold | 10 commits | session-start.cjs |
+| L1_LIMIT (hook) | 500 | genome-loader.cjs |
+| L2_LIMIT (hook) | 200 | genome-loader.cjs |
+| Staleness threshold | 10 commits | genome-loader.cjs |
