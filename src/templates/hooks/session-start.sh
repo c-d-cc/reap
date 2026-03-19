@@ -208,21 +208,51 @@ init_log=""
 if [ -n "$auto_update_message" ]; then
   init_log="${init_log}🟢 ${auto_update_message}\n"
 fi
-init_log="${init_log}🟢 Genome loaded (L1: ${l1_lines} lines)\n"
+
+# Genome loading status
+if [ "$l1_lines" -eq 0 ]; then
+  init_log="${init_log}🔴 Genome empty — no genome files found. Run \`reap init\` or check .reap/genome/\n"
+else
+  init_log="${init_log}🟢 Genome loaded (L1: ${l1_lines} lines)\n"
+fi
+
+# Config status
+if [ ! -f "${REAP_DIR}/config.yml" ]; then
+  init_log="${init_log}🔴 config.yml missing — run \`reap fix\`\n"
+fi
+
+# Genome sync status
 if [ -n "$genome_stale_warning" ]; then
-  init_log="${init_log}🟡 Genome stale — ${commits_since} code commits since last update. Run /reap.sync\n"
+  if [ "$commits_since" -gt 30 ]; then
+    init_log="${init_log}🔴 Genome severely stale — ${commits_since} code commits since last update. Run /reap.sync immediately\n"
+  else
+    init_log="${init_log}🟡 Genome stale — ${commits_since} code commits since last update. Run /reap.sync\n"
+  fi
 else
   init_log="${init_log}🟢 Genome in sync\n"
 fi
+
+# Source-map status
 if [ -n "$sourcemap_drift_warning" ]; then
-  init_log="${init_log}🟡 Source-map drift — ${documented} documented vs ${actual} actual. Run /reap.sync\n"
+  drift_diff=$(( documented > actual ? documented - actual : actual - documented ))
+  if [ "$drift_diff" -gt 3 ]; then
+    init_log="${init_log}🔴 Source-map severely out of date — ${documented} documented vs ${actual} actual. Run /reap.sync immediately\n"
+  else
+    init_log="${init_log}🟡 Source-map drift — ${documented} documented vs ${actual} actual. Run /reap.sync\n"
+  fi
 elif [ -f "$SOURCEMAP_FILE" ]; then
   init_log="${init_log}🟢 Source-map in sync (${actual} components)\n"
 fi
-if [ "$gen_stage" = "none" ]; then
-  init_log="${init_log}⚪ No active Generation\n"
+
+# current.yml integrity
+if [ -f "$CURRENT_YML" ] && [ -n "$(cat "$CURRENT_YML" 2>/dev/null | tr -d '[:space:]')" ]; then
+  if [ -z "$gen_id" ] || [ -z "$gen_stage" ]; then
+    init_log="${init_log}🔴 current.yml corrupted — run \`reap fix\`\n"
+  else
+    init_log="${init_log}🟢 Active: ${gen_id} — stage: ${gen_stage}\n"
+  fi
 else
-  init_log="${init_log}🟢 Active: ${gen_id} — stage: ${gen_stage}\n"
+  init_log="${init_log}⚪ No active Generation\n"
 fi
 printf "%b" "$init_log" > "${REAP_DIR}/life/.session-init.log"
 
