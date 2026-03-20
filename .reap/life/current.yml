@@ -1,1 +1,12 @@
-
+id: gen-079-9dd0f7
+goal: "README + docs update for v0.9.x changes"
+stage: implementation
+genomeVersion: 79
+startedAt: "2026-03-20T13:21:58.913Z"
+timeline:
+  - stage: objective
+    at: "2026-03-20T13:21:58.913Z"
+  - stage: planning
+    at: "2026-03-20T13:22:30.000Z"
+  - stage: implementation
+    at: "2026-03-20T13:22:40.000Z"

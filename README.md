@@ -245,13 +245,17 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.planning` | Task decomposition + implementation plan |
 | `/reap.implementation` | Code implementation with AI + human |
 | `/reap.validation` | Run tests, verify completion criteria |
-| `/reap.completion` | Retrospective + apply Genome changes |
+| `/reap.completion` | Retrospective + apply Genome changes + lineage compression |
 | `/reap.next` | Advance to the next life cycle stage |
 | `/reap.back` | Return to a previous stage (micro loop) |
+| `/reap.abort` | Abort current generation (rollback/stash/hold + backlog save) |
 | `/reap.status` | Show current generation state and project health |
-| `/reap.sync` | Synchronize Genome with current source code |
-| `/reap.help` | Contextual AI help with 24+ topics (workflow, genome, backlog, strict, agents, hooks, config, evolve, regression, author, and all command names) |
-| `/reap.update` | Check for REAP updates and upgrade to the latest version |
+| `/reap.sync` | Synchronize both Genome and Environment |
+| `/reap.sync.genome` | Synchronize Genome with current source code |
+| `/reap.sync.environment` | Discover and document external environment dependencies |
+| `/reap.report` | Report a bug or feedback to the REAP project (privacy-safe) |
+| `/reap.help` | Contextual AI help with 24+ topics |
+| `/reap.update` | Upgrade REAP package + sync commands/templates/hooks |
 | **`/reap.evolve`** | **Run an entire generation from start to finish (recommended)** |
 | **`/reap.pull <branch>`** | **Fetch + run full merge generation (distributed `/reap.evolve`)** |
 | **`/reap.merge <branch>`** | **Run full merge generation for a local branch (no fetch)** |
@@ -270,9 +274,11 @@ Runs automatically at the start of every session, injecting the following into t
 
 - The full REAP workflow guide (Genome, Life Cycle, Four-Axis Structure, etc.)
 - Current generation state (which stage you're in, what to do next)
+- Environment summary (`environment/summary.md`) — external system context
 - Rules to follow the REAP lifecycle
-- Genome staleness detection — checks if code-related commits (`src/`, `tests/`, `package.json`, `tsconfig.json`, `scripts/`) have occurred since the last Genome update (docs-only changes are excluded)
-- Source-map drift detection — compares documented components in `source-map.md` against actual files in the project
+- Genome staleness detection — checks if code-related commits have occurred since the last Genome update
+- Source-map drift detection — compares documented components against actual files
+- Slash command installation — copies commands from `~/.reap/commands/` to project `.claude/commands/`
 
 This ensures the agent immediately understands the project context even in a brand-new session.
 
@@ -314,8 +320,8 @@ Hooks are file-based and stored in `.reap/hooks/`. Each hook is a file named `{e
 ```
 .reap/hooks/
 ├── onGenerationStart.context-load.md
-├── onGenerationComplete.version-bump.md
-├── onGenerationComplete.readme-update.md
+├── onGenerationComplete.reap-update.sh
+├── onGenerationComplete.docs-update.md
 ├── onStageTransition.notify.sh
 └── onRegression.alert.sh
 ```
@@ -339,7 +345,7 @@ order: 10                     # execution order (lower runs first)
 | `onGenomeResolved` | After genome conflicts are resolved in a merge |
 | `onMergeComplete` | After a merge generation is archived |
 
-Hooks are executed by the AI agent in the project root directory. The `onGenerationComplete` hooks include automatic version bump judgment — patch-level bumps are applied automatically, while minor/major bumps require user confirmation.
+Hooks are executed by the AI agent in the project root directory.
 
 ## Project Structure After `reap init`
 
@@ -355,27 +361,38 @@ my-project/
     │   ├── constraints.md
     │   └── source-map.md
     ├── hooks/                    # Lifecycle hooks (.md/.sh)
-    ├── environment/              # External context
+    ├── environment/              # External context (3-layer)
+    │   ├── summary.md            # Session context (~100 lines, auto-loaded)
+    │   ├── docs/                 # Main reference docs
+    │   └── resources/            # Raw materials (user-managed)
     ├── life/                     # Current generation
     │   ├── current.yml
     │   └── backlog/
     └── lineage/                  # Completed generation archive
 
-~/.claude/                        # User-level (installed by reap init)
-├── commands/                     # Slash commands (/reap.*)
-└── settings.json                 # SessionStart hook registration
+~/.reap/                            # User-level (installed by reap init)
+├── commands/                       # Slash command originals
+└── templates/                      # Artifact templates
+
+~/.claude/
+└── settings.json                   # SessionStart hook registration
+
+.claude/commands/                   # Project-level (copied by session-start hook)
+└── reap.*.md                       # Active slash commands (auto-synced)
 ```
 
 ## Lineage Compression
 
-As generations accumulate, the lineage directory grows. REAP manages this with automatic two-level compression:
+As generations accumulate, the lineage directory grows. REAP manages this with automatic two-level compression during the Completion stage:
 
-| Level | Input | Output | Max lines | Trigger |
-|-------|-------|--------|-----------|---------|
-| **Level 1** | Generation folder (5 artifacts) | `gen-XXX-{hash}.md` | 40 lines | lineage > 5,000 lines + 5+ generations |
-| **Level 2** | 5 Level 1 files | `epoch-XXX.md` | 60 lines | 5+ Level 1 files |
+| Level | Input | Output | Trigger | Protection |
+|-------|-------|--------|---------|------------|
+| **Level 1** | Generation folder (5 artifacts) | `gen-XXX-{hash}.md` (40 lines) | lineage > 5,000 lines + 5+ generations | Recent 3 generations + DAG leaf nodes |
+| **Level 2** | 100+ Level 1 files | Single `epoch.md` | Level 1 files > 100 | Recent 9 Level 1 files + fork points |
 
-Compression runs automatically when a generation completes. The most recent 3 generations are always protected from compression. Compressed files preserve objectives and completion results while retaining only notable findings from intermediate stages.
+**DAG preservation**: Level 1 files retain DAG metadata (id, parents, genomeHash) in frontmatter. Level 2 `epoch.md` stores a `generations` hash chain in frontmatter for DAG traversal.
+
+**Fork guard**: Before Level 2 compression, all local and remote branches are scanned. Generations that serve as fork points for other branches are protected from epoch compression. Epoch-compressed generations cannot be used as merge bases.
 
 ## Evolution Flow
 
