@@ -10,7 +10,8 @@ export const COMMAND_NAMES = [
   "reap.objective", "reap.planning", "reap.implementation",
   "reap.validation", "reap.completion", "reap.evolve",
   "reap.start", "reap.next", "reap.back", "reap.abort",
-  "reap.status", "reap.sync", "reap.help", "reap.update",
+  "reap.status", "reap.sync", "reap.sync.genome", "reap.sync.environment",
+  "reap.help", "reap.update",
   "reap.merge.start", "reap.merge.detect", "reap.merge.mate",
   "reap.merge.merge", "reap.merge.sync", "reap.merge.validation",
   "reap.merge.completion", "reap.merge.evolve",
@@ -46,6 +47,8 @@ export async function initProject(
   await mkdir(paths.genome, { recursive: true });
   await mkdir(paths.domain, { recursive: true });
   await mkdir(paths.environment, { recursive: true });
+  await mkdir(join(paths.environment, "docs"), { recursive: true });
+  await mkdir(join(paths.environment, "resources"), { recursive: true });
   await mkdir(paths.life, { recursive: true });
   await mkdir(paths.backlog, { recursive: true });
   await mkdir(paths.lineage, { recursive: true });

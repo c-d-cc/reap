@@ -25,22 +25,11 @@ Brainstorming is triggered based on goal complexity — simple tasks skip it, co
 
 ## Steps
 
-### 1. Environment Scan
-- Read all files in `.reap/environment/`
-- This directory stores external context: external API docs, product requirements, team decision logs, reference materials, etc.
-- **If empty (first time setup)**, conduct an interactive Environment setup:
-  1. **Brief the human on what Environment means**:
-     > "Environment is where we record information **external to this project** — things that affect development but are outside the project's direct control.
-     > Unlike the Genome (design and knowledge the team decides), Environment captures the **constraints and context from the outside world**:
-     > connected systems, infrastructure, organizational rules, external API specs, etc."
-  2. **Ask questions interactively** (one at a time, skip if not applicable):
-     - "Are there any **connected systems**? (other services, external APIs, legacy systems, etc.)"
-     - "What is the **infrastructure/deployment environment**? (cloud, on-premise, containers, etc.)"
-     - "Are there **organizational rules or guidelines** to follow? (company standards, coding policies, security policies, regulatory compliance, etc.)"
-     - "Are there **external reference documents** to incorporate? (API specs, system architecture diagrams, integration guides, etc.)"
-  3. **Save collected information** to `.reap/environment/` as structured markdown files (e.g., `integrations.md`, `infrastructure.md`, `org-guidelines.md`)
-  4. If the human has nothing to add, that's fine — Environment is optional
-- If files already exist, review them and ask if any updates are needed
+### 1. Environment Check
+- Read `.reap/environment/summary.md`
+- If summary.md exists: review it for relevant context to this generation's goal
+- **If empty or missing**: inform the user — "Environment가 설정되지 않았습니다. `/reap.sync.environment`로 외부 환경 정보를 설정할 수 있습니다."
+  - Do NOT block — proceed with the objective. Environment is optional but recommended.
 
 ### 2. Previous Generation Reference
 - If a `05-completion.md` exists for the most recent generation in `.reap/lineage/`, read it

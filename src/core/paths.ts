@@ -22,8 +22,11 @@ export class ReapPaths {
   get constraints(): string { return join(this.genome, "constraints.md"); }
   get sourceMap(): string { return join(this.genome, "source-map.md"); }
 
-  // Environment
+  // Environment (3-layer: summary + docs + resources)
   get environment(): string { return join(this.root, "environment"); }
+  get environmentSummary(): string { return join(this.environment, "summary.md"); }
+  get environmentDocs(): string { return join(this.environment, "docs"); }
+  get environmentResources(): string { return join(this.environment, "resources"); }
 
   // Life (current generation)
   get life(): string { return join(this.root, "life"); }
