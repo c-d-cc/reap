@@ -32,11 +32,20 @@ export class OpenCodeAdapter implements AgentAdapter {
   }
 
   async installCommands(commandNames: string[], sourceDir: string): Promise<void> {
-    await mkdir(this.commandsDir, { recursive: true });
+    // Install originals to ~/.reap/commands/ (shared with Claude Code)
+    await mkdir(ReapPaths.userReapCommands, { recursive: true });
     for (const cmd of commandNames) {
       const src = join(sourceDir, `${cmd}.md`);
-      const dest = join(this.commandsDir, `${cmd}.md`);
+      const dest = join(ReapPaths.userReapCommands, `${cmd}.md`);
       await writeTextFile(dest, await readTextFileOrThrow(src));
+    }
+
+    // Install redirect stubs to ~/.config/opencode/commands/ (Phase 1 backward compat)
+    await mkdir(this.commandsDir, { recursive: true });
+    for (const cmd of commandNames) {
+      const dest = join(this.commandsDir, `${cmd}.md`);
+      const redirectContent = `---\ndescription: "REAP — redirected to ~/.reap/commands/"\n---\nRead \`~/.reap/commands/${cmd}.md\` and follow the instructions there.\n`;
+      await writeTextFile(dest, redirectContent);
     }
   }
 
