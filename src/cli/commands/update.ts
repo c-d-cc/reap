@@ -1,5 +1,6 @@
 import { readdir, unlink, rm, mkdir, chmod } from "fs/promises";
 import { join } from "path";
+import { execSync } from "child_process";
 import { ReapPaths } from "../../core/paths";
 import { AgentRegistry } from "../../core/agents";
 import { migrateHooks } from "../../core/hooks";
@@ -11,6 +12,29 @@ interface UpdateResult {
   updated: string[];
   skipped: string[];
   removed: string[];
+}
+
+export interface SelfUpgradeResult {
+  upgraded: boolean;
+  from?: string;
+  to?: string;
+}
+
+/**
+ * Check for newer @c-d-cc/reap on npm and upgrade if available.
+ */
+export function selfUpgrade(): SelfUpgradeResult {
+  try {
+    const installed = execSync("reap --version", { encoding: "utf-8", timeout: 5_000 }).trim();
+    const latest = execSync("npm view @c-d-cc/reap version", { encoding: "utf-8", timeout: 10_000 }).trim();
+    if (installed === latest) {
+      return { upgraded: false };
+    }
+    execSync("npm update -g @c-d-cc/reap", { encoding: "utf-8", timeout: 60_000, stdio: "pipe" });
+    return { upgraded: true, from: installed, to: latest };
+  } catch {
+    return { upgraded: false };
+  }
 }
 
 export async function updateProject(projectRoot: string, dryRun: boolean = false): Promise<UpdateResult> {

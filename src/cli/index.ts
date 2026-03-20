@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 import { program } from "commander";
 import { initProject } from "./commands/init";
-import { updateProject } from "./commands/update";
+import { updateProject, selfUpgrade } from "./commands/update";
 import { getStatus } from "./commands/status";
 import { fixProject } from "./commands/fix";
 import { LifeCycle } from "../core/lifecycle";
@@ -113,10 +113,19 @@ program
 
 program
   .command("update")
-  .description("Sync slash commands, templates, and hooks to the latest version")
+  .description("Upgrade REAP package and sync slash commands, templates, and hooks")
   .option("--dry-run", "Show changes without applying them")
   .action(async (options: { dryRun?: boolean }) => {
     try {
+      // Step 1: Self-upgrade npm package
+      if (!options.dryRun) {
+        const upgrade = selfUpgrade();
+        if (upgrade.upgraded) {
+          console.log(`Upgraded: v${upgrade.from} → v${upgrade.to}`);
+        }
+      }
+
+      // Step 2: Sync project files
       const result = await updateProject(process.cwd(), options.dryRun ?? false);
       if (options.dryRun) {
         console.log("[dry-run] Changes that would be applied:");
