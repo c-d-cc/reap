@@ -1,8 +1,0 @@
-id: gen-062-b81b66
-type: normal
-parents:
-  - gen-061-c50f6c
-goal: "스킬 로딩 최적화 Phase 1 — ~/.reap/commands + session hook symlink"
-genomeHash: e0722b95f18f
-startedAt: 2026-03-20T03:12:08Z
-completedAt: 2026-03-20T03:17:09Z

@@ -1,8 +1,0 @@
-id: gen-047-c66f55
-type: normal
-parents:
-  - gen-046-b949b6
-goal: "Merge genome 지식 체계화 + reap.merge.* slash commands + merge hooks"
-genomeHash: e057bc17
-startedAt: "2026-03-19T12:36:06.538Z"
-completedAt: "2026-03-19T12:52:00.000Z"

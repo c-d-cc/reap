@@ -1,8 +1,0 @@
-id: gen-051-c5ff37
-type: normal
-parents:
-  - gen-050-caf64b
-goal: "CLI pull/push/merge 제거 + merge lifecycle 6단계 전환 + docs 업데이트"
-genomeHash: e057bc17
-startedAt: "2026-03-19T13:34:45.493Z"
-completedAt: "2026-03-20T01:30:00.000Z"

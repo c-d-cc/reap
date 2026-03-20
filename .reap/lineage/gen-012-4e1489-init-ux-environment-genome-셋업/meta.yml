@@ -1,8 +1,0 @@
-id: gen-012-4e1489
-type: normal
-parents:
-  - gen-011-5fb4b8
-goal: reap init UX 개선 + Environment/Genome 대화형 셋업
-genomeHash: legacy
-startedAt: legacy-12
-completedAt: legacy-12

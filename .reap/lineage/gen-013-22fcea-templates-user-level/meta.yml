@@ -1,8 +1,0 @@
-id: gen-013-22fcea
-type: normal
-parents:
-  - gen-012-4e1489
-goal: artifact templates + domain guide를 ~/.reap/templates/로 이전
-genomeHash: legacy
-startedAt: legacy-13
-completedAt: legacy-13

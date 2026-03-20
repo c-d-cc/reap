@@ -1,8 +1,0 @@
-id: gen-052-fc018e
-type: normal
-parents:
-  - gen-051-c5ff37
-goal: "regression planning append + workflow guard 강화 + strict 모드 세분화"
-genomeHash: e057bc17
-startedAt: "2026-03-19T15:50:53.307Z"
-completedAt: "2026-03-20T02:10:00.000Z"

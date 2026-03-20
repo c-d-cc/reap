@@ -1,9 +1,0 @@
-id: gen-022-9a9b45
-type: normal
-parents:
-  - gen-022-18353b
-goal: docs 구조를 개선한다. Advanced 페이지에서 "다른 도구와의 비교" 섹션을 별도 Comparison 페이지로 분리하고,
-  sidebar 메뉴 구조를 재구성한다.
-genomeHash: legacy
-startedAt: legacy-22
-completedAt: legacy-22

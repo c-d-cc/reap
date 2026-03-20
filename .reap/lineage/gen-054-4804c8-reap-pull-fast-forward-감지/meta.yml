@@ -1,8 +1,0 @@
-id: gen-054-4804c8
-type: normal
-parents:
-  - gen-053-eb8151
-goal: "reap.pull fast-forward 감지"
-genomeHash: e057bc17
-startedAt: "2026-03-19T19:07:14.988Z"
-completedAt: "2026-03-20T04:00:00.000Z"

@@ -9,8 +9,8 @@ import type { ReapConfig } from "../../types";
 export const COMMAND_NAMES = [
   "reap.objective", "reap.planning", "reap.implementation",
   "reap.validation", "reap.completion", "reap.evolve",
-  "reap.start", "reap.next", "reap.back", "reap.status", "reap.sync", "reap.help",
-  "reap.update",
+  "reap.start", "reap.next", "reap.back", "reap.abort",
+  "reap.status", "reap.sync", "reap.help", "reap.update",
   "reap.merge.start", "reap.merge.detect", "reap.merge.mate",
   "reap.merge.merge", "reap.merge.sync", "reap.merge.validation",
   "reap.merge.completion", "reap.merge.evolve",

@@ -1,8 +1,0 @@
-id: gen-034-d83d89
-type: normal
-parents:
-  - gen-033-ceea92
-goal: v0.3.0 docs full scan 갱신 + docs-update hook 버전 수준별 동작 규칙 추가
-genomeHash: legacy
-startedAt: legacy-34
-completedAt: legacy-34

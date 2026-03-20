@@ -1,9 +1,0 @@
-id: gen-021-0d038f
-type: normal
-parents:
-  - gen-020-594bcb
-goal: docs 페이지에 다국어(i18n) 지원을 추가한다. nav header 오른쪽 상단(GitHub 버튼 왼쪽)에 언어 선택 UI를
-  배치하고, 브라우저/환경 기반 자동 언어 감지를 구현하며, 한글 번역을 추가한다. 추후 다른 언어 확장이 용이한 구조로 설계한다.
-genomeHash: legacy
-startedAt: legacy-21
-completedAt: legacy-21

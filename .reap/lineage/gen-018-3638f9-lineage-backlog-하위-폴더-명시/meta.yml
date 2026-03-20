@@ -1,8 +1,0 @@
-id: gen-018-3638f9
-type: normal
-parents:
-  - gen-017-9eb597
-goal: lineage 아카이빙 시 backlog를 backlog/ 하위 폴더에 저장하도록 명시
-genomeHash: legacy
-startedAt: legacy-18
-completedAt: legacy-18

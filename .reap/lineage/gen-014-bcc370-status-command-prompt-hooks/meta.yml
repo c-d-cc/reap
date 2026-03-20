@@ -1,8 +1,0 @@
-id: gen-014-bcc370
-type: normal
-parents:
-  - gen-013-22fcea
-goal: /reap.status slash command + hooks prompt 타입 지원 + 문서 자동 업데이트 hook
-genomeHash: legacy
-startedAt: legacy-14
-completedAt: legacy-14

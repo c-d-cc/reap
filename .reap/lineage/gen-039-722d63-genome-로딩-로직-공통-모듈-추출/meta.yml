@@ -1,9 +1,0 @@
-id: gen-039-722d63
-type: normal
-parents:
-  - gen-036-0ba2b6
-goal: session-start.cjs / opencode-session-start.js 간 Genome 로딩 로직을 공통 모듈로 추출하고,
-  opencode 측 source-map.md 누락 불일치를 수정한다.
-genomeHash: legacy
-startedAt: legacy-39
-completedAt: legacy-39

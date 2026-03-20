@@ -1,8 +1,0 @@
-id: gen-032-68799c
-type: normal
-parents:
-  - gen-031-577bcc
-goal: source-map 템플릿/로딩 정비 + hooks 네이밍 컨벤션(event prefix) + config.yml hooks 제거
-genomeHash: legacy
-startedAt: legacy-32
-completedAt: legacy-32

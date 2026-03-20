@@ -1,9 +1,0 @@
-id: gen-023-820088
-type: normal
-parents:
-  - gen-022-9a9b45
-goal: docs에 일본어(ja)와 중국어 간체(zh-CN) 번역을 추가한다. 기존 i18n 인프라(gen-021)를 활용하여 번역 파일만
-  추가하고 Locale 타입을 확장한다.
-genomeHash: legacy
-startedAt: legacy-23
-completedAt: legacy-23

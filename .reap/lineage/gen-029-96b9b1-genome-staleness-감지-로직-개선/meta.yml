@@ -1,9 +1,0 @@
-id: gen-029-96b9b1
-type: normal
-parents:
-  - gen-026-de2543
-goal: Genome staleness 감지 로직 개선 — 소스 코드와 무관한 커밋(docs, README 등)이 staleness 카운트에
-  포함되어 오탐이 발생하는 문제를 수정한다.
-genomeHash: legacy
-startedAt: legacy-29
-completedAt: legacy-29

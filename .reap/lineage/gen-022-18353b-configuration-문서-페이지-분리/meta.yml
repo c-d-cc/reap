@@ -1,8 +1,0 @@
-id: gen-022-18353b
-type: normal
-parents:
-  - gen-021-f1f804
-goal: Configuration 문서 페이지 분리 — strict 모드를 HookReferencePage에서 ConfigurationPage로 이동
-genomeHash: legacy
-startedAt: legacy-22
-completedAt: legacy-22

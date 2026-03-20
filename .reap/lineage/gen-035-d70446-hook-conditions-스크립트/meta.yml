@@ -1,8 +1,0 @@
-id: gen-035-d70446
-type: normal
-parents:
-  - gen-034-d83d89
-goal: Hook conditions를 user-definable 스크립트 기반으로 전환 (.reap/hooks/conditions/)
-genomeHash: legacy
-startedAt: legacy-35
-completedAt: legacy-35
