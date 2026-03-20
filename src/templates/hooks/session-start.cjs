@@ -6,7 +6,7 @@ const gl = require('./genome-loader.cjs');
 
 const startTime = Date.now();
 let step = 0;
-const totalSteps = 6;
+const totalSteps = 7;
 
 function log(msg) {
   step++;
@@ -26,6 +26,47 @@ const guideFile = path.join(scriptDir, 'reap-guide.md');
 if (!gl.dirExists(reapDir)) {
   process.stderr.write('[REAP] Not a REAP project, skipping\n');
   process.exit(0);
+}
+
+// Step 0: Install project-level command symlinks
+const fs = require('fs');
+const os = require('os');
+const userReapCommands = path.join(os.homedir(), '.reap', 'commands');
+const projectClaudeCommands = path.join(projectRoot, '.claude', 'commands');
+
+if (gl.dirExists(userReapCommands)) {
+  try {
+    fs.mkdirSync(projectClaudeCommands, { recursive: true });
+    const cmdFiles = fs.readdirSync(userReapCommands).filter(f => f.startsWith('reap.') && f.endsWith('.md'));
+    for (const file of cmdFiles) {
+      const src = path.join(userReapCommands, file);
+      const dest = path.join(projectClaudeCommands, file);
+      try {
+        const stat = fs.lstatSync(dest);
+        if (stat.isSymbolicLink()) {
+          const target = fs.readlinkSync(dest);
+          if (target === src) continue; // already correct
+          fs.unlinkSync(dest); // stale symlink
+        } else {
+          // Regular file (old redirect or original) — replace with symlink
+          fs.unlinkSync(dest);
+        }
+      } catch { /* dest doesn't exist */ }
+      fs.symlinkSync(src, dest);
+    }
+    // Ensure .gitignore excludes these symlinks
+    const gitignorePath = path.join(projectRoot, '.gitignore');
+    const gitignoreEntry = '.claude/commands/reap.*';
+    try {
+      const gitignore = fs.existsSync(gitignorePath) ? fs.readFileSync(gitignorePath, 'utf-8') : '';
+      if (!gitignore.includes(gitignoreEntry)) {
+        fs.appendFileSync(gitignorePath, `\n# REAP command symlinks (managed by session-start hook)\n${gitignoreEntry}\n`);
+      }
+    } catch { /* best effort */ }
+    process.stderr.write(`[REAP] Symlinked ${cmdFiles.length} commands to .claude/commands/\n`);
+  } catch (err) {
+    process.stderr.write(`[REAP] Warning: failed to create command symlinks: ${err.message}\n`);
+  }
 }
 
 // Step 1: Version check + Auto-update

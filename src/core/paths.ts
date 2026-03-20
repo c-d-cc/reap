@@ -46,9 +46,10 @@ export class ReapPaths {
   /** @deprecated Use ClaudeCodeAdapter instead */
   static get userClaudeSettingsJson(): string { return join(ReapPaths.userClaudeDir, "settings.json"); }
 
-  // User-level REAP templates
+  // User-level REAP templates and commands
   static get userReapDir(): string { return join(homedir(), ".reap"); }
   static get userReapTemplates(): string { return join(ReapPaths.userReapDir, "templates"); }
+  static get userReapCommands(): string { return join(ReapPaths.userReapDir, "commands"); }
 
   // Package-internal template paths
   // Dev: src/core/ → ../templates = src/templates/

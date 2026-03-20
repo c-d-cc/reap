@@ -28,24 +28,42 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
   // Get active agents
   const adapters = await AgentRegistry.getActiveAdapters(config ?? undefined);
 
-  // 1. Sync slash commands to each agent
+  // 1. Sync slash commands: originals to ~/.reap/commands/, redirects to agent dirs
   const commandsDir = ReapPaths.packageCommandsDir;
   const commandFiles = await readdir(commandsDir);
+
+  // 1a. Sync originals to ~/.reap/commands/
+  await mkdir(ReapPaths.userReapCommands, { recursive: true });
+  for (const file of commandFiles) {
+    if (!file.endsWith(".md")) continue;
+    const src = await readTextFileOrThrow(join(commandsDir, file));
+    const dest = join(ReapPaths.userReapCommands, file);
+    const existing = await readTextFile(dest);
+    if (existing !== null && existing === src) {
+      result.skipped.push(`~/.reap/commands/${file}`);
+    } else {
+      if (!dryRun) await writeTextFile(dest, src);
+      result.updated.push(`~/.reap/commands/${file}`);
+    }
+  }
+
+  // 1b. Sync redirect stubs to each agent's commands dir
   for (const adapter of adapters) {
     const agentCmdDir = adapter.getCommandsDir();
     const label = `${adapter.displayName}`;
 
     for (const file of commandFiles) {
       if (!file.endsWith(".md")) continue;
-      const src = await readTextFileOrThrow(join(commandsDir, file));
+      const cmdName = file.replace(/\.md$/, "");
+      const redirectContent = `---\ndescription: "REAP — redirected to ~/.reap/commands/"\n---\nRead \`~/.reap/commands/${cmdName}.md\` and follow the instructions there.\n`;
       const dest = join(agentCmdDir, file);
       const existingContent = await readTextFile(dest);
-      if (existingContent !== null && existingContent === src) {
+      if (existingContent !== null && existingContent === redirectContent) {
         result.skipped.push(`[${label}] commands/${file}`);
       } else {
         if (!dryRun) {
           await mkdir(agentCmdDir, { recursive: true });
-          await writeTextFile(dest, src);
+          await writeTextFile(dest, redirectContent);
         }
         result.updated.push(`[${label}] commands/${file}`);
       }
