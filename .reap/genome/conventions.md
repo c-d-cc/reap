@@ -33,7 +33,7 @@
 - **릴리스 흐름**: `npm version patch/minor/major` → `git push && git push --tags`
 - **자동화 단계**: 테스트 → 빌드 → 버전 검증 (tag = package.json) → npm publish → GitHub Release 생성
 - **버전 주입**: `scripts/build.js`가 `package.json` 버전을 빌드 시 `--define`으로 주입 — 소스에 버전 하드코딩 금지
-- **릴리스 노트**: `RELEASE_NOTES.md` — version bump 시 `onGenerationComplete` hook이 자동 생성. `release.yml`에서 참조 (없으면 `--generate-notes` fallback)
+- **릴리스 노트**: `RELEASE_NOTES.md` — `/reapdev.versionBump` 커맨드가 생성. `release.yml`에서 참조 (없으면 `--generate-notes` fallback)
 
 ## Template Conventions
 
@@ -50,6 +50,12 @@
 - 산출물(artifact), backlog, 사용자 인터랙션: 유저의 language 설정을 따름
 - Genome 파일: 유저의 language 설정을 따름
 - 소스 템플릿(`src/templates/`): 영어 유지 (범용)
+
+## Testing Conventions
+
+- Lifecycle 관련 변경(compression, generation, merge, abort 등)은 **E2E 테스트 필수**
+- E2E 테스트: sandbox(temp dir)에서 .reap 프로젝트 셋업 후 실제 동작 검증
+- 단위 테스트: `tests/` (private submodule)
 
 ## Enforced Rules
 
