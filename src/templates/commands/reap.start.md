@@ -21,7 +21,12 @@ description: "REAP Start — Start a new Generation"
 
 1. Ask the human for the goal of this generation (or use selected backlog item's goal)
 2. Count existing generations in `.reap/lineage/` to determine the genomeVersion
-3. Generate the next generation ID (existing count + 1, in `gen-XXX-{hash}` format where `{hash}` is a short content hash)
+3. Generate the next generation ID:
+   - Format: `gen-{NNN}-{hash}` (e.g. `gen-042-a3f8c2`)
+   - `{NNN}`: zero-padded 3-digit sequence (existing count + 1)
+   - `{hash}`: **6-character hex** — first 6 chars of `sha256(JSON.stringify({parents, goal, genomeHash, machineId, startedAt}))`
+   - Generate using: `node -e "const crypto=require('crypto');console.log(crypto.createHash('sha256').update(JSON.stringify({parents:[],goal:'...',genomeHash:'...',machineId:require('os').hostname(),startedAt:new Date().toISOString()})).digest('hex').slice(0,6))"`
+   - **`{hash}` MUST be a real cryptographic hash (hex characters 0-9a-f only). NEVER use words, abbreviations, or human-readable slugs.** Wrong: ~~gen-001-botup~~, ~~gen-002-login~~. Correct: `gen-001-a3f8c2`, `gen-002-7b2e1f`.
 4. **If a backlog item was selected in Step 0**: now mark it as `status: consumed` and add `consumedBy: gen-XXX-{hash}` (using the ID just generated)
 6. Write the following to `current.yml`:
    ```yaml

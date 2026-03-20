@@ -58,6 +58,13 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 ### Generation
 A single generation. Carries one goal through the Life Cycle. State is tracked in `life/current.yml`.
 
+**Generation ID format**: `gen-{NNN}-{hash}` (e.g. `gen-042-a3f8c2`)
+- `{NNN}`: zero-padded 3-digit sequence
+- `{hash}`: 6-character hex — first 6 chars of `sha256(JSON.stringify({parents, goal, genomeHash, machineId, startedAt}))`
+- Generate via: `node -e "const c=require('crypto'),o=require('os');console.log(c.createHash('sha256').update(JSON.stringify({parents:[],goal:'YOUR_GOAL',genomeHash:'',machineId:o.hostname(),startedAt:new Date().toISOString()})).digest('hex').slice(0,6))"`
+- **`{hash}` MUST be real hex (0-9a-f). NEVER use words or slugs** (wrong: ~~gen-001-botup~~)
+- Lineage directory appends a goal slug: `gen-042-a3f8c2-fix-login-bug`
+
 ### Backlog
 All items to be carried forward to the next generation are stored in `.reap/life/backlog/`. Each item uses markdown + frontmatter format:
 - `type: genome-change` — Applied to genome during Completion (genome defects discovered mid-generation)
