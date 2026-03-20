@@ -3,7 +3,8 @@ import { execSync } from "child_process";
 import { readFileSync } from "fs";
 
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
-const version = pkg.version;
+const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
+const version = isCI ? pkg.version : `${pkg.version}+dev`;
 
 execSync(
   `bun build src/cli/index.ts --outfile dist/cli.js --target node --define 'process.env.__REAP_VERSION__="${version}"'`,
