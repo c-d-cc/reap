@@ -23,8 +23,17 @@ This command is the **ONLY legitimate way** to advance the lifecycle stage. All 
 - Immediately create the next stage's artifact file from template (empty, ready to fill)
 
 ### Hook Execution (Stage Transition)
-- Scan `.reap/hooks/` for files matching `onStageTransition.*`
-- For each matched file (sorted by `order` from frontmatter, then alphabetically):
+Execute two sets of hooks in order:
+
+1. **Stage-specific hook** — based on the stage that just completed:
+   - objective → planning: `onLifeObjected.*`
+   - planning → implementation: `onLifePlanned.*`
+   - implementation → validation: `onLifeImplemented.*`
+   - validation → completion: `onLifeValidated.*`
+
+2. **Generic transition hook** — `onLifeTransited.*` (fires on every transition)
+
+For each matched file (sorted by `order` from frontmatter, then alphabetically):
   1. Read the frontmatter (`condition`, `order`)
   2. Evaluate `condition` by running `.reap/hooks/conditions/{condition}.sh` (exit 0 = met, non-zero = skip):
      - If `condition` is absent: treat as `always`
@@ -64,7 +73,7 @@ This command is the **ONLY legitimate way** to advance the lifecycle stage. All 
   - If there are no code changes (REAP-only generation), use `chore(reap): [goal summary]`
 
 ### Hook Execution (Generation Complete)
-- Scan `.reap/hooks/` for files matching `onGenerationComplete.*`
+- Scan `.reap/hooks/` for files matching `onLifeCompleted.*`
 - For each matched file (sorted by `order` from frontmatter, then alphabetically):
   1. Read the frontmatter (`condition`, `order`)
   2. Evaluate `condition` by running `.reap/hooks/conditions/{condition}.sh` (exit 0 = met, non-zero = skip):

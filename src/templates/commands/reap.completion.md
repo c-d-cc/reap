@@ -81,10 +81,10 @@ Do NOT finalize Genome changes without running Validation Commands.
     a. **Describe the pattern**: "최근 N개 generation에서 '[작업 설명]'이 반복적으로 수행되었습니다."
     b. **Ask if it should be a hook**: "이 작업을 hook으로 자동화할까요? (yes/no)"
     c. If yes, ask **event**: "어떤 이벤트에서 실행할까요?"
-       - `onGenerationComplete` — generation 완료 후
-       - `onStageTransition` — stage 전환 시
-       - `onGenerationStart` — generation 시작 시
-       - `onRegression` — stage 회귀 시
+       - `onLifeCompleted` — generation 완료 후
+       - `onLifeTransited` — stage 전환 시
+       - `onLifeStarted` — generation 시작 시
+       - `onLifeRegretted` — stage 회귀 시
     d. Ask **condition**: "실행 조건은 무엇인가요?"
        - `always` — 항상
        - `has-code-changes` — src/ 변경이 있을 때

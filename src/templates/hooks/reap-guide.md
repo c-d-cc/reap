@@ -110,19 +110,18 @@ Hooks are defined as individual files in `.reap/hooks/` with the naming conventi
 
 ```
 .reap/hooks/
-├── onGenerationComplete.version-bump.md
-├── onGenerationComplete.reap-update.sh
-├── onGenerationComplete.docs-update.md
-└── onGenerationComplete.release-notes.md
+├── onLifeCompleted.reap-update.sh
+├── onLifeCompleted.docs-update.md
+├── onLifeImplemented.lint-check.sh
+└── onMergeMated.notify.md
 ```
 
 File naming: `{event}.{name}.{extension}`
-- Event: onGenerationStart, onStageTransition, onGenerationComplete, onRegression
 - Extension: `.md` (AI prompt) or `.sh` (shell script)
+- Frontmatter: `condition` (default: `always`), `order` (default: 50, lower runs first)
 
-Frontmatter (`.md` files) or comment headers (`.sh` files):
-- `condition`: name of a script in `.reap/hooks/conditions/` (default: `always`)
-- `order`: execution order within the same event (default: 50, lower runs first)
+Normal events: `onLifeStarted`, `onLifeObjected`, `onLifePlanned`, `onLifeImplemented`, `onLifeValidated`, `onLifeCompleted`, `onLifeTransited`, `onLifeRegretted`
+Merge events: `onMergeStarted`, `onMergeDetected`, `onMergeMated`, `onMergeMerged`, `onMergeSynced`, `onMergeValidated`, `onMergeCompleted`, `onMergeTransited`
 
 ### Conditions
 
@@ -135,14 +134,13 @@ Default conditions (installed by `reap init`):
 
 Custom conditions: add any `.sh` script to `.reap/hooks/conditions/`. The hook's `condition` field matches the filename (without `.sh`).
 
-| Event | Trigger |
-|-------|---------|
-| `onGenerationStart` | After `/reap.start` creates a new generation |
-| `onStageTransition` | After `/reap.next` advances to the next stage |
-| `onGenerationComplete` | After `/reap.next` archives a completed generation (after commit) |
-| `onRegression` | After `/reap.back` returns to a previous stage |
+### Execution
 
-Hooks are executed by the AI agent by scanning `.reap/hooks/` for files matching the current event.
+Hooks are executed by the AI agent by scanning `.reap/hooks/` for files matching the current event:
+- `.md` files: read as AI prompt and follow the instructions
+- `.sh` files: run as shell script in the project root directory
+- Within the same event, hooks run in `order` (lower first), then alphabetically
+- `onLifeCompleted`/`onMergeCompleted` hooks run after git commit — changes are uncommitted
 
 ## Multi-Agent Support
 

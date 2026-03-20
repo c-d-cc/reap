@@ -405,35 +405,45 @@ strict:
     fileNamingFrontmatter: "각 hook 파일은 선택적 YAML frontmatter를 지원합니다:",
     frontmatterHeaders: ["필드", "설명"],
     frontmatterItems: [
-      ["condition", "hook이 실행되기 위해 참이어야 하는 표현식 (예: stage == 'implementation')"],
+      ["condition", ".reap/hooks/conditions/ 폴더의 조건 스크립트 이름 (예: always, has-code-changes, version-bumped)"],
       ["order", "같은 이벤트에 여러 hook이 있을 때 실행 순서 (기본값: 0)"],
     ],
     events: "Events",
+    normalEventsTitle: "Normal Lifecycle Events",
+    mergeEventsTitle: "Merge Lifecycle Events",
     eventHeaders: ["Event", "발생 시점"],
     eventItems: [
-      ["onGenerationStart", "/reap.start가 새 Generation을 생성하고 current.yml을 작성한 후"],
-      ["onStageTransition", "/reap.next가 다음 단계로 전진하고 새 산출물을 생성한 후"],
-      ["onGenerationComplete", "/reap.next가 완료된 Generation을 보관한 후. git commit 이후에 실행되므로 hooks의 변경사항은 uncommitted"],
-      ["onRegression", "/reap.back이 이전 단계로 복귀한 후"],
-      ["onMergeStart", "/reap.merge.start가 병합 Generation을 생성한 후"],
-      ["onGenomeMated", "Genome 충돌 해결 완료 후 (mate 단계)"],
-      ["onSourceMerged", "소스 코드 머지 완료 후"],
-      ["onMergeComplete", "병합 Generation이 보관된 후"],
+      ["onLifeStarted", "/reap.start가 새 Generation을 생성한 후"],
+      ["onLifeObjected", "objective 단계 완료 후"],
+      ["onLifePlanned", "planning 단계 완료 후"],
+      ["onLifeImplemented", "implementation 단계 완료 후"],
+      ["onLifeValidated", "validation 단계 완료 후"],
+      ["onLifeCompleted", "completion + archiving 후 (git commit 이후 실행)"],
+      ["onLifeTransited", "모든 stage 전환 시 (범용)"],
+      ["onLifeRegretted", "/reap.back regression 시"],
+      ["onMergeStarted", "/reap.merge.start가 병합 Generation을 생성한 후"],
+      ["onMergeDetected", "detect 단계 완료 후"],
+      ["onMergeMated", "mate 단계 완료 후 (genome 확정)"],
+      ["onMergeMerged", "merge 단계 완료 후 (소스 병합)"],
+      ["onMergeSynced", "sync 단계 완료 후"],
+      ["onMergeValidated", "merge validation 완료 후"],
+      ["onMergeCompleted", "merge completion + archiving 후"],
+      ["onMergeTransited", "모든 merge stage 전환 시 (범용)"],
     ],
     configuration: "파일 기반 설정",
     configurationDesc: "Hook은 파일 기반입니다 — config.yml이 아닌 .reap/hooks/에 저장. 각 hook은 {event}.{name}.{md|sh} 형식.",
     configExample: `# .reap/hooks/ 디렉토리 구조
 #
 # .reap/hooks/
-# ├── onGenerationStart.notify.sh
-# ├── onStageTransition.lint.sh
-# ├── onGenerationComplete.update.sh
-# ├── onGenerationComplete.docs-review.md
-# └── onRegression.log.md
+# ├── onLifeStarted.notify.sh
+# ├── onLifeTransited.lint.sh
+# ├── onLifeCompleted.update.sh
+# ├── onLifeCompleted.docs-review.md
+# └── onLifeRegretted.log.md
 #
-# 예시: onGenerationComplete.docs-review.md
+# 예시: onLifeCompleted.docs-review.md
 # ---
-# condition: stage == 'completion'
+# condition: has-code-changes
 # order: 10
 # ---
 # 이번 Generation에서 변경된 내용을 검토하라.
@@ -441,7 +451,7 @@ strict:
 # 수정되었다면 README.md와 docs를 업데이트하라.
 # 문서 업데이트가 필요 없으면 건너뛰어라.
 #
-# 예시: onStageTransition.lint.sh
+# 예시: onLifeTransited.lint.sh
 # ---
 # order: 0
 # ---
@@ -459,7 +469,7 @@ strict:
       "command hooks는 프로젝트 루트 디렉토리에서 실행됩니다.",
       "prompt hooks는 현재 세션 컨텍스트에서 AI 에이전트가 해석합니다.",
       "같은 이벤트 내 hooks는 정의된 순서대로 순차 실행됩니다.",
-      "onGenerationComplete hooks는 git commit 이후에 실행됩니다 — hooks의 파일 변경사항은 uncommitted 상태입니다.",
+      "onLifeCompleted hooks는 git commit 이후에 실행됩니다 — hooks의 파일 변경사항은 uncommitted 상태입니다.",
     ],
   },
 
@@ -587,12 +597,16 @@ strict:
     mergeHooks: "병합 Hooks",
     mergeHookHeaders: ["Event", "발생 시점"],
     mergeHookItems: [
-      ["onMergeStart", "/reap.merge.start가 병합 Generation을 생성한 후"],
-      ["onGenomeMated", "Genome 충돌 해결 완료 후 (mate 단계)"],
-      ["onSourceMerged", "소스 코드 머지 완료 후"],
-      ["onMergeComplete", "병합 Generation이 보관된 후"],
+      ["onMergeStarted", "/reap.merge.start가 병합 Generation을 생성한 후"],
+      ["onMergeDetected", "detect 단계 완료 후"],
+      ["onMergeMated", "mate 단계 완료 후 (genome 확정)"],
+      ["onMergeMerged", "merge 단계 완료 후 (소스 병합)"],
+      ["onMergeSynced", "sync 단계 완료 후"],
+      ["onMergeValidated", "merge validation 완료 후"],
+      ["onMergeCompleted", "merge completion + archiving 후"],
+      ["onMergeTransited", "모든 merge stage 전환 시 (범용)"],
     ],
-    mergeHookNote: "일반 hooks(onStageTransition, onRegression)도 병합 단계 전환 시 발생합니다.",
+    mergeHookNote: "onMergeTransited는 모든 merge stage 전환 시 발동. onLifeTransited의 merge 버전.",
   },
 
   // Comparison Page
@@ -606,7 +620,7 @@ strict:
       { title: "세션 간 메모리 없음", desc: "대부분의 AI 개발 도구는 세션 간 컨텍스트를 잃습니다. REAP의 SessionStart Hook은 전체 프로젝트 컨텍스트(Genome, Generation 상태, 워크플로우 규칙)를 매 새 세션에 자동으로 주입합니다." },
       { title: "선형 워크플로우 vs Micro loops", desc: "기존 도구는 선형 흐름(스펙 → 계획 → 구현)을 따릅니다. REAP은 구조화된 회귀를 지원합니다 — 산출물을 보존하면서 어떤 단계든 이전으로 돌아갈 수 있습니다." },
       { title: "독립 태스크 vs 세대별 진화", desc: "기존 도구의 각 태스크는 독립적입니다. REAP에서는 Generation이 서로를 기반으로 발전합니다. 지식이 Lineage 보관과 Genome 진화를 통해 복리로 축적됩니다." },
-      { title: "라이프사이클 hooks 없음", desc: "REAP은 자동화를 위한 프로젝트 수준 hooks(onGenerationStart, onStageTransition, onGenerationComplete, onRegression)를 제공합니다." },
+      { title: "라이프사이클 hooks 없음", desc: "REAP은 자동화를 위한 프로젝트 수준 hooks(onLifeStarted, onLifeTransited, onLifeCompleted, onLifeRegretted)를 제공합니다." },
     ],
   },
   genomePage: { title: "Genome", breadcrumb: "가이드", intro: "Genome은 REAP의 권위 있는 지식 소스입니다 — 아키텍처 원칙, 개발 컨벤션, 기술 제약, 도메인 규칙. 프로젝트의 DNA입니다.", structureTitle: "구조", structure: `.reap/genome/\n├── principles.md      # 아키텍처 원칙/결정 (ADR 스타일)\n├── conventions.md     # 개발 규칙/컨벤션\n├── constraints.md     # 기술 제약/선택\n├── source-map.md      # C4 Container/Component 다이어그램\n└── domain/            # 비즈니스 규칙 (모듈별)`, principlesTitle: "작성 원칙", principles: ["Map not Manual — 파일당 ~100줄. 상세는 domain/으로.", "에이전트가 즉시 행동할 수 있는 수준으로 작성.", "domain/은 비즈니스 규칙 전용 — 코드 구조가 아닌 정책, 임계값, 상태 전이.", "문서 규칙보다 lint/test 강제 우선."], immutabilityTitle: "Genome 불변 원칙", immutabilityDesc: "현재 세대는 Genome을 직접 수정하지 않습니다. 구현 중 발견된 이슈는 genome-change backlog 항목으로 기록하고 Completion 단계에서만 적용합니다.", contextTitle: "세션 컨텍스트", contextDesc: "Genome은 세션 시작 시 AI 에이전트의 컨텍스트에 자동으로 로딩됩니다. 에이전트는 항상 프로젝트의 원칙, 컨벤션, 제약, source map에 접근할 수 있습니다 — 별도 브리핑 불필요.", syncTitle: "소스 코드와 동기화", syncDesc: "/reap.sync.genome으로 소스 코드를 분석하고 Genome을 업데이트합니다. 활성 Generation이 없으면 직접 적용되고, 활성 Generation이 있으면 차이점이 backlog에 기록됩니다." },

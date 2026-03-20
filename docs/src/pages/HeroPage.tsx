@@ -10,8 +10,8 @@ import { useT } from "@/i18n";
 function Section({ title, children }: { title?: string; children: React.ReactNode }) {
   return (
     <section className="border-b border-border px-6 py-8 md:px-8">
-      <div className="max-w-4xl mx-auto">
-        <div className="max-w-3xl">
+      <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl">
           {title && (
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">{title}</div>
           )}
@@ -28,12 +28,12 @@ export function HeroPage() {
     <div className="h-screen bg-background flex flex-col overflow-hidden">
       <AppNavbar showGetStarted />
       <main className="flex-1 pt-11 md:pt-14 overflow-hidden flex justify-center">
-        <div className="w-full max-w-4xl overflow-y-auto flex flex-col">
+        <div className="w-full max-w-5xl overflow-y-auto flex flex-col">
 
         {/* Header */}
         <section className="border-b border-border px-6 py-10 md:px-8">
-          <div className="max-w-4xl mx-auto">
-          <div className="max-w-3xl">
+          <div className="max-w-5xl mx-auto">
+          <div className="max-w-5xl">
             <div className="text-xs font-mono text-muted-foreground border border-border rounded px-2 py-0.5 inline-block mb-4">
               {t.hero.tagline}
             </div>
@@ -41,7 +41,7 @@ export function HeroPage() {
               <img src={logoPath} alt="REAP" className="w-8 h-8" />
               {t.hero.title}
             </h1>
-            <p className="text-sm text-muted-foreground mb-5 max-w-2xl leading-relaxed">
+            <p className="text-sm text-muted-foreground mb-5 max-w-3xl leading-relaxed">
               {t.hero.description}
             </p>
             <div className="flex items-center gap-3">
@@ -170,9 +170,9 @@ reap init`}</CodeBlock>
 
 
         {/* Docs Links */}
-        <section className="px-6 py-8 md:px-8">
-          <div className="max-w-4xl mx-auto">
-        <div className="max-w-3xl">
+        <section className="px-6 py-8 pb-24 md:px-8 md:pb-8">
+          <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl">
             <div className="text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-4">{t.hero.documentation}</div>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
               {t.hero.docLinks.map((item) => (

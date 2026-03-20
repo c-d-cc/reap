@@ -44,9 +44,9 @@ reap.pull, reap.push, reap.merge.start, reap.merge.detect, reap.merge.mate, reap
 
 ## Hooks
 
-7개 event (merge 3개 추가):
-- Normal: onGenerationStart, onStageTransition, onGenerationComplete, onRegression
-- Merge: onMergeStart, onGenomeMated, onSourceMerged, onMergeComplete
+16개 event (stage-level):
+- Normal (8): onLifeStarted, onLifeObjected, onLifePlanned, onLifeImplemented, onLifeValidated, onLifeCompleted, onLifeTransited, onLifeRegretted
+- Merge (8): onMergeStarted, onMergeDetected, onMergeMated, onMergeMerged, onMergeSynced, onMergeValidated, onMergeCompleted, onMergeTransited
 파일 기반: `.reap/hooks/{event}.{name}.{md|sh}`. frontmatter: condition, order
 Conditions: `.reap/hooks/conditions/{name}.sh` (exit 0=true). 기본 3개 + 유저 커스텀
 

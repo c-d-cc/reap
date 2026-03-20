@@ -401,35 +401,45 @@ strict:
     fileNamingFrontmatter: "每个hook文件支持可选的YAML frontmatter：",
     frontmatterHeaders: ["字段", "说明"],
     frontmatterItems: [
-      ["condition", "hook运行前必须为真的表达式（例如: stage == 'implementation'）"],
+      ["condition", ".reap/hooks/conditions/文件夹中的条件脚本名称（例如: always, has-code-changes, version-bumped）"],
       ["order", "同一事件有多个hook时的执行顺序（默认: 0）"],
     ],
     events: "Events",
+    normalEventsTitle: "Normal Lifecycle Events",
+    mergeEventsTitle: "Merge Lifecycle Events",
     eventHeaders: ["Event", "触发时机"],
     eventItems: [
-      ["onGenerationStart", "/reap.start创建新Generation并写入current.yml之后"],
-      ["onStageTransition", "/reap.next前进到下一阶段并创建新产出物之后"],
-      ["onGenerationComplete", "/reap.next归档已完成的Generation之后。在git commit之后运行，因此hooks的变更处于uncommitted状态"],
-      ["onRegression", "/reap.back回到前一阶段之后"],
-      ["onMergeStart", "/reap.merge.start创建合并Generation之后"],
-      ["onGenomeMated", "Genome冲突解决完成后（mate阶段）"],
-      ["onSourceMerged", "源代码合并完成后"],
-      ["onMergeComplete", "合并Generation归档之后"],
+      ["onLifeStarted", "/reap.start创建新Generation之后"],
+      ["onLifeObjected", "objective阶段完成后"],
+      ["onLifePlanned", "planning阶段完成后"],
+      ["onLifeImplemented", "implementation阶段完成后"],
+      ["onLifeValidated", "validation阶段完成后"],
+      ["onLifeCompleted", "completion + 归档后（git commit之后运行）"],
+      ["onLifeTransited", "所有stage转换时（通用）"],
+      ["onLifeRegretted", "/reap.back regression时"],
+      ["onMergeStarted", "/reap.merge.start创建合并Generation之后"],
+      ["onMergeDetected", "detect阶段完成后"],
+      ["onMergeMated", "mate阶段完成后（genome确定）"],
+      ["onMergeMerged", "merge阶段完成后（源代码合并）"],
+      ["onMergeSynced", "sync阶段完成后"],
+      ["onMergeValidated", "merge validation完成后"],
+      ["onMergeCompleted", "merge completion + 归档后"],
+      ["onMergeTransited", "所有merge stage转换时（通用）"],
     ],
     configuration: "基于文件的配置",
     configurationDesc: "Hook是基于文件的 — 存储在.reap/hooks/中，不在config.yml中。每个hook的文件名格式为{event}.{name}.{md|sh}。",
     configExample: `# .reap/hooks/ 目录结构
 #
 # .reap/hooks/
-# ├── onGenerationStart.notify.sh
-# ├── onStageTransition.lint.sh
-# ├── onGenerationComplete.update.sh
-# ├── onGenerationComplete.docs-review.md
-# └── onRegression.log.md
+# ├── onLifeStarted.notify.sh
+# ├── onLifeTransited.lint.sh
+# ├── onLifeCompleted.update.sh
+# ├── onLifeCompleted.docs-review.md
+# └── onLifeRegretted.log.md
 #
-# 示例: onGenerationComplete.docs-review.md
+# 示例: onLifeCompleted.docs-review.md
 # ---
-# condition: stage == 'completion'
+# condition: has-code-changes
 # order: 10
 # ---
 # 检查本Generation中的变更内容。
@@ -437,7 +447,7 @@ strict:
 # 则更新README.md和docs。
 # 如果不需要文档更新则跳过。
 #
-# 示例: onStageTransition.lint.sh
+# 示例: onLifeTransited.lint.sh
 # ---
 # order: 0
 # ---
@@ -455,7 +465,7 @@ strict:
       "command hooks在项目根目录中运行。",
       "prompt hooks由AI代理在当前会话上下文中解释。",
       "同一事件内的hooks按定义顺序依次执行。",
-      "onGenerationComplete hooks在git commit之后运行 — hooks的文件变更处于uncommitted状态。",
+      "onLifeCompleted hooks在git commit之后运行 — hooks的文件变更处于uncommitted状态。",
     ],
   },
 
@@ -583,12 +593,16 @@ strict:
     mergeHooks: "合并Hooks",
     mergeHookHeaders: ["Event", "触发时机"],
     mergeHookItems: [
-      ["onMergeStart", "/reap.merge.start创建合并Generation之后"],
-      ["onGenomeMated", "Genome冲突解决完成后（mate阶段）"],
-      ["onSourceMerged", "源代码合并完成后"],
-      ["onMergeComplete", "合并Generation归档之后"],
+      ["onMergeStarted", "/reap.merge.start创建合并Generation之后"],
+      ["onMergeDetected", "detect阶段完成后"],
+      ["onMergeMated", "mate阶段完成后（genome确定）"],
+      ["onMergeMerged", "merge阶段完成后（源代码合并）"],
+      ["onMergeSynced", "sync阶段完成后"],
+      ["onMergeValidated", "merge validation完成后"],
+      ["onMergeCompleted", "merge completion + 归档后"],
+      ["onMergeTransited", "所有merge stage转换时（通用）"],
     ],
-    mergeHookNote: "正常的hooks（onStageTransition、onRegression）在合并阶段转换时也会触发。",
+    mergeHookNote: "onMergeTransited在所有merge stage转换时触发。相当于onLifeTransited的merge版本。",
   },
 
   // Comparison Page
@@ -602,7 +616,7 @@ strict:
       { title: "跨会话无记忆", desc: "大多数AI开发工具在会话间丢失上下文。REAP的SessionStart Hook自动将完整的项目上下文（Genome、Generation状态、工作流规则）注入每个新会话。" },
       { title: "线性工作流 vs Micro loops", desc: "现有工具遵循线性流程（规格 → 计划 → 实现）。REAP支持结构化回退 — 在保留产出物的同时可以从任何阶段回到前一阶段。" },
       { title: "独立任务 vs 代际进化", desc: "现有工具中的每个任务是独立的。在REAP中，Generation相互建立。知识通过Lineage归档和Genome进化以复利方式积累。" },
-      { title: "无生命周期hooks", desc: "REAP提供项目级hooks（onGenerationStart、onStageTransition、onGenerationComplete、onRegression）用于自动化。" },
+      { title: "无生命周期hooks", desc: "REAP提供项目级hooks（onLifeStarted、onLifeTransited、onLifeCompleted、onLifeRegretted）用于自动化。" },
     ],
   },
   genomePage: { title: "Genome", breadcrumb: "指南", intro: "Genome是REAP的权威知识源 — 架构原则、开发规范、技术约束和领域规则。它是项目的DNA。", structureTitle: "结构", structure: `.reap/genome/\n├── principles.md      # 架构原则/决策 (ADR风格)\n├── conventions.md     # 开发规则/规范\n├── constraints.md     # 技术约束/选择\n├── source-map.md      # C4 Container/Component图\n└── domain/            # 业务规则 (按模块)`, principlesTitle: "编写原则", principles: ["Map not Manual — 每文件~100行。详情移至domain/。", "可供Agent立即行动的水平。", "domain/专用于业务规则 — 不是代码结构，而是策略、阈值、状态转换。", "优先使用lint/test强制，而非文档规则。"], immutabilityTitle: "Genome不变原则", immutabilityDesc: "当前Generation不直接修改Genome。实现过程中发现的问题记录为genome-change backlog项目，仅在Completion阶段应用。", contextTitle: "会话上下文", contextDesc: "Genome在会话启动时自动加载到AI代理的上下文中。代理始终可以访问项目的原则、规范、约束和source map — 无需手动说明。", syncTitle: "与源代码同步", syncDesc: "使用/reap.sync.genome分析源代码并更新Genome。无活跃Generation时直接应用变更，有活跃Generation时差异记录到backlog。" },

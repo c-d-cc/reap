@@ -41,7 +41,7 @@ description: "REAP Start — Start a new Generation"
 7. Immediately create `.reap/life/01-objective.md` from the artifact template with the Goal section filled in
 
 ### Hook Execution (Generation Start)
-8. Scan `.reap/hooks/` for files matching `onGenerationStart.*`
+8. Scan `.reap/hooks/` for files matching `onLifeStarted.*`
    - For each matched file (sorted by `order` from frontmatter, then alphabetically):
      1. Read the frontmatter (`condition`, `order`)
      2. Evaluate `condition` by running `.reap/hooks/conditions/{condition}.sh` (exit 0 = met, non-zero = skip):

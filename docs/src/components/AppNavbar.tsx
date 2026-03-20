@@ -9,7 +9,7 @@ export function AppNavbar({ onMenuClick, showGetStarted }: { onMenuClick?: () =>
   const t = useT();
   return (
     <header className="fixed top-0 left-0 right-0 h-11 md:h-14 bg-background/80 backdrop-blur-md border-b border-border z-50 flex items-center justify-center">
-      <div className="flex items-center justify-between w-full max-w-4xl px-4">
+      <div className="flex items-center justify-between w-full max-w-5xl px-4">
       <div className="flex items-center gap-2">
         {onMenuClick && (
           <button onClick={onMenuClick} className="md:hidden h-8 w-8 flex items-center justify-center text-muted-foreground hover:text-foreground">
@@ -31,7 +31,7 @@ export function AppNavbar({ onMenuClick, showGetStarted }: { onMenuClick?: () =>
             <span className="text-xs hidden sm:inline">GitHub</span>
           </a>
           {showGetStarted && (
-            <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90">
+            <Button asChild size="sm" className="bg-primary text-primary-foreground hover:bg-primary/90 !h-7 !min-h-0 !py-0 text-xs">
               <Link href="/docs/introduction">{t.nav.getStarted}</Link>
             </Button>
           )}

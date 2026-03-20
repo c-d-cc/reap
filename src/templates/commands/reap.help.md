@@ -82,7 +82,7 @@ For command-name topics: read `reap.{name}.md` from the same directory as this f
 - **backlog** — `.reap/life/backlog/`. genome-change, environment-change, task. status: pending/consumed. consumed → lineage, pending → 이월.
 - **strict** — `strict: true`: no generation = 코드 수정 차단, non-implementation = 차단, implementation = plan scope만. Escape: "override"/"bypass strict".
 - **agents** — AgentAdapter 추상화. auto-detect (Claude Code, OpenCode). config.yml `agents` 오버라이드.
-- **hooks** — config.yml: onGenerationStart, onStageTransition, onGenerationComplete, onRegression. command/prompt 타입.
+- **hooks** — config.yml: onLifeStarted, onLifeTransited, onLifeCompleted, onLifeRegretted. command/prompt 타입.
 - **config** — `.reap/config.yml`: version, project, entryMode, strict, language, agents, autoUpdate, hooks.
 - **evolve** — `/reap.evolve`: 전체 lifecycle 자율 실행. 사람 확인 없이 objective~completion 순차 진행.
 - **regression** — `/reap.back`: 이전 stage 회귀. timeline + artifact에 Regression 섹션 기록.

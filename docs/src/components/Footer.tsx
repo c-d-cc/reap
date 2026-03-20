@@ -3,7 +3,7 @@ import logoPath from "@assets/favicon_1773735683357.png";
 export function Footer() {
   return (
     <footer className="border-t border-border bg-background">
-      <div className="max-w-4xl mx-auto px-6 py-14 flex flex-col items-center gap-3">
+      <div className="max-w-5xl mx-auto px-6 py-14 flex flex-col items-center gap-3">
         <div className="flex items-center gap-2">
           <img src={logoPath} alt="REAP" className="w-5 h-5" />
           <span className="text-sm font-semibold text-foreground">REAP</span>

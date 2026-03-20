@@ -46,7 +46,7 @@ description: "REAP Back — Return to a previous lifecycle stage"
    ```
 
 ### Hook Execution (Regression)
-7. Scan `.reap/hooks/` for files matching `onRegression.*`
+7. Scan `.reap/hooks/` for files matching `onLifeRegretted.*`
    - For each matched file (sorted by `order` from frontmatter, then alphabetically):
      1. Read the frontmatter (`condition`, `order`)
      2. Evaluate `condition` by running `.reap/hooks/conditions/{condition}.sh` (exit 0 = met, non-zero = skip):

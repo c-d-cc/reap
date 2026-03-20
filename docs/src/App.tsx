@@ -28,6 +28,7 @@ import CLIPage from "@/pages/CLIPage";
 import AdvancedPage from "@/pages/AdvancedPage";
 import CommandReferencePage from "@/pages/CommandReferencePage";
 import HookReferencePage from "@/pages/HookReferencePage";
+import HooksPage from "@/pages/HooksPage";
 import ConfigurationPage from "@/pages/ConfigurationPage";
 import ComparisonPage from "@/pages/ComparisonPage";
 import DistributedOverviewPage from "@/pages/DistributedOverviewPage";
@@ -49,7 +50,7 @@ function Router() {
       <Route path="/docs/environment" component={EnvironmentPage} />
       <Route path="/docs/lineage" component={LineagePage} />
       <Route path="/docs/backlog" component={BacklogPage} />
-      <Route path="/docs/hooks" component={HookReferencePage} />
+      <Route path="/docs/hooks" component={HooksPage} />
       <Route path="/docs/hook-reference" component={HookReferencePage} />
       <Route path="/docs/cli-reference" component={CLIPage} />
       <Route path="/docs/command-reference" component={CommandReferencePage} />

@@ -66,8 +66,12 @@ export interface GenerationMeta {
 }
 
 export type ReapHookEvent =
-  | "onGenerationStart" | "onStageTransition" | "onGenerationComplete" | "onRegression"
-  | "onMergeStart" | "onGenomeMated" | "onSourceMerged" | "onMergeComplete";
+  // Normal lifecycle
+  | "onLifeStarted" | "onLifeObjected" | "onLifePlanned" | "onLifeImplemented"
+  | "onLifeValidated" | "onLifeCompleted" | "onLifeTransited" | "onLifeRegretted"
+  // Merge lifecycle
+  | "onMergeStarted" | "onMergeDetected" | "onMergeMated" | "onMergeMerged"
+  | "onMergeSynced" | "onMergeValidated" | "onMergeCompleted" | "onMergeTransited";
 
 export interface ReapConfig {
   version: string;

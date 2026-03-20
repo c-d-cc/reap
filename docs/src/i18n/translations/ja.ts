@@ -401,35 +401,45 @@ strict:
     fileNamingFrontmatter: "各hookファイルはオプションのYAML frontmatterをサポートします：",
     frontmatterHeaders: ["フィールド", "説明"],
     frontmatterItems: [
-      ["condition", "hookが実行されるために真でなければならない式（例: stage == 'implementation'）"],
+      ["condition", ".reap/hooks/conditions/内の条件スクリプト名（例: always, has-code-changes, version-bumped）"],
       ["order", "同じイベントに複数のhookがある場合の実行順序（デフォルト: 0）"],
     ],
     events: "Events",
+    normalEventsTitle: "Normal Lifecycle Events",
+    mergeEventsTitle: "Merge Lifecycle Events",
     eventHeaders: ["Event", "発火タイミング"],
     eventItems: [
-      ["onGenerationStart", "/reap.startが新しいGenerationを作成しcurrent.ymlを書き込んだ後"],
-      ["onStageTransition", "/reap.nextが次のステージに前進し新しい成果物を作成した後"],
-      ["onGenerationComplete", "/reap.nextが完了したGenerationをアーカイブした後。git commit後に実行されるため、hooksの変更はuncommitted"],
-      ["onRegression", "/reap.backが前のステージに回帰した後"],
-      ["onMergeStart", "/reap.merge.startがマージGenerationを作成した後"],
-      ["onGenomeMated", "Genome衝突解決完了後（mateステージ）"],
-      ["onSourceMerged", "ソースコードマージ完了後"],
-      ["onMergeComplete", "マージGenerationがアーカイブされた後"],
+      ["onLifeStarted", "/reap.startが新しいGenerationを作成した後"],
+      ["onLifeObjected", "objectiveステージ完了後"],
+      ["onLifePlanned", "planningステージ完了後"],
+      ["onLifeImplemented", "implementationステージ完了後"],
+      ["onLifeValidated", "validationステージ完了後"],
+      ["onLifeCompleted", "completion + archiving後（git commit後に実行）"],
+      ["onLifeTransited", "すべてのstage遷移時（汎用）"],
+      ["onLifeRegretted", "/reap.back regression時"],
+      ["onMergeStarted", "/reap.merge.startがマージGenerationを作成した後"],
+      ["onMergeDetected", "detectステージ完了後"],
+      ["onMergeMated", "mateステージ完了後（genome確定）"],
+      ["onMergeMerged", "mergeステージ完了後（ソースマージ）"],
+      ["onMergeSynced", "syncステージ完了後"],
+      ["onMergeValidated", "merge validation完了後"],
+      ["onMergeCompleted", "merge completion + archiving後"],
+      ["onMergeTransited", "すべてのmerge stage遷移時（汎用）"],
     ],
     configuration: "ファイルベース設定",
     configurationDesc: "Hookはファイルベースです — config.ymlではなく.reap/hooks/に格納。各hookは{event}.{name}.{md|sh}形式。",
     configExample: `# .reap/hooks/ ディレクトリ構造
 #
 # .reap/hooks/
-# ├── onGenerationStart.notify.sh
-# ├── onStageTransition.lint.sh
-# ├── onGenerationComplete.update.sh
-# ├── onGenerationComplete.docs-review.md
-# └── onRegression.log.md
+# ├── onLifeStarted.notify.sh
+# ├── onLifeTransited.lint.sh
+# ├── onLifeCompleted.update.sh
+# ├── onLifeCompleted.docs-review.md
+# └── onLifeRegretted.log.md
 #
-# 例: onGenerationComplete.docs-review.md
+# 例: onLifeCompleted.docs-review.md
 # ---
-# condition: stage == 'completion'
+# condition: has-code-changes
 # order: 10
 # ---
 # 今回のGenerationで変更された内容を確認せよ。
@@ -437,7 +447,7 @@ strict:
 # 変更された場合はREADME.mdとdocsを更新せよ。
 # ドキュメント更新が不要ならスキップせよ。
 #
-# 例: onStageTransition.lint.sh
+# 例: onLifeTransited.lint.sh
 # ---
 # order: 0
 # ---
@@ -455,7 +465,7 @@ strict:
       "command hooksはプロジェクトルートディレクトリで実行されます。",
       "prompt hooksは現在のセッションコンテキストでAIエージェントが解釈します。",
       "同じイベント内のhooksは定義順に順次実行されます。",
-      "onGenerationComplete hooksはgit commit後に実行されます — hooksのファイル変更はuncommitted状態です。",
+      "onLifeCompleted hooksはgit commit後に実行されます — hooksのファイル変更はuncommitted状態です。",
     ],
   },
 
@@ -583,12 +593,16 @@ strict:
     mergeHooks: "マージHooks",
     mergeHookHeaders: ["Event", "発火タイミング"],
     mergeHookItems: [
-      ["onMergeStart", "/reap.merge.startがマージGenerationを作成した後"],
-      ["onGenomeMated", "Genome衝突解決完了後（mateステージ）"],
-      ["onSourceMerged", "ソースコードマージ完了後"],
-      ["onMergeComplete", "マージGenerationがアーカイブされた後"],
+      ["onMergeStarted", "/reap.merge.startがマージGenerationを作成した後"],
+      ["onMergeDetected", "detectステージ完了後"],
+      ["onMergeMated", "mateステージ完了後（genome確定）"],
+      ["onMergeMerged", "mergeステージ完了後（ソースマージ）"],
+      ["onMergeSynced", "syncステージ完了後"],
+      ["onMergeValidated", "merge validation完了後"],
+      ["onMergeCompleted", "merge completion + archiving後"],
+      ["onMergeTransited", "すべてのmerge stage遷移時（汎用）"],
     ],
-    mergeHookNote: "通常のhooks（onStageTransition、onRegression）もマージステージ遷移時に発火します。",
+    mergeHookNote: "onMergeTransitedはすべてのmerge stage遷移時に発火。onLifeTransitedのmerge版。",
   },
 
   // Comparison Page
@@ -602,7 +616,7 @@ strict:
       { title: "セッション間メモリなし", desc: "ほとんどのAI開発ツールはセッション間でコンテキストを失います。REAPのSessionStart Hookはプロジェクト全体のコンテキスト（Genome、Generation状態、ワークフロールール）を毎新セッションに自動注入します。" },
       { title: "線形ワークフロー vs Micro loops", desc: "既存ツールは線形フロー（スペック → 計画 → 実装）に従います。REAPは構造化された回帰をサポートします — 成果物を保持しながらどのステージでも前に戻ることができます。" },
       { title: "独立タスク vs 世代別進化", desc: "既存ツールの各タスクは独立しています。REAPではGenerationが互いを基盤に発展します。知識がLineage保管とGenome進化を通じて複利で蓄積されます。" },
-      { title: "ライフサイクルhooksなし", desc: "REAPは自動化のためのプロジェクトレベルhooks（onGenerationStart、onStageTransition、onGenerationComplete、onRegression）を提供します。" },
+      { title: "ライフサイクルhooksなし", desc: "REAPは自動化のためのプロジェクトレベルhooks（onLifeStarted、onLifeTransited、onLifeCompleted、onLifeRegretted）を提供します。" },
     ],
   },
   genomePage: { title: "Genome", breadcrumb: "ガイド", intro: "GenomeはREAPの権威ある知識ソースです — アーキテクチャ原則、開発コンベンション、技術制約、ドメインルール。プロジェクトのDNAです。", structureTitle: "構造", structure: `.reap/genome/\n├── principles.md      # アーキテクチャ原則/決定 (ADRスタイル)\n├── conventions.md     # 開発ルール/コンベンション\n├── constraints.md     # 技術制約/選択\n├── source-map.md      # C4 Container/Componentダイアグラム\n└── domain/            # ビジネスルール (モジュール別)`, principlesTitle: "記述原則", principles: ["Map not Manual — ファイルあたり~100行。詳細はdomain/へ。", "エージェントが即座に行動できるレベルで記述。", "domain/はビジネスルール専用 — コード構造ではなくポリシー、閾値、状態遷移。", "ドキュメントルールよりlint/test強制を優先。"], immutabilityTitle: "Genome不変原則", immutabilityDesc: "現在のGenerationはGenomeを直接修正しません。実装中に発見された問題はgenome-change backlog項目として記録し、Completion段階でのみ適用します。", contextTitle: "セッションコンテキスト", contextDesc: "Genomeはセッション開始時にAIエージェントのコンテキストに自動ロードされます。エージェントは常にプロジェクトの原則、コンベンション、制約、ソースマップにアクセスできます。", syncTitle: "ソースコードとの同期", syncDesc: "/reap.sync.genomeでソースコードを分析しGenomeを更新します。アクティブなGenerationがなければ直接適用、あればbacklogに記録されます。" },

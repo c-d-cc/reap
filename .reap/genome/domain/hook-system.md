@@ -2,14 +2,31 @@
 
 > REAP lifecycle event에 자동 실행되는 hook 규칙
 
-## Events
+## Normal Lifecycle Events
 
 | Event | Trigger | Timing |
 |-------|---------|--------|
-| onGenerationStart | `/reap.start` 후 | generation 생성 직후 |
-| onStageTransition | `/reap.next` 후 | stage 전진 직후 |
-| onGenerationComplete | `/reap.next` (archiving) 후 | git commit 이후, 변경사항 uncommitted |
-| onRegression | `/reap.back` 후 | stage 회귀 직후 |
+| onLifeStarted | `/reap.start` 후 | generation 생성 직후 |
+| onLifeObjected | objective 완료 후 | `/reap.next` (objective → planning) |
+| onLifePlanned | planning 완료 후 | `/reap.next` (planning → implementation) |
+| onLifeImplemented | implementation 완료 후 | `/reap.next` (implementation → validation) |
+| onLifeValidated | validation 완료 후 | `/reap.next` (validation → completion) |
+| onLifeCompleted | completion + archiving 후 | git commit 이후, 변경사항 uncommitted |
+| onLifeTransited | 모든 stage 전환 시 | `/reap.next` 실행 시마다 (범용) |
+| onLifeRegretted | regression 시 | `/reap.back` 실행 시 |
+
+## Merge Lifecycle Events
+
+| Event | Trigger | Timing |
+|-------|---------|--------|
+| onMergeStarted | `/reap.merge.start` 후 | merge generation 생성 직후 |
+| onMergeDetected | detect 완료 후 | 분기 분석 완료 |
+| onMergeMated | mate 완료 후 | genome 확정, source merge 전 |
+| onMergeMerged | merge 완료 후 | source merge 직후, sync 전 |
+| onMergeSynced | sync 완료 후 | genome-source 일관성 확인 |
+| onMergeValidated | validation 완료 후 | 테스트/빌드 통과 |
+| onMergeCompleted | completion + archiving 후 | git commit 이후 |
+| onMergeTransited | 모든 merge stage 전환 시 | 범용 |
 
 ## File-Based Hooks
 
@@ -17,10 +34,10 @@
 
 ```
 .reap/hooks/
-├── onGenerationComplete.version-bump.md
-├── onGenerationComplete.reap-update.sh
-├── onGenerationComplete.docs-update.md
-└── onGenerationComplete.release-notes.md
+├── onLifeCompleted.reap-update.sh
+├── onLifeCompleted.docs-update.md
+├── onLifeImplemented.lint-check.sh
+└── onMergeMated.notify.md
 ```
 
 - `.md` → AI prompt (에이전트가 읽고 실행)
@@ -51,26 +68,13 @@ order: 10
 - `has-code-changes.sh` — src/ 파일이 마지막 커밋에서 변경됨
 - `version-bumped.sh` — package.json version ≠ 마지막 git tag
 
-커스텀: `.reap/hooks/conditions/`에 `.sh` 파일 추가만으로 동작. hook frontmatter의 condition 값이 파일명(확장자 제외)과 매핑.
+커스텀: `.reap/hooks/conditions/`에 `.sh` 파일 추가만으로 동작.
 
 ## Execution Rules
 
 - 같은 event 내 hook은 `order` 순 (같으면 알파벳순)
 - condition이 충족되지 않으면 skip
-- onGenerationComplete hook은 커밋 이후 실행 → 변경사항은 별도 커밋
-
-## Merge Hook Events
-
-| Event | Trigger | Timing |
-|-------|---------|--------|
-| onMergeStart | `reap.merge.start` 후 | merge generation 생성 직후 |
-| onGenomeMated | genome mate 완료 시 | genome 확정 직후, source merge 전 |
-| onSourceMerged | source merge 완료 시 | source merge 직후, sync/validation 전 |
-| onMergeComplete | merge generation archiving 후 | git commit 이후 |
-
-- 기존 `onStageTransition`은 merge stage 전환에서도 발동
-- 기존 `onRegression`은 merge regression에서도 발동
-- `onMergeComplete`는 `onGenerationComplete`와 별도 — merge 특유의 후처리 (예: genome diff 리포트) 가능
+- onLifeCompleted/onMergeCompleted hook은 커밋 이후 실행 → 변경사항은 별도 커밋
 
 ## Hook Suggestion
 

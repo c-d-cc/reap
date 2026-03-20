@@ -404,28 +404,38 @@ strict:
     fileNamingFrontmatter: "Each hook file supports optional YAML frontmatter:",
     frontmatterHeaders: ["Field", "Description"],
     frontmatterItems: [
-      ["condition", "Expression that must be true for the hook to run (e.g. stage == 'implementation')"],
+      ["condition", "Name of a condition script in .reap/hooks/conditions/ (e.g. always, has-code-changes, version-bumped)"],
       ["order", "Numeric execution order when multiple hooks exist for the same event (default: 0)"],
     ],
     events: "Events",
+    normalEventsTitle: "Normal Lifecycle Events",
+    mergeEventsTitle: "Merge Lifecycle Events",
     eventHeaders: ["Event", "When it fires"],
     eventItems: [
-      ["onGenerationStart", "After /reap.start creates a new generation and writes current.yml"],
-      ["onStageTransition", "After /reap.next advances to the next stage and creates the new artifact"],
-      ["onGenerationComplete", "After /reap.next archives a completed generation. Runs after the git commit, so changes from hooks are uncommitted"],
-      ["onRegression", "After /reap.back returns to a previous stage"],
-      ["onMergeStart", "After /reap.merge.start creates a merge generation"],
-      ["onGenomeMated", "After genome conflicts are resolved (mate stage)"],
-      ["onSourceMerged", "After source code merge is completed"],
-      ["onMergeComplete", "After a merge generation is archived"],
+      ["onLifeStarted", "After /reap.start creates a new generation"],
+      ["onLifeObjected", "After objective stage completes"],
+      ["onLifePlanned", "After planning stage completes"],
+      ["onLifeImplemented", "After implementation stage completes"],
+      ["onLifeValidated", "After validation stage completes"],
+      ["onLifeCompleted", "After completion + archiving (runs after git commit)"],
+      ["onLifeTransited", "After any stage transition (generic)"],
+      ["onLifeRegretted", "After /reap.back regression"],
+      ["onMergeStarted", "After /reap.merge.start creates a merge generation"],
+      ["onMergeDetected", "After detect stage completes"],
+      ["onMergeMated", "After mate stage completes (genome resolved)"],
+      ["onMergeMerged", "After merge stage completes (source merged)"],
+      ["onMergeSynced", "After sync stage completes"],
+      ["onMergeValidated", "After merge validation completes"],
+      ["onMergeCompleted", "After merge completion + archiving"],
+      ["onMergeTransited", "After any merge stage transition (generic)"],
     ],
     configuration: "File-based Configuration",
     configurationDesc: "Hooks are file-based — stored in .reap/hooks/, not in config.yml. Each hook is a file named {event}.{name}.{md|sh}.",
     configExample: `.reap/hooks/
-├── onGenerationComplete.reap-update.sh
-├── onGenerationComplete.docs-update.md
-├── onStageTransition.lint.sh
-└── onRegression.alert.sh
+├── onLifeCompleted.reap-update.sh
+├── onLifeCompleted.docs-update.md
+├── onLifeImplemented.lint-check.sh
+└── onMergeMated.notify.md
 
 # Example: .md hook (AI prompt)
 # ---
@@ -452,7 +462,7 @@ strict:
       ".md files are read as AI prompts and followed by the agent.",
       "Hooks within the same event run in order (frontmatter 'order' field, lower runs first).",
       "Conditions are evaluated via .reap/hooks/conditions/{name}.sh (exit 0 = run, non-zero = skip).",
-      "onGenerationComplete hooks run after the git commit — any file changes from hooks will be uncommitted.",
+      "onLifeCompleted/onMergeCompleted hooks run after the git commit — any file changes from hooks will be uncommitted.",
     ],
   },
 
@@ -580,12 +590,16 @@ strict:
     mergeHooks: "Merge Hooks",
     mergeHookHeaders: ["Event", "When it fires"],
     mergeHookItems: [
-      ["onMergeStart", "After /reap.merge.start creates a merge generation"],
-      ["onGenomeMated", "After genome conflicts are resolved (mate stage)"],
-      ["onSourceMerged", "After source code merge is completed"],
-      ["onMergeComplete", "After a merge generation is archived"],
+      ["onMergeStarted", "After /reap.merge.start creates a merge generation"],
+      ["onMergeDetected", "After detect stage completes"],
+      ["onMergeMated", "After mate stage completes (genome resolved)"],
+      ["onMergeMerged", "After merge stage completes (source merged)"],
+      ["onMergeSynced", "After sync stage completes"],
+      ["onMergeValidated", "After merge validation completes"],
+      ["onMergeCompleted", "After merge completion + archiving"],
+      ["onMergeTransited", "After any merge stage transition (generic)"],
     ],
-    mergeHookNote: "Normal hooks (onStageTransition, onRegression) also fire during merge stage transitions.",
+    mergeHookNote: "onMergeTransited fires on every merge stage transition, similar to onLifeTransited for normal lifecycle.",
   },
 
   // Comparison Page
@@ -599,7 +613,7 @@ strict:
       { title: "No cross-session memory", desc: "Most AI development tools lose context between sessions. REAP's SessionStart Hook injects full project context (Genome, generation state, workflow rules) into every new session automatically." },
       { title: "Linear workflow vs Micro loops", desc: "Traditional tools follow a linear flow (spec → plan → build). REAP supports structured regression — any stage can loop back to a previous one while preserving artifacts." },
       { title: "Isolated tasks vs Generational evolution", desc: "Each task in traditional tools is independent. In REAP, generations build on each other. Knowledge compounds through Lineage archives and Genome evolution." },
-      { title: "No lifecycle hooks", desc: "REAP provides project-level hooks (onGenerationStart, onStageTransition, onGenerationComplete, onRegression) for automation." },
+      { title: "No lifecycle hooks", desc: "REAP provides 16 stage-level hooks (onLifeStarted through onMergeCompleted) for automation at every lifecycle point." },
     ],
   },
 

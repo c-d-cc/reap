@@ -101,7 +101,7 @@ You can also drive each stage manually if you need finer control:
 > ...
 ```
 
-## Life Cycle
+## Life Cycle [↗](https://reap.cc/docs/lifecycle)
 
 Each generation goes through a five-stage life cycle:
 
@@ -117,9 +117,9 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 | **Validation** | Run tests, verify completion criteria | `04-validation.md` |
 | **Completion** | Retrospective + apply Genome changes + hook suggestion + archive | `05-completion.md` |
 
-## Core Concepts
+## Core Concepts [↗](https://reap.cc/docs/core-concepts)
 
-### Genome
+### Genome [↗](https://reap.cc/docs/genome)
 
 The application's genetic information — a collection of architecture principles, business rules, development conventions, and technical constraints.
 
@@ -136,7 +136,7 @@ The application's genetic information — a collection of architecture principle
 
 **Environment Immutability Principle**: The Environment is never modified directly during the current generation. External changes are recorded in the backlog and applied at the Completion stage.
 
-### Backlog
+### Backlog [↗](https://reap.cc/docs/backlog)
 
 All items to be addressed next are stored in `.reap/life/backlog/`. Each item uses markdown + frontmatter format:
 
@@ -153,7 +153,7 @@ At archiving time (`/reap.next` from Completion), `consumed` items move to linea
 
 **Partial completion is normal** — Tasks that depend on Genome changes are marked `[deferred]` and handed off to the next generation.
 
-### Four-Axis Structure
+### Four-Axis Structure [↗](https://reap.cc/docs/core-concepts)
 
 ```
 .reap/
@@ -163,7 +163,7 @@ At archiving time (`/reap.next` from Completion), `consumed` items move to linea
 └── lineage/       # Archive of completed generations
 ```
 
-## Distributed Workflow for Parallel Development
+## Distributed Workflow [↗](https://reap.cc/docs/distributed-workflow)
 
 > **⚠ Early Stage** — The distributed workflow requires further testing. Use with caution in production. We're collecting feedback — [open an issue](https://github.com/c-d-cc/reap/issues).
 
@@ -212,7 +212,7 @@ All distributed operations run through your AI agent:
 - **No server** — Everything is local + Git. No external services.
 - **DAG lineage** — Each generation references its parents via a hash-based ID (`gen-046-a3f8c2`), forming a directed acyclic graph that naturally supports parallel work.
 
-## CLI Commands
+## CLI Commands [↗](https://reap.cc/docs/cli-reference)
 
 | Command | Description |
 |---------|-------------|
@@ -234,7 +234,7 @@ reap update --dry-run                   # Preview changes before applying
 
 REAP integrates with AI agents through slash commands and session hooks. Currently supported agents: **Claude Code** and **OpenCode**.
 
-### Slash Commands
+### Slash Commands [↗](https://reap.cc/docs/command-reference)
 
 Slash commands are installed in `.claude/commands/` and drive the entire workflow:
 
@@ -268,7 +268,7 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.merge.validation` | Run mechanical testing (bun test, tsc, build) |
 | **`/reap.merge.evolve`** | **Run the full merge lifecycle automatically** |
 
-### SessionStart Hook
+### SessionStart Hook [↗](https://reap.cc/docs/hooks)
 
 Runs automatically at the start of every session, injecting the following into the AI agent:
 
@@ -282,7 +282,7 @@ Runs automatically at the start of every session, injecting the following into t
 
 This ensures the agent immediately understands the project context even in a brand-new session.
 
-### Strict Mode
+### Strict Mode [↗](https://reap.cc/docs/configuration)
 
 Strict mode controls what the AI agent is allowed to do. It supports two granular options:
 
@@ -310,7 +310,7 @@ Both are disabled by default. `strict: true` enables both.
 
 Strict mode is disabled by default (`strict: false`).
 
-### REAP Hooks
+### REAP Hooks [↗](https://reap.cc/docs/hooks)
 
 Hooks are file-based and stored in `.reap/hooks/`. Each hook is a file named `{event}.{name}.{md|sh}`:
 
@@ -319,34 +319,47 @@ Hooks are file-based and stored in `.reap/hooks/`. Each hook is a file named `{e
 
 ```
 .reap/hooks/
-├── onGenerationStart.context-load.md
-├── onGenerationComplete.reap-update.sh
-├── onGenerationComplete.docs-update.md
-├── onStageTransition.notify.sh
-└── onRegression.alert.sh
+├── onLifeStarted.context-load.md
+├── onLifeCompleted.reap-update.sh
+├── onLifeCompleted.docs-update.md
+├── onLifeTransited.notify.sh
+└── onLifeRegretted.alert.sh
 ```
 
 Each hook file supports frontmatter with the following fields:
 
 ```yaml
 ---
-condition: has-code-changes   # always | has-code-changes | version-bumped
+condition: has-code-changes   # script name in .reap/hooks/conditions/
 order: 10                     # execution order (lower runs first)
 ---
 ```
 
+**Normal Lifecycle Events:**
+
 | Event | Trigger |
 |-------|---------|
-| `onGenerationStart` | After `/reap.start` creates a new generation |
-| `onStageTransition` | After `/reap.next` advances to the next stage |
-| `onGenerationComplete` | After `/reap.next` archives a completed generation |
-| `onRegression` | After `/reap.back` returns to a previous stage |
-| `onMergeStart` | After `/reap.merge.start` creates a merge generation |
-| `onGenomeMated` | After genome conflicts are resolved (mate stage) |
-| `onSourceMerged` | After source code merge is completed |
-| `onMergeComplete` | After a merge generation is archived |
+| `onLifeStarted` | After `/reap.start` creates a new generation |
+| `onLifeObjected` | After objective stage completes |
+| `onLifePlanned` | After planning stage completes |
+| `onLifeImplemented` | After implementation stage completes |
+| `onLifeValidated` | After validation stage completes |
+| `onLifeCompleted` | After completion + archiving (runs after git commit) |
+| `onLifeTransited` | After any stage transition (generic) |
+| `onLifeRegretted` | After `/reap.back` regression |
 
-Hooks are executed by the AI agent in the project root directory.
+**Merge Lifecycle Events:**
+
+| Event | Trigger |
+|-------|---------|
+| `onMergeStarted` | After `/reap.merge.start` creates a merge generation |
+| `onMergeDetected` | After detect stage completes |
+| `onMergeMated` | After mate stage completes (genome resolved) |
+| `onMergeMerged` | After merge stage completes (source merged) |
+| `onMergeSynced` | After sync stage completes |
+| `onMergeValidated` | After merge validation completes |
+| `onMergeCompleted` | After merge completion + archiving |
+| `onMergeTransited` | After any merge stage transition (generic) |
 
 ## Project Structure After `reap init`
 
@@ -382,7 +395,7 @@ my-project/
 └── reap.*.md                       # Active slash commands (auto-synced)
 ```
 
-## Lineage Compression
+## Lineage Compression [↗](https://reap.cc/docs/lineage)
 
 As generations accumulate, the lineage directory grows. REAP manages this with automatic two-level compression during the Completion stage:
 
