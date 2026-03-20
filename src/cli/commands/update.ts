@@ -1,4 +1,4 @@
-import { readdir, unlink, rm, mkdir } from "fs/promises";
+import { readdir, unlink, rm, mkdir, chmod } from "fs/promises";
 import { join } from "path";
 import { ReapPaths } from "../../core/paths";
 import { AgentRegistry } from "../../core/agents";
@@ -96,6 +96,28 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     } else {
       if (!dryRun) await writeTextFile(dest, src);
       result.updated.push(`~/.reap/templates/merge/${file}`);
+    }
+  }
+
+  // 2c. Sync brainstorm server files to .reap/brainstorm/
+  const brainstormSourceDir = join(ReapPaths.packageTemplatesDir, "brainstorm");
+  const brainstormDestDir = join(paths.root, "brainstorm");
+  await mkdir(brainstormDestDir, { recursive: true });
+  const brainstormFiles = ["server.cjs", "frame.html", "start-server.sh"];
+  for (const file of brainstormFiles) {
+    const src = await readTextFileOrThrow(join(brainstormSourceDir, file));
+    const dest = join(brainstormDestDir, file);
+    const existing = await readTextFile(dest);
+    if (existing !== null && existing === src) {
+      result.skipped.push(`.reap/brainstorm/${file}`);
+    } else {
+      if (!dryRun) {
+        await writeTextFile(dest, src);
+        if (file.endsWith(".sh")) {
+          await chmod(dest, 0o755);
+        }
+      }
+      result.updated.push(`.reap/brainstorm/${file}`);
     }
   }
 

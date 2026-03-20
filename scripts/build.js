@@ -13,3 +13,8 @@ execSync(
 execSync("rm -rf dist/templates && cp -r src/templates dist/templates", {
   stdio: "inherit",
 });
+
+// Ensure brainstorm server script is executable
+execSync("chmod +x dist/templates/brainstorm/start-server.sh", {
+  stdio: "inherit",
+});

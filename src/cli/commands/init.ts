@@ -96,7 +96,20 @@ export async function initProject(
     await writeTextFile(dest, await readTextFileOrThrow(src));
   }
 
-  // 5. Install hook condition scripts
+  // 5. Install brainstorm server files
+  log("Installing brainstorm server...");
+  const brainstormSourceDir = join(ReapPaths.packageTemplatesDir, "brainstorm");
+  const brainstormDestDir = join(paths.root, "brainstorm");
+  await mkdir(brainstormDestDir, { recursive: true });
+  const brainstormFiles = ["server.cjs", "frame.html", "start-server.sh"];
+  for (const file of brainstormFiles) {
+    const src = join(brainstormSourceDir, file);
+    const dest = join(brainstormDestDir, file);
+    await writeTextFile(dest, await readTextFileOrThrow(src));
+    if (file.endsWith(".sh")) await chmod(dest, 0o755);
+  }
+
+  // 6. Install hook condition scripts
   log("Installing hook conditions...");
   const conditionsSourceDir = join(ReapPaths.packageTemplatesDir, "conditions");
   const conditionsDestDir = join(paths.hooks, "conditions");

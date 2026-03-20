@@ -14,6 +14,23 @@
 ### Non-Functional Requirements
 
 
+## Design
+
+### Approaches Considered
+
+| Aspect | Approach A | Approach B |
+|--------|-----------|-----------|
+| Summary | | |
+| Pros | | |
+| Cons | | |
+| Recommendation | | |
+
+### Selected Design
+
+
+### Design Approval History
+
+
 ## Scope
 - **Related Genome Areas**:
 - **Expected Change Scope**:

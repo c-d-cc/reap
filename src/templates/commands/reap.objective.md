@@ -2,11 +2,12 @@
 description: "REAP Objective — Define the goal and specification for this Generation"
 ---
 
-# Objective (Goal Definition)
+# Objective (Goal Definition + Brainstorming Design)
 
 <HARD-GATE>
 Do NOT write any code until the artifact (01-objective.md) has been confirmed by the human.
 If the goal is ambiguous, do NOT guess — STOP and ask the human. This is non-negotiable.
+"This is too simple to need a design" is an anti-pattern. Every goal goes through brainstorming — simple goals just have shorter designs.
 </HARD-GATE>
 
 ## Gate (Preconditions)
@@ -107,13 +108,71 @@ If the goal is ambiguous, do NOT guess — STOP and ask the human. This is non-n
     - **constraints.md has empty Validation Commands** → flag as "test commands undefined"
 - Report the genome health status to the human
 
-### 5. Goal + Spec Definition
-- Based on the above information, converse with the human to refine this generation's goal
-- If genome enhancement is needed, discuss whether to include it in this generation's goal
-- Criteria for a good goal:
-  - Achievable within a single Generation
-  - Verifiable completion criteria (no vague wording)
-  - Relevant genome areas are clearly identified
+### 5. Brainstorming Design
+
+This step replaces the old "Goal + Spec Definition". It follows a structured brainstorming process to produce a well-designed objective. Follow the sub-steps in order.
+
+#### 5a. Visual Companion Proposal
+- Evaluate whether this generation's goal involves visual questions (UI design, architecture diagrams, layout comparisons, etc.)
+- If visual questions are likely, propose the Visual Companion in a **standalone message** (do NOT combine with other questions):
+  > "이번 설계에서 목업이나 다이어그램으로 보여드리면 이해하기 쉬운 부분이 있을 수 있습니다.
+  > 브라우저에서 시각 자료를 보여드릴 수 있는 비주얼 컴패니언을 사용할까요?
+  > (로컬 서버를 띄워 브라우저에서 확인하는 방식입니다)"
+- If the human accepts: start the brainstorm server (`bash` the start script in `.reap/brainstorm/start-server.sh` or `node` the server directly). Read `src/templates/brainstorm/visual-companion-guide.md` for usage rules.
+- If the human declines: proceed terminal-only. Do NOT offer again.
+- **This step applies even under `/reap.evolve` Autonomous Override** — only skip if the human has explicitly declined.
+
+#### 5b. Clarifying Questions (One at a Time)
+- **CRITICAL**: Ask only ONE question per message. Never bundle multiple questions.
+- Prefer **multiple choice** over open-ended questions when possible.
+- Goal: understand purpose, constraints, success criteria, and scope.
+- Continue asking until you have enough information to propose approaches.
+- Good question flow:
+  1. Purpose/motivation: "What problem does this solve?"
+  2. Users/stakeholders: "Who benefits from this?"
+  3. Constraints: "Are there any hard constraints?" (with examples as choices)
+  4. Success criteria: "How will you know this is done?"
+- Under Autonomous Override: Use existing context (genome, backlog, goal from `current.yml`) to answer these questions yourself. Only STOP and ask if genuinely ambiguous.
+
+#### 5c. Approach Exploration (2-3 Alternatives)
+- Propose **2-3 approaches** with clear trade-offs.
+- Present as a comparison table:
+
+  | Aspect | Approach A | Approach B | Approach C |
+  |--------|-----------|-----------|-----------|
+  | Summary | ... | ... | ... |
+  | Pros | ... | ... | ... |
+  | Cons | ... | ... | ... |
+  | Complexity | ... | ... | ... |
+  | Recommendation | ... | ... | ... |
+
+- Include a clear recommendation with reasoning.
+- If using Visual Companion: show approaches visually in the browser for comparison.
+- If only one sensible approach exists, state why alternatives were considered but dismissed.
+- Wait for the human to choose (or confirm the recommendation).
+- Under Autonomous Override: choose the recommended approach and proceed.
+
+#### 5d. Sectional Design Approval
+- Present the design in sections, scaled to complexity:
+  - **Simple** (few sentences per section): small feature, bug fix, config change
+  - **Medium** (1-2 paragraphs per section): new module, refactoring, integration
+  - **Detailed** (200-300 words per section): new system, major architecture change
+- Sections to cover (skip if not applicable):
+  1. **Architecture** — high-level structure, module relationships
+  2. **Components** — key components and their responsibilities
+  3. **Data Flow** — how data moves through the system
+  4. **Error Handling** — failure modes and recovery strategies
+  5. **Testing Strategy** — what and how to test
+- **After each section**, ask: "Does this look right so far?" (or confirm under Autonomous Override)
+- If using Visual Companion: show architecture/data flow diagrams in the browser.
+- Iterate until the human approves each section.
+
+#### 5e. Scope Decomposition Check
+- **Check for multi-subsystem scope**: If the goal describes 2+ independent subsystems (e.g., "build chat + file storage + billing"):
+  - Flag immediately: "This goal covers multiple independent subsystems. I recommend splitting into separate Generations."
+  - Help decompose into sub-goals, each getting its own Generation.
+- **Check FR count**: If functional requirements exceed 10, warn and suggest splitting.
+- Under Autonomous Override: if scope is clearly single-subsystem, proceed without asking.
 
 ### 6. Genome Gap Analysis
 - Identify information required to achieve the goal that is missing from the genome
@@ -135,6 +194,14 @@ If the goal is ambiguous, do NOT guess — STOP and ask the human. This is non-n
 - **Limit**: Maximum 7 completion criteria. Each must be verifiable.
 - Finalize with the human
 
+### 8. Spec Review Loop
+- After the artifact is complete, dispatch a **spec-document-reviewer subagent** (using the Agent tool with the prompt from `src/templates/brainstorm/spec-reviewer-prompt.md`):
+  - The subagent reads `.reap/life/01-objective.md` and reviews for completeness, consistency, clarity, scope, YAGNI, and verifiability.
+  - If **Issues Found**: fix the issues in the artifact and re-dispatch the reviewer.
+  - If **Approved**: proceed to human review.
+  - **Maximum 3 iterations**. If issues persist after 3 rounds, present remaining issues to the human for decision.
+- Under Autonomous Override: run the review loop automatically. Only escalate if the reviewer flags blocking issues after 3 rounds.
+
 ## Escalation
 In the following situations, do NOT guess — **STOP and ask the human**:
 - When the scope of the goal is unclear
@@ -147,6 +214,8 @@ Before saving the artifact, verify:
 - [ ] Are all completion criteria verifiable? (No vague wording like "improve" or "make better"?)
 - [ ] Are exclusions explicitly stated in the scope?
 - [ ] Do functional requirements have FR-XXX numbering?
+- [ ] Does the Design section include the chosen approach with rationale?
+- [ ] Has the spec review loop completed (approved or human-overridden)?
 
 ❌ Bad completion criterion: "Stabilize the service"
 ✅ Good completion criterion: "`npm run lint` reports 0 errors, `npm run build` succeeds"
@@ -159,9 +228,10 @@ Before saving the artifact, verify:
   - After Previous Generation Reference → update Background section
   - After Backlog Review → update Background section
   - After Genome Health Check → update Genome Reference section
-  - After Goal + Spec Definition → update Goal, Scope sections
+  - After Brainstorming Design (5a-5e) → update Goal, Scope, Design sections
   - After Genome Gap Analysis → update Backlog section
   - After Requirements Finalization → update Requirements, Completion Criteria sections
+  - After Spec Review Loop → update with any review-driven changes
 - The artifact should reflect the **current state of work at all times**
 - Do NOT wait until the end to write the artifact
 
