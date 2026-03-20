@@ -11,11 +11,21 @@ priority: medium
 - 하지만 /reap.next 슬래시 커맨드는 AI가 직접 파일 조작하므로 compression 함수 미호출
 - 72세대 9,840줄 — 기준(5,000줄 + 5세대) 초과
 
-## 고려사항
-- 분산 워크플로우(reap pull/push/merge)에서 compression이 상대 branch의 lineage를 훼손할 수 있음
-- 다른 머신에서 아직 참조 중인 generation을 압축하면 merge 시 문제 발생 가능
-- DAG 구조에서 단순 순번 기반 compression이 아닌 DAG-aware compression 필요할 수 있음
+## 분석 결과 (2026-03-20)
 
-## 방향
-- 자동 compression을 /reap.next에 넣을지, 수동 커맨드로 제공할지 결정 필요
-- 분산 환경에서 안전한 compression 전략 설계 필요
+### Level 1 (디렉토리 → .md): 안전
+- frontmatter에 DAG 메타데이터(id, parents, genomeHash) 보존
+- merge의 공통 조상 탐색, genome diff 비교 모두 정상 동작
+
+### Level 2 (5개 Level 1 → epoch .md): DAG 파괴 — 위험
+- Level 1의 frontmatter를 strip하고 body만 파싱 (320행)
+- epoch 파일에 개별 generation의 parents/genomeHash 미포함
+- 원본 Level 1 파일 삭제 → DAG parent 참조 소실
+- merge 공통 조상 BFS 탐색 끊어질 수 있음
+
+## 수정 방향
+- Level 1: /reap.next 아카이빙에 자동 실행 가능
+- Level 2: DAG 메타데이터를 epoch 파일에 보존하도록 수정 필요
+  - 방안 A: epoch frontmatter에 포함된 generation들의 meta 배열 저장
+  - 방안 B: Level 2 폐지, Level 1만 사용
+  - 방안 C: meta.yml만 별도 보존 (epoch + meta index)
