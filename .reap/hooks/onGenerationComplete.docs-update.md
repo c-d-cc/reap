@@ -15,8 +15,17 @@ order: 30
 
 - `README.md` (en 기준 → 아래 i18n 동기화)
 - `src/templates/hooks/reap-guide.md`
+- `src/templates/commands/reap.help.md` (커맨드 테이블 + topic 목록 최신화)
 - `docs/src/i18n/translations/en.ts` (기준 → 아래 i18n 동기화)
 - `docs/src/pages/*.tsx`
+
+## Help Topic 최신화
+
+`src/templates/commands/reap.help.md`의 topic 목록과 커맨드 테이블이 현재 slash command 목록과 일치하는지 확인:
+1. `src/templates/commands/`에 있는 `reap.*.md` 파일 목록을 스캔
+2. `reap.help.md`의 커맨드 테이블에 누락된 커맨드가 있으면 추가
+3. Topic 목록에 누락된 커맨드가 있으면 추가
+4. 삭제된 커맨드가 있으면 제거
 
 ## i18n 동기화 규칙
 

@@ -1,0 +1,8 @@
+id: gen-061-c50f6c
+type: normal
+parents:
+  - gen-060-4a27c7
+goal: reap.help merge/collaboration topic 추가 + help 최신화 hook
+genomeHash: e0722b95f18f
+startedAt: 2026-03-20T01:36:30Z
+completedAt: 2026-03-20T01:38:28Z
