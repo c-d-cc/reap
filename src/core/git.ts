@@ -31,6 +31,18 @@ export function gitRefExists(ref: string, cwd: string): boolean {
   }
 }
 
+/** Get all local + remote branch names */
+export function gitAllBranches(cwd: string): string[] {
+  try {
+    const output = execSync("git branch -a --format='%(refname:short)'", {
+      cwd, encoding: "utf-8", timeout: 10_000,
+    });
+    return output.trim().split("\n").filter(Boolean).map(b => b.replace(/^origin\//, ""));
+  } catch {
+    return [];
+  }
+}
+
 /** Get the current branch name */
 export function gitCurrentBranch(cwd: string): string | null {
   try {

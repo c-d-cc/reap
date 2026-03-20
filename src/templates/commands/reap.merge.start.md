@@ -9,6 +9,7 @@ Start a merge generation by specifying a target branch to merge into the current
 ## Gate
 - Verify no active generation exists
 - Verify the target branch exists (`git rev-parse --verify {branch}`)
+- Verify that the common ancestor is NOT inside `epoch.md`. If it is: ERROR — "The common ancestor has been epoch-compressed and cannot be used as a merge base. The generation is archived in epoch.md for historical reference only."
 
 ## Steps
 

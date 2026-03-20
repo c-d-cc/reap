@@ -204,7 +204,7 @@ export class GenerationManager {
     await writeTextFile(this.paths.currentYml, "");
 
     // Compress lineage if needed
-    const compression = await compressLineageIfNeeded(this.paths);
+    const compression = await compressLineageIfNeeded(this.paths, this.paths.projectRoot);
     return compression;
   }
 

@@ -5,7 +5,7 @@ import { stat } from "fs/promises";
 import { fileURLToPath } from "url";
 
 export class ReapPaths {
-  private projectRoot: string;
+  readonly projectRoot: string;
 
   constructor(projectRoot: string) {
     this.projectRoot = projectRoot;

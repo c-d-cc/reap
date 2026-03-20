@@ -104,6 +104,25 @@ Do NOT finalize Genome changes without running Validation Commands.
 19. 반복 패턴이 없으면 skip — "반복 패턴이 감지되지 않았습니다."
 20. **Limit**: 한 번에 최대 2개까지만 제안 (과부하 방지)
 
+### Phase 6: Lineage Compression
+
+21. Check if lineage compression is needed:
+    - Count total lines in `.reap/lineage/` and number of generations
+    - **Level 1 trigger**: total lines > 5,000 AND generations >= 5
+    - **Level 2 trigger**: Level 1 compressed `.md` files > 100
+22. If Level 1 triggered:
+    - Compress oldest uncompressed generation directories into single `.md` files
+    - Protect: recent 3 generations + DAG leaf nodes
+    - Preserve DAG metadata in frontmatter (id, parents, genomeHash)
+23. If Level 2 triggered:
+    - Run `git fetch --all` to update remote refs
+    - Scan all branches (local + remote) for fork points
+    - Compress eligible Level 1 files into single `epoch.md` (append if exists)
+    - Protect: recent 9 Level 1 files + all generations at/after fork points
+    - epoch.md frontmatter contains `generations` array with hash chain (id, parents, genomeHash)
+24. Report compression results: "Compressed N generations (Level 1: X, Level 2: Y)"
+    - If no compression needed: skip silently
+
 ## Self-Verification
 Before saving the artifact, verify:
 - [ ] Are lessons concrete and applicable to the next generation? (No vague "do better next time")

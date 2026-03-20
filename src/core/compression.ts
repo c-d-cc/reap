@@ -3,14 +3,15 @@ import { readdir, rm } from "fs/promises";
 import { join } from "path";
 import type { ReapPaths } from "./paths";
 import type { GenerationMeta } from "../types";
-import { readTextFile, readTextFileOrThrow, writeTextFile } from "./fs";
+import { readTextFile, readTextFileOrThrow, writeTextFile, fileExists } from "./fs";
+import { gitAllBranches, gitLsTree, gitShow, gitCurrentBranch } from "./git";
 
 const LINEAGE_MAX_LINES = 5_000;
 const MIN_GENERATIONS_FOR_COMPRESSION = 5;
 const LEVEL1_MAX_LINES = 40;
-const LEVEL2_MAX_LINES = 60;
-const LEVEL2_BATCH_SIZE = 5;
-const RECENT_PROTECTED_COUNT = 3;
+const LEVEL1_PROTECTED_COUNT = 3;
+const LEVEL2_MIN_LEVEL1_COUNT = 100;
+const LEVEL2_PROTECTED_COUNT = 9;
 
 /** Extract generation number from directory/file name (supports both gen-NNN and gen-NNN-hash formats) */
 function extractGenNum(name: string): number {
@@ -122,10 +123,11 @@ async function scanLineage(paths: ReapPaths): Promise<LineageEntry[]> {
     }
   } catch { /* lineage doesn't exist */ }
 
-  // Sort by completedAt if available, fallback to genNum
+  // Sort by completedAt, then by genNum as tiebreaker
   return entries.sort((a, b) => {
     if (a.completedAt && b.completedAt) {
-      return a.completedAt.localeCompare(b.completedAt);
+      const cmp = a.completedAt.localeCompare(b.completedAt);
+      if (cmp !== 0) return cmp;
     }
     return a.genNum - b.genNum;
   });
@@ -300,63 +302,121 @@ async function compressLevel1(genDir: string, genName: string): Promise<string> 
   return result;
 }
 
-// ── Level 2 compression ────────────────────────────────────
+// ── Fork detection ────────────────────────────────────────
 
-async function compressLevel2(
-  level1Files: { name: string; path: string }[],
-  epochNum: number,
-): Promise<string> {
-  const lines: string[] = [];
-  const genIds = level1Files.map(f => f.name.replace(".md", "").match(/^gen-\d{3}(?:-[a-f0-9]{6})?/)?.[0] ?? f.name);
-  const first = genIds[0];
-  const last = genIds[genIds.length - 1];
+interface EpochMeta {
+  generations: Array<{ id: string; parents: string[]; genomeHash: string }>;
+}
 
-  lines.push(`# Epoch ${String(epochNum).padStart(3, "0")} (${first} ~ ${last})`);
-  lines.push("");
+/** Find generation IDs that are forked by other branches (local + remote) */
+async function findForkedByOtherBranches(
+  paths: ReapPaths,
+  cwd: string,
+): Promise<Set<string>> {
+  const forked = new Set<string>();
+  const currentBranch = gitCurrentBranch(cwd);
+  const branches = gitAllBranches(cwd).filter(b => b !== currentBranch && b !== "HEAD");
 
+  for (const branch of branches) {
+    const files = gitLsTree(branch, ".reap/lineage/", cwd);
+    for (const file of files) {
+      if (!file.endsWith("meta.yml")) continue;
+      const content = gitShow(branch, file, cwd);
+      if (!content) continue;
+      try {
+        const meta = YAML.parse(content) as GenerationMeta;
+        for (const parent of meta.parents) {
+          forked.add(parent);
+        }
+      } catch { /* skip invalid */ }
+    }
+  }
+
+  return forked;
+}
+
+/** Check if a generation ID is inside epoch.md */
+export async function isInEpoch(paths: ReapPaths, genId: string): Promise<boolean> {
+  const epochPath = join(paths.lineage, "epoch.md");
+  const content = await readTextFile(epochPath);
+  if (!content) return false;
+  const meta = parseFrontmatter(content) as unknown as EpochMeta | null;
+  if (!meta?.generations) return false;
+  return meta.generations.some(g => g.id === genId);
+}
+
+// ── Level 2 compression (single epoch.md) ────────────────
+
+async function compressLevel2Single(
+  level1Files: { name: string; path: string; meta: GenerationMeta | null }[],
+  paths: ReapPaths,
+): Promise<string[]> {
+  const compressed: string[] = [];
+  const epochPath = join(paths.lineage, "epoch.md");
+
+  // Load existing epoch.md if present
+  let existingMeta: EpochMeta = { generations: [] };
+  let existingBody = "";
+  const existingContent = await readTextFile(epochPath);
+  if (existingContent) {
+    const parsed = parseFrontmatter(existingContent) as unknown as EpochMeta | null;
+    if (parsed?.generations) existingMeta = parsed;
+    existingBody = existingContent.replace(/^---\n[\s\S]*?\n---\n?/, "").trim();
+  }
+
+  // Append new generations
+  const newBodyLines: string[] = [];
   for (const file of level1Files) {
     const content = await readTextFileOrThrow(file.path);
-    // Strip frontmatter before parsing content
-    const bodyContent = content.replace(/^---\n[\s\S]*?\n---\n?/, "");
+    const meta = file.meta;
+    const bodyContent = content.replace(/^---\n[\s\S]*?\n---\n?/, "").trim();
 
-    const headerMatch = bodyContent.match(/^# (gen-\d{3}(?:-[a-f0-9]{6})?)/m);
-    const goalMatch = bodyContent.match(/- Goal: (.+)/);
-    const periodMatch = bodyContent.match(/- (?:Started|Period): (.+)/);
-    const genomeMatch = bodyContent.match(/- Genome.*: (.+)/);
-    const resultMatch = bodyContent.match(/## Result: (.+)/);
-
-    const genId = headerMatch?.[1] ?? "unknown";
-    const goal = goalMatch?.[1] ?? "";
-    const result = resultMatch?.[1] ?? "";
-
-    lines.push(`## ${genId}: ${goal}`);
-    if (periodMatch) lines.push(`- ${periodMatch[0].trim()}`);
-    if (genomeMatch) lines.push(`- ${genomeMatch[0].trim()}`);
-    if (result) lines.push(`- Result: ${result}`);
-
-    // Include genome changes if any (most important for traceability)
-    const changeSection = bodyContent.match(/## Genome Changes\n([\s\S]*?)(?=\n##|$)/);
-    if (changeSection && !changeSection[1].match(/^\|\s*\|\s*\|\s*\|\s*\|$/)) {
-      lines.push(`- Genome Changes: ${changeSection[1].trim().split("\n")[0]}`);
+    // Add to chain
+    if (meta) {
+      existingMeta.generations.push({
+        id: meta.id,
+        parents: meta.parents,
+        genomeHash: meta.genomeHash,
+      });
     }
 
-    lines.push("");
+    // Extract summary for body
+    const headerMatch = bodyContent.match(/^# (gen-\d{3}(?:-[a-f0-9]{6})?)/m);
+    const genId = headerMatch?.[1] ?? meta?.id ?? "unknown";
+    const goalMatch = bodyContent.match(/## Objective\n([\s\S]*?)(?=\n##|$)/);
+    const goal = goalMatch?.[1]?.trim().split("\n")[0] ?? "";
+
+    newBodyLines.push(`## ${genId}: ${goal}`);
+    newBodyLines.push("");
+
+    compressed.push(genId);
   }
 
-  // Truncate to max lines
-  let result = lines.join("\n");
-  const resultLines = result.split("\n");
-  if (resultLines.length > LEVEL2_MAX_LINES) {
-    result = resultLines.slice(0, LEVEL2_MAX_LINES - 1).join("\n") + "\n[...truncated]";
+  // Build epoch.md
+  const frontmatter = `---\n${YAML.stringify(existingMeta).trim()}\n---\n`;
+  const allIds = existingMeta.generations.map(g => g.id);
+  const first = allIds[0] ?? "?";
+  const last = allIds[allIds.length - 1] ?? "?";
+  const header = `# Epoch (${first} ~ ${last})\n\n`;
+  const body = existingBody
+    ? existingBody + "\n\n" + newBodyLines.join("\n")
+    : newBodyLines.join("\n");
+
+  await writeTextFile(epochPath, frontmatter + header + body.trim() + "\n");
+
+  // Remove compressed Level 1 files
+  for (const file of level1Files) {
+    await rm(file.path);
   }
 
-  return result;
+  return compressed;
 }
 
 // ── Main compression entry point ────────────────────────────
 
 export async function compressLineageIfNeeded(
   paths: ReapPaths,
+  projectRoot?: string,
 ): Promise<{ level1: string[]; level2: string[] }> {
   const result = { level1: [] as string[], level2: [] as string[] };
 
@@ -380,7 +440,7 @@ export async function compressLineageIfNeeded(
   const allDirs = entries.filter(e => e.type === "dir");
   // Already sorted by completedAt/genNum from scanLineage
   const recentIds = new Set(
-    allDirs.slice(Math.max(0, allDirs.length - RECENT_PROTECTED_COUNT)).map(e => e.genId)
+    allDirs.slice(Math.max(0, allDirs.length - LEVEL1_PROTECTED_COUNT)).map(e => e.genId)
   );
 
   const compressibleDirs = allDirs.filter(dir =>
@@ -401,34 +461,44 @@ export async function compressLineageIfNeeded(
     result.level1.push(genId);
   }
 
-  // Level 2: if 5+ Level 1 files exist, batch into epochs
+  // Level 2: if 100+ Level 1 files exist, compress to single epoch.md
   const level1s = (await scanLineage(paths))
     .filter(e => e.type === "level1");
-  // Already sorted by completedAt/genNum from scanLineage
 
-  if (level1s.length >= LEVEL2_BATCH_SIZE) {
-    const existingEpochs = (await scanLineage(paths)).filter(e => e.type === "level2");
-    let epochNum = existingEpochs.length + 1;
+  if (level1s.length > LEVEL2_MIN_LEVEL1_COUNT) {
+    // Find fork points from other branches
+    const forkedIds = projectRoot
+      ? await findForkedByOtherBranches(paths, projectRoot)
+      : new Set<string>();
 
-    const batchCount = Math.floor(level1s.length / LEVEL2_BATCH_SIZE);
-    for (let i = 0; i < batchCount; i++) {
-      const batch = level1s.slice(i * LEVEL2_BATCH_SIZE, (i + 1) * LEVEL2_BATCH_SIZE);
-      const files = batch.map(e => ({
-        name: e.name,
-        path: join(paths.lineage, e.name),
-      }));
-
-      const compressed = await compressLevel2(files, epochNum);
-      const outPath = join(paths.lineage, `epoch-${String(epochNum).padStart(3, "0")}.md`);
-
-      await writeTextFile(outPath, compressed);
-
-      for (const file of files) {
-        await rm(file.path);
+    // Find the earliest fork point index — everything from that point onward is protected
+    let forkCutoff = level1s.length;
+    for (let i = 0; i < level1s.length; i++) {
+      if (forkedIds.has(level1s[i].genId)) {
+        forkCutoff = i;
+        break;
       }
+    }
 
-      result.level2.push(`epoch-${String(epochNum).padStart(3, "0")}`);
-      epochNum++;
+    // Protect recent 9 Level 1 files
+    const protectedStart = Math.max(0, level1s.length - LEVEL2_PROTECTED_COUNT);
+
+    // Compressible: before fork cutoff AND before protected zone
+    const compressEnd = Math.min(forkCutoff, protectedStart);
+    const compressible = level1s.slice(0, compressEnd);
+
+    if (compressible.length > 0) {
+      // Read meta for each Level 1 file
+      const filesWithMeta = await Promise.all(
+        compressible.map(async (e) => ({
+          name: e.name,
+          path: join(paths.lineage, e.name),
+          meta: await readFileMeta(join(paths.lineage, e.name)),
+        }))
+      );
+
+      const compressed = await compressLevel2Single(filesWithMeta, paths);
+      result.level2.push(...compressed);
     }
   }
 
