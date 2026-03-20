@@ -1,0 +1,8 @@
+id: gen-063-fa6a5d
+type: normal
+parents:
+  - gen-062-b81b66
+goal: "reap init adoption/migration 시 자동 genome sync"
+genomeHash: e0722b95f18f
+startedAt: 2026-03-20T06:48:41Z
+completedAt: 2026-03-20T06:51:40Z

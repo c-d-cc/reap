@@ -60,7 +60,7 @@ export async function initProject(
   };
   await ConfigManager.write(paths, config);
 
-  // 3. Copy genome templates
+  // 3. Copy genome templates (then override with project scan for adoption/migration)
   log("Setting up Genome templates...");
   const genomeTemplates = ["principles.md", "conventions.md", "constraints.md", "source-map.md"];
   const genomeSourceDir = preset
@@ -70,6 +70,13 @@ export async function initProject(
     const src = join(genomeSourceDir, file);
     const dest = join(paths.genome, file);
     await writeTextFile(dest, await readTextFileOrThrow(src));
+  }
+
+  // 3b. Auto-sync genome from project scan (adoption/migration only)
+  if ((entryMode === "adoption" || entryMode === "migration") && !preset) {
+    log("Scanning project for genome auto-sync...");
+    const { syncGenomeFromProject } = await import("../../core/genome-sync");
+    await syncGenomeFromProject(projectRoot, paths.genome, log);
   }
 
   // 4. Install artifact templates + domain guide
