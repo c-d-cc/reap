@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-083-b9727c
 ---
 # E2E 테스트: MigrationRunner
 
