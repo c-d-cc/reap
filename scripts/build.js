@@ -4,7 +4,11 @@ import { readFileSync } from "fs";
 
 const pkg = JSON.parse(readFileSync("package.json", "utf8"));
 const isCI = process.env.CI === "true" || process.env.GITHUB_ACTIONS === "true";
-const version = isCI ? pkg.version : `${pkg.version}+dev`;
+let version = pkg.version;
+if (!isCI) {
+  const commitHash = execSync("git rev-parse --short HEAD", { encoding: "utf-8" }).trim();
+  version = `${pkg.version}+dev.${commitHash}`;
+}
 
 execSync(
   `bun build src/cli/index.ts --outfile dist/cli.js --target node --define 'process.env.__REAP_VERSION__="${version}"'`,

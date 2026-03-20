@@ -79,7 +79,9 @@ let updateAvailableMessage = '';
 const { configContent } = gl.parseConfig(configFile);
 const installed = gl.exec('reap --version');
 const latest = gl.exec('npm view @c-d-cc/reap version');
-if (installed && latest && installed !== latest) {
+if (installed && installed.includes('+dev')) {
+  // Local dev build — skip version check entirely
+} else if (installed && latest && installed !== latest) {
   const autoUpdate = configContent ? /^autoUpdate:\s*true/m.test(configContent) : false;
   if (autoUpdate) {
     const updated = gl.exec('npm update -g @c-d-cc/reap');

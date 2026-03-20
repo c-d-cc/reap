@@ -26,6 +26,10 @@ export interface SelfUpgradeResult {
 export function selfUpgrade(): SelfUpgradeResult {
   try {
     const installed = execSync("reap --version", { encoding: "utf-8", timeout: 5_000 }).trim();
+    // Skip self-upgrade for local dev builds (+dev suffix)
+    if (installed.includes("+dev")) {
+      return { upgraded: false };
+    }
     const latest = execSync("npm view @c-d-cc/reap version", { encoding: "utf-8", timeout: 10_000 }).trim();
     if (installed === latest) {
       return { upgraded: false };
