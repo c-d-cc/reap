@@ -1,9 +1,8 @@
 ## What's New
-- `/reap.sync` 분리 — `sync.genome` (기존) + `sync.environment` (신규) + `sync` (orchestrator)
-- Environment 3-layer 구조 도입 — `summary.md` (context 로딩) + `docs/` (주요 문서) + `resources/` (원본 자료)
-- `reap update`에서 프로젝트 `.claude/commands/` 즉시 동기화 (세션 재시작 불필요)
-- 로컬 빌드 버전 구분 (`+dev.{commitHash}`) + dev 빌드 시 self-upgrade 스킵
+- `/reap.report` 커맨드 추가 — malfunction 자동 감지 + 수동 보고, 개인정보 이중 검사 (PRIVACY_GATE + post-format sanitization)
+- GitHub Issue label 활용 (`auto-reported` + 유형 + 컨텍스트)
+- `reap init` 시 gh CLI 감지 + `autoIssueReport` config 자동 설정
+- Generation ID 형식 명세 강화 (hex hash 필수, slug 금지)
 
 ## Generations
-- **gen-076-092ca7**: reap update에서 프로젝트 commands 즉시 동기화
-- **gen-077-e80520**: sync 분리 (genome/environment) + environment 3-layer 구조
+- **gen-078-a5c28e**: /reap.report 커맨드 추가 — 개인정보 이중 검사
