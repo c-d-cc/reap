@@ -28,7 +28,7 @@ if (!gl.dirExists(reapDir)) {
   process.exit(0);
 }
 
-// Step 0: Install project-level command symlinks
+// Step 0: Install project-level command files (copy, not symlink — Claude Code doesn't follow symlinks)
 const fs = require('fs');
 const os = require('os');
 const userReapCommands = path.join(os.homedir(), '.reap', 'commands');
@@ -38,34 +38,37 @@ if (gl.dirExists(userReapCommands)) {
   try {
     fs.mkdirSync(projectClaudeCommands, { recursive: true });
     const cmdFiles = fs.readdirSync(userReapCommands).filter(f => f.startsWith('reap.') && f.endsWith('.md'));
+    let installed = 0;
     for (const file of cmdFiles) {
       const src = path.join(userReapCommands, file);
       const dest = path.join(projectClaudeCommands, file);
       try {
         const stat = fs.lstatSync(dest);
         if (stat.isSymbolicLink()) {
-          const target = fs.readlinkSync(dest);
-          if (target === src) continue; // already correct
-          fs.unlinkSync(dest); // stale symlink
+          fs.unlinkSync(dest); // replace legacy symlink with real file
         } else {
-          // Regular file (old redirect or original) — replace with symlink
+          // Skip if content is identical
+          const srcContent = fs.readFileSync(src);
+          const destContent = fs.readFileSync(dest);
+          if (srcContent.equals(destContent)) continue;
           fs.unlinkSync(dest);
         }
       } catch { /* dest doesn't exist */ }
-      fs.symlinkSync(src, dest);
+      fs.copyFileSync(src, dest);
+      installed++;
     }
-    // Ensure .gitignore excludes these symlinks
+    // Ensure .gitignore excludes these files
     const gitignorePath = path.join(projectRoot, '.gitignore');
     const gitignoreEntry = '.claude/commands/reap.*';
     try {
       const gitignore = fs.existsSync(gitignorePath) ? fs.readFileSync(gitignorePath, 'utf-8') : '';
       if (!gitignore.includes(gitignoreEntry)) {
-        fs.appendFileSync(gitignorePath, `\n# REAP command symlinks (managed by session-start hook)\n${gitignoreEntry}\n`);
+        fs.appendFileSync(gitignorePath, `\n# REAP command files (managed by session-start hook)\n${gitignoreEntry}\n`);
       }
     } catch { /* best effort */ }
-    process.stderr.write(`[REAP] Symlinked ${cmdFiles.length} commands to .claude/commands/\n`);
+    process.stderr.write(`[REAP] Installed ${installed} commands to .claude/commands/ (${cmdFiles.length - installed} unchanged)\n`);
   } catch (err) {
-    process.stderr.write(`[REAP] Warning: failed to create command symlinks: ${err.message}\n`);
+    process.stderr.write(`[REAP] Warning: failed to install commands: ${err.message}\n`);
   }
 }
 

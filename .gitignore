@@ -5,3 +5,6 @@ dist/
 *.db-shm
 *.db-wal
 *.tgz
+
+# REAP command symlinks (managed by session-start hook)
+.claude/commands/reap.*
