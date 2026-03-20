@@ -114,8 +114,12 @@ Show the sanitized issue to the user (in user's language):
   - **edit**: let user modify, then re-run Step 3 sanitization and re-confirm
 
 ### 5. Submit
-- Determine label: `bug` for bugs, `enhancement` for features, `feedback` for others
-- Run: `gh issue create --repo c-d-cc/reap --title "{title}" --label "{label}" --body "{sanitized body}"`
+- Determine labels (comma-separated, always include `auto-reported`):
+  - Bug: `bug,auto-reported`
+  - Feature request: `enhancement,auto-reported`
+  - Feedback: `feedback,auto-reported`
+  - Add context labels if applicable: `lifecycle`, `genome`, `cli`
+- Run: `gh issue create --repo c-d-cc/reap --title "{title}" --label "{labels}" --body "{sanitized body}"`
 - Show the issue URL to the user
 - Thank the user for their contribution to improving REAP
 
