@@ -285,4 +285,28 @@ export async function syncGenomeFromProject(
 
   log("Generating source-map.md...");
   await writeTextFile(join(genomePath, "source-map.md"), generateSourceMap(scan));
+
+  // Create domain/ hint file if empty
+  const { mkdir } = await import("fs/promises");
+  const domainDir = join(genomePath, "domain");
+  await mkdir(domainDir, { recursive: true });
+  const domainReadme = join(domainDir, "README.md");
+  if (!(await fileExists(domainReadme))) {
+    await writeTextFile(domainReadme, [
+      "# Domain Rules",
+      "",
+      "> This directory stores business rules that cannot be derived from code structure alone.",
+      "> Run `/reap.sync` to scan source code for domain knowledge and auto-generate domain files.",
+      "",
+      "Examples of domain rules:",
+      "- State machines and status transitions",
+      "- Policy rules with thresholds or conditions",
+      "- Classification logic driven by business categories",
+      "- Hardcoded domain constants with business meaning",
+      "- Workflow orchestration sequences",
+      "",
+      "Each file should follow the domain-guide template (`~/.reap/templates/domain-guide.md`).",
+      "",
+    ].join("\n"));
+  }
 }

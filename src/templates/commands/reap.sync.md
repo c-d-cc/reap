@@ -46,12 +46,26 @@ Scan the project to understand its current state:
 - Environment requirements, runtime constraints
 - External service dependencies
 
+**Domain Knowledge** (→ `genome/domain/`):
+- Read `~/.reap/templates/domain-guide.md` for domain file writing principles
+- Scan source code for business rules NOT derivable from infrastructure analysis:
+  - State machines and status transitions (e.g., post lifecycle, order states)
+  - Policy rules with thresholds, limits, or conditions (e.g., rate limits, scoring criteria)
+  - Classification/branching logic driven by business categories (e.g., template selection by type)
+  - Hardcoded domain constants (keyword lists, prompt templates, magic numbers with business meaning)
+  - Workflow orchestration sequences (e.g., approval flows, pipeline stages)
+- For each discovered domain rule cluster, evaluate:
+  - "Would an agent implementing this feature ask 'where is this rule?'" → YES = create domain file
+  - "Does a single item in an upper-level genome file require 3+ lines of explanation?" → YES = extract to domain file
+- Even if `genome/domain/` is currently empty, treat it as "not yet created" rather than "not needed"
+
 ### 3. Diff Analysis
 Compare source analysis with current Genome and identify:
 - **Additions**: Things in code but not in Genome
 - **Changes**: Things in Genome that no longer match code
 - **Removals**: Things in Genome that no longer exist in code
 - **Gaps**: Areas where Genome has placeholders but code has established patterns
+- **Domain gaps**: Business rules in code that have no corresponding `domain/` file
 
 ### 4. Report to Human
 Present a structured diff report:
