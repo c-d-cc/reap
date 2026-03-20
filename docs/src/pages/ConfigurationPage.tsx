@@ -17,16 +17,13 @@ export default function ConfigurationPage() {
         <CodeBlock language="yaml">{`# .reap/config.yml
 version: 0.1.0
 project: my-project
-entryMode: greenfield    # greenfield | migration | adoption
-strict: false            # boolean or { edit, merge } (default: false)
-language: english        # language for artifacts and interactions
-autoUpdate: false        # auto-update REAP on session start
-agents:                  # detected agents (managed by reap init/update)
+entryMode: greenfield       # greenfield | migration | adoption
+strict: true                # boolean or { edit, merge } (default: false)
+language: korean            # language for artifacts and interactions
+autoUpdate: true            # auto-update REAP on session start (default: true)
+autoIssueReport: true       # auto-report issues via gh CLI (default: true if gh found)
+agents:                     # detected agents (managed by reap init/update)
   - claude-code
-hooks:
-  onGenerationComplete:
-    - command: "reap update"
-    - prompt: "Update docs if needed."
 `}</CodeBlock>
 
         <h2 className="text-base font-semibold text-foreground mb-3 mt-8">{t.config.fields}</h2>

@@ -17,7 +17,12 @@ export function useNavGroups() {
       label: t.nav.groups.guide,
       items: [
         { title: t.nav.items.coreConcepts, href: "/docs/core-concepts" },
-        { title: t.nav.items.workflow, href: "/docs/workflow" },
+        { title: t.nav.items.genome, href: "/docs/genome" },
+        { title: t.nav.items.environment, href: "/docs/environment" },
+        { title: t.nav.items.lifecycle, href: "/docs/lifecycle" },
+        { title: t.nav.items.lineage, href: "/docs/lineage" },
+        { title: t.nav.items.backlog, href: "/docs/backlog" },
+        { title: t.nav.items.hooks, href: "/docs/hooks" },
         { title: t.nav.items.advanced, href: "/docs/advanced" },
       ]
     },
@@ -34,7 +39,6 @@ export function useNavGroups() {
       items: [
         { title: t.nav.items.cliReference, href: "/docs/cli-reference" },
         { title: t.nav.items.commandReference, href: "/docs/command-reference" },
-        { title: t.nav.items.hookReference, href: "/docs/hook-reference" },
       ]
     },
     {

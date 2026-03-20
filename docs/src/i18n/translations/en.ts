@@ -13,7 +13,12 @@ export const en = {
       introduction: "Introduction",
       quickStart: "Quick Start",
       coreConcepts: "Core Concepts",
-      workflow: "Workflow",
+      genome: "Genome",
+      environment: "Environment",
+      lifecycle: "Lifecycle",
+      lineage: "Lineage",
+      backlog: "Backlog",
+      hooks: "Hooks",
       advanced: "Advanced",
       collaborationOverview: "Distributed Workflow",
       mergeGeneration: "Merge Generation",
@@ -170,40 +175,36 @@ export const en = {
   concepts: {
     title: "Core Concepts",
     breadcrumb: "Guide",
-    genomeTitle: "Genome",
-    genomeDesc: "The Genome is the application's genetic information — architecture principles, business rules, conventions, technical constraints, and source maps.",
-    principles: "Principles",
-    genomeImmutability: "Genome Immutability Principle",
-    genomeImmutabilityDesc: "The Genome is never modified directly during the current generation. Issues are recorded in the backlog and only applied at the Completion stage.",
-    envImmutability: "Environment Immutability Principle",
-    envImmutabilityDesc: "The Environment is never modified directly during the current generation. External changes are recorded in the backlog and applied at the Completion stage.",
-    lifecycle: "Life Cycle",
-    lifecycleDesc: "Each generation follows five stages:",
+    fourAxisTitle: "Four-Axis Structure",
+    fourAxisDesc: "REAP organizes everything under .reap/ into four axes:",
+    axes: [
+      { axis: "Genome", path: ".reap/genome/", desc: "Genetic information — principles, rules, architecture decisions, source maps.", href: "/docs/genome" },
+      { axis: "Environment", path: ".reap/environment/", desc: "External context — APIs, infrastructure, business constraints. 3-layer: summary + docs + resources.", href: "/docs/environment" },
+      { axis: "Lifecycle", path: ".reap/life/", desc: "Current generation's lifecycle — progress state, artifacts, backlog.", href: "/docs/lifecycle" },
+      { axis: "Lineage", path: ".reap/lineage/", desc: "Archive of completed generations — DAG metadata, compressed history.", href: "/docs/lineage" },
+    ],
+    principlesTitle: "Key Principles",
+    principles: [
+      { name: "Genome Immutability", desc: "Never modified directly during a generation. Changes go through backlog → Completion." },
+      { name: "Environment Immutability", desc: "Never modified directly during a generation. External changes are recorded as backlog items." },
+      { name: "Stage Discipline", desc: "Every generation follows 5 stages. No skipping. Transitions only through /reap.next." },
+      { name: "Genome as Source of Truth", desc: "Architecture decisions live in Genome, not in code comments or docs." },
+    ],
+    lifecycleTitle: "Lifecycle Overview",
+    lifecycleDesc: "Each generation follows five stages, producing artifacts at each step:",
     stageHeaders: ["Stage", "What happens", "Artifact"],
     stages: [
-      ["Objective", "Define goal through structured brainstorming design", "01-objective.md"],
-      ["Planning", "Break down tasks, choose approach, map dependencies", "02-planning.md"],
-      ["Implementation", "Build with AI + human collaboration", "03-implementation.md"],
+      ["Objective", "Define goal through structured brainstorming", "01-objective.md"],
+      ["Planning", "Task decomposition + implementation plan", "02-planning.md"],
+      ["Implementation", "Code with AI + human collaboration", "03-implementation.md"],
       ["Validation", "Run tests, verify completion criteria", "04-validation.md"],
-      ["Completion", "Retrospective + apply Genome changes + archive", "05-completion.md"],
+      ["Completion", "Retrospective + Genome update + compression", "05-completion.md"],
     ],
-    backlog: "Backlog & Deferral",
-    backlogDesc: "All backlog items stored in .reap/life/backlog/ as markdown files with frontmatter:",
-    backlogHeaders: ["Type", "Description"],
-    backlogTypes: [
-      { type: "genome-change", desc: "Applied to Genome at Completion stage." },
-      { type: "environment-change", desc: "Applied to Environment at Completion stage." },
-      { type: "task", desc: "Candidate goals for the next Objective." },
-    ],
-    statusField: "Each item also carries a status field:",
-    statusHeaders: ["Status", "Description"],
-    statuses: [
-      { type: "pending", desc: "Not yet processed. Default value — absent field is treated as pending." },
-      { type: "consumed", desc: "Processed in the current generation. Requires consumedBy: gen-XXX-{hash}." },
-    ],
-    archivingNote: "At archiving time, consumed items move to lineage. pending items are carried forward to the next generation's backlog.",
-    deferralNote: "Partial completion is normal — tasks depending on Genome changes are marked [deferred] and handed to the next generation.",
-    evolutionFlow: "Evolution Flow Example",
+    sessionInitTitle: "Session Initialization",
+    sessionInitDesc: "When you open a REAP project, the session hook automatically injects context into the AI agent — Genome, Environment summary, generation state, and workflow rules. The agent immediately understands your project.",
+    sessionInitAlt: "REAP session initialization showing Genome loaded, generation state, and active goal",
+    evolutionFlowTitle: "Evolution Flow",
+    evolutionFlowDesc: "Knowledge compounds across generations. Each generation evolves the Genome, and lessons accumulate in Lineage:",
   },
 
   // Workflow Page
@@ -323,10 +324,14 @@ export const en = {
     ],
     generalTitle: "General",
     generalCommands: [
+      ["/reap.abort", "Abort current generation. Choose rollback/stash/hold for code changes, optionally save goal to backlog with abort metadata."],
       ["/reap.status", "Show current generation state, stage progress, backlog summary, timeline, and genome health."],
-      ["/reap.sync", "Analyze source code and synchronize Genome. Direct update when no active generation; records to backlog otherwise."],
-      ["/reap.help", "Provide contextual help with 24+ topics, including REAP introduction and detailed explanations (workflow, genome, backlog, strict, agents, hooks, config, evolve, regression, minor-fix, compression, author, and all command names)."],
-      ["/reap.update", "Check for REAP updates and upgrade to the latest version. Compares installed vs published version, updates the npm package, and syncs commands/templates/hooks."],
+      ["/reap.sync", "Synchronize both Genome and Environment with current state. Runs sync.genome + sync.environment."],
+      ["/reap.sync.genome", "Analyze source code and synchronize Genome. Direct update when no active generation; records to backlog otherwise."],
+      ["/reap.sync.environment", "Discover external dependencies (APIs, infrastructure, services) and document them in the 3-layer environment structure (summary.md + docs/ + resources/)."],
+      ["/reap.report", "Report a bug or feedback to the REAP project via GitHub Issue. Privacy double-check: PRIVACY_GATE + post-format sanitization. User confirmation required."],
+      ["/reap.help", "Provide contextual help with 24+ topics."],
+      ["/reap.update", "Upgrade REAP package + sync commands, templates, and hooks to all detected agents. Also syncs project .claude/commands/ immediately."],
     ],
     lifecycleFlow: "Lifecycle Flow",
     lifecycleFlowDesc: "The typical flow when using /reap.evolve:",
@@ -338,7 +343,7 @@ export const en = {
   config: {
     title: "Configuration",
     breadcrumb: "Reference",
-    intro: "REAP projects are configured through .reap/config.yml. This file is created during reap init and controls project settings, strict mode, and lifecycle hooks.",
+    intro: "REAP projects are configured through .reap/config.yml. This file is created during reap init and controls project settings, strict mode, and agent integration.",
     structure: "Config File Structure",
     fields: "Fields",
     fieldHeaders: ["Field", "Description"],
@@ -346,11 +351,12 @@ export const en = {
       ["version", "Config schema version"],
       ["project", "Project name (set during init)"],
       ["entryMode", "How REAP was initialized: greenfield, migration, or adoption"],
+      ["preset", "Preset used during init (e.g. bun-hono-react). Optional"],
       ["strict", "Strict mode: boolean (shorthand) or { edit, merge } for granular control (see below)"],
       ["language", "Language for artifacts and user interactions (e.g. korean, english, japanese)"],
-      ["autoUpdate", "Auto-update REAP on session start (default: false)"],
+      ["autoUpdate", "Auto-update REAP on session start (default: true)"],
+      ["autoIssueReport", "Auto-report issues to GitHub when malfunction detected. Requires gh CLI (default: true if gh found)"],
       ["agents", "Detected AI agents, managed by reap init/update (e.g. claude-code, opencode)"],
-      ["hooks", "Lifecycle hooks (see Hook Reference)"],
     ],
     strictMode: "Strict Mode",
     strictModeDesc: "Strict mode controls what the AI agent is allowed to do. It supports two forms:",
@@ -383,8 +389,8 @@ strict:
 
   // Hook Reference Page
   hooks: {
-    title: "Hook Reference",
-    breadcrumb: "Reference",
+    title: "Hooks",
+    breadcrumb: "Guide",
     intro: "REAP hooks let you run automation at key lifecycle events. Hooks are stored as individual files in .reap/hooks/ and the AI agent executes them at the right moment.",
     hookTypes: "Hook Types",
     hookTypesIntro: "Each hook file supports one of two types based on its extension:",
@@ -412,32 +418,26 @@ strict:
       ["onGenomeResolved", "After genome conflicts are resolved in a merge generation"],
       ["onMergeComplete", "After a merge generation is archived"],
     ],
-    configuration: "Configuration",
-    configExample: `# .reap/hooks/ directory structure
-#
-# .reap/hooks/
-# ├── onGenerationStart.notify.sh
-# ├── onStageTransition.lint.sh
-# ├── onGenerationComplete.update.sh
-# ├── onGenerationComplete.docs-review.md
-# └── onRegression.log.md
-#
-# Example: onGenerationComplete.docs-review.md
+    configuration: "File-based Configuration",
+    configurationDesc: "Hooks are file-based — stored in .reap/hooks/, not in config.yml. Each hook is a file named {event}.{name}.{md|sh}.",
+    configExample: `.reap/hooks/
+├── onGenerationComplete.reap-update.sh
+├── onGenerationComplete.docs-update.md
+├── onStageTransition.lint.sh
+└── onRegression.alert.sh
+
+# Example: .md hook (AI prompt)
 # ---
-# condition: stage == 'completion'
-# order: 10
+# condition: has-code-changes
+# order: 30
 # ---
-# Review the changes made in this generation.
-# Update README.md and docs if any features, CLI commands,
-# or slash commands were added or modified.
-# Skip if no documentation updates are needed.
-#
-# Example: onStageTransition.lint.sh
-# ---
-# order: 0
-# ---
+# Review changes and update docs if needed.
+
+# Example: .sh hook (shell script)
 # #!/bin/bash
-# npm run lint`,
+# # condition: always
+# # order: 20
+# reap update`,
     hookSuggestion: "Automatic Hook Suggestion",
     hookSuggestionDesc: "During the Completion stage (Phase 5: Hook Suggestion), REAP detects repeated patterns across generations — such as recurring manual steps, repeated commands, or consistent post-stage actions. When a pattern is detected, REAP suggests creating a hook to automate it. Hook creation always requires user confirmation before being applied.",
     sessionStart: "SessionStart Hook",
@@ -446,10 +446,11 @@ strict:
     sessionStartNote: "Registered in the agent's settings (e.g. ~/.claude/settings.json for Claude Code, ~/.config/opencode/ for OpenCode). The hook script lives in the REAP package and reads from the project's .reap/ directory.",
     executionNotes: "Execution Notes",
     executionItems: [
-      "Hooks are executed by the AI agent, not the CLI. The agent reads the config and runs each hook.",
-      "command hooks run in the project root directory.",
-      "prompt hooks are interpreted by the AI agent in the current session context.",
-      "Hooks within the same event run sequentially, in the order defined.",
+      "Hooks are executed by the AI agent, not the CLI. The agent scans .reap/hooks/ for matching files.",
+      ".sh files run as shell scripts in the project root directory.",
+      ".md files are read as AI prompts and followed by the agent.",
+      "Hooks within the same event run in order (frontmatter 'order' field, lower runs first).",
+      "Conditions are evaluated via .reap/hooks/conditions/{name}.sh (exit 0 = run, non-zero = skip).",
       "onGenerationComplete hooks run after the git commit — any file changes from hooks will be uncommitted.",
     ],
   },
@@ -459,13 +460,13 @@ strict:
     title: "Advanced",
     breadcrumb: "Guide",
     compressionTitle: "Lineage Compression",
-    compressionDesc: "As generations accumulate, lineage archives are automatically compressed to manage size.",
-    compressionHeaders: ["Level", "Input", "Output", "Max lines", "Trigger"],
+    compressionDesc: "As generations accumulate, lineage archives are automatically compressed during the Completion stage.",
+    compressionHeaders: ["Level", "Input", "Output", "Trigger", "Protection"],
     compressionItems: [
-      ["Level 1", "Generation folder (5 artifacts)", "gen-XXX-{hash}.md", "40", "lineage > 5,000 lines + 5+ generations"],
-      ["Level 2", "5 Level 1 files", "epoch-XXX.md", "60", "5+ Level 1 files exist"],
+      ["Level 1", "Generation folder (5 artifacts)", "gen-XXX-{hash}.md (40 lines)", "lineage > 5,000 lines + 5+ generations", "Recent 3 + DAG leaf nodes"],
+      ["Level 2", "100+ Level 1 files", "Single epoch.md", "Level 1 files > 100", "Recent 9 + fork points"],
     ],
-    compressionProtection: "The most recent 3 generations are always protected from compression, preserving full detail for recent context.",
+    compressionProtection: "DAG preservation: Level 1 files retain metadata in frontmatter. Level 2 epoch.md stores a generations hash chain. Fork guard: all local/remote branches are scanned before Level 2 compression — fork points are protected. Epoch-compressed generations cannot be used as merge bases.",
     presetsTitle: "Presets",
     presetsDesc: "Presets provide pre-configured Genome and project scaffolding for common stacks.",
     presetsNote: "The bun-hono-react preset configures Genome with conventions for a Bun + Hono + React stack, including appropriate architecture principles, conventions, and constraints.",
@@ -598,6 +599,128 @@ strict:
       { title: "Isolated tasks vs Generational evolution", desc: "Each task in traditional tools is independent. In REAP, generations build on each other. Knowledge compounds through Lineage archives and Genome evolution." },
       { title: "No lifecycle hooks", desc: "REAP provides project-level hooks (onGenerationStart, onStageTransition, onGenerationComplete, onRegression) for automation." },
     ],
+  },
+
+  // Genome Page
+  genomePage: {
+    title: "Genome",
+    breadcrumb: "Guide",
+    intro: "The Genome is REAP's authoritative knowledge source — architecture principles, development conventions, technical constraints, and domain rules. It is the DNA of your project.",
+    structureTitle: "Structure",
+    structure: `.reap/genome/
+├── principles.md      # Architecture principles/decisions (ADR style)
+├── conventions.md     # Development rules/conventions
+├── constraints.md     # Technical constraints/choices
+├── source-map.md      # C4 Container/Component diagrams
+└── domain/            # Business rules (per module)`,
+    principlesTitle: "Writing Principles",
+    principles: [
+      "Map not Manual — each file ~100 lines max. Details go to domain/.",
+      "Agent-actionable — written so an AI agent can immediately act on it.",
+      "domain/ is for business rules — not code structure, but policies, thresholds, state machines.",
+      "Mechanical enforcement first — prefer lint/test rules over document rules.",
+    ],
+    immutabilityTitle: "Genome Immutability",
+    immutabilityDesc: "The current generation does not modify Genome directly. Issues discovered during Implementation are recorded as genome-change backlog items and applied only during the Completion stage.",
+    contextTitle: "Session Context",
+    contextDesc: "Genome is automatically loaded into the AI agent's context at session start. The agent always has access to your project's principles, conventions, constraints, and source map — no manual briefing needed.",
+    syncTitle: "Synchronization with Source Code",
+    syncDesc: "Use /reap.sync.genome to analyze source code and update the Genome. When no active generation, changes are applied directly. With an active generation, differences are recorded to backlog.",
+  },
+
+  // Environment Page
+  environmentPage: {
+    title: "Environment",
+    breadcrumb: "Guide",
+    intro: "Environment stores external context that affects your project — APIs, infrastructure, organizational rules, and reference materials. Unlike Genome (internal decisions), Environment captures constraints from the outside world.",
+    structureTitle: "3-Layer Structure",
+    structure: `.reap/environment/
+├── summary.md      # Session context (~100 lines, auto-loaded)
+├── docs/           # Main reference docs (agent reads these)
+└── resources/      # Raw materials (user-managed)`,
+    layersTitle: "Layers",
+    layerHeaders: ["Layer", "Maintained by", "Content", "Limit"],
+    layerItems: [
+      ["summary.md", "AI (auto-generated)", "Overview of all docs/. Loaded into every session context.", "~100 lines"],
+      ["docs/", "AI + User", "One file per environment topic. API constraints, infrastructure, org rules.", "~100 lines each"],
+      ["resources/", "User", "Original documents, PDFs, external links + summaries.", "No limit"],
+    ],
+    flowTitle: "Lookup Flow",
+    flowDesc: "summary.md (always loaded) → docs/ (when detail needed) → resources/ (when original source needed)",
+    syncTitle: "Synchronization",
+    syncDesc: "Use /reap.sync.environment to discover external dependencies from source code and interview the user. The command scans package.json, config files, API clients, and asks about connected systems, infrastructure, and organizational rules.",
+  },
+
+  // Lifecycle Page (renamed from Workflow)
+  lifecyclePage: {
+    title: "Lifecycle",
+    breadcrumb: "Guide",
+    intro: "The lifecycle is the heartbeat of REAP — each generation flows through 5 stages (Objective → Planning → Implementation → Validation → Completion), producing artifacts at every step. The AI agent guides you through the entire lifecycle.",
+  },
+
+  // Lineage Page
+  lineagePage: {
+    title: "Lineage",
+    breadcrumb: "Guide",
+    intro: "Lineage is the archive of completed generations. Every generation that completes its lifecycle is preserved here with full artifacts and DAG metadata.",
+    structureTitle: "Structure",
+    structureDesc: "Each completed generation creates a directory with artifacts and metadata:",
+    structure: `.reap/lineage/
+├── gen-042-a3f8c2-fix-login-bug/   # Full generation (directory)
+│   ├── meta.yml                      # DAG metadata (id, parents, genomeHash)
+│   ├── 01-objective.md
+│   ├── 02-planning.md
+│   ├── 03-implementation.md
+│   ├── 04-validation.md
+│   └── 05-completion.md
+├── gen-030-b7e1f2.md                 # Level 1 compressed (single file)
+└── epoch.md                          # Level 2 compressed (hash chain)`,
+    dagTitle: "DAG (Directed Acyclic Graph)",
+    dagDesc: "Each generation records its parents in meta.yml, forming a DAG. This enables distributed workflows where multiple machines can work independently and merge later.",
+    compressionTitle: "Compression",
+    compressionDesc: "Compression runs during the Completion stage to manage lineage size.",
+    compressionHeaders: ["Level", "Input", "Output", "Trigger", "Protection"],
+    compressionItems: [
+      ["Level 1", "Generation folder", "gen-XXX-{hash}.md (40 lines)", "> 5,000 lines + 5+ generations", "Recent 3 + DAG leaf nodes"],
+      ["Level 2", "100+ Level 1 files", "Single epoch.md", "Level 1 files > 100", "Recent 9 + fork points"],
+    ],
+    compressionSafety: "DAG preservation: Level 1 retains metadata in frontmatter. Level 2 epoch.md stores a generations hash chain. Fork guard: all local/remote branches are scanned — fork points are protected. Epoch-compressed generations cannot be used as merge bases.",
+  },
+
+  // Backlog Page
+  backlogPage: {
+    title: "Backlog",
+    breadcrumb: "Guide",
+    intro: "The backlog carries items forward between generations — deferred tasks, genome changes, and environment changes. It lives in .reap/life/backlog/.",
+    typesTitle: "Item Types",
+    typeHeaders: ["Type", "Description", "When Applied"],
+    typeItems: [
+      ["task", "Deferred work, tech debt, feature ideas", "Referenced as goal candidates in next Objective"],
+      ["genome-change", "Genome modifications discovered mid-generation", "Applied to Genome during Completion"],
+      ["environment-change", "External environment changes discovered mid-generation", "Applied to Environment during Completion"],
+    ],
+    statusTitle: "Status",
+    statusHeaders: ["Status", "Meaning"],
+    statusItems: [
+      ["pending", "Not yet processed (default)"],
+      ["consumed", "Processed in a generation (requires consumedBy: gen-XXX-{hash})"],
+    ],
+    archivingTitle: "Archiving Rules",
+    archivingDesc: "At archiving time, consumed items move to lineage. Pending items are carried forward to the next generation's backlog.",
+    deferralTitle: "Task Deferral",
+    deferralDesc: "Partial completion is normal — tasks depending on Genome changes are marked [deferred] and handed to the next generation.",
+    abortTitle: "Abort Backlog",
+    abortDesc: "When a generation is aborted via /reap.abort, the goal and progress can be saved to backlog with abort metadata (abortedFrom, abortReason, stage, sourceAction, changedFiles). This preserves context for resuming later.",
+    formatTitle: "File Format",
+    format: `---
+type: task
+status: pending
+priority: medium
+---
+
+# Task Title
+
+Description of the task.`,
   },
 };
 

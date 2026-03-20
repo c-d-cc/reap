@@ -1,39 +1,45 @@
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { CodeBlock } from "@/components/CodeBlock";
+import { Link } from "wouter";
 import { useT } from "@/i18n";
 
 export default function CoreConceptsPage() {
   const t = useT();
+  const c = t.concepts;
   return (
     <DocLayout>
-      <DocPage title={t.concepts.title} breadcrumb={t.concepts.breadcrumb}>
+      <DocPage title={c.title} breadcrumb={c.breadcrumb}>
 
-        <h2 className="text-base font-semibold text-foreground mb-2">{t.concepts.genomeTitle}</h2>
-        <p className="text-sm text-muted-foreground mb-3">
-          {t.concepts.genomeDesc}
-        </p>
-        <CodeBlock language="text">{`.reap/genome/
-├── principles.md      # Architecture principles/decisions
-├── domain/            # Business rules (per module)
-├── conventions.md     # Development rules/conventions
-├── constraints.md     # Technical constraints/choices
-└── source-map.md      # C4 Container/Component diagrams`}</CodeBlock>
-
-        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.concepts.principles}</h2>
-        <div className="space-y-3 mb-6">
-          <div className="border border-border rounded-md p-3 bg-card">
-            <div className="text-sm font-semibold text-foreground mb-1">{t.concepts.genomeImmutability}</div>
-            <p className="text-xs text-muted-foreground leading-relaxed">{t.concepts.genomeImmutabilityDesc}</p>
-          </div>
-          <div className="border border-border rounded-md p-3 bg-card">
-            <div className="text-sm font-semibold text-foreground mb-1">{t.concepts.envImmutability}</div>
-            <p className="text-xs text-muted-foreground leading-relaxed">{t.concepts.envImmutabilityDesc}</p>
-          </div>
+        {/* Four-Axis Structure */}
+        <h2 className="text-base font-semibold text-foreground mb-2">{c.fourAxisTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-3">{c.fourAxisDesc}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6">
+          {c.axes.map((item) => (
+            <Link key={item.axis} href={item.href} className="flex">
+              <div className="border border-border rounded-md p-3 bg-card hover:border-primary/50 transition-colors cursor-pointer flex flex-col flex-1">
+                <div className="text-sm font-semibold text-foreground">{item.axis}</div>
+                <div className="text-xs font-mono text-muted-foreground mb-1">{item.path}</div>
+                <p className="text-xs text-muted-foreground flex-1">{item.desc}</p>
+              </div>
+            </Link>
+          ))}
         </div>
 
-        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.concepts.lifecycle}</h2>
-        <p className="text-sm text-muted-foreground mb-3">{t.concepts.lifecycleDesc}</p>
+        {/* Key Principles */}
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{c.principlesTitle}</h2>
+        <div className="space-y-2 mb-6">
+          {c.principles.map((p) => (
+            <div key={p.name} className="border border-border rounded-md p-3 bg-card">
+              <div className="text-sm font-semibold text-foreground mb-1">{p.name}</div>
+              <p className="text-xs text-muted-foreground">{p.desc}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* Lifecycle Overview */}
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{c.lifecycleTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-3">{c.lifecycleDesc}</p>
         <div className="flex items-center gap-1 flex-wrap mb-4">
           {[
             { label: "Objective" }, null,
@@ -51,18 +57,17 @@ export default function CoreConceptsPage() {
             );
           })}
         </div>
-
         <div className="border border-border rounded-md overflow-hidden text-sm mb-6">
           <table className="w-full">
             <thead>
               <tr className="border-b border-border bg-muted/30">
-                {t.concepts.stageHeaders.map((h) => (
+                {c.stageHeaders.map((h) => (
                   <th key={h} className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
                 ))}
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {t.concepts.stages.map(([stage, what, artifact]) => (
+              {c.stages.map(([stage, what, artifact]) => (
                 <tr key={stage}>
                   <td className="px-4 py-2 font-mono text-xs text-primary">{stage}</td>
                   <td className="px-4 py-2 text-muted-foreground text-xs">{what}</td>
@@ -72,58 +77,26 @@ export default function CoreConceptsPage() {
             </tbody>
           </table>
         </div>
-
-        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.concepts.backlog}</h2>
-        <p className="text-sm text-muted-foreground mb-3">
-          {t.concepts.backlogDesc}
-        </p>
-        <div className="border border-border rounded-md overflow-hidden text-sm mb-4">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                {t.concepts.backlogHeaders.map((h) => (
-                  <th key={h} className={`text-left px-4 py-2 text-xs font-semibold text-muted-foreground ${h === t.concepts.backlogHeaders[0] ? "w-48" : ""}`}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {t.concepts.backlogTypes.map((item) => (
-                <tr key={item.type}>
-                  <td className="px-4 py-2 font-mono text-xs text-primary">{item.type}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground">{item.desc}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="text-xs text-muted-foreground mb-2">{t.concepts.statusField}</p>
-        <div className="border border-border rounded-md overflow-hidden text-sm mb-4">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                {t.concepts.statusHeaders.map((h) => (
-                  <th key={h} className={`text-left px-4 py-2 text-xs font-semibold text-muted-foreground ${h === t.concepts.statusHeaders[0] ? "w-48" : ""}`}>{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {t.concepts.statuses.map((item) => (
-                <tr key={item.type}>
-                  <td className="px-4 py-2 font-mono text-xs text-primary">{item.type}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground">{item.desc}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
-        <p className="text-xs text-muted-foreground mb-3">
-          {t.concepts.archivingNote}
-        </p>
-        <p className="text-sm text-muted-foreground mb-6">
-          {t.concepts.deferralNote}
+        <p className="text-xs text-muted-foreground mb-6">
+          <Link href="/docs/lifecycle" className="text-primary hover:underline">→ Lifecycle details</Link>
+          {" · "}
+          <Link href="/docs/backlog" className="text-primary hover:underline">→ Backlog & Deferral</Link>
         </p>
 
-        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.concepts.evolutionFlow}</h2>
+        {/* Session Initialization */}
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{c.sessionInitTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-3">{c.sessionInitDesc}</p>
+        <div className="border border-border rounded-md overflow-hidden mb-6 inline-block">
+          <img
+            src="/session-init-screenshot.png"
+            alt={c.sessionInitAlt}
+            className="max-w-md"
+          />
+        </div>
+
+        {/* Evolution Flow */}
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{c.evolutionFlowTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-3">{c.evolutionFlowDesc}</p>
         <CodeBlock language="text">{`Generation #1 (Genome v1)
   → Objective: "Implement user authentication"
   → Planning → Implementation

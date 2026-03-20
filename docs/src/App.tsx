@@ -19,6 +19,11 @@ import Introduction from "@/pages/Introduction";
 import QuickStartPage from "@/pages/QuickStartPage";
 import CoreConceptsPage from "@/pages/CoreConceptsPage";
 import WorkflowPage from "@/pages/WorkflowPage";
+import LifecyclePage from "@/pages/LifecyclePage";
+import GenomePage from "@/pages/GenomePage";
+import EnvironmentPage from "@/pages/EnvironmentPage";
+import LineagePage from "@/pages/LineagePage";
+import BacklogPage from "@/pages/BacklogPage";
 import CLIPage from "@/pages/CLIPage";
 import AdvancedPage from "@/pages/AdvancedPage";
 import CommandReferencePage from "@/pages/CommandReferencePage";
@@ -39,6 +44,13 @@ function Router() {
       <Route path="/docs/quick-start" component={QuickStartPage} />
       <Route path="/docs/core-concepts" component={CoreConceptsPage} />
       <Route path="/docs/workflow" component={WorkflowPage} />
+      <Route path="/docs/lifecycle" component={LifecyclePage} />
+      <Route path="/docs/genome" component={GenomePage} />
+      <Route path="/docs/environment" component={EnvironmentPage} />
+      <Route path="/docs/lineage" component={LineagePage} />
+      <Route path="/docs/backlog" component={BacklogPage} />
+      <Route path="/docs/hooks" component={HookReferencePage} />
+      <Route path="/docs/hook-reference" component={HookReferencePage} />
       <Route path="/docs/cli-reference" component={CLIPage} />
       <Route path="/docs/command-reference" component={CommandReferencePage} />
       <Route path="/docs/hook-reference" component={HookReferencePage} />

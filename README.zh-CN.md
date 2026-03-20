@@ -160,7 +160,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 .reap/
 ├── genome/        # 遗传信息（跨世代进化）
 ├── environment/   # 外部环境（API文档、基础设施、业务约束）
-├── life/          # 当前世代的状态和产出物
+├── life/          # 生命周期 — 当前世代的状态和产出物
 └── lineage/       # 已完成世代的归档
 ```
 

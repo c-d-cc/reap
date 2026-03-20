@@ -69,35 +69,17 @@ export type ReapHookEvent =
   | "onGenerationStart" | "onStageTransition" | "onGenerationComplete" | "onRegression"
   | "onMergeStart" | "onGenomeResolved" | "onMergeComplete";
 
-export interface ReapHookCommand {
-  command?: string;
-  prompt?: string;
-  execute?: string;     // file path (.md = prompt, .sh = command)
-  condition?: string;   // condition to evaluate before execution
-}
-
-export interface ReapHooks {
-  onGenerationStart?: ReapHookCommand[];
-  onStageTransition?: ReapHookCommand[];
-  onGenerationComplete?: ReapHookCommand[];
-  onRegression?: ReapHookCommand[];
-  onMergeStart?: ReapHookCommand[];
-  onGenomeResolved?: ReapHookCommand[];
-  onMergeComplete?: ReapHookCommand[];
-}
-
 export interface ReapConfig {
   version: string;
   project: string;
   stack?: string;
   preset?: string;
   entryMode: "greenfield" | "migration" | "adoption";
-  hooks?: ReapHooks;
   /** Override auto-detected agents. If omitted, all detected agents are used. */
   agents?: AgentName[];
   /** Project-level language setting. Used by agents that don't have their own language config. */
   language?: string;
-  /** Auto-update REAP on session start. Default: false */
+  /** Auto-update REAP on session start. Default: true */
   autoUpdate?: boolean;
   /** Strict mode: boolean (shorthand) or granular { edit, merge } */
   strict?: boolean | { edit?: boolean; merge?: boolean };

@@ -159,7 +159,7 @@ At archiving time (`/reap.next` from Completion), `consumed` items move to linea
 .reap/
 ├── genome/        # Genetic information (evolves across generations)
 ├── environment/   # External context (API docs, infra, business constraints)
-├── life/          # Current generation's state and artifacts
+├── life/          # Lifecycle — current generation's state and artifacts
 └── lineage/       # Archive of completed generations
 ```
 

@@ -52,18 +52,6 @@ export default function Introduction() {
           </table>
         </div>
 
-        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.intro.fourAxis}</h2>
-        <p className="text-sm text-muted-foreground mb-3">{t.intro.fourAxisDesc}</p>
-        <div className="grid grid-cols-2 gap-3 mb-6">
-          {t.intro.axes.map((item) => (
-            <div key={item.axis} className="border border-border rounded-md p-3 bg-card">
-              <div className="text-sm font-semibold text-foreground">{item.axis}</div>
-              <div className="text-xs font-mono text-primary mt-0.5 mb-1">{item.path}</div>
-              <div className="text-xs text-muted-foreground">{item.desc}</div>
-            </div>
-          ))}
-        </div>
-
         <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.intro.projectStructure}</h2>
         <CodeBlock language="text">{`my-project/
 ├── src/                          # Civilization (your code)

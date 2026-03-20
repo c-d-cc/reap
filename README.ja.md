@@ -160,7 +160,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 .reap/
 ├── genome/        # 遺伝情報（世代を超えて進化）
 ├── environment/   # 外部環境（APIドキュメント、インフラ、ビジネス制約）
-├── life/          # 現在の世代の状態と成果物
+├── life/          # ライフサイクル — 現在の世代の状態と成果物
 └── lineage/       # 完了した世代のアーカイブ
 ```
 
