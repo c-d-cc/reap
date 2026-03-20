@@ -94,11 +94,12 @@ BEFORE writing the issue report:
 
 ### 유저 확인 흐름
 1. Malfunction 감지
-2. "문제가 감지되었습니다. GitHub Issue로 보고할까요? (yes/no)"
+2. "문제가 감지되었습니다. GitHub Issue로 보고할까요? 이 리포트는 REAP 프로젝트의 품질 개선에 큰 도움이 됩니다. (yes/no)"
 3. yes → issue 본문 생성 (1차 검사 적용)
 4. 생성된 본문에 2차 검사 (자동 마스킹)
 5. 마스킹된 최종 본문을 유저에게 표시: "아래 내용으로 issue를 등록합니다. 민감한 정보가 포함되어 있지 않은지 확인해주세요."
 6. 유저 최종 confirm → `gh issue create`
+7. 등록 완료 후: "Issue가 등록되었습니다. 리포트에 감사드립니다! 여러분의 피드백이 REAP을 더 나은 도구로 만듭니다."
 
 ## 수정 대상
 - `src/cli/commands/init.ts` — gh 존재 확인 + config 설정
