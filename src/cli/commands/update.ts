@@ -47,33 +47,26 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     }
   }
 
-  // 1b. Sync redirect stubs to each agent's commands dir
+  // 1b. Phase 2 migration: remove redirect stubs from agent commands dirs
+  // Redirects were created in Phase 1 (v0.7.0) for backward compat.
+  // Now that ~/.reap/commands/ exists, session hook handles project-level symlinks,
+  // so user-level redirects in ~/.claude/commands/ and ~/.config/opencode/commands/ are no longer needed.
   for (const adapter of adapters) {
     const agentCmdDir = adapter.getCommandsDir();
-    const label = `${adapter.displayName}`;
+    const label = adapter.displayName;
 
-    for (const file of commandFiles) {
-      if (!file.endsWith(".md")) continue;
-      const cmdName = file.replace(/\.md$/, "");
-      const redirectContent = `---\ndescription: "REAP — redirected to ~/.reap/commands/"\n---\nRead \`~/.reap/commands/${cmdName}.md\` and follow the instructions there.\n`;
-      const dest = join(agentCmdDir, file);
-      const existingContent = await readTextFile(dest);
-      if (existingContent !== null && existingContent === redirectContent) {
-        result.skipped.push(`[${label}] commands/${file}`);
-      } else {
-        if (!dryRun) {
-          await mkdir(agentCmdDir, { recursive: true });
-          await writeTextFile(dest, redirectContent);
+    try {
+      const existing = await readdir(agentCmdDir);
+      for (const file of existing) {
+        if (!file.startsWith("reap.") || !file.endsWith(".md")) continue;
+        const filePath = join(agentCmdDir, file);
+        const content = await readTextFile(filePath);
+        if (content !== null && content.includes("redirected to ~/.reap/commands/")) {
+          if (!dryRun) await unlink(filePath);
+          result.removed.push(`[${label}] commands/${file} (Phase 2: redirect removed)`);
         }
-        result.updated.push(`[${label}] commands/${file}`);
       }
-    }
-
-    // Cleanup stale commands
-    const validCommandFiles = new Set(commandFiles);
-    if (!dryRun) {
-      await adapter.removeStaleCommands(validCommandFiles);
-    }
+    } catch { /* dir may not exist */ }
   }
 
   // 2. Sync artifact templates + domain guide to ~/.reap/templates/

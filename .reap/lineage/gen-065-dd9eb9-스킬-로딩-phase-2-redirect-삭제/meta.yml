@@ -1,0 +1,8 @@
+id: gen-065-dd9eb9
+type: normal
+parents:
+  - gen-064-0ddf20
+goal: "스킬 로딩 최적화 Phase 2 — ~/.claude/commands/ redirect 삭제"
+genomeHash: 8db4246930c0
+startedAt: 2026-03-20T07:08:02Z
+completedAt: 2026-03-20T07:10:57Z
