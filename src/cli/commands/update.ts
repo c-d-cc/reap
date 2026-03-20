@@ -154,17 +154,8 @@ async function migrateLegacyFiles(
   await removeDirIfExists(paths.legacyTemplates, ".reap/templates/", dryRun, result);
   // .reap/hooks/ is now used for hook execute files (gen-031+), do NOT remove
 
-  // Remove project-level .claude/commands/reap.* files
-  try {
-    const claudeCmdDir = paths.legacyClaudeCommands;
-    const files = await readdir(claudeCmdDir);
-    for (const file of files) {
-      if (file.startsWith("reap.") && file.endsWith(".md")) {
-        if (!dryRun) await unlink(join(claudeCmdDir, file));
-        result.removed.push(`.claude/commands/${file}`);
-      }
-    }
-  } catch { /* dir may not exist */ }
+  // .claude/commands/reap.* files are now managed by session-start hook (copy, not symlink)
+  // Do NOT remove them here — session-start.cjs installs them on each session start
 
   // Clean up .claude/hooks.json legacy references
   try {
