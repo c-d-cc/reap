@@ -101,6 +101,8 @@ export interface ReapConfig {
   autoUpdate?: boolean;
   /** Strict mode: boolean (shorthand) or granular { edit, merge } */
   strict?: boolean | { edit?: boolean; merge?: boolean };
+  /** Auto-report issues to GitHub when malfunction detected. Requires gh CLI. */
+  autoIssueReport?: boolean;
 }
 
 /** Resolved strict mode (always object form) */

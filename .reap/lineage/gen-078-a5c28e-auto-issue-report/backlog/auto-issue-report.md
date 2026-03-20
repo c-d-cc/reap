@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-078-a5c28e
 priority: medium
 ---
 

@@ -11,7 +11,7 @@ export const COMMAND_NAMES = [
   "reap.validation", "reap.completion", "reap.evolve",
   "reap.start", "reap.next", "reap.back", "reap.abort",
   "reap.status", "reap.sync", "reap.sync.genome", "reap.sync.environment",
-  "reap.help", "reap.update",
+  "reap.help", "reap.update", "reap.report",
   "reap.merge.start", "reap.merge.detect", "reap.merge.mate",
   "reap.merge.merge", "reap.merge.sync", "reap.merge.validation",
   "reap.merge.completion", "reap.merge.evolve",
@@ -55,11 +55,24 @@ export async function initProject(
 
   // 2. Write config
   log("Writing config.yml...");
+  // Check for gh CLI
+  let hasGhCli = false;
+  try {
+    const { execSync } = await import("child_process");
+    execSync("which gh", { stdio: "ignore" });
+    hasGhCli = true;
+  } catch { /* gh not installed */ }
+
+  if (!hasGhCli) {
+    log("GitHub CLI(gh) not found. Install from https://cli.github.com for auto issue reporting.");
+  }
+
   const config: ReapConfig = {
     version: "0.1.0",
     project: projectName,
     entryMode,
     autoUpdate: true,
+    autoIssueReport: hasGhCli,
     ...(preset && { preset }),
   };
   await ConfigManager.write(paths, config);
