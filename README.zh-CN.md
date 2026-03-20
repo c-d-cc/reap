@@ -341,7 +341,8 @@ order: 10                     # 执行顺序（数值越小越先执行）
 | `onGenerationComplete` | `/reap.next`归档已完成的Generation后 |
 | `onRegression` | `/reap.back`回到前一阶段后 |
 | `onMergeStart` | `/reap.merge.start`创建合并Generation后 |
-| `onGenomeResolved` | 合并过程中Genome冲突解决完成后 |
+| `onGenomeMated` | 合并过程中Genome冲突解决完成后（mate阶段） |
+| `onSourceMerged` | 源代码合并完成后 |
 | `onMergeComplete` | 合并Generation归档后 |
 
 Hook由AI代理在项目根目录中执行。`onGenerationComplete` Hook包含自动版本号升级判断 — patch级别自动应用，minor/major级别需要用户确认。

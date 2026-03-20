@@ -341,7 +341,8 @@ order: 10                     # 실행 순서 (낮을수록 먼저 실행)
 | `onGenerationComplete` | `/reap.next`로 완료된 Generation 아카이빙 후 |
 | `onRegression` | `/reap.back`으로 이전 stage 복귀 후 |
 | `onMergeStart` | `/reap.merge.start`로 머지 Generation 생성 후 |
-| `onGenomeResolved` | 머지 중 Genome 충돌 해결 완료 후 |
+| `onGenomeMated` | 머지 중 Genome 충돌 해결 완료 후 (mate 단계) |
+| `onSourceMerged` | 소스 코드 머지 완료 후 |
 | `onMergeComplete` | 머지 Generation 아카이빙 후 |
 
 Hook은 AI 에이전트가 프로젝트 루트 디렉토리에서 실행합니다. `onGenerationComplete` Hook에는 자동 버전 범프 판단이 포함되어 있습니다 — patch 수준은 자동으로 적용되고, minor/major 범프는 사용자 확인을 거칩니다.

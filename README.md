@@ -342,7 +342,8 @@ order: 10                     # execution order (lower runs first)
 | `onGenerationComplete` | After `/reap.next` archives a completed generation |
 | `onRegression` | After `/reap.back` returns to a previous stage |
 | `onMergeStart` | After `/reap.merge.start` creates a merge generation |
-| `onGenomeResolved` | After genome conflicts are resolved in a merge |
+| `onGenomeMated` | After genome conflicts are resolved (mate stage) |
+| `onSourceMerged` | After source code merge is completed |
 | `onMergeComplete` | After a merge generation is archived |
 
 Hooks are executed by the AI agent in the project root directory.

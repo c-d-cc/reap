@@ -341,7 +341,8 @@ order: 10                     # 実行順序（小さいほど先に実行）
 | `onGenerationComplete` | `/reap.next`で完了したGenerationをアーカイブ後 |
 | `onRegression` | `/reap.back`で前のステージに回帰後 |
 | `onMergeStart` | `/reap.merge.start`でマージGeneration作成後 |
-| `onGenomeResolved` | マージ中にGenomeの競合が解決された後 |
+| `onGenomeMated` | マージ中にGenomeの競合が解決された後（mateステージ） |
+| `onSourceMerged` | ソースコードマージ完了後 |
 | `onMergeComplete` | マージGenerationがアーカイブされた後 |
 
 HookはAIエージェントがプロジェクトルートディレクトリで実行します。`onGenerationComplete` Hookには自動バージョンバンプ判定が含まれています — patchレベルは自動適用され、minor/majorバンプはユーザー確認が必要です。

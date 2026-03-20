@@ -64,7 +64,8 @@ order: 10
 | Event | Trigger | Timing |
 |-------|---------|--------|
 | onMergeStart | `reap.merge.start` 후 | merge generation 생성 직후 |
-| onGenomeResolved | genome-resolve → source-resolve 전환 시 | genome 확정 직후, source merge 전 |
+| onGenomeMated | genome mate 완료 시 | genome 확정 직후, source merge 전 |
+| onSourceMerged | source merge 완료 시 | source merge 직후, sync/validation 전 |
 | onMergeComplete | merge generation archiving 후 | git commit 이후 |
 
 - 기존 `onStageTransition`은 merge stage 전환에서도 발동
