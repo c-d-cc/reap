@@ -15,24 +15,17 @@ interface UpdateResult {
 
 export async function updateProject(projectRoot: string, dryRun: boolean = false): Promise<UpdateResult> {
   const paths = new ReapPaths(projectRoot);
-
-  if (!(await paths.isReapProject())) {
-    throw new Error("Not a REAP project. Run 'reap init' first.");
-  }
-
   const result: UpdateResult = { updated: [], skipped: [], removed: [] };
 
-  // Read config for agent overrides
-  const config = await ConfigManager.read(paths);
+  // --- Global sync (always runs, no project required) ---
 
-  // Get active agents
+  // Read config for agent overrides (use project config if available, else defaults)
+  const config = (await paths.isReapProject()) ? await ConfigManager.read(paths) : null;
   const adapters = await AgentRegistry.getActiveAdapters(config ?? undefined);
 
-  // 1. Sync slash commands: originals to ~/.reap/commands/, redirects to agent dirs
+  // 1a. Sync originals to ~/.reap/commands/
   const commandsDir = ReapPaths.packageCommandsDir;
   const commandFiles = await readdir(commandsDir);
-
-  // 1a. Sync originals to ~/.reap/commands/
   await mkdir(ReapPaths.userReapCommands, { recursive: true });
   for (const file of commandFiles) {
     if (!file.endsWith(".md")) continue;
@@ -48,13 +41,9 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
   }
 
   // 1b. Phase 2 migration: remove redirect stubs from agent commands dirs
-  // Redirects were created in Phase 1 (v0.7.0) for backward compat.
-  // Now that ~/.reap/commands/ exists, session hook handles project-level symlinks,
-  // so user-level redirects in ~/.claude/commands/ and ~/.config/opencode/commands/ are no longer needed.
   for (const adapter of adapters) {
     const agentCmdDir = adapter.getCommandsDir();
     const label = adapter.displayName;
-
     try {
       const existing = await readdir(agentCmdDir);
       for (const file of existing) {
@@ -110,28 +99,6 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     }
   }
 
-  // 2c. Sync brainstorm server files to .reap/brainstorm/
-  const brainstormSourceDir = join(ReapPaths.packageTemplatesDir, "brainstorm");
-  const brainstormDestDir = join(paths.root, "brainstorm");
-  await mkdir(brainstormDestDir, { recursive: true });
-  const brainstormFiles = ["server.cjs", "frame.html", "start-server.sh"];
-  for (const file of brainstormFiles) {
-    const src = await readTextFileOrThrow(join(brainstormSourceDir, file));
-    const dest = join(brainstormDestDir, file);
-    const existing = await readTextFile(dest);
-    if (existing !== null && existing === src) {
-      result.skipped.push(`.reap/brainstorm/${file}`);
-    } else {
-      if (!dryRun) {
-        await writeTextFile(dest, src);
-        if (file.endsWith(".sh")) {
-          await chmod(dest, 0o755);
-        }
-      }
-      result.updated.push(`.reap/brainstorm/${file}`);
-    }
-  }
-
   // 3. Run migrations for all agents
   const migrations = await migrateHooks(dryRun);
   for (const m of migrations.results) {
@@ -150,21 +117,25 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     }
   }
 
-  // 5. Migration: clean up legacy project-level files
-  await migrateLegacyFiles(paths, dryRun, result);
+  // --- Project-level sync (only if .reap/ exists) ---
 
-  // 6. Migration: lineage to DAG format (v0.4.0+)
-  if (await needsMigration(paths)) {
-    if (!dryRun) {
-      const migrationResult = await migrateLineage(paths);
-      for (const m of migrationResult.migrated) {
-        result.updated.push(`[lineage] ${m}`);
+  if (await paths.isReapProject()) {
+    // 5. Migration: clean up legacy project-level files
+    await migrateLegacyFiles(paths, dryRun, result);
+
+    // 6. Migration: lineage to DAG format (v0.4.0+)
+    if (await needsMigration(paths)) {
+      if (!dryRun) {
+        const migrationResult = await migrateLineage(paths);
+        for (const m of migrationResult.migrated) {
+          result.updated.push(`[lineage] ${m}`);
+        }
+        for (const e of migrationResult.errors) {
+          result.removed.push(`[lineage error] ${e}`);
+        }
+      } else {
+        result.updated.push("[lineage] DAG migration pending (dry-run)");
       }
-      for (const e of migrationResult.errors) {
-        result.removed.push(`[lineage error] ${e}`);
-      }
-    } else {
-      result.updated.push("[lineage] DAG migration pending (dry-run)");
     }
   }
 

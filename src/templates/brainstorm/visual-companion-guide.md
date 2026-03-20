@@ -45,15 +45,17 @@ UI 관련 질문이라도 자동으로 비주얼은 아니다.
 
 ## 서버 기동
 
+서버 파일은 REAP 패키지에 포함되어 있으므로 프로젝트에 복사할 필요 없음.
+
 ```bash
-# 프로젝트 루트에서 실행
-bash .reap/brainstorm/start-server.sh
-# 또는 직접
-node .reap/brainstorm/server.cjs
+# npm 글로벌 패키지 경로에서 실행
+node "$(npm root -g)/@c-d-cc/reap/dist/templates/brainstorm/server.cjs"
+# 또는 start-server.sh 사용
+bash "$(npm root -g)/@c-d-cc/reap/dist/templates/brainstorm/start-server.sh"
 ```
 
 - `BRAINSTORM_PORT` 환경 변수로 포트 변경 (기본: 3210)
-- `BRAINSTORM_DIR` 환경 변수로 스크린 디렉토리 변경 (기본: `.reap/brainstorm/`)
+- `BRAINSTORM_DIR` 환경 변수로 스크린 디렉토리 변경 (기본: `.reap/brainstorm/` — HTML 파일만 저장)
 
 ## 서버 상태 확인
 
