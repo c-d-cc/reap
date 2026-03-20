@@ -1,0 +1,8 @@
+id: gen-060-4a27c7
+type: normal
+parents:
+  - gen-059-fca021
+goal: reap.pull submodule update 자동화
+genomeHash: e0722b95f18f
+startedAt: 2026-03-20T01:29:49Z
+completedAt: 2026-03-20T01:31:56Z

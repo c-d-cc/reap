@@ -34,6 +34,7 @@ If the target branch already includes all local work (fast-forward), skip the me
 9. Check if the local latest generation is an ancestor of the remote latest generation:
    - **If yes (fast-forward possible)**:
      - Run `git merge --ff {branch}`
+     - Run `git submodule update --init` to sync submodules
      - Report: "Fast-forwarded to {branch}. Local lineage now includes {remote-latest-id}. No merge generation needed."
      - **STOP** — no merge lifecycle needed
    - **If same generation**: "Already up to date." → **STOP**
@@ -44,7 +45,8 @@ If the target branch already includes all local work (fast-forward), skip the me
     - This creates the merge generation and runs detect (01-detect.md)
 11. Execute `/reap.merge.evolve` to run the full merge lifecycle:
     - Detect → Mate → Merge → Sync → Validation → Completion
-12. The merge generation is archived upon completion
+12. Run `git submodule update --init` to sync submodules after merge
+13. The merge generation is archived upon completion
 
 ## Completion
 - Fast-forward: "Fast-forwarded to {branch}. No merge generation needed."
