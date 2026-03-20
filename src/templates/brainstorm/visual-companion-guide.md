@@ -109,7 +109,12 @@ node .reap/brainstorm/server.cjs
    </div>
    ```
 
+## 조건부 실행
+
+비주얼 컴패니언은 brainstorming이 활성화된 경우에만 제안된다.
+brainstorming 자체가 목표 복잡도에 따라 조건부로 실행되므로, 단순 태스크(bugfix, config, docs-only)에서는 비주얼 컴패니언도 제안되지 않는다.
+
 ## evolve 모드에서의 동작
 
-`/reap.evolve`의 Autonomous Override가 활성화되어 있어도 비주얼 컴패니언 제안은 수행한다.
+`/reap.evolve`의 Autonomous Override가 활성화되어 있어도, brainstorming 진입 시 비주얼 컴패니언 제안은 수행한다.
 유저가 명시적으로 거부한 경우에만 스킵한다.

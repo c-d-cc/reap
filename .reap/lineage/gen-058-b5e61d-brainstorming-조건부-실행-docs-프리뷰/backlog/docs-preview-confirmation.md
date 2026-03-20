@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-058-b5e61d
 ---
 # docs 수정 시 앱 실행 + 유저 컨펌 프로세스
 

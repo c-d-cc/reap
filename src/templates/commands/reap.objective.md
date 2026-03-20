@@ -7,7 +7,7 @@ description: "REAP Objective — Define the goal and specification for this Gene
 <HARD-GATE>
 Do NOT write any code until the artifact (01-objective.md) has been confirmed by the human.
 If the goal is ambiguous, do NOT guess — STOP and ask the human. This is non-negotiable.
-"This is too simple to need a design" is an anti-pattern. Every goal goes through brainstorming — simple goals just have shorter designs.
+Brainstorming is triggered based on goal complexity — simple tasks skip it, complex tasks require it. The human can always override the AI's assessment.
 </HARD-GATE>
 
 ## Gate (Preconditions)
@@ -108,9 +108,35 @@ If the goal is ambiguous, do NOT guess — STOP and ask the human. This is non-n
     - **constraints.md has empty Validation Commands** → flag as "test commands undefined"
 - Report the genome health status to the human
 
-### 5. Brainstorming Design
+### 5. Goal + Spec Definition (with optional Brainstorming)
 
-This step replaces the old "Goal + Spec Definition". It follows a structured brainstorming process to produce a well-designed objective. Follow the sub-steps in order.
+Before entering brainstorming, evaluate whether the goal requires it.
+
+#### Complexity Gate
+Assess the goal's complexity based on these criteria:
+
+**Skip brainstorming** (proceed directly to Step 6 with simple goal+spec definition):
+- Simple bugfix with clear cause and fix
+- Configuration change or settings adjustment
+- Documentation-only changes
+- Single-file refactoring with obvious approach
+- Tasks where the "what" and "how" are both already clear
+
+**Enter brainstorming** (follow sub-steps 5a–5e):
+- New feature development spanning multiple components
+- Architecture changes or new module design
+- Tasks with multiple valid implementation approaches
+- Requirements that need further exploration or clarification
+- Integration with external systems or complex data flows
+
+**Under Autonomous Override**: Assess automatically. If the goal from `current.yml` clearly fits "skip" criteria, skip brainstorming.
+**Human override**: The human can always request brainstorming ("let's brainstorm this") or skip it ("just do it", "skip brainstorming") regardless of the AI's assessment.
+
+When skipping brainstorming, converse with the human to refine the goal:
+- Criteria for a good goal: achievable within a single Generation, verifiable completion criteria (no vague wording), relevant genome areas identified
+- Then proceed directly to Step 6 (Genome Gap Analysis)
+
+When entering brainstorming, follow the structured brainstorming process below to produce a well-designed objective. Follow the sub-steps in order.
 
 #### 5a. Visual Companion Proposal
 - Evaluate whether this generation's goal involves visual questions (UI design, architecture diagrams, layout comparisons, etc.)

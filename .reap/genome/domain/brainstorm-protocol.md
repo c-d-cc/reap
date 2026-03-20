@@ -4,8 +4,23 @@
 
 ## 개요
 
-Objective Step 5에서 실행되는 구조화된 설계 프로세스.
-"간단해서 설계 불필요"는 안티패턴 — 모든 목표가 brainstorming을 거친다 (간단한 건 짧은 설계).
+Objective Step 5에서 **조건부로** 실행되는 구조화된 설계 프로세스.
+목표 복잡도에 따라 brainstorming 진입 여부를 판단한다.
+
+## 조건부 실행 (Complexity Gate)
+
+**스킵** (기존 Goal+Spec 정의로 직행):
+- 단순 bugfix, config 변경, docs-only
+- 단일 파일 리팩토링, 명확한 단일 태스크
+- "무엇"과 "어떻게"가 모두 명확한 경우
+
+**진입** (brainstorming 5a~5e + Step 8 실행):
+- 새 기능 추가, 아키텍처 변경, 멀티 컴포넌트 작업
+- 유효한 구현 접근법이 2개 이상인 경우
+- 요구사항 탐색/명확화가 필요한 경우
+
+**유저 override**: 유저가 "brainstorm 하자" 또는 "스킵해" 라고 하면 AI 판단을 무시
+**evolve**: Autonomous Override 시 자동 판단, 스킵 기준에 해당하면 자동 스킵
 
 ## Brainstorming 단계 (Step 5a~5e + Step 8)
 

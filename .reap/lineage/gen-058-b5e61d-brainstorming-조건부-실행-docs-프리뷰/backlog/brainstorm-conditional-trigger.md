@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-058-b5e61d
 ---
 # Brainstorming 조건부 실행
 
