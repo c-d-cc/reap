@@ -1,6 +1,7 @@
 ---
 type: genome-change
-status: pending
+status: consumed
+consumedBy: gen-075-aaac1c
 priority: medium
 ---
 

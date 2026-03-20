@@ -45,7 +45,20 @@ Do NOT make technical decisions without reading the Genome (conventions.md, cons
 - Each task must be **one logical unit of change**
 - Specify dependencies and parallelization potential between tasks
 
-### 5. Human Confirmation
+### 5. E2E Test Scenarios (lifecycle 변경 시 필수)
+- If this generation modifies lifecycle logic (compression, generation, merge, abort, stage transitions, etc.):
+  - Define specific E2E test scenarios with expected outcomes
+  - Each scenario: setup → action → assertion
+  - Example:
+    ```
+    ## E2E Test Scenarios
+    1. Normal abort + rollback → source reverted, artifacts deleted, current.yml empty
+    2. Abort + stash → stash created, recoverable
+    3. No active generation → error message
+    ```
+- If not a lifecycle change: skip this step
+
+### 6. Human Confirmation
 - Finalize the plan with the human
 
 ## Task Format

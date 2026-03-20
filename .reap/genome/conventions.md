@@ -54,6 +54,7 @@
 ## Testing Conventions
 
 - Lifecycle 관련 변경(compression, generation, merge, abort 등)은 **E2E 테스트 필수**
+- **Planning에서 E2E 시나리오 명시** — 각 시나리오: setup → action → assertion 형식
 - E2E 테스트: sandbox(temp dir)에서 .reap 프로젝트 셋업 후 실제 동작 검증
 - 단위 테스트: `tests/` (private submodule)
 
