@@ -68,7 +68,7 @@ export async function initProject(
   }
 
   const config: ReapConfig = {
-    version: "0.1.0",
+    version: process.env.__REAP_VERSION__ || "0.0.0",
     project: projectName,
     entryMode,
     autoUpdate: true,

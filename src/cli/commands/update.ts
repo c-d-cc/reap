@@ -6,7 +6,7 @@ import { AgentRegistry } from "../../core/agents";
 import { migrateHooks } from "../../core/hooks";
 import { readTextFile, readTextFileOrThrow, writeTextFile } from "../../core/fs";
 import { ConfigManager } from "../../core/config";
-import { needsMigration, migrateLineage } from "../../core/migration";
+import { MigrationRunner } from "../../core/migrations";
 
 interface UpdateResult {
   updated: string[];
@@ -181,19 +181,31 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     // 6. Migration: clean up legacy project-level files
     await migrateLegacyFiles(paths, dryRun, result);
 
-    // 6. Migration: lineage to DAG format (v0.4.0+)
-    if (await needsMigration(paths)) {
-      if (!dryRun) {
-        const migrationResult = await migrateLineage(paths);
-        for (const m of migrationResult.migrated) {
-          result.updated.push(`[lineage] ${m}`);
-        }
-        for (const e of migrationResult.errors) {
-          result.removed.push(`[lineage error] ${e}`);
-        }
-      } else {
-        result.updated.push("[lineage] DAG migration pending (dry-run)");
-      }
+    // 6. Run migration agent: version-based migrations (includes lineage DAG migration)
+    const currentVersion = process.env.__REAP_VERSION__ || "0.0.0";
+    const migrationResult = await MigrationRunner.run(paths, currentVersion, dryRun);
+    for (const m of migrationResult.migrated) {
+      result.updated.push(`[migration] ${m}`);
+    }
+    for (const s of migrationResult.skipped) {
+      result.skipped.push(`[migration] ${s}`);
+    }
+    for (const e of migrationResult.errors) {
+      result.removed.push(`[migration error] ${e}`);
+    }
+
+    // Auto-report migration failures if enabled
+    if (migrationResult.errors.length > 0 && config?.autoIssueReport) {
+      try {
+        const { execSync } = await import("child_process");
+        const errorSummary = migrationResult.errors.join("\\n");
+        const title = `Migration failure: ${migrationResult.fromVersion} → ${migrationResult.toVersion}`;
+        const body = `## Migration Error\\n\\nFrom: ${migrationResult.fromVersion}\\nTo: ${migrationResult.toVersion}\\n\\n### Errors\\n\\n${errorSummary}`;
+        execSync(
+          `gh issue create --repo c-d-cc/reap --title "${title}" --label "auto-reported,migration" --body "${body}"`,
+          { encoding: "utf-8", timeout: 15_000, stdio: "pipe" },
+        );
+      } catch { /* report is best-effort */ }
     }
   }
 

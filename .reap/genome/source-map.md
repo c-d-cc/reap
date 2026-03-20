@@ -61,7 +61,7 @@ C4Component
   Component(agents, "AgentRegistry", "agents/", "어댑터 추상화. Claude Code + OpenCode")
   Component(compression, "Compression", "compression.ts", "Lineage 자동 압축. L1(dir→md+frontmatter), L2(5×L1→epoch). DAG leaf 보호")
   Component(adaptation, "AdaptationManager", "adaptation.ts", "Generation adaptation 기록")
-  Component(migration, "Migration", "migration.ts", "legacy lineage → DAG 변환. needsMigration, migrateLineage")
+  Component(migration, "MigrationRunner", "migrations/", "버전 기반 migration registry. semver 범위 필터 + 순차 실행. legacy lineage DAG 변환 포함")
   Component(genomeSync, "GenomeSync", "genome-sync.ts", "프로젝트 스캔→genome 자동 생성. adoption/migration init 시 호출")
   Component(fs, "FS Utils", "fs.ts", "readTextFile, writeTextFile, fileExists")
 
