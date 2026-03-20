@@ -20,6 +20,7 @@ export class ReapPaths {
   get domain(): string { return join(this.genome, "domain"); }
   get conventions(): string { return join(this.genome, "conventions.md"); }
   get constraints(): string { return join(this.genome, "constraints.md"); }
+  get sourceMap(): string { return join(this.genome, "source-map.md"); }
 
   // Environment
   get environment(): string { return join(this.root, "environment"); }

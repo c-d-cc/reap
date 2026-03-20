@@ -1,4 +1,5 @@
-import { mkdir, stat } from "fs/promises";
+import { mkdir, stat, copyFile } from "fs/promises";
+import { join } from "path";
 import YAML from "yaml";
 import { ReapPaths } from "../../core/paths";
 import { LifeCycle } from "../../core/lifecycle";
@@ -41,7 +42,26 @@ export async function fixProject(projectRoot: string): Promise<FixResult> {
     }
   }
 
-  // 2. config.yml
+  // 2. Genome required files
+  const genomeFiles = [
+    { path: paths.principles, name: "principles.md" },
+    { path: paths.conventions, name: "conventions.md" },
+    { path: paths.constraints, name: "constraints.md" },
+    { path: paths.sourceMap, name: "source-map.md" },
+  ];
+  for (const gf of genomeFiles) {
+    if (!(await fileExists(gf.path))) {
+      const templateSrc = join(ReapPaths.packageGenomeDir, gf.name);
+      if (await fileExists(templateSrc)) {
+        await copyFile(templateSrc, gf.path);
+        fixed.push(`Restored missing genome/${gf.name} from template`);
+      } else {
+        issues.push(`genome/${gf.name} is missing and no template found`);
+      }
+    }
+  }
+
+  // 3. config.yml
   if (!(await fileExists(paths.config))) {
     issues.push("config.yml is missing. Run 'reap init' to recreate the project.");
   }
