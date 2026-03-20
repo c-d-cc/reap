@@ -156,6 +156,14 @@ export const en = {
       ["Validation", "Run tests, verify completion criteria", "04-validation.md"],
       ["Completion", "Retrospective + apply Genome changes + archive", "05-completion.md"],
     ],
+    commandLoading: "How commands are loaded",
+    commandLoadingDesc: "REAP slash commands are loaded only in REAP projects — they won't appear in non-REAP projects.",
+    commandLoadingDetails: [
+      { label: "Source", desc: "Command originals are stored in ~/.reap/commands/ (installed by reap init and reap update)" },
+      { label: "Loading", desc: "When you open a REAP project, the session hook automatically symlinks commands to .claude/commands/" },
+      { label: "Non-REAP projects", desc: "No symlinks are created, so no REAP skills appear in the AI agent's skill list" },
+      { label: "Backward compat", desc: "Redirect stubs in ~/.claude/commands/ ensure older setups keep working during migration" },
+    ],
   },
 
   // Core Concepts Page

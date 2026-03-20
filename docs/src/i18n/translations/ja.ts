@@ -158,6 +158,14 @@ export const ja: Translations = {
       ["Validation", "テスト実行、完了基準の検証", "04-validation.md"],
       ["Completion", "レトロスペクティブ + Genome変更適用 + 保管", "05-completion.md"],
     ],
+    commandLoading: "コマンドのロード方法",
+    commandLoadingDesc: "REAPスラッシュコマンドはREAPプロジェクトでのみロードされます — 他のプロジェクトでは表示されません。",
+    commandLoadingDetails: [
+      { label: "ソース", desc: "コマンドの原本は ~/.reap/commands/ に保存されます（reap init、reap update時にインストール）" },
+      { label: "ロード", desc: "REAPプロジェクトを開くと、セッションフックが自動的に .claude/commands/ にシンボリックリンクを作成します" },
+      { label: "非REAPプロジェクト", desc: "シンボリックリンクが作成されないため、AIエージェントのスキルリストにREAPが表示されません" },
+      { label: "後方互換", desc: "~/.claude/commands/ のリダイレクトスタブが既存設定の互換性を維持します" },
+    ],
   },
 
   // Core Concepts Page

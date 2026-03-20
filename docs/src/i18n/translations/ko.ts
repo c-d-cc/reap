@@ -158,6 +158,14 @@ export const ko: Translations = {
       ["Validation", "테스트 실행, 완료 기준 검증", "04-validation.md"],
       ["Completion", "회고 + Genome 변경 적용 + 보관", "05-completion.md"],
     ],
+    commandLoading: "커맨드 로딩 방식",
+    commandLoadingDesc: "REAP 슬래시 커맨드는 REAP 프로젝트에서만 로딩됩니다 — 다른 프로젝트에서는 나타나지 않습니다.",
+    commandLoadingDetails: [
+      { label: "소스", desc: "커맨드 원본은 ~/.reap/commands/에 저장됩니다 (reap init, reap update 시 설치)" },
+      { label: "로딩", desc: "REAP 프로젝트를 열면 세션 훅이 자동으로 .claude/commands/에 심링크를 생성합니다" },
+      { label: "비 REAP 프로젝트", desc: "심링크가 생성되지 않으므로 AI 에이전트의 스킬 목록에 REAP이 나타나지 않습니다" },
+      { label: "하위 호환", desc: "~/.claude/commands/의 redirect stub이 기존 설정의 호환성을 유지합니다" },
+    ],
   },
 
   // Core Concepts Page

@@ -158,6 +158,14 @@ export const zhCN: Translations = {
       ["Validation", "执行测试、验证完成标准", "04-validation.md"],
       ["Completion", "回顾 + 应用Genome变更 + 归档", "05-completion.md"],
     ],
+    commandLoading: "命令加载方式",
+    commandLoadingDesc: "REAP斜杠命令仅在REAP项目中加载 — 不会出现在其他项目中。",
+    commandLoadingDetails: [
+      { label: "来源", desc: "命令原件存储在 ~/.reap/commands/（由 reap init 和 reap update 安装）" },
+      { label: "加载", desc: "打开REAP项目时，会话钩子自动在 .claude/commands/ 中创建符号链接" },
+      { label: "非REAP项目", desc: "不会创建符号链接，因此AI代理的技能列表中不会出现REAP" },
+      { label: "向后兼容", desc: "~/.claude/commands/ 中的重定向存根确保旧版设置继续工作" },
+    ],
   },
 
   // Core Concepts Page

@@ -82,6 +82,16 @@ reap init`}</CodeBlock>
             </tbody>
           </table>
         </div>
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.quickstart.commandLoading}</h2>
+        <p className="text-sm text-muted-foreground mb-3">{t.quickstart.commandLoadingDesc}</p>
+        <div className="space-y-2">
+          {t.quickstart.commandLoadingDetails.map((item) => (
+            <div key={item.label} className="flex gap-2 text-sm">
+              <span className="font-mono text-xs text-primary whitespace-nowrap">{item.label}</span>
+              <span className="text-muted-foreground">— {item.desc}</span>
+            </div>
+          ))}
+        </div>
       </DocPage>
     </DocLayout>
   );
