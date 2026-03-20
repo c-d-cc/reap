@@ -22,7 +22,11 @@ Check for REAP updates and upgrade to the latest version.
 - "REAP v{version} is already up to date. (latest)"
 - Then skip to Step 4.
 
-**If installed < latest:**
+**If installed < latest (patch only — same major.minor, different patch):**
+- Show: "Patch update available: v{installed} → v{latest}. Updating automatically..."
+- Proceed directly to Step 3 (no user confirmation needed)
+
+**If installed < latest (minor or major change):**
 - Show: "Update available: v{installed} → v{latest}"
 - Ask the user: "Update now? (yes/no)"
 - If yes: proceed to Step 3
