@@ -53,7 +53,7 @@ export const ko: Translations = {
     lifecycle: "Generation 라이프사이클",
     lifecycleDesc: "각 Generation은 목표 정의부터 회고 및 보관까지 다섯 단계를 거칩니다.",
     stages: [
-      ["Objective", "목표, 요구사항 및 완료 기준 정의", "01-objective.md"],
+      ["Objective", "구조화된 브레인스토밍을 통한 목표 및 설계 정의", "01-objective.md"],
       ["Planning", "태스크 분해, 접근 방식 선택, 의존성 매핑", "02-planning.md"],
       ["Implementation", "AI + 사람 협업으로 구현", "03-implementation.md"],
       ["Validation", "테스트 실행, 완료 기준 검증", "04-validation.md"],
@@ -152,7 +152,7 @@ export const ko: Translations = {
     whatHappens: "Generation 중에 일어나는 일",
     stageHeaders: ["단계", "수행 내용", "산출물"],
     stages: [
-      ["Objective", "목표, 요구사항 및 완료 기준 정의", "01-objective.md"],
+      ["Objective", "구조화된 브레인스토밍을 통한 목표 및 설계 정의", "01-objective.md"],
       ["Planning", "태스크 분해, 접근 방식 선택, 의존성 매핑", "02-planning.md"],
       ["Implementation", "AI + 사람 협업으로 구현", "03-implementation.md"],
       ["Validation", "테스트 실행, 완료 기준 검증", "04-validation.md"],
@@ -175,7 +175,7 @@ export const ko: Translations = {
     lifecycleDesc: "각 Generation은 다섯 단계를 따릅니다:",
     stageHeaders: ["단계", "수행 내용", "산출물"],
     stages: [
-      ["Objective", "목표, 요구사항 및 완료 기준 정의", "01-objective.md"],
+      ["Objective", "구조화된 브레인스토밍을 통한 목표 및 설계 정의", "01-objective.md"],
       ["Planning", "태스크 분해, 접근 방식 선택, 의존성 매핑", "02-planning.md"],
       ["Implementation", "AI + 사람 협업으로 구현", "03-implementation.md"],
       ["Validation", "테스트 실행, 완료 기준 검증", "04-validation.md"],
@@ -212,8 +212,8 @@ export const ko: Translations = {
     stageDetails: [
       {
         title: "1. Objective",
-        desc: "이번 Generation이 달성할 목표를 정의합니다. AI 에이전트가 외부 컨텍스트를 위해 environment를 스캔하고, backlog에서 대기 항목을 검토하고, Genome 상태를 확인한 후 목표를 함께 구체화합니다.",
-        output: "01-objective.md — 목표, 완료 기준 (최대 7개, 검증 가능), 기능 요구사항 (최대 10개), 범위, Genome 갭 분석.",
+        desc: "구조화된 브레인스토밍을 통해 이번 Generation의 목표를 정의합니다. AI 에이전트가 컨텍스트를 스캔한 후, 명확화 질문(한 번에 하나씩)을 안내하고, 2-3개 접근법 대안을 트레이드오프와 함께 제시하며, 섹션별 설계 승인을 진행하고, 선택적으로 비주얼 컴패니언으로 목업과 다이어그램을 보여주며, 자동 Spec 리뷰를 실행합니다.",
+        output: "01-objective.md — 목표, 완료 기준 (최대 7개, 검증 가능), 기능 요구사항 (최대 10개), 설계 (접근법 비교, 선택된 설계), 범위, Genome 갭 분석.",
       },
       {
         title: "2. Planning",
@@ -294,7 +294,7 @@ export const ko: Translations = {
     normalCommands: [
       ["/reap.evolve", "전체 Generation을 처음부터 끝까지 실행. 일상 개발의 주요 커맨드. 모든 단계를 자율적으로 순환 — 일상적 확인은 건너뛰고 정말로 막혔을 때만 멈춤."],
       ["/reap.start", "새 Generation 시작. backlog에서 대기 항목 스캔, 목표 요청, current.yml 생성, 단계를 objective로 설정."],
-      ["/reap.objective", "Generation의 목표, 요구사항, 완료 기준 정의. Environment 스캔, backlog 검토, Genome 상태 확인."],
+      ["/reap.objective", "구조화된 브레인스토밍으로 목표 정의: 명확화 질문, 접근법 대안, 섹션별 설계, 비주얼 컴패니언, Spec 리뷰 루프."],
       ["/reap.planning", "목표를 의존성이 있는 태스크로 분해. 구현 계획 생성."],
       ["/reap.implementation", "계획의 태스크 실행. 완료/미완료 태스크와 Genome 발견사항을 산출물에 기록."],
       ["/reap.validation", "constraints.md의 검증 커맨드 실행. 완료 기준 확인. 판정: pass / partial / fail."],

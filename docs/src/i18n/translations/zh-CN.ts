@@ -53,7 +53,7 @@ export const zhCN: Translations = {
     lifecycle: "Generation生命周期",
     lifecycleDesc: "每个Generation经历从目标定义到回顾和归档的五个阶段。",
     stages: [
-      ["Objective", "定义目标、需求和完成标准", "01-objective.md"],
+      ["Objective", "通过结构化头脑风暴定义目标与设计", "01-objective.md"],
       ["Planning", "任务分解、选择方案、依赖映射", "02-planning.md"],
       ["Implementation", "AI + 人类协作实现", "03-implementation.md"],
       ["Validation", "执行测试、验证完成标准", "04-validation.md"],
@@ -152,7 +152,7 @@ export const zhCN: Translations = {
     whatHappens: "Generation中发生的事情",
     stageHeaders: ["阶段", "内容", "产出物"],
     stages: [
-      ["Objective", "定义目标、需求和完成标准", "01-objective.md"],
+      ["Objective", "通过结构化头脑风暴定义目标与设计", "01-objective.md"],
       ["Planning", "任务分解、选择方案、依赖映射", "02-planning.md"],
       ["Implementation", "AI + 人类协作实现", "03-implementation.md"],
       ["Validation", "执行测试、验证完成标准", "04-validation.md"],
@@ -175,7 +175,7 @@ export const zhCN: Translations = {
     lifecycleDesc: "每个Generation遵循五个阶段：",
     stageHeaders: ["阶段", "内容", "产出物"],
     stages: [
-      ["Objective", "定义目标、需求和完成标准", "01-objective.md"],
+      ["Objective", "通过结构化头脑风暴定义目标与设计", "01-objective.md"],
       ["Planning", "任务分解、选择方案、依赖映射", "02-planning.md"],
       ["Implementation", "AI + 人类协作实现", "03-implementation.md"],
       ["Validation", "执行测试、验证完成标准", "04-validation.md"],
@@ -212,8 +212,8 @@ export const zhCN: Translations = {
     stageDetails: [
       {
         title: "1. Objective",
-        desc: "定义本Generation要达成的目标。AI代理扫描environment获取外部上下文，检查backlog中的待处理项目，检查Genome状态，然后一起细化目标。",
-        output: "01-objective.md — 目标、完成标准（最多7个，可验证）、功能需求（最多10个）、范围、Genome差距分析。",
+        desc: "通过结构化头脑风暴定义本Generation的目标。AI代理扫描上下文后，引导逐一澄清问题，提出2-3个备选方案及权衡分析，进行分段设计审批，可选使用视觉伴侣展示原型和图表，并运行自动Spec审查。",
+        output: "01-objective.md — 目标、完成标准（最多7个，可验证）、功能需求（最多10个）、设计（方案对比、选定设计）、范围、Genome差距分析。",
       },
       {
         title: "2. Planning",
@@ -294,7 +294,7 @@ export const zhCN: Translations = {
     normalCommands: [
       ["/reap.evolve", "从头到尾运行整个Generation。日常开发的主要命令。自主循环所有阶段 — 跳过日常确认，仅在真正受阻时停止。"],
       ["/reap.start", "开始新的Generation。扫描backlog中的待处理项目，请求目标，创建current.yml，将阶段设为objective。"],
-      ["/reap.objective", "定义Generation的目标、需求和完成标准。扫描Environment，检查backlog，检查Genome状态。"],
+      ["/reap.objective", "通过结构化头脑风暴定义目标：澄清问题、方案替代、分段设计、视觉伴侣、Spec审查循环。"],
       ["/reap.planning", "将目标分解为有依赖关系的任务。创建实施计划。"],
       ["/reap.implementation", "执行计划中的任务。将已完成/未完成任务和Genome发现记录在产出物中。"],
       ["/reap.validation", "执行constraints.md中的验证命令。检查完成标准。判定：pass / partial / fail。"],

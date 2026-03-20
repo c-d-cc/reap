@@ -112,7 +112,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 
 | 단계 | 하는 일 | 산출물 |
 |------|---------|--------|
-| **Objective** | 목표 + 요구사항 + 수용기준 정의 | `01-objective.md` |
+| **Objective** | 구조화된 브레인스토밍으로 목표 및 설계 정의: 명확화 질문, 접근법 대안, 섹션별 설계, 비주얼 컴패니언, Spec 리뷰 | `01-objective.md` |
 | **Planning** | 태스크 분해, 구현 접근법, 의존관계 | `02-planning.md` |
 | **Implementation** | AI+Human 협업으로 코드 구현 | `03-implementation.md` |
 | **Validation** | 테스트 실행, 완료 조건 점검 | `04-validation.md` |

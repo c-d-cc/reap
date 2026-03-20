@@ -112,7 +112,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 
 | ステージ | 内容 | 成果物 |
 |----------|------|--------|
-| **Objective** | 目標 + 要件 + 受入基準の定義 | `01-objective.md` |
+| **Objective** | 構造化ブレインストーミングによる目標・設計定義：明確化質問、アプローチ代案、セクション別設計、ビジュアルコンパニオン、Specレビュー | `01-objective.md` |
 | **Planning** | タスク分解、実装アプローチ、依存関係 | `02-planning.md` |
 | **Implementation** | AI+Human協力でコード実装 | `03-implementation.md` |
 | **Validation** | テスト実行、完了条件の確認 | `04-validation.md` |

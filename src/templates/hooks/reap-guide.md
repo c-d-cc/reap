@@ -47,7 +47,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 
 | Stage | Description | What it does | Artifact |
 |-------|-------------|--------------|----------|
-| **Objective** | Goal definition | Define this generation's goal + requirements. Reference environment, backlog, genome | `01-objective.md` |
+| **Objective** | Goal definition + brainstorming design | Define goal + requirements through structured brainstorming: clarifying questions, 2-3 approach alternatives, sectional design approval, visual companion (optional), and spec review loop. Reference environment, backlog, genome | `01-objective.md` |
 | **Planning** | Plan formulation | Task decomposition, dependencies, implementation approach | `02-planning.md` |
 | **Implementation** | Implementation | AI+Human collaboration to write code. Record genome defects in backlog when found | `03-implementation.md` |
 | **Validation** | Verification | Run tests, check completion criteria. Can regress to Implementation on failure | `04-validation.md` |

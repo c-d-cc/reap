@@ -53,7 +53,7 @@ export const ja: Translations = {
     lifecycle: "Generationライフサイクル",
     lifecycleDesc: "各Generationは目標定義からレトロスペクティブ・保管まで5つのステージを経ます。",
     stages: [
-      ["Objective", "目標、要件、完了基準の定義", "01-objective.md"],
+      ["Objective", "構造化ブレインストーミングによる目標・設計定義", "01-objective.md"],
       ["Planning", "タスク分解、アプローチ選択、依存関係マッピング", "02-planning.md"],
       ["Implementation", "AI + 人間の協力で実装", "03-implementation.md"],
       ["Validation", "テスト実行、完了基準の検証", "04-validation.md"],
@@ -152,7 +152,7 @@ export const ja: Translations = {
     whatHappens: "Generation中に起こること",
     stageHeaders: ["ステージ", "内容", "成果物"],
     stages: [
-      ["Objective", "目標、要件、完了基準の定義", "01-objective.md"],
+      ["Objective", "構造化ブレインストーミングによる目標・設計定義", "01-objective.md"],
       ["Planning", "タスク分解、アプローチ選択、依存関係マッピング", "02-planning.md"],
       ["Implementation", "AI + 人間の協力で実装", "03-implementation.md"],
       ["Validation", "テスト実行、完了基準の検証", "04-validation.md"],
@@ -175,7 +175,7 @@ export const ja: Translations = {
     lifecycleDesc: "各Generationは5つのステージに従います：",
     stageHeaders: ["ステージ", "内容", "成果物"],
     stages: [
-      ["Objective", "目標、要件、完了基準の定義", "01-objective.md"],
+      ["Objective", "構造化ブレインストーミングによる目標・設計定義", "01-objective.md"],
       ["Planning", "タスク分解、アプローチ選択、依存関係マッピング", "02-planning.md"],
       ["Implementation", "AI + 人間の協力で実装", "03-implementation.md"],
       ["Validation", "テスト実行、完了基準の検証", "04-validation.md"],
@@ -212,8 +212,8 @@ export const ja: Translations = {
     stageDetails: [
       {
         title: "1. Objective",
-        desc: "このGenerationが達成する目標を定義します。AIエージェントが外部コンテキストのためにenvironmentをスキャンし、backlogで待機項目を確認し、Genome状態をチェックした後、目標を一緒に具体化します。",
-        output: "01-objective.md — 目標、完了基準（最大7個、検証可能）、機能要件（最大10個）、スコープ、Genomeギャップ分析。",
+        desc: "構造化ブレインストーミングでこのGenerationの目標を定義します。AIエージェントがコンテキストをスキャンした後、明確化質問（一度に一つずつ）を案内し、2-3個のアプローチ代案をトレードオフ付きで提示し、セクション別設計承認を行い、オプションでビジュアルコンパニオンでモックアップやダイアグラムを表示し、自動Specレビューを実行します。",
+        output: "01-objective.md — 目標、完了基準（最大7個、検証可能）、機能要件（最大10個）、設計（アプローチ比較、選択された設計）、スコープ、Genomeギャップ分析。",
       },
       {
         title: "2. Planning",
@@ -294,7 +294,7 @@ export const ja: Translations = {
     normalCommands: [
       ["/reap.evolve", "Generation全体を最初から最後まで実行。日常開発の主要コマンド。全ステージを自律的にループ — 日常的な確認はスキップし、本当に行き詰まった時のみ停止。"],
       ["/reap.start", "新しいGenerationを開始。backlogで待機項目をスキャン、目標を要求、current.ymlを作成、ステージをobjectiveに設定。"],
-      ["/reap.objective", "Generationの目標、要件、完了基準を定義。Environmentスキャン、backlog確認、Genome状態チェック。"],
+      ["/reap.objective", "構造化ブレインストーミングで目標定義：明確化質問、アプローチ代案、セクション別設計、ビジュアルコンパニオン、Specレビューループ。"],
       ["/reap.planning", "目標を依存関係のあるタスクに分解。実装計画を作成。"],
       ["/reap.implementation", "計画のタスクを実行。完了/未完了タスクとGenome発見事項を成果物に記録。"],
       ["/reap.validation", "constraints.mdの検証コマンドを実行。完了基準を確認。判定：pass / partial / fail。"],

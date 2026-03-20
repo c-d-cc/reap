@@ -51,7 +51,7 @@ export const en = {
     lifecycle: "Generation Lifecycle",
     lifecycleDesc: "Each generation progresses through five stages, from goal definition to retrospective and archiving.",
     stages: [
-      ["Objective", "Define goal, requirements, and acceptance criteria", "01-objective.md"],
+      ["Objective", "Define goal through structured brainstorming design", "01-objective.md"],
       ["Planning", "Break down tasks, choose approach, map dependencies", "02-planning.md"],
       ["Implementation", "Build with AI + human collaboration", "03-implementation.md"],
       ["Validation", "Run tests, verify completion criteria", "04-validation.md"],
@@ -150,7 +150,7 @@ export const en = {
     whatHappens: "What happens during a generation",
     stageHeaders: ["Stage", "What happens", "Artifact"],
     stages: [
-      ["Objective", "Define goal, requirements, and acceptance criteria", "01-objective.md"],
+      ["Objective", "Define goal through structured brainstorming design", "01-objective.md"],
       ["Planning", "Break down tasks, choose approach, map dependencies", "02-planning.md"],
       ["Implementation", "Build with AI + human collaboration", "03-implementation.md"],
       ["Validation", "Run tests, verify completion criteria", "04-validation.md"],
@@ -173,7 +173,7 @@ export const en = {
     lifecycleDesc: "Each generation follows five stages:",
     stageHeaders: ["Stage", "What happens", "Artifact"],
     stages: [
-      ["Objective", "Define goal, requirements, and acceptance criteria", "01-objective.md"],
+      ["Objective", "Define goal through structured brainstorming design", "01-objective.md"],
       ["Planning", "Break down tasks, choose approach, map dependencies", "02-planning.md"],
       ["Implementation", "Build with AI + human collaboration", "03-implementation.md"],
       ["Validation", "Run tests, verify completion criteria", "04-validation.md"],
@@ -210,8 +210,8 @@ export const en = {
     stageDetails: [
       {
         title: "1. Objective",
-        desc: "Define what this generation will accomplish. The AI agent scans the environment for external context, reviews the backlog for pending items, checks genome health, and then works with you to refine the goal.",
-        output: "01-objective.md — goal, completion criteria (max 7, verifiable), functional requirements (max 10), scope, and genome gap analysis.",
+        desc: "Define what this generation will accomplish through structured brainstorming. The AI agent scans context, then guides you through clarifying questions (one at a time), proposes 2-3 approach alternatives with trade-offs, presents sectional design for approval, optionally uses a visual companion for mockups and diagrams, and runs automated spec review.",
+        output: "01-objective.md — goal, completion criteria (max 7, verifiable), functional requirements (max 10), design (approaches considered, selected design), scope, and genome gap analysis.",
       },
       {
         title: "2. Planning",
@@ -292,7 +292,7 @@ export const en = {
     normalCommands: [
       ["/reap.evolve", "Run an entire generation from start to finish. The primary command for day-to-day development. Loops through all stages autonomously — skips routine confirmations and only stops when genuinely blocked."],
       ["/reap.start", "Start a new generation. Scans backlog for pending items, asks for a goal, creates current.yml, and sets stage to objective."],
-      ["/reap.objective", "Define the generation's goal, requirements, and acceptance criteria. Scans environment, reviews backlog, checks genome health."],
+      ["/reap.objective", "Define the generation's goal through structured brainstorming: clarifying questions, approach alternatives, sectional design, visual companion, and spec review loop."],
       ["/reap.planning", "Break down the objective into tasks with dependencies. Creates the implementation plan."],
       ["/reap.implementation", "Execute tasks from the plan. Records completed/deferred tasks and genome discoveries in the artifact."],
       ["/reap.validation", "Run validation commands from constraints.md. Check completion criteria. Verdict: pass / partial / fail."],

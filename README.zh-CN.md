@@ -112,7 +112,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 
 | 阶段 | 内容 | 产出物 |
 |------|------|--------|
-| **Objective** | 定义目标 + 需求 + 验收标准 | `01-objective.md` |
+| **Objective** | 通过结构化头脑风暴定义目标与设计：澄清问题、方案替代、分段设计、视觉伴侣、Spec审查 | `01-objective.md` |
 | **Planning** | 任务分解、实施方案、依赖关系 | `02-planning.md` |
 | **Implementation** | AI+人类协作编写代码 | `03-implementation.md` |
 | **Validation** | 执行测试、检查完成条件 | `04-validation.md` |

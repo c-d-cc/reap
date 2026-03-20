@@ -111,7 +111,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 
 | Stage | What happens | Artifact |
 |-------|-------------|----------|
-| **Objective** | Define goal, requirements, and acceptance criteria | `01-objective.md` |
+| **Objective** | Define goal through structured brainstorming: clarifying questions, 2-3 approach alternatives, sectional design approval, optional visual companion, and spec review loop | `01-objective.md` |
 | **Planning** | Break down tasks, choose approach, map dependencies | `02-planning.md` |
 | **Implementation** | Build with AI + human collaboration | `03-implementation.md` |
 | **Validation** | Run tests, verify completion criteria | `04-validation.md` |
