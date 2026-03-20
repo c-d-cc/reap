@@ -1,0 +1,8 @@
+id: gen-064-0ddf20
+type: normal
+parents:
+  - gen-063-fa6a5d
+goal: "reap.sync domain 스캔 카테고리 추가 + init domain README 생성"
+genomeHash: 8db4246930c0
+startedAt: 2026-03-20T07:02:20Z
+completedAt: 2026-03-20T07:03:46Z
