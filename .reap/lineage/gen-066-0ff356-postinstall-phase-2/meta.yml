@@ -1,0 +1,8 @@
+id: gen-066-0ff356
+type: normal
+parents:
+  - gen-065-dd9eb9
+goal: "postinstall.cjs Phase 2 수정 — ~/.reap/commands/ 전용 설치"
+genomeHash: 8db4246930c0
+startedAt: 2026-03-20T07:15:56Z
+completedAt: 2026-03-20T07:16:23Z
