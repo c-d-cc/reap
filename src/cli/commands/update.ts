@@ -144,7 +144,37 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
   // --- Project-level sync (only if .reap/ exists) ---
 
   if (await paths.isReapProject()) {
-    // 5. Migration: clean up legacy project-level files
+    // 5. Sync commands to project .claude/commands/
+    const projectClaudeCommands = join(paths.projectRoot, ".claude", "commands");
+    await mkdir(projectClaudeCommands, { recursive: true });
+    const reapCmdFiles = (await readdir(ReapPaths.userReapCommands)).filter(
+      (f: string) => f.startsWith("reap.") && f.endsWith(".md"),
+    );
+    let cmdInstalled = 0;
+    for (const file of reapCmdFiles) {
+      const src = await readTextFileOrThrow(join(ReapPaths.userReapCommands, file));
+      const destPath = join(projectClaudeCommands, file);
+      // Handle stale symlinks: lstat succeeds but readFile fails
+      try {
+        const s = await import("fs/promises").then(m => m.lstat(destPath));
+        if (s.isSymbolicLink()) {
+          if (!dryRun) await unlink(destPath);
+        } else {
+          const existing = await readTextFile(destPath);
+          if (existing !== null && existing === src) continue;
+          if (!dryRun) await unlink(destPath);
+        }
+      } catch { /* dest doesn't exist */ }
+      if (!dryRun) await writeTextFile(destPath, src);
+      cmdInstalled++;
+    }
+    if (cmdInstalled > 0) {
+      result.updated.push(`.claude/commands/ (${cmdInstalled} synced)`);
+    } else {
+      result.skipped.push(`.claude/commands/ (${reapCmdFiles.length} unchanged)`);
+    }
+
+    // 6. Migration: clean up legacy project-level files
     await migrateLegacyFiles(paths, dryRun, result);
 
     // 6. Migration: lineage to DAG format (v0.4.0+)
