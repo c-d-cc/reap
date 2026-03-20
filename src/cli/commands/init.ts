@@ -56,6 +56,7 @@ export async function initProject(
     version: "0.1.0",
     project: projectName,
     entryMode,
+    autoUpdate: true,
     ...(preset && { preset }),
   };
   await ConfigManager.write(paths, config);
