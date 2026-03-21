@@ -19,7 +19,7 @@ C4Context
   System_Ext(github, "GitHub Actions", "CI/CD, 릴리스 자동화")
 
   Rel(user, reap, "reap init/status/fix/update/run")
-  Rel(agent, reap, "slash commands (13개)")
+  Rel(agent, reap, "slash commands (28개)")
   Rel(reap, npm, "publish")
   Rel(github, npm, "auto release")
 ```
@@ -30,10 +30,10 @@ C4Context
 C4Container
   title REAP Containers
 
-  Container(cli, "CLI Layer", "src/cli/", "Commander.js 진입점. init, status, fix, update, help, run")
+  Container(cli, "CLI Layer", "src/cli/", "Commander.js 진입점. init, status, fix, update, help, run (26 scripts)")
   Container(core, "Core Layer", "src/core/", "비즈니스 로직. 아래 Component 참조")
-  Container(types, "Types", "src/types/index.ts", "공유 타입 정의 (~120줄). GenerationType, GenerationMeta 추가")
-  Container(templates, "Templates", "src/templates/", "commands(13), artifacts(5), genome, hooks, help, presets")
+  Container(types, "Types", "src/types/index.ts", "공유 타입 정의 (~176줄). RunOutput, HookResult, GenerationType, GenerationMeta")
+  Container(templates, "Templates", "src/templates/", "commands(28), artifacts(11), genome, hooks, help, presets, brainstorm")
 
   Rel(cli, core, "uses")
   Rel(cli, types, "imports")
@@ -67,6 +67,7 @@ C4Component
   Component(runOutput, "RunOutput", "run-output.ts", "emitOutput, emitError — structured JSON output")
   Component(hookEngine, "HookEngine", "hook-engine.ts", "hook 스캔, condition 평가, sh 실행 / md 반환")
   Component(commit, "CommitUtils", "commit.ts", "submodule check, git commit — checkSubmodules, commitChanges")
+  Component(git, "Git Utils", "git.ts", "gitShow, gitLsTree, gitRefExists, gitAllBranches, gitCurrentBranch")
   Component(fs, "FS Utils", "fs.ts", "readTextFile, writeTextFile, fileExists")
 
   Rel(generation, lifecycle, "stage transitions")
@@ -77,6 +78,8 @@ C4Component
   Rel(mergeGeneration, lineage, "lineage 조회")
   Rel(mergeGeneration, merge, "conflict detection")
   Rel(mergeGeneration, compression, "archiving 시 호출")
+  Rel(mergeGeneration, git, "git ref 기반 읽기")
+  Rel(merge, git, "genome diff via git show")
   Rel(hooks, agents, "에이전트별 hook 등록")
   Rel(agents, paths, "에이전트별 경로")
   Rel(config, paths, "config 경로")

@@ -18,6 +18,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     const principlesContent = await readTextFile(paths.principles);
     const conventionsContent = await readTextFile(paths.conventions);
     const constraintsContent = await readTextFile(paths.constraints);
+    const sourceMapContent = await readTextFile(paths.sourceMap);
 
     // Read domain files
     const domainFiles: Record<string, string> = {};
@@ -38,9 +39,6 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       genomeVersion = lineageEntries.filter(e => e.startsWith("gen-")).length;
     } catch { /* no lineage */ }
 
-    // Read config
-    const configContent = await readTextFile(paths.config);
-
     emitOutput({
       status: "prompt",
       command: "sync-genome",
@@ -58,6 +56,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
           principles: principlesContent?.slice(0, 2000),
           conventions: conventionsContent?.slice(0, 2000),
           constraints: constraintsContent?.slice(0, 2000),
+          sourceMap: sourceMapContent?.slice(0, 3000),
           domainFiles,
         },
       },

@@ -28,6 +28,7 @@
 | ADR-008 | user-level 템플릿 (~/.reap/templates/) | 패키지 경로 의존 제거, AI 에이전트가 확정 경로 참조 | 2026-03 |
 | ADR-009 | Node.js 호환 빌드 | Bun API→fs/promises 교체, npm publish용 번들 | 2026-03 |
 | ADR-010 | npm scoped package (@c-d-cc/reap) | 'reap' 이름 점유, scoped로 배포 | 2026-03 |
+| ADR-011 | Script Orchestrator Pattern | Slash command(.md)는 1줄 wrapper, 로직은 `src/cli/commands/run/` script가 담당. deterministic-creative 분리 | 2026-03 |
 
 ## Source Map
 

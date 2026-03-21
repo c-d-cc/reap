@@ -33,11 +33,12 @@
 ### Normal (17개)
 reap.objective, reap.planning, reap.implementation, reap.validation, reap.completion, reap.evolve, reap.start, reap.next, reap.back, reap.abort, reap.status, reap.sync, reap.sync.genome, reap.sync.environment, reap.update, reap.report, reap.help
 
-### Collaboration (10개)
-reap.pull, reap.push, reap.merge.start, reap.merge.detect, reap.merge.mate, reap.merge.merge, reap.merge.sync, reap.merge.validation, reap.merge.completion, reap.merge.evolve
+### Collaboration (11개)
+reap.pull, reap.push, reap.merge, reap.merge.start, reap.merge.detect, reap.merge.mate, reap.merge.merge, reap.merge.sync, reap.merge.validation, reap.merge.completion, reap.merge.evolve
 
 - `reap.pull` — fetch + full merge generation lifecycle (distributed /reap.evolve)
 - `reap.push` — REAP 상태 검증 + git push
+- `reap.merge` — full merge generation lifecycle 단축 실행
 - `reap.merge.start` — merge generation 생성 (branch 지정)
 - `reap.merge.detect` ~ `reap.merge.completion` — 각 merge stage 실행 (6단계)
 - `reap.merge.evolve` — merge full lifecycle 자동 실행
@@ -64,7 +65,7 @@ Conditions: `.reap/hooks/conditions/{name}.sh` (exit 0=true). 기본 3개 + 유�
 
 ## Release Pipeline
 
-- **CI**: GitHub Actions (`.github/workflows/release.yml`)
+- **CI**: GitHub Actions (`.github/workflows/release.yml`, `docs.yml`)
 - **트리거**: `v*` tag push
 - **Secret**: `NPM_TOKEN` (GitHub repo secret)
 - **버전 주입**: `scripts/build.js` — `package.json` 버전을 `--define`으로 번들에 주입. 소스에 버전 하드코딩 금지
