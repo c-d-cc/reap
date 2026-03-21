@@ -1,7 +1,7 @@
 import YAML from "yaml";
 import { createHash } from "crypto";
 import { hostname } from "os";
-import { readdir, mkdir, rename } from "fs/promises";
+import { readdir, mkdir, rename, unlink } from "fs/promises";
 import { join } from "path";
 import type { GenerationState, GenerationMeta, LifeCycleStage } from "../types";
 import type { ReapPaths } from "./paths";
@@ -172,16 +172,21 @@ export class GenerationManager {
       }
     }
 
-    // Move backlog/ to lineage (genome-change items were already consumed in Closure)
+    // Copy backlog/ to lineage; only remove consumed items from life/backlog/
     const backlogDir = join(genDir, "backlog");
     await mkdir(backlogDir, { recursive: true });
     try {
       const backlogEntries = await readdir(this.paths.backlog);
       for (const entry of backlogEntries) {
-        await rename(
-          join(this.paths.backlog, entry),
-          join(backlogDir, entry),
-        );
+        const content = await readTextFile(join(this.paths.backlog, entry));
+        if (!content) continue;
+        const isConsumed = /status:\s*consumed/i.test(content) || /consumed:\s*true/i.test(content);
+        // Always copy to lineage
+        await writeTextFile(join(backlogDir, entry), content);
+        // Only remove from life/backlog if consumed
+        if (isConsumed) {
+          await unlink(join(this.paths.backlog, entry));
+        }
       }
     } catch { /* no backlog items */ }
 

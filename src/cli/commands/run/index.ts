@@ -8,6 +8,12 @@ const COMMANDS: Record<string, () => Promise<{ execute: CommandExecutor }>> = {
   back: () => import("./back"),
   start: () => import("./start"),
   completion: () => import("./completion"),
+  abort: () => import("./abort"),
+  push: () => import("./push"),
+  objective: () => import("./objective"),
+  planning: () => import("./planning"),
+  implementation: () => import("./implementation"),
+  validation: () => import("./validation"),
 };
 
 export async function runCommand(command: string, phase?: string): Promise<void> {
