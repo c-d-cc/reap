@@ -1,8 +1,0 @@
-id: gen-089-c9ee0c
-type: normal
-parents:
-  - gen-086-bc3af7
-goal: E2E 테스트 — hook-engine + commit 모듈 통합 검증
-genomeHash: b726c9bf
-startedAt: 2026-03-21T07:30:24.538Z
-completedAt: 2026-03-21T07:33:48.997Z

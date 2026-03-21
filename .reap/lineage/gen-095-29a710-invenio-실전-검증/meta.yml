@@ -1,8 +1,0 @@
-id: gen-095-29a710
-type: normal
-parents:
-  - gen-094-2dc229
-goal: "Invenio 프로젝트를 통한 REAP Script Orchestrator 실전 검증"
-genomeHash: b726c9bf
-startedAt: "2026-03-21T09:30:00.000Z"
-completedAt: "2026-03-21T10:50:00.000Z"

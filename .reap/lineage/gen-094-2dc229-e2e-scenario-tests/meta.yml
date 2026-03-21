@@ -1,8 +1,0 @@
-id: gen-094-2dc229
-type: normal
-parents:
-  - gen-093-76b22f
-goal: "E2E Scenario Tests — run-lifecycle + run-merge-lifecycle"
-genomeHash: b726c9bf
-startedAt: "2026-03-21T09:00:00.000Z"
-completedAt: "2026-03-21T09:20:00.000Z"

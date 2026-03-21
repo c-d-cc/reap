@@ -1,0 +1,8 @@
+id: gen-098-7d39ee
+type: normal
+parents:
+  - gen-097-724974
+goal: "autoSubagent 모드 구현 — evolve 시 subagent 위임 + user-level commands 정리"
+genomeHash: b726c9bf
+startedAt: 2026-03-21T12:00:00.000Z
+completedAt: 2026-03-21T11:41:23.355Z
