@@ -91,7 +91,7 @@ C4Component
 | `reap fix` | `cli/commands/fix.ts` | .reap/ 구조 진단/복구 |
 | `reap update` | `cli/commands/update.ts` | commands/templates/hooks 동기화 |
 | `reap help` | `cli/index.ts` | 언어별 help 텍스트 출력 (en/ko) |
-| `reap run` | `cli/commands/run/index.ts` | command script dispatcher (next, back, start, completion, abort, push, objective, planning, implementation, validation) |
+| `reap run` | `cli/commands/run/index.ts` | command script dispatcher (next, back, start, completion, abort, push, objective, planning, implementation, validation, evolve, sync, sync-genome, sync-environment, help, report) |
 
 ## Agent Adapters
 

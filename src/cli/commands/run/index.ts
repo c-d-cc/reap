@@ -14,6 +14,12 @@ const COMMANDS: Record<string, () => Promise<{ execute: CommandExecutor }>> = {
   planning: () => import("./planning"),
   implementation: () => import("./implementation"),
   validation: () => import("./validation"),
+  evolve: () => import("./evolve"),
+  sync: () => import("./sync"),
+  "sync-genome": () => import("./sync-genome"),
+  "sync-environment": () => import("./sync-environment"),
+  help: () => import("./help"),
+  report: () => import("./report"),
 };
 
 export async function runCommand(command: string, phase?: string): Promise<void> {
