@@ -17,6 +17,7 @@ export const COMMAND_NAMES = [
   "reap.merge.completion", "reap.merge.evolve",
   "reap.merge",
   "reap.pull", "reap.push",
+  "reap.config",
 ];
 
 export async function initProject(
@@ -67,11 +68,17 @@ export async function initProject(
     log("GitHub CLI(gh) not found. Install from https://cli.github.com for auto issue reporting.");
   }
 
+  // Detect language from agent settings
+  const detectedLanguage = await AgentRegistry.readLanguage();
+
   const config: ReapConfig = {
     version: process.env.__REAP_VERSION__ || "0.0.0",
     project: projectName,
     entryMode,
+    strict: false,
+    ...(detectedLanguage && { language: detectedLanguage }),
     autoUpdate: true,
+    autoSubagent: true,
     autoIssueReport: hasGhCli,
     ...(preset && { preset }),
   };

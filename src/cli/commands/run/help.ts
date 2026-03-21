@@ -69,7 +69,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       "| `/reap.push` | REAP 상태 검증 + git push |",
       "| `/reap.report` | 버그/이슈 리포트 |",
       "",
-      `${versionDisplay} | Strict: ${strict} | Auto-Update: ${autoUpdate} | Language: ${language}`,
+      "설정 확인: /reap.config",
       "",
       "### Topic Help",
       "If a topic is provided, look up from these known topics:",

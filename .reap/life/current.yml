@@ -1,0 +1,21 @@
+# REAP MANAGED — Do not modify directly. Use reap run next/back/start/abort.
+id: gen-100-54bde0
+goal: auto-report on error + /reap.config 커맨드 추가
+stage: completion
+genomeVersion: 100
+startedAt: 2026-03-21T12:34:21.191Z
+timeline:
+  - stage: objective
+    at: 2026-03-21T12:34:21.191Z
+  - stage: planning
+    at: 2026-03-21T12:40:27.482Z
+  - stage: implementation
+    at: 2026-03-21T12:40:59.339Z
+  - stage: validation
+    at: 2026-03-21T12:45:28.303Z
+  - stage: completion
+    at: 2026-03-21T12:45:57.612Z
+type: normal
+parents:
+  - gen-006-d9ca51
+genomeHash: 13c9ca8a

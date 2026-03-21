@@ -1,4 +1,6 @@
+import { execSync } from "child_process";
 import { ReapPaths } from "../../../core/paths";
+import { ConfigManager } from "../../../core/config";
 import { emitError } from "../../../core/run-output";
 
 export type CommandExecutor = (paths: ReapPaths, phase?: string) => Promise<void>;
@@ -30,6 +32,7 @@ const COMMANDS: Record<string, () => Promise<{ execute: CommandExecutor }>> = {
   "merge-evolve": () => import("./merge-evolve"),
   merge: () => import("./merge"),
   pull: () => import("./pull"),
+  config: () => import("./config"),
 };
 
 export async function runCommand(command: string, phase?: string): Promise<void> {
@@ -45,6 +48,33 @@ export async function runCommand(command: string, phase?: string): Promise<void>
     emitError(command, `Unknown command: ${command}. Available: ${Object.keys(COMMANDS).join(", ")}`);
   }
 
-  const mod = await loader();
-  await mod.execute(paths, phase);
+  try {
+    const mod = await loader();
+    await mod.execute(paths, phase);
+  } catch (err) {
+    // Intentional errors (emitError → process.exit) don't reach here.
+    // This catches unexpected runtime errors only.
+    try {
+      const config = await ConfigManager.read(paths);
+      if (config.autoIssueReport) {
+        const version = process.env.__REAP_VERSION__ || "unknown";
+        const errMsg = err instanceof Error ? err.message : String(err);
+        const title = `[auto] reap run ${command}: ${errMsg.slice(0, 80)}`;
+        const body = [
+          `**REAP Version**: ${version}`,
+          `**Command**: reap run ${command}${phase ? ` --phase ${phase}` : ""}`,
+          `**Error**: ${errMsg}`,
+          `**OS**: ${process.platform} ${process.arch}`,
+          `**Node**: ${process.version}`,
+        ].join("\\n");
+        execSync(
+          `gh issue create --repo c-d-cc/reap --title "${title}" --label "auto-reported,bug" --body "${body}"`,
+          { stdio: "ignore", timeout: 10000 },
+        );
+      }
+    } catch { /* report is best-effort */ }
+
+    // Re-emit the original error
+    emitError(command, err instanceof Error ? err.message : String(err));
+  }
 }

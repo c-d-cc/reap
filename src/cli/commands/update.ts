@@ -158,6 +158,14 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
   // --- Project-level sync (only if .reap/ exists) ---
 
   if (await paths.isReapProject()) {
+    // 4b. Backfill missing config fields with defaults
+    if (!dryRun) {
+      const backfillResult = await ConfigManager.backfill(paths);
+      if (backfillResult.added.length > 0) {
+        result.updated.push(`Config: added ${backfillResult.added.join(", ")}`);
+      }
+    }
+
     // 5. Sync commands to project .claude/commands/
     const projectClaudeCommands = join(paths.projectRoot, ".claude", "commands");
     await mkdir(projectClaudeCommands, { recursive: true });
