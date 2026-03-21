@@ -3,6 +3,7 @@ import { readdir, unlink } from "fs/promises";
 import type { ReapPaths } from "../../../core/paths";
 import { GenerationManager } from "../../../core/generation";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
+import { revertBacklogConsumed } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
@@ -86,6 +87,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       await writeTextFile(join(paths.backlog, `aborted-${state.id}.md`), backlogContent);
       backlogSaved = true;
     }
+
+    // Revert consumed backlog items back to pending
+    await revertBacklogConsumed(paths.backlog, state.id);
 
     // Delete artifact files from life/
     try {

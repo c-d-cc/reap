@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-096-57c421
 ---
 
 # abort 시 consumed backlog가 pending으로 복원되지 않음

@@ -28,7 +28,9 @@ export async function scanBacklog(backlogDir: string): Promise<BacklogFile[]> {
     if (!content) continue;
 
     const { frontmatter, body } = parseFrontmatter(content);
-    const title = body.match(/^#\s+(.+)/m)?.[1] ?? filename.replace(/\.md$/, "");
+    const title =
+      body.match(/^#\s+(.+)/m)?.[1] ??
+      (frontmatter.title != null ? String(frontmatter.title) : filename.replace(/\.md$/, ""));
 
     items.push({
       filename,
@@ -60,6 +62,31 @@ export async function markBacklogConsumed(
 
   const newContent = `---\n${YAML.stringify(frontmatter).trim()}\n---\n${body}`;
   await writeTextFile(filePath, newContent);
+}
+
+export async function revertBacklogConsumed(backlogDir: string, genId: string): Promise<void> {
+  let entries: string[];
+  try {
+    entries = await readdir(backlogDir);
+  } catch {
+    return;
+  }
+
+  for (const filename of entries) {
+    if (!filename.endsWith(".md")) continue;
+    const filePath = join(backlogDir, filename);
+    const content = await readTextFile(filePath);
+    if (!content) continue;
+
+    const { frontmatter, body } = parseFrontmatter(content);
+    if (frontmatter.status === "consumed" && frontmatter.consumedBy === genId) {
+      frontmatter.status = "pending";
+      delete frontmatter.consumedBy;
+
+      const newContent = `---\n${YAML.stringify(frontmatter).trim()}\n---\n${body}`;
+      await writeTextFile(filePath, newContent);
+    }
+  }
 }
 
 function parseFrontmatter(content: string): { frontmatter: Record<string, unknown>; body: string } {

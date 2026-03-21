@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-096-57c421
 ---
 
 # reap init: 기존 프로젝트 감지 시 자동 adoption 모드 전환

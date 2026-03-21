@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-096-57c421
 ---
 
 # backlog title이 frontmatter title 대신 filename에서 추출됨

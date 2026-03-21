@@ -27,15 +27,16 @@ program
       const name = projectName ?? require("path").basename(cwd);
       let mode = options.mode as "greenfield" | "migration" | "adoption";
 
-      // If no name provided and existing project signals detected, suggest adoption
-      if (!projectName && mode === "greenfield") {
+      // If existing project signals detected and mode not explicitly set, auto-switch to adoption
+      const modeExplicit = process.argv.some(a => a === "-m" || a === "--mode");
+      if (!modeExplicit && mode === "greenfield") {
         const { existsSync } = require("fs");
         const signals = ["package.json", "go.mod", "Cargo.toml", "pom.xml", "pyproject.toml", "Makefile", "CMakeLists.txt"];
         const hasExistingProject = signals.some(f => existsSync(require("path").join(cwd, f)));
         if (hasExistingProject) {
-          console.log(`Existing project detected in current directory.`);
-          console.log(`  Consider using --mode adoption to apply REAP to this codebase.`);
-          console.log(`  Proceeding with greenfield mode. Use -m adoption to change.\n`);
+          mode = "adoption";
+          console.log(`Existing project detected. Automatically using adoption mode.`);
+          console.log(`  To force greenfield mode, use: reap init --mode greenfield\n`);
         }
       }
 
