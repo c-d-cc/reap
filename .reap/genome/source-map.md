@@ -65,6 +65,8 @@ C4Component
   Component(genomeSync, "GenomeSync", "genome-sync.ts", "프로젝트 스캔→genome 자동 생성. adoption/migration init 시 호출")
   Component(backlog, "Backlog Utils", "backlog.ts", "scanBacklog, markBacklogConsumed — backlog CRUD")
   Component(runOutput, "RunOutput", "run-output.ts", "emitOutput, emitError — structured JSON output")
+  Component(hookEngine, "HookEngine", "hook-engine.ts", "hook 스캔, condition 평가, sh 실행 / md 반환")
+  Component(commit, "CommitUtils", "commit.ts", "submodule check, git commit — checkSubmodules, commitChanges")
   Component(fs, "FS Utils", "fs.ts", "readTextFile, writeTextFile, fileExists")
 
   Rel(generation, lifecycle, "stage transitions")

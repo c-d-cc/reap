@@ -4,6 +4,8 @@ import { GenerationManager } from "../../../core/generation";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { scanBacklog, markBacklogConsumed } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
+import { executeHooks } from "../../../core/hook-engine";
+import { checkSubmodules } from "../../../core/commit";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -115,20 +117,31 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "archive") {
-    // Phase 4: Deterministic — archiving + compression
+    // Phase 4: Execute onLifeCompleted hooks, then archive
+    const hookResults = await executeHooks(paths.hooks, "onLifeCompleted", paths.projectRoot);
+
+    // Check submodules
+    const submodules = checkSubmodules(paths.projectRoot);
+    const dirtySubmodules = submodules.filter(s => s.dirty);
+
+    // Archive + compress
     const compression = await gm.complete();
 
     emitOutput({
       status: "prompt",
       command: "completion",
       phase: "commit",
-      completed: ["gate", "artifact-create", "context-scan", "retrospective", "genome", "hook-suggest", "archive", "compress"],
+      completed: ["gate", "artifact-create", "context-scan", "retrospective", "genome", "hook-suggest", "hooks", "archive", "compress"],
       context: {
         id: state.id,
         goal: state.goal,
         compression: { level1: compression.level1.length, level2: compression.level2.length },
+        hookResults,
+        dirtySubmodules,
       },
-      prompt: "Commit all changes (code + .reap/ artifacts). Check submodules first. Commit message: feat/fix/chore(gen-NNN-hash): [goal summary]. Generation complete.",
+      prompt: dirtySubmodules.length > 0
+        ? `Dirty submodules detected: ${dirtySubmodules.map(s => s.path).join(", ")}. Commit and push inside each submodule first, then commit the parent repo. Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`
+        : `Commit all changes (code + .reap/ artifacts). Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`,
       message: `Generation ${state.id} archived.`,
     });
   }

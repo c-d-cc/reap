@@ -5,7 +5,8 @@ import { LifeCycle } from "../../../core/lifecycle";
 import { MergeLifeCycle } from "../../../core/merge-lifecycle";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
-import type { LifeCycleStage, MergeStage, AnyStage } from "../../../types";
+import { executeHooks } from "../../../core/hook-engine";
+import type { LifeCycleStage, MergeStage, AnyStage, ReapHookEvent } from "../../../types";
 
 const NORMAL_ARTIFACT: Partial<Record<LifeCycleStage, string>> = {
   planning: "02-planning.md",
@@ -67,21 +68,44 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
     }
   }
 
-  // Hook event
-  const hookEvent = isMerge ? "onMergeTransited" : "onLifeTransited";
+  // Stage-specific hook (e.g., objective→planning triggers onLifeObjected)
+  const previousStage = state.timeline[state.timeline.length - 2]?.stage;
+  const STAGE_HOOK: Record<string, ReapHookEvent> = {
+    planning: "onLifeObjected",
+    implementation: "onLifePlanned",
+    validation: "onLifeImplemented",
+    completion: "onLifeValidated",
+    // merge
+    mate: "onMergeDetected",
+    merge: "onMergeMated",
+    sync: "onMergeMerged",
+    "validation:merge": "onMergeSynced",
+    "completion:merge": "onMergeValidated",
+  };
+
+  const stageKey = isMerge && (nextStage === "validation" || nextStage === "completion")
+    ? `${nextStage}:merge` : nextStage;
+  const stageHookEvent = STAGE_HOOK[stageKey];
+  const stageHookResults = stageHookEvent
+    ? await executeHooks(paths.hooks, stageHookEvent, paths.projectRoot)
+    : [];
+
+  // Transition hook
+  const transitionEvent: ReapHookEvent = isMerge ? "onMergeTransited" : "onLifeTransited";
+  const transitionHookResults = await executeHooks(paths.hooks, transitionEvent, paths.projectRoot);
 
   emitOutput({
     status: "ok",
     command: "next",
     phase: "done",
-    completed: ["gate", "advance-stage", "create-artifact"],
+    completed: ["gate", "advance-stage", "create-artifact", "hooks"],
     context: {
       generationId: state.id,
-      previousStage: state.timeline[state.timeline.length - 2]?.stage,
+      previousStage,
       stage: nextStage,
       type: state.type,
       artifactFile,
-      hookEvent,
+      hookResults: [...stageHookResults, ...transitionHookResults],
     },
     message: `Advanced to ${nextStage}. Proceed with /reap.${nextStage}.`,
   });

@@ -147,6 +147,20 @@ export interface AdaptationRecord {
   createdAt: string;
 }
 
+// ── hook engine types ───────────────────────────────────────
+
+export interface HookResult {
+  name: string;
+  event: string;
+  type: "sh" | "md";
+  status: "executed" | "skipped";
+  exitCode?: number;
+  stdout?: string;
+  stderr?: string;
+  content?: string;
+  skipReason?: string;
+}
+
 // ── reap run output types ──────────────────────────────────
 
 export interface RunOutput {

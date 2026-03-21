@@ -3,6 +3,7 @@ import { GenerationManager } from "../../../core/generation";
 import { LifeCycle } from "../../../core/lifecycle";
 import { MergeLifeCycle } from "../../../core/merge-lifecycle";
 import { emitOutput, emitError } from "../../../core/run-output";
+import { executeHooks } from "../../../core/hook-engine";
 import type { LifeCycleStage, MergeStage, AnyStage } from "../../../types";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
@@ -74,20 +75,22 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     });
     await gm.save(state);
 
+    // Execute regression hook
     const hookEvent = isMerge ? "onMergeTransited" : "onLifeRegretted";
+    const hookResults = await executeHooks(paths.hooks, hookEvent, paths.projectRoot);
 
     emitOutput({
       status: "prompt",
       command: "back",
       phase: "record-regression",
-      completed: ["gate", "collect", "apply-regression"],
+      completed: ["gate", "collect", "apply-regression", "hooks"],
       context: {
         id: state.id,
         targetStage: target,
         fromStage: originalStage,
         reason,
         refs,
-        hookEvent,
+        hookResults,
       },
       prompt: `Regression applied: ${originalStage} → ${target}. Add a ## Regression section to the target artifact. Then proceed with /reap.${target}.`,
       message: `Returned to ${target} stage.`,

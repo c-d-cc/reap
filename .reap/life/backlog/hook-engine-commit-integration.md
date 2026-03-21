@@ -3,6 +3,8 @@ type: task
 priority: high
 createdBy: gen-087-adc61f
 consumed: false
+status: consumed
+consumedBy: gen-088-86dd81
 ---
 
 # Hook 실행 엔진 + commit 로직 통합

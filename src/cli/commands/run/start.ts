@@ -5,6 +5,7 @@ import { GenerationManager } from "../../../core/generation";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { scanBacklog, markBacklogConsumed } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
+import { executeHooks } from "../../../core/hook-engine";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -73,17 +74,21 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       }
     }
 
+    // Execute onLifeStarted hooks
+    const hookResults = await executeHooks(paths.hooks, "onLifeStarted", paths.projectRoot);
+
     emitOutput({
       status: "prompt",
       command: "start",
       phase: "started",
-      completed: ["gate", "backlog-scan", "create-generation", "backlog-consumed", "create-artifact"],
+      completed: ["gate", "backlog-scan", "create-generation", "backlog-consumed", "create-artifact", "hooks"],
       context: {
         generationId: state.id,
         goal: state.goal,
         genomeVersion: state.genomeVersion,
         parents: state.parents,
         genomeHash: state.genomeHash,
+        hookResults,
       },
       prompt: `Generation ${state.id} created. Fill in the Goal section of 01-objective.md if needed. Then proceed with /reap.objective or /reap.evolve.`,
       message: `Generation ${state.id} started.`,
