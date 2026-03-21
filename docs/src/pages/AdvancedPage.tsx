@@ -46,7 +46,7 @@ export default function AdvancedPage() {
         <p className="text-xs text-muted-foreground mb-6">
           📄 Related Article:{" "}
           <a href="https://dev.to/casamia918/new-workflow-control-method-for-harness-engineering-signature-based-locking-3bmj" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
-            Harness Engineering의 새로운 Workflow 제어 방법 — Signature-Based Locking
+            New workflow control method for harness engineering — Signature-Based Locking
           </a>
         </p>
 
