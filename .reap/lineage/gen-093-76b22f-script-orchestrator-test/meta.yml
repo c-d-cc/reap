@@ -1,0 +1,8 @@
+id: gen-093-76b22f
+type: normal
+parents:
+  - gen-092-17baef
+goal: "Script Orchestrator Architecture 전체 테스트 커버리지 작성"
+genomeHash: b726c9bf
+startedAt: "2026-03-21T08:20:00.000Z"
+completedAt: "2026-03-21T08:55:00.000Z"
