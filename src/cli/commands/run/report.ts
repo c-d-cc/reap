@@ -1,23 +1,13 @@
 import type { ReapPaths } from "../../../core/paths";
 import { GenerationManager } from "../../../core/generation";
-import { readTextFile } from "../../../core/fs";
-import { emitOutput, emitError } from "../../../core/run-output";
+import { emitOutput } from "../../../core/run-output";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
   const state = await gm.current();
 
-  // Read config
-  const configContent = await readTextFile(paths.config);
-
   if (!phase || phase === "collect") {
     // Phase 1: Gate + 시스템 정보 수집 → AI에게 issue report 작성 지시
-
-    // Check autoIssueReport config
-    const autoIssueReport = configContent?.match(/autoIssueReport:\s*false/);
-    if (autoIssueReport) {
-      emitError("report", "Issue reporting is disabled. Set `autoIssueReport: true` in .reap/config.yml to enable.");
-    }
 
     emitOutput({
       status: "prompt",
