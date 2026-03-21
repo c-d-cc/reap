@@ -129,8 +129,14 @@ const CONFIG_LINE: Record<SupportedLanguage, string> = {
   "zh-CN": "查看设置: /reap.config",
 };
 
+const LANGUAGE_ALIASES: Record<string, SupportedLanguage> = {
+  korean: "ko", english: "en", japanese: "ja", chinese: "zh-CN",
+};
+
 function detectLanguage(configContent: string | null): string | null {
-  return configContent?.match(/language:\s*(\S+)/)?.[1] ?? null;
+  const raw = configContent?.match(/language:\s*(\S+)/)?.[1] ?? null;
+  if (raw && raw in LANGUAGE_ALIASES) return LANGUAGE_ALIASES[raw];
+  return raw;
 }
 
 function isSupportedLanguage(lang: string | null): lang is SupportedLanguage {
