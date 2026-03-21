@@ -1,15 +1,22 @@
 ## What's New
 
-- **/reap.config**: 설정 확인 전용 커맨드 — AI 추론 없이 즉시 출력
-- **auto-report on error**: `reap run` 중 예상치 못한 에러 시 자동 `gh issue create`
-- **config backfill**: `reap init` 모든 필드 명시, `reap update` 시 누락 필드 자동 채우기
-- **AI migration agent**: `reap update` 시 구조 gap 감지 → AI migration prompt
-- **REAP MANAGED strip**: archiving 시 artifact의 관리 헤더 자동 제거
-- **CLAUDE.md integration**: init/update 시 `.claude/CLAUDE.md`에 REAP 섹션 추가
-- **help/config 개선**: status ok + formatted message (AI 추론 불필요), REAP 소개 문구, topic 목록 전체 표시
+- `/reap.config` command — display current project configuration without AI interpretation
+- Auto-report on uncaught errors — `autoIssueReport` setting triggers automatic GitHub issue creation
+- Config backfill — `reap update` fills missing config fields with defaults
+- AI migration agent — `detectMigrationGaps()` checks structural gaps during `reap update`
+- REAP MANAGED header on `current.yml` and artifacts, stripped during archiving
+- Help command i18n — descriptions in en/ko/ja/zh-CN, unsupported languages delegated to AI translation
+- Help topic mode includes `reap-guide.md` as context for accurate REAP knowledge
+- CLAUDE.md integration — REAP rules section auto-managed by `reap init`/`reap update`
+- Version display in help/status output with latest version check
+- `reap.report` decoupled from `autoIssueReport` — manual reports always available
+- Execution flow clarified — `/reap.next` documented as transition command, not lifecycle stage
+- Language alias support — `korean`→`ko`, `english`→`en`, `japanese`→`ja`, `chinese`→`zh-CN`
 
 ## Generations
 
-- **gen-100-54bde0**: auto-report + /reap.config + config backfill
-- **gen-101-c88beb**: AI migration agent + REAP MANAGED 헤더 strip
-- **gen-102-95708b**: CLAUDE.md REAP 룰 + README/docs 갱신
+- **gen-100-54bde0**: auto-report on error + /reap.config command
+- **gen-101-c88beb**: AI migration agent + REAP MANAGED header strip on archiving
+- **gen-102-95708b**: CLAUDE.md REAP rules + README/docs v0.11.x update
+- **gen-103-15e966**: help command description i18n (en/ko/ja/zh-CN)
+- **gen-104-e65f10**: help topic mode includes reap-guide.md context
