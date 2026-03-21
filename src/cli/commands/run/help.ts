@@ -1,4 +1,5 @@
-import type { ReapPaths } from "../../../core/paths";
+import { ReapPaths } from "../../../core/paths";
+import { join } from "path";
 import { GenerationManager } from "../../../core/generation";
 import { readTextFile } from "../../../core/fs";
 import { emitOutput } from "../../../core/run-output";
@@ -197,19 +198,24 @@ export async function execute(paths: ReapPaths): Promise<void> {
   const lines = buildLines(versionDisplay, lang, stateDisplay);
 
   if (topic) {
+    // Topic mode: read reap-guide.md for REAP knowledge context
+    const guidePath = join(ReapPaths.packageHooksDir, "reap-guide.md");
+    const reapGuide = await readTextFile(guidePath) ?? "";
+
     // Topic mode: AI needs to look up and explain the topic
     emitOutput({
       status: "prompt",
       command: "help",
       phase: "respond",
       completed: ["gate", "context-collect"],
-      context: { topic },
+      context: { topic, reapGuide },
       message: lines.join("\n"),
       prompt: [
         `Topic requested: "${topic}".`,
         "Look up from known topics: workflow/lifecycle, genome, backlog, strict, agents, hooks, config, evolve, regression, minor-fix, compression, merge/collaboration.",
         "Command topics: read `reap.{name}.md` from `~/.reap/commands/` or template commands directory, then explain.",
         "If the topic is NOT known: respond 'Unknown topic'.",
+        "Use the reapGuide content in context as the primary knowledge source for explaining REAP topics.",
       ].join("\n"),
     });
   } else if (!supported && rawLang !== null) {

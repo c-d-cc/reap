@@ -1,0 +1,21 @@
+# REAP MANAGED — Do not modify directly. Use reap run next/back/start/abort.
+id: gen-104-e65f10
+goal: help topic 모드에서 reap-guide.md를 context로 포함
+stage: completion
+genomeVersion: 104
+startedAt: 2026-03-21T13:56:31.246Z
+timeline:
+  - stage: objective
+    at: 2026-03-21T13:56:31.246Z
+  - stage: planning
+    at: 2026-03-21T13:57:10.307Z
+  - stage: implementation
+    at: 2026-03-21T13:57:32.977Z
+  - stage: validation
+    at: 2026-03-21T13:58:40.489Z
+  - stage: completion
+    at: 2026-03-21T13:59:26.008Z
+type: normal
+parents:
+  - gen-006-d9ca51
+genomeHash: 13c9ca8a
