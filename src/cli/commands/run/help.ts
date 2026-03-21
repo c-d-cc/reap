@@ -45,7 +45,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         : "No specific topic. Show the basic help overview.",
       "",
       "### Basic Help (no topic)",
-      "Show REAP overview, current state, and command table.",
+      "REAP (Recursive Evolutionary Autonomous Pipeline) — AI+Human 협업으로 소프트웨어를 세대 단위로 진화시키는 개발 파이프라인.",
+      "",
+      "Show current state and command table.",
       state?.id
         ? `> Current: **${state.id}** — ${state.goal} (Stage: ${state.stage})`
         : "> No active Generation -> `/reap.start` or `/reap.evolve`",
