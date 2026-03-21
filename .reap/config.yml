@@ -4,3 +4,5 @@ entryMode: greenfield
 strict: true
 language: korean
 autoUpdate: true
+autoSubagent: true
+autoIssueReport: false

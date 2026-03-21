@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-103-15e966
 ---
 
 # reap.help command description 다국어 지원
