@@ -43,6 +43,12 @@ export default function AdvancedPage() {
             </tbody>
           </table>
         </div>
+        <p className="text-xs text-muted-foreground mb-6">
+          📄 Related Article:{" "}
+          <a href="https://dev.to/casamia918/new-workflow-control-method-for-harness-engineering-signature-based-locking-3bmj" target="_blank" rel="noopener noreferrer" className="text-primary hover:underline">
+            Harness Engineering의 새로운 Workflow 제어 방법 — Signature-Based Locking
+          </a>
+        </p>
 
         <h2 className="text-base font-semibold text-foreground mb-2">{t.advanced.compressionTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3">
