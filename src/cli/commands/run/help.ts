@@ -168,7 +168,7 @@ function buildLines(
     ...buildCommandTable(lang),
     "",
     TOPICS_LINE[lang],
-    "Usage: REAP_HELP_TOPIC=<topic> reap run help",
+    "Usage: /reap.help <topic>",
     CONFIG_LINE[lang],
   ];
 }
@@ -188,8 +188,9 @@ export async function execute(paths: ReapPaths): Promise<void> {
   const supported = isSupportedLanguage(rawLang);
   const lang: SupportedLanguage = supported ? rawLang : "en";
 
-  // Determine topic from REAP_HELP_TOPIC env var
-  const topic = process.env.REAP_HELP_TOPIC;
+  // Determine topic from argv: reap run help <topic>
+  const args = process.argv.slice(2).filter(a => !a.startsWith("-") && a !== "run" && a !== "help");
+  const topic = args[0] || undefined;
 
   const stateDisplay = state?.id
     ? `Active: **${state.id}** — ${state.goal} (Stage: ${state.stage})`
