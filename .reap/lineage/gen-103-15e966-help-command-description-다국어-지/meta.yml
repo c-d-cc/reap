@@ -1,0 +1,8 @@
+id: gen-103-15e966
+type: normal
+parents:
+  - gen-086-bc3af7
+goal: help command description 다국어 지원 (en/ko/ja/zh-CN 사전 정의 + 기타 AI 번역)
+genomeHash: 13c9ca8a
+startedAt: 2026-03-21T13:16:27.879Z
+completedAt: 2026-03-21T13:21:12.578Z
