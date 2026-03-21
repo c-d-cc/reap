@@ -1,8 +1,0 @@
-id: gen-097-724974
-type: normal
-parents:
-  - gen-096-57c421
-goal: "Genome/Environment sync 검증 및 개선"
-genomeHash: b726c9bf
-startedAt: "2026-03-21T11:30:00.000Z"
-completedAt: "2026-03-21T11:50:00.000Z"
