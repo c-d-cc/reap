@@ -10,6 +10,14 @@ const { join, dirname } = require("path");
 const { homedir } = require("os");
 
 try {
+  // Warn if installed locally instead of globally
+  const isGlobal = process.env.npm_config_global === "true"
+    || (process.env.npm_config_prefix && !process.env.npm_config_prefix.includes("node_modules"));
+  if (!isGlobal) {
+    console.warn("\n  ⚠ @c-d-cc/reap is a CLI tool and should be installed globally:");
+    console.warn("    npm install -g @c-d-cc/reap\n");
+  }
+
   // Resolve commands source: dist/templates/commands/ relative to this script
   const commandsSource = join(dirname(__dirname), "dist", "templates", "commands");
   if (!existsSync(commandsSource)) {

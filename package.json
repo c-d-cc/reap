@@ -1,6 +1,6 @@
 {
   "name": "@c-d-cc/reap",
-  "version": "0.13.0",
+  "version": "0.13.1",
   "description": "Recursive Evolutionary Autonomous Pipeline — AI and humans evolve software across generations",
   "type": "module",
   "license": "MIT",
@@ -26,6 +26,7 @@
     "dist/",
     "scripts/postinstall.cjs"
   ],
+  "preferGlobal": true,
   "engines": {
     "node": ">=18"
   },
