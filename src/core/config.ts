@@ -14,6 +14,11 @@ export class ConfigManager {
     await writeTextFile(paths.config, content);
   }
 
+  /** Resolve autoSubagent option. Default: true */
+  static resolveAutoSubagent(value?: boolean): boolean {
+    return value !== false;
+  }
+
   /** Resolve strict mode from boolean | object to StrictMode */
   static resolveStrict(strict?: boolean | { edit?: boolean; merge?: boolean }): StrictMode {
     if (strict === undefined || strict === false) {

@@ -184,6 +184,20 @@ export class ClaudeCodeAdapter implements AgentAdapter {
     return { action: "migrated" };
   }
 
+  async cleanupLegacyCommands(): Promise<string[]> {
+    const removed: string[] = [];
+    try {
+      const files = await readdir(this.commandsDir);
+      for (const file of files) {
+        if (file.startsWith("reap.") && file.endsWith(".md")) {
+          await unlink(join(this.commandsDir, file));
+          removed.push(file);
+        }
+      }
+    } catch { /* dir may not exist */ }
+    return removed;
+  }
+
   // --- Private helpers ---
 
   private getHookEntry() {

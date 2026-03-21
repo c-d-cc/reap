@@ -1,7 +1,108 @@
 import type { ReapPaths } from "../../../core/paths";
+import type { GenerationState } from "../../../types";
 import { GenerationManager } from "../../../core/generation";
+import { ConfigManager } from "../../../core/config";
 import { readTextFile } from "../../../core/fs";
+import { scanBacklog } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
+
+/**
+ * Build the full prompt string that the parent agent passes to a subagent
+ * via the Agent tool.
+ */
+function buildSubagentPrompt(
+  paths: ReapPaths,
+  state: GenerationState | null,
+  genomeSummaries: { principles: string; conventions: string; constraints: string },
+  backlogSummary: string,
+): string {
+  const lines: string[] = [];
+
+  // 1. REAP lifecycle rules
+  lines.push("# REAP Subagent Instructions");
+  lines.push("");
+  lines.push("## Rules");
+  lines.push("- ALWAYS use `reap run <cmd>` commands to drive lifecycle. NEVER modify `current.yml` directly.");
+  lines.push("- Use `/reap.next` to advance stages and `/reap.back` to regress.");
+  lines.push("- Each stage command runs its own hook automatically at completion.");
+  lines.push("- `/reap.completion` handles archiving and the final commit.");
+  lines.push("");
+
+  // 2. Current state
+  lines.push("## Current State");
+  if (state) {
+    lines.push(`- Generation ID: ${state.id}`);
+    lines.push(`- Goal: ${state.goal}`);
+    lines.push(`- Stage: ${state.stage}`);
+  } else {
+    lines.push("- No active generation. Start one first.");
+  }
+  lines.push("");
+
+  // 3. Genome summary (first 500 chars each)
+  lines.push("## Genome Summary");
+  lines.push("");
+  lines.push("### Principles");
+  lines.push(genomeSummaries.principles);
+  lines.push("");
+  lines.push("### Conventions");
+  lines.push(genomeSummaries.conventions);
+  lines.push("");
+  lines.push("### Constraints");
+  lines.push(genomeSummaries.constraints);
+  lines.push("");
+
+  // 4. Backlog
+  lines.push("## Backlog");
+  lines.push(backlogSummary || "(empty)");
+  lines.push("");
+
+  // 5. Lifecycle execution instructions
+  lines.push("## Lifecycle Execution");
+  lines.push("");
+  if (!state || !state.id) {
+    lines.push("1. Run `reap run start` to scan and create a new generation.");
+    lines.push("2. Then follow the stage loop below.");
+  } else {
+    lines.push(`Resume from stage: **${state.stage}**`);
+  }
+  lines.push("");
+  lines.push("### Stage Loop");
+  lines.push("1. Read `current.yml` to confirm the current stage.");
+  lines.push("2. Execute the stage command:");
+  lines.push("   - `objective` -> `/reap.objective`");
+  lines.push("   - `planning` -> `/reap.planning`");
+  lines.push("   - `implementation` -> `/reap.implementation`");
+  lines.push("   - `validation` -> `/reap.validation`");
+  lines.push("   - `completion` -> `/reap.completion`");
+  lines.push("3. Write the required artifact BEFORE completing the stage.");
+  lines.push("4. Run the stage complete phase if applicable (e.g., `reap run <stage> --phase complete`).");
+  lines.push("5. Run `/reap.next` to advance to the next stage.");
+  lines.push("6. Repeat until `completion` stage is done.");
+  lines.push("");
+  lines.push("### Completion");
+  lines.push("- Run `/reap.completion` which handles: retrospective, genome updates, backlog consume, and archive.");
+  lines.push("");
+
+  // 6. Project path
+  lines.push("## Project");
+  lines.push(`- Path: ${paths.projectRoot}`);
+  lines.push("");
+
+  // 7. Commit rules
+  lines.push("## Commit Rules");
+  lines.push("- Create a git commit after implementation and after completion.");
+  lines.push("- Use conventional commit format: `feat|fix|chore(scope): description`");
+  lines.push("- Include the generation ID in the commit message.");
+
+  return lines.join("\n");
+}
+
+/** Truncate text to maxLen characters */
+function truncate(text: string | null, maxLen: number): string {
+  if (!text) return "(not found)";
+  return text.length <= maxLen ? text : text.slice(0, maxLen) + "...";
+}
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -10,9 +111,63 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   if (!phase || phase === "start") {
     // Phase 1: Gate — active generation 확인 또는 start 안내
 
-    // Read config
-    const configContent = await readTextFile(paths.config);
+    // Read config to check autoSubagent
+    let autoSubagent = true;
+    try {
+      const config = await ConfigManager.read(paths);
+      autoSubagent = ConfigManager.resolveAutoSubagent(config.autoSubagent);
+    } catch {
+      // config read failed — use default
+    }
 
+    // autoSubagent=true → delegate phase
+    if (autoSubagent) {
+      // Read genome summaries
+      const [principles, conventions, constraints] = await Promise.all([
+        readTextFile(paths.principles),
+        readTextFile(paths.conventions),
+        readTextFile(paths.constraints),
+      ]);
+      const genomeSummaries = {
+        principles: truncate(principles, 500),
+        conventions: truncate(conventions, 500),
+        constraints: truncate(constraints, 500),
+      };
+
+      // Read backlog
+      const backlogItems = await scanBacklog(paths.backlog);
+      const pendingItems = backlogItems.filter(b => b.status === "pending");
+      const backlogSummary = pendingItems.length > 0
+        ? pendingItems.map(b => `- [${b.type}] ${b.title}`).join("\n")
+        : "(no pending items)";
+
+      const subagentPrompt = buildSubagentPrompt(paths, state, genomeSummaries, backlogSummary);
+
+      emitOutput({
+        status: "prompt",
+        command: "evolve",
+        phase: "delegate",
+        completed: ["gate", "config-check"],
+        context: {
+          autoSubagent: true,
+          subagentPrompt,
+          generationId: state?.id,
+          goal: state?.goal,
+        },
+        prompt: [
+          "## AutoSubagent Mode",
+          "",
+          "Launch a subagent using the Agent tool with:",
+          "- description: generation goal (short)",
+          "- prompt: the subagentPrompt from context",
+          "- run_in_background: false (wait for result)",
+          "",
+          "After the subagent completes, report the result summary to the user.",
+        ].join("\n"),
+      });
+    }
+
+    // autoSubagent=false → existing behavior
     if (!state || !state.id) {
       // No active generation — instruct AI to run /reap.start first
       emitOutput({

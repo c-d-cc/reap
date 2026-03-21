@@ -86,6 +86,16 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     } catch { /* dir may not exist */ }
   }
 
+  // 1c. Clean up legacy user-level slash commands (e.g. ~/.claude/commands/reap.*.md)
+  for (const adapter of adapters) {
+    if (typeof adapter.cleanupLegacyCommands === "function") {
+      const removed = await adapter.cleanupLegacyCommands();
+      for (const file of removed) {
+        result.removed.push(`[${adapter.displayName}] ~commands/${file} (legacy user-level)`);
+      }
+    }
+  }
+
   // 2. Sync artifact templates + domain guide to ~/.reap/templates/
   await mkdir(ReapPaths.userReapTemplates, { recursive: true });
   const artifactFiles = ["01-objective.md", "02-planning.md", "03-implementation.md", "04-validation.md", "05-completion.md"];

@@ -89,6 +89,8 @@ export interface ReapConfig {
   strict?: boolean | { edit?: boolean; merge?: boolean };
   /** Auto-report issues to GitHub when malfunction detected. Requires gh CLI. */
   autoIssueReport?: boolean;
+  /** Auto-delegate evolve to a subagent via Agent tool. Default: true */
+  autoSubagent?: boolean;
 }
 
 /** Resolved strict mode (always object form) */
@@ -127,6 +129,9 @@ export interface AgentAdapter {
 
   /** Optional migration from legacy formats */
   migrate?(dryRun?: boolean): Promise<{ action: string }>;
+
+  /** Clean up legacy user-level slash commands (e.g. ~/.claude/commands/reap.*.md) */
+  cleanupLegacyCommands?(): Promise<string[]>;
 }
 
 export type BacklogItemType = "genome-change" | "environment-change" | "task";
