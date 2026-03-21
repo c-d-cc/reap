@@ -218,8 +218,8 @@ Machine A:
 | 命令 | 说明 |
 |------|------|
 | `reap init <name>` | 初始化项目。创建`.reap/`结构 |
-| `reap status` | 查看当前Generation状态（显示版本 + 最新状态） |
-| `reap update` | 将命令/模板/hook同步到最新版本。自动清理`~/.claude/commands/`旧版文件 |
+| `reap status` | 查看当前Generation状态 |
+| `reap update` | 将命令/模板/hook同步到最新版本 |
 | `reap fix` | 诊断和修复`.reap/`结构 |
 | `reap help` | 输出CLI命令 + 斜杠命令 + 工作流摘要（显示版本 + 最新状态） |
 | `reap run <cmd>` | 直接执行斜杠命令的脚本（由1行`.md` wrapper内部调用） |
@@ -251,6 +251,25 @@ autoSubagent: true    # 默认值: true
 
 Subagent接收完整上下文后自主执行所有阶段，仅在确实遇到阻碍时才向用户确认。
 
+### 错误时自动Issue报告
+
+当`reap run`执行中发生意外错误时，可通过`gh issue create`自动创建GitHub Issue：
+
+```yaml
+# .reap/config.yml
+autoIssueReport: true    # 默认值: true（检测到gh CLI时）
+```
+
+### AI Migration Agent
+
+`reap update`执行时，如果检测到项目与最新REAP版本之间的结构性差异（缺失的config字段、过时的模板等），会提供AI辅助的迁移提示。代理分析差异并交互式地应用变更，无需手动迁移。
+
+`reap init`会明确声明所有config字段，`reap update`时自动补全缺失字段。
+
+### CLAUDE.md集成
+
+`reap init`和`reap update`执行时，会在`.claude/CLAUDE.md`中添加REAP管理段落，为Claude Code会话提供必要的项目上下文。
+
 ### 斜杠命令 [↗](https://reap.cc/docs/command-reference)
 
 斜杠命令安装在`.claude/commands/`中，驱动整个工作流：
@@ -270,6 +289,7 @@ Subagent接收完整上下文后自主执行所有阶段，仅在确实遇到阻
 | `/reap.sync` | 同时同步Genome和Environment |
 | `/reap.sync.genome` | 基于源代码同步Genome |
 | `/reap.sync.environment` | 发现和记录外部环境依赖 |
+| `/reap.config` | 显示当前项目配置 |
 | `/reap.report` | 向REAP项目报告bug/反馈（隐私保护） |
 | `/reap.help` | 24+主题的上下文AI帮助 |
 | `/reap.update` | 升级REAP包 + 同步命令/模板/hook |
@@ -403,7 +423,7 @@ my-project/
 ~/.claude/
 └── settings.json                 # SessionStart hook注册
 
-.claude/commands/                 # 项目级别（会话启动时symlink）
+.claude/commands/                 # 项目级斜杠命令
 └── reap.*.md                     # 活跃斜杠命令（调用`reap run <cmd>`）
 ```
 

@@ -198,6 +198,35 @@ export class ClaudeCodeAdapter implements AgentAdapter {
     return removed;
   }
 
+  async setupClaudeMd(projectRoot: string): Promise<{ action: "created" | "updated" | "skipped" }> {
+    const claudeMdPath = join(projectRoot, ".claude", "CLAUDE.md");
+    const marker = "# REAP Project";
+    const reapSection = `# REAP Project\nThis project uses REAP. Session-start hook loads project knowledge on session start.\nIf context was compacted and REAP knowledge is lost, re-run the session-start hook.\n`;
+
+    // .claude/ 디렉토리 생성
+    await mkdir(join(projectRoot, ".claude"), { recursive: true });
+
+    const existing = await readTextFile(claudeMdPath);
+
+    if (existing === null) {
+      // 파일 없음 → 새로 생성
+      await writeTextFile(claudeMdPath, reapSection);
+      return { action: "created" };
+    }
+
+    if (existing.includes(marker)) {
+      // 이미 REAP 섹션 존재 → 업데이트 (기존 REAP 섹션을 새 내용으로 교체)
+      const updated = existing.replace(/# REAP Project[\s\S]*?(?=\n# |\n*$)/, reapSection.trim());
+      if (updated === existing) return { action: "skipped" };
+      await writeTextFile(claudeMdPath, updated);
+      return { action: "updated" };
+    }
+
+    // 기존 내용 있지만 REAP 섹션 없음 → 맨 위에 추가
+    await writeTextFile(claudeMdPath, reapSection + "\n" + existing);
+    return { action: "created" };
+  }
+
   // --- Private helpers ---
 
   private getHookEntry() {

@@ -156,6 +156,18 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     }
   }
 
+  // Sync .claude/CLAUDE.md REAP section for all agents (project-level)
+  for (const adapter of adapters) {
+    if (typeof adapter.setupClaudeMd === "function") {
+      const mdResult = await adapter.setupClaudeMd(projectRoot);
+      if (mdResult.action !== "skipped") {
+        result.updated.push(`[${adapter.displayName}] .claude/CLAUDE.md (${mdResult.action})`);
+      } else {
+        result.skipped.push(`[${adapter.displayName}] .claude/CLAUDE.md`);
+      }
+    }
+  }
+
   // --- Project-level sync (only if .reap/ exists) ---
 
   if (await paths.isReapProject()) {

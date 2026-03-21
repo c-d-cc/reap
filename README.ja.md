@@ -218,8 +218,8 @@ Machine A:
 | コマンド | 説明 |
 |----------|------|
 | `reap init <name>` | プロジェクト初期化。`.reap/`構造を作成 |
-| `reap status` | 現在のGeneration状態を確認（バージョン + 最新状況表示） |
-| `reap update` | コマンド/テンプレート/hookを最新バージョンに同期。`~/.claude/commands/`のレガシーを自動クリーンアップ |
+| `reap status` | 現在のGeneration状態を確認 |
+| `reap update` | コマンド/テンプレート/hookを最新バージョンに同期 |
 | `reap fix` | `.reap/`構造の診断と修復 |
 | `reap help` | CLIコマンド + スラッシュコマンド + ワークフロー概要を出力（バージョン + 最新状況表示） |
 | `reap run <cmd>` | スラッシュコマンドのスクリプトを直接実行（1行`.md`ラッパーが内部的に使用） |
@@ -251,6 +251,25 @@ autoSubagent: true    # デフォルト: true
 
 Subagentは完全なコンテキストを受け取り、すべてのステージを自律的に実行します。本当にブロックされた場合のみユーザーに確認を求めます。
 
+### エラー時の自動Issue報告
+
+`reap run`の実行中に予期しないエラーが発生した場合、`gh issue create`を通じてGitHub Issueを自動作成できます：
+
+```yaml
+# .reap/config.yml
+autoIssueReport: true    # デフォルト: true（gh CLIがある場合）
+```
+
+### AI Migration Agent
+
+`reap update`の実行時にプロジェクトと最新REAPバージョン間の構造的な差分（不足しているconfigフィールド、古いテンプレートなど）が検出されると、AI支援のマイグレーションプロンプトが表示されます。エージェントが差分を分析し、対話的に変更を適用するため、手動マイグレーションは不要です。
+
+`reap init`ではすべてのconfigフィールドを明示的に宣言し、`reap update`時に不足しているフィールドは自動的に補完されます。
+
+### CLAUDE.md連携
+
+`reap init`と`reap update`の実行時に、`.claude/CLAUDE.md`にREAP管理セクションを追加し、Claude Codeセッションに必要なプロジェクトコンテキストを提供します。
+
 ### スラッシュコマンド [↗](https://reap.cc/docs/command-reference)
 
 スラッシュコマンドが`.claude/commands/`にインストールされ、ワークフロー全体を駆動します：
@@ -270,6 +289,7 @@ Subagentは完全なコンテキストを受け取り、すべてのステージ
 | `/reap.sync` | GenomeとEnvironmentを同時に同期 |
 | `/reap.sync.genome` | ソースコードベースでGenomeを最新化 |
 | `/reap.sync.environment` | 外部環境依存関係の発見と文書化 |
+| `/reap.config` | 現在のプロジェクト設定を表示 |
 | `/reap.report` | REAPプロジェクトにバグ/フィードバックを報告（プライバシー保護） |
 | `/reap.help` | 24+トピックのcontextual AIヘルプ |
 | `/reap.update` | REAPパッケージのアップグレード + コマンド/テンプレート/hook同期 |
@@ -403,7 +423,7 @@ my-project/
 ~/.claude/
 └── settings.json                 # SessionStart hookの登録
 
-.claude/commands/                 # プロジェクトレベル（セッション開始時にsymlink）
+.claude/commands/                 # プロジェクトレベルのスラッシュコマンド
 └── reap.*.md                     # アクティブなスラッシュコマンド（`reap run <cmd>`を呼び出し）
 ```
 

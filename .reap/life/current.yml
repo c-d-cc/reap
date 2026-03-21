@@ -1,0 +1,21 @@
+# REAP MANAGED — Do not modify directly. Use reap run next/back/start/abort.
+id: gen-102-95708b
+goal: CLAUDE.md REAP 룰 추가 + README/docs v0.11.x 갱신
+stage: completion
+genomeVersion: 102
+startedAt: 2026-03-21T12:55:20.822Z
+timeline:
+  - stage: objective
+    at: 2026-03-21T12:55:20.822Z
+  - stage: planning
+    at: 2026-03-21T12:55:41.493Z
+  - stage: implementation
+    at: 2026-03-21T12:56:11.250Z
+  - stage: validation
+    at: 2026-03-21T13:02:11.400Z
+  - stage: completion
+    at: 2026-03-21T13:02:11.452Z
+type: normal
+parents:
+  - gen-006-d9ca51
+genomeHash: 13c9ca8a

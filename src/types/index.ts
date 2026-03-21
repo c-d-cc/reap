@@ -132,6 +132,9 @@ export interface AgentAdapter {
 
   /** Clean up legacy user-level slash commands (e.g. ~/.claude/commands/reap.*.md) */
   cleanupLegacyCommands?(): Promise<string[]>;
+
+  /** Setup .claude/CLAUDE.md with REAP section in the project */
+  setupClaudeMd?(projectRoot: string): Promise<{ action: "created" | "updated" | "skipped" }>;
 }
 
 export type BacklogItemType = "genome-change" | "environment-change" | "task";

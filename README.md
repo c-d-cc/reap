@@ -250,6 +250,25 @@ autoSubagent: true    # default: true
 
 The subagent receives the full context and runs autonomously through all stages, only surfacing when genuinely blocked.
 
+### Auto Issue Report
+
+When an unexpected error occurs during `reap run`, REAP can automatically create a GitHub Issue via `gh issue create`. This is controlled by:
+
+```yaml
+# .reap/config.yml
+autoIssueReport: true    # default: true (when gh CLI is available)
+```
+
+### AI Migration Agent
+
+When `reap update` detects structural gaps between your project and the latest REAP version (e.g., missing config fields, outdated templates), it offers an AI-assisted migration prompt. The agent analyzes the differences and applies changes interactively — no manual migration needed.
+
+`reap init` also ensures all config fields are explicitly declared, and `reap update` backfills any missing fields automatically.
+
+### CLAUDE.md Integration
+
+During `reap init` and `reap update`, REAP adds a managed section to `.claude/CLAUDE.md` containing essential project context for Claude Code sessions.
+
 ### Slash Commands [↗](https://reap.cc/docs/command-reference)
 
 Slash commands are installed in `.claude/commands/` and drive the entire workflow:
@@ -269,6 +288,7 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.sync` | Synchronize both Genome and Environment |
 | `/reap.sync.genome` | Synchronize Genome with current source code |
 | `/reap.sync.environment` | Discover and document external environment dependencies |
+| `/reap.config` | Display current project configuration |
 | `/reap.report` | Report a bug or feedback to the REAP project (privacy-safe) |
 | `/reap.help` | Contextual AI help with 24+ topics |
 | `/reap.update` | Upgrade REAP package + sync commands/templates/hooks |

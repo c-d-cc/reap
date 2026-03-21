@@ -332,6 +332,7 @@ export const en = {
       ["/reap.sync", "Synchronize both Genome and Environment with current state. Runs sync.genome + sync.environment."],
       ["/reap.sync.genome", "Analyze source code and synchronize Genome. Direct update when no active generation; records to backlog otherwise."],
       ["/reap.sync.environment", "Discover external dependencies (APIs, infrastructure, services) and document them in the 3-layer environment structure (summary.md + docs/ + resources/)."],
+      ["/reap.config", "Display current project configuration (.reap/config.yml)."],
       ["/reap.report", "Report a bug or feedback to the REAP project via GitHub Issue. Privacy double-check: PRIVACY_GATE + post-format sanitization. User confirmation required."],
       ["/reap.help", "Provide contextual help with 24+ topics."],
       ["/reap.update", "Upgrade REAP package + sync commands, templates, and hooks to all detected agents. Also syncs project .claude/commands/ immediately."],

@@ -334,6 +334,7 @@ export const ko: Translations = {
       ["/reap.sync", "Genome과 Environment를 동시에 동기화. sync.genome + sync.environment 순차 실행."],
       ["/reap.sync.genome", "소스 코드를 분석하고 Genome 동기화. 활성 Generation이 없으면 직접 업데이트; 있으면 backlog에 기록."],
       ["/reap.sync.environment", "외부 의존성(API, 인프라, 서비스)을 탐색하고 3-layer 환경 구조(summary.md + docs/ + resources/)에 문서화."],
+      ["/reap.config", "현재 프로젝트 설정(.reap/config.yml) 표시."],
       ["/reap.report", "REAP 프로젝트에 GitHub Issue로 버그/피드백 보고. 개인정보 이중 검사(PRIVACY_GATE + 포맷 후 마스킹). 유저 확인 필수."],
       ["/reap.help", "24+ 주제의 상황별 도움말 제공."],
       ["/reap.update", "REAP 패키지 업그레이드 + 커맨드/템플릿/훅을 모든 에이전트에 동기화. 프로젝트 .claude/commands/ 즉시 동기화."],
