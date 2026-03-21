@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-094-2dc229
 ---
 
 # E2E Scenario Tests for Script Orchestrator
