@@ -1,8 +1,0 @@
-id: gen-082-399b16
-type: normal
-parents:
-  - gen-081-ce4de9
-goal: "Migration Agent — reap update 후 .reap/ 프로젝트 파일을 자동 마이그레이션하는 시스템 구축"
-genomeHash: c35ba62cbc7e
-startedAt: 2026-03-21T12:00:00Z
-completedAt: 2026-03-21T12:05:00Z

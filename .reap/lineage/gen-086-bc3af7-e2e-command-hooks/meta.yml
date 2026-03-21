@@ -1,8 +1,0 @@
-id: gen-086-bc3af7
-type: normal
-parents:
-  - gen-085-b07ba0
-goal: "E2E 테스트: slash command hook 실행 + archiving 책임 분리 검증"
-genomeHash: c35ba62cbc7e
-startedAt: 2026-03-21T13:40:00Z
-completedAt: 2026-03-21T13:50:00Z

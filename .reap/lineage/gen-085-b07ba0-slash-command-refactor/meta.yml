@@ -1,8 +1,0 @@
-id: gen-085-b07ba0
-type: normal
-parents:
-  - gen-084-5076d2
-goal: "slash command 전면 정리 — 책임 분리 + hook 배치 + 일관성"
-genomeHash: c35ba62cbc7e
-startedAt: 2026-03-21T13:00:00Z
-completedAt: 2026-03-21T13:30:00Z

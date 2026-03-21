@@ -1,7 +1,0 @@
-id: gen-081-ce4de9
-type: normal
-parents: []
-goal: "hook system overhaul: stage-level events for normal + merge lifecycle"
-genomeHash: eb48bd4f1a9e
-startedAt: "2026-03-20T15:16:33.192Z"
-completedAt: "2026-03-21T00:51:00.000Z"

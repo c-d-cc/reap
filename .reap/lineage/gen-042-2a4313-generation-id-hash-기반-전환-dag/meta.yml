@@ -1,9 +1,0 @@
-id: gen-042-2a4313
-type: normal
-parents:
-  - gen-041-c7b6c0
-goal: Generation ID hash 기반 전환 + DAG lineage + backward compatibility/migration
-  (v0.4.0)
-genomeHash: legacy
-startedAt: legacy-42
-completedAt: legacy-42

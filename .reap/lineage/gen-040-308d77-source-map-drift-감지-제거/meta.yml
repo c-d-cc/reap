@@ -1,8 +1,0 @@
-id: gen-040-308d77
-type: normal
-parents:
-  - gen-039-722d63
-goal: source-map drift 감지를 session hook에서 제거하고, staleness 감지 하나로 통합한다.
-genomeHash: legacy
-startedAt: legacy-40
-completedAt: legacy-40

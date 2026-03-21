@@ -1,8 +1,0 @@
-id: gen-083-b9727c
-type: normal
-parents:
-  - gen-082-399b16
-goal: "E2E 테스트: MigrationRunner — 4개 시나리오"
-genomeHash: c35ba62cbc7e
-startedAt: 2026-03-21T12:10:00Z
-completedAt: 2026-03-21T12:22:00Z
