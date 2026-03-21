@@ -1,3 +1,5 @@
-version: 0.1.0
+version: 0.10.3+dev.0c02aa4
 project: invenio
 entryMode: greenfield
+autoUpdate: true
+autoIssueReport: true

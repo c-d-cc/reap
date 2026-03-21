@@ -1,0 +1,8 @@
+id: gen-003-343390
+type: normal
+parents:
+  - gen-002-998e36
+goal: 테스트 환경 구성
+genomeHash: 597eb2a8
+startedAt: 2026-03-21T10:45:14.604Z
+completedAt: 2026-03-21T10:46:30.947Z

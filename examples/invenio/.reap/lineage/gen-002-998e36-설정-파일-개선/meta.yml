@@ -1,0 +1,8 @@
+id: gen-002-998e36
+type: normal
+parents:
+  - gen-001-809b7e
+goal: 설정 파일 개선
+genomeHash: 597eb2a8
+startedAt: 2026-03-21T10:32:18.625Z
+completedAt: 2026-03-21T10:44:17.775Z
