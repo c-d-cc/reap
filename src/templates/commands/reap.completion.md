@@ -1,5 +1,5 @@
 ---
-description: "REAP Completion — Retrospect, evolve the Genome, and finalize the Generation"
+description: "REAP Completion — Retrospect, evolve the Genome, archive, and finalize the Generation"
 ---
 
 # Completion
@@ -81,10 +81,15 @@ Do NOT finalize Genome changes without running Validation Commands.
     a. **Describe the pattern**: "최근 N개 generation에서 '[작업 설명]'이 반복적으로 수행되었습니다."
     b. **Ask if it should be a hook**: "이 작업을 hook으로 자동화할까요? (yes/no)"
     c. If yes, ask **event**: "어떤 이벤트에서 실행할까요?"
-       - `onLifeCompleted` — generation 완료 후
-       - `onLifeTransited` — stage 전환 시
-       - `onLifeStarted` — generation 시작 시
-       - `onLifeRegretted` — stage 회귀 시
+       - Normal lifecycle events (8개):
+         - `onLifeStarted` — generation 시작 시
+         - `onLifeObjected` — objective 완료 시
+         - `onLifePlanned` — planning 완료 시
+         - `onLifeImplemented` — implementation 완료 시
+         - `onLifeValidated` — validation 완료 시
+         - `onLifeCompleted` — generation 완료 시 (archiving 전, 커밋 전)
+         - `onLifeTransited` — stage 전환 시
+         - `onLifeRegretted` — stage 회귀 시
     d. Ask **condition**: "실행 조건은 무엇인가요?"
        - `always` — 항상
        - `has-code-changes` — src/ 변경이 있을 때
@@ -123,6 +128,47 @@ Do NOT finalize Genome changes without running Validation Commands.
 24. Report compression results: "Compressed N generations (Level 1: X, Level 2: Y)"
     - If no compression needed: skip silently
 
+### Phase 7: Hook Execution + Archiving + Commit
+
+**This phase replaces what `reap.next` previously did when advancing from completion.**
+
+25. **Hook Execution** (before archiving, before commit):
+    Execute hooks for event `onLifeCompleted` following the Hook System protocol:
+    - Scan `.reap/hooks/` for `onLifeCompleted.*` files
+    - Sort by frontmatter `order`, then alphabetically
+    - Evaluate `condition`, execute `.md` (AI prompt) or `.sh` (shell script)
+    - All hook outputs are included in the same generation commit
+
+26. **Archiving**:
+    - Add the current timestamp to `completedAt` in `current.yml`
+    - Create the lineage directory: `.reap/lineage/[gen-id]-[goal-slug]/`
+      - Goal slug: lowercase, non-alphanumeric/hangul replaced with `-`, max 30 chars
+    - **Write `meta.yml`** in the lineage directory with DAG metadata:
+      ```yaml
+      id: [gen-id]
+      type: normal
+      parents: [parent generation IDs from current.yml]
+      goal: [goal from current.yml]
+      genomeHash: [genomeHash from current.yml, or compute from .reap/genome/]
+      startedAt: [startedAt from current.yml]
+      completedAt: [current ISO 8601]
+      ```
+    - Move artifact files (`01-*.md` through `05-*.md`) from `.reap/life/` to the lineage directory
+    - Process backlog files from `.reap/life/backlog/`:
+      - Create `.reap/lineage/[gen-id]-[goal-slug]/backlog/` directory
+      - Files with `status: consumed` → move to `.reap/lineage/[gen-id]-[goal-slug]/backlog/`
+      - Files with `status: pending` or no status field → copy to `.reap/lineage/[gen-id]-[goal-slug]/backlog/` for record, then carry over to new `.reap/life/backlog/`
+    - Clear `current.yml` (write empty content)
+    - Recreate `.reap/life/backlog/` directory (with carried-over pending items already in place)
+
+27. **Commit all changes** (code + `.reap/` artifacts together):
+    - **Submodule check**: If any git submodule has uncommitted changes (e.g., `tests/`), commit and push inside the submodule first, then stage the updated submodule pointer in the parent repo
+    - Stage all changed files: code changes from this generation + `.reap/` directory + submodule pointers
+    - Commit message format: `feat(gen-NNN): [generation goal summary]`
+    - Use `feat` for feature generations, `fix` for bugfix generations, `chore` for maintenance
+    - Include both code and REAP artifacts in the same commit
+    - If there are no code changes (REAP-only generation), use `chore(reap): [goal summary]`
+
 ## Self-Verification
 Before saving the artifact, verify:
 - [ ] Are lessons concrete and applicable to the next generation? (No vague "do better next time")
@@ -144,5 +190,5 @@ Before saving the artifact, verify:
 - The artifact should reflect the current state of completion work at all times
 
 ## Completion
-- **If called from `/reap.evolve`** (Autonomous Override active): Proceed automatically to `/reap.next`.
-- **If called standalone**: "Finalize the generation with `/reap.next`. Lineage archiving will be performed automatically."
+- **If called from `/reap.evolve`** (Autonomous Override active): Execute Phase 7 (Hook + Archiving + Commit) automatically. Report: "Generation [id] complete and archived."
+- **If called standalone**: Execute Phase 7 (Hook + Archiving + Commit). Report: "Generation [id] complete and archived. Run `/reap.start` to begin a new generation."

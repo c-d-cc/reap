@@ -20,3 +20,10 @@ Start a merge generation by specifying a target branch to merge into the current
 5. Report: parents, common ancestor, conflict count
 6. If genome conflicts exist: proceed to `/reap.merge.mate`
 7. If no genome conflicts: mate can auto-pass, proceed to `/reap.merge.merge`
+
+### Hook Execution
+Execute hooks for event `onMergeStarted` following the Hook System protocol:
+- Scan `.reap/hooks/` for `onMergeStarted.*` files
+- Sort by frontmatter `order`, then alphabetically
+- Evaluate `condition`, execute `.md` (AI prompt) or `.sh` (shell script)
+- All hooks run BEFORE any commit (hook outputs included in the same commit)

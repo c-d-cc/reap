@@ -20,7 +20,14 @@ Resolve genome conflicts identified in the detect stage. The genome must be full
    - Show the changes and ask if they are logically compatible
 4. Apply the resolved genome to `.reap/genome/`
 5. Record all decisions in `02-mate.md`
-6. Proceed with `/reap.next`
+6. Execute hooks and proceed with `/reap.next`
+
+### Hook Execution
+Execute hooks for event `onMergeMated` following the Hook System protocol:
+- Scan `.reap/hooks/` for `onMergeMated.*` files
+- Sort by frontmatter `order`, then alphabetically
+- Evaluate `condition`, execute `.md` (AI prompt) or `.sh` (shell script)
+- All hooks run BEFORE any commit (hook outputs included in the same commit)
 
 ## Escalation
 - If conflicts are complex or ambiguous, STOP and ask the human

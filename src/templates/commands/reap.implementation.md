@@ -97,6 +97,13 @@ In the following situations, **STOP and ask the human**:
 - By the time all tasks are done, the artifact should already be complete — no separate "generation" step is needed
 - Add Implementation Notes at the end summarizing notable decisions
 
+## Hook Execution
+Execute hooks for event `onLifeImplemented` following the Hook System protocol:
+- Scan `.reap/hooks/` for `onLifeImplemented.*` files
+- Sort by frontmatter `order`, then alphabetically
+- Evaluate `condition`, execute `.md` (AI prompt) or `.sh` (shell script)
+- All hooks run BEFORE any commit (hook outputs included in the same commit)
+
 ## Completion
 - "Proceed to the Validation stage with `/reap.next`."
 - "If issues are found during Validation, you can return with `/reap.back`."

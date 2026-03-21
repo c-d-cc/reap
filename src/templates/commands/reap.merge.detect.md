@@ -17,4 +17,11 @@ Analyze the divergence between the current branch and the target branch.
    - Genome changes on each side
    - Conflicts (WRITE-WRITE, CROSS-FILE)
 3. If the detect needs to be re-run, use `reap merge {branch}` again
-4. When satisfied, proceed with `/reap.next`
+4. When satisfied, execute hooks and proceed with `/reap.next`
+
+### Hook Execution
+Execute hooks for event `onMergeDetected` following the Hook System protocol:
+- Scan `.reap/hooks/` for `onMergeDetected.*` files
+- Sort by frontmatter `order`, then alphabetically
+- Evaluate `condition`, execute `.md` (AI prompt) or `.sh` (shell script)
+- All hooks run BEFORE any commit (hook outputs included in the same commit)

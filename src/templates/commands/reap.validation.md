@@ -80,6 +80,13 @@ Do NOT make claims without evidence. This is non-negotiable.
 - After Step 5 (Verdict) → update the Result field to pass / partial / fail
 - The artifact should reflect the current validation progress at all times
 
+## Hook Execution
+Execute hooks for event `onLifeValidated` following the Hook System protocol:
+- Scan `.reap/hooks/` for `onLifeValidated.*` files
+- Sort by frontmatter `order`, then alphabetically
+- Evaluate `condition`, execute `.md` (AI prompt) or `.sh` (shell script)
+- All hooks run BEFORE any commit (hook outputs included in the same commit)
+
 ## Completion
-- pass/partial: "Proceed to the Completion stage with `/reap.next`."
-- fail: Provide regression guidance
+- pass/partial: Execute hooks, then "Proceed to the Completion stage with `/reap.next`."
+- fail: Provide regression guidance (do NOT execute hooks on fail)

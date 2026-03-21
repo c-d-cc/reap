@@ -24,7 +24,14 @@ Verify that the merged source code is consistent with the finalized genome. This
    - Ask: fix the source, update the genome, or accept as-is with rationale
    - Record the decision in `04-sync.md`
 4. If no inconsistencies: record "All consistent" in `04-sync.md`
-5. Proceed with `/reap.next`
+5. Execute hooks and proceed with `/reap.next`
+
+### Hook Execution
+Execute hooks for event `onMergeSynced` following the Hook System protocol:
+- Scan `.reap/hooks/` for `onMergeSynced.*` files
+- Sort by frontmatter `order`, then alphabetically
+- Evaluate `condition`, execute `.md` (AI prompt) or `.sh` (shell script)
+- All hooks run BEFORE any commit (hook outputs included in the same commit)
 
 ## Escalation
 - **Every inconsistency requires user confirmation** — do NOT auto-resolve

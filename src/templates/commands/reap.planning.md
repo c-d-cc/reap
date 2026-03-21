@@ -95,7 +95,14 @@ Before saving the artifact, verify:
 - The artifact is a **living document** during the stage — it should reflect the current state of work at all times
 - Do NOT wait until the end to write the artifact
 
+## Hook Execution
+Execute hooks for event `onLifePlanned` following the Hook System protocol:
+- Scan `.reap/hooks/` for `onLifePlanned.*` files
+- Sort by frontmatter `order`, then alphabetically
+- Evaluate `condition`, execute `.md` (AI prompt) or `.sh` (shell script)
+- All hooks run BEFORE any commit (hook outputs included in the same commit)
+
 ## Completion
-- **If called from `/reap.evolve`** (Autonomous Override active): Save the artifact and proceed automatically. Do NOT pause for human confirmation.
-- **If called standalone**: Show the artifact to the human and get confirmation.
+- **If called from `/reap.evolve`** (Autonomous Override active): Save the artifact, execute hooks, and proceed automatically. Do NOT pause for human confirmation.
+- **If called standalone**: Show the artifact to the human and get confirmation. Then execute hooks.
 - After confirmation or auto-proceed: "Proceed to the Implementation stage with `/reap.next`."

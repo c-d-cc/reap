@@ -19,4 +19,11 @@ Merge the source code from the target branch, using the finalized genome as the 
 3. If no git conflicts:
    - Check for semantic conflicts (code that compiles but contradicts the genome)
 4. Do NOT commit yet — sync and validation must pass first
-5. Proceed with `/reap.next`
+5. Execute hooks and proceed with `/reap.next`
+
+### Hook Execution
+Execute hooks for event `onMergeMerged` following the Hook System protocol:
+- Scan `.reap/hooks/` for `onMergeMerged.*` files
+- Sort by frontmatter `order`, then alphabetically
+- Evaluate `condition`, execute `.md` (AI prompt) or `.sh` (shell script)
+- All hooks run BEFORE any commit (hook outputs included in the same commit)

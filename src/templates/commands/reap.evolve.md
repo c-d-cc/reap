@@ -31,6 +31,17 @@ When `/reap.evolve` calls each stage command, the following overrides apply:
 - **Escalation sections still apply**: If a stage's Escalation rules trigger, STOP and ask.
 - This override does NOT apply when stages are invoked standalone (e.g., user runs `/reap.objective` directly).
 
+## Hook Auto-Execution
+Each stage command automatically executes its own hook at completion:
+- `/reap.objective` → `onLifeObjected`
+- `/reap.planning` → `onLifePlanned`
+- `/reap.implementation` → `onLifeImplemented`
+- `/reap.validation` → `onLifeValidated`
+- `/reap.completion` → `onLifeCompleted` (before archiving and commit)
+
+`/reap.next` only handles stage transitions — it does NOT execute hooks or archiving.
+`/reap.completion` handles archiving and the final commit.
+
 ## Lifecycle Loop
 
 Execute the following loop until the generation is complete:
@@ -42,14 +53,14 @@ Execute the following loop until the generation is complete:
    - `implementation` → `/reap.implementation`
    - `validation` → `/reap.validation`
    - `completion` → `/reap.completion`
-3. When the stage command completes, run `/reap.next` to advance
-4. If `/reap.next` archives the generation (from completion), the loop ends
-5. Otherwise, return to step 1
+3. When the stage command completes (hooks already executed by the stage command):
+   - If the current stage is `completion`: `/reap.completion` handles archiving and commit internally. The loop ends.
+   - Otherwise: run `/reap.next` to advance, then return to step 1.
 
 ## Handling Issues
 - If validation fails: `/reap.back` to return to implementation (or earlier), then resume the loop
 - If the human wants to pause: stop the loop, the generation state is preserved in `current.yml`
-- If the human wants to skip a stage: advance with `/reap.next` without running the stage command
+- If the human wants to skip a stage: advance with `/reap.next` without running the stage command (note: hooks for skipped stages will NOT run)
 
 ## Completion
 - "Generation [id] completed. All artifacts archived to lineage."

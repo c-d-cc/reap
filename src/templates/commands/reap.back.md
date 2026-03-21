@@ -46,17 +46,11 @@ description: "REAP Back — Return to a previous lifecycle stage"
    ```
 
 ### Hook Execution (Regression)
-7. Scan `.reap/hooks/` for files matching `onLifeRegretted.*`
-   - For each matched file (sorted by `order` from frontmatter, then alphabetically):
-     1. Read the frontmatter (`condition`, `order`)
-     2. Evaluate `condition` by running `.reap/hooks/conditions/{condition}.sh` (exit 0 = met, non-zero = skip):
-        - If `condition` is absent: treat as `always`
-        - If the condition script doesn't exist: warn and skip the hook
-        - Default conditions: `always`, `has-code-changes`, `version-bumped`
-        - Users can add custom conditions by placing scripts in `.reap/hooks/conditions/`
-     3. Execute based on file extension:
-        - `.md`: read the file content (after frontmatter) as AI prompt and follow the instructions
-        - `.sh`: run as shell script in the project root directory
+7. Execute hooks for event `onLifeRegretted` following the Hook System protocol:
+   - Scan `.reap/hooks/` for `onLifeRegretted.*` files
+   - Sort by frontmatter `order`, then alphabetically
+   - Evaluate `condition`, execute `.md` (AI prompt) or `.sh` (shell script)
+   - All hooks run BEFORE any commit (hook outputs included in the same commit)
 
 ## Completion
 - "Returned to [stage] stage. Proceed with `/reap.[stage]`."

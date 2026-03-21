@@ -41,17 +41,12 @@ description: "REAP Start — Start a new Generation"
 7. Immediately create `.reap/life/01-objective.md` from the artifact template with the Goal section filled in
 
 ### Hook Execution (Generation Start)
-8. Scan `.reap/hooks/` for files matching `onLifeStarted.*`
-   - For each matched file (sorted by `order` from frontmatter, then alphabetically):
-     1. Read the frontmatter (`condition`, `order`)
-     2. Evaluate `condition` by running `.reap/hooks/conditions/{condition}.sh` (exit 0 = met, non-zero = skip):
-        - If `condition` is absent: treat as `always`
-        - If the condition script doesn't exist: warn and skip the hook
-        - Default conditions: `always`, `has-code-changes`, `version-bumped`
-        - Users can add custom conditions by placing scripts in `.reap/hooks/conditions/`
-     3. Execute based on file extension:
-        - `.md`: read the file content (after frontmatter) as AI prompt and follow the instructions
-        - `.sh`: run as shell script in the project root directory
+8. Execute hooks for event `onLifeStarted` following the Hook System protocol:
+   - Scan `.reap/hooks/` for `onLifeStarted.*` files
+   - Sort by frontmatter `order`, then alphabetically
+   - Evaluate `condition`, execute `.md` (AI prompt) or `.sh` (shell script)
+   - All hooks run BEFORE any commit (hook outputs included in the same commit)
+   - **Order**: This runs AFTER backlog consumed marking (Step 4) and current.yml creation (Step 6)
 
 ## Completion
 - "Generation gen-XXX-{hash} started. Proceed with `/reap.objective` to define the goal, or `/reap.evolve` to run the full lifecycle."
