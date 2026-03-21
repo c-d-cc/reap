@@ -91,7 +91,7 @@ C4Component
 | `reap fix` | `cli/commands/fix.ts` | .reap/ 구조 진단/복구 |
 | `reap update` | `cli/commands/update.ts` | commands/templates/hooks 동기화 |
 | `reap help` | `cli/index.ts` | 언어별 help 텍스트 출력 (en/ko) |
-| `reap run` | `cli/commands/run/index.ts` | command script dispatcher (next, back, start, completion, abort, push, objective, planning, implementation, validation, evolve, sync, sync-genome, sync-environment, help, report) |
+| `reap run` | `cli/commands/run/index.ts` | command script dispatcher (26개: next, back, start, completion, abort, push, objective, planning, implementation, validation, evolve, sync, sync-genome, sync-environment, help, report, merge-start, merge-detect, merge-mate, merge-merge, merge-sync, merge-validation, merge-completion, merge-evolve, merge, pull) |
 
 ## Agent Adapters
 
@@ -103,11 +103,13 @@ C4Component
 ## Data Flow
 
 ```
-User/Agent → slash command → AI reads template → AI executes steps
-                                                    ↓
-                                              core/ functions
-                                                    ↓
-                                              .reap/ files (YAML/MD)
+User/Agent → slash command (.md) → reap run <cmd> → Script Orchestrator (.ts)
+                                                         ↓
+                                                   core/ functions
+                                                         ↓
+                                                   .reap/ files (YAML/MD)
+                                                         ↓
+                                                   JSON stdout → AI follows prompt
 ```
 
 ## Key Constants

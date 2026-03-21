@@ -20,6 +20,16 @@ const COMMANDS: Record<string, () => Promise<{ execute: CommandExecutor }>> = {
   "sync-environment": () => import("./sync-environment"),
   help: () => import("./help"),
   report: () => import("./report"),
+  "merge-start": () => import("./merge-start"),
+  "merge-detect": () => import("./merge-detect"),
+  "merge-mate": () => import("./merge-mate"),
+  "merge-merge": () => import("./merge-merge"),
+  "merge-sync": () => import("./merge-sync"),
+  "merge-validation": () => import("./merge-validation"),
+  "merge-completion": () => import("./merge-completion"),
+  "merge-evolve": () => import("./merge-evolve"),
+  merge: () => import("./merge"),
+  pull: () => import("./pull"),
 };
 
 export async function runCommand(command: string, phase?: string): Promise<void> {

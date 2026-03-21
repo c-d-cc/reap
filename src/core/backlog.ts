@@ -56,6 +56,7 @@ export async function markBacklogConsumed(
   const { frontmatter, body } = parseFrontmatter(content);
   frontmatter.status = "consumed";
   frontmatter.consumedBy = genId;
+  delete frontmatter.consumed; // remove legacy field if present
 
   const newContent = `---\n${YAML.stringify(frontmatter).trim()}\n---\n${body}`;
   await writeTextFile(filePath, newContent);
