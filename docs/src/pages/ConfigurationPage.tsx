@@ -21,6 +21,7 @@ entryMode: greenfield       # greenfield | migration | adoption
 strict: true                # boolean or { edit, merge } (default: false)
 language: korean            # language for artifacts and interactions
 autoUpdate: true            # auto-update REAP on session start (default: true)
+autoSubagent: true          # auto-delegate /reap.evolve to subagent (default: true)
 autoIssueReport: true       # auto-report issues via gh CLI (default: true if gh found)
 agents:                     # detected agents (managed by reap init/update)
   - claude-code

@@ -116,7 +116,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 | **Planning** | タスク分解、実装アプローチ、依存関係 | `02-planning.md` |
 | **Implementation** | AI+Human協力でコード実装 | `03-implementation.md` |
 | **Validation** | テスト実行、完了条件の確認 | `04-validation.md` |
-| **Completion** | レトロスペクティブ + Genome変更反映 + Hook提案 + アーカイブ | `05-completion.md` |
+| **Completion** | レトロスペクティブ + Genome変更反映 + Hook提案 + 自動アーカイブ（consume + archive + commit） | `05-completion.md` |
 
 ## コアコンセプト [↗](https://reap.cc/docs/core-concepts)
 
@@ -218,10 +218,11 @@ Machine A:
 | コマンド | 説明 |
 |----------|------|
 | `reap init <name>` | プロジェクト初期化。`.reap/`構造を作成 |
-| `reap status` | 現在のGeneration状態を確認 |
-| `reap update` | コマンド/テンプレート/hookを最新バージョンに同期 |
+| `reap status` | 現在のGeneration状態を確認（バージョン + 最新状況表示） |
+| `reap update` | コマンド/テンプレート/hookを最新バージョンに同期。`~/.claude/commands/`のレガシーを自動クリーンアップ |
 | `reap fix` | `.reap/`構造の診断と修復 |
-| `reap help` | CLIコマンド + スラッシュコマンド + ワークフロー概要を出力 |
+| `reap help` | CLIコマンド + スラッシュコマンド + ワークフロー概要を出力（バージョン + 最新状況表示） |
+| `reap run <cmd>` | スラッシュコマンドのスクリプトを直接実行（1行`.md`ラッパーが内部的に使用） |
 
 ### オプション
 
@@ -234,6 +235,21 @@ reap update --dry-run                   # 変更のプレビュー
 ## エージェント連携
 
 REAPはスラッシュコマンドとセッションフックを通じてAIエージェントと統合します。現在サポートされているエージェント：**Claude Code**、**OpenCode**。
+
+### Script Orchestratorアーキテクチャ
+
+v0.11.0より、28個のスラッシュコマンドが**1行`.md`ラッパー + TypeScriptスクリプト**構造に移行しました。各`.md`ファイルは`reap run <cmd>`を呼び出し、TSスクリプト（`src/cli/commands/run/`）がすべての決定論的ロジックを処理して、AIエージェントにstructured JSONで指示します。一貫性とテスト容易性が大幅に向上しました。
+
+### autoSubagentモード
+
+`/reap.evolve`実行時、自動的にsubagentにGenerationライフサイクル全体を委任できます：
+
+```yaml
+# .reap/config.yml
+autoSubagent: true    # デフォルト: true
+```
+
+Subagentは完全なコンテキストを受け取り、すべてのステージを自律的に実行します。本当にブロックされた場合のみユーザーに確認を求めます。
 
 ### スラッシュコマンド [↗](https://reap.cc/docs/command-reference)
 
@@ -380,9 +396,15 @@ my-project/
     │   └── backlog/
     └── lineage/                  # 完了した世代のアーカイブ
 
-~/.claude/                        # ユーザーレベル（reap initでインストール）
-├── commands/                     # スラッシュコマンド（/reap.*）
+~/.reap/                          # ユーザーレベル（reap initでインストール）
+├── commands/                     # スラッシュコマンド原本（1行.mdラッパー）
+└── templates/                    # Artifactテンプレート
+
+~/.claude/
 └── settings.json                 # SessionStart hookの登録
+
+.claude/commands/                 # プロジェクトレベル（セッション開始時にsymlink）
+└── reap.*.md                     # アクティブなスラッシュコマンド（`reap run <cmd>`を呼び出し）
 ```
 
 ## 系譜圧縮（Lineage Compression）

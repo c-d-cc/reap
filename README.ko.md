@@ -116,7 +116,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 | **Planning** | 태스크 분해, 구현 접근법, 의존관계 | `02-planning.md` |
 | **Implementation** | AI+Human 협업으로 코드 구현 | `03-implementation.md` |
 | **Validation** | 테스트 실행, 완료 조건 점검 | `04-validation.md` |
-| **Completion** | 회고 + Genome 변경 반영 + Hook 제안 + 아카이빙 | `05-completion.md` |
+| **Completion** | 회고 + Genome 변경 반영 + Hook 제안 + 자동 아카이빙 (consume + archive + commit) | `05-completion.md` |
 
 ## 핵심 개념 [↗](https://reap.cc/docs/core-concepts)
 
@@ -218,10 +218,11 @@ Machine A:
 | 명령어 | 설명 |
 |--------|------|
 | `reap init <name>` | 프로젝트 초기화. `.reap/` 구조 생성 |
-| `reap status` | 현재 Generation 상태 확인 |
-| `reap update` | 커맨드/템플릿/훅을 최신 버전으로 동기화 |
+| `reap status` | 현재 Generation 상태 확인 (버전 + 최신 여부 표시) |
+| `reap update` | 커맨드/템플릿/훅을 최신 버전으로 동기화. `~/.claude/commands/` 레거시 자동 정리 |
 | `reap fix` | `.reap/` 구조 진단 및 복구 |
-| `reap help` | CLI 명령어 + 슬래시 커맨드 + 워크플로우 요약 출력 |
+| `reap help` | CLI 명령어 + 슬래시 커맨드 + 워크플로우 요약 출력 (버전 + 최신 여부 표시) |
+| `reap run <cmd>` | 슬래시 커맨드의 스크립트를 직접 실행 (1줄 `.md` wrapper가 내부적으로 사용) |
 
 ### 옵션
 
@@ -234,6 +235,21 @@ reap update --dry-run                   # 변경사항 미리보기
 ## 에이전트 연동
 
 REAP은 슬래시 커맨드와 세션 훅을 통해 AI 에이전트와 통합됩니다. 현재 지원 에이전트: **Claude Code**, **OpenCode**.
+
+### Script Orchestrator 아키텍처
+
+v0.11.0부터 28개 슬래시 커맨드가 **1줄 `.md` wrapper + TypeScript 스크립트** 구조로 전환되었습니다. 각 `.md` 파일은 `reap run <cmd>`를 호출하고, TS 스크립트(`src/cli/commands/run/`)가 모든 결정적 로직을 처리하여 AI에게 structured JSON으로 지시합니다. 일관성과 테스트 용이성이 크게 향상되었습니다.
+
+### autoSubagent 모드
+
+`/reap.evolve` 실행 시 자동으로 subagent에게 Generation lifecycle 전체를 위임할 수 있습니다:
+
+```yaml
+# .reap/config.yml
+autoSubagent: true    # 기본값: true
+```
+
+Subagent는 전체 컨텍스트를 받아 모든 stage를 자율적으로 실행하며, 정말로 막혔을 때만 사용자에게 확인을 요청합니다.
 
 ### Slash Commands
 
@@ -380,9 +396,15 @@ my-project/
     │   └── backlog/
     └── lineage/                  # 완료된 세대 아카이브
 
-~/.claude/                        # 사용자 레벨 (reap init 시 설치)
-├── commands/                     # Slash commands (/reap.*)
+~/.reap/                          # 사용자 레벨 (reap init 시 설치)
+├── commands/                     # Slash command 원본 (1줄 .md wrapper)
+└── templates/                    # Artifact 템플릿
+
+~/.claude/
 └── settings.json                 # SessionStart hook 등록
+
+.claude/commands/                 # 프로젝트 레벨 (세션 시작 시 symlink)
+└── reap.*.md                     # 활성 슬래시 커맨드 (`reap run <cmd>` 호출)
 ```
 
 ## 계보 압축 (Lineage Compression)

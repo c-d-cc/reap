@@ -116,7 +116,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 | **Planning** | 任务分解、实施方案、依赖关系 | `02-planning.md` |
 | **Implementation** | AI+人类协作编写代码 | `03-implementation.md` |
 | **Validation** | 执行测试、检查完成条件 | `04-validation.md` |
-| **Completion** | 回顾 + 应用Genome变更 + Hook建议 + 归档 | `05-completion.md` |
+| **Completion** | 回顾 + 应用Genome变更 + Hook建议 + 自动归档（consume + archive + commit） | `05-completion.md` |
 
 ## 核心概念 [↗](https://reap.cc/docs/core-concepts)
 
@@ -218,10 +218,11 @@ Machine A:
 | 命令 | 说明 |
 |------|------|
 | `reap init <name>` | 初始化项目。创建`.reap/`结构 |
-| `reap status` | 查看当前Generation状态 |
-| `reap update` | 将命令/模板/hook同步到最新版本 |
+| `reap status` | 查看当前Generation状态（显示版本 + 最新状态） |
+| `reap update` | 将命令/模板/hook同步到最新版本。自动清理`~/.claude/commands/`旧版文件 |
 | `reap fix` | 诊断和修复`.reap/`结构 |
-| `reap help` | 输出CLI命令 + 斜杠命令 + 工作流摘要 |
+| `reap help` | 输出CLI命令 + 斜杠命令 + 工作流摘要（显示版本 + 最新状态） |
+| `reap run <cmd>` | 直接执行斜杠命令的脚本（由1行`.md` wrapper内部调用） |
 
 ### 选项
 
@@ -234,6 +235,21 @@ reap update --dry-run                   # 预览变更
 ## 代理集成
 
 REAP通过斜杠命令和会话钩子与AI代理集成。当前支持的代理：**Claude Code**、**OpenCode**。
+
+### Script Orchestrator架构
+
+从v0.11.0开始，28个斜杠命令全部采用**1行`.md` wrapper + TypeScript脚本**模式。每个`.md`文件仅调用`reap run <cmd>`，TS脚本（`src/cli/commands/run/`）处理所有确定性逻辑，以structured JSON形式指示AI代理。大幅提升了一致性和可测试性。
+
+### autoSubagent模式
+
+执行`/reap.evolve`时，可自动将整个Generation生命周期委托给subagent：
+
+```yaml
+# .reap/config.yml
+autoSubagent: true    # 默认值: true
+```
+
+Subagent接收完整上下文后自主执行所有阶段，仅在确实遇到阻碍时才向用户确认。
 
 ### 斜杠命令 [↗](https://reap.cc/docs/command-reference)
 
@@ -380,9 +396,15 @@ my-project/
     │   └── backlog/
     └── lineage/                  # 已完成世代的归档
 
-~/.claude/                        # 用户级别（reap init时安装）
-├── commands/                     # 斜杠命令（/reap.*）
+~/.reap/                          # 用户级别（reap init时安装）
+├── commands/                     # 斜杠命令原件（1行.md wrapper）
+└── templates/                    # Artifact模板
+
+~/.claude/
 └── settings.json                 # SessionStart hook注册
+
+.claude/commands/                 # 项目级别（会话启动时symlink）
+└── reap.*.md                     # 活跃斜杠命令（调用`reap run <cmd>`）
 ```
 
 ## 谱系压缩（Lineage Compression）

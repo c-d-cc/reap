@@ -64,8 +64,15 @@ export default function CLIPage() {
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.helpTitle}</h2>
         <p className="text-sm text-muted-foreground mb-2">{t.cli.helpDesc}</p>
         <CodeBlock language="bash">{`reap help`}</CodeBlock>
-        <p className="text-xs text-muted-foreground mt-2">
+        <p className="text-xs text-muted-foreground mt-2 mb-6">
           {t.cli.helpNote}
+        </p>
+
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.runTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-2">{t.cli.runDesc}</p>
+        <CodeBlock language="bash">{`reap run <command> [--phase <phase>]`}</CodeBlock>
+        <p className="text-xs text-muted-foreground mt-2">
+          {t.cli.runNote}
         </p>
       </DocPage>
     </DocLayout>

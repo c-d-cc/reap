@@ -115,7 +115,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 | **Planning** | Break down tasks, choose approach, map dependencies | `02-planning.md` |
 | **Implementation** | Build with AI + human collaboration | `03-implementation.md` |
 | **Validation** | Run tests, verify completion criteria | `04-validation.md` |
-| **Completion** | Retrospective + apply Genome changes + hook suggestion + archive | `05-completion.md` |
+| **Completion** | Retrospective + apply Genome changes + hook suggestion + auto-archive (consume + archive + commit) | `05-completion.md` |
 
 ## Core Concepts [↗](https://reap.cc/docs/core-concepts)
 
@@ -221,6 +221,7 @@ All distributed operations run through your AI agent:
 | `reap update` | Sync commands/templates/hooks to the latest version |
 | `reap fix` | Diagnose and repair the `.reap/` structure |
 | `reap help` | Print CLI commands, slash commands, and workflow summary |
+| `reap run <cmd>` | Execute a slash command's script directly (used internally by 1-line `.md` wrappers) |
 
 ### Options
 
@@ -233,6 +234,21 @@ reap update --dry-run                   # Preview changes before applying
 ## Agent Integration
 
 REAP integrates with AI agents through slash commands and session hooks. Currently supported agents: **Claude Code** and **OpenCode**.
+
+### Script Orchestrator Architecture
+
+Since v0.11.0, all 28 slash commands follow a **1-line `.md` wrapper + TypeScript script** pattern. Each `.md` file simply calls `reap run <cmd>`, and the TS script (`src/cli/commands/run/`) handles all deterministic logic — returning structured JSON instructions for the AI agent. This ensures consistency and testability.
+
+### autoSubagent Mode
+
+When `/reap.evolve` is run, REAP can automatically delegate the entire generation lifecycle to a subagent. This is controlled by:
+
+```yaml
+# .reap/config.yml
+autoSubagent: true    # default: true
+```
+
+The subagent receives the full context and runs autonomously through all stages, only surfacing when genuinely blocked.
 
 ### Slash Commands [↗](https://reap.cc/docs/command-reference)
 
@@ -385,14 +401,14 @@ my-project/
     └── lineage/                  # Completed generation archive
 
 ~/.reap/                            # User-level (installed by reap init)
-├── commands/                       # Slash command originals
+├── commands/                       # Slash command originals (1-line .md wrappers)
 └── templates/                      # Artifact templates
 
 ~/.claude/
 └── settings.json                   # SessionStart hook registration
 
-.claude/commands/                   # Project-level (copied by session-start hook)
-└── reap.*.md                       # Active slash commands (auto-synced)
+.claude/commands/                   # Project-level slash commands
+└── reap.*.md                       # Active slash commands (each calls `reap run <cmd>`)
 ```
 
 ## Lineage Compression [↗](https://reap.cc/docs/lineage)
