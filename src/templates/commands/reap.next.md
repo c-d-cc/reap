@@ -66,7 +66,8 @@ For each matched file (sorted by `order` from frontmatter, then alphabetically):
 - Clear `current.yml` (write empty content)
 - Recreate `.reap/life/backlog/` directory (with carried-over pending items already in place)
 - **Commit all changes** (code + `.reap/` artifacts together):
-  - Stage all changed files: code changes from this generation + `.reap/` directory
+  - **Submodule check**: If any git submodule has uncommitted changes (e.g., `tests/`), commit and push inside the submodule first, then stage the updated submodule pointer in the parent repo
+  - Stage all changed files: code changes from this generation + `.reap/` directory + submodule pointers
   - Commit message format: `feat(gen-NNN): [generation goal summary]`
   - Use `feat` for feature generations, `fix` for bugfix generations, `chore` for maintenance
   - Include both code and REAP artifacts in the same commit
