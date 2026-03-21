@@ -146,9 +146,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       emitError("objective", "01-objective.md appears incomplete (too short). Fill in the objective before completing.");
     }
 
-    // Generate stage chain token
-    const { nonce: stageToken, hash: tokenHash } = generateStageToken(state.id, state.stage);
-    state.expectedTokenHash = tokenHash;
+    // Generate stage chain token — hash stored in current.yml, nonce given to AI
+    const { nonce, hash } = generateStageToken(state.id, state.stage);
+    state.expectedTokenHash = hash;
     await gm.save(state);
 
     // Execute hooks
@@ -161,10 +161,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       completed: ["gate", "context-collect", "artifact-ensure", "creative-work", "artifact-verify", "hooks"],
       context: {
         id: state.id,
-        stageToken,
         hookResults,
       },
-      message: `Objective stage complete. Proceed to the Planning stage with /reap.next.\n\nIMPORTANT: Pass the following token to the next stage transition: \`reap run next --token ${stageToken}\`. Without this token, stage transition will be REJECTED.`,
+      message: `Objective stage complete. Advance with: /reap.next ${nonce}`,
     });
   }
 }

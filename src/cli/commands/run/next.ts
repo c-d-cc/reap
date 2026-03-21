@@ -1,6 +1,6 @@
 import { join } from "path";
 import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager, generateStageToken, verifyStageToken } from "../../../core/generation";
+import { GenerationManager, verifyStageToken } from "../../../core/generation";
 import { LifeCycle } from "../../../core/lifecycle";
 import { MergeLifeCycle } from "../../../core/merge-lifecycle";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
@@ -30,21 +30,18 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
     emitError("next", "No active Generation. Run /reap.start first.");
   }
 
-  // Stage chain token verification
+  // Stage chain token verification — nonce passed as argument, hash in current.yml
   if (state.expectedTokenHash) {
-    // Read token from --token arg or REAP_STAGE_TOKEN env var
-    let token: string | undefined = process.env.REAP_STAGE_TOKEN;
-    const tokenArgIdx = process.argv.indexOf("--token");
-    if (tokenArgIdx !== -1 && process.argv[tokenArgIdx + 1]) {
-      token = process.argv[tokenArgIdx + 1];
+    // Read nonce from argv: reap run next <nonce>
+    const args = process.argv.slice(2); // strip 'node' and script path
+    const nonce = args.find(a => !a.startsWith("-") && a !== "run" && a !== "next");
+
+    if (!nonce) {
+      emitError("next", `Stage transition blocked: no token provided. The stage command outputs a nonce that must be passed to /reap.next. Example: /reap.next <nonce>. This ensures the stage command was actually executed — you cannot skip stages.`);
     }
 
-    if (!token) {
-      emitError("next", "Stage transition requires a valid token. Run the current stage command first to obtain one. Use: reap run next --token <TOKEN> or set REAP_STAGE_TOKEN environment variable.");
-    }
-
-    if (!verifyStageToken(token, state.id, state.stage as string, state.expectedTokenHash)) {
-      emitError("next", `Token mismatch. The token must come from the output of \`reap run ${state.stage}\`. Re-run the stage command to get a valid token.`);
+    if (!verifyStageToken(nonce, state.id, state.stage as string, state.expectedTokenHash)) {
+      emitError("next", `Token verification failed. The provided nonce does not match. Re-run the current stage command (reap run ${state.stage}) to get a valid token. You cannot forge or guess the token.`);
     }
   }
 
@@ -66,9 +63,8 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
   if (!state.timeline) state.timeline = [];
   state.timeline.push({ stage: nextStage, at: new Date().toISOString() });
 
-  // Generate new stage chain token for the next stage
-  const { nonce: stageToken, hash: tokenHash } = generateStageToken(state.id, nextStage);
-  state.expectedTokenHash = tokenHash;
+  // Clear consumed token hash — next stage command will generate a new one
+  state.expectedTokenHash = undefined;
 
   await gm.save(state);
 
@@ -121,16 +117,15 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
     status: "ok",
     command: "next",
     phase: "done",
-    completed: ["gate", "token-verify", "advance-stage", "create-artifact", "hooks"],
+    completed: ["gate", "nonce-verify", "advance-stage", "create-artifact", "hooks"],
     context: {
       generationId: state.id,
       previousStage,
       stage: nextStage,
       type: state.type,
       artifactFile,
-      stageToken,
       hookResults: [...stageHookResults, ...transitionHookResults],
     },
-    message: `Advanced to ${nextStage}. Proceed with /reap.${nextStage}.\n\nIMPORTANT: Pass the following token to the next stage transition: \`reap run next --token ${stageToken}\`. Without this token, stage transition will be REJECTED.`,
+    message: `Advanced to ${nextStage}. Proceed with /reap.${nextStage}.`,
   });
 }

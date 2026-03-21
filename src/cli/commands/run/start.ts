@@ -55,9 +55,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     // Create generation (ID + current.yml)
     const state = await gm.create(goal, genomeVersion);
 
-    // Generate initial stage chain token for objective stage
-    const { nonce: stageToken, hash: tokenHash } = generateStageToken(state.id, state.stage);
-    state.expectedTokenHash = tokenHash;
+    // Generate stage chain token — hash stored in current.yml, nonce given to AI
+    const { nonce, hash } = generateStageToken(state.id, state.stage);
+    state.expectedTokenHash = hash;
     await gm.save(state);
 
     // Mark backlog consumed (after ID generation)
@@ -93,10 +93,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         genomeVersion: state.genomeVersion,
         parents: state.parents,
         genomeHash: state.genomeHash,
-        stageToken,
         hookResults,
       },
-      prompt: `Generation ${state.id} created. Fill in the Goal section of 01-objective.md if needed. Then proceed with /reap.objective or /reap.evolve.\n\nIMPORTANT: Pass the following token to the next stage transition: \`reap run next --token ${stageToken}\`. Without this token, stage transition will be REJECTED.`,
+      prompt: `Generation ${state.id} created. Fill in the Goal section of 01-objective.md if needed. Then proceed with /reap.objective or /reap.evolve.`,
       message: `Generation ${state.id} started.`,
     });
   }

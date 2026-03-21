@@ -13,14 +13,14 @@ import * as lineageUtils from "./lineage";
 
 // ── Stage Chain Token ───────────────────────────────────────
 
-/** Generate a stage chain token (nonce) and its verification hash */
+/** Generate a stage chain token (nonce + hash). Both stored in current.yml, consumed by next. */
 export function generateStageToken(genId: string, stage: string): { nonce: string; hash: string } {
   const nonce = randomBytes(16).toString("hex");
   const hash = createHash("sha256").update(nonce + genId + stage).digest("hex");
   return { nonce, hash };
 }
 
-/** Verify a stage chain token against an expected hash */
+/** Verify a stage chain token — recomputes hash from nonce and compares to expected. */
 export function verifyStageToken(token: string, genId: string, stage: string, expectedHash: string): boolean {
   const computed = createHash("sha256").update(token + genId + stage).digest("hex");
   return computed === expectedHash;

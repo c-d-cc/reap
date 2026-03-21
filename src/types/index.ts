@@ -52,7 +52,7 @@ export interface GenerationState {
   genomeHash?: string;
   /** Common ancestor generation ID (merge only) */
   commonAncestor?: string;
-  /** Stage chain token hash — used to enforce correct stage ordering */
+  /** Stage token hash — SHA256(nonce + genId + stage). Only hash stored; nonce given to AI via prompt. */
   expectedTokenHash?: string;
 }
 
