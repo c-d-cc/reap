@@ -156,21 +156,21 @@ REAP supports multiple AI agents simultaneously through the AgentAdapter abstrac
 
 ## Execution Flow
 
+**Lifecycle stages** (5 stages, in order):
 ```
-1. /reap.start → Start a new Generation
-2. /reap.objective → Define goal + requirements
-3. /reap.next
-4. /reap.planning → Task decomposition + implementation plan
-5. /reap.next
-6. /reap.implementation → Code implementation
-7. /reap.next
-8. /reap.validation → Verification
-9. /reap.next
-10. /reap.completion → Retrospective + genome updates
-11. /reap.next → Archiving, generation ends
+objective → planning → implementation → validation → completion
 ```
 
-Each slash command follows a 3-step structure: Gate (precondition check) → Steps (work execution) → Artifact generation.
+**Execution sequence**:
+1. `/reap.start` — Create a new Generation
+2. `/reap.objective` — Define goal + requirements → `/reap.next`
+3. `/reap.planning` — Task decomposition + plan → `/reap.next`
+4. `/reap.implementation` — Code implementation → `/reap.next`
+5. `/reap.validation` — Verification → `/reap.next`
+6. `/reap.completion` — Retrospective + genome updates + archiving (auto)
+
+`/reap.next` is a **transition command**, not a lifecycle stage. It advances `current.yml` to the next stage.
+`/reap.completion` auto-archives after the genome phase — no separate `/reap.next` needed at the end.
 
 ## Language
 
