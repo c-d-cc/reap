@@ -6,7 +6,9 @@ import { emitOutput, emitError } from "../../../core/run-output";
 import * as lineageUtils from "../../../core/lineage";
 import { canFastForward } from "../../../core/merge-generation";
 
-export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
+export async function execute(paths: ReapPaths, phase?: string, argv: string[] = []): Promise<void> {
+  const positionals = argv.filter(a => !a.startsWith("--"));
+  const targetBranchArg = positionals[0];
   const gm = new GenerationManager(paths);
 
   if (!phase || phase === "detect") {
@@ -28,8 +30,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "## Merge -- Full Merge Generation for a Local Branch",
         "",
         "Ask the human for the target branch to merge.",
-        "Set REAP_MERGE_TARGET_BRANCH to the branch name.",
-        "Then run: reap run merge --phase check",
+        "Then run: reap run merge --phase check <branch-name>",
       ].join("\n"),
       nextCommand: "reap run merge --phase check",
     });
@@ -37,9 +38,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
 
   if (phase === "check") {
     // Phase 2: Fast-forward check and divergence analysis
-    const targetBranch = process.env.REAP_MERGE_TARGET_BRANCH;
+    const targetBranch = targetBranchArg;
     if (!targetBranch) {
-      emitError("merge", "REAP_MERGE_TARGET_BRANCH environment variable is required.");
+      emitError("merge", "Target branch is required. Usage: reap run merge --phase check <branch>");
     }
 
     if (!gitRefExists(targetBranch, paths.projectRoot)) {
@@ -59,7 +60,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         phase: "start-merge",
         completed: ["gate", "branch-verify"],
         context: { targetBranch, currentBranch },
-        prompt: `No lineage found. Run /reap.merge.start with REAP_MERGE_TARGET_BRANCH=${targetBranch} to begin the merge generation, then /reap.merge.evolve.`,
+        prompt: `No lineage found. Run /reap.merge.start ${targetBranch} to begin the merge generation, then /reap.merge.evolve.`,
         nextCommand: `reap run merge-start --phase create`,
       });
       return;
@@ -86,9 +87,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         `Current branch: ${currentBranch}`,
         "",
         "Execute the following sequence:",
-        `1. Set REAP_MERGE_TARGET_BRANCH=${targetBranch}`,
-        "2. Run /reap.merge.start (creates merge generation + detect report)",
-        "3. Run /reap.merge.evolve (runs detect -> mate -> merge -> sync -> validation -> completion)",
+        `1. Run /reap.merge.start ${targetBranch} (creates merge generation + detect report)`,
+        "2. Run /reap.merge.evolve (runs detect -> mate -> merge -> sync -> validation -> completion)",
         "",
         "The merge generation will be archived upon completion.",
       ].join("\n"),

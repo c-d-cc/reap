@@ -51,7 +51,7 @@
 - Deterministic 로직(gate, state 전환, artifact 생성 등)은 `src/cli/commands/run/`에서 `src/core/` 직접 호출
 - Creative 작업 지점에서 `emitOutput()` — structured JSON으로 AI에게 지시
 - Phase 기반 재진입: `reap run <command> --phase <phase>` — deterministic-creative 교차 구간 처리
-- env var로 AI → script 데이터 전달: `REAP_START_GOAL`, `REAP_BACK_TARGET` 등
+- argv로 AI → script 데이터 전달: positional (`reap run start <goal>`) + flags (`--reason`, `--backlog` 등). Slash command는 `$ARGUMENTS` 사용
 
 ## Language
 

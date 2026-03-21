@@ -7,7 +7,9 @@ import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
 import * as lineageUtils from "../../../core/lineage";
 
-export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
+export async function execute(paths: ReapPaths, phase?: string, argv: string[] = []): Promise<void> {
+  const positionals = argv.filter(a => !a.startsWith("--"));
+  const targetBranchArg = positionals[0];
   const gm = new GenerationManager(paths);
 
   if (!phase || phase === "collect") {
@@ -27,16 +29,16 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       context: {
         currentBranch,
       },
-      prompt: "Ask the human for the target branch to merge. Set REAP_MERGE_TARGET_BRANCH to the branch name. Then run: reap run merge-start --phase create",
+      prompt: "Ask the human for the target branch to merge. Then run: reap run merge-start --phase create <branch-name>",
       nextCommand: "reap run merge-start --phase create",
     });
   }
 
   if (phase === "create") {
     // Phase 2: merge generation 생성
-    const targetBranch = process.env.REAP_MERGE_TARGET_BRANCH;
+    const targetBranch = targetBranchArg;
     if (!targetBranch) {
-      emitError("merge-start", "REAP_MERGE_TARGET_BRANCH environment variable is required.");
+      emitError("merge-start", "Target branch is required. Usage: reap run merge-start --phase create <branch>");
     }
 
     // Double-check gate

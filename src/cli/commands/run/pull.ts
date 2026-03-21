@@ -7,7 +7,9 @@ import * as lineageUtils from "../../../core/lineage";
 import { canFastForward } from "../../../core/merge-generation";
 import { execSync } from "child_process";
 
-export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
+export async function execute(paths: ReapPaths, phase?: string, argv: string[] = []): Promise<void> {
+  const positionals = argv.filter(a => !a.startsWith("--"));
+  const targetBranchArg = positionals[0];
   const gm = new GenerationManager(paths);
 
   if (!phase || phase === "fetch") {
@@ -30,8 +32,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "",
         "1. Run `git fetch origin`",
         "2. Ask the human for the target remote branch (e.g., `origin/main`)",
-        "3. Set REAP_PULL_TARGET_BRANCH to the branch name",
-        "4. Then run: reap run pull --phase check",
+        "3. Then run: reap run pull --phase check <branch-name>",
       ].join("\n"),
       nextCommand: "reap run pull --phase check",
     });
@@ -39,9 +40,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
 
   if (phase === "check") {
     // Phase 2: Divergence detection and fast-forward check
-    const targetBranch = process.env.REAP_PULL_TARGET_BRANCH;
+    const targetBranch = targetBranchArg;
     if (!targetBranch) {
-      emitError("pull", "REAP_PULL_TARGET_BRANCH environment variable is required.");
+      emitError("pull", "Target branch is required. Usage: reap run pull --phase check <branch>");
     }
 
     if (!gitRefExists(targetBranch, paths.projectRoot)) {
@@ -126,10 +127,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "## Branches have diverged -- full merge required",
         "",
         "Execute the following sequence:",
-        `1. Set REAP_MERGE_TARGET_BRANCH=${targetBranch}`,
-        "2. Run /reap.merge.start (creates merge generation + detect report)",
-        "3. Run /reap.merge.evolve (runs detect -> mate -> merge -> sync -> validation -> completion)",
-        "4. Run `git submodule update --init` after merge completes",
+        `1. Run /reap.merge.start ${targetBranch} (creates merge generation + detect report)`,
+        "2. Run /reap.merge.evolve (runs detect -> mate -> merge -> sync -> validation -> completion)",
+        "3. Run `git submodule update --init` after merge completes",
       ].join("\n"),
     });
   }

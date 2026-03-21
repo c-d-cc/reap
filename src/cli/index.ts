@@ -189,9 +189,17 @@ program
   .command("run <command>")
   .description("Run a REAP command script (internal, used by slash commands)")
   .option("--phase <phase>", "Start from a specific phase")
-  .action(async (command: string, options: { phase?: string }) => {
+  .allowUnknownOption()
+  .action(async (command: string, options: { phase?: string }, cmd: any) => {
+    // Collect pass-through args: everything after "run <command>" except --phase and its value
+    const rawArgs = cmd.args.slice(1); // skip command name (already parsed)
+    const passArgs: string[] = [];
+    for (let i = 0; i < rawArgs.length; i++) {
+      if (rawArgs[i] === "--phase") { i++; continue; } // skip --phase and its value
+      passArgs.push(rawArgs[i]);
+    }
     const { runCommand } = await import("./commands/run/index");
-    await runCommand(command, options.phase);
+    await runCommand(command, options.phase, passArgs);
   });
 
 program.parse();

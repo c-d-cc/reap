@@ -7,7 +7,29 @@ import { scanBacklog, markBacklogConsumed } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
 
-export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
+function getFlag(args: string[], name: string): string | undefined {
+  const idx = args.indexOf(`--${name}`);
+  return idx !== -1 && args[idx + 1] ? args[idx + 1] : undefined;
+}
+
+/** Extract positionals, skipping flag names and their values */
+function getPositionals(args: string[], valueFlags: string[]): string[] {
+  const result: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith("--")) {
+      const flagName = args[i].slice(2);
+      if (valueFlags.includes(flagName) && i + 1 < args.length) i++; // skip value
+      continue;
+    }
+    result.push(args[i]);
+  }
+  return result;
+}
+
+export async function execute(paths: ReapPaths, phase?: string, argv: string[] = []): Promise<void> {
+  const positionals = getPositionals(argv, ["backlog"]);
+  const goal = positionals.join(" ") || undefined;
+  const backlogFile = getFlag(argv, "backlog");
   const gm = new GenerationManager(paths);
 
   if (!phase || phase === "scan") {
@@ -26,17 +48,16 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       completed: ["gate", "backlog-scan"],
       context: { backlogItems },
       prompt: backlogItems.length > 0
-        ? "Present the backlog items to the human. Ask: select one or enter a new goal. Set REAP_START_GOAL and optionally REAP_START_BACKLOG_FILE (selected backlog filename). Then run: reap run start --phase create"
-        : "Ask the human for the goal of this generation. Set REAP_START_GOAL. Then run: reap run start --phase create",
+        ? "Present the backlog items to the human. Ask: select one or enter a new goal. Then run: reap run start --phase create \"<goal>\" (add --backlog <filename> if selected from backlog)"
+        : "Ask the human for the goal of this generation. Then run: reap run start --phase create \"<goal>\"",
       nextCommand: "reap run start --phase create",
     });
   }
 
   if (phase === "create") {
     // Phase 2: Create generation
-    const goal = process.env.REAP_START_GOAL;
     if (!goal) {
-      emitError("start", "REAP_START_GOAL environment variable is required.");
+      emitError("start", "Goal is required. Usage: reap run start --phase create \"<goal>\"");
     }
 
     // Double-check gate
@@ -61,7 +82,6 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     await gm.save(state);
 
     // Mark backlog consumed (after ID generation)
-    const backlogFile = process.env.REAP_START_BACKLOG_FILE;
     if (backlogFile) {
       await markBacklogConsumed(paths.backlog, backlogFile, state.id);
     }

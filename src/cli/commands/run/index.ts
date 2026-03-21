@@ -3,7 +3,7 @@ import { ReapPaths } from "../../../core/paths";
 import { ConfigManager } from "../../../core/config";
 import { emitError } from "../../../core/run-output";
 
-export type CommandExecutor = (paths: ReapPaths, phase?: string) => Promise<void>;
+export type CommandExecutor = (paths: ReapPaths, phase?: string, argv?: string[]) => Promise<void>;
 
 const COMMANDS: Record<string, () => Promise<{ execute: CommandExecutor }>> = {
   next: () => import("./next"),
@@ -35,7 +35,7 @@ const COMMANDS: Record<string, () => Promise<{ execute: CommandExecutor }>> = {
   config: () => import("./config"),
 };
 
-export async function runCommand(command: string, phase?: string): Promise<void> {
+export async function runCommand(command: string, phase?: string, argv: string[] = []): Promise<void> {
   const cwd = process.cwd();
   const paths = new ReapPaths(cwd);
 
@@ -50,7 +50,7 @@ export async function runCommand(command: string, phase?: string): Promise<void>
 
   try {
     const mod = await loader();
-    await mod.execute(paths, phase);
+    await mod.execute(paths, phase, argv);
   } catch (err) {
     // Intentional errors (emitError → process.exit) don't reach here.
     // This catches unexpected runtime errors only.

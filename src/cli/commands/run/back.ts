@@ -6,7 +6,26 @@ import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
 import type { LifeCycleStage, MergeStage, AnyStage } from "../../../types";
 
-export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
+function getFlag(args: string[], name: string): string | undefined {
+  const idx = args.indexOf(`--${name}`);
+  return idx !== -1 && args[idx + 1] ? args[idx + 1] : undefined;
+}
+
+/** Extract positionals, skipping flag names and their values */
+function getPositionals(args: string[], valueFlags: string[]): string[] {
+  const result: string[] = [];
+  for (let i = 0; i < args.length; i++) {
+    if (args[i].startsWith("--")) {
+      const flagName = args[i].slice(2);
+      if (valueFlags.includes(flagName) && i + 1 < args.length) i++; // skip value
+      continue;
+    }
+    result.push(args[i]);
+  }
+  return result;
+}
+
+export async function execute(paths: ReapPaths, phase?: string, argv: string[] = []): Promise<void> {
   const gm = new GenerationManager(paths);
   const state = await gm.current();
 
@@ -33,7 +52,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         type: state.type,
         id: state.id,
       },
-      prompt: "Ask the human: (1) target stage (default: previous stage), (2) reason for regression, (3) related refs. Then run: reap run back --phase apply. Pass via env: REAP_BACK_TARGET, REAP_BACK_REASON, REAP_BACK_REFS (comma-separated).",
+      prompt: "Ask the human: (1) target stage (default: previous stage), (2) reason for regression, (3) related refs. Then run: reap run back --phase apply <target-stage> --reason \"<reason>\" --refs \"<a,b,c>\"",
       nextCommand: "reap run back --phase apply",
     });
   }
@@ -41,11 +60,12 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   if (phase === "apply") {
     const originalStage = state.stage;
 
-    // Determine target
-    const targetEnv = process.env.REAP_BACK_TARGET;
+    // Determine target from argv positional (skip flag values)
+    const positionals = getPositionals(argv, ["reason", "refs"]);
+    const targetArg = positionals[0];
     let target: AnyStage;
-    if (targetEnv) {
-      target = targetEnv as AnyStage;
+    if (targetArg) {
+      target = targetArg as AnyStage;
     } else if (isMerge) {
       target = MergeLifeCycle.prev(state.stage as MergeStage)!;
     } else {
@@ -61,8 +81,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       emitError("back", `Cannot regress from '${originalStage}' to '${target}'.`);
     }
 
-    const reason = process.env.REAP_BACK_REASON ?? "No reason provided";
-    const refs = (process.env.REAP_BACK_REFS ?? "").split(",").filter(Boolean);
+    const reason = getFlag(argv, "reason") ?? "No reason provided";
+    const refs = (getFlag(argv, "refs") ?? "").split(",").filter(Boolean);
 
     // Update state
     state.stage = target;

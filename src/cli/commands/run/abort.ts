@@ -6,7 +6,16 @@ import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { revertBacklogConsumed } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
 
-export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
+function getFlag(args: string[], name: string): string | undefined {
+  const idx = args.indexOf(`--${name}`);
+  return idx !== -1 && args[idx + 1] ? args[idx + 1] : undefined;
+}
+
+function hasFlag(args: string[], name: string): boolean {
+  return args.includes(`--${name}`);
+}
+
+export async function execute(paths: ReapPaths, phase?: string, argv: string[] = []): Promise<void> {
   const gm = new GenerationManager(paths);
   const state = await gm.current();
 
@@ -35,17 +44,16 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "  - If changes: offer rollback / stash / hold.",
         "  - If no changes: skip.",
         "Ask: 'Goal과 진행 상황을 backlog에 저장할까요? (yes/no)'",
-        "Set env vars: REAP_ABORT_REASON, REAP_ABORT_SOURCE_ACTION (rollback|stash|hold|none), REAP_ABORT_SAVE_BACKLOG (yes|no).",
-        "Then run: reap run abort --phase execute",
+        "Then run: reap run abort --phase execute --reason \"<reason>\" --source-action <rollback|stash|hold|none> [--save-backlog]",
       ].join("\n"),
       nextCommand: "reap run abort --phase execute",
     });
   }
 
   if (phase === "execute") {
-    const reason = process.env.REAP_ABORT_REASON ?? "No reason provided";
-    const sourceAction = process.env.REAP_ABORT_SOURCE_ACTION ?? "none";
-    const saveBacklog = process.env.REAP_ABORT_SAVE_BACKLOG === "yes";
+    const reason = getFlag(argv, "reason") ?? "No reason provided";
+    const sourceAction = getFlag(argv, "source-action") ?? "none";
+    const saveBacklog = hasFlag(argv, "save-backlog");
 
     // Save to backlog if requested
     let backlogSaved = false;
