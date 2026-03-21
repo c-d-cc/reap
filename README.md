@@ -13,7 +13,7 @@
 
 <table align="center">
 <tr>
-<td align="center"><strong>Genome</strong><br><sub>Design & Knowledge</sub></td>
+<td align="center"><strong>Knowledge Base</strong><br><sub>Genome + Environment</sub></td>
 <td align="center">→</td>
 <td align="center"><strong>Evolution</strong><br><sub>Generational Progress</sub></td>
 <td align="center">→</td>
@@ -21,7 +21,7 @@
 </tr>
 </table>
 
-REAP defines an application's genetic information (Genome), sets objectives for each generation to implement, and feeds back any Genome defects discovered along the way into subsequent stages. As generations accumulate, the Genome evolves and the Source Code (Civilization) grows.
+REAP captures an application's design knowledge — the Genome (architecture, conventions, constraints) and Environment (external APIs, infrastructure) — then sets objectives for each generation to implement. Defects discovered along the way feed back into the Knowledge Base. As generations accumulate, knowledge evolves and the Source Code (Civilization) grows.
 
 ## Table of Contents
 

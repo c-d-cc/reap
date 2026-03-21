@@ -13,7 +13,7 @@
 
 <table align="center">
 <tr>
-<td align="center"><strong>Genome</strong><br><sub>设计与知识</sub></td>
+<td align="center"><strong>Knowledge Base</strong><br><sub>Genome + Environment</sub></td>
 <td align="center">→</td>
 <td align="center"><strong>Evolution</strong><br><sub>代际进化</sub></td>
 <td align="center">→</td>
@@ -21,7 +21,7 @@
 </tr>
 </table>
 
-REAP定义应用程序的遗传信息（Genome），为每个世代设定目标进行实现，并将过程中发现的Genome缺陷反馈到后续阶段。随着世代的积累，Genome不断进化，Source Code（Civilization）持续成长。
+REAP记录应用程序的设计知识 — Genome（架构、约定、约束）和Environment（外部API、基础设施） — 并在每个世代设定目标进行实现。过程中发现的缺陷反馈到Knowledge Base。随着世代的积累，知识不断进化，Source Code（Civilization）持续成长。
 
 ## 目录
 

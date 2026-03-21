@@ -47,9 +47,9 @@ export const en = {
       { problem: "Collaboration chaos", solution: "Genome-first merge workflow reconciles parallel branches — design conflicts before code conflicts" },
     ],
     threeLayer: "3-Layer Model",
-    threeLayerDesc: "Every REAP project consists of three conceptual layers. The Genome defines what to build. The Evolution process builds it. The Civilization is the result.",
+    threeLayerDesc: "Every REAP project consists of three conceptual layers. The Knowledge Base captures what to build and the external context. The Evolution process builds it. The Civilization is the result.",
     layers: [
-      { label: "Genome", sub: "Design & Knowledge", path: ".reap/genome/", desc: "Architecture principles, business rules, conventions, technical constraints, and source maps (C4 diagrams). Never modified mid-generation." },
+      { label: "Knowledge Base", sub: "Genome + Environment", path: ".reap/genome/ + .reap/environment/", desc: "Genome (architecture, conventions, constraints, source maps) and Environment (external APIs, infrastructure, business constraints). Continuously synchronized with the codebase through each generation's lifecycle." },
       { label: "Evolution", sub: "Generational Process", path: ".reap/life/ → .reap/lineage/", desc: "Each Generation runs Objective → Planning → Implementation → Validation → Completion. On completion, archived to lineage." },
       { label: "Civilization", sub: "Source Code", path: "your codebase/", desc: "Everything outside .reap/. Grows and improves with each completed generation." },
     ],
@@ -101,12 +101,12 @@ export const en = {
     description: "REAP (Recursive Evolutionary Autonomous Pipeline) is a development pipeline where AI and humans collaborate to incrementally evolve an Application across successive Generations. Rather than treating each AI session as an isolated task, REAP maintains continuity through a structured lifecycle and a living knowledge base called the Genome.",
     threeLayer: "3-Layer Model",
     layerItems: [
-      { label: "Genome", sub: "Design & Knowledge", path: ".reap/genome/" },
+      { label: "Knowledge Base", sub: "Genome + Environment", path: ".reap/genome/ + .reap/environment/" },
       { label: "Evolution", sub: "Generational Process", path: ".reap/life/ → .reap/lineage/" },
       { label: "Civilization", sub: "Source Code", path: "your codebase/" },
     ],
     layerDescs: [
-      "Design and knowledge for building the Application. Architecture principles, business rules, conventions, technical constraints, and source maps (C4 Container/Component Mermaid diagrams). Stored in .reap/genome/.",
+      "Design knowledge and external context for building the Application. Genome (architecture, conventions, constraints, source maps) in .reap/genome/ and Environment (external APIs, infrastructure, business constraints) in .reap/environment/. Continuously synchronized with the codebase through each generation's lifecycle.",
       "The process by which the Genome evolves and Civilization grows through repeated Generations.",
       "Source Code. The entire project codebase outside .reap/.",
     ],
@@ -638,10 +638,13 @@ strict:
     ],
     immutabilityTitle: "Genome Immutability",
     immutabilityDesc: "The current generation does not modify Genome directly. Issues discovered during Implementation are recorded as genome-change backlog items and applied only during the Completion stage.",
+    immutabilityWhy: "Why? Think of the Genome as a constitution. If you amend it mid-sprint, every decision made so far loses its foundation. By deferring changes to Completion, the generation finishes with a stable reference — then the Genome evolves deliberately, informed by what actually happened rather than what was assumed.",
     contextTitle: "Session Context",
     contextDesc: "Genome is automatically loaded into the AI agent's context at session start. The agent always has access to your project's principles, conventions, constraints, and source map — no manual briefing needed.",
-    syncTitle: "Synchronization with Source Code",
-    syncDesc: "Use /reap.sync.genome to analyze source code and update the Genome. When no active generation, changes are applied directly. With an active generation, differences are recorded to backlog.",
+    evolutionTitle: "Evolution through Generations",
+    evolutionDesc: "At the end of each generation (Completion stage), genome-change backlog items are reviewed and applied to the Genome. Source code changes from the generation are reflected back into the Genome — ensuring the Knowledge Base stays in sync with your codebase as it evolves.",
+    syncTitle: "Manual Synchronization",
+    syncDesc: "Use /reap.sync.genome to analyze source code and update the Genome on demand. When no active generation, changes are applied directly. With an active generation, differences are recorded to backlog for the next Completion.",
   },
 
   // Environment Page
@@ -653,7 +656,7 @@ strict:
     structure: `.reap/environment/
 ├── summary.md      # Session context (~100 lines, auto-loaded)
 ├── docs/           # Main reference docs (agent reads these)
-└── resources/      # Raw materials (user-managed)`,
+└── resources/      # Raw materials (user-provided or AI-collected)`,
     layersTitle: "Layers",
     layerHeaders: ["Layer", "Maintained by", "Content", "Limit"],
     layerItems: [
@@ -661,10 +664,18 @@ strict:
       ["docs/", "AI + User", "One file per environment topic. API constraints, infrastructure, org rules.", "~100 lines each"],
       ["resources/", "User", "Original documents, PDFs, external links + summaries.", "No limit"],
     ],
+    immutabilityTitle: "Environment Immutability",
+    immutabilityDesc: "Like the Genome, the Environment is not modified directly during a generation. External changes discovered mid-generation are recorded as environment-change backlog items and applied at Completion.",
+    immutabilityWhy: "External context shifts — an API deprecation, an infra migration — can invalidate assumptions made during Planning. By capturing changes in the backlog rather than rewriting Environment on the fly, the generation completes on a stable map of the outside world. The update happens once, deliberately, with full context of what was built.",
     flowTitle: "Lookup Flow",
     flowDesc: "summary.md (always loaded) → docs/ (when detail needed) → resources/ (when original source needed)",
-    syncTitle: "Synchronization",
-    syncDesc: "Use /reap.sync.environment to discover external dependencies from source code and interview the user. The command scans package.json, config files, API clients, and asks about connected systems, infrastructure, and organizational rules.",
+    syncTitle: "Manual Synchronization",
+    syncDesc: "Use /reap.sync.environment to discover external dependencies and document them. The command scans source code for clues, then interviews the user about connected systems, infrastructure, and organizational rules.",
+    syncSources: [
+      { label: "Human Input", role: "Primary source", desc: "The user describes APIs, infrastructure, org rules, and business constraints that can't be inferred from code." },
+      { label: "Source Code", role: "Secondary source", desc: "package.json, config files, API clients — scanned to seed questions and detect dependencies." },
+    ],
+    syncContrast: "Compare with Genome sync, where source code is the primary source. For Environment, the outside world lives in the human's head — code only hints at it.",
   },
 
   // Lifecycle Page (renamed from Workflow)
@@ -672,6 +683,18 @@ strict:
     title: "Lifecycle",
     breadcrumb: "Guide",
     intro: "The lifecycle is the heartbeat of REAP — each generation flows through 5 stages (Objective → Planning → Implementation → Validation → Completion), producing artifacts at every step. The AI agent guides you through the entire lifecycle.",
+    structureTitle: "Artifacts Structure",
+    structure: `.reap/life/
+├── current.yml          # Current generation state (id, goal, stage, timeline)
+├── 01-objective.md      # Goal, requirements, design decisions
+├── 02-planning.md       # Task decomposition, dependencies
+├── 03-implementation.md # Implementation log, changes made
+├── 04-validation.md     # Test results, completion criteria check
+├── 05-completion.md     # Retrospective, genome changelog
+└── backlog/             # Items for next generation
+    ├── fix-auth-bug.md  #   type: task
+    └── add-index.md     #   type: genome-change`,
+    structureDesc: "Each stage produces its artifact in .reap/life/. When the generation completes, all artifacts are archived to .reap/lineage/gen-XXX-hash-slug/ and current.yml is cleared for the next generation.",
   },
 
   // Lineage Page

@@ -20,10 +20,16 @@ export default function GenomePage() {
         </ul>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{g.immutabilityTitle}</h2>
-        <p className="text-sm text-muted-foreground mb-4">{g.immutabilityDesc}</p>
+        <p className="text-sm text-muted-foreground mb-3">{g.immutabilityDesc}</p>
+        <div className="border-l-2 border-primary/30 pl-4 py-2 mb-4 bg-muted/30 rounded-r-md">
+          <p className="text-sm text-muted-foreground italic">{g.immutabilityWhy}</p>
+        </div>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{g.contextTitle}</h2>
         <p className="text-sm text-muted-foreground mb-4">{g.contextDesc}</p>
+
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{g.evolutionTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-4">{g.evolutionDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{g.syncTitle}</h2>
         <p className="text-sm text-muted-foreground">{g.syncDesc}</p>

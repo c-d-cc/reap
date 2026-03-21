@@ -22,11 +22,28 @@ export default function EnvironmentPage() {
           </table>
         </div>
 
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{e.immutabilityTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-3">{e.immutabilityDesc}</p>
+        <div className="border-l-2 border-primary/30 pl-4 py-2 mb-4 bg-muted/30 rounded-r-md">
+          <p className="text-sm text-muted-foreground italic">{e.immutabilityWhy}</p>
+        </div>
+
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{e.flowTitle}</h2>
         <p className="text-sm text-muted-foreground mb-4">{e.flowDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{e.syncTitle}</h2>
-        <p className="text-sm text-muted-foreground">{e.syncDesc}</p>
+        <p className="text-sm text-muted-foreground mb-4">{e.syncDesc}</p>
+
+        <div className="flex flex-col sm:flex-row gap-3 mb-4">
+          {e.syncSources.map((src, i) => (
+            <div key={i} className="flex-1 border border-border rounded-md p-3 bg-card">
+              <div className="text-xs font-semibold text-foreground mb-1">{src.label}</div>
+              <div className="text-[10px] uppercase tracking-wider text-primary/70 mb-1.5">{src.role}</div>
+              <div className="text-xs text-muted-foreground leading-relaxed">{src.desc}</div>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground italic">{e.syncContrast}</p>
       </DocPage>
     </DocLayout>
   );

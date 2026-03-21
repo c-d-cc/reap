@@ -13,7 +13,7 @@
 
 <table align="center">
 <tr>
-<td align="center"><strong>Genome</strong><br><sub>設計とナレッジ</sub></td>
+<td align="center"><strong>Knowledge Base</strong><br><sub>Genome + Environment</sub></td>
 <td align="center">→</td>
 <td align="center"><strong>Evolution</strong><br><sub>世代を超えた進化</sub></td>
 <td align="center">→</td>
@@ -21,7 +21,7 @@
 </tr>
 </table>
 
-REAPはアプリケーションの遺伝情報（Genome）を定義し、各世代で目標を設定して実装し、その過程で発見したGenomeの欠陥を次のステージにフィードバックします。世代を重ねるごとにGenomeが進化し、Source Code（Civilization）が成長します。
+REAPはアプリケーションの設計知識 — Genome（アーキテクチャ、コンベンション、制約）とEnvironment（外部API、インフラ） — を記録し、各世代で目標を設定して実装します。その過程で発見した欠陥はKnowledge Baseにフィードバックされます。世代を重ねるごとに知識が進化し、Source Code（Civilization）が成長します。
 
 ## 目次
 

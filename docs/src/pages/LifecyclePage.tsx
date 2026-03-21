@@ -1,5 +1,6 @@
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
+import { CodeBlock } from "@/components/CodeBlock";
 import { Link } from "wouter";
 import { useT } from "@/i18n";
 
@@ -12,6 +13,10 @@ export default function LifecyclePage() {
         <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
           {t.lifecyclePage.intro}
         </p>
+
+        <h2 className="text-base font-semibold text-foreground mb-2">{t.lifecyclePage.structureTitle}</h2>
+        <CodeBlock language="text">{t.lifecyclePage.structure}</CodeBlock>
+        <p className="text-xs text-muted-foreground mb-6 mt-2">{t.lifecyclePage.structureDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2">{t.workflow.evolveTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">

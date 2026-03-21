@@ -13,7 +13,7 @@
 
 <table align="center">
 <tr>
-<td align="center"><strong>Genome</strong><br><sub>설계와 지식</sub></td>
+<td align="center"><strong>Knowledge Base</strong><br><sub>Genome + Environment</sub></td>
 <td align="center">→</td>
 <td align="center"><strong>Evolution</strong><br><sub>세대를 거친 진화</sub></td>
 <td align="center">→</td>
@@ -21,7 +21,7 @@
 </tr>
 </table>
 
-REAP은 Application의 유전 정보(Genome)를 정의하고, 각 세대에서 목표를 설정하여 구현하고, 그 과정에서 발견한 Genome 결함을 다음 단계에서 반영합니다. 세대를 거듭하며 Genome이 진화하고, Source Code(Civilization)가 성장합니다.
+REAP은 Application의 설계 지식 — Genome(아키텍처, 컨벤션, 제약사항)과 Environment(외부 API, 인프라) — 을 기록하고, 각 세대에서 목표를 설정하여 구현합니다. 그 과정에서 발견한 결함은 Knowledge Base에 반영됩니다. 세대를 거듭하며 지식이 진화하고, Source Code(Civilization)가 성장합니다.
 
 ## 목차
 

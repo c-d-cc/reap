@@ -25,7 +25,7 @@ export function DocLayout({ children }: DocLayoutProps) {
       </div>
 
       <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
-        <SheetContent side="left" className="w-64 bg-sidebar p-0 pt-4 flex flex-col">
+        <SheetContent side="left" className="w-64 bg-sidebar p-0 pt-4 flex flex-col overflow-y-auto">
           <SheetHeader className="sr-only">
             <SheetTitle>Navigation</SheetTitle>
           </SheetHeader>
