@@ -1,7 +1,0 @@
-id: gen-071-7de266
-type: normal
-parents: []
-goal: "remove version-bump hook, add reapdev.versionBump project command"
-genomeHash: e5c2e07232ca
-startedAt: "2026-03-20T08:12:16.577Z"
-completedAt: "2026-03-20T08:14:00.000Z"

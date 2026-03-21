@@ -1,8 +1,0 @@
-id: gen-067-c6de1b
-type: normal
-parents:
-  - gen-066-0ff356
-goal: "reap update 전역/프로젝트 분리 + brainstorm 복사 제거"
-genomeHash: 8db4246930c0
-startedAt: 2026-03-20T07:23:43Z
-completedAt: 2026-03-20T07:26:41Z

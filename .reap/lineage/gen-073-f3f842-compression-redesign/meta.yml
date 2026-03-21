@@ -1,7 +1,0 @@
-id: gen-073-f3f842
-type: normal
-parents: []
-goal: "compression redesign: completion trigger, epoch single-file + hash chain, fork guard"
-genomeHash: e5c2e07232ca
-startedAt: "2026-03-20T08:51:12.402Z"
-completedAt: "2026-03-20T08:57:00.000Z"

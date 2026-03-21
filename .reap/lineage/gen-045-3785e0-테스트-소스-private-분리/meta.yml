@@ -1,8 +1,0 @@
-id: gen-045-3785e0
-type: normal
-parents:
-  - gen-044-782053
-goal: 테스트 소스 private 분리
-genomeHash: legacy
-startedAt: legacy-45
-completedAt: legacy-45
