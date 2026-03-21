@@ -179,9 +179,9 @@ export async function execute(paths: ReapPaths): Promise<void> {
 
   // Read config
   const configContent = await readTextFile(paths.config);
-  const configVersion = configContent?.match(/version:\s*([\d.]+)/)?.[1] ?? "0.0.0";
+  const installedVersion = process.env.__REAP_VERSION__ || "0.0.0";
   const autoUpdate = configContent?.match(/autoUpdate:\s*(true|false)/)?.[1] === "true";
-  const versionDisplay = formatVersionLine(configVersion, !autoUpdate);
+  const versionDisplay = formatVersionLine(installedVersion, !autoUpdate);
 
   // Determine language from config
   const rawLang = detectLanguage(configContent);

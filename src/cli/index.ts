@@ -80,7 +80,8 @@ program
       const paths = new ReapPaths(cwd);
       const config = await ConfigManager.read(paths);
       const skipCheck = config.autoUpdate === false;
-      const versionLine = formatVersionLine(status.version, skipCheck);
+      const installedVersion = process.env.__REAP_VERSION__ || "0.0.0";
+      const versionLine = formatVersionLine(installedVersion, skipCheck);
 
       console.log(`${versionLine} | Project: ${status.project} (${status.entryMode})`);
       console.log(`Completed Generations: ${status.totalGenerations}`);
