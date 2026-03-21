@@ -89,6 +89,13 @@ function buildSubagentPrompt(
   lines.push("");
 
   // 7. Commit rules
+  lines.push("## Stage Chain Token");
+  lines.push("- Each stage command returns a `stageToken` in its output context.");
+  lines.push("- You MUST pass this token to `/reap.next --token <TOKEN>` (or set `REAP_STAGE_TOKEN` env var).");
+  lines.push("- Without a valid token, stage transition will be REJECTED.");
+  lines.push("- If token is missing or mismatched, re-run the current stage command to obtain a new token.");
+  lines.push("");
+
   lines.push("## Commit Rules");
   lines.push("- Create a git commit after implementation and after completion.");
   lines.push("- Use conventional commit format: `feat|fix|chore(scope): description`");

@@ -1,7 +1,7 @@
 import { join } from "path";
 import { readdir } from "fs/promises";
 import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager } from "../../../core/generation";
+import { GenerationManager, generateStageToken } from "../../../core/generation";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { scanBacklog } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
@@ -146,6 +146,11 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       emitError("objective", "01-objective.md appears incomplete (too short). Fill in the objective before completing.");
     }
 
+    // Generate stage chain token
+    const { nonce: stageToken, hash: tokenHash } = generateStageToken(state.id, state.stage);
+    state.expectedTokenHash = tokenHash;
+    await gm.save(state);
+
     // Execute hooks
     const hookResults = await executeHooks(paths.hooks, "onLifeObjected", paths.projectRoot);
 
@@ -156,9 +161,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       completed: ["gate", "context-collect", "artifact-ensure", "creative-work", "artifact-verify", "hooks"],
       context: {
         id: state.id,
+        stageToken,
         hookResults,
       },
-      message: "Objective stage complete. Proceed to the Planning stage with /reap.next.",
+      message: `Objective stage complete. Proceed to the Planning stage with /reap.next.\n\nIMPORTANT: Pass the following token to the next stage transition: \`reap run next --token ${stageToken}\`. Without this token, stage transition will be REJECTED.`,
     });
   }
 }

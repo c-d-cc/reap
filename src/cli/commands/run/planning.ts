@@ -1,6 +1,6 @@
 import { join } from "path";
 import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager } from "../../../core/generation";
+import { GenerationManager, generateStageToken } from "../../../core/generation";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
@@ -115,6 +115,11 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       emitError("planning", "02-planning.md appears incomplete. Fill in the plan before completing.");
     }
 
+    // Generate stage chain token
+    const { nonce: stageToken, hash: tokenHash } = generateStageToken(state.id, state.stage);
+    state.expectedTokenHash = tokenHash;
+    await gm.save(state);
+
     // Execute hooks
     const hookResults = await executeHooks(paths.hooks, "onLifePlanned", paths.projectRoot);
 
@@ -125,9 +130,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       completed: ["gate", "context-collect", "artifact-ensure", "creative-work", "artifact-verify", "hooks"],
       context: {
         id: state.id,
+        stageToken,
         hookResults,
       },
-      message: "Planning stage complete. Proceed to the Implementation stage with /reap.next.",
+      message: `Planning stage complete. Proceed to the Implementation stage with /reap.next.\n\nIMPORTANT: Pass the following token to the next stage transition: \`reap run next --token ${stageToken}\`. Without this token, stage transition will be REJECTED.`,
     });
   }
 }

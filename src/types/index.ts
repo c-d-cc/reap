@@ -52,6 +52,8 @@ export interface GenerationState {
   genomeHash?: string;
   /** Common ancestor generation ID (merge only) */
   commonAncestor?: string;
+  /** Stage chain token hash — used to enforce correct stage ordering */
+  expectedTokenHash?: string;
 }
 
 /** Metadata stored in lineage/{gen-dir}/meta.yml */

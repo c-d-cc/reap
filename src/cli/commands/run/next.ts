@@ -1,6 +1,6 @@
 import { join } from "path";
 import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager } from "../../../core/generation";
+import { GenerationManager, generateStageToken, verifyStageToken } from "../../../core/generation";
 import { LifeCycle } from "../../../core/lifecycle";
 import { MergeLifeCycle } from "../../../core/merge-lifecycle";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
@@ -30,6 +30,24 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
     emitError("next", "No active Generation. Run /reap.start first.");
   }
 
+  // Stage chain token verification
+  if (state.expectedTokenHash) {
+    // Read token from --token arg or REAP_STAGE_TOKEN env var
+    let token: string | undefined = process.env.REAP_STAGE_TOKEN;
+    const tokenArgIdx = process.argv.indexOf("--token");
+    if (tokenArgIdx !== -1 && process.argv[tokenArgIdx + 1]) {
+      token = process.argv[tokenArgIdx + 1];
+    }
+
+    if (!token) {
+      emitError("next", "Stage transition requires a valid token. Run the current stage command first to obtain one. Use: reap run next --token <TOKEN> or set REAP_STAGE_TOKEN environment variable.");
+    }
+
+    if (!verifyStageToken(token, state.id, state.stage as string, state.expectedTokenHash)) {
+      emitError("next", `Token mismatch. The token must come from the output of \`reap run ${state.stage}\`. Re-run the stage command to get a valid token.`);
+    }
+  }
+
   const isMerge = state.type === "merge";
   let nextStage: AnyStage | null;
 
@@ -47,6 +65,11 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
   state.stage = nextStage;
   if (!state.timeline) state.timeline = [];
   state.timeline.push({ stage: nextStage, at: new Date().toISOString() });
+
+  // Generate new stage chain token for the next stage
+  const { nonce: stageToken, hash: tokenHash } = generateStageToken(state.id, nextStage);
+  state.expectedTokenHash = tokenHash;
+
   await gm.save(state);
 
   // Determine artifact file
@@ -98,15 +121,16 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
     status: "ok",
     command: "next",
     phase: "done",
-    completed: ["gate", "advance-stage", "create-artifact", "hooks"],
+    completed: ["gate", "token-verify", "advance-stage", "create-artifact", "hooks"],
     context: {
       generationId: state.id,
       previousStage,
       stage: nextStage,
       type: state.type,
       artifactFile,
+      stageToken,
       hookResults: [...stageHookResults, ...transitionHookResults],
     },
-    message: `Advanced to ${nextStage}. Proceed with /reap.${nextStage}.`,
+    message: `Advanced to ${nextStage}. Proceed with /reap.${nextStage}.\n\nIMPORTANT: Pass the following token to the next stage transition: \`reap run next --token ${stageToken}\`. Without this token, stage transition will be REJECTED.`,
   });
 }

@@ -1,6 +1,6 @@
 import { join } from "path";
 import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager } from "../../../core/generation";
+import { GenerationManager, generateStageToken } from "../../../core/generation";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
@@ -109,6 +109,11 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       emitError("implementation", "03-implementation.md does not exist. Complete the implementation work first.");
     }
 
+    // Generate stage chain token
+    const { nonce: stageToken, hash: tokenHash } = generateStageToken(state.id, state.stage);
+    state.expectedTokenHash = tokenHash;
+    await gm.save(state);
+
     // Execute hooks
     const hookResults = await executeHooks(paths.hooks, "onLifeImplemented", paths.projectRoot);
 
@@ -119,9 +124,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       completed: ["gate", "context-collect", "artifact-ensure", "creative-work", "hooks"],
       context: {
         id: state.id,
+        stageToken,
         hookResults,
       },
-      message: "Implementation stage complete. Proceed to the Validation stage with /reap.next.",
+      message: `Implementation stage complete. Proceed to the Validation stage with /reap.next.\n\nIMPORTANT: Pass the following token to the next stage transition: \`reap run next --token ${stageToken}\`. Without this token, stage transition will be REJECTED.`,
     });
   }
 }

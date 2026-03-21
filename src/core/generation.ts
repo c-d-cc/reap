@@ -1,5 +1,5 @@
 import YAML from "yaml";
-import { createHash } from "crypto";
+import { createHash, randomBytes } from "crypto";
 import { hostname } from "os";
 import { readdir, mkdir, rename, unlink } from "fs/promises";
 import { join } from "path";
@@ -10,6 +10,21 @@ import { compressLineageIfNeeded } from "./compression";
 import { readTextFile, writeTextFile } from "./fs";
 import { parseFrontmatter } from "./compression";
 import * as lineageUtils from "./lineage";
+
+// ── Stage Chain Token ───────────────────────────────────────
+
+/** Generate a stage chain token (nonce) and its verification hash */
+export function generateStageToken(genId: string, stage: string): { nonce: string; hash: string } {
+  const nonce = randomBytes(16).toString("hex");
+  const hash = createHash("sha256").update(nonce + genId + stage).digest("hex");
+  return { nonce, hash };
+}
+
+/** Verify a stage chain token against an expected hash */
+export function verifyStageToken(token: string, genId: string, stage: string, expectedHash: string): boolean {
+  const computed = createHash("sha256").update(token + genId + stage).digest("hex");
+  return computed === expectedHash;
+}
 
 // ── Hash utilities ──────────────────────────────────────────
 

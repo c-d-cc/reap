@@ -1,7 +1,7 @@
 import { join } from "path";
 import { readdir } from "fs/promises";
 import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager } from "../../../core/generation";
+import { GenerationManager, generateStageToken } from "../../../core/generation";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { scanBacklog, markBacklogConsumed } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
@@ -55,6 +55,11 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     // Create generation (ID + current.yml)
     const state = await gm.create(goal, genomeVersion);
 
+    // Generate initial stage chain token for objective stage
+    const { nonce: stageToken, hash: tokenHash } = generateStageToken(state.id, state.stage);
+    state.expectedTokenHash = tokenHash;
+    await gm.save(state);
+
     // Mark backlog consumed (after ID generation)
     const backlogFile = process.env.REAP_START_BACKLOG_FILE;
     if (backlogFile) {
@@ -88,9 +93,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         genomeVersion: state.genomeVersion,
         parents: state.parents,
         genomeHash: state.genomeHash,
+        stageToken,
         hookResults,
       },
-      prompt: `Generation ${state.id} created. Fill in the Goal section of 01-objective.md if needed. Then proceed with /reap.objective or /reap.evolve.`,
+      prompt: `Generation ${state.id} created. Fill in the Goal section of 01-objective.md if needed. Then proceed with /reap.objective or /reap.evolve.\n\nIMPORTANT: Pass the following token to the next stage transition: \`reap run next --token ${stageToken}\`. Without this token, stage transition will be REJECTED.`,
       message: `Generation ${state.id} started.`,
     });
   }
