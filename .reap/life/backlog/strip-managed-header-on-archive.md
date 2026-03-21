@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-101-c88beb
 ---
 
 # archiving 시 artifact의 REAP MANAGED 헤더 제거

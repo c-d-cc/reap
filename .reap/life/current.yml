@@ -1,0 +1,21 @@
+# REAP MANAGED — Do not modify directly. Use reap run next/back/start/abort.
+id: gen-101-c88beb
+goal: AI migration agent + archiving 시 REAP MANAGED 헤더 제거
+stage: completion
+genomeVersion: 101
+startedAt: 2026-03-21T12:47:58.368Z
+timeline:
+  - stage: objective
+    at: 2026-03-21T12:47:58.368Z
+  - stage: planning
+    at: 2026-03-21T12:48:19.116Z
+  - stage: implementation
+    at: 2026-03-21T12:48:44.851Z
+  - stage: validation
+    at: 2026-03-21T12:52:15.244Z
+  - stage: completion
+    at: 2026-03-21T12:52:31.204Z
+type: normal
+parents:
+  - gen-086-bc3af7
+genomeHash: 13c9ca8a

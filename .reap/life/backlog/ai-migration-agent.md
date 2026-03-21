@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-101-c88beb
 ---
 
 # AI 기반 Migration Agent 구현

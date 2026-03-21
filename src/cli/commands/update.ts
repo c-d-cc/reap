@@ -7,6 +7,7 @@ import { migrateHooks } from "../../core/hooks";
 import { readTextFile, readTextFileOrThrow, writeTextFile } from "../../core/fs";
 import { ConfigManager } from "../../core/config";
 import { MigrationRunner } from "../../core/migrations";
+import { buildMigrationSpec, detectMigrationGaps } from "../../core/migration-spec";
 
 interface UpdateResult {
   updated: string[];
@@ -210,6 +211,19 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     }
     for (const e of migrationResult.errors) {
       result.removed.push(`[migration error] ${e}`);
+    }
+
+    // 7. Check for structural gaps that AI migration agent can fix
+    const gaps = await detectMigrationGaps(paths);
+    if (gaps.length > 0) {
+      const spec = buildMigrationSpec(paths);
+      console.log(JSON.stringify({
+        status: "prompt",
+        command: "migrate",
+        gaps,
+        spec,
+        prompt: "Analyze the gaps between current .reap/ structure and expected structure. Fix each gap after user confirmation.",
+      }, null, 2));
     }
 
     // Auto-report migration failures if enabled

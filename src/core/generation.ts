@@ -165,14 +165,18 @@ export class GenerationManager {
     };
     await writeTextFile(join(genDir, "meta.yml"), YAML.stringify(meta));
 
-    // Move artifacts from life/ to lineage/
+    // Move artifacts from life/ to lineage/ (strip REAP MANAGED header)
     const lifeEntries = await readdir(this.paths.life);
     for (const entry of lifeEntries) {
       if (/^\d{2}-[a-z]+(?:-[a-z]+)*\.md$/.test(entry)) {
-        await rename(
-          join(this.paths.life, entry),
-          join(genDir, entry),
-        );
+        const srcPath = join(this.paths.life, entry);
+        const destPath = join(genDir, entry);
+        let content = await readTextFile(srcPath);
+        if (content && content.startsWith("# REAP MANAGED")) {
+          content = content.replace(/^# REAP MANAGED[^\n]*\n/, "");
+        }
+        await writeTextFile(destPath, content ?? "");
+        await unlink(srcPath);
       }
     }
 
