@@ -1,6 +1,6 @@
 {
   "name": "@c-d-cc/reap",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "Recursive Evolutionary Autonomous Pipeline — AI and humans evolve software across generations",
   "type": "module",
   "license": "MIT",
@@ -24,7 +24,8 @@
   },
   "files": [
     "dist/",
-    "scripts/postinstall.cjs"
+    "scripts/postinstall.cjs",
+    "scripts/preinstall.cjs"
   ],
   "preferGlobal": true,
   "engines": {
@@ -33,6 +34,7 @@
   "scripts": {
     "dev": "bun run src/cli/index.ts",
     "build": "node scripts/build.js",
+    "preinstall": "node scripts/preinstall.cjs",
     "postinstall": "node scripts/postinstall.cjs",
     "prepublishOnly": "npm run build",
     "test": "bun test"

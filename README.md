@@ -60,6 +60,8 @@ REAP solves these with a **generation-based evolution model**:
 
 ## Installation
 
+> **Global installation required.** REAP is a CLI tool and must be installed globally. Local project-level installation (`npm i @c-d-cc/reap`) is blocked.
+
 ```bash
 # npm
 npm install -g @c-d-cc/reap

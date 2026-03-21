@@ -22,6 +22,7 @@ export default function QuickStartPage() {
         </div>
 
         <h2 className="text-base font-semibold text-foreground mb-2">{t.quickstart.install}</h2>
+        <p className="text-xs text-muted-foreground mb-2">Global installation required. Local project-level installation is blocked.</p>
         <CodeBlock language="bash">{`# npm
 npm install -g @c-d-cc/reap
 

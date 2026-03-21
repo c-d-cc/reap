@@ -60,6 +60,8 @@ REAP通过**基于世代的进化模型**解决这些问题：
 
 ## 安装
 
+> **必须全局安装。** REAP是CLI工具，必须全局安装。本地项目级安装（`npm i @c-d-cc/reap`）将被阻止。
+
 ```bash
 # npm
 npm install -g @c-d-cc/reap

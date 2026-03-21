@@ -60,6 +60,8 @@ REAP은 **세대 기반 진화 모델**로 이 문제들을 해결합니다:
 
 ## 설치
 
+> **글로벌 설치 필수.** REAP은 CLI 도구이며 반드시 글로벌로 설치해야 합니다. 로컬 프로젝트 레벨 설치(`npm i @c-d-cc/reap`)는 차단됩니다.
+
 ```bash
 # npm
 npm install -g @c-d-cc/reap
