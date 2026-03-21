@@ -4,6 +4,7 @@
 
 import { readFile, writeFile, unlink, stat } from "fs/promises";
 import { join } from "path";
+import { connect } from "net";
 
 const PID_FILENAME = "daemon.pid";
 const SOCK_FILENAME = "daemon.sock";
@@ -80,20 +81,61 @@ export async function cleanupStaleSock(sockFile: string): Promise<boolean> {
 }
 
 /**
+ * UDS 소켓 연결을 시도하여 daemon liveness를 확인.
+ * 연결 성공 = alive (즉시 disconnect), ECONNREFUSED/ENOENT = dead.
+ * timeoutMs 내에 연결되지 않으면 dead 판정.
+ */
+export function probeDaemonSocket(sockFile: string, timeoutMs = 2000): Promise<boolean> {
+  return new Promise((resolve) => {
+    const socket = connect(sockFile);
+
+    const timer = setTimeout(() => {
+      socket.destroy();
+      resolve(false);
+    }, timeoutMs);
+
+    socket.on("connect", () => {
+      clearTimeout(timer);
+      socket.destroy();
+      resolve(true);
+    });
+
+    socket.on("error", () => {
+      clearTimeout(timer);
+      socket.destroy();
+      resolve(false);
+    });
+  });
+}
+
+/**
  * Daemon이 이미 실행 중인지 확인.
- * PID 파일이 존재하고 해당 프로세스가 살아있으면 true.
- * PID 파일이 존재하지만 프로세스가 죽었으면 정리 후 false.
+ * 1차: UDS 소켓 connect probe (가장 정확)
+ * 2차: PID 파일 + 프로세스 생존 확인 (보조)
+ * Stale 상태면 정리 후 false 반환.
  */
 export async function isDaemonRunning(daemonPaths: DaemonPaths): Promise<boolean> {
+  // 소켓 파일이 존재하면 connect probe 시도
+  if (await sockFileExists(daemonPaths.sockFile)) {
+    const alive = await probeDaemonSocket(daemonPaths.sockFile);
+    if (alive) return true;
+
+    // 소켓 파일은 있지만 연결 불가 — stale
+    await cleanupStaleSock(daemonPaths.sockFile);
+    await removePidFile(daemonPaths.pidFile);
+    return false;
+  }
+
+  // 소켓 파일 없음 — PID 파일 보조 확인
   const pid = await readPidFile(daemonPaths.pidFile);
   if (pid === null) return false;
 
   if (isProcessAlive(pid)) {
+    // PID는 살아있지만 소켓이 없는 비정상 상태 — alive로 판단
     return true;
   }
 
   // Stale PID — 정리
   await removePidFile(daemonPaths.pidFile);
-  await cleanupStaleSock(daemonPaths.sockFile);
   return false;
 }

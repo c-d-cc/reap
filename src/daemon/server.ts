@@ -1,15 +1,17 @@
 /**
  * Daemon Server — Unix Domain Socket 기반 lifecycle 오케스트레이터
  *
- * PoC 범위:
+ * 기능:
  * - UDS 서버 시작/종료
  * - 클라이언트 연결 수락
  * - Stage prompt 전송 → 클라이언트 응답 수신 → stage 전환
  * - current.yml 기반 idempotent resume
+ * - Graceful shutdown (SIGTERM/SIGINT, onCompleted auto-stop)
+ * - Parent PID 모니터링 (orphan 방지)
+ * - Idle timeout (클라이언트 0개 시 자동 종료)
  */
 
 import { createServer, type Server, type Socket } from "net";
-import { join } from "path";
 import type { LifeCycleStage } from "../types";
 import { LIFECYCLE_ORDER } from "../types";
 import {
@@ -47,9 +49,12 @@ const STAGE_PROMPTS: Record<LifeCycleStage, string> = {
 export interface DaemonServerOptions {
   lifeDir: string;           // .reap/life/ 경로
   initialStage?: LifeCycleStage;  // resume 시 시작 stage
+  parentPid?: number;        // 부모 프로세스 PID (orphan 방지)
+  idleTimeoutMs?: number;    // 클라이언트 0개 시 자동 종료 타임아웃 (ms)
   onStageAdvanced?: (from: LifeCycleStage, to: LifeCycleStage) => void;
   onCompleted?: () => void;
   onError?: (err: Error) => void;
+  onStopped?: () => void;    // stop 완료 후 콜백 (테스트용)
 }
 
 // ── Server State ────────────────────────────────────────────
@@ -69,6 +74,15 @@ export class DaemonServer {
   private daemonPaths: DaemonPaths;
   private isRunning = false;
   private opts: DaemonServerOptions;
+
+  // Graceful shutdown
+  private signalHandler: (() => void) | null = null;
+
+  // Parent PID monitoring
+  private parentPidInterval: ReturnType<typeof setInterval> | null = null;
+
+  // Idle timeout
+  private idleTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(opts: DaemonServerOptions) {
     this.opts = opts;
@@ -97,6 +111,16 @@ export class DaemonServer {
       this.server.listen(this.daemonPaths.sockFile, async () => {
         this.isRunning = true;
         await writePidFile(this.daemonPaths.pidFile, process.pid);
+
+        // SIGTERM/SIGINT 핸들러 등록
+        this.registerSignalHandlers();
+
+        // Parent PID 모니터링 시작
+        this.startParentPidMonitor();
+
+        // 초기 idle timeout 시작 (클라이언트 0개 상태)
+        this.resetIdleTimer();
+
         resolve();
       });
     });
@@ -104,7 +128,17 @@ export class DaemonServer {
 
   /** 서버 종료 */
   async stop(): Promise<void> {
+    if (!this.isRunning) return;
     this.isRunning = false;
+
+    // Signal 핸들러 해제
+    this.removeSignalHandlers();
+
+    // Parent PID 모니터 해제
+    this.stopParentPidMonitor();
+
+    // Idle timer 해제
+    this.clearIdleTimer();
 
     // 모든 클라이언트 연결 종료
     for (const client of this.clients) {
@@ -123,6 +157,9 @@ export class DaemonServer {
     // PID/sock 파일 정리
     await removePidFile(this.daemonPaths.pidFile);
     await cleanupStaleSock(this.daemonPaths.sockFile);
+
+    // stop 완료 콜백
+    this.opts.onStopped?.();
   }
 
   /** 현재 상태 조회 */
@@ -134,10 +171,94 @@ export class DaemonServer {
     };
   }
 
+  // ── Signal Handlers ─────────────────────────────────────
+
+  private registerSignalHandlers(): void {
+    this.signalHandler = () => {
+      this.stop().catch(() => {});
+    };
+    process.on("SIGTERM", this.signalHandler);
+    process.on("SIGINT", this.signalHandler);
+  }
+
+  private removeSignalHandlers(): void {
+    if (this.signalHandler) {
+      process.removeListener("SIGTERM", this.signalHandler);
+      process.removeListener("SIGINT", this.signalHandler);
+      this.signalHandler = null;
+    }
+  }
+
+  // ── Parent PID Monitoring ───────────────────────────────
+
+  private startParentPidMonitor(): void {
+    const parentPid = this.opts.parentPid;
+    if (parentPid == null) return;
+
+    this.parentPidInterval = setInterval(() => {
+      if (!this.isParentAlive(parentPid)) {
+        this.stop().catch(() => {});
+      }
+    }, 5000);
+
+    // interval이 프로세스 종료를 막지 않도록 unref
+    this.parentPidInterval.unref();
+  }
+
+  private stopParentPidMonitor(): void {
+    if (this.parentPidInterval) {
+      clearInterval(this.parentPidInterval);
+      this.parentPidInterval = null;
+    }
+  }
+
+  /** 부모 프로세스 생존 확인 — 테스트에서 override 가능하도록 분리 */
+  protected isParentAlive(pid: number): boolean {
+    try {
+      process.kill(pid, 0);
+      return true;
+    } catch {
+      return false;
+    }
+  }
+
+  // ── Idle Timeout ────────────────────────────────────────
+
+  private resetIdleTimer(): void {
+    this.clearIdleTimer();
+
+    const timeoutMs = this.opts.idleTimeoutMs;
+    if (timeoutMs == null || timeoutMs <= 0) return;
+
+    // 클라이언트가 있으면 타이머 시작하지 않음
+    if (this.clients.size > 0) return;
+
+    this.idleTimer = setTimeout(() => {
+      if (this.isRunning && this.clients.size === 0) {
+        this.stop().catch(() => {});
+      }
+    }, timeoutMs);
+
+    // timer가 프로세스 종료를 막지 않도록 unref
+    this.idleTimer.unref();
+  }
+
+  private clearIdleTimer(): void {
+    if (this.idleTimer) {
+      clearTimeout(this.idleTimer);
+      this.idleTimer = null;
+    }
+  }
+
+  // ── Connection Handling ─────────────────────────────────
+
   /** 클라이언트 연결 핸들러 */
   private handleConnection(socket: Socket): void {
     this.clients.add(socket);
     const parser = new MessageParser();
+
+    // 새 클라이언트 연결 시 idle timer 취소
+    this.clearIdleTimer();
 
     // 연결 즉시 현재 stage prompt 전송
     this.sendStagePrompt(socket);
@@ -151,10 +272,17 @@ export class DaemonServer {
 
     socket.on("close", () => {
       this.clients.delete(socket);
+      // 클라이언트가 0이 되면 idle timer 시작
+      if (this.clients.size === 0) {
+        this.resetIdleTimer();
+      }
     });
 
     socket.on("error", () => {
       this.clients.delete(socket);
+      if (this.clients.size === 0) {
+        this.resetIdleTimer();
+      }
     });
   }
 
@@ -199,6 +327,8 @@ export class DaemonServer {
       // Generation 완료
       this.broadcastMessage({ type: "completed", stage: "completion" });
       this.opts.onCompleted?.();
+      // Auto-stop after completion
+      this.stop().catch(() => {});
       return;
     }
 

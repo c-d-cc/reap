@@ -1,0 +1,8 @@
+id: gen-106-66e0b8
+type: normal
+parents:
+  - gen-006-d9ca51
+goal: Daemon PoC Hardening + 포괄적 테스트
+genomeHash: 13c9ca8a
+startedAt: 2026-03-21T14:45:39.883Z
+completedAt: 2026-03-21T14:54:27.510Z

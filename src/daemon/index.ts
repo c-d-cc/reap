@@ -24,5 +24,6 @@ export {
   removePidFile,
   isProcessAlive,
   isDaemonRunning,
+  probeDaemonSocket,
   type DaemonPaths,
 } from "./pid";

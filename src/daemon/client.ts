@@ -13,7 +13,6 @@ import type { LifeCycleStage } from "../types";
 import {
   type DaemonMessage,
   type ClientMessage,
-  type ClientMessageType,
   encodeMessage,
   MessageParser,
 } from "./protocol";
