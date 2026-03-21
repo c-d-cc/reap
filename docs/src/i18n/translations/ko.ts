@@ -92,7 +92,7 @@ export const ko: Translations = {
       { href: "/docs/command-reference", title: "커맨드 레퍼런스", desc: "/reap.evolve, 단계별 커맨드, /reap.status — 모든 슬래시 커맨드." },
       { href: "/docs/hook-reference", title: "Hook 레퍼런스", desc: "라이프사이클 hooks: command와 prompt 타입, events, SessionStart." },
       { href: "/docs/comparison", title: "비교", desc: "REAP과 기존 스펙 기반 개발 도구와의 비교." },
-      { href: "/docs/advanced", title: "고급", desc: "Lineage 압축, 프리셋, entry 모드." },
+      { href: "/docs/advanced", title: "고급", desc: "서명 기반 잠금, Lineage 압축, 프리셋, entry 모드." },
     ],
   },
 
@@ -483,6 +483,30 @@ strict:
   advanced: {
     title: "고급",
     breadcrumb: "가이드",
+    signatureTitle: "서명 기반 잠금 (Signature-Based Locking)",
+    signatureDesc: "REAP은 암호학적 nonce 체인을 사용하여 stage 순서를 강제합니다. 유효한 nonce 없이는 AI 에이전트가 다음 stage로 진행할 수 없습니다 — 건너뛰려 해도 차단됩니다.",
+    signatureFlow: `Stage Command          current.yml              /reap.next
+─────────────          ───────────              ──────────
+nonce 생성 ──────────→ hash(nonce) 저장
+AI에게 nonce 반환                          ←── AI가 nonce 전달
+                                               hash(nonce) 검증
+                                               ✓ stage 전진`,
+    signatureHow: "작동 방식",
+    signatureHowItems: [
+      "Stage 커맨드 (예: /reap.objective)가 랜덤 nonce를 생성",
+      "Nonce의 SHA-256 해시가 current.yml에 저장",
+      "Nonce가 JSON 응답에 포함되어 AI 에이전트에게 반환",
+      "/reap.next가 nonce를 받아 해시하고 current.yml과 비교",
+      "일치 → stage 전진. 불일치 → 거부.",
+    ],
+    signatureComparisonTitle: "프롬프트 전용 vs 서명 기반",
+    signatureComparisonHeaders: ["위협", "프롬프트 전용", "서명 기반"],
+    signatureComparisonItems: [
+      ["Stage 건너뛰기", "AI 준수에 의존", "차단 — 유효한 nonce 없음"],
+      ["토큰 위조", "해당 없음", "불가능 — 단방향 해시"],
+      ["이전 nonce 재사용", "해당 없음", "차단 — 일회용, stage에 바인딩"],
+      ["프롬프트 인젝션", "취약", "Nonce는 프롬프트 컨텍스트 외부"],
+    ],
     compressionTitle: "Lineage 압축",
     compressionDesc: "Generation이 축적되면 Completion 단계에서 lineage가 자동 압축됩니다.",
     compressionHeaders: ["레벨", "입력", "출력", "트리거", "보호"],

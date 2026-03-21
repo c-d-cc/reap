@@ -90,7 +90,7 @@ export const en = {
       { href: "/docs/command-reference", title: "Command Reference", desc: "/reap.evolve, stage commands, /reap.status — all slash commands." },
       { href: "/docs/hook-reference", title: "Hook Reference", desc: "Lifecycle hooks: command and prompt types, events, SessionStart." },
       { href: "/docs/comparison", title: "Comparison", desc: "How REAP compares to traditional spec-driven development tools." },
-      { href: "/docs/advanced", title: "Advanced", desc: "Lineage compression, presets, entry modes." },
+      { href: "/docs/advanced", title: "Advanced", desc: "Signature-based locking, lineage compression, presets, entry modes." },
     ],
   },
 
@@ -475,6 +475,30 @@ strict:
   advanced: {
     title: "Advanced",
     breadcrumb: "Guide",
+    signatureTitle: "Signature-Based Locking",
+    signatureDesc: "REAP uses a cryptographic nonce chain to enforce stage ordering. Without a valid nonce, the AI agent cannot advance to the next stage — even if it tries to skip ahead.",
+    signatureFlow: `Stage Command          current.yml              /reap.next
+─────────────          ───────────              ──────────
+generate nonce ──────→ store hash(nonce)
+return nonce to AI                         ←── AI passes nonce
+                                               verify hash(nonce)
+                                               ✓ advance stage`,
+    signatureHow: "How It Works",
+    signatureHowItems: [
+      "Stage command (e.g. /reap.objective) generates a random nonce",
+      "The nonce's SHA-256 hash is stored in current.yml",
+      "The nonce is returned to the AI agent in the JSON response",
+      "/reap.next receives the nonce, hashes it, and compares against current.yml",
+      "Match → stage advances. Mismatch → rejected.",
+    ],
+    signatureComparisonTitle: "Prompt-Only vs Signature-Based",
+    signatureComparisonHeaders: ["Threat", "Prompt-Only", "Signature-Based"],
+    signatureComparisonItems: [
+      ["Skipping stages", "Relies on AI compliance", "Blocked — no valid nonce"],
+      ["Forging tokens", "N/A", "Infeasible — one-way hash"],
+      ["Replaying old nonces", "N/A", "Blocked — single-use, stage-bound"],
+      ["Prompt injection", "Vulnerable", "Nonce is external to prompt context"],
+    ],
     compressionTitle: "Lineage Compression",
     compressionDesc: "As generations accumulate, lineage archives are automatically compressed during the Completion stage.",
     compressionHeaders: ["Level", "Input", "Output", "Trigger", "Protection"],

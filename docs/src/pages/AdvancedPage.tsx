@@ -9,6 +9,41 @@ export default function AdvancedPage() {
     <DocLayout>
       <DocPage title={t.advanced.title} breadcrumb={t.advanced.breadcrumb}>
 
+        <h2 className="text-base font-semibold text-foreground mb-2">{t.advanced.signatureTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-3">
+          {t.advanced.signatureDesc}
+        </p>
+        <CodeBlock language="text">{t.advanced.signatureFlow}</CodeBlock>
+
+        <h3 className="text-sm font-semibold text-foreground mt-4 mb-2">{t.advanced.signatureHow}</h3>
+        <ol className="list-decimal list-inside text-sm text-muted-foreground mb-4 space-y-1">
+          {t.advanced.signatureHowItems.map((item) => (
+            <li key={item}>{item}</li>
+          ))}
+        </ol>
+
+        <h3 className="text-sm font-semibold text-foreground mt-4 mb-2">{t.advanced.signatureComparisonTitle}</h3>
+        <div className="border border-border rounded-md overflow-hidden text-sm mb-6">
+          <table className="w-full">
+            <thead>
+              <tr className="border-b border-border bg-muted/30">
+                {t.advanced.signatureComparisonHeaders.map((h) => (
+                  <th key={h} className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border">
+              {t.advanced.signatureComparisonItems.map(([threat, promptOnly, signatureBased]) => (
+                <tr key={threat}>
+                  <td className="px-4 py-2 text-xs text-muted-foreground">{threat}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground">{promptOnly}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground">{signatureBased}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
         <h2 className="text-base font-semibold text-foreground mb-2">{t.advanced.compressionTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3">
           {t.advanced.compressionDesc}

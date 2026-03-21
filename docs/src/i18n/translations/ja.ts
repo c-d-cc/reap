@@ -92,7 +92,7 @@ export const ja: Translations = {
       { href: "/docs/command-reference", title: "コマンドリファレンス", desc: "/reap.evolve、ステージコマンド、/reap.status — 全スラッシュコマンド。" },
       { href: "/docs/hook-reference", title: "Hookリファレンス", desc: "ライフサイクルhooks：commandとpromptタイプ、events、SessionStart。" },
       { href: "/docs/comparison", title: "比較", desc: "REAPと既存のスペック駆動開発ツールとの比較。" },
-      { href: "/docs/advanced", title: "上級", desc: "Lineage圧縮、プリセット、entryモード。" },
+      { href: "/docs/advanced", title: "上級", desc: "署名ベースロック、Lineage圧縮、プリセット、entryモード。" },
     ],
   },
 
@@ -483,6 +483,30 @@ strict:
   advanced: {
     title: "上級",
     breadcrumb: "ガイド",
+    signatureTitle: "署名ベースロック（Signature-Based Locking）",
+    signatureDesc: "REAPは暗号学的nonceチェーンを使用してステージの順序を強制します。有効なnonceがなければ、AIエージェントは次のステージに進むことができません — スキップしようとしてもブロックされます。",
+    signatureFlow: `Stage Command          current.yml              /reap.next
+─────────────          ───────────              ──────────
+nonce生成 ────────────→ hash(nonce)を保存
+AIにnonce返却                              ←── AIがnonceを渡す
+                                               hash(nonce)を検証
+                                               ✓ ステージ前進`,
+    signatureHow: "仕組み",
+    signatureHowItems: [
+      "ステージコマンド（例：/reap.objective）がランダムnonceを生成",
+      "NonceのSHA-256ハッシュがcurrent.ymlに保存",
+      "NonceがJSONレスポンスに含まれてAIエージェントに返却",
+      "/reap.nextがnonceを受け取り、ハッシュしてcurrent.ymlと比較",
+      "一致 → ステージ前進。不一致 → 拒否。",
+    ],
+    signatureComparisonTitle: "プロンプトのみ vs 署名ベース",
+    signatureComparisonHeaders: ["脅威", "プロンプトのみ", "署名ベース"],
+    signatureComparisonItems: [
+      ["ステージのスキップ", "AIの遵守に依存", "ブロック — 有効なnonceなし"],
+      ["トークンの偽造", "該当なし", "不可能 — 一方向ハッシュ"],
+      ["古いnonceの再利用", "該当なし", "ブロック — ワンタイム、ステージにバインド"],
+      ["プロンプトインジェクション", "脆弱", "Nonceはプロンプトコンテキスト外"],
+    ],
     compressionTitle: "Lineage圧縮",
     compressionDesc: "Generationが蓄積されると、lineageアーカイブはサイズ管理のために自動的に圧縮されます。",
     compressionHeaders: ["レベル", "入力", "出力", "最大行数", "トリガー"],

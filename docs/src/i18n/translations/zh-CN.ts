@@ -92,7 +92,7 @@ export const zhCN: Translations = {
       { href: "/docs/command-reference", title: "命令参考", desc: "/reap.evolve、阶段命令、/reap.status — 所有斜杠命令。" },
       { href: "/docs/hook-reference", title: "Hook参考", desc: "生命周期hooks：command和prompt类型、events、SessionStart。" },
       { href: "/docs/comparison", title: "对比", desc: "REAP与现有规格驱动开发工具的对比。" },
-      { href: "/docs/advanced", title: "进阶", desc: "Lineage压缩、预设、entry模式。" },
+      { href: "/docs/advanced", title: "进阶", desc: "签名锁定、Lineage压缩、预设、entry模式。" },
     ],
   },
 
@@ -483,6 +483,30 @@ strict:
   advanced: {
     title: "进阶",
     breadcrumb: "指南",
+    signatureTitle: "签名锁定（Signature-Based Locking）",
+    signatureDesc: "REAP使用加密nonce链来强制执行阶段顺序。没有有效的nonce，AI代理无法推进到下一阶段 — 即使尝试跳过也会被阻止。",
+    signatureFlow: `Stage Command          current.yml              /reap.next
+─────────────          ───────────              ──────────
+生成nonce ────────────→ 存储hash(nonce)
+将nonce返回给AI                            ←── AI传递nonce
+                                               验证hash(nonce)
+                                               ✓ 阶段推进`,
+    signatureHow: "工作原理",
+    signatureHowItems: [
+      "阶段命令（如 /reap.objective）生成随机nonce",
+      "Nonce的SHA-256哈希存储在current.yml中",
+      "Nonce包含在JSON响应中返回给AI代理",
+      "/reap.next接收nonce，进行哈希并与current.yml比较",
+      "匹配 → 阶段推进。不匹配 → 拒绝。",
+    ],
+    signatureComparisonTitle: "仅提示词 vs 签名锁定",
+    signatureComparisonHeaders: ["威胁", "仅提示词", "签名锁定"],
+    signatureComparisonItems: [
+      ["跳过阶段", "依赖AI遵守", "阻止 — 无有效nonce"],
+      ["伪造令牌", "不适用", "不可行 — 单向哈希"],
+      ["重放旧nonce", "不适用", "阻止 — 一次性，绑定到当前阶段"],
+      ["提示词注入", "脆弱", "Nonce在提示词上下文之外"],
+    ],
     compressionTitle: "Lineage压缩",
     compressionDesc: "随着Generation的积累，lineage归档会自动压缩以管理大小。",
     compressionHeaders: ["级别", "输入", "输出", "最大行数", "触发条件"],

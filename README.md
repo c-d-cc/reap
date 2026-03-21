@@ -37,6 +37,7 @@ REAP captures an application's design knowledge — the Genome (architecture, co
 - [Lineage Compression](#lineage-compression)
 - [Evolution Flow](#evolution-flow)
 - [Presets](#presets)
+- [Signature-Based Locking](#signature-based-locking)
 - [Entry Modes](#entry-modes)
 
 ## Why REAP?
@@ -238,6 +239,24 @@ REAP integrates with AI agents through slash commands and session hooks. Current
 ### Script Orchestrator Architecture
 
 Since v0.11.0, all 28 slash commands follow a **1-line `.md` wrapper + TypeScript script** pattern. Each `.md` file simply calls `reap run <cmd>`, and the TS script (`src/cli/commands/run/`) handles all deterministic logic — returning structured JSON instructions for the AI agent. This ensures consistency and testability.
+
+### Signature-Based Locking [↗](https://reap.cc/docs/advanced)
+
+REAP uses a cryptographic nonce chain to enforce stage ordering. When a stage command runs, the script generates a one-time nonce, stores its hash in `current.yml`, and returns the nonce to the AI agent. `/reap.next` requires this nonce to advance — without it, progression is rejected.
+
+```
+Stage Command          current.yml              /reap.next
+─────────────          ───────────              ──────────
+generate nonce ──────→ store hash(nonce)
+return nonce to AI                         ←── AI passes nonce
+                                               verify hash(nonce)
+                                               ✓ advance stage
+```
+
+This prevents:
+- **Skipping stages** — no valid nonce exists for stages that were not executed
+- **Forging tokens** — the hash is one-way; guessing the nonce from the hash is infeasible
+- **Replaying old nonces** — each nonce is single-use and bound to the current stage
 
 ### autoSubagent Mode
 
