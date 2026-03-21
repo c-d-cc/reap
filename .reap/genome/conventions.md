@@ -45,6 +45,14 @@
 - Help 텍스트: `src/templates/help/` — 언어별 CLI help 출력 (en.txt, ko.txt)
 - **새 템플릿 추가 시 반드시 `init.ts`의 COMMAND_NAMES 및 설치 로직도 동기화하라**
 
+## Script Orchestrator Pattern
+
+- Slash command(.md)는 **1줄 wrapper** 유지 — 로직/조건문/다단계 지시 없음
+- Deterministic 로직(gate, state 전환, artifact 생성 등)은 `src/cli/commands/run/`에서 `src/core/` 직접 호출
+- Creative 작업 지점에서 `emitOutput()` — structured JSON으로 AI에게 지시
+- Phase 기반 재진입: `reap run <command> --phase <phase>` — deterministic-creative 교차 구간 처리
+- env var로 AI → script 데이터 전달: `REAP_START_GOAL`, `REAP_BACK_TARGET` 등
+
 ## Language
 
 - 산출물(artifact), backlog, 사용자 인터랙션: 유저의 language 설정을 따름

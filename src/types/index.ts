@@ -146,3 +146,16 @@ export interface AdaptationRecord {
   diff: string;
   createdAt: string;
 }
+
+// ── reap run output types ──────────────────────────────────
+
+export interface RunOutput {
+  status: "ok" | "prompt" | "error";
+  command: string;
+  phase: string;
+  completed: string[];
+  context?: Record<string, unknown>;
+  prompt?: string;
+  nextCommand?: string;
+  message?: string;
+}

@@ -18,7 +18,7 @@ C4Context
   System_Ext(npm, "npm Registry", "@c-d-cc/reap 패키지 배포")
   System_Ext(github, "GitHub Actions", "CI/CD, 릴리스 자동화")
 
-  Rel(user, reap, "reap init/status/fix/update")
+  Rel(user, reap, "reap init/status/fix/update/run")
   Rel(agent, reap, "slash commands (13개)")
   Rel(reap, npm, "publish")
   Rel(github, npm, "auto release")
@@ -30,7 +30,7 @@ C4Context
 C4Container
   title REAP Containers
 
-  Container(cli, "CLI Layer", "src/cli/", "Commander.js 진입점. init, status, fix, update, help")
+  Container(cli, "CLI Layer", "src/cli/", "Commander.js 진입점. init, status, fix, update, help, run")
   Container(core, "Core Layer", "src/core/", "비즈니스 로직. 아래 Component 참조")
   Container(types, "Types", "src/types/index.ts", "공유 타입 정의 (~120줄). GenerationType, GenerationMeta 추가")
   Container(templates, "Templates", "src/templates/", "commands(13), artifacts(5), genome, hooks, help, presets")
@@ -63,6 +63,8 @@ C4Component
   Component(adaptation, "AdaptationManager", "adaptation.ts", "Generation adaptation 기록")
   Component(migration, "MigrationRunner", "migrations/", "버전 기반 migration registry. semver 범위 필터 + 순차 실행. legacy lineage DAG 변환 포함")
   Component(genomeSync, "GenomeSync", "genome-sync.ts", "프로젝트 스캔→genome 자동 생성. adoption/migration init 시 호출")
+  Component(backlog, "Backlog Utils", "backlog.ts", "scanBacklog, markBacklogConsumed — backlog CRUD")
+  Component(runOutput, "RunOutput", "run-output.ts", "emitOutput, emitError — structured JSON output")
   Component(fs, "FS Utils", "fs.ts", "readTextFile, writeTextFile, fileExists")
 
   Rel(generation, lifecycle, "stage transitions")
@@ -87,6 +89,7 @@ C4Component
 | `reap fix` | `cli/commands/fix.ts` | .reap/ 구조 진단/복구 |
 | `reap update` | `cli/commands/update.ts` | commands/templates/hooks 동기화 |
 | `reap help` | `cli/index.ts` | 언어별 help 텍스트 출력 (en/ko) |
+| `reap run` | `cli/commands/run/index.ts` | command script dispatcher (next, back, start, completion) |
 
 ## Agent Adapters
 

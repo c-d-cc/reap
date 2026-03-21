@@ -174,4 +174,13 @@ program
     console.log(helpText);
   });
 
+program
+  .command("run <command>")
+  .description("Run a REAP command script (internal, used by slash commands)")
+  .option("--phase <phase>", "Start from a specific phase")
+  .action(async (command: string, options: { phase?: string }) => {
+    const { runCommand } = await import("./commands/run/index");
+    await runCommand(command, options.phase);
+  });
+
 program.parse();
