@@ -61,37 +61,52 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "genome") {
-    // Phase 2: AI has written retrospective. Now handle genome changes.
+    // Phase 2: AI has written retrospective. Now handle genome changes + auto consume/archive.
     const backlogItems = await scanBacklog(paths.backlog);
     const genomeChanges = backlogItems.filter(b => b.type === "genome-change" && b.status !== "consumed");
     const envChanges = backlogItems.filter(b => b.type === "environment-change" && b.status !== "consumed");
 
-    if (genomeChanges.length === 0 && envChanges.length === 0) {
-      // No genome/env changes — skip to hook-suggest
-      emitOutput({
-        status: "prompt",
-        command: "completion",
-        phase: "hook-suggest",
-        completed: ["gate", "artifact-create", "context-scan", "retrospective", "genome-skip"],
-        context: { id: state.id },
-        prompt: "No genome/environment changes to apply. Check the last 3 generations in .reap/lineage/ for repeated manual patterns. If found, suggest hooks (max 2). Then run: reap run completion --phase archive",
-        nextCommand: "reap run completion --phase archive",
-      });
-    } else {
-      emitOutput({
-        status: "prompt",
-        command: "completion",
-        phase: "genome-apply",
-        completed: ["gate", "artifact-create", "context-scan", "retrospective"],
-        context: {
-          id: state.id,
-          genomeChanges: genomeChanges.map(g => ({ filename: g.filename, title: g.title, body: g.body, target: g.target })),
-          envChanges: envChanges.map(e => ({ filename: e.filename, title: e.title, body: e.body, target: e.target })),
-        },
-        prompt: "Apply genome-change items to .reap/genome/ and environment-change items to .reap/environment/. Run validation commands after. Get human confirmation (unless autonomous). Then run: reap run completion --phase consume",
-        nextCommand: "reap run completion --phase consume",
-      });
+    // --- Consume: mark genome/env changes as consumed ---
+    const toConsume = backlogItems.filter(
+      b => (b.type === "genome-change" || b.type === "environment-change") && b.status !== "consumed"
+    );
+    for (const item of toConsume) {
+      await markBacklogConsumed(paths.backlog, item.filename, state.id);
     }
+
+    // --- Archive: execute hooks, check submodules, complete generation ---
+    const hookResults = await executeHooks(paths.hooks, "onLifeCompleted", paths.projectRoot);
+    const submodules = checkSubmodules(paths.projectRoot);
+    const dirtySubmodules = submodules.filter(s => s.dirty);
+    const compression = await gm.complete();
+
+    const hasChanges = genomeChanges.length > 0 || envChanges.length > 0;
+    const completedSteps = [
+      "gate", "artifact-create", "context-scan", "retrospective",
+      ...(hasChanges ? ["genome-apply"] : ["genome-skip"]),
+      "backlog-consume", "hooks", "archive", "compress",
+    ];
+
+    emitOutput({
+      status: "prompt",
+      command: "completion",
+      phase: "commit",
+      completed: completedSteps,
+      context: {
+        id: state.id,
+        goal: state.goal,
+        genomeChanges: hasChanges ? genomeChanges.map(g => ({ filename: g.filename, title: g.title, body: g.body, target: g.target })) : [],
+        envChanges: hasChanges ? envChanges.map(e => ({ filename: e.filename, title: e.title, body: e.body, target: e.target })) : [],
+        consumedCount: toConsume.length,
+        compression: { level1: compression.level1.length, level2: compression.level2.length },
+        hookResults,
+        dirtySubmodules,
+      },
+      prompt: dirtySubmodules.length > 0
+        ? `Dirty submodules detected: ${dirtySubmodules.map(s => s.path).join(", ")}. Commit and push inside each submodule first, then commit the parent repo. Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`
+        : `Commit all changes (code + .reap/ artifacts). Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`,
+      message: `Generation ${state.id} archived. ${hasChanges ? "Genome/env changes applied." : "No genome/environment changes."} ${toConsume.length} backlog item(s) consumed.`,
+    });
   }
 
   if (phase === "consume") {

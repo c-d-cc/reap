@@ -1,3 +1,4 @@
+# REAP MANAGED — Do not modify directly. Use reap run commands.
 # Implementation Log
 
 ## Completed Tasks

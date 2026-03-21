@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-099-3e6442
 ---
 
 # current.yml + artifact 템플릿에 AI 직접 수정 금지 frontmatter 추가

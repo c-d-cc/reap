@@ -2,6 +2,7 @@ import type { ReapPaths } from "../../../core/paths";
 import { GenerationManager } from "../../../core/generation";
 import { readTextFile } from "../../../core/fs";
 import { emitOutput } from "../../../core/run-output";
+import { formatVersionLine } from "../../../core/version";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -14,6 +15,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const strict = configContent?.match(/strict:\s*(true|false)/)?.[1] === "true" ? "on" : "off";
   const autoUpdate = configContent?.match(/autoUpdate:\s*(true|false)/)?.[1] === "true" ? "on" : "off";
   const language = configContent?.match(/language:\s*(\w+)/)?.[1] ?? "ko";
+  const configVersion = configContent?.match(/version:\s*([\d.]+)/)?.[1] ?? "0.0.0";
+  const skipCheck = autoUpdate !== "on";
+  const versionDisplay = formatVersionLine(configVersion, skipCheck);
 
   // Determine topic from REAP_HELP_TOPIC env var (set by AI before calling)
   const topic = process.env.REAP_HELP_TOPIC;
@@ -28,6 +32,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       generationId: state?.id,
       goal: state?.goal,
       stage: state?.stage,
+      version: configVersion,
+      versionDisplay,
       config: { strict, autoUpdate, language },
       topic: topic || null,
     },
@@ -63,7 +69,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       "| `/reap.push` | REAP 상태 검증 + git push |",
       "| `/reap.report` | 버그/이슈 리포트 |",
       "",
-      `Config: Strict: ${strict} | Auto-Update: ${autoUpdate} | Language: ${language}`,
+      `${versionDisplay} | Strict: ${strict} | Auto-Update: ${autoUpdate} | Language: ${language}`,
       "",
       "### Topic Help",
       "If a topic is provided, look up from these known topics:",

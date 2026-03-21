@@ -8,6 +8,8 @@ import { LifeCycle } from "../core/lifecycle";
 import { ReapPaths } from "../core/paths";
 import { AgentRegistry } from "../core/agents";
 import { readTextFile } from "../core/fs";
+import { formatVersionLine } from "../core/version";
+import { ConfigManager } from "../core/config";
 import { join } from "path";
 
 program
@@ -71,8 +73,16 @@ program
   .description("Show current project and Generation status")
   .action(async () => {
     try {
-      const status = await getStatus(process.cwd());
-      console.log(`Project: ${status.project} (${status.entryMode})`);
+      const cwd = process.cwd();
+      const status = await getStatus(cwd);
+
+      // Check autoUpdate config to decide whether to check latest
+      const paths = new ReapPaths(cwd);
+      const config = await ConfigManager.read(paths);
+      const skipCheck = config.autoUpdate === false;
+      const versionLine = formatVersionLine(status.version, skipCheck);
+
+      console.log(`${versionLine} | Project: ${status.project} (${status.entryMode})`);
       console.log(`Completed Generations: ${status.totalGenerations}`);
       if (status.generation) {
         console.log(`\nActive Generation: ${status.generation.id}`);

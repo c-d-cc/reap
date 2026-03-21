@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-099-3e6442
 ---
 
 # reap status / reap help 에 REAP 버전 출력 추가

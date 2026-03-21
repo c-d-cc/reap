@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-099-3e6442
 ---
 
 # completion: consume/archive/commit을 genome 이후 자동 실행

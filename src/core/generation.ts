@@ -80,6 +80,10 @@ export function isLegacyId(id: string): boolean {
   return /^gen-\d{3}$/.test(id);
 }
 
+// ── Constants ────────────────────────────────────────────────
+
+const CURRENT_YML_HEADER = "# REAP MANAGED — Do not modify directly. Use reap run next/back/start/abort.\n";
+
 // ── GenerationManager ───────────────────────────────────────
 
 export class GenerationManager {
@@ -115,7 +119,7 @@ export class GenerationManager {
       parents,
       genomeHash,
     };
-    await writeTextFile(this.paths.currentYml, YAML.stringify(state));
+    await writeTextFile(this.paths.currentYml, CURRENT_YML_HEADER + YAML.stringify(state));
     return state;
   }
 
@@ -129,7 +133,7 @@ export class GenerationManager {
     state.stage = next;
     if (!state.timeline) state.timeline = [];
     state.timeline.push({ stage: next, at: new Date().toISOString() });
-    await writeTextFile(this.paths.currentYml, YAML.stringify(state));
+    await writeTextFile(this.paths.currentYml, CURRENT_YML_HEADER + YAML.stringify(state));
     return state;
   }
 
@@ -214,7 +218,7 @@ export class GenerationManager {
   }
 
   async save(state: GenerationState): Promise<void> {
-    await writeTextFile(this.paths.currentYml, YAML.stringify(state));
+    await writeTextFile(this.paths.currentYml, CURRENT_YML_HEADER + YAML.stringify(state));
   }
 
   async listCompleted(): Promise<string[]> {

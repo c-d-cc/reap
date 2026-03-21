@@ -3,6 +3,7 @@ import { GenerationManager } from "../../core/generation";
 import { ConfigManager } from "../../core/config";
 
 export interface ProjectStatus {
+  version: string;
   project: string;
   entryMode: string;
   generation: {
@@ -27,6 +28,7 @@ export async function getStatus(projectRoot: string): Promise<ProjectStatus> {
   const completedGens = await mgr.listCompleted();
 
   return {
+    version: config.version,
     project: config.project,
     entryMode: config.entryMode,
     generation: current ? {
