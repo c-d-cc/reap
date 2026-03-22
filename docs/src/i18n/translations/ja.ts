@@ -346,6 +346,7 @@ export const ja: Translations = {
       ["/reap.help", "24+トピックの状況別ヘルプを提供。"],
       ["/reap.update", "REAPパッケージのアップグレード + コマンド/テンプレート/hookをすべてのエージェントに同期。プロジェクトの.claude/commands/を即時同期。"],
       ["/reap.refreshKnowledge", "サブエージェント用REAPコンテキストのロード（Genome、Environment、状態）。オーケストレーターがサブエージェントセッションをブートストラップする際に使用。"],
+      ["/reap.update-genome", "Generationなしでpending genome-change backlogを適用。active generationがない場合のみ実行可能。適用項目はconsumedマーク、genomeVersion増加。"],
     ],
     commandStructure: "Script Orchestratorアーキテクチャ",
     commandStructureDesc: "v0.11.0より、すべてのスラッシュコマンドはreap run <cmd>を呼び出す1行.md wrapperです。TypeScriptスクリプトがすべての決定論的ロジックを処理し、AIにstructured JSONで指示します。パターン：Gate（前提条件チェック） → Steps（作業実行） → Artifact（.reap/life/に記録）。Generationタイプ：normal、merge、recovery。",

@@ -223,7 +223,6 @@ Machine A:
 | `reap status` | 查看当前Generation状态 |
 | `reap update` | 将命令/模板/hook同步到最新版本 |
 | `reap fix` | 诊断和修复`.reap/`结构（`--check`为只读模式） |
-| `reap update-genome` | 从CLI更新genome文件（非交互式） |
 | `reap clean` | 通过交互式选项重置REAP项目 |
 | `reap destroy` | 从项目中删除所有REAP文件（需输入"yes destroy"确认） |
 | `reap help` | 输出CLI命令 + 斜杠命令 + 工作流摘要（显示版本 + 最新状态） |
@@ -317,6 +316,7 @@ autoIssueReport: true    # 默认值: true（检测到gh CLI时）
 | `/reap.report` | 向REAP项目报告bug/反馈（隐私保护） |
 | `/reap.help` | 24+主题的上下文AI帮助 |
 | `/reap.update` | 升级REAP包 + 同步命令/模板/hook |
+| `/reap.update-genome` | 无需Generation即可应用待处理的genome-change backlog |
 | **`/reap.evolve`** | **从头到尾运行一个完整的Generation（推荐）** |
 | **`/reap.evolve.recovery`** | **从失败/中断的Generation中恢复** |
 | **`/reap.pull <branch>`** | **Fetch + 运行完整合并Generation（分布式 `/reap.evolve`）** |

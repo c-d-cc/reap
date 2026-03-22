@@ -344,6 +344,7 @@ export const en = {
       ["/reap.help", "Provide contextual help with 24+ topics."],
       ["/reap.update", "Upgrade REAP package + sync commands, templates, and hooks to all detected agents. Also syncs project .claude/commands/ immediately."],
       ["/reap.refreshKnowledge", "Load REAP context for subagents (Genome, Environment, state). Used by orchestrator agents to bootstrap subagent sessions."],
+      ["/reap.update-genome", "Apply pending genome-change backlog without a generation. Only available when no generation is active. Marks applied items as consumed and bumps genomeVersion."],
     ],
     commandStructure: "Script Orchestrator Architecture",
     commandStructureDesc: "Since v0.11.0, every slash command is a 1-line .md wrapper that calls reap run <cmd>. The TypeScript script handles all deterministic logic and returns structured JSON instructions for the AI agent. Pattern: Gate (precondition check) → Steps (work execution) → Artifact (recorded to .reap/life/). Generation types: normal, merge, and recovery.",

@@ -150,13 +150,13 @@ REAP supports multiple AI agents simultaneously through the AgentAdapter abstrac
 
 ## CLI Subcommands
 
-9 CLI subcommands: `reap init`, `reap status`, `reap update`, `reap fix` (`--check` for read-only), `reap update-genome`, `reap clean`, `reap destroy`, `reap help`, `reap run`.
+8 CLI subcommands: `reap init`, `reap status`, `reap update`, `reap fix` (`--check` for read-only), `reap clean`, `reap destroy`, `reap help`, `reap run`.
 
 ## Role Separation
 
 | Component | Role |
 |-----------|------|
-| **CLI (`reap`)** | Project setup and maintenance. Init, status, update, fix, update-genome |
+| **CLI (`reap`)** | Project setup and maintenance. Init, status, update, fix, clean, destroy |
 | **AI Agent** | Workflow executor. Performs each stage's work via slash commands |
 | **Human** | Decision maker. Sets goals, finalizes specs, reviews code, approves stage transitions |
 

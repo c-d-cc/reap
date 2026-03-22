@@ -223,7 +223,6 @@ Machine A:
 | `reap status` | 現在のGeneration状態を確認 |
 | `reap update` | コマンド/テンプレート/hookを最新バージョンに同期 |
 | `reap fix` | `.reap/`構造の診断と修復（`--check`で読み取り専用モード） |
-| `reap update-genome` | CLIからgenomeファイルを更新（非対話型） |
 | `reap clean` | 対話式オプションでREAPプロジェクトをリセット |
 | `reap destroy` | プロジェクトからすべてのREAPファイルを削除（"yes destroy"の入力で確認） |
 | `reap help` | CLIコマンド + スラッシュコマンド + ワークフロー概要を出力（バージョン + 最新状況表示） |
@@ -317,6 +316,7 @@ autoIssueReport: true    # デフォルト: true（gh CLIがある場合）
 | `/reap.report` | REAPプロジェクトにバグ/フィードバックを報告（プライバシー保護） |
 | `/reap.help` | 24+トピックのcontextual AIヘルプ |
 | `/reap.update` | REAPパッケージのアップグレード + コマンド/テンプレート/hook同期 |
+| `/reap.update-genome` | Generationなしで保留中のgenome-change backlogを適用 |
 | **`/reap.evolve`** | **1つのGeneration全体を最初から最後まで実行（推奨）** |
 | **`/reap.evolve.recovery`** | **失敗/中断したGenerationからの復旧** |
 | **`/reap.pull <branch>`** | **Fetch + マージGeneration全体を実行（分散版 `/reap.evolve`）** |

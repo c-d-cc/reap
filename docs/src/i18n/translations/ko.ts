@@ -346,6 +346,7 @@ export const ko: Translations = {
       ["/reap.help", "24+ 주제의 상황별 도움말 제공."],
       ["/reap.update", "REAP 패키지 업그레이드 + 커맨드/템플릿/훅을 모든 에이전트에 동기화. 프로젝트 .claude/commands/ 즉시 동기화."],
       ["/reap.refreshKnowledge", "서브에이전트용 REAP 컨텍스트 로드 (Genome, Environment, 상태). 오케스트레이터 에이전트가 서브에이전트 세션을 부트스트랩할 때 사용."],
+      ["/reap.update-genome", "Generation 없이 pending genome-change backlog 적용. active generation이 없을 때만 실행 가능. 적용된 항목은 consumed 마킹, genomeVersion 증가."],
     ],
     commandStructure: "Script Orchestrator 아키텍처",
     commandStructureDesc: "v0.11.0부터 모든 슬래시 커맨드는 reap run <cmd>를 호출하는 1줄 .md wrapper입니다. TypeScript 스크립트가 모든 결정적 로직을 처리하고 AI에게 structured JSON으로 지시합니다. 패턴: Gate (사전 조건 확인) → Steps (작업 실행) → Artifact (.reap/life/에 기록). Generation 유형: normal, merge, recovery.",
