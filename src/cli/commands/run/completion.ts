@@ -1,11 +1,36 @@
 import { join } from "path";
 import type { ReapPaths } from "../../../core/paths";
+import type { HookResult } from "../../../types";
 import { GenerationManager } from "../../../core/generation";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { scanBacklog, markBacklogConsumed } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
 import { checkSubmodules } from "../../../core/commit";
+
+/**
+ * Collect executed .md hook contents and build a prompt string
+ * so the AI subagent follows hook instructions.
+ */
+function buildMdHookPrompt(hookResults: HookResult[]): string {
+  const mdHooks = hookResults.filter(
+    (h) => h.type === "md" && h.status === "executed" && h.content,
+  );
+  if (mdHooks.length === 0) return "";
+
+  const sections = mdHooks.map(
+    (h) => `### ${h.name}\n${h.content}`,
+  );
+
+  return [
+    "",
+    "",
+    "## Hook Prompts",
+    "다음 hook prompt를 순서대로 실행하라:",
+    "",
+    ...sections,
+  ].join("\n");
+}
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -102,9 +127,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         hookResults,
         dirtySubmodules,
       },
-      prompt: dirtySubmodules.length > 0
+      prompt: (dirtySubmodules.length > 0
         ? `Dirty submodules detected: ${dirtySubmodules.map(s => s.path).join(", ")}. Commit and push inside each submodule first, then commit the parent repo. Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`
-        : `Commit all changes (code + .reap/ artifacts). Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`,
+        : `Commit all changes (code + .reap/ artifacts). Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`) + buildMdHookPrompt(hookResults),
       message: `Generation ${state.id} archived. ${hasChanges ? "Genome/env changes applied." : "No genome/environment changes."} ${toConsume.length} backlog item(s) consumed.`,
     });
   }
@@ -154,9 +179,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         hookResults,
         dirtySubmodules,
       },
-      prompt: dirtySubmodules.length > 0
+      prompt: (dirtySubmodules.length > 0
         ? `Dirty submodules detected: ${dirtySubmodules.map(s => s.path).join(", ")}. Commit and push inside each submodule first, then commit the parent repo. Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`
-        : `Commit all changes (code + .reap/ artifacts). Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`,
+        : `Commit all changes (code + .reap/ artifacts). Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`) + buildMdHookPrompt(hookResults),
       message: `Generation ${state.id} archived.`,
     });
   }

@@ -104,6 +104,13 @@ function buildSubagentPrompt(
   lines.push("- Create a git commit after implementation and after completion.");
   lines.push("- Use conventional commit format: `feat|fix|chore(scope): description`");
   lines.push("- Include the generation ID in the commit message.");
+  lines.push("");
+
+  // Hook prompt execution instructions
+  lines.push("## Hook Prompt Execution");
+  lines.push("- completion output의 `prompt` 필드에 '## Hook Prompts' 섹션이 포함되어 있으면, 해당 hook prompt를 반드시 순서대로 실행하라.");
+  lines.push("- Hook prompt는 `.md` hook 파일의 내용으로, AI가 따라야 할 지시사항이다.");
+  lines.push("- Hook prompt에 유저 확인이 필요한 경우(예: 프리뷰+컨펌), autonomous mode에서도 이를 존중하라.");
 
   return lines.join("\n");
 }

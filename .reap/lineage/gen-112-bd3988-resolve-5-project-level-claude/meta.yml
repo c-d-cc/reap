@@ -1,9 +1,0 @@
-id: gen-112-bd3988
-type: normal
-parents:
-  - gen-006-d9ca51
-goal: "resolve #5: Project-level .claude/commands/ not loaded into Claude Code
-  skills list"
-genomeHash: 4c796714
-startedAt: 2026-03-22T06:24:39.068Z
-completedAt: 2026-03-22T06:32:09.512Z

@@ -1,20 +1,20 @@
 # Completion
 
 ## Summary
-- **Goal**: fix: resolve #5 — `.claude/commands/`에서 `.claude/skills/`로 REAP 커맨드 설치 경로 마이그레이션
+- **Goal**: fix: .md hook이 evolve subagent에서 실행되도록 completion output 개선
 - **Period**: 2026-03-22
 - **Result**: pass
-- **Key Changes**: session-start.cjs와 update.ts에서 커맨드 설치 경로를 `.claude/skills/{name}/SKILL.md`로 변경, 레거시 정리 로직 추가
+- **Key Changes**: completion.ts에 `buildMdHookPrompt()` 헬퍼 추가하여 .md hook content를 prompt에 append, evolve.ts subagentPrompt에 Hook Prompt Execution 안내 추가
 
 ## Retrospective
 
 ### Lessons Learned
 #### What Went Well
-- 두 파일만 수정하여 깔끔하게 마이그레이션 완료
-- 기존 테스트 595개 모두 통과
+- 변경 범위가 명확하여 2개 파일만 수정으로 완료
+- 기존 hook-engine.ts를 전혀 수정하지 않고 output 레이어에서만 해결
 
 #### Areas for Improvement
-- 없음
+- .md hook의 실행 결과를 AI가 실제로 따르는지는 E2E 레벨에서만 검증 가능 — 향후 E2E 테스트 추가 고려
 
 ### Genome Change Proposals
 | Target File | Change Description | Reason |
@@ -42,8 +42,8 @@
 | - | - | - |
 
 ### Genome Version
-- Before: v112
-- After: v112 (genome 파일 변경 없음)
+- Before: v115
+- After: v115 (genome 파일 변경 없음)
 
 ### Modified Genome Files
 없음
