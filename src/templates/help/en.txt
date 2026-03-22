@@ -21,8 +21,6 @@ Slash Commands (use in Claude Code):
   /reap.sync           Synchronize Genome with source code
   /reap.help           Contextual help (AI-powered)
   /reap.refreshKnowledge  Load REAP context for subagents
-  /reapdev.docsUpdate     Update docs/README/i18n from code changes
-  /reapdev.versionBump    Analyze changes and bump version
 
 Quick Start:
   1. reap init my-project

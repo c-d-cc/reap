@@ -21,8 +21,6 @@ CLI 명령어:
   /reap.sync           Genome을 소스 코드와 동기화
   /reap.help           상황별 도움말 (AI 기반)
   /reap.refreshKnowledge  서브에이전트용 REAP 컨텍스트 로드
-  /reapdev.docsUpdate     코드 변경 기반 문서/README/i18n 업데이트
-  /reapdev.versionBump    변경 분석 및 버전 범프
 
 빠른 시작:
   1. reap init my-project
