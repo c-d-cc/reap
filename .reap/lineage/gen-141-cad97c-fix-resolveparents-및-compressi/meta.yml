@@ -1,7 +1,7 @@
 id: gen-141-cad97c
 type: normal
 parents:
-  - gen-045-3785e0
+  - gen-140-80b51f
 goal: "fix: resolveParents 및 compression의 NaN completedAt 정렬 버그 수정"
 genomeHash: c8d4e1e4
 startedAt: 2026-03-22T14:58:55.702Z

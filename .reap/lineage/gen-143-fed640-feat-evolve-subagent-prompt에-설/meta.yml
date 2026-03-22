@@ -1,7 +1,7 @@
 id: gen-143-fed640
 type: normal
 parents:
-  - gen-045-3785e0
+  - gen-142-610ca8
 goal: "feat: evolve subagent prompt에 설계 피벗 감지 및 artifact 일관성 검증 규칙 추가"
 genomeHash: c8d4e1e4
 startedAt: 2026-03-22T15:12:12.955Z
