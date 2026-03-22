@@ -62,8 +62,9 @@ program
       console.log(`  Genome:   .reap/genome/ (principles, conventions, constraints)`);
       console.log(`\n  Getting started:`);
       console.log(`    1. Open your AI agent (${initResult.agents[0] || "Claude Code or OpenCode"})`);
-      console.log(`    2. Run /reap.start to begin your first Generation`);
-      console.log(`    3. Or run /reap.evolve for autonomous execution`);
+      console.log(`    2. Run /reap.sync to synchronize Genome with your project`);
+      console.log(`    3. Run /reap.start to begin your first Generation`);
+      console.log(`    4. Or run /reap.evolve for autonomous execution`);
       if (initResult.agents.length === 0) {
         console.log(`\n  ⚠ No AI agents detected. Install Claude Code or OpenCode, then run 'reap update'.`);
       }
