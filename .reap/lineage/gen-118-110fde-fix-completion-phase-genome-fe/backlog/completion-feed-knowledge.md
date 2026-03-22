@@ -1,7 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
+consumedBy: gen-118-110fde
 ---
 
 # completion phase "genome" → "feedKnowledge" 리네이밍 + genome/environment 영향 자동 감지

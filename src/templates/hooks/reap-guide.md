@@ -170,7 +170,7 @@ objective → planning → implementation → validation → completion
 6. `/reap.completion` — Retrospective + genome updates + archiving (auto)
 
 `/reap.next` is a **transition command**, not a lifecycle stage. It advances `current.yml` to the next stage.
-`/reap.completion` auto-archives after the genome phase — no separate `/reap.next` needed at the end.
+`/reap.completion` auto-archives after the feedKnowledge phase — no separate `/reap.next` needed at the end.
 
 ## Language
 

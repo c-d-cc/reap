@@ -82,7 +82,7 @@ function buildSubagentPrompt(
   lines.push("3. Write the required artifact BEFORE completing the stage.");
   lines.push("4. Run the stage complete phase if applicable (e.g., `reap run <stage> --phase complete`).");
   lines.push("5. If current stage is NOT `completion`: run `/reap.next` to advance, then go to step 1.");
-  lines.push("6. If current stage IS `completion`: `/reap.completion` auto-archives after genome phase. Done.");
+  lines.push("6. If current stage IS `completion`: `/reap.completion` auto-archives after feedKnowledge phase. Done.");
   lines.push("");
   lines.push("Note: `/reap.next` is a transition command, NOT a lifecycle stage.");
   lines.push("");

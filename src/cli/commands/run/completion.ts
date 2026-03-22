@@ -7,6 +7,79 @@ import { scanBacklog, markBacklogConsumed } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
 import { checkSubmodules } from "../../../core/commit";
+import { execSync } from "child_process";
+
+interface GenomeImpact {
+  newCommands: string[];
+  packageJsonChanged: boolean;
+  coreChanges: string[];
+}
+
+/**
+ * Detect files changed in the current generation that may require genome updates.
+ * Returns categorized impact for prompt inclusion.
+ */
+function detectGenomeImpact(projectRoot: string): GenomeImpact {
+  const impact: GenomeImpact = {
+    newCommands: [],
+    packageJsonChanged: false,
+    coreChanges: [],
+  };
+
+  let changedFiles: string[];
+  try {
+    const output = execSync("git diff --name-only HEAD~1", {
+      cwd: projectRoot,
+      encoding: "utf-8",
+      timeout: 5000,
+    });
+    changedFiles = output.trim().split("\n").filter(Boolean);
+  } catch {
+    return impact; // graceful fallback
+  }
+
+  for (const file of changedFiles) {
+    if (file.startsWith("src/cli/commands/") && file.endsWith(".ts")) {
+      impact.newCommands.push(file);
+    }
+    if (file === "package.json") {
+      impact.packageJsonChanged = true;
+    }
+    if (file.startsWith("src/core/") && file.endsWith(".ts")) {
+      impact.coreChanges.push(file);
+    }
+  }
+
+  return impact;
+}
+
+/**
+ * Build a prompt section describing detected genome impact.
+ */
+function buildGenomeImpactPrompt(impact: GenomeImpact): string {
+  const lines: string[] = [];
+
+  if (impact.newCommands.length > 0) {
+    lines.push(`- **Commands changed/added** (${impact.newCommands.length}): constraints.md의 Slash Commands 목록 업데이트 필요 여부 확인`);
+  }
+  if (impact.packageJsonChanged) {
+    lines.push("- **package.json changed**: constraints.md의 Tech Stack 및 environment.md 업데이트 필요 여부 확인");
+  }
+  if (impact.coreChanges.length > 0) {
+    lines.push(`- **Core modules changed** (${impact.coreChanges.length}): principles.md 및 source-map.md 업데이트 필요 여부 확인`);
+  }
+
+  if (lines.length === 0) return "";
+
+  return [
+    "",
+    "",
+    "## Genome/Environment Impact Detection",
+    "다음 변경이 감지되었습니다. genome-change 또는 environment-change backlog 작성이 필요한지 검토하라:",
+    "",
+    ...lines,
+  ].join("\n");
+}
 
 /**
  * Collect executed .md hook contents and build a prompt string
@@ -80,12 +153,12 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         validationSummary: validationContent?.slice(0, 2000),
         implSummary: implContent?.slice(0, 2000),
       },
-      prompt: "Fill 05-completion.md: Summary (goal, period, result, key changes), Lessons Learned (max 5), Genome Change Proposals, Garbage Collection (check conventions violations), Backlog Cleanup (add deferred tasks). Then run: reap run completion --phase genome",
-      nextCommand: "reap run completion --phase genome",
+      prompt: "Fill 05-completion.md: Summary (goal, period, result, key changes), Lessons Learned (max 5), Genome Change Proposals, Garbage Collection (check conventions violations), Backlog Cleanup (add deferred tasks). Then run: reap run completion --phase feedKnowledge",
+      nextCommand: "reap run completion --phase feedKnowledge",
     });
   }
 
-  if (phase === "genome") {
+  if (phase === "feedKnowledge") {
     // Phase 2: AI has written retrospective. Now handle genome changes + auto consume/archive.
     const backlogItems = await scanBacklog(paths.backlog);
     const genomeChanges = backlogItems.filter(b => b.type === "genome-change" && b.status !== "consumed");
@@ -98,6 +171,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     for (const item of toConsume) {
       await markBacklogConsumed(paths.backlog, item.filename, state.id);
     }
+
+    // --- Detect genome/environment impact from changed files ---
+    const genomeImpact = detectGenomeImpact(paths.projectRoot);
+    const impactPrompt = buildGenomeImpactPrompt(genomeImpact);
 
     // --- Archive: execute hooks, check submodules, complete generation ---
     const hookResults = await executeHooks(paths.hooks, "onLifeCompleted", paths.projectRoot);
@@ -126,10 +203,11 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         compression: { level1: compression.level1.length, level2: compression.level2.length },
         hookResults,
         dirtySubmodules,
+        genomeImpact,
       },
       prompt: (dirtySubmodules.length > 0
         ? `Dirty submodules detected: ${dirtySubmodules.map(s => s.path).join(", ")}. Commit and push inside each submodule first, then commit the parent repo. Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`
-        : `Commit all changes (code + .reap/ artifacts). Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`) + buildMdHookPrompt(hookResults),
+        : `Commit all changes (code + .reap/ artifacts). Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`) + impactPrompt + buildMdHookPrompt(hookResults),
       message: `Generation ${state.id} archived. ${hasChanges ? "Genome/env changes applied." : "No genome/environment changes."} ${toConsume.length} backlog item(s) consumed.`,
     });
   }
