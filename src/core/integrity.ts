@@ -16,6 +16,12 @@ const VALID_BACKLOG_TYPES = ["genome-change", "environment-change", "task"];
 const VALID_BACKLOG_STATUSES = ["pending", "consumed"];
 const VALID_GENERATION_TYPES = ["normal", "merge", "recovery"];
 const GENOME_LINE_WARNING_THRESHOLD = 100;
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?)?$/;
+
+/** Check if a string is a valid ISO 8601 date (not just parseable by Date constructor) */
+function isISODate(s: string): boolean {
+  return ISO_DATE_RE.test(s) && !Number.isNaN(new Date(s).getTime());
+}
 
 /** Structural integrity check for .reap/ directory (read-only, no modifications) */
 export async function checkIntegrity(paths: ReapPaths): Promise<IntegrityResult> {
@@ -276,18 +282,16 @@ function validateLineageMeta(
     }
   }
 
-  // completedAt ISO validity
+  // completedAt ISO validity (NaN check + ISO format regex)
   if (typeof meta.completedAt === "string") {
-    const t = new Date(meta.completedAt).getTime();
-    if (Number.isNaN(t)) {
+    if (!isISODate(meta.completedAt)) {
       errors.push(`${location}: completedAt "${meta.completedAt}" is not a valid ISO date`);
     }
   }
 
   // startedAt ISO validity
   if (typeof meta.startedAt === "string") {
-    const t = new Date(meta.startedAt).getTime();
-    if (Number.isNaN(t)) {
+    if (!isISODate(meta.startedAt)) {
       warnings.push(`${location}: startedAt "${meta.startedAt}" is not a valid ISO date`);
     }
   }
