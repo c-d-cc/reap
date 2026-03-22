@@ -1,0 +1,9 @@
+id: gen-145-864402
+type: normal
+parents:
+  - gen-045-3785e0
+goal: "feat: reap update-genome CLI subcommand — generation 없이 genome-change
+  backlog 적용"
+genomeHash: c8d4e1e4
+startedAt: 2026-03-22T16:01:10.983Z
+completedAt: 2026-03-22T16:18:09.182Z

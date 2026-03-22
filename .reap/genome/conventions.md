@@ -73,3 +73,9 @@
 | 전체 테스트 통과 | bun test | `bun test` |
 | TypeScript 컴파일 | tsc | `bunx tsc --noEmit` |
 | Node.js 빌드 | node scripts/build.js | `npm run build` |
+| IntegrityChecker | `src/core/integrity.ts` | `reap fix --check` |
+
+- IntegrityChecker는 `.reap/` 폴더 구조의 single source of truth
+- `.reap/` 하위 구조 변경 시 IntegrityChecker 검증 로직도 함께 업데이트 필수
+- TypeScript type checking 활용 (런타임 타입 검증 아닌 컴파일 타임)
+- `reap fix --check`로 실행, `onLifeCompleted` hook으로 자동 실행

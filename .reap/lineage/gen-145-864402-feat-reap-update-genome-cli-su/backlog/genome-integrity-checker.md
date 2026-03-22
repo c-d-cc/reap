@@ -1,6 +1,7 @@
 ---
 type: genome-change
-status: pending
+status: consumed
+consumedBy: gen-145-864402
 ---
 
 # IntegrityChecker를 Genome 지식에 추가

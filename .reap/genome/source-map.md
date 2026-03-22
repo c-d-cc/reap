@@ -66,6 +66,7 @@ C4Component
   Component(backlog, "Backlog Utils", "backlog.ts", "scanBacklog, markBacklogConsumed — backlog CRUD")
   Component(runOutput, "RunOutput", "run-output.ts", "emitOutput, emitError — structured JSON output")
   Component(hookEngine, "HookEngine", "hook-engine.ts", "hook 스캔, condition 평가, sh 실행 / md 반환")
+  Component(integrity, "IntegrityChecker", "integrity.ts", ".reap/ 구조 검증. reap fix --check으로 실행")
   Component(commit, "CommitUtils", "commit.ts", "submodule check, git commit — checkSubmodules, commitChanges")
   Component(git, "Git Utils", "git.ts", "gitShow, gitLsTree, gitRefExists, gitAllBranches, gitCurrentBranch")
   Component(fs, "FS Utils", "fs.ts", "readTextFile, writeTextFile, fileExists")
@@ -94,6 +95,7 @@ C4Component
 | `reap fix` | `cli/commands/fix.ts` | .reap/ 구조 진단/복구 |
 | `reap update` | `cli/commands/update.ts` | commands/templates/hooks 동기화 |
 | `reap help` | `cli/index.ts` | 언어별 help 텍스트 출력 (en/ko) |
+| `reap update-genome` | `cli/commands/update-genome.ts` | generation 없이 pending genome-change backlog 적용. 2-phase (scan → apply) |
 | `reap run` | `cli/commands/run/index.ts` | command script dispatcher (27개: next, back, start, completion, abort, push, objective, planning, implementation, validation, evolve, evolve-recovery, sync, sync-genome, sync-environment, help, report, merge-start, merge-detect, merge-mate, merge-merge, merge-sync, merge-validation, merge-completion, merge-evolve, merge, pull) |
 
 ## Agent Adapters
