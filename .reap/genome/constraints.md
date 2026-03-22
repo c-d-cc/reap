@@ -30,8 +30,8 @@
 
 ## Slash Commands
 
-### Normal (17개)
-reap.objective, reap.planning, reap.implementation, reap.validation, reap.completion, reap.evolve, reap.start, reap.next, reap.back, reap.abort, reap.status, reap.sync, reap.sync.genome, reap.sync.environment, reap.update, reap.report, reap.help
+### Normal (18개)
+reap.objective, reap.planning, reap.implementation, reap.validation, reap.completion, reap.evolve, reap.evolve.recovery, reap.start, reap.next, reap.back, reap.abort, reap.status, reap.sync, reap.sync.genome, reap.sync.environment, reap.update, reap.report, reap.help
 
 ### Collaboration (11개)
 reap.pull, reap.push, reap.merge, reap.merge.start, reap.merge.detect, reap.merge.mate, reap.merge.merge, reap.merge.sync, reap.merge.validation, reap.merge.completion, reap.merge.evolve

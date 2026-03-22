@@ -56,6 +56,16 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 - 5분 이내, 설계 변경 없는 사소한 수정 (typo, lint error)
 - stage 전환 없이 현재 artifact에 기록
 
+## Recovery Generation Lifecycle
+
+- `type: recovery` — 기존 generation의 산출물을 검토·교정하는 특수 타입
+- `recovers: string[]` — 교정 대상 generation ID 목록. `parents`와 별도 필드
+- Recovery generation은 normal과 동일한 5단계 (Objective → Planning → Implementation → Validation → Completion)를 사용하되, 각 단계의 목적이 교정에 맞게 조정됨
+- Stage 전환 규칙은 normal과 동일 (`/reap.next`, `/reap.back`)
+- `/reap.evolve.recovery <target-gen-id>` 명령어로 개시. 검토 후 교정 필요 시에만 generation 생성
+
+→ `domain/recovery-generation.md` 참조
+
 ## Merge Generation Lifecycle
 
 → `domain/merge-lifecycle.md` 참조

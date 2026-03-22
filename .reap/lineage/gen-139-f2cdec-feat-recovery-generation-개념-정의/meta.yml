@@ -1,0 +1,8 @@
+id: gen-139-f2cdec
+type: normal
+parents:
+  - gen-045-3785e0
+goal: "feat: recovery generation 개념 정의 — genome/domain에 recovery generation 프로세스 문서화"
+genomeHash: be30670f
+startedAt: 2026-03-22T13:21:00.506Z
+completedAt: 2026-03-22T14:06:39.969Z

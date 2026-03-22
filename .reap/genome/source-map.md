@@ -19,7 +19,7 @@ C4Context
   System_Ext(github, "GitHub Actions", "CI/CD, 릴리스 자동화")
 
   Rel(user, reap, "reap init/status/fix/update/run")
-  Rel(agent, reap, "slash commands (28개)")
+  Rel(agent, reap, "slash commands (29개)")
   Rel(reap, npm, "publish")
   Rel(github, npm, "auto release")
 ```
@@ -30,7 +30,7 @@ C4Context
 C4Container
   title REAP Containers
 
-  Container(cli, "CLI Layer", "src/cli/", "Commander.js 진입점. init, status, fix, update, help, run (26 scripts)")
+  Container(cli, "CLI Layer", "src/cli/", "Commander.js 진입점. init, status, fix, update, help, run (27 scripts)")
   Container(core, "Core Layer", "src/core/", "비즈니스 로직. 아래 Component 참조")
   Container(types, "Types", "src/types/index.ts", "공유 타입 정의 (~176줄). RunOutput, HookResult, GenerationType, GenerationMeta")
   Container(templates, "Templates", "src/templates/", "commands(28), artifacts(11), genome, hooks, help, presets, brainstorm")
@@ -94,7 +94,7 @@ C4Component
 | `reap fix` | `cli/commands/fix.ts` | .reap/ 구조 진단/복구 |
 | `reap update` | `cli/commands/update.ts` | commands/templates/hooks 동기화 |
 | `reap help` | `cli/index.ts` | 언어별 help 텍스트 출력 (en/ko) |
-| `reap run` | `cli/commands/run/index.ts` | command script dispatcher (26개: next, back, start, completion, abort, push, objective, planning, implementation, validation, evolve, sync, sync-genome, sync-environment, help, report, merge-start, merge-detect, merge-mate, merge-merge, merge-sync, merge-validation, merge-completion, merge-evolve, merge, pull) |
+| `reap run` | `cli/commands/run/index.ts` | command script dispatcher (27개: next, back, start, completion, abort, push, objective, planning, implementation, validation, evolve, evolve-recovery, sync, sync-genome, sync-environment, help, report, merge-start, merge-detect, merge-mate, merge-merge, merge-sync, merge-validation, merge-completion, merge-evolve, merge, pull) |
 
 ## Agent Adapters
 
