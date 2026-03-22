@@ -5,7 +5,7 @@ import YAML from "yaml";
 import { ReapPaths } from "./paths";
 import { readTextFile, fileExists } from "./fs";
 import { LifeCycle } from "./lifecycle";
-import type { ReapConfig, GenerationState, GenerationMeta, LifeCycleStage } from "../types";
+import type { GenerationState, LifeCycleStage } from "../types";
 import { LIFECYCLE_ORDER } from "../types";
 
 export interface IntegrityResult {
