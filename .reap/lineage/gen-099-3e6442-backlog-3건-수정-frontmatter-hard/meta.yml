@@ -1,7 +1,7 @@
 id: gen-099-3e6442
 type: normal
 parents:
-  - gen-086-bc3af7
+  - gen-098-7d39ee
 goal: Backlog 3건 수정 — frontmatter hard-gate, status/help 버전 출력, completion
   auto-archive
 genomeHash: 13c9ca8a

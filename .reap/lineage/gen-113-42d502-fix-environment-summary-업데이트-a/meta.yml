@@ -1,7 +1,7 @@
 id: gen-113-42d502
 type: normal
 parents:
-  - gen-112-bd3988
+  - gen-111-845eb4
 goal: "fix: environment summary 업데이트 — AI 에이전트 환경 기술 수정 (.claude/skills 반영)"
 genomeHash: 4c796714
 startedAt: 2026-03-22T06:32:59.846Z

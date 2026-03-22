@@ -1,7 +1,7 @@
 id: gen-131-141810
 type: normal
 parents:
-  - gen-045-3785e0
+  - gen-130-428ef4
 goal: "feat: phase 전환 시에도 nonce 검증 추가"
 genomeHash: be30670f
 startedAt: 2026-03-22T10:36:30.162Z

@@ -1,7 +1,7 @@
 id: gen-109-993f83
 type: normal
 parents:
-  - gen-108-000e84
+  - gen-107-4556fe
 goal: env var → $ARGUMENTS argv 마이그레이션
 genomeHash: 13c9ca8a
 startedAt: 2026-03-21T18:28:05.845Z

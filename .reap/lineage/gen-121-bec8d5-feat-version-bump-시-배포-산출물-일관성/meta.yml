@@ -1,7 +1,7 @@
 id: gen-121-bec8d5
 type: normal
 parents:
-  - gen-045-3785e0
+  - gen-120-488e3e
 goal: "feat: version bump 시 배포 산출물 일관성 검증 추가"
 genomeHash: 4c796714
 startedAt: 2026-03-22T07:52:21.084Z

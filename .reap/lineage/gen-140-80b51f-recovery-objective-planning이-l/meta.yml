@@ -1,7 +1,7 @@
 id: gen-140-80b51f
 type: recovery
 parents:
-  - gen-045-3785e0
+  - gen-139-f2cdec
 goal: "Recovery: objective/planning이 lastSyncedCommit 기반으로 작성되었으나 실제 구현은
   lastSyncedGeneration 기반 (corrects gen-138-26723a)"
 genomeHash: c8d4e1e4

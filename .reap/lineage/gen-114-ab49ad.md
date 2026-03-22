@@ -2,7 +2,7 @@
 id: gen-114-ab49ad
 type: normal
 parents:
-  - gen-006-d9ca51
+  - gen-113-42d502
 goal: "feat: refreshKnowledge 커맨드 추가 — subagent REAP context 로딩"
 genomeHash: 4c796714
 startedAt: 2026-03-22T06:45:31.255Z

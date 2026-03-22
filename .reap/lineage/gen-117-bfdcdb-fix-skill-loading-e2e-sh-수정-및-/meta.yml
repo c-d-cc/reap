@@ -1,7 +1,7 @@
 id: gen-117-bfdcdb
 type: normal
 parents:
-  - gen-045-3785e0
+  - gen-116-92c7d5
 goal: "fix: skill-loading-e2e.sh 수정 및 OpenShell E2E 실제 실행"
 genomeHash: 4c796714
 startedAt: 2026-03-22T07:24:20.031Z

@@ -1,7 +1,7 @@
 id: gen-135-7e8f8a
 type: normal
 parents:
-  - gen-045-3785e0
+  - gen-134-beaedb
 goal: "fix: evolve subagent가 tests submodule 커밋을 누락하는 문제"
 genomeHash: be30670f
 startedAt: 2026-03-22T11:38:59.660Z

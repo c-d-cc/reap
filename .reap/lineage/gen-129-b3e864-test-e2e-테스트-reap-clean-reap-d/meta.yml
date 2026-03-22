@@ -1,7 +1,7 @@
 id: gen-129-b3e864
 type: normal
 parents:
-  - gen-045-3785e0
+  - gen-128-9001c1
 goal: "test: E2E 테스트 — reap clean / reap destroy (OpenShell)"
 genomeHash: be30670f
 startedAt: 2026-03-22T09:30:26.442Z

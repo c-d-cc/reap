@@ -1,7 +1,7 @@
 id: gen-102-95708b
 type: normal
 parents:
-  - gen-006-d9ca51
+  - gen-101-c88beb
 goal: CLAUDE.md REAP 룰 추가 + README/docs v0.11.x 갱신
 genomeHash: 13c9ca8a
 startedAt: 2026-03-21T12:55:20.822Z

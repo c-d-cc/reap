@@ -1,7 +1,7 @@
 id: gen-127-e73a96
 type: normal
 parents:
-  - gen-045-3785e0
+  - gen-126-8d3c61
 goal: "feat: reap.next에서 lastNonce 자동 읽기"
 genomeHash: be30670f
 startedAt: 2026-03-22T09:20:42.015Z
