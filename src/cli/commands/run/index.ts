@@ -31,6 +31,7 @@ const COMMANDS: Record<string, () => Promise<{ execute: CommandExecutor }>> = {
   "merge-completion": () => import("./merge-completion"),
   "merge-evolve": () => import("./merge-evolve"),
   merge: () => import("./merge"),
+  "evolve-recovery": () => import("./evolve-recovery"),
   pull: () => import("./pull"),
   config: () => import("./config"),
   refreshKnowledge: () => import("./refresh-knowledge"),

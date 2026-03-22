@@ -34,7 +34,7 @@ export interface TimelineEntry {
   refs?: string[];          // regression only: file paths, artifact sections, code locations
 }
 
-export type GenerationType = "normal" | "merge";
+export type GenerationType = "normal" | "merge" | "recovery";
 
 export interface GenerationState {
   id: string;
@@ -52,6 +52,8 @@ export interface GenerationState {
   genomeHash?: string;
   /** Common ancestor generation ID (merge only) */
   commonAncestor?: string;
+  /** Generation IDs that this recovery generation corrects (recovery only) */
+  recovers?: string[];
   /** Last generated nonce — auto-read by next.ts if no explicit nonce argument */
   lastNonce?: string;
   /** Token hash — SHA256(nonce + genId + stage[:phase]). Unified for both stage and phase tokens. */
@@ -69,6 +71,8 @@ export interface GenerationMeta {
   genomeHash: string;
   startedAt: string;
   completedAt: string;
+  /** Generation IDs that this recovery generation corrects (recovery only) */
+  recovers?: string[];
 }
 
 export type ReapHookEvent =

@@ -16,6 +16,7 @@ export const COMMAND_NAMES = [
   "reap.merge.start", "reap.merge.detect", "reap.merge.mate",
   "reap.merge.merge", "reap.merge.sync", "reap.merge.validation",
   "reap.merge.completion", "reap.merge.evolve",
+  "reap.evolve.recovery",
   "reap.merge",
   "reap.pull", "reap.push",
   "reap.config",

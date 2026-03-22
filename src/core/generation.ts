@@ -139,6 +139,35 @@ export class GenerationManager {
     return state;
   }
 
+  async createRecoveryGeneration(goal: string, genomeVersion: number, recovers: string[]): Promise<GenerationState> {
+    if (recovers.length === 0) {
+      throw new Error("Recovery generation requires at least one target generation ID");
+    }
+
+    const seq = await this.nextSeq();
+    const now = new Date().toISOString();
+    const genomeHash = await computeGenomeHash(this.paths.genome);
+    const machineId = getMachineId();
+    const parents = await this.resolveParents();
+    const hash = generateGenHash(parents, goal, genomeHash, machineId, now);
+    const id = formatGenId(seq, hash);
+
+    const state: GenerationState = {
+      id,
+      goal,
+      stage: "objective",
+      genomeVersion,
+      startedAt: now,
+      timeline: [{ stage: "objective", at: now }],
+      type: "recovery",
+      parents,
+      genomeHash,
+      recovers,
+    };
+    await writeTextFile(this.paths.currentYml, CURRENT_YML_HEADER + YAML.stringify(state));
+    return state;
+  }
+
   async advance(): Promise<GenerationState> {
     const state = await this.current();
     if (!state) throw new Error("No active generation");
@@ -178,6 +207,7 @@ export class GenerationManager {
       genomeHash: state.genomeHash ?? "unknown",
       startedAt: state.startedAt,
       completedAt: now,
+      ...(state.type === "recovery" && state.recovers ? { recovers: state.recovers } : {}),
     };
     await writeTextFile(join(genDir, "meta.yml"), YAML.stringify(meta));
 
