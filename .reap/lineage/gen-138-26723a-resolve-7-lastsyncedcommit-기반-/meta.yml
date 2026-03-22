@@ -1,0 +1,8 @@
+id: gen-138-26723a
+type: normal
+parents:
+  - gen-045-3785e0
+goal: "resolve #7: lastSyncedCommit 기반 genome sync 상태 추적"
+genomeHash: be30670f
+startedAt: 2026-03-22T12:53:26.543Z
+completedAt: 2026-03-22T13:07:44.795Z
