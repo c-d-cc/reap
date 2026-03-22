@@ -1,30 +1,20 @@
 ## What's New
 
-- **Placeholder Genome detection** — `reap init` on existing projects now detects placeholder content and shows "needs customization" instead of falsely reporting "synced". Also displays a `/reap.sync` guidance message after init.
-- **Skill-based command discovery** — Commands are now installed as `.claude/skills/{name}/SKILL.md` for Claude Code's current skill discovery mechanism, with legacy `.claude/commands/` cleanup.
-- **`refreshKnowledge` command** — New `/reap.refreshKnowledge` command enables subagents to load full REAP context (Genome, Environment, Generation state) on demand.
-- **Completion `feedKnowledge` phase** — Renamed from "genome" to better reflect its role handling both Genome and Environment changes. Includes automatic impact detection for Genome/Environment consistency.
-- **`.md` hook execution in subagents** — Completion output now includes `.md` hook content in the prompt field, so evolve subagents properly execute hook prompts.
-- **Subagent interrupt protection** — Evolve subagent prompt now includes protection against premature task termination from user messages during execution.
-- **E2E skill installation tests** — New OpenShell-based E2E tests verify Claude Code `.claude/skills/` and OpenCode plugin installation across all supported agents.
-- **Docs consistency gate for version bump** — Version bump now runs docs update as a pre-check, blocking bumps when docs are out of sync.
-- **3-Layer Model updated** — reap-guide.md now uses "Knowledge Base (Genome + Environment)" matching README terminology.
+- **Stage auto-transition** — `--phase complete` now automatically advances to the next stage. No separate `/reap.next` call needed. `/reap.next` remains as a fallback for manual transitions.
+- **Phase nonce verification** — Nonce verification now also applies to phase transitions within a stage (work → complete), preventing AI from skipping work phases.
+- **Token unification** — Simplified from 4 fields (`expectedTokenHash`, `lastNonce`, `lastPhaseNonce`, `expectedPhaseTokenHash`) to 2 fields (`lastNonce`, `expectedHash`). New `phase` field in `current.yml` tracks the current phase.
+- **`reap clean` / `reap destroy`** — New CLI commands for project reset and REAP removal. `clean` provides interactive options for lineage, hooks, genome, and backlog. `destroy` requires explicit confirmation by typing `destroy <project-name>`.
+- **Submodule commit rules** — Evolve subagent prompt now includes explicit instructions for committing dirty git submodules before the parent repo.
 
 ## Generations
 
-- **gen-110-59caf6**: Detect placeholder genome files instead of showing 'synced'
-- **gen-111-845eb4**: reap init 완료 시 /reap.sync 실행 안내 메시지 출력
-- **gen-112-bd3988**: Migrate .claude/commands/ to .claude/skills/ for Claude Code skill discovery
-- **gen-113-42d502**: Update environment summary — AI agent env & test count
-- **gen-114-ab49ad**: Add refreshKnowledge command for subagent REAP context loading
-- **gen-115-dc9f09**: .md hook execution in evolve subagent completion output
-- **gen-116-92c7d5**: E2E skill installation tests for Claude Code + OpenCode
-- **gen-117-bfdcdb**: E2E skill loading tests verified in OpenShell sandbox
-- **gen-118-110fde**: Rename completion phase genome to feedKnowledge
-- **gen-119-afd037**: Subagent interrupt protection + orchestrator warning
-- **gen-120-488e3e**: Extract docsUpdate skill from hook
-- **gen-121-bec8d5**: Add version bump artifact validation
-- **gen-122-519e18**: Add docsUpdate gate to versionBump
-- **gen-123-98fe85**: Full scan update — 3-layer model, new commands, i18n sync
-- **gen-124-ea5e55**: Remove reapdev commands from public docs
-- **gen-125-aed658**: Remove reapdev from src and COMMAND_NAMES
+- **gen-126-8d3c61**: Add reap clean and reap destroy commands
+- **gen-127-e73a96**: lastNonce auto-read in reap.next
+- **gen-128-9001c1**: next outputs nextCommand for auto-chaining to next stage
+- **gen-129-b3e864**: E2E tests for reap clean and reap destroy
+- **gen-130-428ef4**: Stage auto-transition with nonce verification
+- **gen-131-141810**: Phase nonce verification
+- **gen-132-cadeb8**: Unify token fields + add phase tracking
+- **gen-133-19090f**: Update stage-token E2E for auto-transition
+- **gen-134-beaedb**: Update docs for clean/destroy and auto-transition
+- **gen-135-7e8f8a**: Add submodule commit rules to evolve subagent prompt
