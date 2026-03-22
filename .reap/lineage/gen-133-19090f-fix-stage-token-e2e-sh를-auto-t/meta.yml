@@ -1,8 +1,0 @@
-id: gen-133-19090f
-type: normal
-parents:
-  - gen-132-cadeb8
-goal: "fix: stage-token-e2e.sh를 auto-transition 흐름에 맞게 업데이트"
-genomeHash: be30670f
-startedAt: 2026-03-22T11:14:45.635Z
-completedAt: 2026-03-22T11:21:43.304Z

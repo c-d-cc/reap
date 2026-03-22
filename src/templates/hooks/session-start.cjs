@@ -6,7 +6,7 @@ const gl = require('./genome-loader.cjs');
 
 const startTime = Date.now();
 let step = 0;
-const totalSteps = 7;
+const totalSteps = 8;
 
 function log(msg) {
   step++;
@@ -196,6 +196,25 @@ if (currentContent && currentContent.trim()) {
   }
 } else {
   initLines.push('⚪ No active Generation');
+}
+
+// Integrity check via reap fix --check subprocess
+log('Checking integrity...');
+try {
+  require('child_process').execSync('reap fix --check', { encoding: 'utf-8', timeout: 5000, stdio: 'pipe' });
+  initLines.push('🟢 Integrity — OK');
+} catch (integrityErr) {
+  const output = (integrityErr.stdout || '').trim();
+  const errorCount = (output.match(/✗/g) || []).length;
+  const warnCount = (output.match(/⚠/g) || []).length;
+  if (errorCount > 0 || warnCount > 0) {
+    const parts = [];
+    if (errorCount > 0) parts.push(`${errorCount} error${errorCount > 1 ? 's' : ''}`);
+    if (warnCount > 0) parts.push(`${warnCount} warning${warnCount > 1 ? 's' : ''}`);
+    initLines.push(`🔴 Integrity — ${parts.join(', ')}`);
+  } else {
+    initLines.push('🟡 Integrity — check failed');
+  }
 }
 
 const initSummary = initLines.join('\n');

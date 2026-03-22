@@ -1,6 +1,7 @@
 import { ReapPaths } from "../../core/paths";
 import { GenerationManager } from "../../core/generation";
 import { ConfigManager } from "../../core/config";
+import { checkIntegrity } from "../../core/integrity";
 
 export interface ProjectStatus {
   version: string;
@@ -18,6 +19,7 @@ export interface ProjectStatus {
     genomeHash?: string;
   } | null;
   totalGenerations: number;
+  integrity: { errors: number; warnings: number };
 }
 
 export async function getStatus(projectRoot: string): Promise<ProjectStatus> {
@@ -27,6 +29,7 @@ export async function getStatus(projectRoot: string): Promise<ProjectStatus> {
 
   const current = await mgr.current();
   const completedGens = await mgr.listCompleted();
+  const integrityResult = await checkIntegrity(paths);
 
   return {
     version: config.version,
@@ -44,5 +47,6 @@ export async function getStatus(projectRoot: string): Promise<ProjectStatus> {
       genomeHash: current.genomeHash,
     } : null,
     totalGenerations: completedGens.length,
+    integrity: { errors: integrityResult.errors.length, warnings: integrityResult.warnings.length },
   };
 }

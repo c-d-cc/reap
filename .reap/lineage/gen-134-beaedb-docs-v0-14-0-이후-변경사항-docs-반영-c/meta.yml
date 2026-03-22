@@ -1,8 +1,0 @@
-id: gen-134-beaedb
-type: normal
-parents:
-  - gen-133-19090f
-goal: "docs: v0.14.0 이후 변경사항 docs 반영 — clean/destroy, auto-transition, phase nonce"
-genomeHash: be30670f
-startedAt: 2026-03-22T11:26:49.863Z
-completedAt: 2026-03-22T11:31:27.990Z

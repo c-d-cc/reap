@@ -94,6 +94,14 @@ program
         ? `synced (${status.lastSyncedGeneration})`
         : "never synced";
       console.log(`Genome Sync: ${syncLabel}`);
+      if (status.integrity.errors > 0 || status.integrity.warnings > 0) {
+        const parts: string[] = [];
+        if (status.integrity.errors > 0) parts.push(`${status.integrity.errors} error${status.integrity.errors > 1 ? "s" : ""}`);
+        if (status.integrity.warnings > 0) parts.push(`${status.integrity.warnings} warning${status.integrity.warnings > 1 ? "s" : ""}`);
+        console.log(`Integrity: ${parts.join(", ")} (run 'reap fix --check' for details)`);
+      } else {
+        console.log(`Integrity: ✓ OK`);
+      }
       if (status.generation) {
         console.log(`\nActive Generation: ${status.generation.id}`);
         console.log(`  Goal: ${status.generation.goal}`);
@@ -185,6 +193,21 @@ program
       }
       if (result.skipped.length > 0) {
         console.log(`Unchanged: ${result.skipped.length} files`);
+      }
+
+      // Integrity check after update
+      try {
+        const integrityResult = await checkProject(process.cwd());
+        if (integrityResult.errors.length > 0 || integrityResult.warnings.length > 0) {
+          const parts: string[] = [];
+          if (integrityResult.errors.length > 0) parts.push(`${integrityResult.errors.length} error${integrityResult.errors.length > 1 ? "s" : ""}`);
+          if (integrityResult.warnings.length > 0) parts.push(`${integrityResult.warnings.length} warning${integrityResult.warnings.length > 1 ? "s" : ""}`);
+          console.log(`\nIntegrity: ${parts.join(", ")} (run 'reap fix --check' for details)`);
+        } else {
+          console.log(`\nIntegrity: ✓ OK`);
+        }
+      } catch {
+        // Integrity check is best-effort; skip if not a REAP project
       }
     } catch (e: any) {
       console.error(`Error: ${e.message}`);

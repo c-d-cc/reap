@@ -1,0 +1,8 @@
+id: gen-147-3559ba
+type: normal
+parents:
+  - gen-045-3785e0
+goal: checkIntegrity를 status, session-init, update 후에 호출
+genomeHash: 6eda03ff
+startedAt: 2026-03-22T19:17:18.801Z
+completedAt: 2026-03-22T19:24:21.149Z
