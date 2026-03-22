@@ -340,8 +340,6 @@ export const ja: Translations = {
       ["/reap.update", "REAPパッケージのアップグレード + コマンド/テンプレート/hookをすべてのエージェントに同期。プロジェクトの.claude/commands/を即時同期。"],
       ["/reap.refreshKnowledge", "サブエージェント用REAPコンテキストのロード（Genome、Environment、状態）。オーケストレーターがサブエージェントセッションをブートストラップする際に使用。"],
     ],
-    lifecycleFlow: "ライフサイクルフロー",
-    lifecycleFlowDesc: "/reap.evolve使用時の一般的なフロー：",
     commandStructure: "Script Orchestratorアーキテクチャ",
     commandStructureDesc: "v0.11.0より、すべてのスラッシュコマンドはreap run <cmd>を呼び出す1行.md wrapperです。TypeScriptスクリプトがすべての決定論的ロジックを処理し、AIにstructured JSONで指示します。パターン：Gate（前提条件チェック） → Steps（作業実行） → Artifact（.reap/life/に記録）。",
   },

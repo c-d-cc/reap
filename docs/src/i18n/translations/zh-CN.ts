@@ -340,8 +340,6 @@ export const zhCN: Translations = {
       ["/reap.update", "升级REAP包 + 将命令/模板/hook同步到所有检测到的代理。即时同步项目.claude/commands/。"],
       ["/reap.refreshKnowledge", "为子代理加载REAP上下文（Genome、Environment、状态）。编排代理用于引导子代理会话。"],
     ],
-    lifecycleFlow: "生命周期流程",
-    lifecycleFlowDesc: "使用/reap.evolve时的典型流程：",
     commandStructure: "Script Orchestrator架构",
     commandStructureDesc: "从v0.11.0起，所有斜杠命令都是调用reap run <cmd>的1行.md wrapper。TypeScript脚本处理所有确定性逻辑，以structured JSON向AI发出指令。模式：Gate（前置条件检查）→ Steps（工作执行）→ Artifact（记录到.reap/life/）。",
   },

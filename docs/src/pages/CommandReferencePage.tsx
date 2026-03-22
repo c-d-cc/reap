@@ -58,24 +58,6 @@ export default function CommandReferencePage() {
         <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{t.commands.generalTitle}</h3>
         <CommandTable headers={t.commands.commandHeaders} commands={t.commands.generalCommands} />
 
-        <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{t.commands.lifecycleFlow}</h3>
-        <p className="text-xs text-muted-foreground mb-3">
-          {t.commands.lifecycleFlowDesc}
-        </p>
-        <div className="border-l border-border pl-3 space-y-1 text-xs text-muted-foreground mb-6">
-          <div>1. <code className="bg-muted px-1 rounded">/reap.start</code> → Create generation</div>
-          <div>2. <code className="bg-muted px-1 rounded">/reap.objective</code> → Define goal</div>
-          <div>3. <code className="bg-muted px-1 rounded">/reap.next</code></div>
-          <div>4. <code className="bg-muted px-1 rounded">/reap.planning</code> → Plan tasks</div>
-          <div>5. <code className="bg-muted px-1 rounded">/reap.next</code></div>
-          <div>6. <code className="bg-muted px-1 rounded">/reap.implementation</code> → Build</div>
-          <div>7. <code className="bg-muted px-1 rounded">/reap.next</code></div>
-          <div>8. <code className="bg-muted px-1 rounded">/reap.validation</code> → Verify</div>
-          <div>9. <code className="bg-muted px-1 rounded">/reap.next</code></div>
-          <div>10. <code className="bg-muted px-1 rounded">/reap.completion</code> → Retrospect</div>
-          <div>11. <code className="bg-muted px-1 rounded">/reap.next</code> → Archive, generation ends</div>
-        </div>
-
         <h3 className="text-sm font-semibold text-foreground mb-2">{t.commands.commandStructure}</h3>
         <p className="text-xs text-muted-foreground mb-6">
           {t.commands.commandStructureDesc}
