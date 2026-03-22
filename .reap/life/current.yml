@@ -1,0 +1,23 @@
+# REAP MANAGED — Do not modify directly. Use reap run next/back/start/abort.
+id: gen-141-cad97c
+goal: "fix: resolveParents 및 compression의 NaN completedAt 정렬 버그 수정"
+stage: completion
+genomeVersion: 50
+startedAt: 2026-03-22T14:58:55.702Z
+timeline:
+  - stage: objective
+    at: 2026-03-22T14:58:55.702Z
+  - stage: planning
+    at: 2026-03-22T15:00:24.999Z
+  - stage: implementation
+    at: 2026-03-22T15:00:46.945Z
+  - stage: validation
+    at: 2026-03-22T15:02:23.949Z
+  - stage: completion
+    at: 2026-03-22T15:03:08.649Z
+type: normal
+parents:
+  - gen-045-3785e0
+genomeHash: c8d4e1e4
+expectedHash: 62c6f576a3859ac11406179aee8e75efbe1d89063e3e3962f09d66dbaa1f0543
+lastNonce: e927832ffc727a51e30b19461ce0ddfc

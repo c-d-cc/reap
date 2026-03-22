@@ -13,6 +13,12 @@ const LEVEL1_PROTECTED_COUNT = 3;
 const LEVEL2_MIN_LEVEL1_COUNT = 100;
 const LEVEL2_PROTECTED_COUNT = 9;
 
+/** Safe completedAt to timestamp — returns 0 for NaN/invalid dates */
+function safeCompletedAtTime(dateStr: string): number {
+  const t = new Date(dateStr).getTime();
+  return Number.isNaN(t) ? 0 : t;
+}
+
 /** Extract generation number from directory/file name (supports both gen-NNN and gen-NNN-hash formats) */
 function extractGenNum(name: string): number {
   const match = name.match(/^gen-(\d{3})/);
@@ -125,10 +131,9 @@ async function scanLineage(paths: ReapPaths): Promise<LineageEntry[]> {
 
   // Sort by completedAt, then by genNum as tiebreaker
   return entries.sort((a, b) => {
-    if (a.completedAt && b.completedAt) {
-      const cmp = a.completedAt.localeCompare(b.completedAt);
-      if (cmp !== 0) return cmp;
-    }
+    const aTime = safeCompletedAtTime(a.completedAt);
+    const bTime = safeCompletedAtTime(b.completedAt);
+    if (aTime !== bTime) return aTime - bTime;
     return a.genNum - b.genNum;
   });
 }

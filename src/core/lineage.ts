@@ -63,12 +63,18 @@ export async function nextSeq(paths: ReapPaths, currentId?: string): Promise<num
   return maxSeq + 1;
 }
 
+/** Safe completedAt to timestamp — returns 0 for NaN/invalid dates */
+export function safeCompletedAtTime(dateStr: string): number {
+  const t = new Date(dateStr).getTime();
+  return Number.isNaN(t) ? 0 : t;
+}
+
 /** Resolve parent generation IDs (most recently completed) */
 export async function resolveParents(paths: ReapPaths): Promise<string[]> {
   const metas = await listMeta(paths);
   if (metas.length > 0) {
     const sorted = metas.sort((a, b) =>
-      new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
+      safeCompletedAtTime(b.completedAt) - safeCompletedAtTime(a.completedAt)
     );
     return [sorted[0].id];
   }

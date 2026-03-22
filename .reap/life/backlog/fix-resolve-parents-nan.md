@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-141-cad97c
 ---
 
 # resolveParents()에서 NaN completedAt 정렬 버그
