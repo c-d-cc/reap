@@ -161,5 +161,11 @@ export async function initProject(
     log("  No AI agents detected.");
   }
 
+  // 7. Guide user to run /reap.sync if auto-sync was not performed
+  const autoSynced = (entryMode === "adoption" || entryMode === "migration") && !preset;
+  if (!autoSynced) {
+    log("\n💡 Run /reap.sync to synchronize Genome with your project's actual state.");
+  }
+
   return { agents: detectedAgents.map(a => a.displayName) };
 }
