@@ -106,6 +106,16 @@ function buildSubagentPrompt(
   lines.push("- Include the generation ID in the commit message.");
   lines.push("");
 
+  // Submodule commit rules
+  lines.push("## Submodule Commit Rules");
+  lines.push("- 커밋 전 반드시 `git -C tests status -s` 로 tests submodule의 dirty 상태를 확인하라.");
+  lines.push("- dirty 파일이 있으면:");
+  lines.push("  1. `git -C tests add -A && git -C tests commit -m \"...\" && git -C tests push`");
+  lines.push("  2. parent repo에서 `git add tests` 로 submodule ref 업데이트");
+  lines.push("  3. 그 다음 parent repo의 나머지 파일과 함께 커밋");
+  lines.push("- completion의 prompt에 \"Dirty submodules detected\"가 있으면 반드시 위 절차를 따르라.");
+  lines.push("");
+
   // Hook prompt execution instructions
   lines.push("## Hook Prompt Execution");
   lines.push("- completion output의 `prompt` 필드에 '## Hook Prompts' 섹션이 포함되어 있으면, 해당 hook prompt를 반드시 순서대로 실행하라.");
