@@ -1,6 +1,6 @@
 {
   "name": "@c-d-cc/reap",
-  "version": "0.13.4",
+  "version": "0.14.0",
   "description": "Recursive Evolutionary Autonomous Pipeline — AI and humans evolve software across generations",
   "type": "module",
   "license": "MIT",
