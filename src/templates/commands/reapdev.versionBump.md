@@ -6,6 +6,13 @@ description: "Version bump — 배포 산출물 검증 후 bump 유형을 제안
 
 ## Steps
 
+### Pre-check: Docs Consistency Gate
+
+version bump 전에 `/reapdev.docsUpdate` 스킬을 실행하여 문서 일관성을 확인하라.
+- `/reapdev.docsUpdate`를 실행
+- 불일치가 발견되면 먼저 수정하고 유저 확인을 받아라
+- 문서가 최신 상태임이 확인된 후에만 Step 0 이하로 진행
+
 0. **배포 산출물 일관성 검증** (bump 실행 전 필수):
 
    아래 4가지 cross-check를 수행하고, 불일치가 하나라도 있으면 목록을 유저에게 보여준 뒤 "계속 진행 / 중단" 선택을 받는다. 모두 통과하면 "모든 검증 통과" 메시지를 출력하고 Step 1로 진행한다.
