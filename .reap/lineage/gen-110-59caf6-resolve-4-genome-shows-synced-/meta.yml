@@ -1,9 +1,0 @@
-id: gen-110-59caf6
-type: normal
-parents:
-  - gen-006-d9ca51
-goal: "resolve #4: Genome shows 'synced' but actually needs sync on existing
-  projects"
-genomeHash: 4c796714
-startedAt: 2026-03-22T06:14:19.017Z
-completedAt: 2026-03-22T06:20:00.528Z

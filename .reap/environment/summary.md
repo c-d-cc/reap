@@ -26,15 +26,17 @@
 
 - **패키지 매니저**: npm (배포), bun (개발/테스트)
 - **빌드**: `node scripts/build.js` — esbuild 번들 + templates 복사
-- **테스트**: `bun test` (524 tests, 56 files)
+- **테스트**: `bun test` (595 tests, 60 files)
 - **타입체크**: `bunx tsc --noEmit`
 - **E2E**: OpenShell CLI (`openshell`) 필요 — `uv tool install -U openshell`
 
 ## AI 에이전트 환경
 
-- **Claude Code**: `~/.claude/commands/` (slash commands), `settings.json` (SessionStart hook)
-- **OpenCode**: `~/.config/opencode/commands/` (slash commands), `plugins/` (session hook)
-- **Hook 공유 모듈**: `genome-loader.cjs` — Genome 로딩, staleness 감지, strict mode
+- **커맨드 저장소**: `~/.reap/commands/` — source of truth (init/update 시 설치)
+- **Claude Code**: project `.claude/skills/{name}/SKILL.md` (session-start hook이 자동 복사), `settings.json` (SessionStart hook)
+- **OpenCode**: `~/.config/opencode/plugins/reap-session-start.js` (session hook), `~/.config/opencode/commands/` (레거시, 현재 미사용)
+- **Hook 공유 모듈**: `genome-loader.cjs` — Genome 로딩, staleness 감지, placeholder 감지, strict mode
+- **Skill Discovery 변경**: Claude Code가 `.claude/commands/` → `.claude/skills/` 마이그레이션 (2026-03 확인). project-level `.claude/commands/`는 skill list에 로드되지 않음
 
 ## 테스트 인프라
 
