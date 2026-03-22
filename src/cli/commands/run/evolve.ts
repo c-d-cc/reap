@@ -21,6 +21,10 @@ function buildSubagentPrompt(
   // 1. REAP lifecycle rules
   lines.push("# REAP Subagent Instructions");
   lines.push("");
+  lines.push("## FIRST: Load REAP Context");
+  lines.push("Before doing anything else, run `reap run refreshKnowledge` to load full REAP context (Genome, Environment, Generation state, Workflow Guide).");
+  lines.push("Incorporate the returned context into your working knowledge before proceeding.");
+  lines.push("");
   lines.push("## Rules");
   lines.push("- ALWAYS use `reap run <cmd>` commands to drive lifecycle. NEVER modify `current.yml` directly.");
   lines.push("- Use `/reap.next` to advance stages and `/reap.back` to regress.");

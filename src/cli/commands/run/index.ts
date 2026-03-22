@@ -33,6 +33,7 @@ const COMMANDS: Record<string, () => Promise<{ execute: CommandExecutor }>> = {
   merge: () => import("./merge"),
   pull: () => import("./pull"),
   config: () => import("./config"),
+  refreshKnowledge: () => import("./refresh-knowledge"),
 };
 
 export async function runCommand(command: string, phase?: string, argv: string[] = []): Promise<void> {
