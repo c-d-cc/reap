@@ -202,7 +202,7 @@ program
         process.exit(1);
       }
 
-      const expectedInput = `destroy ${projectName}`;
+      const expectedInput = "yes destroy";
       console.log(`\nThis will permanently remove all REAP files from this project.`);
       console.log(`To confirm, type '${expectedInput}':\n`);
 

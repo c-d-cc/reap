@@ -154,11 +154,17 @@ const { genomeStaleWarning, commitsSince } = gl.detectStaleness(projectRoot);
 
 // Step 5: Read generation state
 log('Reading generation state...');
-const { strictEdit, strictMerge } = gl.parseConfig(configFile);
+const { strictEdit, strictMerge, language } = gl.parseConfig(configFile);
 const { genStage, genId, generationContext, nextCmd } = gl.parseCurrentYml(currentYml);
 
 // Build strict mode section
 const strictSection = gl.buildStrictSection(strictEdit, strictMerge, genStage);
+
+// Build language instruction
+let langSection = '';
+if (language) {
+  langSection = `\n\n## Language\nAlways respond in ${language}. Use ${language} for all explanations, comments, and communications with the user. Technical terms and code identifiers should remain in their original form.`;
+}
 
 // Build staleness section
 let staleSection = '';
@@ -210,7 +216,7 @@ log('Done. Injecting context.');
 
 const envSection = envSummary ? `\n\n---\n\n## Environment (External Context)\n${envSummary}` : '';
 
-const reapContext = `<REAP_WORKFLOW>\n${reapGuide}\n\n---\n\n## Genome (Project Knowledge — treat as authoritative source of truth)\n${genomeContent}${envSection}\n\n---\n\n## Current State\n${generationContext}${staleSection}${strictSection}${updateSection}\n\n## Session Init (display to user on first message)\n${sessionInitDisplay}\n\n## Rules\n1. ALL development work MUST follow the REAP lifecycle. Do NOT bypass it.\n2. Before writing any code, check if a Generation is active and what stage it is in.\n3. If a Generation is active, use \`${nextCmd}\` to proceed with the current stage.\n4. If no Generation is active, use \`/reap.start\` to start a new one.\n5. Do NOT implement features, fix bugs, or make changes outside of the REAP lifecycle unless the user explicitly asks to bypass it.\n6. When the user says "reap evolve", "next stage", "proceed", or similar — invoke the appropriate REAP skill.\n7. **Genome is the authoritative knowledge source.** When making decisions about architecture, conventions, or constraints, ALWAYS reference the Genome first. If code contradicts Genome, flag it as a potential genome-change backlog item.\n8. If you notice the Genome is outdated or missing information relevant to your current task, inform the user and suggest running \`/reap.sync\`.\n</REAP_WORKFLOW>`;
+const reapContext = `<REAP_WORKFLOW>\n${reapGuide}\n\n---\n\n## Genome (Project Knowledge — treat as authoritative source of truth)\n${genomeContent}${envSection}\n\n---\n\n## Current State\n${generationContext}${staleSection}${strictSection}${updateSection}${langSection}\n\n## Session Init (display to user on first message)\n${sessionInitDisplay}\n\n## Rules\n1. ALL development work MUST follow the REAP lifecycle. Do NOT bypass it.\n2. Before writing any code, check if a Generation is active and what stage it is in.\n3. If a Generation is active, use \`${nextCmd}\` to proceed with the current stage.\n4. If no Generation is active, use \`/reap.start\` to start a new one.\n5. Do NOT implement features, fix bugs, or make changes outside of the REAP lifecycle unless the user explicitly asks to bypass it.\n6. When the user says "reap evolve", "next stage", "proceed", or similar — invoke the appropriate REAP skill.\n7. **Genome is the authoritative knowledge source.** When making decisions about architecture, conventions, or constraints, ALWAYS reference the Genome first. If code contradicts Genome, flag it as a potential genome-change backlog item.\n8. If you notice the Genome is outdated or missing information relevant to your current task, inform the user and suggest running \`/reap.sync\`.\n</REAP_WORKFLOW>`;
 
 process.stdout.write(JSON.stringify({
   hookSpecificOutput: {

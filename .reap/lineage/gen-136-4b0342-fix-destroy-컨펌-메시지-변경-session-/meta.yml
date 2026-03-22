@@ -1,0 +1,8 @@
+id: gen-136-4b0342
+type: normal
+parents:
+  - gen-045-3785e0
+goal: "fix: destroy 컨펌 메시지 변경 + session-start language 주입 누락 수정"
+genomeHash: be30670f
+startedAt: 2026-03-22T12:29:55.635Z
+completedAt: 2026-03-22T12:35:15.722Z
