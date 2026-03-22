@@ -123,6 +123,18 @@ function buildSubagentPrompt(
   lines.push("- Hook prompt에 유저 확인이 필요한 경우(예: 프리뷰+컨펌), autonomous mode에서도 이를 존중하라.");
   lines.push("");
 
+  // Artifact consistency & design pivot detection
+  lines.push("## Artifact Consistency & Design Pivot Detection");
+  lines.push("- Before proceeding to a new stage, verify that previous stage artifacts align with the current design direction.");
+  lines.push("- If the prompt context contains design corrections that contradict existing artifacts:");
+  lines.push("  1. Prioritize prompt instructions over the goal text.");
+  lines.push("  2. Use `/reap.back` to regress to the stage with the inconsistent artifact and rewrite it.");
+  lines.push("- Regression triggers (use `/reap.back` in these situations):");
+  lines.push("  - Artifacts contradict the design direction given in the prompt");
+  lines.push("  - Implementation approach differs from what objective/planning described");
+  lines.push("  - Prompt provides explicit design changes but earlier artifacts still reflect the old design");
+  lines.push("");
+
   // Interrupt protection instructions
   lines.push("## Interrupt Protection");
   lines.push("- 사용자의 새 메시지가 중간에 들어와도, 명시적 kill/중단 요청(\"중단\", \"stop\", \"abort\")이 아닌 한 현재 작업을 끝까지 완료하라.");
@@ -275,6 +287,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
           "",
           "### Handling Issues",
           "- If validation fails: `/reap.back` to return to implementation (or earlier), then resume the loop",
+          "- If artifacts contradict the design direction in the prompt: `/reap.back` to fix the inconsistent artifact",
+          "- If implementation approach differs from what objective/planning described: `/reap.back` to objective or planning",
+          "- If the prompt provides design corrections that differ from existing artifacts: prioritize prompt instructions, `/reap.back` to rewrite artifacts with the corrected design",
           "- If the human wants to pause: stop the loop",
         ].join("\n"),
       });

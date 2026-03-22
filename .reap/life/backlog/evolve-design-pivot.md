@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-143-fed640
 ---
 
 # evolve subagent prompt에 설계 피벗/artifact 일관성 검증 규칙 추가

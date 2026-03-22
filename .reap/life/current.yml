@@ -1,0 +1,20 @@
+# REAP MANAGED — Do not modify directly. Use reap run next/back/start/abort.
+id: gen-143-fed640
+goal: "feat: evolve subagent prompt에 설계 피벗 감지 및 artifact 일관성 검증 규칙 추가"
+stage: implementation
+genomeVersion: 52
+startedAt: 2026-03-22T15:12:12.955Z
+timeline:
+  - stage: objective
+    at: 2026-03-22T15:12:12.955Z
+  - stage: planning
+    at: 2026-03-22T15:14:35.968Z
+  - stage: implementation
+    at: 2026-03-22T15:15:06.967Z
+type: normal
+parents:
+  - gen-045-3785e0
+genomeHash: c8d4e1e4
+expectedHash: 3dcb775f81f768e13c4b1a9bda2c071746a4aa624f60639444e27ac97c7c94e0
+lastNonce: 8c31a9e047aae870a781939345f5cc15
+phase: work
