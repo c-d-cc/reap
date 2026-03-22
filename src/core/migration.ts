@@ -1,10 +1,41 @@
 import YAML from "yaml";
 import { readdir, mkdir, rename } from "fs/promises";
 import { join } from "path";
+import { execSync } from "child_process";
 import type { GenerationMeta, GenerationState } from "../types";
 import type { ReapPaths } from "./paths";
 import { readTextFile, writeTextFile } from "./fs";
 import { generateGenHash, formatGenId, parseGenSeq, isLegacyId } from "./generation";
+
+/** Estimate startedAt/completedAt for a legacy lineage entry using git commit history */
+function estimateGenDates(
+  lineagePath: string,
+  dirName: string,
+  seq: number,
+  fallbackDate?: string,
+): { startedAt: string; completedAt: string } {
+  const pattern = join(lineagePath, `${dirName}*`);
+  const fallback = fallbackDate ?? new Date().toISOString();
+  try {
+    // First commit that added this entry = startedAt
+    const startedRaw = execSync(
+      `git log --format=%aI --diff-filter=A -- "${pattern}"`,
+      { encoding: "utf-8", timeout: 5000 },
+    ).trim();
+    const startedAt = startedRaw.split("\n").pop() || fallback;
+
+    // Last commit that touched this entry = completedAt
+    const completedRaw = execSync(
+      `git log -1 --format=%aI -- "${pattern}"`,
+      { encoding: "utf-8", timeout: 5000 },
+    ).trim();
+    const completedAt = completedRaw || startedAt;
+
+    return { startedAt, completedAt };
+  } catch {
+    return { startedAt: fallback, completedAt: fallback };
+  }
+}
 
 export interface MigrationResult {
   migrated: string[];   // "gen-001 → gen-001-a3f8c2"
@@ -86,14 +117,15 @@ export async function migrateLineage(paths: ReapPaths): Promise<MigrationResult>
       const newId = formatGenId(entry.seq, hash);
 
       // Write meta.yml
+      const dates = estimateGenDates(paths.lineage, entry.dirName, entry.seq);
       const meta: GenerationMeta = {
         id: newId,
         type: "normal",
         parents,
         goal: entry.goal,
         genomeHash: "legacy",
-        startedAt: `legacy-${entry.seq}`,
-        completedAt: `legacy-${entry.seq}`,
+        startedAt: dates.startedAt,
+        completedAt: dates.completedAt,
       };
       await writeTextFile(join(paths.lineage, entry.dirName, "meta.yml"), YAML.stringify(meta));
 

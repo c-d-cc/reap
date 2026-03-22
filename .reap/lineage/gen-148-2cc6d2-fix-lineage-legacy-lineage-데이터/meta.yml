@@ -1,0 +1,9 @@
+id: gen-148-2cc6d2
+type: normal
+parents:
+  - gen-045-3785e0
+goal: "fix(lineage): legacy lineage 데이터 정리 - legacy 날짜 교정(9건), compressed
+  frontmatter 누락 복구(7건), migration.ts 개선"
+genomeHash: 6eda03ff
+startedAt: 2026-03-22T19:33:14.732Z
+completedAt: 2026-03-22T19:39:58.728Z

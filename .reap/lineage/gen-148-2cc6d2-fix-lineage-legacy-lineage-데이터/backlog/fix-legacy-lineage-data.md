@@ -1,7 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: low
+consumedBy: gen-148-2cc6d2
 ---
 
 # Legacy lineage 데이터 정리
