@@ -8,6 +8,7 @@ import { fixProject, checkProject } from "./commands/fix";
 import { destroyProject, getProjectName } from "./commands/destroy";
 import { cleanProject, hasActiveGeneration } from "./commands/clean";
 import type { CleanOptions } from "./commands/clean";
+import { updateGenome } from "./commands/update-genome";
 import { LifeCycle } from "../core/lifecycle";
 import { ReapPaths } from "../core/paths";
 import { AgentRegistry } from "../core/agents";
@@ -325,6 +326,14 @@ program
       console.error(`Error: ${e.message}`);
       process.exit(1);
     }
+  });
+
+program
+  .command("update-genome")
+  .description("Apply pending genome-change backlog without creating a generation")
+  .option("--apply", "Finalize: mark backlog consumed and bump genomeVersion")
+  .action(async (options: { apply?: boolean }) => {
+    await updateGenome(process.cwd(), options.apply ?? false);
   });
 
 program

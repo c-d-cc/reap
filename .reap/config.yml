@@ -6,3 +6,4 @@ language: korean
 autoUpdate: true
 autoSubagent: true
 autoIssueReport: false
+lastSyncedGeneration: ""

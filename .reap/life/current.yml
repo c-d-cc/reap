@@ -1,0 +1,24 @@
+# REAP MANAGED — Do not modify directly. Use reap run next/back/start/abort.
+id: gen-145-864402
+goal: "feat: reap update-genome CLI subcommand — generation 없이 genome-change
+  backlog 적용"
+stage: completion
+genomeVersion: 54
+startedAt: 2026-03-22T16:01:10.983Z
+timeline:
+  - stage: objective
+    at: 2026-03-22T16:01:10.983Z
+  - stage: planning
+    at: 2026-03-22T16:13:05.041Z
+  - stage: implementation
+    at: 2026-03-22T16:13:30.016Z
+  - stage: validation
+    at: 2026-03-22T16:16:07.817Z
+  - stage: completion
+    at: 2026-03-22T16:16:54.721Z
+type: normal
+parents:
+  - gen-045-3785e0
+genomeHash: c8d4e1e4
+expectedHash: 2bfab8979bace9217b097b957621bfa1104af52b823da488fae179813c7aa44d
+lastNonce: d5d2bc6a9939be9f3606251f2e47b114

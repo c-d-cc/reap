@@ -103,6 +103,8 @@ export interface ReapConfig {
   autoSubagent?: boolean;
   /** Generation ID of the last successful genome sync. Empty string = never synced. */
   lastSyncedGeneration?: string;
+  /** Genome version counter. Bumped by update-genome and completion. */
+  genomeVersion?: number;
 }
 
 /** Resolved strict mode (always object form) */
