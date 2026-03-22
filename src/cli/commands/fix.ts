@@ -4,11 +4,19 @@ import YAML from "yaml";
 import { ReapPaths } from "../../core/paths";
 import { LifeCycle } from "../../core/lifecycle";
 import { readTextFile, fileExists, writeTextFile } from "../../core/fs";
+import { checkIntegrity } from "../../core/integrity";
+import type { IntegrityResult } from "../../core/integrity";
 import type { GenerationState } from "../../types";
 
 export interface FixResult {
   issues: string[];
   fixed: string[];
+}
+
+/** Check-only mode: run structural integrity check without modifying anything */
+export async function checkProject(projectRoot: string): Promise<IntegrityResult> {
+  const paths = new ReapPaths(projectRoot);
+  return checkIntegrity(paths);
 }
 
 async function dirExists(path: string): Promise<boolean> {

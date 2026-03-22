@@ -4,7 +4,7 @@ import { createInterface } from "readline";
 import { initProject } from "./commands/init";
 import { updateProject, selfUpgrade } from "./commands/update";
 import { getStatus } from "./commands/status";
-import { fixProject } from "./commands/fix";
+import { fixProject, checkProject } from "./commands/fix";
 import { destroyProject, getProjectName } from "./commands/destroy";
 import { cleanProject, hasActiveGeneration } from "./commands/clean";
 import type { CleanOptions } from "./commands/clean";
@@ -110,19 +110,39 @@ program
 program
   .command("fix")
   .description("Diagnose and repair .reap/ directory structure")
-  .action(async () => {
+  .option("--check", "Check-only mode: report issues without fixing anything")
+  .action(async (options: { check?: boolean }) => {
     try {
-      const result = await fixProject(process.cwd());
-      if (result.fixed.length === 0 && result.issues.length === 0) {
-        console.log("✓ Project is healthy. No issues found.");
-      } else {
-        if (result.fixed.length > 0) {
-          console.log("Fixed:");
-          result.fixed.forEach(f => console.log(`  ✓ ${f}`));
+      if (options.check) {
+        const result = await checkProject(process.cwd());
+        if (result.errors.length === 0 && result.warnings.length === 0) {
+          console.log("✓ Integrity check passed. No issues found.");
+        } else {
+          if (result.errors.length > 0) {
+            console.log("Errors:");
+            result.errors.forEach(e => console.log(`  ✗ ${e}`));
+          }
+          if (result.warnings.length > 0) {
+            console.log("Warnings:");
+            result.warnings.forEach(w => console.log(`  ⚠ ${w}`));
+          }
         }
-        if (result.issues.length > 0) {
-          console.log("Issues (require manual intervention):");
-          result.issues.forEach(i => console.log(`  ✗ ${i}`));
+        if (result.errors.length > 0) {
+          process.exit(1);
+        }
+      } else {
+        const result = await fixProject(process.cwd());
+        if (result.fixed.length === 0 && result.issues.length === 0) {
+          console.log("✓ Project is healthy. No issues found.");
+        } else {
+          if (result.fixed.length > 0) {
+            console.log("Fixed:");
+            result.fixed.forEach(f => console.log(`  ✓ ${f}`));
+          }
+          if (result.issues.length > 0) {
+            console.log("Issues (require manual intervention):");
+            result.issues.forEach(i => console.log(`  ✗ ${i}`));
+          }
         }
       }
     } catch (e: any) {

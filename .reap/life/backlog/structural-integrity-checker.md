@@ -1,6 +1,7 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-142-610ca8
 ---
 
 # .reap/ 구조적 완전성 검사 도구

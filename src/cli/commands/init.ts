@@ -144,6 +144,19 @@ export async function initProject(
     await chmod(dest, 0o755);
   }
 
+  // 5b. Install hook execute files
+  log("Installing hook scripts...");
+  const hooksSourceDir = join(ReapPaths.packageTemplatesDir, "hooks");
+  const { readdir: readdirAsync } = await import("fs/promises");
+  const hookFiles = await readdirAsync(hooksSourceDir);
+  for (const file of hookFiles) {
+    if (!file.endsWith(".sh") || !file.startsWith("on")) continue;
+    const src = join(hooksSourceDir, file);
+    const dest = join(paths.hooks, file);
+    await writeTextFile(dest, await readTextFileOrThrow(src));
+    await chmod(dest, 0o755);
+  }
+
   // 6. Detect installed agents and install commands + hooks
   log("Detecting AI agents...");
   const detectedAgents = await AgentRegistry.detectInstalled();
