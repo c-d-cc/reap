@@ -1,20 +1,25 @@
 ## What's New
 
-- **Stage auto-transition** — `--phase complete` now automatically advances to the next stage. No separate `/reap.next` call needed. `/reap.next` remains as a fallback for manual transitions.
-- **Phase nonce verification** — Nonce verification now also applies to phase transitions within a stage (work → complete), preventing AI from skipping work phases.
-- **Token unification** — Simplified from 4 fields (`expectedTokenHash`, `lastNonce`, `lastPhaseNonce`, `expectedPhaseTokenHash`) to 2 fields (`lastNonce`, `expectedHash`). New `phase` field in `current.yml` tracks the current phase.
-- **`reap clean` / `reap destroy`** — New CLI commands for project reset and REAP removal. `clean` provides interactive options for lineage, hooks, genome, and backlog. `destroy` requires explicit confirmation by typing `destroy <project-name>`.
-- **Submodule commit rules** — Evolve subagent prompt now includes explicit instructions for committing dirty git submodules before the parent repo.
+- **Recovery Generation** — New generation type (`type: recovery`) for correcting past generation errors. `/reap.evolve.recovery` reviews and creates recovery generations
+- **Structural Integrity Checker** — `reap fix --check` validates `.reap/` directory structure. Auto-runs via `onLifeCompleted` hook
+- **`/reap.update-genome`** — Apply pending genome-change backlog without a generation. Available during idle periods
+- **Evolve Design Pivot Detection** — Subagent detects artifact-design mismatches and triggers `/reap.back` for correction
+- **`lastSyncedGeneration` Tracking** — Genome sync state tracked by generation ID. Detects "never synced" state after init
+- **Destroy Confirmation** — Changed from `destroy {projectName}` to `yes destroy`
+- **Session Language Injection** — `session-start.cjs` injects configured language into AI context
+- **Init Skills Sync** — `reap init` installs `.claude/skills/` immediately (resolves #6)
+- **resolveParents NaN Fix** — Fixed sort bug caused by legacy `completedAt` placeholder values
 
 ## Generations
 
-- **gen-126-8d3c61**: Add reap clean and reap destroy commands
-- **gen-127-e73a96**: lastNonce auto-read in reap.next
-- **gen-128-9001c1**: next outputs nextCommand for auto-chaining to next stage
-- **gen-129-b3e864**: E2E tests for reap clean and reap destroy
-- **gen-130-428ef4**: Stage auto-transition with nonce verification
-- **gen-131-141810**: Phase nonce verification
-- **gen-132-cadeb8**: Unify token fields + add phase tracking
-- **gen-133-19090f**: Update stage-token E2E for auto-transition
-- **gen-134-beaedb**: Update docs for clean/destroy and auto-transition
-- **gen-135-7e8f8a**: Add submodule commit rules to evolve subagent prompt
+- **gen-136-4b0342**: fix: destroy 컨펌 메시지 변경 + session-start language 주입 누락 수정
+- **gen-137-c8d9b9**: resolve #6: reap init이 .claude/skills/에 sub-command를 설치하지 않음
+- **gen-138-26723a**: resolve #7: lastSyncedGeneration 기반 genome sync 상태 추적
+- **gen-139-f2cdec**: feat: recovery generation 개념 정의 + genome domain 문서화
+- **gen-140-80b51f**: recovery: gen-138 lastSyncedGeneration 설계 교정
+- **gen-141-cad97c**: fix: resolveParents NaN completedAt 정렬 버그 수정
+- **gen-142-610ca8**: feat: .reap/ 구조적 완전성 검사 도구 + onLifeCompleted hook
+- **gen-143-fed640**: feat: evolve subagent prompt 설계 피벗 감지 규칙 추가
+- **gen-144-e63e59**: fix: localInstall nvm 경로 수정
+- **gen-145-864402**: feat: reap update-genome 명령어 추가
+- **gen-146-56b321**: refactor: update-genome을 CLI에서 slash command로 변환
