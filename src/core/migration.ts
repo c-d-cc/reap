@@ -1,5 +1,5 @@
 import YAML from "yaml";
-import { readdir, mkdir, rename } from "fs/promises";
+import { readdir, rename } from "fs/promises";
 import { join } from "path";
 import { execSync } from "child_process";
 import type { GenerationMeta, GenerationState } from "../types";
@@ -11,7 +11,6 @@ import { generateGenHash, formatGenId, parseGenSeq, isLegacyId } from "./generat
 function estimateGenDates(
   lineagePath: string,
   dirName: string,
-  seq: number,
   fallbackDate?: string,
 ): { startedAt: string; completedAt: string } {
   const pattern = join(lineagePath, `${dirName}*`);
@@ -117,7 +116,7 @@ export async function migrateLineage(paths: ReapPaths): Promise<MigrationResult>
       const newId = formatGenId(entry.seq, hash);
 
       // Write meta.yml
-      const dates = estimateGenDates(paths.lineage, entry.dirName, entry.seq);
+      const dates = estimateGenDates(paths.lineage, entry.dirName);
       const meta: GenerationMeta = {
         id: newId,
         type: "normal",
