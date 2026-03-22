@@ -1,8 +1,0 @@
-id: gen-130-428ef4
-type: normal
-parents:
-  - gen-129-b3e864
-goal: "feat: stage 자동 전환 — complete에서 전환, 다음 stage에서 token 검증"
-genomeHash: be30670f
-startedAt: 2026-03-22T10:06:33.602Z
-completedAt: 2026-03-22T10:24:49.570Z
