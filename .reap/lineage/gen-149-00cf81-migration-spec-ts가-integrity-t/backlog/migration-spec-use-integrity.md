@@ -1,7 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: medium
+consumedBy: gen-149-00cf81
 ---
 
 # migration-spec.ts가 integrity.ts를 SSOT로 사용하도록 리팩토링

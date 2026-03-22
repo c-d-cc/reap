@@ -1,8 +1,5 @@
-import { existsSync } from "fs";
-import { join } from "path";
 import type { ReapPaths } from "./paths";
-import { readTextFile } from "./fs";
-import YAML from "yaml";
+import { checkIntegrity } from "./integrity";
 
 /**
  * Build a migration spec string describing the expected REAP structure.
@@ -59,13 +56,14 @@ export function buildMigrationSpec(paths: ReapPaths): string {
     └── {event}.{name}.{sh|md}`);
 
   // 3. Slash commands
-  sections.push(`## Slash commands (29)
+  sections.push(`## Slash commands (32)
 
 reap.objective, reap.planning, reap.implementation,
 reap.validation, reap.completion, reap.evolve,
-reap.start, reap.next, reap.back, reap.abort,
+reap.evolve.recovery, reap.start, reap.next, reap.back, reap.abort,
 reap.status, reap.sync, reap.sync.genome, reap.sync.environment,
-reap.help, reap.update, reap.report,
+reap.help, reap.update, reap.update-genome, reap.report,
+reap.refreshKnowledge,
 reap.merge.start, reap.merge.detect, reap.merge.mate,
 reap.merge.merge, reap.merge.sync, reap.merge.validation,
 reap.merge.completion, reap.merge.evolve,
@@ -99,68 +97,8 @@ Condition files: .reap/hooks/conditions/{name}.yml`);
  * Returns a list of human-readable gap descriptions.
  */
 export async function detectMigrationGaps(paths: ReapPaths): Promise<string[]> {
-  const gaps: string[] = [];
-
-  // 1. Check config.yml exists and has required fields
-  const configContent = await readTextFile(paths.config);
-  if (configContent === null) {
-    gaps.push("config.yml missing");
-  } else {
-    try {
-      const config = YAML.parse(configContent);
-      if (!config?.version) gaps.push("config.yml: missing required field 'version'");
-      if (!config?.project) gaps.push("config.yml: missing required field 'project'");
-      if (!config?.entryMode) gaps.push("config.yml: missing required field 'entryMode'");
-    } catch {
-      gaps.push("config.yml: invalid YAML");
-    }
-  }
-
-  // 2. Check genome/ directory and required files
-  if (!existsSync(paths.genome)) {
-    gaps.push("genome/ directory missing");
-  } else {
-    const genomeFiles = [
-      { path: paths.principles, label: "genome/principles.md" },
-      { path: paths.conventions, label: "genome/conventions.md" },
-      { path: paths.constraints, label: "genome/constraints.md" },
-      { path: paths.sourceMap, label: "genome/source-map.md" },
-    ];
-    for (const { path, label } of genomeFiles) {
-      if (!existsSync(path)) {
-        gaps.push(`${label} missing`);
-      }
-    }
-  }
-
-  // 3. Check environment/ directory
-  if (!existsSync(paths.environment)) {
-    gaps.push("environment/ directory missing");
-  }
-
-  // 4. Check life/ directory
-  if (!existsSync(paths.life)) {
-    gaps.push("life/ directory missing");
-  } else {
-    if (!existsSync(paths.backlog)) {
-      gaps.push("life/backlog/ directory missing");
-    }
-  }
-
-  // 5. Check lineage/ directory
-  if (!existsSync(paths.lineage)) {
-    gaps.push("lineage/ directory missing");
-  }
-
-  // 6. Check hooks/ directory
-  if (!existsSync(paths.hooks)) {
-    gaps.push("hooks/ directory missing");
-  }
-
-  // 7. Check hooks/conditions/ directory
-  if (!existsSync(paths.hookConditions)) {
-    gaps.push("hooks/conditions/ directory missing");
-  }
-
-  return gaps;
+  const result = await checkIntegrity(paths);
+  // Integrity errors represent structural gaps that need migration attention.
+  // Warnings are informational and not considered migration-blocking gaps.
+  return result.errors;
 }

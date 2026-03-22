@@ -4,7 +4,7 @@ import YAML from "yaml";
 import { ReapPaths } from "../../core/paths";
 import { LifeCycle } from "../../core/lifecycle";
 import { readTextFile, fileExists, writeTextFile } from "../../core/fs";
-import { checkIntegrity } from "../../core/integrity";
+import { checkIntegrity, checkUserLevelArtifacts } from "../../core/integrity";
 import type { IntegrityResult } from "../../core/integrity";
 import type { GenerationState } from "../../types";
 
@@ -16,7 +16,14 @@ export interface FixResult {
 /** Check-only mode: run structural integrity check without modifying anything */
 export async function checkProject(projectRoot: string): Promise<IntegrityResult> {
   const paths = new ReapPaths(projectRoot);
-  return checkIntegrity(paths);
+  const [structureResult, userLevelResult] = await Promise.all([
+    checkIntegrity(paths),
+    checkUserLevelArtifacts(projectRoot),
+  ]);
+  return {
+    errors: [...structureResult.errors, ...userLevelResult.errors],
+    warnings: [...structureResult.warnings, ...userLevelResult.warnings],
+  };
 }
 
 async function dirExists(path: string): Promise<boolean> {

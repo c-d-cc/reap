@@ -1,8 +1,0 @@
-id: gen-137-c8d9b9
-type: normal
-parents:
-  - gen-136-4b0342
-goal: "resolve #6: reap init이 .claude/skills/에 sub-command를 설치하지 않음"
-genomeHash: be30670f
-startedAt: 2026-03-22T12:37:36.035Z
-completedAt: 2026-03-22T12:45:23.674Z

@@ -1,5 +1,6 @@
 import { readdir, stat } from "fs/promises";
 import { join } from "path";
+import { homedir } from "os";
 import YAML from "yaml";
 import { ReapPaths } from "./paths";
 import { readTextFile, fileExists } from "./fs";
@@ -28,6 +29,7 @@ export async function checkIntegrity(paths: ReapPaths): Promise<IntegrityResult>
   const errors: string[] = [];
   const warnings: string[] = [];
 
+  await checkDirectoryStructure(paths, errors);
   await checkConfig(paths, errors, warnings);
   const state = await checkCurrentYml(paths, errors, warnings);
   await checkLineage(paths, errors, warnings);
@@ -38,6 +40,34 @@ export async function checkIntegrity(paths: ReapPaths): Promise<IntegrityResult>
   }
 
   return { errors, warnings };
+}
+
+// ── directory structure ─────────────────────────────────────
+
+async function checkDirectoryStructure(
+  paths: ReapPaths,
+  errors: string[],
+): Promise<void> {
+  const requiredDirs = [
+    { path: paths.genome, name: "genome/" },
+    { path: paths.environment, name: "environment/" },
+    { path: paths.life, name: "life/" },
+    { path: paths.lineage, name: "lineage/" },
+    { path: paths.backlog, name: "life/backlog/" },
+    { path: paths.hooks, name: "hooks/" },
+    { path: paths.hookConditions, name: "hooks/conditions/" },
+  ];
+
+  for (const dir of requiredDirs) {
+    try {
+      const s = await stat(dir.path);
+      if (!s.isDirectory()) {
+        errors.push(`${dir.name} directory missing`);
+      }
+    } catch {
+      errors.push(`${dir.name} directory missing`);
+    }
+  }
 }
 
 // ── config.yml ───────────────────────────────────────────────
@@ -450,6 +480,78 @@ async function checkArtifacts(
     const artifactPath = paths.artifact(currentArtifact);
     if (!(await fileExists(artifactPath))) {
       warnings.push(`artifact ${currentArtifact} not yet created for current stage '${state.stage}'`);
+    }
+  }
+}
+
+// ── user-level falsy checks ─────────────────────────────────
+
+/**
+ * Check for user-level artifacts that should NOT exist.
+ * These indicate legacy remnants or misconfigured installations.
+ * Separate from checkIntegrity() because it inspects paths outside .reap/.
+ */
+export async function checkUserLevelArtifacts(projectRoot: string): Promise<IntegrityResult> {
+  const errors: string[] = [];
+  const warnings: string[] = [];
+  const home = homedir();
+
+  // ~/.claude/skills/reap.* — user-level reap skills (should only be project-level)
+  await checkGlobPattern(
+    join(home, ".claude", "skills"),
+    /^reap\./,
+    "~/.claude/skills/",
+    "user-level reap skill found (should only be project-level)",
+    errors,
+  );
+
+  // ~/.claude/commands/reap.* — legacy reap commands at user level
+  await checkGlobPattern(
+    join(home, ".claude", "commands"),
+    /^reap\./,
+    "~/.claude/commands/",
+    "legacy reap command at user level (Phase 2 remnant)",
+    warnings,
+  );
+
+  // ~/.config/opencode/commands/reap.* — legacy opencode commands
+  await checkGlobPattern(
+    join(home, ".config", "opencode", "commands"),
+    /^reap\./,
+    "~/.config/opencode/commands/",
+    "legacy reap command at user level (Phase 2 remnant)",
+    warnings,
+  );
+
+  // .claude/commands/reap.* — legacy project-level commands (should be in skills/)
+  await checkGlobPattern(
+    join(projectRoot, ".claude", "commands"),
+    /^reap\./,
+    ".claude/commands/",
+    "legacy project-level reap command (should be migrated to skills/)",
+    warnings,
+  );
+
+  return { errors, warnings };
+}
+
+async function checkGlobPattern(
+  dir: string,
+  pattern: RegExp,
+  displayDir: string,
+  message: string,
+  target: string[],
+): Promise<void> {
+  let entries: string[];
+  try {
+    entries = await readdir(dir);
+  } catch {
+    return; // directory doesn't exist — that's fine
+  }
+
+  for (const entry of entries) {
+    if (pattern.test(entry)) {
+      target.push(`${displayDir}${entry}: ${message}`);
     }
   }
 }
