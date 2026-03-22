@@ -58,6 +58,8 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 ### Generation
 A single generation. Carries one goal through the Life Cycle. State is tracked in `life/current.yml`.
 
+**Generation types**: `normal` (standard lifecycle), `merge` (distributed merge lifecycle), `recovery` (recover from failed/interrupted generation via `/reap.evolve.recovery`).
+
 **Generation ID format**: `gen-{NNN}-{hash}` (e.g. `gen-042-a3f8c2`)
 - `{hash}`: 6-char hex from sha256. **MUST be real hex (0-9a-f), NEVER words/slugs.**
 - Lineage directory appends a goal slug: `gen-042-a3f8c2-fix-login-bug`
@@ -146,11 +148,15 @@ Hooks are executed by the AI agent by scanning `.reap/hooks/` for files matching
 
 REAP supports multiple AI agents simultaneously through the AgentAdapter abstraction. Currently supported: **Claude Code** and **OpenCode**. Detected agents are listed in `.reap/config.yml` under the `agents` field (managed by `reap init` / `reap update`). Slash commands and session hooks are installed to each detected agent's configuration directory.
 
+## CLI Subcommands
+
+9 CLI subcommands: `reap init`, `reap status`, `reap update`, `reap fix` (`--check` for read-only), `reap update-genome`, `reap clean`, `reap destroy`, `reap help`, `reap run`.
+
 ## Role Separation
 
 | Component | Role |
 |-----------|------|
-| **CLI (`reap`)** | Project setup and maintenance. Init, status, update, fix |
+| **CLI (`reap`)** | Project setup and maintenance. Init, status, update, fix, update-genome |
 | **AI Agent** | Workflow executor. Performs each stage's work via slash commands |
 | **Human** | Decision maker. Sets goals, finalizes specs, reviews code, approves stage transitions |
 

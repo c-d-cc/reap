@@ -146,6 +146,7 @@ reap init`}</CodeBlock>
             <div>
               <div className="text-xs text-muted-foreground mb-1">{t.hero.installStep3}</div>
               <CodeBlock language="bash">{`claude
+> /reap.sync
 > /reap.evolve "Implement user authentication"`}</CodeBlock>
             </div>
           </div>

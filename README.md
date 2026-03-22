@@ -84,8 +84,9 @@ reap init my-project
 cd my-project
 reap init
 
-# 2. Open Claude Code and run a full generation
+# 2. Open Claude Code, sync knowledge, then run a full generation
 claude
+> /reap.sync
 > /reap.evolve "Implement user authentication"
 ```
 
@@ -220,9 +221,10 @@ All distributed operations run through your AI agent:
 | `reap init <name>` | Initialize project. Creates the `.reap/` structure |
 | `reap status` | Check the current generation's status |
 | `reap update` | Sync commands/templates/hooks to the latest version |
-| `reap fix` | Diagnose and repair the `.reap/` structure |
+| `reap fix` | Diagnose and repair the `.reap/` structure (`--check` for read-only mode) |
+| `reap update-genome` | Update genome files from CLI (non-interactive) |
 | `reap clean` | Reset REAP project with interactive options |
-| `reap destroy` | Remove all REAP files from project (requires confirmation) |
+| `reap destroy` | Remove all REAP files from project (requires typing "yes destroy" to confirm) |
 | `reap help` | Print CLI commands, slash commands, and workflow summary |
 | `reap run <cmd>` | Execute a slash command's script directly (used internally by 1-line `.md` wrappers) |
 
@@ -240,7 +242,7 @@ REAP integrates with AI agents through slash commands and session hooks. Current
 
 ### Script Orchestrator Architecture
 
-Since v0.11.0, all 28 slash commands follow a **1-line `.md` wrapper + TypeScript script** pattern. Each `.md` file simply calls `reap run <cmd>`, and the TS script (`src/cli/commands/run/`) handles all deterministic logic — returning structured JSON instructions for the AI agent. This ensures consistency and testability.
+Since v0.11.0, all 31 slash commands follow a **1-line `.md` wrapper + TypeScript script** pattern. Each `.md` file simply calls `reap run <cmd>`, and the TS script (`src/cli/commands/run/`) handles all deterministic logic — returning structured JSON instructions for the AI agent. This ensures consistency and testability.
 
 ### Signature-Based Locking [↗](https://reap.cc/docs/advanced)
 
@@ -315,6 +317,7 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.help` | Contextual AI help with 24+ topics |
 | `/reap.update` | Upgrade REAP package + sync commands/templates/hooks |
 | **`/reap.evolve`** | **Run an entire generation from start to finish (recommended)** |
+| **`/reap.evolve.recovery`** | **Recover from a failed/interrupted generation** |
 | **`/reap.pull <branch>`** | **Fetch + run full merge generation (distributed `/reap.evolve`)** |
 | **`/reap.merge <branch>`** | **Run full merge generation for a local branch (no fetch)** |
 | `/reap.push` | Validate REAP state and push current branch |
