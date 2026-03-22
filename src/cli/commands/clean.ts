@@ -1,7 +1,7 @@
 import { rm, readdir, mkdir } from "fs/promises";
 import { join } from "path";
 import { ReapPaths } from "../../core/paths";
-import { fileExists, readTextFile, readTextFileOrThrow, writeTextFile } from "../../core/fs";
+import { fileExists, readTextFileOrThrow, writeTextFile } from "../../core/fs";
 import { GenerationManager } from "../../core/generation";
 
 export interface CleanOptions {
