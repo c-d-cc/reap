@@ -1,4 +1,4 @@
-version: 0.13.4+dev.689eb20
+version: 0.15.0
 project: reap
 entryMode: greenfield
 strict: true
