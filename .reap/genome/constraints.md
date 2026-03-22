@@ -25,7 +25,7 @@
 
 ## CLI Subcommands
 
-6개: init, status, fix, update, help, run
+8개: init, status, fix, update, help, destroy, clean, run
 - `reap run <command> [--phase <phase>]` — command script dispatcher. deterministic 로직 실행 + structured JSON output
 
 ## Slash Commands

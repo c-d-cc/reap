@@ -1,9 +1,13 @@
 #!/usr/bin/env node
 import { program } from "commander";
+import { createInterface } from "readline";
 import { initProject } from "./commands/init";
 import { updateProject, selfUpgrade } from "./commands/update";
 import { getStatus } from "./commands/status";
 import { fixProject } from "./commands/fix";
+import { destroyProject, getProjectName } from "./commands/destroy";
+import { cleanProject, hasActiveGeneration } from "./commands/clean";
+import type { CleanOptions } from "./commands/clean";
 import { LifeCycle } from "../core/lifecycle";
 import { ReapPaths } from "../core/paths";
 import { AgentRegistry } from "../core/agents";
@@ -187,6 +191,119 @@ program
   });
 
 program
+  .command("destroy")
+  .description("Remove all REAP files from this project")
+  .action(async () => {
+    try {
+      const cwd = process.cwd();
+      const projectName = await getProjectName(cwd);
+      if (!projectName) {
+        console.error("Error: Not a REAP project (cannot read .reap/config.yml).");
+        process.exit(1);
+      }
+
+      const expectedInput = `destroy ${projectName}`;
+      console.log(`\nThis will permanently remove all REAP files from this project.`);
+      console.log(`To confirm, type '${expectedInput}':\n`);
+
+      const answer = await prompt("> ");
+
+      if (answer.trim() !== expectedInput) {
+        console.log("\nConfirmation mismatch. Destroy cancelled.");
+        process.exit(0);
+      }
+
+      console.log("");
+      const result = await destroyProject(cwd);
+
+      if (result.removed.length > 0) {
+        console.log("Removed:");
+        result.removed.forEach(f => console.log(`  - ${f}`));
+      }
+      if (result.skipped.length > 0) {
+        console.log("Skipped:");
+        result.skipped.forEach(f => console.log(`  - ${f}`));
+      }
+      console.log("\nREAP has been removed from this project.");
+    } catch (e: any) {
+      console.error(`Error: ${e.message}`);
+      process.exit(1);
+    }
+  });
+
+program
+  .command("clean")
+  .description("Reset REAP project with interactive options")
+  .action(async () => {
+    try {
+      const cwd = process.cwd();
+      const paths = new ReapPaths(cwd);
+      if (!(await paths.isReapProject())) {
+        console.error("Error: Not a REAP project (.reap/ not found).");
+        process.exit(1);
+      }
+
+      // Warn about active generation
+      if (await hasActiveGeneration(cwd)) {
+        console.log("\n⚠ Warning: There is an active generation in progress.");
+        const proceed = await prompt("Continue and discard it? (y/N): ");
+        if (proceed.trim().toLowerCase() !== "y") {
+          console.log("Clean cancelled.");
+          process.exit(0);
+        }
+      }
+
+      console.log("\n--- REAP Clean ---\n");
+
+      // 1. Lineage
+      console.log("1. Lineage (generation history):");
+      console.log("   [1] Compress into epoch summary");
+      console.log("   [2] Delete entirely");
+      const lineageChoice = await prompt("   Choice (1/2): ");
+      const lineage: CleanOptions["lineage"] = lineageChoice.trim() === "2" ? "delete" : "compress";
+
+      // 2. Hooks
+      console.log("\n2. Hooks:");
+      console.log("   [1] Keep existing hooks");
+      console.log("   [2] Reset to defaults");
+      const hooksChoice = await prompt("   Choice (1/2): ");
+      const hooks: CleanOptions["hooks"] = hooksChoice.trim() === "2" ? "reset" : "keep";
+
+      // 3. Genome/Environment
+      console.log("\n3. Genome / Environment:");
+      console.log("   [1] Override with templates (then run /reap.sync)");
+      console.log("   [2] Keep current files");
+      console.log("   [3] Manual editing (no changes)");
+      const genomeChoice = await prompt("   Choice (1/2/3): ");
+      const genome: CleanOptions["genome"] =
+        genomeChoice.trim() === "1" ? "template" :
+        genomeChoice.trim() === "3" ? "manual" : "keep";
+
+      // 4. Backlog
+      console.log("\n4. Backlog:");
+      console.log("   [1] Keep existing backlog items");
+      console.log("   [2] Delete all");
+      const backlogChoice = await prompt("   Choice (1/2): ");
+      const backlog: CleanOptions["backlog"] = backlogChoice.trim() === "2" ? "delete" : "keep";
+
+      console.log("\nApplying...\n");
+      const result = await cleanProject(cwd, { lineage, hooks, genome, backlog });
+
+      for (const action of result.actions) {
+        console.log(`  - ${action}`);
+      }
+      for (const warning of result.warnings) {
+        console.log(`  ⚠ ${warning}`);
+      }
+
+      console.log("\nClean complete. Run /reap.start to begin a new generation.");
+    } catch (e: any) {
+      console.error(`Error: ${e.message}`);
+      process.exit(1);
+    }
+  });
+
+program
   .command("run <command>")
   .description("Run a REAP command script (internal, used by slash commands)")
   .option("--phase <phase>", "Start from a specific phase")
@@ -202,5 +319,15 @@ program
     const { runCommand } = await import("./commands/run/index");
     await runCommand(command, options.phase, passArgs);
   });
+
+function prompt(question: string): Promise<string> {
+  const rl = createInterface({ input: process.stdin, output: process.stdout });
+  return new Promise((resolve) => {
+    rl.question(question, (answer) => {
+      rl.close();
+      resolve(answer);
+    });
+  });
+}
 
 program.parse();
