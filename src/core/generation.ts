@@ -11,32 +11,20 @@ import { readTextFile, writeTextFile } from "./fs";
 import { parseFrontmatter } from "./compression";
 import * as lineageUtils from "./lineage";
 
-// ── Stage Chain Token ───────────────────────────────────────
+// ── Unified Token ───────────────────────────────────────────
 
-/** Generate a stage chain token (nonce + hash). Both stored in current.yml, consumed by next. */
-export function generateStageToken(genId: string, stage: string): { nonce: string; hash: string } {
+/** Generate a unified chain token (nonce + hash). Used for both stage and phase tokens. */
+export function generateToken(genId: string, stage: string, phase?: string): { nonce: string; hash: string } {
   const nonce = randomBytes(16).toString("hex");
-  const hash = createHash("sha256").update(nonce + genId + stage).digest("hex");
+  const input = phase ? `${nonce}${genId}${stage}:${phase}` : `${nonce}${genId}${stage}`;
+  const hash = createHash("sha256").update(input).digest("hex");
   return { nonce, hash };
 }
 
-/** Verify a stage chain token — recomputes hash from nonce and compares to expected. */
-export function verifyStageToken(token: string, genId: string, stage: string, expectedHash: string): boolean {
-  const computed = createHash("sha256").update(token + genId + stage).digest("hex");
-  return computed === expectedHash;
-}
-
-/** Generate a phase chain token (nonce + hash). Prevents skipping work phase within a stage. */
-export function generatePhaseToken(genId: string, stage: string, phase: string): { nonce: string; hash: string } {
-  const nonce = randomBytes(16).toString("hex");
-  const hash = createHash("sha256").update(nonce + genId + stage + ":" + phase).digest("hex");
-  return { nonce, hash };
-}
-
-/** Verify a phase chain token — recomputes hash from nonce and compares to expected. */
-export function verifyPhaseToken(token: string, genId: string, stage: string, phase: string, expectedHash: string): boolean {
-  const computed = createHash("sha256").update(token + genId + stage + ":" + phase).digest("hex");
-  return computed === expectedHash;
+/** Verify a unified chain token — recomputes hash from nonce and compares to expected. */
+export function verifyToken(token: string, genId: string, stage: string, expectedHash: string, phase?: string): boolean {
+  const input = phase ? `${token}${genId}${stage}:${phase}` : `${token}${genId}${stage}`;
+  return createHash("sha256").update(input).digest("hex") === expectedHash;
 }
 
 // ── Hash utilities ──────────────────────────────────────────

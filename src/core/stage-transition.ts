@@ -3,7 +3,7 @@ import type { ReapPaths } from "./paths";
 import type { GenerationState, AnyStage, LifeCycleStage, MergeStage, ReapHookEvent, HookResult } from "../types";
 import { LifeCycle } from "./lifecycle";
 import { MergeLifeCycle } from "./merge-lifecycle";
-import { verifyStageToken, generatePhaseToken, verifyPhaseToken } from "./generation";
+import { generateToken, verifyToken } from "./generation";
 import { readTextFile, writeTextFile, fileExists } from "./fs";
 import { executeHooks } from "./hook-engine";
 import { emitError } from "./run-output";
@@ -45,9 +45,9 @@ const STAGE_HOOK: Record<string, ReapHookEvent> = {
 
 /**
  * Verify the stage chain token at stage entry.
- * - If lastNonce exists: verify against expectedTokenHash, clear lastNonce on success.
+ * - If lastNonce exists: verify against expectedHash, clear lastNonce on success.
  * - If lastNonce does not exist: pass (first stage like objective/detect).
- * Mutates state in-place (clears lastNonce + expectedTokenHash on success).
+ * Mutates state in-place (clears lastNonce + expectedHash on success).
  */
 export function verifyStageEntry(
   command: string,
@@ -58,8 +58,13 @@ export function verifyStageEntry(
     return;
   }
 
-  if (!state.expectedTokenHash) {
-    emitError(command, "Stage transition error: lastNonce exists but expectedTokenHash is missing. State may be corrupted.");
+  if (state.phase) {
+    // Nonce belongs to a phase token, not a stage token — skip stage verification
+    return;
+  }
+
+  if (!state.expectedHash) {
+    emitError(command, "Stage transition error: lastNonce exists but expectedHash is missing. State may be corrupted.");
   }
 
   // The previous stage stored the nonce for the PREVIOUS stage.
@@ -78,13 +83,13 @@ export function verifyStageEntry(
     emitError(command, "Stage transition error: cannot determine previous stage for token verification.");
   }
 
-  if (!verifyStageToken(state.lastNonce, state.id, prevStage as string, state.expectedTokenHash)) {
+  if (!verifyToken(state.lastNonce, state.id, prevStage as string, state.expectedHash)) {
     emitError(command, `Token verification failed. The stage chain token does not match. Re-run the previous stage command to get a valid token.`);
   }
 
   // Clear consumed token
   state.lastNonce = undefined;
-  state.expectedTokenHash = undefined;
+  state.expectedHash = undefined;
 }
 
 // ── Phase nonce helpers ─────────────────────────────────────
@@ -95,33 +100,35 @@ export function verifyStageEntry(
  * Mutates state in-place. Caller must save state after calling this.
  */
 export function setPhaseNonce(state: GenerationState, stage: string, phase: string): void {
-  const { nonce, hash } = generatePhaseToken(state.id, stage, phase);
-  state.lastPhaseNonce = nonce;
-  state.expectedPhaseTokenHash = hash;
+  const { nonce, hash } = generateToken(state.id, stage, phase);
+  state.lastNonce = nonce;
+  state.expectedHash = hash;
+  state.phase = phase;
 }
 
 /**
  * Verify the phase nonce at the start of a phase (e.g., --phase complete).
- * - If lastPhaseNonce exists: verify against expectedPhaseTokenHash, clear on success.
- * - If lastPhaseNonce does not exist: error (work phase was skipped).
- * Mutates state in-place (clears lastPhaseNonce + expectedPhaseTokenHash on success).
+ * - If lastNonce exists: verify against expectedHash with phase, clear on success.
+ * - If lastNonce does not exist: error (work phase was skipped).
+ * Mutates state in-place (clears lastNonce + expectedHash + phase on success).
  */
 export function verifyPhaseEntry(command: string, state: GenerationState, stage: string, phase: string): void {
-  if (!state.lastPhaseNonce) {
+  if (!state.lastNonce) {
     emitError(command, `Phase nonce missing. Complete the previous phase before running --phase ${phase}.`);
   }
 
-  if (!state.expectedPhaseTokenHash) {
-    emitError(command, "Phase transition error: lastPhaseNonce exists but expectedPhaseTokenHash is missing. State may be corrupted.");
+  if (!state.expectedHash) {
+    emitError(command, "Phase transition error: lastNonce exists but expectedHash is missing. State may be corrupted.");
   }
 
-  if (!verifyPhaseToken(state.lastPhaseNonce, state.id, stage, phase, state.expectedPhaseTokenHash)) {
+  if (!verifyToken(state.lastNonce, state.id, stage, state.expectedHash, phase)) {
     emitError(command, `Phase token verification failed. Re-run the previous phase to get a valid token.`);
   }
 
   // Clear consumed phase token
-  state.lastPhaseNonce = undefined;
-  state.expectedPhaseTokenHash = undefined;
+  state.lastNonce = undefined;
+  state.expectedHash = undefined;
+  state.phase = undefined;
 }
 
 // ── Auto-transition ─────────────────────────────────────────

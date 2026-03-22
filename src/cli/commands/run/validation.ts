@@ -1,6 +1,6 @@
 import { join } from "path";
 import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager, generateStageToken } from "../../../core/generation";
+import { GenerationManager, generateToken } from "../../../core/generation";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
@@ -134,8 +134,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     }
 
     // Generate stage chain token
-    const { nonce, hash } = generateStageToken(state.id, state.stage);
-    state.expectedTokenHash = hash;
+    const { nonce, hash } = generateToken(state.id, state.stage);
+    state.expectedHash = hash;
     state.lastNonce = nonce;
 
     // Execute hooks (only on pass/partial, not on fail)

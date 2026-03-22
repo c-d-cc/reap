@@ -52,14 +52,12 @@ export interface GenerationState {
   genomeHash?: string;
   /** Common ancestor generation ID (merge only) */
   commonAncestor?: string;
-  /** Stage token hash — SHA256(nonce + genId + stage). Only hash stored; nonce given to AI via prompt. */
-  expectedTokenHash?: string;
   /** Last generated nonce — auto-read by next.ts if no explicit nonce argument */
   lastNonce?: string;
-  /** Phase nonce — prevents skipping work phase within a stage */
-  lastPhaseNonce?: string;
-  /** Phase token hash — SHA256(nonce + genId + stage + ":" + phase) */
-  expectedPhaseTokenHash?: string;
+  /** Token hash — SHA256(nonce + genId + stage[:phase]). Unified for both stage and phase tokens. */
+  expectedHash?: string;
+  /** Current phase within the active stage */
+  phase?: string;
 }
 
 /** Metadata stored in lineage/{gen-dir}/meta.yml */

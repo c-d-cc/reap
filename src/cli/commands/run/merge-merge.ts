@@ -1,6 +1,6 @@
 import type { ReapPaths } from "../../../core/paths";
 import { MergeGenerationManager } from "../../../core/merge-generation";
-import { generateStageToken } from "../../../core/generation";
+import { generateToken } from "../../../core/generation";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
@@ -80,8 +80,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     await mgm.save(state);
 
     // Generate stage chain token
-    const { nonce, hash } = generateStageToken(state.id, state.stage);
-    state.expectedTokenHash = hash;
+    const { nonce, hash } = generateToken(state.id, state.stage);
+    state.expectedHash = hash;
     state.lastNonce = nonce;
 
     // Execute hooks

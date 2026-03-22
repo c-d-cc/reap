@@ -1,7 +1,7 @@
 import { join } from "path";
 import { readdir } from "fs/promises";
 import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager, generateStageToken } from "../../../core/generation";
+import { GenerationManager, generateToken } from "../../../core/generation";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { scanBacklog } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
@@ -156,8 +156,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     }
 
     // Generate stage chain token — hash stored in current.yml, nonce given to AI
-    const { nonce, hash } = generateStageToken(state.id, state.stage);
-    state.expectedTokenHash = hash;
+    const { nonce, hash } = generateToken(state.id, state.stage);
+    state.expectedHash = hash;
     state.lastNonce = nonce;
 
     // Execute stage-specific hooks (before transition)
