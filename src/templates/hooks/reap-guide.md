@@ -161,15 +161,17 @@ REAP supports multiple AI agents simultaneously through the AgentAdapter abstrac
 objective → planning → implementation → validation → completion
 ```
 
-**Execution sequence**:
+**Execution sequence** (auto-transition):
 1. `/reap.start` — Create a new Generation
-2. `/reap.objective` — Define goal + requirements → `/reap.next`
-3. `/reap.planning` — Task decomposition + plan → `/reap.next`
-4. `/reap.implementation` — Code implementation → `/reap.next`
-5. `/reap.validation` — Verification → `/reap.next`
+2. `/reap.objective` — Define goal + requirements → `--phase complete` auto-advances to planning
+3. `/reap.planning` — Task decomposition + plan → `--phase complete` auto-advances to implementation
+4. `/reap.implementation` — Code implementation → `--phase complete` auto-advances to validation
+5. `/reap.validation` — Verification → `--phase complete` auto-advances to completion
 6. `/reap.completion` — Retrospective + genome updates + archiving (auto)
 
-`/reap.next` is a **transition command**, not a lifecycle stage. It advances `current.yml` to the next stage.
+Each `--phase complete` generates a stage chain token (nonce), auto-transitions to the next stage, and creates the next artifact template. The next stage command verifies the token at entry — this ensures stages cannot be skipped.
+
+`/reap.next` is maintained as a **fallback command**. If auto-transition already occurred, it confirms the transition. If not, it errors.
 `/reap.completion` auto-archives after the feedKnowledge phase — no separate `/reap.next` needed at the end.
 
 ## Language

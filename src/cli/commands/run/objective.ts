@@ -6,6 +6,7 @@ import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { scanBacklog } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
+import { performTransition } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -150,21 +151,29 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     const { nonce, hash } = generateStageToken(state.id, state.stage);
     state.expectedTokenHash = hash;
     state.lastNonce = nonce;
-    await gm.save(state);
 
-    // Execute hooks
+    // Execute stage-specific hooks (before transition)
     const hookResults = await executeHooks(paths.hooks, "onLifeObjected", paths.projectRoot);
+
+    // Auto-transition to next stage
+    const transition = await performTransition(paths, state, (s) => gm.save(s));
+
+    const nextCommand = `reap run ${transition.nextStage}`;
 
     emitOutput({
       status: "ok",
       command: "objective",
       phase: "complete",
-      completed: ["gate", "context-collect", "artifact-ensure", "creative-work", "artifact-verify", "hooks"],
+      completed: ["gate", "context-collect", "artifact-ensure", "creative-work", "artifact-verify", "hooks", "auto-transition"],
       context: {
         id: state.id,
         hookResults,
+        nextStage: transition.nextStage,
+        artifactFile: transition.artifactFile,
+        transitionHookResults: [...transition.stageHookResults, ...transition.transitionHookResults],
       },
-      message: `Objective stage complete. Advance with: /reap.next ${nonce}`,
+      message: `Objective stage complete. Auto-advanced to ${transition.nextStage}. Run: ${nextCommand}`,
+      nextCommand,
     });
   }
 }

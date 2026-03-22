@@ -95,12 +95,11 @@ You can also drive each stage manually if you need finer control:
 
 ```bash
 > /reap.start            # Start a new generation
-> /reap.objective        # Define objective + spec
-> /reap.next             # Advance to the next stage
-> /reap.planning         # Create implementation plan
-> /reap.next
+> /reap.objective        # Define objective + spec (--phase complete auto-advances)
+> /reap.planning         # Create implementation plan (--phase complete auto-advances)
 > /reap.implementation   # Build with AI + human collaboration
-> ...
+> /reap.validation       # Run tests, verify completion criteria
+> /reap.completion       # Retrospective + finalize
 ```
 
 ## Life Cycle [↗](https://reap.cc/docs/lifecycle)
@@ -151,7 +150,7 @@ Each item also carries a `status` field:
 - `status: pending` — Not yet processed (default)
 - `status: consumed` — Processed in the current generation (requires `consumedBy: gen-XXX-{hash}`)
 
-At archiving time (`/reap.next` from Completion), `consumed` items move to lineage while `pending` items are carried forward to the next generation's backlog.
+At archiving time (during Completion), `consumed` items move to lineage while `pending` items are carried forward to the next generation's backlog.
 
 **Partial completion is normal** — Tasks that depend on Genome changes are marked `[deferred]` and handed off to the next generation.
 
@@ -243,13 +242,14 @@ Since v0.11.0, all 28 slash commands follow a **1-line `.md` wrapper + TypeScrip
 
 ### Signature-Based Locking [↗](https://reap.cc/docs/advanced)
 
-REAP uses a cryptographic nonce chain to enforce stage ordering. When a stage command runs, the script generates a one-time nonce, stores its hash in `current.yml`, and returns the nonce to the AI agent. `/reap.next` requires this nonce to advance — without it, progression is rejected.
+REAP uses a cryptographic nonce chain to enforce stage ordering. When `--phase complete` runs, it generates a one-time nonce, stores its hash in `current.yml`, and auto-transitions to the next stage. The next stage command verifies the nonce at entry — without it, the stage is rejected.
 
 ```
-Stage Command          current.yml              /reap.next
-─────────────          ───────────              ──────────
+--phase complete       current.yml              Next Stage Entry
+────────────────       ───────────              ────────────────
 generate nonce ──────→ store hash(nonce)
-return nonce to AI                         ←── AI passes nonce
+auto-transition ─────→ advance stage
+                                           ←── verify nonce at entry
                                                verify hash(nonce)
                                                ✓ advance stage
 ```
@@ -301,7 +301,7 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.implementation` | Code implementation with AI + human |
 | `/reap.validation` | Run tests, verify completion criteria |
 | `/reap.completion` | Retrospective + apply Genome changes + lineage compression |
-| `/reap.next` | Advance to the next life cycle stage |
+| `/reap.next` | Confirm auto-transition (fallback) |
 | `/reap.back` | Return to a previous stage (micro loop) |
 | `/reap.abort` | Abort current generation (rollback/stash/hold + backlog save) |
 | `/reap.status` | Show current generation state and project health |

@@ -8,6 +8,7 @@ import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
 import { checkSubmodules } from "../../../core/commit";
 import { execSync } from "child_process";
+import { verifyStageEntry } from "../../../core/stage-transition";
 
 interface GenomeImpact {
   newCommands: string[];
@@ -115,6 +116,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   if (state.stage !== "completion") {
     emitError("completion", `Stage is '${state.stage}', expected 'completion'.`);
   }
+
+  // Verify stage chain token from previous stage's --phase complete
+  verifyStageEntry("completion", state);
+  await gm.save(state);
 
   const validationArtifact = paths.artifact("04-validation.md");
   if (!(await fileExists(validationArtifact))) {

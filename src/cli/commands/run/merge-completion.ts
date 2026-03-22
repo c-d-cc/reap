@@ -4,6 +4,7 @@ import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
 import { checkSubmodules } from "../../../core/commit";
+import { verifyStageEntry } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const mgm = new MergeGenerationManager(paths);
@@ -18,6 +19,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   if (state.stage !== "completion") {
     emitError("merge-completion", `Stage is '${state.stage}', expected 'completion'.`);
   }
+
+  // Verify stage chain token from previous stage's --phase complete
+  verifyStageEntry("merge-completion", state);
+  await mgm.save(state);
 
   const validationArtifact = paths.artifact("05-validation.md");
   if (!(await fileExists(validationArtifact))) {

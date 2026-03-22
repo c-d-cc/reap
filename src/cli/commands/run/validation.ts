@@ -4,6 +4,7 @@ import { GenerationManager, generateStageToken } from "../../../core/generation"
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
+import { verifyStageEntry, performTransition } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -15,6 +16,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   if (state.stage !== "validation") {
     emitError("validation", `Current stage is '${state.stage}', not 'validation'.`);
   }
+
+  // Verify stage chain token from previous stage's --phase complete
+  verifyStageEntry("validation", state);
+  await gm.save(state);
 
   const implArtifact = paths.artifact("03-implementation.md");
   if (!(await fileExists(implArtifact))) {
@@ -120,25 +125,35 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       emitError("validation", "04-validation.md does not exist. Complete the validation work first.");
     }
 
-    // Generate stage chain token — hash stored in current.yml, nonce given to AI
+    // Generate stage chain token
     const { nonce, hash } = generateStageToken(state.id, state.stage);
     state.expectedTokenHash = hash;
     state.lastNonce = nonce;
-    await gm.save(state);
 
     // Execute hooks (only on pass/partial, not on fail)
     const hookResults = await executeHooks(paths.hooks, "onLifeValidated", paths.projectRoot);
+
+    // Auto-transition to next stage
+    const transition = await performTransition(paths, state, (s) => gm.save(s));
+
+    const nextCommand = transition.nextStage !== "completion"
+      ? `reap run ${transition.nextStage}`
+      : "reap run completion";
 
     emitOutput({
       status: "ok",
       command: "validation",
       phase: "complete",
-      completed: ["gate", "context-collect", "artifact-ensure", "creative-work", "artifact-verify", "hooks"],
+      completed: ["gate", "context-collect", "artifact-ensure", "creative-work", "artifact-verify", "hooks", "auto-transition"],
       context: {
         id: state.id,
         hookResults,
+        nextStage: transition.nextStage,
+        artifactFile: transition.artifactFile,
+        transitionHookResults: [...transition.stageHookResults, ...transition.transitionHookResults],
       },
-      message: `Validation stage complete. Advance with: /reap.next ${nonce}`,
+      message: `Validation stage complete. Auto-advanced to ${transition.nextStage}. Run: ${nextCommand}`,
+      nextCommand,
     });
   }
 }

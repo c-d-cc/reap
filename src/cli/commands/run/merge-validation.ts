@@ -1,8 +1,10 @@
 import type { ReapPaths } from "../../../core/paths";
 import { MergeGenerationManager } from "../../../core/merge-generation";
+import { generateStageToken } from "../../../core/generation";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
+import { verifyStageEntry, performTransition } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const mgm = new MergeGenerationManager(paths);
@@ -17,6 +19,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   if (state.stage !== "validation") {
     emitError("merge-validation", `Stage is '${state.stage}', expected 'validation'.`);
   }
+
+  // Verify stage chain token from previous stage's --phase complete
+  verifyStageEntry("merge-validation", state);
+  await mgm.save(state);
 
   const syncArtifact = paths.artifact("04-sync.md");
   if (!(await fileExists(syncArtifact))) {
@@ -69,18 +75,32 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       emitError("merge-validation", "05-validation.md does not exist. Complete validation work first.");
     }
 
+    // Generate stage chain token
+    const { nonce, hash } = generateStageToken(state.id, state.stage);
+    state.expectedTokenHash = hash;
+    state.lastNonce = nonce;
+
     const hookResults = await executeHooks(paths.hooks, "onMergeValidated", paths.projectRoot);
+
+    // Auto-transition to next stage
+    const transition = await performTransition(paths, state, (s) => mgm.save(s));
+
+    const nextCommand = `reap run merge-${transition.nextStage}`;
 
     emitOutput({
       status: "ok",
       command: "merge-validation",
       phase: "complete",
-      completed: ["gate", "context-collect", "validation-work", "hooks"],
+      completed: ["gate", "context-collect", "validation-work", "hooks", "auto-transition"],
       context: {
         id: state.id,
         hookResults,
+        nextStage: transition.nextStage,
+        artifactFile: transition.artifactFile,
+        transitionHookResults: [...transition.stageHookResults, ...transition.transitionHookResults],
       },
-      message: "Validation stage complete. Run /reap.next to advance to completion stage.",
+      message: `Validation stage complete. Auto-advanced to ${transition.nextStage}. Run: ${nextCommand}`,
+      nextCommand,
     });
   }
 }

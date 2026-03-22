@@ -27,8 +27,9 @@ function buildSubagentPrompt(
   lines.push("");
   lines.push("## Rules");
   lines.push("- ALWAYS use `reap run <cmd>` commands to drive lifecycle. NEVER modify `current.yml` directly.");
-  lines.push("- Use `/reap.next` to advance stages and `/reap.back` to regress.");
-  lines.push("- Each stage command runs its own hook automatically at completion.");
+  lines.push("- Each `--phase complete` auto-transitions to the next stage. No explicit `/reap.next` needed.");
+  lines.push("- Use `/reap.back` to regress to a previous stage.");
+  lines.push("- Each stage command verifies the stage chain token at entry (auto-verified from lastNonce).");
   lines.push("- `/reap.completion` handles archiving and the final commit.");
   lines.push("");
 
@@ -71,7 +72,7 @@ function buildSubagentPrompt(
     lines.push(`Resume from stage: **${state.stage}**`);
   }
   lines.push("");
-  lines.push("### Stage Loop");
+  lines.push("### Stage Loop (Auto-Transition)");
   lines.push("1. Read `current.yml` to confirm the current stage.");
   lines.push("2. Execute the stage command:");
   lines.push("   - `objective` -> `/reap.objective`");
@@ -80,11 +81,11 @@ function buildSubagentPrompt(
   lines.push("   - `validation` -> `/reap.validation`");
   lines.push("   - `completion` -> `/reap.completion`");
   lines.push("3. Write the required artifact BEFORE completing the stage.");
-  lines.push("4. Run the stage complete phase if applicable (e.g., `reap run <stage> --phase complete`).");
-  lines.push("5. If current stage is NOT `completion`: run `/reap.next` to advance, then go to step 1.");
-  lines.push("6. If current stage IS `completion`: `/reap.completion` auto-archives after feedKnowledge phase. Done.");
+  lines.push("4. Run `--phase complete` — this auto-transitions to the next stage.");
+  lines.push("5. If current stage IS `completion`: `/reap.completion` auto-archives after feedKnowledge phase. Done.");
+  lines.push("6. Otherwise: the output tells you the next command — go to step 1.");
   lines.push("");
-  lines.push("Note: `/reap.next` is a transition command, NOT a lifecycle stage.");
+  lines.push("Note: `--phase complete` auto-transitions. `/reap.next` is a fallback, not required.");
   lines.push("");
 
   // 6. Project path
@@ -93,11 +94,10 @@ function buildSubagentPrompt(
   lines.push("");
 
   // 7. Commit rules
-  lines.push("## Stage Chain Token");
-  lines.push("- Each stage command returns a `stageToken` in its output context.");
-  lines.push("- You MUST pass this token to `/reap.next --token <TOKEN>` (or set `REAP_STAGE_TOKEN` env var).");
-  lines.push("- Without a valid token, stage transition will be REJECTED.");
-  lines.push("- If token is missing or mismatched, re-run the current stage command to obtain a new token.");
+  lines.push("## Stage Chain Token (Auto-Transition)");
+  lines.push("- Each `--phase complete` generates a stage chain token and auto-transitions to the next stage.");
+  lines.push("- The next stage command verifies the token at entry — this ensures stages were not skipped.");
+  lines.push("- `/reap.next` is maintained as a fallback but is no longer required in the normal flow.");
   lines.push("");
 
   lines.push("## Commit Rules");
@@ -231,7 +231,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
           "",
           "### HARD-GATE",
           "NEVER modify `current.yml` directly to change the stage.",
-          "ALWAYS use `/reap.next` to advance and `/reap.back` to regress.",
+          "Stage transitions happen automatically via `--phase complete`. Use `/reap.back` to regress.",
           "",
           "### Autonomous Override",
           "- Skip routine human confirmations. Proceed autonomously.",
@@ -247,10 +247,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
           "- `/reap.validation` -> `onLifeValidated`",
           "- `/reap.completion` -> `onLifeCompleted` (before archiving and commit)",
           "",
-          "`/reap.next` only handles stage transitions -- it does NOT execute hooks or archiving.",
+          "`--phase complete` auto-transitions to the next stage. `/reap.next` is a fallback.",
           "`/reap.completion` handles archiving and the final commit.",
           "",
-          "### Lifecycle Loop",
+          "### Lifecycle Loop (Auto-Transition)",
           "Execute the following loop until the generation is complete:",
           "1. Read `current.yml` to determine the current stage",
           "2. Execute the corresponding stage command:",
@@ -259,14 +259,13 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
           "   - `implementation` -> `/reap.implementation`",
           "   - `validation` -> `/reap.validation`",
           "   - `completion` -> `/reap.completion`",
-          "3. When the stage command completes (hooks already executed by the stage command):",
-          "   - If the current stage is `completion`: the loop ends.",
-          "   - Otherwise: run `/reap.next` to advance, then return to step 1.",
+          "3. `--phase complete` auto-transitions to the next stage.",
+          "   - If the stage is `completion`: the loop ends.",
+          "   - Otherwise: follow the `nextCommand` in the output to run the next stage.",
           "",
           "### Handling Issues",
           "- If validation fails: `/reap.back` to return to implementation (or earlier), then resume the loop",
           "- If the human wants to pause: stop the loop",
-          "- If the human wants to skip a stage: advance with `/reap.next` without running the stage command",
         ].join("\n"),
       });
     }

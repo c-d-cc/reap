@@ -95,12 +95,11 @@ claude
 
 ```bash
 > /reap.start            # 新しいGenerationを開始
-> /reap.objective        # 目標 + 仕様を定義
-> /reap.next             # 次のステージへ前進
-> /reap.planning         # 実装計画
-> /reap.next
+> /reap.objective        # 目標 + 仕様を定義（--phase completeで自動遷移）
+> /reap.planning         # 実装計画（--phase completeで自動遷移）
 > /reap.implementation   # AI+Human協力でコード実装
-> ...
+> /reap.validation       # テスト実行、完了条件の確認
+> /reap.completion       # レトロスペクティブ + 最終化
 ```
 
 ## ライフサイクル [↗](https://reap.cc/docs/lifecycle)
@@ -152,7 +151,7 @@ Objective → Planning → Implementation ⟷ Validation → Completion
 - `status: pending` — 未処理項目（デフォルト）
 - `status: consumed` — 現在の世代で処理完了（`consumedBy: gen-XXX-{hash}`必須）
 
-アーカイブ時点（`/reap.next` from Completion）で`consumed`項目はlineageに移動し、`pending`項目は次の世代のbacklogに繰り越されます。
+アーカイブ時点（Completion中）で`consumed`項目はlineageに移動し、`pending`項目は次の世代のbacklogに繰り越されます。
 
 **部分完了は正常** — Genome変更に依存するタスクは`[deferred]`とマークし、次の世代に引き継ぎます。
 
@@ -244,12 +243,13 @@ v0.11.0より、28個のスラッシュコマンドが**1行`.md`ラッパー + 
 
 ### 署名ベースロック（Signature-Based Locking） [↗](https://reap.cc/docs/advanced)
 
-REAPは暗号学的nonceチェーンを使用してステージの順序を強制します。ステージコマンドが実行されると、スクリプトがワンタイムnonceを生成し、そのハッシュを`current.yml`に保存して、nonceをAIエージェントに返します。`/reap.next`はこのnonceがなければ進行できず、なければ拒否されます。
+REAPは暗号学的nonceチェーンを使用してステージの順序を強制します。`--phase complete`が実行されると、ワンタイムnonceを生成してハッシュを`current.yml`に保存し、自動的に次のステージへ遷移します。次のステージコマンドは進入時にnonceを検証し、有効でなければ拒否されます。
 
 ```
-Stage Command          current.yml              /reap.next
-─────────────          ───────────              ──────────
+--phase complete       current.yml              次のステージ進入
+────────────────       ───────────              ────────────────
 nonce生成 ────────────→ hash(nonce)を保存
+自動遷移 ─────────────→ ステージ前進
 AIにnonce返却                              ←── AIがnonceを渡す
                                                hash(nonce)を検証
                                                ✓ ステージ前進
@@ -302,7 +302,7 @@ autoIssueReport: true    # デフォルト: true（gh CLIがある場合）
 | `/reap.implementation` | AI+Human協力でコード実装 |
 | `/reap.validation` | テスト実行、完了条件の確認 |
 | `/reap.completion` | レトロスペクティブ + Genome変更反映 + lineage圧縮 |
-| `/reap.next` | 次のライフサイクルステージへ前進 |
+| `/reap.next` | 自動遷移の確認（フォールバック） |
 | `/reap.back` | 前のステージに回帰（micro loop） |
 | `/reap.abort` | 現在のGenerationを中断（rollback/stash/hold + backlog保存） |
 | `/reap.status` | 現在のGeneration状態とプロジェクト健全性を表示 |

@@ -1,8 +1,10 @@
 import type { ReapPaths } from "../../../core/paths";
 import { MergeGenerationManager } from "../../../core/merge-generation";
+import { generateStageToken } from "../../../core/generation";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
+import { verifyStageEntry, performTransition } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const mgm = new MergeGenerationManager(paths);
@@ -17,6 +19,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   if (state.stage !== "mate") {
     emitError("merge-mate", `Stage is '${state.stage}', expected 'mate'.`);
   }
+
+  // Verify stage chain token from previous stage's --phase complete
+  verifyStageEntry("merge-mate", state);
+  await mgm.save(state);
 
   const detectArtifact = paths.artifact("01-detect.md");
   if (!(await fileExists(detectArtifact))) {
@@ -66,19 +72,33 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    // Phase 2: Execute hooks and signal completion
+    // Generate stage chain token
+    const { nonce, hash } = generateStageToken(state.id, state.stage);
+    state.expectedTokenHash = hash;
+    state.lastNonce = nonce;
+
+    // Execute hooks
     const hookResults = await executeHooks(paths.hooks, "onMergeMated", paths.projectRoot);
+
+    // Auto-transition to next stage
+    const transition = await performTransition(paths, state, (s) => mgm.save(s));
+
+    const nextCommand = `reap run merge-${transition.nextStage}`;
 
     emitOutput({
       status: "ok",
       command: "merge-mate",
       phase: "complete",
-      completed: ["gate", "artifact-read", "conflict-resolution", "hooks"],
+      completed: ["gate", "artifact-read", "conflict-resolution", "hooks", "auto-transition"],
       context: {
         id: state.id,
         hookResults,
+        nextStage: transition.nextStage,
+        artifactFile: transition.artifactFile,
+        transitionHookResults: [...transition.stageHookResults, ...transition.transitionHookResults],
       },
-      message: "Mate stage complete. Run /reap.next to advance to merge stage.",
+      message: `Mate stage complete. Auto-advanced to ${transition.nextStage}. Run: ${nextCommand}`,
+      nextCommand,
     });
   }
 }
