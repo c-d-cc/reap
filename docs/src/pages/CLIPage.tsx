@@ -61,6 +61,20 @@ export default function CLIPage() {
           {t.cli.fixNote}
         </p>
 
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.cleanTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-2">{t.cli.cleanDesc}</p>
+        <CodeBlock language="bash">{`reap clean`}</CodeBlock>
+        <p className="text-xs text-muted-foreground mt-2 mb-6">
+          {t.cli.cleanNote}
+        </p>
+
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.destroyTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-2">{t.cli.destroyDesc}</p>
+        <CodeBlock language="bash">{`reap destroy`}</CodeBlock>
+        <p className="text-xs text-muted-foreground mt-2 mb-6">
+          {t.cli.destroyNote}
+        </p>
+
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.helpTitle}</h2>
         <p className="text-sm text-muted-foreground mb-2">{t.cli.helpDesc}</p>
         <CodeBlock language="bash">{`reap help`}</CodeBlock>

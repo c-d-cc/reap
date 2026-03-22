@@ -222,6 +222,8 @@ Machine A:
 | `reap status` | 現在のGeneration状態を確認 |
 | `reap update` | コマンド/テンプレート/hookを最新バージョンに同期 |
 | `reap fix` | `.reap/`構造の診断と修復 |
+| `reap clean` | 対話式オプションでREAPプロジェクトをリセット |
+| `reap destroy` | プロジェクトからすべてのREAPファイルを削除（確認が必要） |
 | `reap help` | CLIコマンド + スラッシュコマンド + ワークフロー概要を出力（バージョン + 最新状況表示） |
 | `reap run <cmd>` | スラッシュコマンドのスクリプトを直接実行（1行`.md`ラッパーが内部的に使用） |
 

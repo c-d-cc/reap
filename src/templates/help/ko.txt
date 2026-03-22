@@ -5,6 +5,8 @@ CLI 명령어:
   reap status         현재 프로젝트 및 Generation 상태 확인
   reap update         슬래시 커맨드, 템플릿, 훅을 최신 버전으로 동기화
   reap fix            .reap/ 디렉토리 구조 진단 및 복구
+  reap clean          대화형 옵션으로 REAP 프로젝트 초기화
+  reap destroy        프로젝트에서 모든 REAP 파일 제거
   reap help           이 도움말 표시
 
 슬래시 커맨드 (Claude Code에서 사용):

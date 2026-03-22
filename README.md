@@ -221,6 +221,8 @@ All distributed operations run through your AI agent:
 | `reap status` | Check the current generation's status |
 | `reap update` | Sync commands/templates/hooks to the latest version |
 | `reap fix` | Diagnose and repair the `.reap/` structure |
+| `reap clean` | Reset REAP project with interactive options |
+| `reap destroy` | Remove all REAP files from project (requires confirmation) |
 | `reap help` | Print CLI commands, slash commands, and workflow summary |
 | `reap run <cmd>` | Execute a slash command's script directly (used internally by 1-line `.md` wrappers) |
 

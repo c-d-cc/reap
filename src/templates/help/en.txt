@@ -5,6 +5,8 @@ CLI Commands:
   reap status         Show current project and Generation status
   reap update         Sync slash commands, templates, and hooks
   reap fix            Diagnose and repair .reap/ directory
+  reap clean          Reset REAP project with interactive options
+  reap destroy        Remove all REAP files from project
   reap help           Show this help message
 
 Slash Commands (use in Claude Code):

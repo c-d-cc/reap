@@ -222,6 +222,8 @@ Machine A:
 | `reap status` | 查看当前Generation状态 |
 | `reap update` | 将命令/模板/hook同步到最新版本 |
 | `reap fix` | 诊断和修复`.reap/`结构 |
+| `reap clean` | 通过交互式选项重置REAP项目 |
+| `reap destroy` | 从项目中删除所有REAP文件（需要确认） |
 | `reap help` | 输出CLI命令 + 斜杠命令 + 工作流摘要（显示版本 + 最新状态） |
 | `reap run <cmd>` | 直接执行斜杠命令的脚本（由1行`.md` wrapper内部调用） |
 

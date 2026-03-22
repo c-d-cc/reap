@@ -222,6 +222,8 @@ Machine A:
 | `reap status` | 현재 Generation 상태 확인 |
 | `reap update` | 커맨드/템플릿/훅을 최신 버전으로 동기화 |
 | `reap fix` | `.reap/` 구조 진단 및 복구 |
+| `reap clean` | 대화형 옵션으로 REAP 프로젝트 초기화 |
+| `reap destroy` | 프로젝트에서 모든 REAP 파일 제거 (확인 필요) |
 | `reap help` | CLI 명령어 + 슬래시 커맨드 + 워크플로우 요약 출력 (버전 + 최신 여부 표시) |
 | `reap run <cmd>` | 슬래시 커맨드의 스크립트를 직접 실행 (1줄 `.md` wrapper가 내부적으로 사용) |
 
