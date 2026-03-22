@@ -8,6 +8,7 @@ import { readTextFile, readTextFileOrThrow, writeTextFile } from "../../core/fs"
 import { ConfigManager } from "../../core/config";
 import { MigrationRunner } from "../../core/migrations";
 import { buildMigrationSpec, detectMigrationGaps } from "../../core/migration-spec";
+import { syncSkillsToProject } from "../../core/skills";
 
 interface UpdateResult {
   updated: string[];
@@ -180,38 +181,11 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     }
 
     // 5. Sync commands to project .claude/skills/{name}/SKILL.md
-    const projectClaudeSkills = join(paths.projectRoot, ".claude", "skills");
-    const reapCmdFiles = (await readdir(ReapPaths.userReapCommands)).filter(
-      (f: string) => f.startsWith("reap.") && f.endsWith(".md"),
-    );
-    let cmdInstalled = 0;
-    for (const file of reapCmdFiles) {
-      const src = await readTextFileOrThrow(join(ReapPaths.userReapCommands, file));
-      const name = file.replace(/\.md$/, ""); // e.g. reap.objective
-      const skillDir = join(projectClaudeSkills, name);
-      const skillFile = join(skillDir, "SKILL.md");
-
-      // Parse frontmatter
-      const fmMatch = src.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
-      const description = fmMatch
-        ? (fmMatch[1].match(/^description:\s*"?([^"\n]*)"?/m)?.[1]?.trim() ?? "")
-        : "";
-      const body = fmMatch ? fmMatch[2] : src;
-      const skillContent = `---\nname: ${name}\ndescription: "${description}"\n---\n${body}`;
-
-      const existing = await readTextFile(skillFile);
-      if (existing !== null && existing === skillContent) continue;
-
-      if (!dryRun) {
-        await mkdir(skillDir, { recursive: true });
-        await writeTextFile(skillFile, skillContent);
-      }
-      cmdInstalled++;
-    }
-    if (cmdInstalled > 0) {
-      result.updated.push(`.claude/skills/ (${cmdInstalled} synced)`);
+    const skillsResult = await syncSkillsToProject(paths.projectRoot, dryRun);
+    if (skillsResult.installed > 0) {
+      result.updated.push(`.claude/skills/ (${skillsResult.installed} synced)`);
     } else {
-      result.skipped.push(`.claude/skills/ (${reapCmdFiles.length} unchanged)`);
+      result.skipped.push(`.claude/skills/ (${skillsResult.total} unchanged)`);
     }
 
     // 5b. Clean up legacy .claude/commands/reap.* files

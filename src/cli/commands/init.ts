@@ -4,6 +4,7 @@ import { ReapPaths } from "../../core/paths";
 import { ConfigManager } from "../../core/config";
 import { AgentRegistry } from "../../core/agents";
 import { fileExists, readTextFileOrThrow, writeTextFile } from "../../core/fs";
+import { syncSkillsToProject } from "../../core/skills";
 import type { ReapConfig } from "../../types";
 
 export const COMMAND_NAMES = [
@@ -160,6 +161,13 @@ export async function initProject(
 
   if (detectedAgents.length === 0) {
     log("  No AI agents detected.");
+  }
+
+  // 6b. Sync commands to project .claude/skills/
+  log("Syncing skills to project...");
+  const skillsResult = await syncSkillsToProject(projectRoot);
+  if (skillsResult.installed > 0) {
+    log(`  .claude/skills/ (${skillsResult.installed} synced)`);
   }
 
   // 7. Guide user to run /reap.sync if auto-sync was not performed

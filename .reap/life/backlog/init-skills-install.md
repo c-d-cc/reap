@@ -1,7 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
 source: "GitHub Issue #6"
+consumedBy: gen-137-c8d9b9
 ---
 
 # reap init이 .claude/skills/에 sub-command를 설치하지 않음

@@ -1,0 +1,21 @@
+# REAP MANAGED — Do not modify directly. Use reap run next/back/start/abort.
+id: gen-137-c8d9b9
+goal: "resolve #6: reap init이 .claude/skills/에 sub-command를 설치하지 않음"
+stage: validation
+genomeVersion: 46
+startedAt: 2026-03-22T12:37:36.035Z
+timeline:
+  - stage: objective
+    at: 2026-03-22T12:37:36.035Z
+  - stage: planning
+    at: 2026-03-22T12:39:44.341Z
+  - stage: implementation
+    at: 2026-03-22T12:40:07.914Z
+  - stage: validation
+    at: 2026-03-22T12:43:27.402Z
+type: normal
+parents:
+  - gen-045-3785e0
+genomeHash: be30670f
+expectedHash: 927a4f20a9dcad247b1c8e4661fa8107bd58ac149285856ae0d9abd0f4569236
+lastNonce: 95c44b063d8ede799377c7803f6b465d
