@@ -63,8 +63,11 @@ export async function nextSeq(paths: ReapPaths, currentId?: string): Promise<num
   return maxSeq + 1;
 }
 
-/** Safe completedAt to timestamp — returns 0 for NaN/invalid dates */
+const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?)?$/;
+
+/** Safe completedAt to timestamp — returns 0 for non-ISO or invalid dates */
 export function safeCompletedAtTime(dateStr: string): number {
+  if (!ISO_DATE_RE.test(dateStr)) return 0;
   const t = new Date(dateStr).getTime();
   return Number.isNaN(t) ? 0 : t;
 }
