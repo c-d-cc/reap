@@ -121,6 +121,8 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
   const transitionEvent: ReapHookEvent = isMerge ? "onMergeTransited" : "onLifeTransited";
   const transitionHookResults = await executeHooks(paths.hooks, transitionEvent, paths.projectRoot);
 
+  const nextCommand = isMerge ? `reap run merge-${nextStage}` : `reap run ${nextStage}`;
+
   emitOutput({
     status: "ok",
     command: "next",
@@ -134,13 +136,8 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
       artifactFile,
       hookResults: [...stageHookResults, ...transitionHookResults],
     },
-    message: `Advanced to ${nextStage}. Proceed with /reap.${nextStage}.`,
+    prompt: nextStage !== "completion" ? `Stage advanced to ${nextStage}. Now run: ${nextCommand}` : undefined,
+    nextCommand: nextStage !== "completion" ? nextCommand : undefined,
+    message: `Advanced to ${nextStage}.${nextStage !== "completion" ? ` Run: ${nextCommand}` : " Proceed with /reap.completion."}`,
   });
-
-  // Auto-execute the next stage command (skip completion — user must run explicitly)
-  if (nextStage !== "completion") {
-    const moduleName = isMerge ? `./merge-${nextStage}` : `./${nextStage}`;
-    const { execute: nextExecute } = await import(moduleName);
-    await nextExecute(paths);
-  }
 }
