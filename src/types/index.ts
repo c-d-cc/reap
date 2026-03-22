@@ -54,6 +54,8 @@ export interface GenerationState {
   commonAncestor?: string;
   /** Stage token hash — SHA256(nonce + genId + stage). Only hash stored; nonce given to AI via prompt. */
   expectedTokenHash?: string;
+  /** Last generated nonce — auto-read by next.ts if no explicit nonce argument */
+  lastNonce?: string;
 }
 
 /** Metadata stored in lineage/{gen-dir}/meta.yml */

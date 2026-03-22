@@ -34,7 +34,12 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
   if (state.expectedTokenHash) {
     // Read nonce from argv: reap run next <nonce>
     const args = process.argv.slice(2); // strip 'node' and script path
-    const nonce = args.find(a => !a.startsWith("-") && a !== "run" && a !== "next");
+    let nonce = args.find(a => !a.startsWith("-") && a !== "run" && a !== "next");
+
+    // Fallback: read from state.lastNonce if no explicit argument
+    if (!nonce && state.lastNonce) {
+      nonce = state.lastNonce;
+    }
 
     if (!nonce) {
       emitError("next", `Stage transition blocked: no token provided. The stage command outputs a nonce that must be passed to /reap.next. Example: /reap.next <nonce>. This ensures the stage command was actually executed — you cannot skip stages.`);
@@ -43,6 +48,9 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
     if (!verifyStageToken(nonce, state.id, state.stage as string, state.expectedTokenHash)) {
       emitError("next", `Token verification failed. The provided nonce does not match. Re-run the current stage command (reap run ${state.stage}) to get a valid token. You cannot forge or guess the token.`);
     }
+
+    // Clear lastNonce after use to prevent reuse
+    state.lastNonce = undefined;
   }
 
   const isMerge = state.type === "merge";

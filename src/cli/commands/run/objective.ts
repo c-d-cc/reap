@@ -149,6 +149,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     // Generate stage chain token — hash stored in current.yml, nonce given to AI
     const { nonce, hash } = generateStageToken(state.id, state.stage);
     state.expectedTokenHash = hash;
+    state.lastNonce = nonce;
     await gm.save(state);
 
     // Execute hooks
