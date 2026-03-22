@@ -7,4 +7,4 @@ dist/
 *.tgz
 
 # REAP command symlinks (managed by session-start hook)
-.claude/commands/reap.*
+.claude/skills/reap.*

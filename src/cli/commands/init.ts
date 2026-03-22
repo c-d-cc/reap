@@ -19,6 +19,7 @@ export const COMMAND_NAMES = [
   "reap.pull", "reap.push",
   "reap.config",
   "reap.refreshKnowledge",
+  "reapdev.docsUpdate",
 ];
 
 export async function initProject(

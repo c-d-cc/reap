@@ -1,7 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: medium
+consumedBy: gen-120-488e3e
 ---
 
 # docs-update를 reapdev 스킬로 분리
