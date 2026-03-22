@@ -26,7 +26,7 @@
 
 - **패키지 매니저**: npm (배포), bun (개발/테스트)
 - **빌드**: `node scripts/build.js` — esbuild 번들 + templates 복사
-- **테스트**: `bun test` (595 tests, 60 files)
+- **테스트**: `bun test` (600 tests, 61 files)
 - **타입체크**: `bunx tsc --noEmit`
 - **E2E**: OpenShell CLI (`openshell`) 필요 — `uv tool install -U openshell`
 

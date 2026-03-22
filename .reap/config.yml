@@ -1,4 +1,4 @@
-version: 0.15.0
+version: 0.15.1
 project: reap
 entryMode: greenfield
 strict: true
@@ -6,4 +6,4 @@ language: korean
 autoUpdate: true
 autoSubagent: true
 autoIssueReport: false
-lastSyncedGeneration: ""
+lastSyncedGeneration: manual

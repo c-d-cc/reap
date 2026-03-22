@@ -19,7 +19,7 @@ C4Context
   System_Ext(github, "GitHub Actions", "CI/CD, 릴리스 자동화")
 
   Rel(user, reap, "reap init/status/fix/update/run")
-  Rel(agent, reap, "slash commands (30개)")
+  Rel(agent, reap, "slash commands (32개)")
   Rel(reap, npm, "publish")
   Rel(github, npm, "auto release")
 ```
@@ -30,10 +30,10 @@ C4Context
 C4Container
   title REAP Containers
 
-  Container(cli, "CLI Layer", "src/cli/", "Commander.js 진입점. init, status, fix, update, help, run (30 scripts)")
+  Container(cli, "CLI Layer", "src/cli/", "Commander.js 진입점. init, status, fix, update, help, run (31 scripts)")
   Container(core, "Core Layer", "src/core/", "비즈니스 로직. 아래 Component 참조")
-  Container(types, "Types", "src/types/index.ts", "공유 타입 정의 (~176줄). RunOutput, HookResult, GenerationType, GenerationMeta")
-  Container(templates, "Templates", "src/templates/", "commands(29), artifacts(11), genome, hooks, help, presets, brainstorm")
+  Container(types, "Types", "src/types/index.ts", "공유 타입 정의 (~197줄). RunOutput, HookResult, GenerationType, GenerationMeta")
+  Container(templates, "Templates", "src/templates/", "commands(32), artifacts(11+6 merge), genome, hooks, help, presets, brainstorm")
 
   Rel(cli, core, "uses")
   Rel(cli, types, "imports")
@@ -95,7 +95,7 @@ C4Component
 | `reap fix` | `cli/commands/fix.ts` | .reap/ 구조 진단/복구 |
 | `reap update` | `cli/commands/update.ts` | commands/templates/hooks 동기화 |
 | `reap help` | `cli/index.ts` | 언어별 help 텍스트 출력 (en/ko) |
-| `reap run` | `cli/commands/run/index.ts` | command script dispatcher (30개: next, back, start, completion, abort, push, objective, planning, implementation, validation, evolve, evolve-recovery, sync, sync-genome, sync-environment, help, report, merge-start, merge-detect, merge-mate, merge-merge, merge-sync, merge-validation, merge-completion, merge-evolve, merge, pull, config, update-genome, refreshKnowledge) |
+| `reap run` | `cli/commands/run/index.ts` | command script dispatcher (31개: next, back, start, completion, abort, push, objective, planning, implementation, validation, evolve, evolve-recovery, sync, sync-genome, sync-environment, help, report, refresh-knowledge, config, update-genome, merge-start, merge-detect, merge-mate, merge-merge, merge-sync, merge-validation, merge-completion, merge-evolve, merge, pull, validation) |
 
 ## Agent Adapters
 
