@@ -323,6 +323,14 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.merge.sync` | Verify genome–source consistency (AI compares, user confirms) |
 | `/reap.merge.validation` | Run mechanical testing (bun test, tsc, build) |
 | **`/reap.merge.evolve`** | **Run the full merge lifecycle automatically** |
+| `/reap.refreshKnowledge` | Load REAP context for subagents (Genome, Environment, state) |
+
+**Dev Commands**
+
+| Command | Description |
+|---------|-------------|
+| `/reapdev.docsUpdate` | Update docs, README, i18n translations based on code changes |
+| `/reapdev.versionBump` | Analyze changes and bump version with artifact validation |
 
 ### SessionStart Hook [↗](https://reap.cc/docs/hooks)
 

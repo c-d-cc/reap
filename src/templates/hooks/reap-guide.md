@@ -7,12 +7,12 @@ REAP (Recursive Evolutionary Autonomous Pipeline) is a development pipeline wher
 ## 3-Layer Model
 
 ```
-Genome (Genetic Information)  →  Evolution (Cross-generational Evolution)  →  Civilization (Source Code)
-  Design and knowledge             Life cycle, mutation, adaptation              Accumulated artifacts
+Knowledge Base (Genome + Environment)  →  Evolution (Generational Progress)  →  Civilization (Source Code)
+  Design, knowledge & external context      Life cycle, mutation, adaptation       Accumulated artifacts
 ```
 
-- **Genome** — Design and knowledge for building the Application. Stored in `.reap/genome/`.
-- **Evolution** — The process by which Genome evolves and Civilization grows through repeated Generations.
+- **Knowledge Base** — Genome (architecture, conventions, constraints) and Environment (external APIs, infrastructure). Stored in `.reap/genome/` and `.reap/environment/`.
+- **Evolution** — The process by which knowledge evolves and Civilization grows through repeated Generations.
 - **Civilization** — Source Code. The entire project codebase outside `.reap/`.
 
 ## Genome Structure

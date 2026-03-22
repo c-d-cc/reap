@@ -324,6 +324,14 @@ autoIssueReport: true    # デフォルト: true（gh CLIがある場合）
 | `/reap.merge.sync` | Genome-ソース間の整合性を検証（AI比較、ユーザー確認） |
 | `/reap.merge.validation` | 機械的テストを実行（bun test、tsc、build） |
 | **`/reap.merge.evolve`** | **マージライフサイクル全体を自動実行** |
+| `/reap.refreshKnowledge` | サブエージェント用REAPコンテキストのロード（Genome、Environment、状態） |
+
+**Dev Commands**
+
+| コマンド | 説明 |
+|----------|------|
+| `/reapdev.docsUpdate` | コード変更に基づくドキュメント、README、i18n翻訳の更新 |
+| `/reapdev.versionBump` | 変更分析とartifact検証を含むバージョンバンプ |
 
 ### SessionStart Hook [↗](https://reap.cc/docs/hooks)
 

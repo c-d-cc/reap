@@ -324,6 +324,14 @@ autoIssueReport: true    # 默认值: true（检测到gh CLI时）
 | `/reap.merge.sync` | 验证Genome与源代码的一致性（AI比较，用户确认） |
 | `/reap.merge.validation` | 运行机械化测试（bun test、tsc、build） |
 | **`/reap.merge.evolve`** | **自动运行完整的合并生命周期** |
+| `/reap.refreshKnowledge` | 为子代理加载REAP上下文（Genome、Environment、状态） |
+
+**Dev Commands**
+
+| 命令 | 说明 |
+|------|------|
+| `/reapdev.docsUpdate` | 基于代码变更更新文档、README、i18n翻译 |
+| `/reapdev.versionBump` | 分析变更并进行版本升级（含artifact验证） |
 
 ### SessionStart Hook [↗](https://reap.cc/docs/hooks)
 
