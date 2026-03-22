@@ -28,47 +28,89 @@ if (!gl.dirExists(reapDir)) {
   process.exit(0);
 }
 
-// Step 0: Install project-level command files (copy, not symlink — Claude Code doesn't follow symlinks)
+// Step 0: Install project-level skill files (.claude/skills/{name}/SKILL.md)
 const fs = require('fs');
 const os = require('os');
 const userReapCommands = path.join(os.homedir(), '.reap', 'commands');
-const projectClaudeCommands = path.join(projectRoot, '.claude', 'commands');
+const projectClaudeSkills = path.join(projectRoot, '.claude', 'skills');
+
+/**
+ * Parse frontmatter from a command .md file.
+ * Returns { description, body } where body is the content after frontmatter.
+ */
+function parseFrontmatter(content) {
+  const match = content.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+  if (!match) return { description: '', body: content };
+  const fm = match[1];
+  const body = match[2];
+  const descMatch = fm.match(/^description:\s*"?([^"\n]*)"?/m);
+  return { description: descMatch ? descMatch[1].trim() : '', body };
+}
 
 if (gl.dirExists(userReapCommands)) {
   try {
-    fs.mkdirSync(projectClaudeCommands, { recursive: true });
     const cmdFiles = fs.readdirSync(userReapCommands).filter(f => f.startsWith('reap.') && f.endsWith('.md'));
     let installed = 0;
     for (const file of cmdFiles) {
       const src = path.join(userReapCommands, file);
-      const dest = path.join(projectClaudeCommands, file);
+      const name = file.replace(/\.md$/, ''); // e.g. reap.objective
+      const skillDir = path.join(projectClaudeSkills, name);
+      const skillFile = path.join(skillDir, 'SKILL.md');
+
+      const srcContent = fs.readFileSync(src, 'utf-8');
+      const { description, body } = parseFrontmatter(srcContent);
+      const skillContent = `---\nname: ${name}\ndescription: "${description}"\n---\n${body}`;
+
+      // Skip if content is identical
       try {
-        const stat = fs.lstatSync(dest);
-        if (stat.isSymbolicLink()) {
-          fs.unlinkSync(dest); // replace legacy symlink with real file
-        } else {
-          // Skip if content is identical
-          const srcContent = fs.readFileSync(src);
-          const destContent = fs.readFileSync(dest);
-          if (srcContent.equals(destContent)) continue;
-          fs.unlinkSync(dest);
-        }
+        const existing = fs.readFileSync(skillFile, 'utf-8');
+        if (existing === skillContent) continue;
       } catch { /* dest doesn't exist */ }
-      fs.copyFileSync(src, dest);
+
+      fs.mkdirSync(skillDir, { recursive: true });
+      fs.writeFileSync(skillFile, skillContent, 'utf-8');
       installed++;
     }
-    // Ensure .gitignore excludes these files
-    const gitignorePath = path.join(projectRoot, '.gitignore');
-    const gitignoreEntry = '.claude/commands/reap.*';
+
+    // Clean up legacy .claude/commands/reap.* files
+    const projectClaudeCommands = path.join(projectRoot, '.claude', 'commands');
     try {
-      const gitignore = fs.existsSync(gitignorePath) ? fs.readFileSync(gitignorePath, 'utf-8') : '';
-      if (!gitignore.includes(gitignoreEntry)) {
-        fs.appendFileSync(gitignorePath, `\n# REAP command files (managed by session-start hook)\n${gitignoreEntry}\n`);
+      if (fs.existsSync(projectClaudeCommands)) {
+        const legacyFiles = fs.readdirSync(projectClaudeCommands).filter(f => f.startsWith('reap.') && f.endsWith('.md'));
+        for (const file of legacyFiles) {
+          fs.unlinkSync(path.join(projectClaudeCommands, file));
+        }
+        if (legacyFiles.length > 0) {
+          process.stderr.write(`[REAP] Cleaned up ${legacyFiles.length} legacy .claude/commands/reap.* files\n`);
+        }
       }
     } catch { /* best effort */ }
-    process.stderr.write(`[REAP] Installed ${installed} commands to .claude/commands/ (${cmdFiles.length - installed} unchanged)\n`);
+
+    // Ensure .gitignore excludes skill files (and migrate legacy entry)
+    const gitignorePath = path.join(projectRoot, '.gitignore');
+    const newEntry = '.claude/skills/reap.*';
+    const legacyEntry = '.claude/commands/reap.*';
+    try {
+      let gitignore = fs.existsSync(gitignorePath) ? fs.readFileSync(gitignorePath, 'utf-8') : '';
+      let changed = false;
+      // Replace legacy entry with new entry
+      if (gitignore.includes(legacyEntry)) {
+        gitignore = gitignore.replace(legacyEntry, newEntry);
+        changed = true;
+      }
+      // Add new entry if not present
+      if (!gitignore.includes(newEntry)) {
+        gitignore += `\n# REAP skill files (managed by session-start hook)\n${newEntry}\n`;
+        changed = true;
+      }
+      if (changed) {
+        fs.writeFileSync(gitignorePath, gitignore, 'utf-8');
+      }
+    } catch { /* best effort */ }
+
+    process.stderr.write(`[REAP] Installed ${installed} skills to .claude/skills/ (${cmdFiles.length - installed} unchanged)\n`);
   } catch (err) {
-    process.stderr.write(`[REAP] Warning: failed to install commands: ${err.message}\n`);
+    process.stderr.write(`[REAP] Warning: failed to install skills: ${err.message}\n`);
   }
 }
 

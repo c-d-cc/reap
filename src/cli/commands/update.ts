@@ -179,35 +179,52 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
       }
     }
 
-    // 5. Sync commands to project .claude/commands/
-    const projectClaudeCommands = join(paths.projectRoot, ".claude", "commands");
-    await mkdir(projectClaudeCommands, { recursive: true });
+    // 5. Sync commands to project .claude/skills/{name}/SKILL.md
+    const projectClaudeSkills = join(paths.projectRoot, ".claude", "skills");
     const reapCmdFiles = (await readdir(ReapPaths.userReapCommands)).filter(
       (f: string) => f.startsWith("reap.") && f.endsWith(".md"),
     );
     let cmdInstalled = 0;
     for (const file of reapCmdFiles) {
       const src = await readTextFileOrThrow(join(ReapPaths.userReapCommands, file));
-      const destPath = join(projectClaudeCommands, file);
-      // Handle stale symlinks: lstat succeeds but readFile fails
-      try {
-        const s = await import("fs/promises").then(m => m.lstat(destPath));
-        if (s.isSymbolicLink()) {
-          if (!dryRun) await unlink(destPath);
-        } else {
-          const existing = await readTextFile(destPath);
-          if (existing !== null && existing === src) continue;
-          if (!dryRun) await unlink(destPath);
-        }
-      } catch { /* dest doesn't exist */ }
-      if (!dryRun) await writeTextFile(destPath, src);
+      const name = file.replace(/\.md$/, ""); // e.g. reap.objective
+      const skillDir = join(projectClaudeSkills, name);
+      const skillFile = join(skillDir, "SKILL.md");
+
+      // Parse frontmatter
+      const fmMatch = src.match(/^---\n([\s\S]*?)\n---\n?([\s\S]*)$/);
+      const description = fmMatch
+        ? (fmMatch[1].match(/^description:\s*"?([^"\n]*)"?/m)?.[1]?.trim() ?? "")
+        : "";
+      const body = fmMatch ? fmMatch[2] : src;
+      const skillContent = `---\nname: ${name}\ndescription: "${description}"\n---\n${body}`;
+
+      const existing = await readTextFile(skillFile);
+      if (existing !== null && existing === skillContent) continue;
+
+      if (!dryRun) {
+        await mkdir(skillDir, { recursive: true });
+        await writeTextFile(skillFile, skillContent);
+      }
       cmdInstalled++;
     }
     if (cmdInstalled > 0) {
-      result.updated.push(`.claude/commands/ (${cmdInstalled} synced)`);
+      result.updated.push(`.claude/skills/ (${cmdInstalled} synced)`);
     } else {
-      result.skipped.push(`.claude/commands/ (${reapCmdFiles.length} unchanged)`);
+      result.skipped.push(`.claude/skills/ (${reapCmdFiles.length} unchanged)`);
     }
+
+    // 5b. Clean up legacy .claude/commands/reap.* files
+    const projectClaudeCommands = join(paths.projectRoot, ".claude", "commands");
+    try {
+      const legacyFiles = (await readdir(projectClaudeCommands)).filter(
+        (f: string) => f.startsWith("reap.") && f.endsWith(".md"),
+      );
+      for (const file of legacyFiles) {
+        if (!dryRun) await unlink(join(projectClaudeCommands, file));
+        result.removed.push(`.claude/commands/${file} (legacy)`);
+      }
+    } catch { /* dir may not exist */ }
 
     // 6. Migration: clean up legacy project-level files
     await migrateLegacyFiles(paths, dryRun, result);
@@ -268,8 +285,8 @@ async function migrateLegacyFiles(
   await removeDirIfExists(paths.legacyTemplates, ".reap/templates/", dryRun, result);
   // .reap/hooks/ is now used for hook execute files (gen-031+), do NOT remove
 
-  // .claude/commands/reap.* files are now managed by session-start hook (copy, not symlink)
-  // Do NOT remove them here — session-start.cjs installs them on each session start
+  // .claude/commands/reap.* legacy files are cleaned up in step 5b above
+  // .claude/skills/reap.*/SKILL.md are now managed by session-start hook
 
   // Clean up .claude/hooks.json legacy references
   try {
