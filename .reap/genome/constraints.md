@@ -25,13 +25,13 @@
 
 ## CLI Subcommands
 
-9개: init, status, fix, update, help, destroy, clean, update-genome, run
+8개: init, status, fix, update, help, destroy, clean, run
 - `reap run <command> [--phase <phase>]` — command script dispatcher. deterministic 로직 실행 + structured JSON output
 
 ## Slash Commands
 
-### Normal (18개)
-reap.objective, reap.planning, reap.implementation, reap.validation, reap.completion, reap.evolve, reap.evolve.recovery, reap.start, reap.next, reap.back, reap.abort, reap.status, reap.sync, reap.sync.genome, reap.sync.environment, reap.update, reap.report, reap.help
+### Normal (19개)
+reap.objective, reap.planning, reap.implementation, reap.validation, reap.completion, reap.evolve, reap.evolve.recovery, reap.start, reap.next, reap.back, reap.abort, reap.status, reap.sync, reap.sync.genome, reap.sync.environment, reap.update, reap.update-genome, reap.report, reap.help
 
 ### Collaboration (11개)
 reap.pull, reap.push, reap.merge, reap.merge.start, reap.merge.detect, reap.merge.mate, reap.merge.merge, reap.merge.sync, reap.merge.validation, reap.merge.completion, reap.merge.evolve

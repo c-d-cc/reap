@@ -1,0 +1,8 @@
+id: gen-146-56b321
+type: normal
+parents:
+  - gen-045-3785e0
+goal: "refactor: reap update-genome을 CLI subcommand에서 slash command로 변환"
+genomeHash: 8379eb3a
+startedAt: 2026-03-22T17:12:49.656Z
+completedAt: 2026-03-22T17:22:48.797Z
