@@ -136,4 +136,11 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
     },
     message: `Advanced to ${nextStage}. Proceed with /reap.${nextStage}.`,
   });
+
+  // Auto-execute the next stage command (skip completion — user must run explicitly)
+  if (nextStage !== "completion") {
+    const moduleName = isMerge ? `./merge-${nextStage}` : `./${nextStage}`;
+    const { execute: nextExecute } = await import(moduleName);
+    await nextExecute(paths);
+  }
 }
