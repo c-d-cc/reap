@@ -97,6 +97,8 @@ export interface ReapConfig {
   autoIssueReport?: boolean;
   /** Auto-delegate evolve to a subagent via Agent tool. Default: true */
   autoSubagent?: boolean;
+  /** Generation ID of the last successful genome sync. Empty string = never synced. */
+  lastSyncedGeneration?: string;
 }
 
 /** Resolved strict mode (always object form) */

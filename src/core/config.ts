@@ -29,6 +29,7 @@ export class ConfigManager {
       autoUpdate: true,
       autoSubagent: true,
       autoIssueReport: false,
+      lastSyncedGeneration: "",
     };
 
     for (const [key, defaultValue] of Object.entries(defaults)) {
@@ -36,6 +37,18 @@ export class ConfigManager {
         (config as any)[key] = defaultValue;
         added.push(key);
       }
+    }
+
+    // Migrate legacy lastSyncedCommit → lastSyncedGeneration
+    if ((config as any).lastSyncedCommit !== undefined) {
+      // If lastSyncedGeneration is still empty and lastSyncedCommit has a value,
+      // mark as "legacy" to indicate it was synced before the migration
+      if (!config.lastSyncedGeneration && (config as any).lastSyncedCommit) {
+        config.lastSyncedGeneration = "legacy";
+        added.push("lastSyncedGeneration(migrated)");
+      }
+      delete (config as any).lastSyncedCommit;
+      added.push("lastSyncedCommit(removed)");
     }
 
     if (added.length > 0) {

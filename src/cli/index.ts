@@ -89,6 +89,10 @@ program
 
       console.log(`${versionLine} | Project: ${status.project} (${status.entryMode})`);
       console.log(`Completed Generations: ${status.totalGenerations}`);
+      const syncLabel = status.lastSyncedGeneration
+        ? `synced (${status.lastSyncedGeneration})`
+        : "never synced";
+      console.log(`Genome Sync: ${syncLabel}`);
       if (status.generation) {
         console.log(`\nActive Generation: ${status.generation.id}`);
         console.log(`  Goal: ${status.generation.goal}`);

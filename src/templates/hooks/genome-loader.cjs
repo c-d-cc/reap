@@ -123,7 +123,18 @@ function parseConfig(configFile) {
     const langMatch = configContent.match(/^language:\s*(.+)$/m);
     if (langMatch) language = langMatch[1].trim();
   }
-  return { strictEdit, strictMerge, language, configContent };
+
+  // Parse lastSyncedGeneration (and legacy lastSyncedCommit for backward compat)
+  let lastSyncedGeneration = '';
+  let lastSyncedCommit = '';
+  if (configContent) {
+    const genMatch = configContent.match(/^lastSyncedGeneration:\s*["']?(.*)["']?\s*$/m);
+    if (genMatch) lastSyncedGeneration = genMatch[1].trim().replace(/^["']|["']$/g, '') || '';
+    const commitMatch = configContent.match(/^lastSyncedCommit:\s*["']?([a-f0-9]*)["']?$/m);
+    if (commitMatch) lastSyncedCommit = commitMatch[1] || '';
+  }
+
+  return { strictEdit, strictMerge, language, configContent, lastSyncedGeneration, lastSyncedCommit };
 }
 
 /**
@@ -152,14 +163,40 @@ function parseCurrentYml(currentYml) {
 }
 
 /**
- * Detect Genome staleness.
+ * Detect Genome staleness based on lastSyncedGeneration (with lastSyncedCommit fallback).
  * @param {string} projectRoot
- * @returns {{ genomeStaleWarning: string, commitsSince: number }}
+ * @param {string} [lastSyncedGeneration] - from config.yml; empty string = never synced
+ * @param {string} [lastSyncedCommit] - legacy field for backward compatibility
+ * @returns {{ genomeStaleWarning: string, commitsSince: number, neverSynced: boolean }}
  */
-function detectStaleness(projectRoot) {
+function detectStaleness(projectRoot, lastSyncedGeneration, lastSyncedCommit) {
   let genomeStaleWarning = '';
   let commitsSince = 0;
-  if (dirExists(path.join(projectRoot, '.git'))) {
+  let neverSynced = false;
+
+  if (!dirExists(path.join(projectRoot, '.git'))) {
+    return { genomeStaleWarning, commitsSince, neverSynced };
+  }
+
+  // Primary: lastSyncedGeneration — if non-empty, genome has been synced at least once
+  if (lastSyncedGeneration) {
+    // Use git log to count commits since last genome change as staleness heuristic
+    const lastGenomeCommit = exec(`git -C "${projectRoot}" log -1 --format="%H" -- ".reap/genome/"`);
+    if (lastGenomeCommit) {
+      commitsSince = parseInt(exec(`git -C "${projectRoot}" rev-list --count "${lastGenomeCommit}..HEAD" -- src/ tests/ package.json tsconfig.json scripts/`) || '0', 10);
+      if (commitsSince > 10) {
+        genomeStaleWarning = `WARNING: Genome may be stale — ${commitsSince} commits since last sync (${lastSyncedGeneration}). Consider running /reap.sync to synchronize.`;
+      }
+    }
+  } else if (lastSyncedCommit) {
+    // Legacy fallback: lastSyncedCommit (commit hash) for backward compatibility
+    commitsSince = parseInt(exec(`git -C "${projectRoot}" rev-list --count "${lastSyncedCommit}..HEAD" -- src/ tests/ package.json tsconfig.json scripts/`) || '0', 10);
+    if (commitsSince > 10) {
+      genomeStaleWarning = `WARNING: Genome may be stale — ${commitsSince} commits since last sync. Consider running /reap.sync to synchronize.`;
+    }
+  } else {
+    // Neither field set — never synced
+    // Fall back to git log based detection
     const lastGenomeCommit = exec(`git -C "${projectRoot}" log -1 --format="%H" -- ".reap/genome/"`);
     if (lastGenomeCommit) {
       commitsSince = parseInt(exec(`git -C "${projectRoot}" rev-list --count "${lastGenomeCommit}..HEAD" -- src/ tests/ package.json tsconfig.json scripts/`) || '0', 10);
@@ -167,9 +204,10 @@ function detectStaleness(projectRoot) {
         genomeStaleWarning = `WARNING: Genome may be stale — ${commitsSince} commits since last Genome update. Consider running /reap.sync to synchronize.`;
       }
     }
+    neverSynced = true;
   }
 
-  return { genomeStaleWarning, commitsSince };
+  return { genomeStaleWarning, commitsSince, neverSynced };
 }
 
 /**
@@ -215,7 +253,7 @@ function hasPlaceholders(filePath) {
  * @param {object} params
  * @returns {{ initLines: string[], severity: string }}
  */
-function buildGenomeHealth({ l1Lines, genomeDir, configFile, genomeStaleWarning, commitsSince }) {
+function buildGenomeHealth({ l1Lines, genomeDir, configFile, genomeStaleWarning, commitsSince, neverSynced }) {
   const issues = [];
   let severity = 'ok';
   if (l1Lines === 0) { issues.push('empty'); severity = 'danger'; }
@@ -238,6 +276,11 @@ function buildGenomeHealth({ l1Lines, genomeDir, configFile, genomeStaleWarning,
       issues.push(`needs customization (${placeholderFiles.length}/${L1_FILES.length} files)`);
       if (severity === 'ok') severity = 'warn';
     }
+  }
+
+  if (neverSynced) {
+    issues.push('never synced');
+    if (severity === 'ok') severity = 'warn';
   }
 
   if (genomeStaleWarning && commitsSince > 30) {

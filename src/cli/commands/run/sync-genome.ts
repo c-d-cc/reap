@@ -2,6 +2,7 @@ import { readdir } from "fs/promises";
 import { join } from "path";
 import type { ReapPaths } from "../../../core/paths";
 import { GenerationManager } from "../../../core/generation";
+import { ConfigManager } from "../../../core/config";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 
@@ -95,18 +96,24 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    // Phase 2: 결과 확인
+    // Phase 2: 결과 확인 + lastSyncedGeneration 업데이트
+    const genId = state?.id || "manual";
+    const config = await ConfigManager.read(paths);
+    config.lastSyncedGeneration = genId;
+    await ConfigManager.write(paths, config);
+
     emitOutput({
       status: "ok",
       command: "sync-genome",
       phase: "complete",
-      completed: ["gate", "context-collect", "analyze", "apply"],
+      completed: ["gate", "context-collect", "analyze", "apply", "update-sync-state"],
       context: {
         hasActiveGeneration: hasActiveGen,
+        lastSyncedGeneration: genId,
       },
       message: hasActiveGen
         ? "Genome differences recorded as backlog items. Apply during Completion."
-        : "Genome synchronized.",
+        : `Genome synchronized. lastSyncedGeneration: ${genId}`,
     });
   }
 }

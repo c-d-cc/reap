@@ -6,6 +6,7 @@ export interface ProjectStatus {
   version: string;
   project: string;
   entryMode: string;
+  lastSyncedGeneration?: string;
   generation: {
     id: string;
     goal: string;
@@ -31,6 +32,7 @@ export async function getStatus(projectRoot: string): Promise<ProjectStatus> {
     version: config.version,
     project: config.project,
     entryMode: config.entryMode,
+    lastSyncedGeneration: config.lastSyncedGeneration,
     generation: current ? {
       id: current.id,
       goal: current.goal,

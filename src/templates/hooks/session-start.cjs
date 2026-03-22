@@ -148,13 +148,13 @@ const { content: genomeContent, l1Lines } = gl.loadGenome(genomeDir);
 const envSummaryFile = path.join(reapDir, 'environment', 'summary.md');
 const envSummary = gl.readFile(envSummaryFile) || '';
 
-// Step 4: Check Genome staleness
-log('Checking sync...');
-const { genomeStaleWarning, commitsSince } = gl.detectStaleness(projectRoot);
-
 // Step 5: Read generation state
 log('Reading generation state...');
-const { strictEdit, strictMerge, language } = gl.parseConfig(configFile);
+const { strictEdit, strictMerge, language, lastSyncedGeneration, lastSyncedCommit } = gl.parseConfig(configFile);
+
+// Step 4: Check Genome staleness
+log('Checking sync...');
+const { genomeStaleWarning, commitsSince, neverSynced } = gl.detectStaleness(projectRoot, lastSyncedGeneration, lastSyncedCommit);
 const { genStage, genId, generationContext, nextCmd } = gl.parseCurrentYml(currentYml);
 
 // Build strict mode section
@@ -183,7 +183,7 @@ const initLines = [];
 if (autoUpdateMessage) initLines.push(`🟢 ${autoUpdateMessage}`);
 
 // Genome health
-const health = gl.buildGenomeHealth({ l1Lines, genomeDir, configFile, genomeStaleWarning, commitsSince });
+const health = gl.buildGenomeHealth({ l1Lines, genomeDir, configFile, genomeStaleWarning, commitsSince, neverSynced });
 initLines.push(...health.initLines);
 
 // Generation status

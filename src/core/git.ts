@@ -43,6 +43,15 @@ export function gitAllBranches(cwd: string): string[] {
   }
 }
 
+/** Get the HEAD commit hash (full SHA) */
+export function gitHeadCommit(cwd: string): string | null {
+  try {
+    return execSync("git rev-parse HEAD", { cwd, encoding: "utf-8", timeout: 5_000 }).trim();
+  } catch {
+    return null;
+  }
+}
+
 /** Get the current branch name */
 export function gitCurrentBranch(cwd: string): string | null {
   try {
