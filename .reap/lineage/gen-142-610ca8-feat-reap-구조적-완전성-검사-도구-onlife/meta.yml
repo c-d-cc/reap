@@ -1,0 +1,8 @@
+id: gen-142-610ca8
+type: normal
+parents:
+  - gen-045-3785e0
+goal: "feat: .reap/ 구조적 완전성 검사 도구 + onLifeCompleted hook"
+genomeHash: c8d4e1e4
+startedAt: 2026-03-22T15:04:45.226Z
+completedAt: 2026-03-22T15:11:32.723Z
