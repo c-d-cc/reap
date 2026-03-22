@@ -1,8 +1,0 @@
-id: gen-120-488e3e
-type: normal
-parents:
-  - gen-119-afd037
-goal: "feat: docs-update를 reapdev.docsUpdate 스킬로 분리"
-genomeHash: 4c796714
-startedAt: 2026-03-22T07:45:16.165Z
-completedAt: 2026-03-22T07:48:29.284Z

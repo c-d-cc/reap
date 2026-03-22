@@ -1,8 +1,0 @@
-id: gen-105-7c34e7
-type: normal
-parents:
-  - gen-103-15e966
-goal: Daemon 기반 Lifecycle Orchestration
-genomeHash: 13c9ca8a
-startedAt: 2026-03-21T14:15:42.049Z
-completedAt: 2026-03-21T14:22:54.937Z

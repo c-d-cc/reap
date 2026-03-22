@@ -1,8 +1,0 @@
-id: gen-118-110fde
-type: normal
-parents:
-  - gen-117-bfdcdb
-goal: "fix: completion phase 'genome' → 'feedKnowledge' 리네이밍 + genome/env 영향 자동 감지"
-genomeHash: 4c796714
-startedAt: 2026-03-22T07:35:19.347Z
-completedAt: 2026-03-22T07:40:32.259Z

@@ -1,8 +1,0 @@
-id: gen-126-8d3c61
-type: normal
-parents:
-  - gen-125-aed658
-goal: "feat: reap clean / reap destroy 커맨드 추가"
-genomeHash: d2fc59cd
-startedAt: 2026-03-22T09:01:00.135Z
-completedAt: 2026-03-22T09:06:06.562Z

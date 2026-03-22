@@ -1,8 +1,0 @@
-id: gen-122-519e18
-type: normal
-parents:
-  - gen-121-bec8d5
-goal: "fix: versionBump Step 0에서 docsUpdate를 선행 실행하여 내용 불일치 gate"
-genomeHash: 460af8d0
-startedAt: 2026-03-22T08:01:25.950Z
-completedAt: 2026-03-22T08:04:13.719Z

@@ -1,8 +1,0 @@
-id: gen-128-9001c1
-type: normal
-parents:
-  - gen-127-e73a96
-goal: "feat: reap.next가 다음 stage command를 자동 실행"
-genomeHash: be30670f
-startedAt: 2026-03-22T09:24:37.831Z
-completedAt: 2026-03-22T09:28:27.280Z

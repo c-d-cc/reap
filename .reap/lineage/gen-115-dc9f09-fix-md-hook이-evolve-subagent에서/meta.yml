@@ -1,8 +1,0 @@
-id: gen-115-dc9f09
-type: normal
-parents:
-  - gen-114-ab49ad
-goal: "fix: .md hook이 evolve subagent에서 실행되도록 completion output 개선"
-genomeHash: 4c796714
-startedAt: 2026-03-22T06:59:50.842Z
-completedAt: 2026-03-22T07:03:57.003Z

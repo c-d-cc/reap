@@ -1,8 +1,0 @@
-id: gen-111-845eb4
-type: normal
-parents:
-  - gen-109-993f83
-goal: "fix: reap init 완료 시 /reap.sync 실행 안내 메시지 출력 (issue #4 보완)"
-genomeHash: 4c796714
-startedAt: 2026-03-22T06:21:12.593Z
-completedAt: 2026-03-22T06:24:08.237Z

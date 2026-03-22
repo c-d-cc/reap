@@ -1,8 +1,0 @@
-id: gen-116-92c7d5
-type: normal
-parents:
-  - gen-115-dc9f09
-goal: "feat: E2E 테스트 — project-level skill 설치 검증 + OpenCode 대응"
-genomeHash: 4c796714
-startedAt: 2026-03-22T07:09:44.667Z
-completedAt: 2026-03-22T07:18:18.980Z

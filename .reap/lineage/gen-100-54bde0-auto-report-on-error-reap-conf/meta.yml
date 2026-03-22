@@ -1,8 +1,0 @@
-id: gen-100-54bde0
-type: normal
-parents:
-  - gen-099-3e6442
-goal: auto-report on error + /reap.config 커맨드 추가
-genomeHash: 13c9ca8a
-startedAt: 2026-03-21T12:34:21.191Z
-completedAt: 2026-03-21T12:46:39.415Z

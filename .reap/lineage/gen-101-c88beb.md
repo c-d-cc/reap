@@ -1,0 +1,19 @@
+---
+id: gen-101-c88beb
+type: normal
+parents:
+  - gen-100-54bde0
+goal: AI migration agent + archiving 시 REAP MANAGED 헤더 제거
+genomeHash: 13c9ca8a
+startedAt: 2026-03-21T12:47:58.368Z
+completedAt: 2026-03-21T12:53:18.227Z
+---
+
+# gen-101-c88beb
+- **Goal**: AI migration agent + REAP MANAGED 헤더 strip
+- **Result**: pass
+
+## Objective
+AI migration agent + archiving 시 REAP MANAGED 헤더 제거
+
+## Result: pass
