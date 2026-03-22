@@ -111,6 +111,13 @@ function buildSubagentPrompt(
   lines.push("- completion output의 `prompt` 필드에 '## Hook Prompts' 섹션이 포함되어 있으면, 해당 hook prompt를 반드시 순서대로 실행하라.");
   lines.push("- Hook prompt는 `.md` hook 파일의 내용으로, AI가 따라야 할 지시사항이다.");
   lines.push("- Hook prompt에 유저 확인이 필요한 경우(예: 프리뷰+컨펌), autonomous mode에서도 이를 존중하라.");
+  lines.push("");
+
+  // Interrupt protection instructions
+  lines.push("## Interrupt Protection");
+  lines.push("- 사용자의 새 메시지가 중간에 들어와도, 명시적 kill/중단 요청(\"중단\", \"stop\", \"abort\")이 아닌 한 현재 작업을 끝까지 완료하라.");
+  lines.push("- 작업을 shortcut으로 건너뛰거나 결과를 추정하지 마라. 모든 validation은 실제 실행 결과를 확인하라.");
+  lines.push("- E2E 테스트 등 외부 실행이 포함된 작업은 반드시 실제 실행하고 결과를 확인하라.");
 
   return lines.join("\n");
 }

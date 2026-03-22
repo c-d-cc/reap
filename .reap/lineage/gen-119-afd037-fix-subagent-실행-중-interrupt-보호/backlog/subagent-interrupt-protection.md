@@ -1,7 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
+consumedBy: gen-119-afd037
 ---
 
 # Subagent 실행 중 사용자 입력 보호 — 중단 방지 및 orchestrator 경고

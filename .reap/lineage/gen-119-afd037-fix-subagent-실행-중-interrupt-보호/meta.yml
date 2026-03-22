@@ -1,0 +1,8 @@
+id: gen-119-afd037
+type: normal
+parents:
+  - gen-045-3785e0
+goal: "fix: subagent 실행 중 interrupt 보호 + orchestrator 경고"
+genomeHash: 4c796714
+startedAt: 2026-03-22T07:41:24.533Z
+completedAt: 2026-03-22T07:44:46.472Z
