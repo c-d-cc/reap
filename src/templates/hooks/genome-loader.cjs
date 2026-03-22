@@ -7,6 +7,17 @@ const { execSync } = require('child_process');
 const L1_LIMIT = 500;
 const L2_LIMIT = 200;
 const L1_FILES = ['principles.md', 'conventions.md', 'constraints.md', 'source-map.md'];
+const PLACEHOLDER_PATTERNS = [
+  /\(Add .+ here\)/,
+  /\(Describe .+\)/,
+  /\(language and version\)/,
+  /\(External .+\)/,
+  /\(runtime environment\)/,
+  /\(framework\)/,
+  /\(database\)/,
+  /^\|\s*\|\s*\|\s*\|\s*\|$/m,
+];
+
 const STAGE_COMMANDS = {
   objective: '/reap.objective',
   planning: '/reap.planning',
@@ -189,6 +200,17 @@ function buildStrictSection(strictEdit, strictMerge, genStage) {
 }
 
 /**
+ * Check if a genome file contains placeholder template content.
+ * @param {string} filePath - path to a genome file
+ * @returns {boolean} true if the file contains placeholder patterns
+ */
+function hasPlaceholders(filePath) {
+  const content = readFile(filePath);
+  if (!content) return false;
+  return PLACEHOLDER_PATTERNS.some(pattern => pattern.test(content));
+}
+
+/**
  * Build Genome health status for session init display.
  * @param {object} params
  * @returns {{ initLines: string[], severity: string }}
@@ -202,6 +224,22 @@ function buildGenomeHealth({ l1Lines, genomeDir, configFile, genomeStaleWarning,
     if (!check) { issues.push(`missing ${f}`); severity = 'danger'; }
   }
   if (!fileExists(configFile)) { issues.push('no config.yml'); severity = 'danger'; }
+
+  // Check for placeholder content in L1 files
+  const placeholderFiles = L1_FILES.filter(f => {
+    const fp = path.join(genomeDir, f);
+    return fileExists(fp) && hasPlaceholders(fp);
+  });
+  if (placeholderFiles.length > 0) {
+    if (placeholderFiles.length === L1_FILES.length) {
+      issues.push(`needs customization (${placeholderFiles.length}/${L1_FILES.length} files)`);
+      severity = 'danger';
+    } else {
+      issues.push(`needs customization (${placeholderFiles.length}/${L1_FILES.length} files)`);
+      if (severity === 'ok') severity = 'warn';
+    }
+  }
+
   if (genomeStaleWarning && commitsSince > 30) {
     issues.push(`severely stale (${commitsSince} commits)`);
     if (severity !== 'danger') severity = 'danger';
@@ -223,6 +261,7 @@ module.exports = {
   L2_LIMIT,
   L1_FILES,
   STAGE_COMMANDS,
+  PLACEHOLDER_PATTERNS,
   readFile,
   fileExists,
   dirExists,
@@ -233,4 +272,5 @@ module.exports = {
   detectStaleness,
   buildStrictSection,
   buildGenomeHealth,
+  hasPlaceholders,
 };
