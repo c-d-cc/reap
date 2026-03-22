@@ -4,7 +4,7 @@ import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
 import { checkSubmodules } from "../../../core/commit";
-import { verifyStageEntry } from "../../../core/stage-transition";
+import { verifyStageEntry, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const mgm = new MergeGenerationManager(paths);
@@ -36,6 +36,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     const mergeContent = await readTextFile(paths.artifact("03-merge.md"));
     const validationContent = await readTextFile(validationArtifact);
 
+    // Set phase nonce for archive phase
+    setPhaseNonce(state, "completion", "retrospective");
+    await mgm.save(state);
+
     emitOutput({
       status: "prompt",
       command: "merge-completion",
@@ -66,6 +70,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "archive") {
+    // Verify phase nonce from retrospective phase
+    verifyPhaseEntry("merge-completion", state, "completion", "retrospective");
+    await mgm.save(state);
+
     // Phase 2: Execute hooks, archive, and prepare for commit
     const hookResults = await executeHooks(paths.hooks, "onMergeCompleted", paths.projectRoot);
 

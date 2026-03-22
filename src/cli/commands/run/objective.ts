@@ -6,7 +6,7 @@ import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { scanBacklog } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
-import { performTransition } from "../../../core/stage-transition";
+import { performTransition, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -77,6 +77,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       }
     }
 
+    // Set phase nonce — prevents skipping work phase
+    setPhaseNonce(state, "objective", "work");
+    await gm.save(state);
+
     emitOutput({
       status: "prompt",
       command: "objective",
@@ -136,6 +140,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
+    // Verify phase nonce from work phase
+    verifyPhaseEntry("objective", state, "objective", "work");
+    await gm.save(state);
+
     // Phase 2: Verify artifact and run hooks
     const artifactPath = paths.artifact("01-objective.md");
     if (!(await fileExists(artifactPath))) {

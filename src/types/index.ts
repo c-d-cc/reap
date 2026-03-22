@@ -56,6 +56,10 @@ export interface GenerationState {
   expectedTokenHash?: string;
   /** Last generated nonce — auto-read by next.ts if no explicit nonce argument */
   lastNonce?: string;
+  /** Phase nonce — prevents skipping work phase within a stage */
+  lastPhaseNonce?: string;
+  /** Phase token hash — SHA256(nonce + genId + stage + ":" + phase) */
+  expectedPhaseTokenHash?: string;
 }
 
 /** Metadata stored in lineage/{gen-dir}/meta.yml */

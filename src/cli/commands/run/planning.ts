@@ -4,7 +4,7 @@ import { GenerationManager, generateStageToken } from "../../../core/generation"
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
-import { verifyStageEntry, performTransition } from "../../../core/stage-transition";
+import { verifyStageEntry, performTransition, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -53,6 +53,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         if (template) await writeTextFile(artifactPath, template);
       }
     }
+
+    // Set phase nonce — prevents skipping work phase
+    setPhaseNonce(state, "planning", "work");
+    await gm.save(state);
 
     emitOutput({
       status: "prompt",
@@ -110,6 +114,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
+    // Verify phase nonce from work phase
+    verifyPhaseEntry("planning", state, "planning", "work");
+    await gm.save(state);
+
     const artifactPath = paths.artifact("02-planning.md");
     if (!(await fileExists(artifactPath))) {
       emitError("planning", "02-planning.md does not exist. Complete the planning work first.");

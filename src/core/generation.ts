@@ -26,6 +26,19 @@ export function verifyStageToken(token: string, genId: string, stage: string, ex
   return computed === expectedHash;
 }
 
+/** Generate a phase chain token (nonce + hash). Prevents skipping work phase within a stage. */
+export function generatePhaseToken(genId: string, stage: string, phase: string): { nonce: string; hash: string } {
+  const nonce = randomBytes(16).toString("hex");
+  const hash = createHash("sha256").update(nonce + genId + stage + ":" + phase).digest("hex");
+  return { nonce, hash };
+}
+
+/** Verify a phase chain token — recomputes hash from nonce and compares to expected. */
+export function verifyPhaseToken(token: string, genId: string, stage: string, phase: string, expectedHash: string): boolean {
+  const computed = createHash("sha256").update(token + genId + stage + ":" + phase).digest("hex");
+  return computed === expectedHash;
+}
+
 // ── Hash utilities ──────────────────────────────────────────
 
 /** Generate a 6-char hex hash for a generation ID */

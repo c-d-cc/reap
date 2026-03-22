@@ -8,7 +8,7 @@ import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
 import { checkSubmodules } from "../../../core/commit";
 import { execSync } from "child_process";
-import { verifyStageEntry } from "../../../core/stage-transition";
+import { verifyStageEntry, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
 
 interface GenomeImpact {
   newCommands: string[];
@@ -144,6 +144,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       }
     }
 
+    // Set phase nonce for feedKnowledge phase
+    setPhaseNonce(state, "completion", "retrospective");
+    await gm.save(state);
+
     emitOutput({
       status: "prompt",
       command: "completion",
@@ -164,6 +168,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "feedKnowledge") {
+    // Verify phase nonce from retrospective phase
+    verifyPhaseEntry("completion", state, "completion", "retrospective");
+    await gm.save(state);
+
     // Phase 2: AI has written retrospective. Now handle genome changes + auto consume/archive.
     const backlogItems = await scanBacklog(paths.backlog);
     const genomeChanges = backlogItems.filter(b => b.type === "genome-change" && b.status !== "consumed");

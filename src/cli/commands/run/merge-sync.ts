@@ -4,7 +4,7 @@ import { generateStageToken } from "../../../core/generation";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
-import { verifyStageEntry, performTransition } from "../../../core/stage-transition";
+import { verifyStageEntry, performTransition, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const mgm = new MergeGenerationManager(paths);
@@ -35,6 +35,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     const genomeConstraints = await readTextFile(paths.constraints);
     const genomePrinciples = await readTextFile(paths.principles);
     const mergeContent = await readTextFile(mergeArtifact);
+
+    // Set phase nonce — prevents skipping verify phase
+    setPhaseNonce(state, "sync", "verify");
+    await mgm.save(state);
 
     emitOutput({
       status: "prompt",
@@ -80,6 +84,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
+    // Verify phase nonce from verify phase
+    verifyPhaseEntry("merge-sync", state, "sync", "verify");
+    await mgm.save(state);
+
     // Generate stage chain token
     const { nonce, hash } = generateStageToken(state.id, state.stage);
     state.expectedTokenHash = hash;

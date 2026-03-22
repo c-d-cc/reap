@@ -1,7 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: low
+consumedBy: gen-131-141810
 ---
 
 # Phase 전환 시에도 nonce 검증 추가

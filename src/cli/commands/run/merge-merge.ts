@@ -4,7 +4,7 @@ import { generateStageToken } from "../../../core/generation";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
-import { verifyStageEntry, performTransition } from "../../../core/stage-transition";
+import { verifyStageEntry, performTransition, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const mgm = new MergeGenerationManager(paths);
@@ -36,6 +36,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
 
     // Extract target branch from goal (format: "Merge <current> + <target>")
     const targetBranch = state.goal.split(" + ").pop() ?? "";
+
+    // Set phase nonce — prevents skipping work phase
+    setPhaseNonce(state, "merge", "work");
+    await mgm.save(state);
 
     emitOutput({
       status: "prompt",
@@ -71,6 +75,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
+    // Verify phase nonce from work phase
+    verifyPhaseEntry("merge-merge", state, "merge", "work");
+    await mgm.save(state);
+
     // Generate stage chain token
     const { nonce, hash } = generateStageToken(state.id, state.stage);
     state.expectedTokenHash = hash;

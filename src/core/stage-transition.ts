@@ -3,7 +3,7 @@ import type { ReapPaths } from "./paths";
 import type { GenerationState, AnyStage, LifeCycleStage, MergeStage, ReapHookEvent, HookResult } from "../types";
 import { LifeCycle } from "./lifecycle";
 import { MergeLifeCycle } from "./merge-lifecycle";
-import { verifyStageToken } from "./generation";
+import { verifyStageToken, generatePhaseToken, verifyPhaseToken } from "./generation";
 import { readTextFile, writeTextFile, fileExists } from "./fs";
 import { executeHooks } from "./hook-engine";
 import { emitError } from "./run-output";
@@ -85,6 +85,43 @@ export function verifyStageEntry(
   // Clear consumed token
   state.lastNonce = undefined;
   state.expectedTokenHash = undefined;
+}
+
+// ── Phase nonce helpers ─────────────────────────────────────
+
+/**
+ * Set a phase nonce on the state. Call at the end of a work/review/verify phase
+ * to ensure the AI cannot skip directly to --phase complete.
+ * Mutates state in-place. Caller must save state after calling this.
+ */
+export function setPhaseNonce(state: GenerationState, stage: string, phase: string): void {
+  const { nonce, hash } = generatePhaseToken(state.id, stage, phase);
+  state.lastPhaseNonce = nonce;
+  state.expectedPhaseTokenHash = hash;
+}
+
+/**
+ * Verify the phase nonce at the start of a phase (e.g., --phase complete).
+ * - If lastPhaseNonce exists: verify against expectedPhaseTokenHash, clear on success.
+ * - If lastPhaseNonce does not exist: error (work phase was skipped).
+ * Mutates state in-place (clears lastPhaseNonce + expectedPhaseTokenHash on success).
+ */
+export function verifyPhaseEntry(command: string, state: GenerationState, stage: string, phase: string): void {
+  if (!state.lastPhaseNonce) {
+    emitError(command, `Phase nonce missing. Complete the previous phase before running --phase ${phase}.`);
+  }
+
+  if (!state.expectedPhaseTokenHash) {
+    emitError(command, "Phase transition error: lastPhaseNonce exists but expectedPhaseTokenHash is missing. State may be corrupted.");
+  }
+
+  if (!verifyPhaseToken(state.lastPhaseNonce, state.id, stage, phase, state.expectedPhaseTokenHash)) {
+    emitError(command, `Phase token verification failed. Re-run the previous phase to get a valid token.`);
+  }
+
+  // Clear consumed phase token
+  state.lastPhaseNonce = undefined;
+  state.expectedPhaseTokenHash = undefined;
 }
 
 // ── Auto-transition ─────────────────────────────────────────

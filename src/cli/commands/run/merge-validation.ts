@@ -4,7 +4,7 @@ import { generateStageToken } from "../../../core/generation";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
-import { verifyStageEntry, performTransition } from "../../../core/stage-transition";
+import { verifyStageEntry, performTransition, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const mgm = new MergeGenerationManager(paths);
@@ -32,6 +32,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   if (!phase || phase === "work") {
     // Phase 1: Gate passed, instruct AI to run validation commands
     const constraintsContent = await readTextFile(paths.constraints);
+
+    // Set phase nonce — prevents skipping work phase
+    setPhaseNonce(state, "validation", "work");
+    await mgm.save(state);
 
     emitOutput({
       status: "prompt",
@@ -69,6 +73,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
+    // Verify phase nonce from work phase
+    verifyPhaseEntry("merge-validation", state, "validation", "work");
+    await mgm.save(state);
+
     // Phase 2: Execute hooks (only on pass) and signal completion
     const validationArtifact = paths.artifact("05-validation.md");
     if (!(await fileExists(validationArtifact))) {
