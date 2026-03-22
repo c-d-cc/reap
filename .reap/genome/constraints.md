@@ -44,12 +44,6 @@ reap.pull, reap.push, reap.merge, reap.merge.start, reap.merge.detect, reap.merg
 - `reap.merge.evolve` — merge full lifecycle 자동 실행
 - `reap.next`/`reap.back`은 type: merge에서도 동작 (stage 분기)
 
-### Dev (2개)
-reapdev.docsUpdate, reapdev.versionBump
-
-- `reapdev.docsUpdate` — 문서/i18n 업데이트 (onLifeCompleted hook에서 호출)
-- `reapdev.versionBump` — 배포 산출물 검증 + version bump
-
 ## Hooks
 
 16개 event (stage-level):

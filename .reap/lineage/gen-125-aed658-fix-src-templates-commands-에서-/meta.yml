@@ -1,0 +1,9 @@
+id: gen-125-aed658
+type: normal
+parents:
+  - gen-045-3785e0
+goal: "fix: src/templates/commands/에서 reapdev.* 제거 + COMMAND_NAMES 정리 — 개발 전용
+  커맨드는 프로젝트 .claude/commands/에서만 관리"
+genomeHash: 460af8d0
+startedAt: 2026-03-22T08:27:34.739Z
+completedAt: 2026-03-22T08:31:29.572Z
