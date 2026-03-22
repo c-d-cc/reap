@@ -34,6 +34,7 @@ const COMMANDS: Record<string, () => Promise<{ execute: CommandExecutor }>> = {
   "evolve-recovery": () => import("./evolve-recovery"),
   pull: () => import("./pull"),
   config: () => import("./config"),
+  "update-genome": () => import("./update-genome"),
   refreshKnowledge: () => import("./refresh-knowledge"),
 };
 

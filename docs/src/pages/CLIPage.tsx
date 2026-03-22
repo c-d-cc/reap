@@ -61,13 +61,6 @@ export default function CLIPage() {
           {t.cli.fixNote}
         </p>
 
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.updateGenomeTitle}</h2>
-        <p className="text-sm text-muted-foreground mb-2">{t.cli.updateGenomeDesc}</p>
-        <CodeBlock language="bash">{`reap update-genome`}</CodeBlock>
-        <p className="text-xs text-muted-foreground mt-2 mb-6">
-          {t.cli.updateGenomeNote}
-        </p>
-
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.cleanTitle}</h2>
         <p className="text-sm text-muted-foreground mb-2">{t.cli.cleanDesc}</p>
         <CodeBlock language="bash">{`reap clean`}</CodeBlock>

@@ -1,18 +1,12 @@
-import { ReapPaths } from "../../core/paths";
-import { ConfigManager } from "../../core/config";
-import { GenerationManager } from "../../core/generation";
-import { scanBacklog, markBacklogConsumed, type BacklogFile } from "../../core/backlog";
-import { emitOutput, emitError } from "../../core/run-output";
+import type { ReapPaths } from "../../../core/paths";
+import { ConfigManager } from "../../../core/config";
+import { GenerationManager } from "../../../core/generation";
+import { scanBacklog, markBacklogConsumed, type BacklogFile } from "../../../core/backlog";
+import { emitOutput, emitError } from "../../../core/run-output";
 
 const COMMAND = "update-genome";
 
-export async function updateGenome(cwd: string, apply: boolean): Promise<void> {
-  const paths = new ReapPaths(cwd);
-
-  if (!(await paths.isReapProject())) {
-    emitError(COMMAND, "Not a REAP project (.reap/ not found).");
-  }
-
+export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   // Gate: no active generation allowed
   const gm = new GenerationManager(paths);
   const current = await gm.current();
@@ -25,10 +19,10 @@ export async function updateGenome(cwd: string, apply: boolean): Promise<void> {
     (b) => b.type === "genome-change" && b.status === "pending",
   );
 
-  if (apply) {
+  if (phase === "apply") {
     await applyPhase(paths, pending);
   } else {
-    await scanPhase(pending);
+    scanPhase(pending);
   }
 }
 
@@ -60,9 +54,9 @@ function scanPhase(pending: BacklogFile[]): never {
       "Pending genome-change backlog items are listed in context.items.",
       "For each item, apply the described changes to the corresponding .reap/genome/ files.",
       "Only modify files under .reap/genome/. Do NOT modify source code.",
-      "After all changes are applied, run: reap update-genome --apply",
+      "After all changes are applied, run: reap run update-genome --phase apply",
     ].join("\n"),
-    nextCommand: "reap update-genome --apply",
+    nextCommand: "reap run update-genome --phase apply",
   });
 }
 

@@ -20,6 +20,7 @@ export const COMMAND_NAMES = [
   "reap.merge",
   "reap.pull", "reap.push",
   "reap.config",
+  "reap.update-genome",
   "reap.refreshKnowledge",
 ];
 
