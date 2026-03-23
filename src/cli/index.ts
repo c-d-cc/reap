@@ -2,7 +2,7 @@
 import { program } from "commander";
 import { createInterface } from "readline";
 import { initProject } from "./commands/init";
-import { updateProject, selfUpgrade } from "./commands/update";
+import { updateProject, selfUpgrade, type SelfUpgradeResult } from "./commands/update";
 import { fetchReleaseNotice } from "../core/notice";
 import { getCurrentVersion } from "../core/version";
 import { getStatus } from "./commands/status";
@@ -169,11 +169,9 @@ program
   .action(async (options: { dryRun?: boolean }) => {
     try {
       // Step 1: Self-upgrade npm package
-      if (!options.dryRun) {
-        const upgrade = selfUpgrade();
-        if (upgrade.upgraded) {
-          console.log(`Upgraded: v${upgrade.from} → v${upgrade.to}`);
-        }
+      const upgrade = !options.dryRun ? selfUpgrade() : { upgraded: false } as SelfUpgradeResult;
+      if (upgrade.upgraded) {
+        console.log(`Upgraded: v${upgrade.from} → v${upgrade.to}`);
       }
 
       // Step 2: Sync project files
@@ -213,11 +211,22 @@ program
       }
 
       // Step 4: Show release notice
+      // If selfUpgrade succeeded, delegate to the NEW binary so it reads
+      // the new RELEASE_NOTICE.md (the current process still has old code).
       try {
         const version = getCurrentVersion();
         const lang = (await AgentRegistry.readLanguage()) ?? "en";
-        const notice = fetchReleaseNotice(version, lang);
-        if (notice) console.log(notice);
+        if (!options.dryRun && upgrade.upgraded) {
+          const { execSync } = await import("child_process");
+          const output = execSync(
+            `reap --show-notice ${upgrade.to} --show-notice-lang ${lang}`,
+            { encoding: "utf-8", timeout: 5_000, stdio: ["pipe", "pipe", "pipe"] },
+          );
+          if (output.trim()) console.log(output.trimEnd());
+        } else {
+          const notice = fetchReleaseNotice(version, lang);
+          if (notice) console.log(notice);
+        }
       } catch {
         // Notice fetch is best-effort
       }
@@ -409,6 +418,21 @@ function prompt(question: string): Promise<string> {
       resolve(answer ?? "");
     });
   });
+}
+
+// Hidden --show-notice handler: invoked by `reap update` after selfUpgrade
+// to read notice from the NEW binary's RELEASE_NOTICE.md.
+// Usage: reap --show-notice <version> --show-notice-lang <lang>
+const showNoticeIdx = process.argv.indexOf("--show-notice");
+if (showNoticeIdx !== -1) {
+  const version = process.argv[showNoticeIdx + 1] ?? "";
+  const langIdx = process.argv.indexOf("--show-notice-lang");
+  const lang = langIdx !== -1 ? (process.argv[langIdx + 1] ?? "en") : "en";
+  if (version) {
+    const notice = fetchReleaseNotice(version, lang);
+    if (notice) process.stdout.write(notice);
+  }
+  process.exit(0);
 }
 
 program.parse();

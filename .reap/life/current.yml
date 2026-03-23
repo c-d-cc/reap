@@ -1,0 +1,22 @@
+# REAP MANAGED — Do not modify directly. Use 'reap run <stage> --phase <phase>' to update.
+id: gen-169-17c5c0
+goal: selfUpgrade 후 새 바이너리로 notice 표시
+stage: validation
+genomeVersion: 77
+startedAt: 2026-03-23T16:27:36.574Z
+timeline:
+  - stage: objective
+    at: 2026-03-23T16:27:36.574Z
+  - stage: planning
+    at: 2026-03-23T16:28:08.546Z
+  - stage: implementation
+    at: 2026-03-23T16:28:30.782Z
+  - stage: validation
+    at: 2026-03-23T16:30:17.881Z
+type: normal
+parents:
+  - gen-168-f8f638
+genomeHash: c2e6348e
+lastNonce: b54ceeda58ed081b09a136ae6882d5de
+expectedHash: e51903aafd4ab0d32d9f6b3965622e97901577434737a4a628de838412804d53
+phase: entry
