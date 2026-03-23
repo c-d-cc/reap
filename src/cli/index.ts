@@ -376,7 +376,7 @@ program
         process.exit(1);
       }
       const passArgs = [target, ...cmd.args.slice(1)];
-      const { execute } = await import("./commands/run/make");
+      const { execute } = await import("./commands/make");
       await execute(paths, undefined, passArgs);
     } catch (e: any) {
       console.error(`Error: ${e.message}`);

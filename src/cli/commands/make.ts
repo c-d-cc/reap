@@ -1,6 +1,6 @@
-import { ReapPaths } from "../../../core/paths";
-import { createBacklog, VALID_BACKLOG_TYPES } from "../../../core/backlog";
-import { emitOutput, emitError } from "../../../core/run-output";
+import { ReapPaths } from "../../core/paths";
+import { createBacklog, VALID_BACKLOG_TYPES } from "../../core/backlog";
+import { emitOutput, emitError } from "../../core/run-output";
 
 function parseFlags(argv: string[]): Record<string, string> {
   const flags: Record<string, string> = {};
