@@ -67,7 +67,6 @@ export async function execute(paths: ReapPaths, phase?: string, argv: string[] =
     const { ahead, behind } = getAheadBehind(targetBranch, paths.projectRoot);
 
     if (ahead === 0 && behind === 0) {
-      // up-to-date
       emitOutput({
         status: "ok",
         command: "pull",
@@ -76,11 +75,7 @@ export async function execute(paths: ReapPaths, phase?: string, argv: string[] =
         context: { targetBranch, currentBranch, ahead, behind },
         message: "Already up to date.",
       });
-      return;
-    }
-
-    if (ahead > 0 && behind === 0) {
-      // ahead only — local has commits not on remote
+    } else if (ahead > 0 && behind === 0) {
       emitOutput({
         status: "ok",
         command: "pull",
@@ -95,11 +90,7 @@ export async function execute(paths: ReapPaths, phase?: string, argv: string[] =
           "Run `git push` to update the remote.",
         ].join("\n"),
       });
-      return;
-    }
-
-    if (ahead === 0 && behind > 0) {
-      // behind only — fast-forward possible
+    } else if (ahead === 0 && behind > 0) {
       emitOutput({
         status: "prompt",
         command: "pull",
@@ -113,10 +104,8 @@ export async function execute(paths: ReapPaths, phase?: string, argv: string[] =
           "No merge generation needed.",
         ].join("\n"),
       });
-      return;
-    }
-
-    // ahead > 0 && behind > 0 — diverged
+    } else {
+      // ahead > 0 && behind > 0 — diverged
     emitOutput({
       status: "prompt",
       command: "pull",
@@ -138,5 +127,6 @@ export async function execute(paths: ReapPaths, phase?: string, argv: string[] =
         "3. Run `git submodule update --init` after merge completes",
       ].join("\n"),
     });
+    }
   }
 }
