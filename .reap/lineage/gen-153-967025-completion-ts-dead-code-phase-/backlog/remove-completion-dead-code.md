@@ -1,7 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: low
+consumedBy: gen-153-967025
 ---
 
 # completion.ts의 dead code phase 제거
