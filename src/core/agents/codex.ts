@@ -10,7 +10,7 @@ export class CodexAdapter implements AgentAdapter {
   readonly displayName = "Codex CLI";
 
   private get userDir(): string { return join(homedir(), ".codex"); }
-  private get commandsDir(): string { return join(this.userDir, "commands"); }
+  private get commandsDir(): string { return join(this.userDir, "prompts"); }
   private get hooksJsonPath(): string { return join(this.userDir, "hooks.json"); }
   private get configTomlPath(): string { return join(this.userDir, "config.toml"); }
 

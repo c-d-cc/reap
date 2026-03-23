@@ -1,7 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
+consumedBy: gen-158-6d5755
 ---
 
 # Codex CLI 커맨드 설치 경로 수정

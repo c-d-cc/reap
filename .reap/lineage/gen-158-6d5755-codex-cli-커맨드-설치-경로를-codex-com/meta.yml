@@ -1,0 +1,8 @@
+id: gen-158-6d5755
+type: normal
+parents:
+  - gen-157-39e691
+goal: Codex CLI 커맨드 설치 경로를 ~/.codex/commands/에서 ~/.codex/prompts/로 수정
+genomeHash: 6eda03ff
+startedAt: 2026-03-23T05:07:46.803Z
+completedAt: 2026-03-23T05:11:08.200Z

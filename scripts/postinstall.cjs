@@ -40,7 +40,7 @@ try {
   const agentDirs = [
     join(homedir(), ".claude", "commands"),
     join(homedir(), ".config", "opencode", "commands"),
-    join(homedir(), ".codex", "commands"),
+    join(homedir(), ".codex", "prompts"),
   ];
   for (const agentDir of agentDirs) {
     if (!existsSync(agentDir)) continue;

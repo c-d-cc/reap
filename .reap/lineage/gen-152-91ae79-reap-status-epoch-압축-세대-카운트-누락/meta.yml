@@ -1,8 +1,0 @@
-id: gen-152-91ae79
-type: normal
-parents:
-  - gen-151-5d17d4
-goal: reap status epoch 압축 세대 카운트 누락 버그 수정
-genomeHash: 6eda03ff
-startedAt: 2026-03-23T02:58:10.311Z
-completedAt: 2026-03-23T03:03:26.095Z
