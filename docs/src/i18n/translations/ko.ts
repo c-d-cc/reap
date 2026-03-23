@@ -30,6 +30,7 @@ export const ko: Translations = {
       hookReference: "Hook 레퍼런스",
       comparison: "비교",
       configuration: "설정",
+      recoveryGeneration: "Recovery Generation",
     },
   },
 
@@ -345,11 +346,53 @@ export const ko: Translations = {
       ["/reap.report", "REAP 프로젝트에 GitHub Issue로 버그/피드백 보고. 개인정보 이중 검사(PRIVACY_GATE + 포맷 후 마스킹). 유저 확인 필수."],
       ["/reap.help", "24+ 주제의 상황별 도움말 제공."],
       ["/reap.update", "REAP 패키지 업그레이드 + 커맨드/템플릿/훅을 모든 에이전트에 동기화. 프로젝트 .claude/commands/ 즉시 동기화."],
-      ["/reap.refreshKnowledge", "서브에이전트용 REAP 컨텍스트 로드 (Genome, Environment, 상태). 오케스트레이터 에이전트가 서브에이전트 세션을 부트스트랩할 때 사용."],
+      ["/reap.refreshKnowledge", "REAP 컨텍스트 재로드 (Genome, Environment, 상태). context compaction 후 또는 서브에이전트에서 사용."],
       ["/reap.update-genome", "Generation 없이 pending genome-change backlog 적용. active generation이 없을 때만 실행 가능. 적용된 항목은 consumed 마킹, genomeVersion 증가."],
     ],
     commandStructure: "Script Orchestrator 아키텍처",
-    commandStructureDesc: "v0.11.0부터 모든 슬래시 커맨드는 reap run <cmd>를 호출하는 1줄 .md wrapper입니다. TypeScript 스크립트가 모든 결정적 로직을 처리하고 AI에게 structured JSON으로 지시합니다. 패턴: Gate (사전 조건 확인) → Steps (작업 실행) → Artifact (.reap/life/에 기록). Generation 유형: normal, merge, recovery.",
+    commandStructureDesc: "v0.11.0부터 모든 슬래시 커맨드는 reap run <cmd>를 호출하는 1줄 .md wrapper입니다. TypeScript 스크립트가 모든 결정적 로직을 처리하고 AI에게 structured JSON으로 지시합니다. 패턴: Gate (사전 조건 확인) → Steps (작업 실행) → Artifact (.reap/life/에 기록).",
+  },
+
+  // Recovery Generation Page
+  recovery: {
+    title: "Recovery Generation",
+    breadcrumb: "기타",
+    intro: "Recovery Generation은 과거 generation의 산출물에서 오류나 불일치가 발견되었을 때, 이를 검토하고 교정하는 특수 generation 타입입니다. type: recovery를 사용하며 recovers 필드로 대상 generation을 참조합니다.",
+    triggerTitle: "실행 방법",
+    triggerDesc: "/reap.evolve.recovery 커맨드에 대상 generation ID를 지정하여 실행합니다. 대상 산출물을 검토한 후 교정이 필요한 경우에만 recovery generation이 생성됩니다.",
+    criteriaTitle: "검토 기준",
+    criteriaHeaders: ["기준", "설명"],
+    criteriaItems: [
+      ["Artifact 간 불일치", "동일 generation 내 artifact 간 내용 모순 (예: objective와 implementation의 설계 불일치)"],
+      ["구조적 결함", "artifact의 누락 섹션, 불완전 내용, 형식 오류"],
+      ["사람 지정 교정", "사용자가 직접 지정한 교정 사항"],
+    ] as string[][],
+    processTitle: "프로세스 흐름",
+    processDesc: "recovery 커맨드는 review (기준에 따른 artifact 분석)와 create (문제 발견 시 recovery generation 시작) 두 단계로 실행됩니다.",
+    processFlow: `/reap.evolve.recovery gen-XXX
+  → 대상 generation lineage artifact 로드
+  → 3가지 기준으로 검토 수행
+  → 교정 사항 발견 → recovery generation 자동 개시 (type: recovery)
+  → 교정 사항 없음 → "no recovery needed" 종료 (generation 미생성)`,
+    stagesTitle: "Stage 목적 비교",
+    stagesDesc: "Recovery generation은 normal generation과 동일한 5단계 lifecycle을 따르지만, 각 stage의 목적이 다릅니다.",
+    stageHeaders: ["Stage", "Normal", "Recovery"],
+    stageItems: [
+      ["Objective", "새 목표 정의", "정정된 목표/설계 재정의 (원본 인용 + 검토 결과)"],
+      ["Planning", "태스크 분해", "검토 대상 파일/로직 목록 + 검증 기준"],
+      ["Implementation", "코드 작성", "기존 코드 검토 & 교정"],
+      ["Validation", "검증", "교정 후 검증"],
+      ["Completion", "회고", "회고 + 원본 generation에 대한 정정 기록"],
+    ] as string[][],
+    currentYmlTitle: "current.yml 확장",
+    currentYmlDesc: "Recovery generation은 current.yml과 meta.yml에 recovers 필드를 추가합니다. parents 필드는 기존 DAG 규칙을 따르며, recovers는 교정 대상을 별도로 참조합니다.",
+    notesTitle: "기타",
+    notes: [
+      "기존 normal/merge generation에 영향 없음",
+      "lineage 압축 시 recovery generation도 동일 규칙 적용",
+      "Recovery generation은 normal generation과 동일한 5개 artifact를 생성",
+      "Objective에 대상 generation의 원본 objective + completion을 자동 인용",
+    ],
   },
 
   // Configuration Page
@@ -387,7 +430,7 @@ strict:
     strictRules: [
       ["활성 Generation 없음 / Implementation 단계가 아닌 경우", "코드 수정 완전 차단"],
       ["Implementation 단계", "02-planning.md 범위 내의 수정만 허용"],
-      ["탈출구", '사용자가 명시적으로 "override" 또는 "bypass strict"를 요청하면 수정 허용'],
+      ["탈출구", '사용자가 명시적으로 "override" 또는 "bypass strict"를 요청하면 해당 작업에 한해 수정 허용, 완료 후 strict 모드 재적용'],
     ],
     strictMergeTitle: "strict.merge — Git 명령 제어",
     strictMergeDesc: "활성화하면 직접적인 git pull, git push, git merge 명령이 제한됩니다. 에이전트는 사용자에게 REAP 슬래시 커맨드(/reap.pull, /reap.push, /reap.merge)를 사용하도록 안내합니다.",

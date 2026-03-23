@@ -34,6 +34,7 @@ import ComparisonPage from "@/pages/ComparisonPage";
 import DistributedOverviewPage from "@/pages/DistributedOverviewPage";
 import MergeLifecyclePage from "@/pages/MergeLifecyclePage";
 import MergeCommandsPage from "@/pages/MergeCommandsPage";
+import RecoveryGenerationPage from "@/pages/RecoveryGenerationPage";
 
 const queryClient = new QueryClient();
 
@@ -55,6 +56,7 @@ function Router() {
       <Route path="/docs/cli-reference" component={CLIPage} />
       <Route path="/docs/command-reference" component={CommandReferencePage} />
       <Route path="/docs/hook-reference" component={HookReferencePage} />
+      <Route path="/docs/recovery-generation" component={RecoveryGenerationPage} />
       <Route path="/docs/configuration" component={ConfigurationPage} />
       <Route path="/docs/comparison" component={ComparisonPage} />
       <Route path="/docs/distributed-workflow" component={DistributedOverviewPage} />

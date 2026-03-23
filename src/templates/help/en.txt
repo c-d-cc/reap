@@ -22,7 +22,7 @@ Slash Commands (use in Claude Code):
   /reap.status         Show current state
   /reap.sync           Synchronize Genome with source code
   /reap.help           Contextual help (AI-powered)
-  /reap.refreshKnowledge  Load REAP context for subagents
+  /reap.refreshKnowledge  Reload REAP context (Genome, Environment, state)
 
 Quick Start:
   1. reap init my-project

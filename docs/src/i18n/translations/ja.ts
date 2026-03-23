@@ -30,6 +30,7 @@ export const ja: Translations = {
       hookReference: "Hookリファレンス",
       comparison: "比較",
       configuration: "設定",
+      recoveryGeneration: "Recovery Generation",
     },
   },
 
@@ -345,11 +346,53 @@ export const ja: Translations = {
       ["/reap.report", "REAPプロジェクトにGitHub Issueでバグ/フィードバックを報告。プライバシー二重チェック（PRIVACY_GATE + フォーマット後マスキング）。ユーザー確認必須。"],
       ["/reap.help", "24+トピックの状況別ヘルプを提供。"],
       ["/reap.update", "REAPパッケージのアップグレード + コマンド/テンプレート/hookをすべてのエージェントに同期。プロジェクトの.claude/commands/を即時同期。"],
-      ["/reap.refreshKnowledge", "サブエージェント用REAPコンテキストのロード（Genome、Environment、状態）。オーケストレーターがサブエージェントセッションをブートストラップする際に使用。"],
+      ["/reap.refreshKnowledge", "REAPコンテキストの再ロード（Genome、Environment、状態）。context compaction後やサブエージェントで使用。"],
       ["/reap.update-genome", "Generationなしでpending genome-change backlogを適用。active generationがない場合のみ実行可能。適用項目はconsumedマーク、genomeVersion増加。"],
     ],
     commandStructure: "Script Orchestratorアーキテクチャ",
-    commandStructureDesc: "v0.11.0より、すべてのスラッシュコマンドはreap run <cmd>を呼び出す1行.md wrapperです。TypeScriptスクリプトがすべての決定論的ロジックを処理し、AIにstructured JSONで指示します。パターン：Gate（前提条件チェック） → Steps（作業実行） → Artifact（.reap/life/に記録）。Generationタイプ：normal、merge、recovery。",
+    commandStructureDesc: "v0.11.0より、すべてのスラッシュコマンドはreap run <cmd>を呼び出す1行.md wrapperです。TypeScriptスクリプトがすべての決定論的ロジックを処理し、AIにstructured JSONで指示します。パターン：Gate（前提条件チェック） → Steps（作業実行） → Artifact（.reap/life/に記録）。",
+  },
+
+  // Recovery Generation Page
+  recovery: {
+    title: "Recovery Generation",
+    breadcrumb: "その他",
+    intro: "Recovery Generationは、過去のgenerationの成果物にエラーや不整合が発見された際に、それを検討・修正する特殊なgenerationタイプです。type: recoveryを使用し、recoversフィールドで対象generationを参照します。",
+    triggerTitle: "実行方法",
+    triggerDesc: "/reap.evolve.recoveryコマンドに対象generation IDを指定して実行します。対象の成果物を検討した後、修正が必要な場合にのみrecovery generationが作成されます。",
+    criteriaTitle: "検討基準",
+    criteriaHeaders: ["基準", "説明"],
+    criteriaItems: [
+      ["Artifact間の不整合", "同一generation内のartifact間の内容矛盾（例：objectiveとimplementationの設計不一致）"],
+      ["構造的欠陥", "artifactの欠落セクション、不完全な内容、フォーマットエラー"],
+      ["ユーザー指定の修正", "ユーザーが直接指定した修正事項"],
+    ] as string[][],
+    processTitle: "プロセスフロー",
+    processDesc: "recoveryコマンドはreview（基準に基づくartifact分析）とcreate（問題発見時にrecovery generation開始）の2段階で実行されます。",
+    processFlow: `/reap.evolve.recovery gen-XXX
+  → 対象generation lineage artifactをロード
+  → 3つの基準で検討実施
+  → 修正事項発見 → recovery generation自動開始（type: recovery）
+  → 修正事項なし → "no recovery needed" 終了（generation未作成）`,
+    stagesTitle: "Stage目的の比較",
+    stagesDesc: "Recovery generationはnormal generationと同じ5段階lifecycleに従いますが、各stageの目的が異なります。",
+    stageHeaders: ["Stage", "Normal", "Recovery"],
+    stageItems: [
+      ["Objective", "新しい目標定義", "修正された目標/設計の再定義（原本引用＋検討結果）"],
+      ["Planning", "タスク分解", "検討対象ファイル/ロジックリスト＋検証基準"],
+      ["Implementation", "コード作成", "既存コードの検討＆修正"],
+      ["Validation", "検証", "修正後の検証"],
+      ["Completion", "振り返り", "振り返り＋元generationへの修正記録"],
+    ] as string[][],
+    currentYmlTitle: "current.yml拡張",
+    currentYmlDesc: "Recovery generationはcurrent.ymlとmeta.ymlにrecoversフィールドを追加します。parentsフィールドは通常のDAGルールに従い、recoversは修正対象を別途参照します。",
+    notesTitle: "その他",
+    notes: [
+      "既存のnormal/merge generationに影響なし",
+      "lineage圧縮時もrecovery generationに同じルールを適用",
+      "Recovery generationはnormal generationと同じ5つのartifactを生成",
+      "Objectiveに対象generationの元objective＋completionを自動引用",
+    ],
   },
 
   // Configuration Page
@@ -387,7 +430,7 @@ strict:
     strictRules: [
       ["アクティブGenerationなし / Implementationステージ以外", "コード変更は完全にブロック"],
       ["Implementationステージ", "02-planning.mdの範囲内の変更のみ許可"],
-      ["エスケープハッチ", "ユーザーが明示的に「override」または「bypass strict」を要求すると変更許可"],
+      ["エスケープハッチ", "ユーザーが明示的に「override」または「bypass strict」を要求した場合、その特定のアクションに限り許可。完了後strictモード再適用"],
     ],
     strictMergeTitle: "strict.merge — Gitコマンド制御",
     strictMergeDesc: "有効にすると、直接的なgit pull、git push、git mergeコマンドが制限されます。エージェントはユーザーにREAPスラッシュコマンド（/reap.pull、/reap.push、/reap.merge）の使用を案内します。",

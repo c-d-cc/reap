@@ -200,7 +200,7 @@ When `strict: true` is set in `.reap/config.yml`, the AI agent enforces code mod
 | Active Generation, not implementation stage | **BLOCKED** | Read, analyze, answer questions, write REAP artifacts |
 | Active Generation, implementation stage | **SCOPED** — only files/modules listed in 02-planning.md | Full development within plan scope |
 
-- **Escape hatch**: If the user explicitly requests to bypass strict mode (e.g., "override", "bypass strict", "just do it"), the agent may proceed but must inform the user that strict mode is being bypassed.
+- **Escape hatch**: If the user explicitly requests to bypass strict mode (e.g., "override", "bypass strict", "just do it"), the agent may proceed **for that specific action only** and must inform the user that strict mode is being bypassed. The bypass does NOT persist — strict mode re-engages immediately after the requested action is complete.
 - **Default**: `strict: false` (no restrictions beyond normal REAP workflow guidance).
 
 ## Critical Rules

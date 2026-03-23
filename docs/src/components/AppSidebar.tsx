@@ -44,6 +44,7 @@ export function useNavGroups() {
     {
       label: t.nav.groups.other,
       items: [
+        { title: t.nav.items.recoveryGeneration, href: "/docs/recovery-generation" },
         { title: t.nav.items.configuration, href: "/docs/configuration" },
       ]
     }

@@ -22,7 +22,7 @@ CLI 명령어:
   /reap.status         현재 상태 확인
   /reap.sync           Genome을 소스 코드와 동기화
   /reap.help           상황별 도움말 (AI 기반)
-  /reap.refreshKnowledge  서브에이전트용 REAP 컨텍스트 로드
+  /reap.refreshKnowledge  REAP 컨텍스트 재로드 (Genome, Environment, 상태)
 
 빠른 시작:
   1. reap init my-project
