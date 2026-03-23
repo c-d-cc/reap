@@ -79,6 +79,12 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     verifyPhaseEntry("merge-merge", state, "merge", "work");
     await mgm.save(state);
 
+    // Verify artifact exists before completing
+    const mergeArtifactCheck = paths.artifact("03-merge.md");
+    if (!(await fileExists(mergeArtifactCheck))) {
+      emitError("merge-merge", "03-merge.md does not exist. Write the merge artifact before completing.");
+    }
+
     // Generate stage chain token
     const { nonce, hash } = generateToken(state.id, state.stage);
     state.expectedHash = hash;

@@ -1,5 +1,5 @@
 import YAML from "yaml";
-import { readdir, mkdir, rename } from "fs/promises";
+import { readdir, mkdir, rename, unlink } from "fs/promises";
 import { join } from "path";
 import type { GenerationState, GenerationMeta, MergeStage } from "../types";
 import type { ReapPaths } from "./paths";
@@ -233,27 +233,36 @@ export class MergeGenerationManager {
     };
     await writeTextFile(join(genDir, "meta.yml"), YAML.stringify(meta));
 
-    // Move artifacts from life/ to lineage/
+    // Move artifacts from life/ to lineage/ (strip REAP MANAGED header)
     const lifeEntries = await readdir(this.paths.life);
     for (const entry of lifeEntries) {
       if (/^\d{2}-[a-z]+(?:-[a-z]+)*\.md$/.test(entry)) {
-        await rename(
-          join(this.paths.life, entry),
-          join(genDir, entry),
-        );
+        const srcPath = join(this.paths.life, entry);
+        const destPath = join(genDir, entry);
+        let content = await readTextFile(srcPath);
+        if (content && content.startsWith("# REAP MANAGED")) {
+          content = content.replace(/^# REAP MANAGED[^\n]*\n/, "");
+        }
+        await writeTextFile(destPath, content ?? "");
+        await unlink(srcPath);
       }
     }
 
-    // Move backlog/ to lineage
+    // Copy backlog/ to lineage; only remove consumed items from life/backlog/
     const backlogDir = join(genDir, "backlog");
     await mkdir(backlogDir, { recursive: true });
     try {
       const backlogEntries = await readdir(this.paths.backlog);
       for (const entry of backlogEntries) {
-        await rename(
-          join(this.paths.backlog, entry),
-          join(backlogDir, entry),
-        );
+        const content = await readTextFile(join(this.paths.backlog, entry));
+        if (!content) continue;
+        const isConsumed = /status:\s*consumed/i.test(content) || /consumed:\s*true/i.test(content);
+        // Always copy to lineage
+        await writeTextFile(join(backlogDir, entry), content);
+        // Only remove from life/backlog if consumed
+        if (isConsumed) {
+          await unlink(join(this.paths.backlog, entry));
+        }
       }
     } catch { /* no backlog items */ }
 
