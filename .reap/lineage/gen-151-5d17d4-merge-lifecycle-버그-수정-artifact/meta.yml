@@ -1,0 +1,8 @@
+id: gen-151-5d17d4
+type: normal
+parents:
+  - gen-150-76c3fa
+goal: "merge lifecycle 버그 수정: artifact 미생성 + backlog carry-forward"
+genomeHash: 6eda03ff
+startedAt: 2026-03-23T02:49:36.847Z
+completedAt: 2026-03-23T02:56:26.953Z
