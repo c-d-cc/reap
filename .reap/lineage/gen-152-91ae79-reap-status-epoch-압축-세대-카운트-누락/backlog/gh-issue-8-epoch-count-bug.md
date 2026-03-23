@@ -1,8 +1,9 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: medium
 source: github-issue-8
+consumedBy: gen-152-91ae79
 ---
 
 # reap status의 Completed Generations 카운트가 epoch 압축된 세대를 무시

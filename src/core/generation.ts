@@ -275,6 +275,10 @@ export class GenerationManager {
     return lineageUtils.listCompleted(this.paths);
   }
 
+  async countAllCompleted(): Promise<number> {
+    return lineageUtils.countAllCompleted(this.paths);
+  }
+
   async readMeta(lineageDirName: string): Promise<GenerationMeta | null> {
     return lineageUtils.readMeta(this.paths, lineageDirName);
   }

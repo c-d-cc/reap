@@ -28,7 +28,7 @@ export async function getStatus(projectRoot: string): Promise<ProjectStatus> {
   const mgr = new GenerationManager(paths);
 
   const current = await mgr.current();
-  const completedGens = await mgr.listCompleted();
+  const totalCompleted = await mgr.countAllCompleted();
   const integrityResult = await checkIntegrity(paths);
 
   return {
@@ -46,7 +46,7 @@ export async function getStatus(projectRoot: string): Promise<ProjectStatus> {
       parents: current.parents,
       genomeHash: current.genomeHash,
     } : null,
-    totalGenerations: completedGens.length,
+    totalGenerations: totalCompleted,
     integrity: { errors: integrityResult.errors.length, warnings: integrityResult.warnings.length },
   };
 }

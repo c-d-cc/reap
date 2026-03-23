@@ -1,23 +1,24 @@
 # Completion
 
 ## Summary
-- **Goal**: resolveParents 및 compression의 NaN completedAt 정렬 버그 수정
-- **Period**: 2026-03-22 ~ 2026-03-23
-- **Genome Version**: v50 → v50 (변경 없음)
+- **Goal**: reap status epoch 압축 세대 카운트 누락 버그 수정
+- **Period**: 2026-03-23
 - **Result**: pass
 - **Key Changes**:
-  - `src/core/lineage.ts`: `safeCompletedAtTime()` 유틸리티 추가, `resolveParents()` 정렬 수정
-  - `src/core/compression.ts`: `safeCompletedAtTime()` inline 추가, `scanLineage()` 정렬 수정
+  - `src/core/lineage.ts`: `listEpochGenerations()`, `countAllCompleted()` 함수 추가, `nextSeq()` epoch 고려
+  - `src/core/generation.ts`: `countAllCompleted()` 메서드 추가
+  - `src/cli/commands/status.ts`: epoch 포함 카운트 사용
+  - `tests/core/lineage.test.ts`: epoch 관련 테스트 추가
 
 ## Retrospective
 
 ### Lessons Learned
 #### What Went Well
 - 버그 원인이 명확하여 빠르게 수정 완료
-- 순환 의존성 문제를 사전에 감지하여 inline 방식으로 해결
+- 기존 API(`listCompleted()`) 시그니처를 유지하여 영향 범위 최소화
 
 #### Areas for Improvement
-- `completedAt` 필드에 비 ISO 값이 들어가는 것 자체를 방지하는 validation이 없음 (structural-integrity-checker backlog 참조)
+- Level 2 압축 도입 시 `listCompleted()`의 카운트 로직을 함께 업데이트했어야 함
 
 ### Genome Change Proposals
 | Target File | Change Description | Reason |
@@ -28,7 +29,7 @@
 |------|-------------|-----------------|-------------|
 
 ### Next Generation Backlog
-
+없음
 
 ---
 
@@ -43,8 +44,8 @@
 |-------------|-------------------|---------|
 
 ### Genome Version
-- Before: v50
-- After: v50
+- Before: (no change)
+- After: (no change)
 
 ### Modified Genome Files
-None
+없음

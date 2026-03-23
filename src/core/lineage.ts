@@ -17,6 +17,29 @@ export async function listCompleted(paths: ReapPaths): Promise<string[]> {
   }
 }
 
+/** List generation IDs compressed into epoch.md */
+export async function listEpochGenerations(paths: ReapPaths): Promise<string[]> {
+  const epochPath = join(paths.lineage, "epoch.md");
+  const content = await readTextFile(epochPath);
+  if (!content) return [];
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return [];
+  try {
+    const meta = YAML.parse(match[1]) as { generations?: Array<{ id: string }> } | null;
+    if (!meta?.generations) return [];
+    return meta.generations.map(g => g.id).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+/** Count all completed generations (gen-* entries + epoch.md generations) */
+export async function countAllCompleted(paths: ReapPaths): Promise<number> {
+  const genDirs = await listCompleted(paths);
+  const epochGens = await listEpochGenerations(paths);
+  return genDirs.length + epochGens.length;
+}
+
 /** Read meta.yml from a lineage directory */
 export async function readMeta(paths: ReapPaths, lineageDirName: string): Promise<GenerationMeta | null> {
   const metaPath = join(paths.lineage, lineageDirName, "meta.yml");
@@ -49,15 +72,17 @@ export async function listMeta(paths: ReapPaths): Promise<GenerationMeta[]> {
 /** Calculate next sequence number from lineage */
 export async function nextSeq(paths: ReapPaths, currentId?: string): Promise<number> {
   const genDirs = await listCompleted(paths);
-  if (genDirs.length === 0) {
+  const epochGens = await listEpochGenerations(paths);
+  const allIds = [...genDirs, ...epochGens];
+  if (allIds.length === 0) {
     if (currentId) {
       return parseGenSeq(currentId) + 1;
     }
     return 1;
   }
   let maxSeq = 0;
-  for (const dir of genDirs) {
-    const seq = parseGenSeq(dir);
+  for (const id of allIds) {
+    const seq = parseGenSeq(id);
     if (seq > maxSeq) maxSeq = seq;
   }
   return maxSeq + 1;
