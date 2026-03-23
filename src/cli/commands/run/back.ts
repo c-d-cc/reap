@@ -84,8 +84,11 @@ export async function execute(paths: ReapPaths, phase?: string, argv: string[] =
     const reason = getFlag(argv, "reason") ?? "No reason provided";
     const refs = (getFlag(argv, "refs") ?? "").split(",").filter(Boolean);
 
-    // Update state
+    // Update state — reset nonce fields so target stage entry works like first entry
     state.stage = target;
+    state.lastNonce = undefined;
+    state.expectedHash = undefined;
+    state.phase = undefined;
     state.timeline.push({
       stage: target,
       at: new Date().toISOString(),

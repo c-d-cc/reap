@@ -1,0 +1,8 @@
+id: gen-157-39e691
+type: normal
+parents:
+  - gen-156-b0102e
+goal: reap.back 실행 후 nonce 미초기화 버그 수정
+genomeHash: 6eda03ff
+startedAt: 2026-03-23T04:59:56.211Z
+completedAt: 2026-03-23T05:03:45.105Z

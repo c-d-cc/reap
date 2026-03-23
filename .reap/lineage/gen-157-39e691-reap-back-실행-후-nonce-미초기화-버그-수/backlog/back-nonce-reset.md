@@ -1,7 +1,8 @@
 ---
 type: task
 priority: high
-status: pending
+status: consumed
+consumedBy: gen-157-39e691
 ---
 
 # reap.back 실행 후 nonce 미초기화 버그
