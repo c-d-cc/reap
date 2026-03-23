@@ -1,5 +1,5 @@
 import YAML from "yaml";
-import { readdir, mkdir, rename, unlink } from "fs/promises";
+import { readdir, mkdir, unlink } from "fs/promises";
 import { join } from "path";
 import type { GenerationState, GenerationMeta, MergeStage } from "../types";
 import type { ReapPaths } from "./paths";
@@ -123,7 +123,7 @@ export class MergeGenerationManager {
   }
 
   /** Resolve the latest generation ID from local lineage */
-  private async resolveLatestGenId(branch: string, cwd: string): Promise<string | null> {
+  private async resolveLatestGenId(_branch: string, _cwd: string): Promise<string | null> {
     const metas = await lineageUtils.listMeta(this.paths);
     if (metas.length === 0) return null;
     const sorted = metas.sort((a, b) =>
