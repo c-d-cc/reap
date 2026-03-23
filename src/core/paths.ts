@@ -32,8 +32,6 @@ export class ReapPaths {
   get life(): string { return join(this.root, "life"); }
   get currentYml(): string { return join(this.life, "current.yml"); }
   get backlog(): string { return join(this.life, "backlog"); }
-  /** @deprecated Use backlog with type: genome-change instead */
-  get mutations(): string { return join(this.life, "mutations"); }
   artifact(name: string): string { return join(this.life, name); }
 
   // Lineage (completed generations)

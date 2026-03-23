@@ -1,7 +1,7 @@
 import YAML from "yaml";
 import { createHash, randomBytes } from "crypto";
 import { hostname } from "os";
-import { readdir, mkdir, rename, unlink } from "fs/promises";
+import { readdir, mkdir, unlink } from "fs/promises";
 import { join } from "path";
 import type { GenerationState, GenerationMeta, LifeCycleStage } from "../types";
 import type { ReapPaths } from "./paths";
@@ -242,20 +242,6 @@ export class GenerationManager {
       }
     } catch { /* no backlog items */ }
 
-    // Also move legacy mutations/ if present (backward compat)
-    try {
-      const mutEntries = await readdir(this.paths.mutations);
-      if (mutEntries.length > 0) {
-        const mutDir = join(genDir, "mutations");
-        await mkdir(mutDir, { recursive: true });
-        for (const entry of mutEntries) {
-          await rename(
-            join(this.paths.mutations, entry),
-            join(mutDir, entry),
-          );
-        }
-      }
-    } catch { /* no mutations dir */ }
 
     // Clear current
     await writeTextFile(this.paths.currentYml, "");
