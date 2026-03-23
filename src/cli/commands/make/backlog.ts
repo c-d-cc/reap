@@ -36,8 +36,7 @@ export async function execute(paths: ReapPaths, argv: string[]): Promise<void> {
     command: "make",
     phase: "done",
     completed: ["backlog-create"],
-    message: `Backlog created: ${filename}`,
+    message: `Backlog created: ${filePath}. Fill in the template sections (문제/해결/수정 대상/배경) and remove HTML comments.`,
     context: { filename, type: flags.type, title: flags.title, path: filePath },
-    prompt: `Backlog file created at: ${filePath}\n\nNow edit the file to add detailed content. The frontmatter is already set correctly — only edit the body (below the --- delimiter). Add:\n- Problem description (## 문제)\n- Solution approach (## 해결)\n- Specific files/functions to modify (## 수정 대상)\n- Background context if relevant (## 배경)\n\nUse the Edit tool to update the file body. Keep the frontmatter unchanged.`,
   });
 }

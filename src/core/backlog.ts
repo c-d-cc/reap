@@ -136,7 +136,25 @@ export async function createBacklog(
     priority,
   };
 
-  const bodyContent = opts.body ? `\n# ${opts.title}\n\n${opts.body}\n` : `\n# ${opts.title}\n`;
+  const summary = opts.body ? `${opts.body}\n` : "";
+  const bodyContent = `
+# ${opts.title}
+
+${summary}
+## Problem
+<!-- Describe the current issue and why this work is needed -->
+
+## Solution
+<!-- Describe the approach, implementation direction, and key ideas -->
+
+## Files to Change
+<!-- List specific file/function/module paths that need modification -->
+
+## Context
+<!-- Related generations, issues, or background that led to this task. Remove if not applicable -->
+
+<!-- Feel free to add more sections if needed (e.g., Constraints, Alternatives, References) -->
+`;
   const content = `---\n${YAML.stringify(frontmatter).trim()}\n---\n${bodyContent}`;
 
   await mkdir(backlogDir, { recursive: true });
