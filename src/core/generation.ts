@@ -8,7 +8,6 @@ import type { ReapPaths } from "./paths";
 import { LifeCycle } from "./lifecycle";
 import { compressLineageIfNeeded } from "./compression";
 import { readTextFile, writeTextFile } from "./fs";
-import { parseFrontmatter } from "./compression";
 import * as lineageUtils from "./lineage";
 
 // ── Unified Token ───────────────────────────────────────────
