@@ -15,6 +15,7 @@ function buildSubagentPrompt(
   state: GenerationState | null,
   genomeSummaries: { principles: string; conventions: string; constraints: string },
   backlogSummary: string,
+  backlogFilenames: string[] = [],
 ): string {
   const lines: string[] = [];
 
@@ -62,6 +63,17 @@ function buildSubagentPrompt(
   lines.push(backlogSummary || "(empty)");
   lines.push("");
 
+  // 4.5. Backlog 원본 참조 지시
+  if (backlogFilenames.length > 0) {
+    lines.push("## CRITICAL: Read the backlog file");
+    lines.push("BEFORE starting objective, read the backlog file directly:");
+    for (const fn of backlogFilenames) {
+      lines.push(`\`.reap/life/backlog/${fn}\``);
+    }
+    lines.push("This file contains ALL implementation points. Do NOT skip any of them.");
+    lines.push("");
+  }
+
   // 5. Lifecycle execution instructions
   lines.push("## Lifecycle Execution");
   lines.push("");
@@ -104,6 +116,13 @@ function buildSubagentPrompt(
   lines.push("- Create a git commit after implementation and after completion.");
   lines.push("- Use conventional commit format: `feat|fix|chore(scope): description`");
   lines.push("- Include the generation ID in the commit message.");
+  lines.push("");
+
+  // Backlog creation rules
+  lines.push("## Backlog Creation Rules");
+  lines.push("- backlog 생성 시 반드시 `reap make backlog --type <type> --title <title> --body <body>` 명령을 사용하라.");
+  lines.push("- Write 도구로 backlog 파일을 직접 생성하지 마라 (frontmatter 형식 오류 방지).");
+  lines.push("- 생성된 backlog 파일에 상세 내용을 추가해야 하면, 생성 후 해당 파일을 편집하라.");
   lines.push("");
 
   // Submodule commit rules
@@ -187,7 +206,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         ? pendingItems.map(b => `- [${b.type}] ${b.title}`).join("\n")
         : "(no pending items)";
 
-      const subagentPrompt = buildSubagentPrompt(paths, state, genomeSummaries, backlogSummary);
+      const backlogFilenames = pendingItems.map(b => b.filename);
+      const subagentPrompt = buildSubagentPrompt(paths, state, genomeSummaries, backlogSummary, backlogFilenames);
 
       emitOutput({
         status: "prompt",

@@ -76,7 +76,9 @@ function buildGenomeImpactPrompt(impact: GenomeImpact): string {
     "",
     "",
     "## Genome/Environment Impact Detection",
-    "다음 변경이 감지되었습니다. genome-change 또는 environment-change backlog 작성이 필요한지 검토하라:",
+    "다음 변경이 감지되었습니다. genome-change 또는 environment-change backlog 작성이 필요한지 검토하라.",
+    "backlog 생성 시 반드시 `reap make backlog --type <type> --title <title> --body <body>` 명령을 사용하라. Write로 직접 파일을 생성하지 마라.",
+    "생성된 backlog 파일에 상세 내용을 추가해야 하면, 생성 후 해당 파일을 편집하라.",
     "",
     ...lines,
   ].join("\n");
