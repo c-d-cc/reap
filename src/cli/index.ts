@@ -212,11 +212,11 @@ program
         // Integrity check is best-effort; skip if not a REAP project
       }
 
-      // Step 4: Show release notice from GitHub Discussions
+      // Step 4: Show release notice
       try {
         const version = getCurrentVersion();
         const lang = (await AgentRegistry.readLanguage()) ?? "en";
-        const notice = await fetchReleaseNotice(version, lang);
+        const notice = fetchReleaseNotice(version, lang);
         if (notice) console.log(notice);
       } catch {
         // Notice fetch is best-effort

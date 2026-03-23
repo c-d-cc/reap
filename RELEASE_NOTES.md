@@ -1,3 +1,4 @@
-## Bug Fixes
+## Improvements
 
-- UPDATE_NOTICE.md now included in npm package (was missing from `files` field)
+- Renamed UPDATE_NOTICE.md to RELEASE_NOTICE.md
+- Release notices now inline in file (no GitHub Discussions fetch dependency)
