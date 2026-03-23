@@ -1,0 +1,8 @@
+id: gen-166-04291a
+type: normal
+parents:
+  - gen-165-a260f3
+goal: integrity check에서 source-map.md 줄수 경고 제외
+genomeHash: 7f02153c
+startedAt: 2026-03-23T06:40:47.027Z
+completedAt: 2026-03-23T06:44:52.336Z

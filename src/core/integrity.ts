@@ -365,7 +365,7 @@ async function checkGenome(
     if (content === null) continue;
 
     const lines = content.split("\n").length;
-    if (lines > GENOME_LINE_WARNING_THRESHOLD) {
+    if (gf.name !== "source-map.md" && lines > GENOME_LINE_WARNING_THRESHOLD) {
       warnings.push(`genome/${gf.name}: ${lines} lines (exceeds ~${GENOME_LINE_WARNING_THRESHOLD} line guideline)`);
     }
 
