@@ -1,10 +1,9 @@
 import type { ReapPaths } from "../../../core/paths";
 import { MergeGenerationManager } from "../../../core/merge-generation";
-import { generateToken } from "../../../core/generation";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
-import { verifyStageEntry, performTransition, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
+import { performTransition, verifyNonce, setNonce } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const mgm = new MergeGenerationManager(paths);
@@ -20,16 +19,16 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     emitError("merge-merge", `Stage is '${state.stage}', expected 'merge'.`);
   }
 
-  // Verify stage chain token from previous stage's --phase complete
-  verifyStageEntry("merge-merge", state);
-  await mgm.save(state);
-
   const mateArtifact = paths.artifact("02-mate.md");
   if (!(await fileExists(mateArtifact))) {
     emitError("merge-merge", "02-mate.md does not exist. Complete mate stage first.");
   }
 
   if (!phase || phase === "work") {
+    // Verify entry nonce from previous stage's --phase complete
+    verifyNonce("merge-merge", state, "merge", "entry");
+    await mgm.save(state);
+
     // Phase 1: Gate passed, instruct AI to perform source merge
     const mateContent = await readTextFile(mateArtifact);
     const detectContent = await readTextFile(paths.artifact("01-detect.md"));
@@ -37,8 +36,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     // Extract target branch from goal (format: "Merge <current> + <target>")
     const targetBranch = state.goal.split(" + ").pop() ?? "";
 
-    // Set phase nonce — prevents skipping work phase
-    setPhaseNonce(state, "merge", "work");
+    // Set nonce for complete phase entry — prevents skipping work phase
+    setNonce(state, "merge", "complete");
     await mgm.save(state);
 
     emitOutput({
@@ -75,9 +74,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    // Verify phase nonce from work phase
-    verifyPhaseEntry("merge-merge", state, "merge", "work");
-    await mgm.save(state);
+    // Verify complete phase nonce from work phase
+    verifyNonce("merge-merge", state, "merge", "complete");
 
     // Verify artifact exists before completing
     const mergeArtifactCheck = paths.artifact("03-merge.md");
@@ -85,10 +83,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       emitError("merge-merge", "03-merge.md does not exist. Write the merge artifact before completing.");
     }
 
-    // Generate stage chain token
-    const { nonce, hash } = generateToken(state.id, state.stage);
-    state.expectedHash = hash;
-    state.lastNonce = nonce;
+    // Generate entry token for next stage (receiver-based)
+    setNonce(state, "sync", "entry");
+    await mgm.save(state);
 
     // Execute hooks
     const hookResults = await executeHooks(paths.hooks, "onMergeMerged", paths.projectRoot);

@@ -1,10 +1,10 @@
 import { join } from "path";
 import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager, generateToken } from "../../../core/generation";
+import { GenerationManager } from "../../../core/generation";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
-import { verifyStageEntry, performTransition, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
+import { performTransition, verifyNonce, setNonce } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -17,16 +17,16 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     emitError("validation", `Current stage is '${state.stage}', not 'validation'.`);
   }
 
-  // Verify stage chain token from previous stage's --phase complete
-  verifyStageEntry("validation", state);
-  await gm.save(state);
-
   const implArtifact = paths.artifact("03-implementation.md");
   if (!(await fileExists(implArtifact))) {
     emitError("validation", "03-implementation.md does not exist. Complete the implementation stage first.");
   }
 
   if (!phase || phase === "work") {
+    // Verify entry nonce from previous stage's --phase complete
+    verifyNonce("validation", state, "validation", "entry");
+    await gm.save(state);
+
     // Phase 1: Gate passed — collect context and instruct AI
 
     const artifactPath = paths.artifact("04-validation.md");
@@ -51,8 +51,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       }
     }
 
-    // Set phase nonce — prevents skipping work phase
-    setPhaseNonce(state, "validation", "work");
+    // Set nonce for complete phase entry — prevents skipping work phase
+    setNonce(state, "validation", "complete");
     await gm.save(state);
 
     emitOutput({
@@ -124,19 +124,17 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    // Verify phase nonce from work phase
-    verifyPhaseEntry("validation", state, "validation", "work");
-    await gm.save(state);
+    // Verify complete phase nonce from work phase
+    verifyNonce("validation", state, "validation", "complete");
 
     const artifactPath = paths.artifact("04-validation.md");
     if (!(await fileExists(artifactPath))) {
       emitError("validation", "04-validation.md does not exist. Complete the validation work first.");
     }
 
-    // Generate stage chain token
-    const { nonce, hash } = generateToken(state.id, state.stage);
-    state.expectedHash = hash;
-    state.lastNonce = nonce;
+    // Generate entry token for next stage (receiver-based)
+    setNonce(state, "completion", "entry");
+    await gm.save(state);
 
     // Execute hooks (only on pass/partial, not on fail)
     const hookResults = await executeHooks(paths.hooks, "onLifeValidated", paths.projectRoot);

@@ -1,7 +1,8 @@
 import { join } from "path";
 import { readdir } from "fs/promises";
 import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager, generateToken } from "../../../core/generation";
+import { GenerationManager } from "../../../core/generation";
+import { setNonce } from "../../../core/stage-transition";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { scanBacklog, markBacklogConsumed } from "../../../core/backlog";
 import { emitOutput, emitError } from "../../../core/run-output";
@@ -76,9 +77,8 @@ export async function execute(paths: ReapPaths, phase?: string, argv: string[] =
     // Create generation (ID + current.yml)
     const state = await gm.create(goal, genomeVersion);
 
-    // Generate stage chain token — hash stored in current.yml, nonce given to AI
-    const { nonce, hash } = generateToken(state.id, state.stage);
-    state.expectedHash = hash;
+    // Generate entry token for objective stage (receiver-based)
+    setNonce(state, "objective", "entry");
     await gm.save(state);
 
     // Mark backlog consumed (after ID generation)

@@ -1,10 +1,9 @@
 import type { ReapPaths } from "../../../core/paths";
 import { MergeGenerationManager } from "../../../core/merge-generation";
-import { generateToken } from "../../../core/generation";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
-import { verifyStageEntry, performTransition, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
+import { performTransition, verifyNonce, setNonce } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const mgm = new MergeGenerationManager(paths);
@@ -20,21 +19,21 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     emitError("merge-mate", `Stage is '${state.stage}', expected 'mate'.`);
   }
 
-  // Verify stage chain token from previous stage's --phase complete
-  verifyStageEntry("merge-mate", state);
-  await mgm.save(state);
-
   const detectArtifact = paths.artifact("01-detect.md");
   if (!(await fileExists(detectArtifact))) {
     emitError("merge-mate", "01-detect.md does not exist. Complete detect stage first.");
   }
 
   if (!phase || phase === "resolve") {
+    // Verify entry nonce from previous stage's --phase complete
+    verifyNonce("merge-mate", state, "mate", "entry");
+    await mgm.save(state);
+
     // Phase 1: Gate passed, present conflicts for resolution
     const detectContent = await readTextFile(detectArtifact);
 
-    // Set phase nonce — prevents skipping resolve phase
-    setPhaseNonce(state, "mate", "resolve");
+    // Set nonce for complete phase entry — prevents skipping resolve phase
+    setNonce(state, "mate", "complete");
     await mgm.save(state);
 
     emitOutput({
@@ -76,9 +75,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    // Verify phase nonce from resolve phase
-    verifyPhaseEntry("merge-mate", state, "mate", "resolve");
-    await mgm.save(state);
+    // Verify complete phase nonce from resolve phase
+    verifyNonce("merge-mate", state, "mate", "complete");
 
     // Verify artifact exists before completing
     const mateArtifact = paths.artifact("02-mate.md");
@@ -86,10 +84,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       emitError("merge-mate", "02-mate.md does not exist. Write the mate artifact before completing.");
     }
 
-    // Generate stage chain token
-    const { nonce, hash } = generateToken(state.id, state.stage);
-    state.expectedHash = hash;
-    state.lastNonce = nonce;
+    // Generate entry token for next stage (receiver-based)
+    setNonce(state, "merge", "entry");
+    await mgm.save(state);
 
     // Execute hooks
     const hookResults = await executeHooks(paths.hooks, "onMergeMated", paths.projectRoot);

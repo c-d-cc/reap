@@ -8,7 +8,7 @@ import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
 import { checkSubmodules } from "../../../core/commit";
 import { execSync } from "child_process";
-import { verifyStageEntry, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
+import { verifyNonce, setNonce } from "../../../core/stage-transition";
 
 interface GenomeImpact {
   newCommands: string[];
@@ -117,16 +117,15 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     emitError("completion", `Stage is '${state.stage}', expected 'completion'.`);
   }
 
-  // Verify stage chain token from previous stage's --phase complete
-  verifyStageEntry("completion", state);
-  await gm.save(state);
-
   const validationArtifact = paths.artifact("04-validation.md");
   if (!(await fileExists(validationArtifact))) {
     emitError("completion", "04-validation.md does not exist. Complete validation first.");
   }
 
   if (!phase || phase === "retrospective") {
+    // Verify entry nonce from previous stage's --phase complete
+    verifyNonce("completion", state, "completion", "entry");
+    await gm.save(state);
     // Phase 1: Gate passed, collect context for AI creative work
     const backlogItems = await scanBacklog(paths.backlog);
     const validationContent = await readTextFile(validationArtifact);
@@ -144,8 +143,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       }
     }
 
-    // Set phase nonce for feedKnowledge phase
-    setPhaseNonce(state, "completion", "retrospective");
+    // Set nonce for feedKnowledge phase entry — prevents skipping retrospective
+    setNonce(state, "completion", "feedKnowledge");
     await gm.save(state);
 
     emitOutput({
@@ -168,8 +167,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "feedKnowledge") {
-    // Verify phase nonce from retrospective phase
-    verifyPhaseEntry("completion", state, "completion", "retrospective");
+    // Verify feedKnowledge nonce from retrospective phase
+    verifyNonce("completion", state, "completion", "feedKnowledge");
     await gm.save(state);
 
     // Phase 2: AI has written retrospective. Now handle genome changes + auto consume/archive.

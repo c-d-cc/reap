@@ -1,7 +1,8 @@
 import { join } from "path";
 import { readdir } from "fs/promises";
 import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager, generateToken } from "../../../core/generation";
+import { GenerationManager } from "../../../core/generation";
+import { setNonce } from "../../../core/stage-transition";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import * as lineageUtils from "../../../core/lineage";
@@ -185,9 +186,8 @@ export async function execute(paths: ReapPaths, phase?: string, argv: string[] =
     // Create recovery generation
     const state = await gm.createRecoveryGeneration(goal, genomeVersion, targetGenIds);
 
-    // Generate stage chain token
-    const { nonce, hash } = generateToken(state.id, state.stage);
-    state.expectedHash = hash;
+    // Generate entry token for objective stage (receiver-based)
+    setNonce(state, "objective", "entry");
     await gm.save(state);
 
     emitOutput({

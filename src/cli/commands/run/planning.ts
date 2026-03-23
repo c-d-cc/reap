@@ -1,10 +1,10 @@
 import { join } from "path";
 import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager, generateToken } from "../../../core/generation";
+import { GenerationManager } from "../../../core/generation";
 import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
-import { verifyStageEntry, performTransition, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
+import { performTransition, verifyNonce, setNonce } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -17,16 +17,16 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     emitError("planning", `Current stage is '${state.stage}', not 'planning'.`);
   }
 
-  // Verify stage chain token from previous stage's --phase complete
-  verifyStageEntry("planning", state);
-  await gm.save(state);
-
   const objectiveArtifact = paths.artifact("01-objective.md");
   if (!(await fileExists(objectiveArtifact))) {
     emitError("planning", "01-objective.md does not exist. Complete the objective stage first.");
   }
 
   if (!phase || phase === "work") {
+    // Verify entry nonce from previous stage's --phase complete
+    verifyNonce("planning", state, "planning", "entry");
+    await gm.save(state);
+
     // Phase 1: Gate passed — collect context and instruct AI
 
     const artifactPath = paths.artifact("02-planning.md");
@@ -54,8 +54,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       }
     }
 
-    // Set phase nonce — prevents skipping work phase
-    setPhaseNonce(state, "planning", "work");
+    // Set nonce for complete phase entry — prevents skipping work phase
+    setNonce(state, "planning", "complete");
     await gm.save(state);
 
     emitOutput({
@@ -114,9 +114,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    // Verify phase nonce from work phase
-    verifyPhaseEntry("planning", state, "planning", "work");
-    await gm.save(state);
+    // Verify complete phase nonce from work phase
+    verifyNonce("planning", state, "planning", "complete");
 
     const artifactPath = paths.artifact("02-planning.md");
     if (!(await fileExists(artifactPath))) {
@@ -128,10 +127,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       emitError("planning", "02-planning.md appears incomplete. Fill in the plan before completing.");
     }
 
-    // Generate stage chain token
-    const { nonce, hash } = generateToken(state.id, state.stage);
-    state.expectedHash = hash;
-    state.lastNonce = nonce;
+    // Generate entry token for next stage (receiver-based)
+    setNonce(state, "implementation", "entry");
+    await gm.save(state);
 
     // Execute stage-specific hooks (before transition)
     const hookResults = await executeHooks(paths.hooks, "onLifePlanned", paths.projectRoot);

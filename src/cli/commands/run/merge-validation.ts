@@ -1,10 +1,9 @@
 import type { ReapPaths } from "../../../core/paths";
 import { MergeGenerationManager } from "../../../core/merge-generation";
-import { generateToken } from "../../../core/generation";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
-import { verifyStageEntry, performTransition, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
+import { performTransition, verifyNonce, setNonce } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const mgm = new MergeGenerationManager(paths);
@@ -20,21 +19,21 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     emitError("merge-validation", `Stage is '${state.stage}', expected 'validation'.`);
   }
 
-  // Verify stage chain token from previous stage's --phase complete
-  verifyStageEntry("merge-validation", state);
-  await mgm.save(state);
-
   const syncArtifact = paths.artifact("04-sync.md");
   if (!(await fileExists(syncArtifact))) {
     emitError("merge-validation", "04-sync.md does not exist. Complete sync stage first.");
   }
 
   if (!phase || phase === "work") {
+    // Verify entry nonce from previous stage's --phase complete
+    verifyNonce("merge-validation", state, "validation", "entry");
+    await mgm.save(state);
+
     // Phase 1: Gate passed, instruct AI to run validation commands
     const constraintsContent = await readTextFile(paths.constraints);
 
-    // Set phase nonce — prevents skipping work phase
-    setPhaseNonce(state, "validation", "work");
+    // Set nonce for complete phase entry — prevents skipping work phase
+    setNonce(state, "validation", "complete");
     await mgm.save(state);
 
     emitOutput({
@@ -73,9 +72,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    // Verify phase nonce from work phase
-    verifyPhaseEntry("merge-validation", state, "validation", "work");
-    await mgm.save(state);
+    // Verify complete phase nonce from work phase
+    verifyNonce("merge-validation", state, "validation", "complete");
 
     // Phase 2: Execute hooks (only on pass) and signal completion
     const validationArtifact = paths.artifact("05-validation.md");
@@ -83,10 +81,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       emitError("merge-validation", "05-validation.md does not exist. Complete validation work first.");
     }
 
-    // Generate stage chain token
-    const { nonce, hash } = generateToken(state.id, state.stage);
-    state.expectedHash = hash;
-    state.lastNonce = nonce;
+    // Generate entry token for next stage (receiver-based)
+    setNonce(state, "completion", "entry");
+    await mgm.save(state);
 
     const hookResults = await executeHooks(paths.hooks, "onMergeValidated", paths.projectRoot);
 

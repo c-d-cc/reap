@@ -1,7 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: medium
+consumedBy: gen-154-32dead
 ---
 
 # Nonce 토큰 구조 통일 — stage/phase 동일 형태로 추상화

@@ -12,17 +12,17 @@ import * as lineageUtils from "./lineage";
 
 // ── Unified Token ───────────────────────────────────────────
 
-/** Generate a unified chain token (nonce + hash). Used for both stage and phase tokens. */
-export function generateToken(genId: string, stage: string, phase?: string): { nonce: string; hash: string } {
+/** Generate a unified chain token (nonce + hash). Always uses stage:phase format. */
+export function generateToken(genId: string, stage: string, phase: string): { nonce: string; hash: string } {
   const nonce = randomBytes(16).toString("hex");
-  const input = phase ? `${nonce}${genId}${stage}:${phase}` : `${nonce}${genId}${stage}`;
+  const input = `${nonce}${genId}${stage}:${phase}`;
   const hash = createHash("sha256").update(input).digest("hex");
   return { nonce, hash };
 }
 
-/** Verify a unified chain token — recomputes hash from nonce and compares to expected. */
-export function verifyToken(token: string, genId: string, stage: string, expectedHash: string, phase?: string): boolean {
-  const input = phase ? `${token}${genId}${stage}:${phase}` : `${token}${genId}${stage}`;
+/** Verify a unified chain token — recomputes hash from nonce and compares to expected. Always uses stage:phase format. */
+export function verifyToken(token: string, genId: string, stage: string, expectedHash: string, phase: string): boolean {
+  const input = `${token}${genId}${stage}:${phase}`;
   return createHash("sha256").update(input).digest("hex") === expectedHash;
 }
 

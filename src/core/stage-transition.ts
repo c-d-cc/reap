@@ -41,94 +41,45 @@ const STAGE_HOOK: Record<string, ReapHookEvent> = {
   "completion:merge": "onMergeValidated",
 };
 
-// ── Token verification ──────────────────────────────────────
+// ── Unified nonce helpers ────────────────────────────────────
 
 /**
- * Verify the stage chain token at stage entry.
- * - If lastNonce exists: verify against expectedHash, clear lastNonce on success.
- * - If lastNonce does not exist: pass (first stage like objective/detect).
- * Mutates state in-place (clears lastNonce + expectedHash on success).
+ * Verify and consume a nonce token (receiver-based).
+ * Token format: hash(nonce + genId + stage:phase).
+ * - If lastNonce does not exist: skip (first stage:entry like objective/detect).
+ * - If lastNonce exists: verify against expectedHash, clear on success.
+ * Mutates state in-place (clears lastNonce + expectedHash + phase on success).
  */
-export function verifyStageEntry(
-  command: string,
-  state: GenerationState,
-): void {
+export function verifyNonce(command: string, state: GenerationState, stage: string, phase: string): void {
   if (!state.lastNonce) {
-    // First stage (objective/detect) — no token to verify
-    return;
-  }
-
-  if (state.phase) {
-    // Nonce belongs to a phase token, not a stage token — skip stage verification
+    // First stage entry — no token to verify
     return;
   }
 
   if (!state.expectedHash) {
-    emitError(command, "Stage transition error: lastNonce exists but expectedHash is missing. State may be corrupted.");
+    emitError(command, "Nonce transition error: lastNonce exists but expectedHash is missing. State may be corrupted.");
   }
 
-  // The previous stage stored the nonce for the PREVIOUS stage.
-  // We need to figure out which stage generated the token.
-  // The token was generated with (genId, previousStage), so we need to verify against the previous stage.
-  const isMerge = state.type === "merge";
-  let prevStage: AnyStage | null;
-  if (isMerge) {
-    prevStage = MergeLifeCycle.prev(state.stage as MergeStage);
-  } else {
-    prevStage = LifeCycle.prev(state.stage as LifeCycleStage);
-  }
-
-  if (!prevStage) {
-    // Should not happen — first stages don't have lastNonce
-    emitError(command, "Stage transition error: cannot determine previous stage for token verification.");
-  }
-
-  if (!verifyToken(state.lastNonce, state.id, prevStage as string, state.expectedHash)) {
-    emitError(command, `Token verification failed. The stage chain token does not match. Re-run the previous stage command to get a valid token.`);
+  if (!verifyToken(state.lastNonce, state.id, stage, state.expectedHash, phase)) {
+    emitError(command, `Nonce verification failed for ${stage}:${phase}. Re-run the previous phase to get a valid token.`);
   }
 
   // Clear consumed token
   state.lastNonce = undefined;
   state.expectedHash = undefined;
+  state.phase = undefined;
 }
 
-// ── Phase nonce helpers ─────────────────────────────────────
-
 /**
- * Set a phase nonce on the state. Call at the end of a work/review/verify phase
- * to ensure the AI cannot skip directly to --phase complete.
+ * Generate and set a nonce token for the next entry point (receiver-based).
+ * Token format: hash(nonce + genId + stage:phase).
  * Mutates state in-place. Caller must save state after calling this.
  */
-export function setPhaseNonce(state: GenerationState, stage: string, phase: string): void {
+export function setNonce(state: GenerationState, stage: string, phase: string): void {
   const { nonce, hash } = generateToken(state.id, stage, phase);
   state.lastNonce = nonce;
   state.expectedHash = hash;
   state.phase = phase;
-}
-
-/**
- * Verify the phase nonce at the start of a phase (e.g., --phase complete).
- * - If lastNonce exists: verify against expectedHash with phase, clear on success.
- * - If lastNonce does not exist: error (work phase was skipped).
- * Mutates state in-place (clears lastNonce + expectedHash + phase on success).
- */
-export function verifyPhaseEntry(command: string, state: GenerationState, stage: string, phase: string): void {
-  if (!state.lastNonce) {
-    emitError(command, `Phase nonce missing. Complete the previous phase before running --phase ${phase}.`);
-  }
-
-  if (!state.expectedHash) {
-    emitError(command, "Phase transition error: lastNonce exists but expectedHash is missing. State may be corrupted.");
-  }
-
-  if (!verifyToken(state.lastNonce, state.id, stage, state.expectedHash, phase)) {
-    emitError(command, `Phase token verification failed. Re-run the previous phase to get a valid token.`);
-  }
-
-  // Clear consumed phase token
-  state.lastNonce = undefined;
-  state.expectedHash = undefined;
-  state.phase = undefined;
 }
 
 // ── Auto-transition ─────────────────────────────────────────

@@ -1,10 +1,9 @@
 import type { ReapPaths } from "../../../core/paths";
 import { MergeGenerationManager } from "../../../core/merge-generation";
-import { generateToken } from "../../../core/generation";
 import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
-import { verifyStageEntry, performTransition, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
+import { performTransition, verifyNonce, setNonce } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const mgm = new MergeGenerationManager(paths);
@@ -20,24 +19,24 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     emitError("merge-sync", `Stage is '${state.stage}', expected 'sync'.`);
   }
 
-  // Verify stage chain token from previous stage's --phase complete
-  verifyStageEntry("merge-sync", state);
-  await mgm.save(state);
-
   const mergeArtifact = paths.artifact("03-merge.md");
   if (!(await fileExists(mergeArtifact))) {
     emitError("merge-sync", "03-merge.md does not exist. Complete merge stage first.");
   }
 
   if (!phase || phase === "verify") {
+    // Verify entry nonce from previous stage's --phase complete
+    verifyNonce("merge-sync", state, "sync", "entry");
+    await mgm.save(state);
+
     // Phase 1: Gate passed, instruct AI to verify genome-source consistency
     const genomeConventions = await readTextFile(paths.conventions);
     const genomeConstraints = await readTextFile(paths.constraints);
     const genomePrinciples = await readTextFile(paths.principles);
     const mergeContent = await readTextFile(mergeArtifact);
 
-    // Set phase nonce — prevents skipping verify phase
-    setPhaseNonce(state, "sync", "verify");
+    // Set nonce for complete phase entry — prevents skipping verify phase
+    setNonce(state, "sync", "complete");
     await mgm.save(state);
 
     emitOutput({
@@ -84,9 +83,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    // Verify phase nonce from verify phase
-    verifyPhaseEntry("merge-sync", state, "sync", "verify");
-    await mgm.save(state);
+    // Verify complete phase nonce from verify phase
+    verifyNonce("merge-sync", state, "sync", "complete");
 
     // Verify artifact exists before completing
     const syncArtifactCheck = paths.artifact("04-sync.md");
@@ -94,10 +92,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       emitError("merge-sync", "04-sync.md does not exist. Write the sync artifact before completing.");
     }
 
-    // Generate stage chain token
-    const { nonce, hash } = generateToken(state.id, state.stage);
-    state.expectedHash = hash;
-    state.lastNonce = nonce;
+    // Generate entry token for next stage (receiver-based)
+    setNonce(state, "validation", "entry");
+    await mgm.save(state);
 
     // Execute hooks
     const hookResults = await executeHooks(paths.hooks, "onMergeSynced", paths.projectRoot);

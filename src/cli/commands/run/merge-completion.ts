@@ -4,7 +4,7 @@ import { readTextFile, fileExists } from "../../../core/fs";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
 import { checkSubmodules } from "../../../core/commit";
-import { verifyStageEntry, setPhaseNonce, verifyPhaseEntry } from "../../../core/stage-transition";
+import { verifyNonce, setNonce } from "../../../core/stage-transition";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const mgm = new MergeGenerationManager(paths);
@@ -20,24 +20,24 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     emitError("merge-completion", `Stage is '${state.stage}', expected 'completion'.`);
   }
 
-  // Verify stage chain token from previous stage's --phase complete
-  verifyStageEntry("merge-completion", state);
-  await mgm.save(state);
-
   const validationArtifact = paths.artifact("05-validation.md");
   if (!(await fileExists(validationArtifact))) {
     emitError("merge-completion", "05-validation.md does not exist. Complete validation first.");
   }
 
   if (!phase || phase === "retrospective") {
+    // Verify entry nonce from previous stage's --phase complete
+    verifyNonce("merge-completion", state, "completion", "entry");
+    await mgm.save(state);
+
     // Phase 1: Gate passed, collect context for AI to write completion report
     const detectContent = await readTextFile(paths.artifact("01-detect.md"));
     const mateContent = await readTextFile(paths.artifact("02-mate.md"));
     const mergeContent = await readTextFile(paths.artifact("03-merge.md"));
     const validationContent = await readTextFile(validationArtifact);
 
-    // Set phase nonce for archive phase
-    setPhaseNonce(state, "completion", "retrospective");
+    // Set nonce for archive phase entry — prevents skipping retrospective
+    setNonce(state, "completion", "archive");
     await mgm.save(state);
 
     emitOutput({
@@ -70,8 +70,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "archive") {
-    // Verify phase nonce from retrospective phase
-    verifyPhaseEntry("merge-completion", state, "completion", "retrospective");
+    // Verify archive nonce from retrospective phase
+    verifyNonce("merge-completion", state, "completion", "archive");
     await mgm.save(state);
 
     // Phase 2: Execute hooks, archive, and prepare for commit
