@@ -1,0 +1,8 @@
+id: gen-167-b369f4
+type: normal
+parents:
+  - gen-166-04291a
+goal: config.yml version 필드 제거 및 migration 로직 변경
+genomeHash: c2e6348e
+startedAt: 2026-03-23T07:04:46.500Z
+completedAt: 2026-03-23T07:12:56.843Z
