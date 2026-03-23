@@ -1,8 +1,0 @@
-id: gen-153-967025
-type: normal
-parents:
-  - gen-152-91ae79
-goal: completion.ts dead code phase 제거
-genomeHash: 6eda03ff
-startedAt: 2026-03-23T03:04:30.985Z
-completedAt: 2026-03-23T03:08:43.275Z

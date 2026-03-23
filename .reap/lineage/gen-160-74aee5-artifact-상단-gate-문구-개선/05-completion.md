@@ -1,25 +1,25 @@
 # Completion
 
 ## Summary
-- **Goal**: completion.ts에서 dead code phase(`consume`, `archive`) 제거
-- **Period**: gen-153-967025
-- **Genome Version**: 변경 없음
+- **Goal**: Artifact 상단 gate 문구 개선
+- **Period**: 2026-03-23
+- **Genome Version**: v68 → v68 (genome 변경 없음)
 - **Result**: pass
 - **Key Changes**:
-  - `completion.ts`에서 `consume` phase 블록 제거 (20줄)
-  - `completion.ts`에서 `archive` phase 블록 제거 (29줄)
-  - `completion.test.ts`에서 dead code 부재 확인 테스트 추가
-  - `run-lifecycle.test.ts`에서 archive→feedKnowledge 호출로 변경
+  - `src/core/generation.ts`: CURRENT_YML_HEADER 상수 문구 변경
+  - `src/templates/artifacts/` 11개 파일: gate 문구 변경
+  - 기존: `# REAP MANAGED — Do not modify directly. Use reap run commands.`
+  - 변경: `# REAP MANAGED — Do not modify directly. Use 'reap run <stage> --phase <phase>' to update.`
 
 ## Retrospective
 
 ### Lessons Learned
 #### What Went Well
-- feedKnowledge phase가 이미 consume + archive + compress를 통합 처리하고 있어 삭제가 안전했음
-- nonce token 미검증이라는 dead code 시그널이 명확했음
+- 변경 범위가 명확하여 빠르게 완료
+- 기존 검증/strip 로직이 prefix 기반이라 호환성 문제 없음
 
 #### Areas for Improvement
-- 없음 (단순 정리 작업)
+- 없음 (단순 문구 변경 작업)
 
 ### Genome Change Proposals
 | Target File | Change Description | Reason |
@@ -32,8 +32,7 @@
 | 없음 | | | |
 
 ### Next Generation Backlog
-없음
-
+- command-unification.md: Slash command 구조 대규모 통합 (32개 -> 2개)
 
 ---
 
@@ -42,14 +41,16 @@
 ### Genome-Change Backlog Applied
 | Backlog File | Target | Change Description | Applied |
 |-------------|--------|-------------------|---------|
+| 없음 | | | |
 
 ### Retrospective Proposals Applied
 | Target File | Change Description | Applied |
 |-------------|-------------------|---------|
+| 없음 | | |
 
 ### Genome Version
-- Before:
-- After:
+- Before: 68
+- After: 68
 
 ### Modified Genome Files
-
+없음

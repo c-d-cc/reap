@@ -1,8 +1,0 @@
-id: gen-154-32dead
-type: normal
-parents:
-  - gen-153-967025
-goal: "Nonce 토큰 구조 통일: stage/phase 동일 형태로 추상화"
-genomeHash: 6eda03ff
-startedAt: 2026-03-23T03:09:32.858Z
-completedAt: 2026-03-23T03:25:58.754Z
