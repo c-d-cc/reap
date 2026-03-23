@@ -1,25 +1,33 @@
 ## What's New
 
-- **Recovery Generation** — New generation type (`type: recovery`) for correcting past generation errors. `/reap.evolve.recovery` reviews and creates recovery generations
-- **Structural Integrity Checker** — `reap fix --check` validates `.reap/` directory structure. Auto-runs via `onLifeCompleted` hook
-- **`/reap.update-genome`** — Apply pending genome-change backlog without a generation. Available during idle periods
-- **Evolve Design Pivot Detection** — Subagent detects artifact-design mismatches and triggers `/reap.back` for correction
-- **`lastSyncedGeneration` Tracking** — Genome sync state tracked by generation ID. Detects "never synced" state after init
-- **Destroy Confirmation** — Changed from `destroy {projectName}` to `yes destroy`
-- **Session Language Injection** — `session-start.cjs` injects configured language into AI context
-- **Init Skills Sync** — `reap init` installs `.claude/skills/` immediately (resolves #6)
-- **resolveParents NaN Fix** — Fixed sort bug caused by legacy `completedAt` placeholder values
+- `reap make backlog` — CLI command for creating properly-formatted backlog files
+- Release notice on `reap update` — fetches from GitHub Discussions via UPDATE_NOTICE.md
+- versionBump workflow now includes notice publishing step
+- Subagent prompt now instructs reading backlog files directly
+
+## Bug Fixes
+
+- Lineage archiving now copies only consumed backlog items
+- `reap back` generates proper entry nonce via `setNonce()` to maintain signature chain
+- Codex CLI command path corrected: `commands/` → `prompts/`
+
+## Improvements
+
+- Compression protection count: 3 → 20 (preserves ~20 original generations)
+- Artifact gate text shows explicit `reap run <stage> --phase <phase>` format
+- Notice fetch uses direct URL (no `gh` CLI dependency)
+- Removed legacy `mutations` backward-compat code
+- Added `notes/` directory for design docs
 
 ## Generations
 
-- **gen-136-4b0342**: fix: destroy 컨펌 메시지 변경 + session-start language 주입 누락 수정
-- **gen-137-c8d9b9**: resolve #6: reap init이 .claude/skills/에 sub-command를 설치하지 않음
-- **gen-138-26723a**: resolve #7: lastSyncedGeneration 기반 genome sync 상태 추적
-- **gen-139-f2cdec**: feat: recovery generation 개념 정의 + genome domain 문서화
-- **gen-140-80b51f**: recovery: gen-138 lastSyncedGeneration 설계 교정
-- **gen-141-cad97c**: fix: resolveParents NaN completedAt 정렬 버그 수정
-- **gen-142-610ca8**: feat: .reap/ 구조적 완전성 검사 도구 + onLifeCompleted hook
-- **gen-143-fed640**: feat: evolve subagent prompt 설계 피벗 감지 규칙 추가
-- **gen-144-e63e59**: fix: localInstall nvm 경로 수정
-- **gen-145-864402**: feat: reap update-genome 명령어 추가
-- **gen-146-56b321**: refactor: update-genome을 CLI에서 slash command로 변환
+- **gen-156-b0102e**: Lineage backlog copy bug fix
+- **gen-157-39e691**: back nonce reset bug fix
+- **gen-158-6d5755**: Codex CLI commands path fix
+- **gen-159-59e74a**: Compression protection count expansion
+- **gen-160-74aee5**: Artifact gate text improvement
+- **gen-161-b18c79**: back.ts setNonce chain maintenance
+- **gen-162-616395**: reap make backlog command
+- **gen-163-cf5086**: Recovery — make as top-level CLI command
+- **gen-164-649f49**: GitHub Discussions notice fetch
+- **gen-165-a260f3**: versionBump notice + backlog creation workflow
