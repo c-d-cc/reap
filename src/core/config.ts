@@ -39,6 +39,12 @@ export class ConfigManager {
       }
     }
 
+    // Remove legacy version field (no longer used for migration tracking)
+    if ((config as any).version !== undefined) {
+      delete (config as any).version;
+      added.push("version(removed)");
+    }
+
     // Migrate legacy lastSyncedCommit → lastSyncedGeneration
     if ((config as any).lastSyncedCommit !== undefined) {
       // If lastSyncedGeneration is still empty and lastSyncedCommit has a value,

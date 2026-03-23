@@ -110,9 +110,6 @@ async function checkConfig(
   }
 
   // Type checks for optional fields
-  if (config.version !== undefined && typeof config.version !== "string") {
-    warnings.push("config.yml: 'version' should be a string");
-  }
   if (config.strict !== undefined && typeof config.strict !== "boolean" && typeof config.strict !== "object") {
     warnings.push("config.yml: 'strict' should be boolean or object");
   }

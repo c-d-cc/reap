@@ -84,7 +84,6 @@ export type ReapHookEvent =
   | "onMergeSynced" | "onMergeValidated" | "onMergeCompleted" | "onMergeTransited";
 
 export interface ReapConfig {
-  version: string;
   project: string;
   stack?: string;
   preset?: string;

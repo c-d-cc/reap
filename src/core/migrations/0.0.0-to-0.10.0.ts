@@ -7,8 +7,6 @@ import type { ReapPaths } from "../paths";
  * Wraps existing migration.ts logic into the registry pattern.
  */
 export const migration_0_0_0_to_0_10_0: Migration = {
-  fromVersion: "0.0.0",
-  toVersion: "0.10.0",
   description: "Lineage DAG migration — legacy gen-NNN directories to gen-NNN-HASH format",
 
   async check(paths: ReapPaths): Promise<boolean> {

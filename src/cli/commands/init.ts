@@ -76,7 +76,6 @@ export async function initProject(
   const detectedLanguage = await AgentRegistry.readLanguage();
 
   const config: ReapConfig = {
-    version: process.env.__REAP_VERSION__ || "0.0.0",
     project: projectName,
     entryMode,
     strict: false,

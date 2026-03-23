@@ -1,4 +1,3 @@
-version: 0.15.5
 project: reap
 entryMode: greenfield
 strict: true

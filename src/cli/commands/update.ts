@@ -203,9 +203,8 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     // 6. Migration: clean up legacy project-level files
     await migrateLegacyFiles(paths, dryRun, result);
 
-    // 6. Run migration agent: version-based migrations (includes lineage DAG migration)
-    const currentVersion = process.env.__REAP_VERSION__ || "0.0.0";
-    const migrationResult = await MigrationRunner.run(paths, currentVersion, dryRun);
+    // 6. Run migrations: each migration's check() determines if it needs to run
+    const migrationResult = await MigrationRunner.run(paths, dryRun);
     for (const m of migrationResult.migrated) {
       result.updated.push(`[migration] ${m}`);
     }
@@ -234,8 +233,8 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
       try {
         const { execSync } = await import("child_process");
         const errorSummary = migrationResult.errors.join("\\n");
-        const title = `Migration failure: ${migrationResult.fromVersion} → ${migrationResult.toVersion}`;
-        const body = `## Migration Error\\n\\nFrom: ${migrationResult.fromVersion}\\nTo: ${migrationResult.toVersion}\\n\\n### Errors\\n\\n${errorSummary}`;
+        const title = `Migration failure during update`;
+        const body = `## Migration Error\\n\\n### Errors\\n\\n${errorSummary}`;
         execSync(
           `gh issue create --repo c-d-cc/reap --title "${title}" --label "auto-reported,migration" --body "${body}"`,
           { encoding: "utf-8", timeout: 15_000, stdio: "pipe" },

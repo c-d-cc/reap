@@ -32,7 +32,7 @@ export async function getStatus(projectRoot: string): Promise<ProjectStatus> {
   const integrityResult = await checkIntegrity(paths);
 
   return {
-    version: config.version,
+    version: process.env.__REAP_VERSION__ || "0.0.0",
     project: config.project,
     entryMode: config.entryMode,
     lastSyncedGeneration: config.lastSyncedGeneration,

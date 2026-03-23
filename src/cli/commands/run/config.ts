@@ -8,7 +8,7 @@ export async function execute(paths: ReapPaths): Promise<void> {
   const lines = [
     `REAP Configuration (${paths.config})`,
     "",
-    `  version:         ${config.version}`,
+    `  version:         ${process.env.__REAP_VERSION__ || "0.0.0"} (package)`,
     `  project:         ${config.project}`,
     `  entryMode:       ${config.entryMode}`,
     `  strict:          ${config.strict ?? false}`,
