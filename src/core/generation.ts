@@ -234,10 +234,9 @@ export class GenerationManager {
         const content = await readTextFile(join(this.paths.backlog, entry));
         if (!content) continue;
         const isConsumed = /status:\s*consumed/i.test(content) || /consumed:\s*true/i.test(content);
-        // Always copy to lineage
-        await writeTextFile(join(backlogDir, entry), content);
-        // Only remove from life/backlog if consumed
         if (isConsumed) {
+          // Copy consumed backlog to lineage and remove from life/backlog
+          await writeTextFile(join(backlogDir, entry), content);
           await unlink(join(this.paths.backlog, entry));
         }
       }

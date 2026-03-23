@@ -1,0 +1,8 @@
+id: gen-156-b0102e
+type: normal
+parents:
+  - gen-155-791ab8
+goal: Lineage archiving 시 전체 backlog 복사 버그 수정
+genomeHash: 6eda03ff
+startedAt: 2026-03-23T04:45:47.857Z
+completedAt: 2026-03-23T04:49:50.979Z

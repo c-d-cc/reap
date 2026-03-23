@@ -1,8 +1,0 @@
-id: gen-149-00cf81
-type: normal
-parents:
-  - gen-148-2cc6d2
-goal: migration-spec.ts가 integrity.ts를 SSOT로 사용하도록 리팩토링
-genomeHash: 6eda03ff
-startedAt: 2026-03-22T19:46:02.027Z
-completedAt: 2026-03-22T19:52:22.714Z
