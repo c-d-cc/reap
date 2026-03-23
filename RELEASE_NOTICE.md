@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.15.12
+### en
+Release notice now displays correctly after `reap update` auto-upgrade.
+### ko
+`reap update` 자동 업그레이드 후 릴리스 공지가 정상 표시됩니다.
+
 ## v0.15.11
 ### en
 Fixed `reap pull` incorrectly recommending merge for ahead-only branches. Now uses `git rev-list` for accurate ahead/behind/diverged detection.
