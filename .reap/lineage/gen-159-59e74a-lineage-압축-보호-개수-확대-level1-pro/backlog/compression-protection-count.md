@@ -1,7 +1,8 @@
 ---
 type: task
 priority: medium
-status: pending
+status: consumed
+consumedBy: gen-159-59e74a
 ---
 
 # Lineage 압축 보호 개수 확대

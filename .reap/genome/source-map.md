@@ -120,8 +120,8 @@ User/Agent → slash command (.md) → reap run <cmd> → Script Orchestrator (.
 
 | Constant | Value | Location |
 |----------|-------|----------|
-| LINEAGE_MAX_LINES | 5,000 | compression.ts |
-| RECENT_PROTECTED_COUNT | 3 | compression.ts |
+| LINEAGE_MAX_LINES | 10,000 | compression.ts |
+| RECENT_PROTECTED_COUNT | 20 | compression.ts |
 | L1_LIMIT (hook) | 500 | genome-loader.cjs |
 | L2_LIMIT (hook) | 200 | genome-loader.cjs |
 | Staleness threshold | 10 commits | genome-loader.cjs |

@@ -6,10 +6,10 @@ import type { GenerationMeta } from "../types";
 import { readTextFile, readTextFileOrThrow, writeTextFile, fileExists } from "./fs";
 import { gitAllBranches, gitLsTree, gitShow, gitCurrentBranch } from "./git";
 
-const LINEAGE_MAX_LINES = 5_000;
+const LINEAGE_MAX_LINES = 10_000;
 const MIN_GENERATIONS_FOR_COMPRESSION = 5;
 const LEVEL1_MAX_LINES = 40;
-const LEVEL1_PROTECTED_COUNT = 3;
+const LEVEL1_PROTECTED_COUNT = 20;
 const LEVEL2_MIN_LEVEL1_COUNT = 100;
 const LEVEL2_PROTECTED_COUNT = 9;
 
