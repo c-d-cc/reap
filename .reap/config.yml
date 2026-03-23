@@ -6,3 +6,4 @@ autoUpdate: true
 autoSubagent: true
 autoIssueReport: false
 lastSyncedGeneration: manual
+version: 0.15.7

@@ -1,5 +1,19 @@
 import { readFileSync } from "fs";
-import { join } from "path";
+import { join, dirname } from "path";
+
+/**
+ * Find the package root by locating package.json via require.resolve.
+ */
+function findPackageRoot(): string {
+  try {
+    // Works in both dev (bun) and production (node, npm global install)
+    const pkgPath = require.resolve("@c-d-cc/reap/package.json");
+    return dirname(pkgPath);
+  } catch {
+    // Fallback: assume CWD has RELEASE_NOTICE.md (dev mode)
+    return process.cwd();
+  }
+}
 
 /**
  * Read release notice for the given version from RELEASE_NOTICE.md.
@@ -14,7 +28,7 @@ import { join } from "path";
  */
 export function fetchReleaseNotice(version: string, language: string): string | null {
   try {
-    const noticePath = join(__dirname, "../../RELEASE_NOTICE.md");
+    const noticePath = join(findPackageRoot(), "RELEASE_NOTICE.md");
     const content = readFileSync(noticePath, "utf-8");
     const versionTag = version.startsWith("v") ? version : `v${version}`;
 
@@ -34,7 +48,6 @@ export function fetchReleaseNotice(version: string, language: string): string | 
     const langPattern = new RegExp(`^### ${lang}\\s*$`, "im");
     const langMatch = langPattern.exec(section);
     if (!langMatch) {
-      // No language match — return whole section trimmed
       const trimmed = section.trim();
       return trimmed ? `\n--- Release Notes (${versionTag}) ---\n${trimmed}\n` : null;
     }

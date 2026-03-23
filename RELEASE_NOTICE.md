@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.15.9
+### en
+Fixed release notice not displaying after `reap update`. Path resolution now uses `require.resolve` instead of `__dirname`.
+### ko
+`reap update` 후 릴리스 공지가 표시되지 않던 문제 수정. 경로 탐색을 `__dirname` 대신 `require.resolve` 사용으로 변경.
+
 ## v0.15.8
 ### en
 Removed `version` field from config.yml. No more uncommitted changes after `reap update`.

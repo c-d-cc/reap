@@ -1,8 +1,4 @@
-## Improvements
+## Bug Fixes
 
-- Removed `version` field from config.yml — no more uncommitted changes after `reap update`
-- Migrations now use check()-based idempotent execution instead of version comparison
-
-## Generations
-
-- **gen-167-b369f4**: config.yml version 필드 제거 및 migration 로직 변경
+- Fixed release notice not displaying after `reap update` (esbuild hardcoded `__dirname` → `require.resolve`)
+- RELEASE_NOTICE.md now uses inline content instead of GitHub Discussions URL fetch
