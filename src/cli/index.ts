@@ -216,7 +216,7 @@ program
       try {
         const version = getCurrentVersion();
         const lang = (await AgentRegistry.readLanguage()) ?? "en";
-        const notice = fetchReleaseNotice(version, lang);
+        const notice = await fetchReleaseNotice(version, lang);
         if (notice) console.log(notice);
       } catch {
         // Notice fetch is best-effort
