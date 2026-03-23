@@ -328,7 +328,7 @@ Slash commands are installed in `.claude/commands/` and drive the entire workflo
 | `/reap.merge.sync` | Verify genome–source consistency (AI compares, user confirms) |
 | `/reap.merge.validation` | Run mechanical testing (bun test, tsc, build) |
 | **`/reap.merge.evolve`** | **Run the full merge lifecycle automatically** |
-| `/reap.refreshKnowledge` | Load REAP context for subagents (Genome, Environment, state) |
+| `/reap.refreshKnowledge` | Reload REAP context (Genome, Environment, state). Useful after context compaction or in subagents |
 
 ### SessionStart Hook [↗](https://reap.cc/docs/hooks)
 
@@ -364,7 +364,7 @@ strict:
 |---------|----------|
 | No active generation / non-implementation stage | Code modifications are fully blocked |
 | Implementation stage | Only modifications within the scope of `02-planning.md` are allowed |
-| Escape hatch | User explicitly requests "override" or "bypass strict" to allow modifications |
+| Escape hatch | User explicitly requests "override" or "bypass strict" — bypass applies to that specific action only, then strict mode re-engages |
 
 **`strict.merge`** — Git command control: when enabled, direct `git pull`/`push`/`merge` are restricted. The agent guides users to use `/reap.pull`, `/reap.push`, `/reap.merge` instead.
 

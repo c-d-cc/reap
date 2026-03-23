@@ -28,6 +28,7 @@ export const en = {
       hookReference: "Hook Reference",
       comparison: "Comparison",
       configuration: "Configuration",
+      recoveryGeneration: "Recovery Generation",
     },
   },
 
@@ -343,11 +344,53 @@ export const en = {
       ["/reap.report", "Report a bug or feedback to the REAP project via GitHub Issue. Privacy double-check: PRIVACY_GATE + post-format sanitization. User confirmation required."],
       ["/reap.help", "Provide contextual help with 24+ topics."],
       ["/reap.update", "Upgrade REAP package + sync commands, templates, and hooks to all detected agents. Also syncs project .claude/commands/ immediately."],
-      ["/reap.refreshKnowledge", "Load REAP context for subagents (Genome, Environment, state). Used by orchestrator agents to bootstrap subagent sessions."],
+      ["/reap.refreshKnowledge", "Reload REAP context (Genome, Environment, state). Useful after context compaction or in subagents."],
       ["/reap.update-genome", "Apply pending genome-change backlog without a generation. Only available when no generation is active. Marks applied items as consumed and bumps genomeVersion."],
     ],
     commandStructure: "Script Orchestrator Architecture",
-    commandStructureDesc: "Since v0.11.0, every slash command is a 1-line .md wrapper that calls reap run <cmd>. The TypeScript script handles all deterministic logic and returns structured JSON instructions for the AI agent. Pattern: Gate (precondition check) → Steps (work execution) → Artifact (recorded to .reap/life/). Generation types: normal, merge, and recovery.",
+    commandStructureDesc: "Since v0.11.0, every slash command is a 1-line .md wrapper that calls reap run <cmd>. The TypeScript script handles all deterministic logic and returns structured JSON instructions for the AI agent. Pattern: Gate (precondition check) → Steps (work execution) → Artifact (recorded to .reap/life/).",
+  },
+
+  // Recovery Generation Page
+  recovery: {
+    title: "Recovery Generation",
+    breadcrumb: "Other",
+    intro: "A Recovery Generation is a special generation type that reviews and corrects artifacts from past generations when errors or inconsistencies are discovered. It uses type: recovery and references target generations via the recovers field.",
+    triggerTitle: "How to Trigger",
+    triggerDesc: "Use the /reap.evolve.recovery command with the target generation ID. The system reviews the target's artifacts and only creates a recovery generation if corrections are needed.",
+    criteriaTitle: "Review Criteria",
+    criteriaHeaders: ["Criterion", "Description"],
+    criteriaItems: [
+      ["Artifact Inconsistency", "Contradictions between artifacts within the same generation (e.g., objective vs implementation design mismatch)"],
+      ["Structural Defects", "Missing sections, incomplete content, or format errors in artifacts"],
+      ["Human-specified Correction", "Corrections explicitly requested by the user"],
+    ] as string[][],
+    processTitle: "Process Flow",
+    processDesc: "The recovery command runs in two phases: review (analyze artifacts against criteria) and create (start recovery generation if issues found).",
+    processFlow: `/reap.evolve.recovery gen-XXX
+  → Load target generation's lineage artifacts
+  → Review against 3 criteria
+  → Issues found → Auto-start recovery generation (type: recovery)
+  → No issues   → "no recovery needed" (no generation created)`,
+    stagesTitle: "Stage Purpose Comparison",
+    stagesDesc: "Recovery generations follow the same 5-stage lifecycle as normal generations, but each stage serves a different purpose.",
+    stageHeaders: ["Stage", "Normal", "Recovery"],
+    stageItems: [
+      ["Objective", "Define new goal", "Redefine corrected goal/design (cite original + review results)"],
+      ["Planning", "Task decomposition", "List files/logic to review + verification criteria"],
+      ["Implementation", "Write code", "Review & correct existing code"],
+      ["Validation", "Verify", "Verify after correction"],
+      ["Completion", "Retrospective", "Retrospective + correction record for original generation"],
+    ] as string[][],
+    currentYmlTitle: "current.yml Extension",
+    currentYmlDesc: "Recovery generations add a recovers field to current.yml and meta.yml. The parents field follows normal DAG rules, while recovers separately references the correction target.",
+    notesTitle: "Notes",
+    notes: [
+      "Does not affect existing normal/merge generations",
+      "Same lineage compression rules apply to recovery generations",
+      "Recovery generations produce the same 5 artifacts as normal generations",
+      "The objective automatically cites the target generation's original objective + completion",
+    ],
   },
 
   // Configuration Page
@@ -385,7 +428,7 @@ strict:
     strictRules: [
       ["No active generation / non-implementation stage", "Code modifications are fully blocked"],
       ["Implementation stage", "Only modifications within the scope of 02-planning.md are allowed"],
-      ["Escape hatch", 'User explicitly requests "override" or "bypass strict" to allow modifications'],
+      ["Escape hatch", 'User explicitly requests "override" or "bypass strict" — bypass applies to that specific action only, then strict mode re-engages'],
     ],
     strictMergeTitle: "strict.merge — Git Command Control",
     strictMergeDesc: "When enabled, direct git pull, git push, and git merge commands are restricted. The agent will guide users to use REAP slash commands instead (/reap.pull, /reap.push, /reap.merge).",

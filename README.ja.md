@@ -329,7 +329,7 @@ autoIssueReport: true    # デフォルト: true（gh CLIがある場合）
 | `/reap.merge.sync` | Genome-ソース間の整合性を検証（AI比較、ユーザー確認） |
 | `/reap.merge.validation` | 機械的テストを実行（bun test、tsc、build） |
 | **`/reap.merge.evolve`** | **マージライフサイクル全体を自動実行** |
-| `/reap.refreshKnowledge` | サブエージェント用REAPコンテキストのロード（Genome、Environment、状態） |
+| `/reap.refreshKnowledge` | REAPコンテキストの再ロード（Genome、Environment、状態）。context compaction後やサブエージェントで使用 |
 
 ### SessionStart Hook [↗](https://reap.cc/docs/hooks)
 
@@ -363,7 +363,7 @@ strict:
 |------|------|
 | アクティブGenerationなし / 実装ステージ外 | コード変更は完全にブロック |
 | Implementationステージ | `02-planning.md`の範囲内でのみ変更許可 |
-| エスケープハッチ | ユーザーが「override」「bypass strict」等を明示的に要求した場合に許可 |
+| エスケープハッチ | ユーザーが「override」「bypass strict」等を明示的に要求した場合、その特定のアクションに限り許可。完了後strictモード再適用 |
 
 **`strict.merge`** — Gitコマンド制御：有効にすると`git pull`/`push`/`merge`の直接使用が制限されます。エージェントが`/reap.pull`、`/reap.push`、`/reap.merge`の使用を案内します。
 

@@ -329,7 +329,7 @@ autoIssueReport: true    # 默认值: true（检测到gh CLI时）
 | `/reap.merge.sync` | 验证Genome与源代码的一致性（AI比较，用户确认） |
 | `/reap.merge.validation` | 运行机械化测试（bun test、tsc、build） |
 | **`/reap.merge.evolve`** | **自动运行完整的合并生命周期** |
-| `/reap.refreshKnowledge` | 为子代理加载REAP上下文（Genome、Environment、状态） |
+| `/reap.refreshKnowledge` | 重新加载REAP上下文（Genome、Environment、状态）。context compaction后或在子代理中使用 |
 
 ### SessionStart Hook [↗](https://reap.cc/docs/hooks)
 
@@ -363,7 +363,7 @@ strict:
 |------|------|
 | 无活跃Generation / 非实现阶段 | 代码修改完全阻止 |
 | Implementation阶段 | 仅允许`02-planning.md`范围内的修改 |
-| 逃生舱 | 用户明确请求"override"或"bypass strict"时允许 |
+| 逃生舱 | 用户明确请求"override"或"bypass strict"时，仅对该特定操作允许，完成后strict模式重新生效 |
 
 **`strict.merge`** — Git命令控制：启用后，直接使用`git pull`/`push`/`merge`将被限制。代理会引导用户使用`/reap.pull`、`/reap.push`、`/reap.merge`。
 

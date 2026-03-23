@@ -30,6 +30,7 @@ export const zhCN: Translations = {
       hookReference: "Hook参考",
       comparison: "对比",
       configuration: "配置",
+      recoveryGeneration: "Recovery Generation",
     },
   },
 
@@ -345,11 +346,53 @@ export const zhCN: Translations = {
       ["/reap.report", "通过GitHub Issue向REAP项目报告bug/反馈。隐私双重检查（PRIVACY_GATE + 格式化后脱敏）。需用户确认。"],
       ["/reap.help", "提供24+主题的上下文帮助。"],
       ["/reap.update", "升级REAP包 + 将命令/模板/hook同步到所有检测到的代理。即时同步项目.claude/commands/。"],
-      ["/reap.refreshKnowledge", "为子代理加载REAP上下文（Genome、Environment、状态）。编排代理用于引导子代理会话。"],
+      ["/reap.refreshKnowledge", "重新加载REAP上下文（Genome、Environment、状态）。context compaction后或在子代理中使用。"],
       ["/reap.update-genome", "无需Generation即可应用待处理的genome-change backlog。仅在没有active generation时可用。已应用项目标记为consumed，genomeVersion递增。"],
     ],
     commandStructure: "Script Orchestrator架构",
-    commandStructureDesc: "从v0.11.0起，所有斜杠命令都是调用reap run <cmd>的1行.md wrapper。TypeScript脚本处理所有确定性逻辑，以structured JSON向AI发出指令。模式：Gate（前置条件检查）→ Steps（工作执行）→ Artifact（记录到.reap/life/）。Generation类型：normal、merge、recovery。",
+    commandStructureDesc: "从v0.11.0起，所有斜杠命令都是调用reap run <cmd>的1行.md wrapper。TypeScript脚本处理所有确定性逻辑，以structured JSON向AI发出指令。模式：Gate（前置条件检查）→ Steps（工作执行）→ Artifact（记录到.reap/life/）。",
+  },
+
+  // Recovery Generation Page
+  recovery: {
+    title: "Recovery Generation",
+    breadcrumb: "其他",
+    intro: "Recovery Generation是一种特殊的generation类型，当发现过去generation的产出物存在错误或不一致时，用于审查和纠正。使用type: recovery，并通过recovers字段引用目标generation。",
+    triggerTitle: "触发方式",
+    triggerDesc: "使用/reap.evolve.recovery命令指定目标generation ID来执行。系统审查目标产出物后，仅在需要纠正时才创建recovery generation。",
+    criteriaTitle: "审查标准",
+    criteriaHeaders: ["标准", "说明"],
+    criteriaItems: [
+      ["Artifact间不一致", "同一generation内artifact间的内容矛盾（例：objective与implementation的设计不匹配）"],
+      ["结构性缺陷", "artifact的缺失章节、不完整内容或格式错误"],
+      ["用户指定纠正", "用户直接指定的纠正事项"],
+    ] as string[][],
+    processTitle: "流程",
+    processDesc: "recovery命令分两个阶段执行：review（按标准分析artifact）和create（发现问题时启动recovery generation）。",
+    processFlow: `/reap.evolve.recovery gen-XXX
+  → 加载目标generation lineage artifact
+  → 按3个标准进行审查
+  → 发现纠正事项 → 自动启动recovery generation（type: recovery）
+  → 无纠正事项   → "no recovery needed" 结束（不创建generation）`,
+    stagesTitle: "Stage目的对比",
+    stagesDesc: "Recovery generation遵循与normal generation相同的5阶段lifecycle，但每个stage的目的不同。",
+    stageHeaders: ["Stage", "Normal", "Recovery"],
+    stageItems: [
+      ["Objective", "定义新目标", "重新定义纠正后的目标/设计（引用原文+审查结果）"],
+      ["Planning", "任务分解", "审查目标文件/逻辑列表+验证标准"],
+      ["Implementation", "编写代码", "审查和纠正现有代码"],
+      ["Validation", "验证", "纠正后验证"],
+      ["Completion", "回顾", "回顾+对原generation的纠正记录"],
+    ] as string[][],
+    currentYmlTitle: "current.yml扩展",
+    currentYmlDesc: "Recovery generation在current.yml和meta.yml中添加recovers字段。parents字段遵循常规DAG规则，recovers单独引用纠正目标。",
+    notesTitle: "其他",
+    notes: [
+      "不影响现有的normal/merge generation",
+      "lineage压缩时recovery generation适用相同规则",
+      "Recovery generation生成与normal generation相同的5个artifact",
+      "Objective自动引用目标generation的原始objective+completion",
+    ],
   },
 
   // Configuration Page
@@ -387,7 +430,7 @@ strict:
     strictRules: [
       ["无活跃Generation / 非Implementation阶段", "代码修改完全阻止"],
       ["Implementation阶段", "仅允许02-planning.md范围内的修改"],
-      ["逃生舱", '用户明确请求 "override" 或 "bypass strict" 时允许修改'],
+      ["逃生舱", '用户明确请求 "override" 或 "bypass strict" 时，仅对该特定操作允许修改，完成后strict模式重新生效'],
     ],
     strictMergeTitle: "strict.merge — Git命令控制",
     strictMergeDesc: "启用后，直接的git pull、git push和git merge命令将被限制。代理会引导用户使用REAP斜杠命令（/reap.pull、/reap.push、/reap.merge）。",
