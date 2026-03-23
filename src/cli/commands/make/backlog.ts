@@ -1,6 +1,6 @@
-import { ReapPaths } from "../../core/paths";
-import { createBacklog, VALID_BACKLOG_TYPES } from "../../core/backlog";
-import { emitOutput, emitError } from "../../core/run-output";
+import type { ReapPaths } from "../../../core/paths";
+import { createBacklog, VALID_BACKLOG_TYPES } from "../../../core/backlog";
+import { emitOutput, emitError } from "../../../core/run-output";
 
 function parseFlags(argv: string[]): Record<string, string> {
   const flags: Record<string, string> = {};
@@ -13,7 +13,7 @@ function parseFlags(argv: string[]): Record<string, string> {
   return flags;
 }
 
-async function makeBacklog(paths: ReapPaths, argv: string[]): Promise<void> {
+export async function execute(paths: ReapPaths, argv: string[]): Promise<void> {
   const flags = parseFlags(argv);
 
   if (!flags.type) {
@@ -38,22 +38,4 @@ async function makeBacklog(paths: ReapPaths, argv: string[]): Promise<void> {
     message: `Backlog created: ${filename}`,
     context: { filename, type: flags.type, title: flags.title },
   });
-}
-
-const TARGETS: Record<string, (paths: ReapPaths, argv: string[]) => Promise<void>> = {
-  backlog: makeBacklog,
-};
-
-export async function execute(paths: ReapPaths, _phase?: string, argv: string[] = []): Promise<void> {
-  const target = argv[0];
-  if (!target) {
-    emitError("make", `Target required. Available: ${Object.keys(TARGETS).join(", ")}`);
-  }
-
-  const handler = TARGETS[target];
-  if (!handler) {
-    emitError("make", `Unknown target: "${target}". Available: ${Object.keys(TARGETS).join(", ")}`);
-  }
-
-  await handler(paths, argv.slice(1));
 }
