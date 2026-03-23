@@ -25,7 +25,8 @@
   "files": [
     "dist/",
     "scripts/postinstall.cjs",
-    "scripts/preinstall.cjs"
+    "scripts/preinstall.cjs",
+    "UPDATE_NOTICE.md"
   ],
   "preferGlobal": true,
   "engines": {
