@@ -4,7 +4,7 @@ import { GenerationManager } from "../../../core/generation";
 import { ConfigManager } from "../../../core/config";
 import { readTextFile } from "../../../core/fs";
 import { scanBacklog } from "../../../core/backlog";
-import { emitOutput, emitError } from "../../../core/run-output";
+import { emitOutput } from "../../../core/run-output";
 
 /**
  * Build the full prompt string that the parent agent passes to a subagent
