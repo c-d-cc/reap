@@ -1,7 +1,8 @@
 ---
 type: task
 priority: medium
-status: pending
+status: consumed
+consumedBy: gen-164-649f49
 ---
 
 # reap update 시 GitHub Discussions 기반 notice 표시

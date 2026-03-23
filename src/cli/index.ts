@@ -3,6 +3,8 @@ import { program } from "commander";
 import { createInterface } from "readline";
 import { initProject } from "./commands/init";
 import { updateProject, selfUpgrade } from "./commands/update";
+import { fetchReleaseNotice } from "../core/notice";
+import { getCurrentVersion } from "../core/version";
 import { getStatus } from "./commands/status";
 import { fixProject, checkProject } from "./commands/fix";
 import { destroyProject, getProjectName } from "./commands/destroy";
@@ -208,6 +210,16 @@ program
         }
       } catch {
         // Integrity check is best-effort; skip if not a REAP project
+      }
+
+      // Step 4: Show release notice from GitHub Discussions
+      try {
+        const version = getCurrentVersion();
+        const lang = (await AgentRegistry.readLanguage()) ?? "en";
+        const notice = fetchReleaseNotice(version, lang);
+        if (notice) console.log(notice);
+      } catch {
+        // Notice fetch is best-effort
       }
     } catch (e: any) {
       console.error(`Error: ${e.message}`);
