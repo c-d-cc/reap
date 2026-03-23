@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.15.10
+### en
+Fixed release notice language matching (e.g. "korean" → "ko").
+### ko
+릴리스 공지 언어 매칭 수정 (예: "korean" → "ko").
+
 ## v0.15.9
 ### en
 Fixed release notice not displaying after `reap update`. Path resolution now uses `require.resolve` instead of `__dirname`.

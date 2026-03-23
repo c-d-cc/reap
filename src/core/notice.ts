@@ -44,7 +44,18 @@ export function fetchReleaseNotice(version: string, language: string): string | 
     const section = nextVersion === -1 ? rest : rest.slice(0, nextVersion);
 
     // Find language subsection: ### en or ### ko
-    const lang = language.toLowerCase();
+    const LANG_MAP: Record<string, string> = {
+      korean: "ko",
+      english: "en",
+      japanese: "ja",
+      chinese: "zh-cn",
+      spanish: "es",
+      french: "fr",
+      german: "de",
+      portuguese: "pt",
+    };
+    const raw = language.toLowerCase();
+    const lang = LANG_MAP[raw] ?? raw;
     const langPattern = new RegExp(`^### ${lang}\\s*$`, "im");
     const langMatch = langPattern.exec(section);
     if (!langMatch) {
