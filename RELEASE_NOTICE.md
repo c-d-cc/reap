@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.15.11
+### en
+Fixed `reap pull` incorrectly recommending merge for ahead-only branches. Now uses `git rev-list` for accurate ahead/behind/diverged detection.
+### ko
+`reap pull`이 ahead 상태에서 불필요한 merge를 추천하던 문제 수정. `git rev-list` 기반 정확한 ahead/behind/diverged 감지.
+
 ## v0.15.10
 ### en
 Fixed release notice language matching (e.g. "korean" → "ko").
