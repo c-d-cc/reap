@@ -4,6 +4,7 @@ import { LifeCycle } from "../../../core/lifecycle";
 import { MergeLifeCycle } from "../../../core/merge-lifecycle";
 import { emitOutput, emitError } from "../../../core/run-output";
 import { executeHooks } from "../../../core/hook-engine";
+import { setNonce } from "../../../core/stage-transition";
 import type { LifeCycleStage, MergeStage, AnyStage } from "../../../types";
 
 function getFlag(args: string[], name: string): string | undefined {
@@ -84,11 +85,9 @@ export async function execute(paths: ReapPaths, phase?: string, argv: string[] =
     const reason = getFlag(argv, "reason") ?? "No reason provided";
     const refs = (getFlag(argv, "refs") ?? "").split(",").filter(Boolean);
 
-    // Update state — reset nonce fields so target stage entry works like first entry
+    // Update state — generate entry nonce for target stage to maintain locking chain
     state.stage = target;
-    state.lastNonce = undefined;
-    state.expectedHash = undefined;
-    state.phase = undefined;
+    setNonce(state, target, "entry");
     state.timeline.push({
       stage: target,
       at: new Date().toISOString(),
