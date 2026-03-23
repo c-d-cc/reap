@@ -1,4 +1,4 @@
-# REAP MANAGED — Do not modify directly. Use reap run commands.
+# REAP MANAGED — Do not modify directly. Use 'reap run <stage> --phase <phase>' to update.
 # Sync (Genome-Source Consistency)
 
 ## Genome-Source Comparison

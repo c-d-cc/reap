@@ -1,4 +1,4 @@
-# REAP MANAGED — Do not modify directly. Use reap run commands.
+# REAP MANAGED — Do not modify directly. Use 'reap run <stage> --phase <phase>' to update.
 # Merge (Source Merge)
 
 ## Git Merge Result

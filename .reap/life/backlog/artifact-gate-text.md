@@ -1,7 +1,8 @@
 ---
 type: task
 priority: low
-status: pending
+status: consumed
+consumedBy: gen-160-74aee5
 ---
 
 # Artifact 상단 gate 문구 개선

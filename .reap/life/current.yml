@@ -1,0 +1,22 @@
+# REAP MANAGED — Do not modify directly. Use reap run next/back/start/abort.
+id: gen-160-74aee5
+goal: Artifact 상단 gate 문구 개선
+stage: validation
+genomeVersion: 68
+startedAt: 2026-03-23T05:19:35.456Z
+timeline:
+  - stage: objective
+    at: 2026-03-23T05:19:35.456Z
+  - stage: planning
+    at: 2026-03-23T05:20:18.345Z
+  - stage: implementation
+    at: 2026-03-23T05:20:38.581Z
+  - stage: validation
+    at: 2026-03-23T05:21:49.124Z
+type: normal
+parents:
+  - gen-159-59e74a
+genomeHash: 0d68ab7c
+lastNonce: f2d2de067efb5bee23648280d9cb1021
+expectedHash: 7564a58685d1cd68563663113821ee9235cde4cb7a045e3c39cf272a84d836c1
+phase: entry
