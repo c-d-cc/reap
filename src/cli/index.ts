@@ -352,6 +352,27 @@ program
   });
 
 program
+  .command("make <target>")
+  .description("Create REAP resources (e.g., backlog items)")
+  .allowUnknownOption()
+  .action(async (target: string, _options: any, cmd: any) => {
+    try {
+      const cwd = process.cwd();
+      const paths = new ReapPaths(cwd);
+      if (!(await paths.isReapProject())) {
+        console.error("Error: Not a REAP project. Run 'reap init' first.");
+        process.exit(1);
+      }
+      const passArgs = [target, ...cmd.args.slice(1)];
+      const { execute } = await import("./commands/run/make");
+      await execute(paths, undefined, passArgs);
+    } catch (e: any) {
+      console.error(`Error: ${e.message}`);
+      process.exit(1);
+    }
+  });
+
+program
   .command("run <command>")
   .description("Run a REAP command script (internal, used by slash commands)")
   .option("--phase <phase>", "Start from a specific phase")
