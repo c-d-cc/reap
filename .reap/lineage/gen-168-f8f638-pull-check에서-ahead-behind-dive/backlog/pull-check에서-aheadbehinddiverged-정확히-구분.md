@@ -1,7 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
+consumedBy: gen-168-f8f638
 ---
 
 # pull check에서 ahead/behind/diverged 정확히 구분

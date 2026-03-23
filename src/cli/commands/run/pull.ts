@@ -1,11 +1,25 @@
 import type { ReapPaths } from "../../../core/paths";
 import { GenerationManager } from "../../../core/generation";
-import { MergeGenerationManager } from "../../../core/merge-generation";
 import { gitRefExists, gitCurrentBranch } from "../../../core/git";
 import { emitOutput, emitError } from "../../../core/run-output";
-import * as lineageUtils from "../../../core/lineage";
-import { canFastForward } from "../../../core/merge-generation";
 import { execSync } from "child_process";
+
+/**
+ * git rev-list --left-right --count HEAD...target 로 ahead/behind 카운트를 반환한다.
+ * @returns { ahead: number, behind: number }
+ */
+function getAheadBehind(target: string, cwd: string): { ahead: number; behind: number } {
+  try {
+    const result = execSync(`git rev-list --left-right --count HEAD...${target}`, {
+      cwd,
+      encoding: "utf-8",
+    }).trim();
+    const [aheadStr, behindStr] = result.split(/\s+/);
+    return { ahead: parseInt(aheadStr, 10) || 0, behind: parseInt(behindStr, 10) || 0 };
+  } catch {
+    throw new Error(`Failed to compare HEAD with ${target}. Ensure both refs exist.`);
+  }
+}
 
 export async function execute(paths: ReapPaths, phase?: string, argv: string[] = []): Promise<void> {
   const positionals = argv.filter(a => !a.startsWith("--"));
@@ -39,7 +53,7 @@ export async function execute(paths: ReapPaths, phase?: string, argv: string[] =
   }
 
   if (phase === "check") {
-    // Phase 2: Divergence detection and fast-forward check
+    // Phase 2: ahead/behind detection via git rev-list
     const targetBranch = targetBranchArg;
     if (!targetBranch) {
       emitError("pull", "Target branch is required. Usage: reap run pull --phase check <branch>");
@@ -50,81 +64,73 @@ export async function execute(paths: ReapPaths, phase?: string, argv: string[] =
     }
 
     const currentBranch = gitCurrentBranch(paths.projectRoot);
-    const mgm = new MergeGenerationManager(paths);
-    const localMetas = await lineageUtils.listMeta(paths);
+    const { ahead, behind } = getAheadBehind(targetBranch, paths.projectRoot);
 
-    // Try to resolve remote lineage for fast-forward check
-    let remoteMetasRaw: Array<{ id: string; completedAt: string }> = [];
-    try {
-      const remoteMetas = (mgm as any).listMetaFromRef(targetBranch, paths.projectRoot);
-      remoteMetasRaw = remoteMetas;
-    } catch { /* may fail if no lineage on remote */ }
-
-    if (localMetas.length === 0 && remoteMetasRaw.length === 0) {
+    if (ahead === 0 && behind === 0) {
+      // up-to-date
       emitOutput({
         status: "ok",
         command: "pull",
         phase: "up-to-date",
         completed: ["gate", "fetch", "detect"],
-        context: { targetBranch, currentBranch },
-        message: "No lineage on either branch. Already up to date.",
+        context: { targetBranch, currentBranch, ahead, behind },
+        message: "Already up to date.",
       });
       return;
     }
 
-    // Check if we can fast-forward
-    if (localMetas.length > 0 && remoteMetasRaw.length > 0) {
-      const localLatest = localMetas.sort((a, b) =>
-        new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-      )[0];
-      const remoteLatest = remoteMetasRaw.sort((a: any, b: any) =>
-        new Date(b.completedAt).getTime() - new Date(a.completedAt).getTime()
-      )[0];
-
-      const allMetas = [...localMetas];
-      for (const rm of remoteMetasRaw as any[]) {
-        if (!allMetas.find(m => m.id === rm.id)) allMetas.push(rm);
-      }
-
-      const ffResult = canFastForward(localLatest.id, remoteLatest.id, allMetas);
-
-      if (ffResult.fastForward) {
-        emitOutput({
-          status: "prompt",
-          command: "pull",
-          phase: "fast-forward",
-          completed: ["gate", "fetch", "detect", "ff-check"],
-          context: {
-            targetBranch,
-            currentBranch,
-            localLatestId: localLatest.id,
-            remoteLatestId: remoteLatest.id,
-            reason: ffResult.reason,
-          },
-          prompt: [
-            `Fast-forward possible: ${ffResult.reason}`,
-            "",
-            `Run \`git merge --ff ${targetBranch}\`, then \`git submodule update --init\`.`,
-            "No merge generation needed.",
-          ].join("\n"),
-        });
-        return;
-      }
+    if (ahead > 0 && behind === 0) {
+      // ahead only — local has commits not on remote
+      emitOutput({
+        status: "ok",
+        command: "pull",
+        phase: "ahead",
+        completed: ["gate", "fetch", "detect"],
+        context: { targetBranch, currentBranch, ahead, behind },
+        message: `Local is ${ahead} commit(s) ahead of ${targetBranch}. Consider pushing.`,
+        prompt: [
+          `## Local is ahead by ${ahead} commit(s)`,
+          "",
+          `Your branch is ahead of \`${targetBranch}\`. No pull needed.`,
+          "Run `git push` to update the remote.",
+        ].join("\n"),
+      });
+      return;
     }
 
-    // Diverged — need merge generation
+    if (ahead === 0 && behind > 0) {
+      // behind only — fast-forward possible
+      emitOutput({
+        status: "prompt",
+        command: "pull",
+        phase: "fast-forward",
+        completed: ["gate", "fetch", "detect"],
+        context: { targetBranch, currentBranch, ahead, behind },
+        prompt: [
+          `## Behind by ${behind} commit(s) -- fast-forward possible`,
+          "",
+          `Run \`git merge --ff ${targetBranch}\`, then \`git submodule update --init\`.`,
+          "No merge generation needed.",
+        ].join("\n"),
+      });
+      return;
+    }
+
+    // ahead > 0 && behind > 0 — diverged
     emitOutput({
       status: "prompt",
       command: "pull",
       phase: "start-merge",
-      completed: ["gate", "fetch", "detect", "ff-check"],
+      completed: ["gate", "fetch", "detect"],
       context: {
         targetBranch,
         currentBranch,
+        ahead,
+        behind,
         diverged: true,
       },
       prompt: [
-        "## Branches have diverged -- full merge required",
+        `## Branches have diverged (ahead: ${ahead}, behind: ${behind}) -- full merge required`,
         "",
         "Execute the following sequence:",
         `1. Run /reap.merge.start ${targetBranch} (creates merge generation + detect report)`,
