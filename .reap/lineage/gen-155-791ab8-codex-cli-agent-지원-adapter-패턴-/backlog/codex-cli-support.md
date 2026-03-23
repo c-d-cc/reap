@@ -1,7 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
+consumedBy: gen-155-791ab8
 ---
 
 # Codex CLI Agent 지원 + Adapter 패턴 강화

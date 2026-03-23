@@ -29,6 +29,9 @@ if (!gl.dirExists(reapDir)) {
 }
 
 // Step 0: Install project-level skill files (.claude/skills/{name}/SKILL.md)
+// NOTE: This section is Claude Code-specific. Claude Code uses .claude/skills/ for
+// slash command discovery. Other agents (Codex CLI, OpenCode) use different mechanisms
+// (AGENTS.md, plugins) and this section is safely skipped when the directory doesn't exist.
 const fs = require('fs');
 const os = require('os');
 const userReapCommands = path.join(os.homedir(), '.reap', 'commands');

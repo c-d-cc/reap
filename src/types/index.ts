@@ -114,7 +114,7 @@ export interface StrictMode {
 }
 
 // Agent adapter types
-export type AgentName = "claude-code" | "opencode";
+export type AgentName = "claude-code" | "opencode" | "codex";
 
 export interface AgentAdapter {
   readonly name: AgentName;
@@ -147,8 +147,14 @@ export interface AgentAdapter {
   /** Clean up legacy user-level slash commands (e.g. ~/.claude/commands/reap.*.md) */
   cleanupLegacyCommands?(): Promise<string[]>;
 
-  /** Setup .claude/CLAUDE.md with REAP section in the project */
+  /** @deprecated Use setupAgentMd instead */
   setupClaudeMd?(projectRoot: string): Promise<{ action: "created" | "updated" | "skipped" }>;
+
+  /** Setup agent-specific instruction file (e.g. .claude/CLAUDE.md, .codex/AGENTS.md) */
+  setupAgentMd?(projectRoot: string): Promise<{ action: "created" | "updated" | "skipped" }>;
+
+  /** Clean up agent-specific project files during destroy (e.g. .claude/commands/, .codex/) */
+  cleanupProjectFiles?(projectRoot: string): Promise<{ removed: string[]; skipped: string[] }>;
 }
 
 export type BacklogItemType = "genome-change" | "environment-change" | "task";

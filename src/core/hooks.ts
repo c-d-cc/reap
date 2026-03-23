@@ -1,5 +1,4 @@
 import { AgentRegistry } from "./agents";
-import { ClaudeCodeAdapter } from "./agents/claude-code";
 import type { ReapConfig } from "../types";
 
 /**
@@ -57,35 +56,3 @@ export async function migrateHooks(
   return { results };
 }
 
-// --- Backward compatibility ---
-
-/**
- * @deprecated Use registerHooks() instead. Kept for backward compatibility.
- */
-export async function registerClaudeHook(
-  dryRun: boolean = false,
-): Promise<{ action: "created" | "updated" | "skipped" }> {
-  const adapter = new ClaudeCodeAdapter();
-  return adapter.registerSessionHook(dryRun);
-}
-
-/**
- * @deprecated Use syncHooks() instead. Kept for backward compatibility.
- */
-export async function syncHookRegistration(
-  dryRun: boolean = false,
-): Promise<{ action: "updated" | "skipped" }> {
-  const adapter = new ClaudeCodeAdapter();
-  return adapter.syncSessionHook(dryRun);
-}
-
-/**
- * @deprecated Use migrateHooks() instead. Kept for backward compatibility.
- */
-export async function migrateHooksJsonToSettings(
-  dryRun: boolean = false,
-): Promise<{ action: "migrated" | "skipped" }> {
-  const adapter = new ClaudeCodeAdapter();
-  const result = await adapter.migrate!(dryRun);
-  return { action: result.action as "migrated" | "skipped" };
-}

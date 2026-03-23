@@ -1,6 +1,6 @@
 import { join } from "path";
 import { homedir } from "os";
-import { mkdir, readdir, unlink } from "fs/promises";
+import { mkdir, readdir, rm, unlink } from "fs/promises";
 import { readTextFile, readTextFileOrThrow, writeTextFile } from "../fs";
 import { ReapPaths } from "../paths";
 import type { AgentAdapter, AgentName } from "../../types";
@@ -196,6 +196,61 @@ export class ClaudeCodeAdapter implements AgentAdapter {
       }
     } catch { /* dir may not exist */ }
     return removed;
+  }
+
+  async setupAgentMd(projectRoot: string): Promise<{ action: "created" | "updated" | "skipped" }> {
+    return this.setupClaudeMd(projectRoot);
+  }
+
+  async cleanupProjectFiles(projectRoot: string): Promise<{ removed: string[]; skipped: string[] }> {
+    const removed: string[] = [];
+    const skipped: string[] = [];
+
+    // Remove .claude/commands/reap.* files
+    const claudeCommandsDir = join(projectRoot, ".claude", "commands");
+    try {
+      const files = await readdir(claudeCommandsDir);
+      const matched = files.filter(f => f.startsWith("reap."));
+      for (const file of matched) {
+        await unlink(join(claudeCommandsDir, file));
+        removed.push(`.claude/commands/${file}`);
+      }
+      if (matched.length === 0) skipped.push(".claude/commands/reap.* (none found)");
+    } catch {
+      skipped.push(".claude/commands/reap.* (directory not found)");
+    }
+
+    // Remove .claude/skills/reap.* directories
+    const claudeSkillsDir = join(projectRoot, ".claude", "skills");
+    try {
+      const entries = await readdir(claudeSkillsDir);
+      const matched = entries.filter(e => e.startsWith("reap."));
+      for (const entry of matched) {
+        await rm(join(claudeSkillsDir, entry), { recursive: true, force: true });
+        removed.push(`.claude/skills/${entry}`);
+      }
+      if (matched.length === 0) skipped.push(".claude/skills/reap.* (none found)");
+    } catch {
+      skipped.push(".claude/skills/reap.* (directory not found)");
+    }
+
+    // Clean REAP section from .claude/CLAUDE.md
+    const claudeMdPath = join(projectRoot, ".claude", "CLAUDE.md");
+    const content = await readTextFile(claudeMdPath);
+    if (content !== null && content.includes("# REAP Project")) {
+      const cleaned = content.replace(/# REAP Project[\s\S]*?(?=\n# |\s*$)/, "").trim();
+      if (cleaned.length === 0) {
+        await unlink(claudeMdPath);
+        removed.push(".claude/CLAUDE.md (deleted, was REAP-only)");
+      } else {
+        await writeTextFile(claudeMdPath, cleaned + "\n");
+        removed.push(".claude/CLAUDE.md (REAP section removed)");
+      }
+    } else {
+      skipped.push(".claude/CLAUDE.md (no REAP section)");
+    }
+
+    return { removed, skipped };
   }
 
   async setupClaudeMd(projectRoot: string): Promise<{ action: "created" | "updated" | "skipped" }> {

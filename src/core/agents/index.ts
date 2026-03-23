@@ -1,10 +1,12 @@
 import type { AgentAdapter, AgentName, ReapConfig } from "../../types";
 import { ClaudeCodeAdapter } from "./claude-code";
+import { CodexAdapter } from "./codex";
 import { OpenCodeAdapter } from "./opencode";
 
 const ALL_ADAPTERS: AgentAdapter[] = [
   new ClaudeCodeAdapter(),
   new OpenCodeAdapter(),
+  new CodexAdapter(),
 ];
 
 export class AgentRegistry {

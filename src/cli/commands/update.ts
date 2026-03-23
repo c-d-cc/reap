@@ -157,14 +157,14 @@ export async function updateProject(projectRoot: string, dryRun: boolean = false
     }
   }
 
-  // Sync .claude/CLAUDE.md REAP section for all agents (project-level)
+  // Sync agent instruction files (e.g. .claude/CLAUDE.md, .codex/AGENTS.md)
   for (const adapter of adapters) {
-    if (typeof adapter.setupClaudeMd === "function") {
-      const mdResult = await adapter.setupClaudeMd(projectRoot);
+    if (typeof adapter.setupAgentMd === "function") {
+      const mdResult = await adapter.setupAgentMd(projectRoot);
       if (mdResult.action !== "skipped") {
-        result.updated.push(`[${adapter.displayName}] .claude/CLAUDE.md (${mdResult.action})`);
+        result.updated.push(`[${adapter.displayName}] agent md (${mdResult.action})`);
       } else {
-        result.skipped.push(`[${adapter.displayName}] .claude/CLAUDE.md`);
+        result.skipped.push(`[${adapter.displayName}] agent md`);
       }
     }
   }

@@ -11,6 +11,10 @@ export interface SyncSkillsResult {
 /**
  * Sync ~/.reap/commands/reap.*.md → .claude/skills/{name}/SKILL.md
  * Parses frontmatter from command files and generates SKILL.md with name/description.
+ *
+ * NOTE: This is Claude Code-specific logic. Claude Code uses .claude/skills/ for
+ * slash command discovery. Other agents (OpenCode, Codex CLI) use different mechanisms
+ * (plugins, AGENTS.md) and do not need skills syncing.
  */
 export async function syncSkillsToProject(
   projectRoot: string,

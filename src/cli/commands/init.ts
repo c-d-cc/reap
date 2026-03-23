@@ -168,9 +168,9 @@ export async function initProject(
     await adapter.installCommands(COMMAND_NAMES, sourceDir);
     log(`  Registering session hook for ${adapter.displayName}...`);
     await adapter.registerSessionHook();
-    if (typeof adapter.setupClaudeMd === "function") {
-      const mdResult = await adapter.setupClaudeMd(projectRoot);
-      log(`  .claude/CLAUDE.md: ${mdResult.action}`);
+    if (typeof adapter.setupAgentMd === "function") {
+      const mdResult = await adapter.setupAgentMd(projectRoot);
+      log(`  [${adapter.displayName}] agent md: ${mdResult.action}`);
     }
   }
 
