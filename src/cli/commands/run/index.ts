@@ -36,6 +36,7 @@ const COMMANDS: Record<string, () => Promise<{ execute: CommandExecutor }>> = {
   config: () => import("./config"),
   "update-genome": () => import("./update-genome"),
   refreshKnowledge: () => import("./refresh-knowledge"),
+  make: () => import("./make"),
 };
 
 export async function runCommand(command: string, phase?: string, argv: string[] = []): Promise<void> {

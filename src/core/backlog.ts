@@ -1,7 +1,10 @@
-import { readdir } from "fs/promises";
+import { readdir, mkdir } from "fs/promises";
 import { join } from "path";
 import YAML from "yaml";
 import { readTextFile, writeTextFile } from "./fs";
+
+export const VALID_BACKLOG_TYPES = ["genome-change", "environment-change", "task"] as const;
+export type BacklogType = (typeof VALID_BACKLOG_TYPES)[number];
 
 export interface BacklogFile {
   filename: string;
@@ -97,4 +100,47 @@ function parseFrontmatter(content: string): { frontmatter: Record<string, unknow
   } catch {
     return { frontmatter: {}, body: content };
   }
+}
+
+export function toKebabCase(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export interface CreateBacklogOptions {
+  type: string;
+  title: string;
+  body?: string;
+  priority?: string;
+}
+
+export async function createBacklog(
+  backlogDir: string,
+  opts: CreateBacklogOptions,
+): Promise<string> {
+  if (!(VALID_BACKLOG_TYPES as readonly string[]).includes(opts.type)) {
+    throw new Error(
+      `Invalid backlog type: "${opts.type}". Allowed: ${VALID_BACKLOG_TYPES.join(", ")}`,
+    );
+  }
+
+  const priority = opts.priority ?? "medium";
+  const filename = `${toKebabCase(opts.title)}.md`;
+  const frontmatter: Record<string, string> = {
+    type: opts.type,
+    status: "pending",
+    priority,
+  };
+
+  const bodyContent = opts.body ? `\n# ${opts.title}\n\n${opts.body}\n` : `\n# ${opts.title}\n`;
+  const content = `---\n${YAML.stringify(frontmatter).trim()}\n---\n${bodyContent}`;
+
+  await mkdir(backlogDir, { recursive: true });
+  await writeTextFile(join(backlogDir, filename), content);
+
+  return filename;
 }

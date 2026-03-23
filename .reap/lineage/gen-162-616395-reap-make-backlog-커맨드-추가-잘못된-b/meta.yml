@@ -1,0 +1,8 @@
+id: gen-162-616395
+type: normal
+parents:
+  - gen-161-b18c79
+goal: reap make backlog 커맨드 추가 + 잘못된 backlog 파일 정리
+genomeHash: 0d68ab7c
+startedAt: 2026-03-23T05:37:19.584Z
+completedAt: 2026-03-23T05:42:17.809Z
