@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.15.8
+### en
+Removed `version` field from config.yml. No more uncommitted changes after `reap update`.
+### ko
+config.yml에서 `version` 필드 제거. `reap update` 후 uncommitted changes 발생 문제 해소.
+
 ## v0.15.7
 ### en
 Renamed UPDATE_NOTICE.md to RELEASE_NOTICE.md. Notice content now inline (no GitHub Discussions dependency).
