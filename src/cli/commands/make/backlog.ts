@@ -35,7 +35,7 @@ export async function execute(paths: ReapPaths, argv: string[]): Promise<void> {
     command: "make",
     phase: "done",
     completed: ["backlog-create"],
-    message: `Backlog created: ${filename}`,
-    context: { filename, type: flags.type, title: flags.title },
+    message: `Backlog created: ${filename}. Edit the file directly to add detailed content (headers, lists, code blocks, etc.).`,
+    context: { filename, type: flags.type, title: flags.title, path: `${paths.backlog}/${filename}` },
   });
 }
