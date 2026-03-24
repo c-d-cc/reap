@@ -35,6 +35,10 @@ export const ko: Translations = {
     },
   },
 
+  homeBanner: {
+    text: "v0.16에서 Breaking Changes가 예정되어 있습니다",
+    cta: "릴리스 노트 →",
+  },
   // Hero Page
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
@@ -713,7 +717,13 @@ AI에게 nonce 반환                          ←── AI가 nonce 전달
     title: "릴리스 노트",
     breadcrumb: "기타",
     breakingBannerTitle: "v0.16 Breaking Changes 예정",
-    breakingBannerDesc: "v0.16에서 breaking change가 예정되어 있습니다. v0.15.x에서 v0.16.x로의 자동 업데이트가 차단됩니다. 수동 업데이트 필요: npm install -g @c-d-cc/reap@latest",
+    breakingBannerDesc: "v0.15.x에서 v0.16.x로의 자동 업데이트가 차단됩니다. /reap.update를 실행하여 수동 업데이트하세요.",
+    breakingBannerItems: [
+      "REAP이 Self Evolving Pipeline으로 전환됩니다 — AI가 인간과 협업하여 소프트웨어를 자가 진화하는 recursive pipeline.",
+      "Lifecycle 변경: learning → planning → implementation → validation → completion (Learning stage 신규 추가, Objective와 Planning을 Planning으로 병합).",
+      "Slash command 구조 변경: skill 매칭 최적화를 위해 auto-matching 10개 + direct-invocation 6개로 재편.",
+      "CLI 커맨드가 사용자 인터페이스에서 제거됩니다. 모든 조작은 slash command로만 수행 (CLI 커맨드는 내부 용도로만 사용).",
+    ],
     versions: [
       { version: "0.15.13", notes: "commander.js를 자체 CLI 라이브러리로 대체. 런타임 의존성 2개 -> 1개." },
       { version: "0.15.12", notes: "reap update 자동 업그레이드 후 릴리스 공지가 정상 표시됩니다." },

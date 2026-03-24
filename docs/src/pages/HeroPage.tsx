@@ -57,6 +57,17 @@ export function HeroPage() {
           </div>
         </section>
 
+        {/* Breaking change banner */}
+        <section className="border-b border-orange-500/30 bg-orange-500/5 px-6 py-3 md:px-8">
+          <div className="max-w-5xl mx-auto flex items-center justify-between gap-4">
+            <span className="text-sm text-orange-400">{t.homeBanner.text}</span>
+            <Link href="/docs/release-notes"
+              className="shrink-0 text-xs font-medium text-orange-400 border border-orange-500/40 rounded px-3 py-1.5 hover:bg-orange-500/10 transition-colors">
+              {t.homeBanner.cta}
+            </Link>
+          </div>
+        </section>
+
         {/* Why REAP */}
         <Section title={t.hero.whyReap}>
           <p className="text-sm text-muted-foreground mb-4 leading-relaxed">

@@ -64,7 +64,7 @@ module.exports = async (ctx) => {
                 // Auto-update guard: check autoUpdateMinVersion
                 const minVersion = gl.exec("npm view @c-d-cc/reap reap.autoUpdateMinVersion 2>/dev/null", execOpts);
                 if (minVersion && !semverGte(installed, minVersion)) {
-                  autoUpdateMessage = `[BREAKING] Auto-update blocked: v${installed} -> v${latest} contains breaking changes. Inform the user about this breaking change and ask if they want to update manually: npm install -g @c-d-cc/reap@${latest}. Release notes: https://reap.cc/docs/release-notes`;
+                  autoUpdateMessage = `[BREAKING] Auto-update blocked: v${installed} -> v${latest} contains breaking changes. Inform the user about this breaking change and ask if they want to update via '/reap.update'. Release notes: https://reap.cc/docs/release-notes`;
                 } else {
                   execSync("npm update -g @c-d-cc/reap >/dev/null 2>&1", { ...execOpts, stdio: "ignore" });
                   execSync("reap update >/dev/null 2>&1", { ...execOpts, stdio: "ignore" });

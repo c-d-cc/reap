@@ -35,6 +35,10 @@ export const ja: Translations = {
     },
   },
 
+  homeBanner: {
+    text: "v0.16でBreaking Changesが予定されています",
+    cta: "リリースノート →",
+  },
   // Hero Page
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
@@ -713,7 +717,13 @@ AIにnonce返却                              ←── AIがnonceを渡す
     title: "リリースノート",
     breadcrumb: "その他",
     breakingBannerTitle: "v0.16 Breaking Changes予定",
-    breakingBannerDesc: "v0.16でbreaking changeが予定されています。v0.15.xからv0.16.xへの自動アップデートはブロックされます。手動アップデートが必要: npm install -g @c-d-cc/reap@latest",
+    breakingBannerDesc: "v0.15.xからv0.16.xへの自動アップデートはブロックされます。/reap.updateを実行して手動アップデートしてください。",
+    breakingBannerItems: [
+      "REAPがSelf Evolving Pipelineへ移行 — AIが人間と協力してソフトウェアを自己進化させるrecursive pipeline。",
+      "ライフサイクル変更: learning → planning → implementation → validation → completion（Learning stage新規追加、ObjectiveとPlanningをPlanningに統合）。",
+      "スラッシュコマンド再編: skillマッチング最適化のためauto-matching 10個 + direct-invocation 6個に整理。",
+      "CLIコマンドがユーザーインターフェースから削除。全操作はスラッシュコマンドのみ（CLIコマンドは内部用途のみ）。",
+    ],
     versions: [
       { version: "0.15.13", notes: "commander.jsを自作CLIライブラリに置き換え。ランタイム依存: 2 -> 1。" },
       { version: "0.15.12", notes: "reap update自動アップグレード後のリリース通知が正常に表示されるようになりました。" },

@@ -144,7 +144,7 @@ if (installed && installed.includes('+dev')) {
     const minVersion = gl.exec('npm view @c-d-cc/reap reap.autoUpdateMinVersion');
     if (minVersion && !semverGte(installed, minVersion)) {
       // Breaking change detected — block auto-update
-      autoUpdateMessage = `[BREAKING] Auto-update blocked: v${installed} → v${latest} contains breaking changes. Inform the user about this breaking change and ask if they want to update manually: npm install -g @c-d-cc/reap@${latest}. Release notes: https://reap.cc/docs/release-notes`;
+      autoUpdateMessage = `[BREAKING] Auto-update blocked: v${installed} → v${latest} contains breaking changes. Inform the user about this breaking change and ask if they want to update via '/reap.update'. Release notes: https://reap.cc/docs/release-notes`;
     } else {
       const updated = gl.exec('npm update -g @c-d-cc/reap');
       if (updated !== null) {

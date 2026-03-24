@@ -13,9 +13,24 @@ export default function ReleaseNotesPage() {
           <h2 className="text-lg font-bold text-orange-400 mb-2">
             {t.releaseNotes.breakingBannerTitle}
           </h2>
-          <p className="text-sm text-orange-300/90 leading-relaxed">
+          <p className="text-sm text-orange-300/90 leading-relaxed mb-3">
             {t.releaseNotes.breakingBannerDesc}
           </p>
+          <ul className="list-disc list-inside space-y-2 text-sm text-orange-300/80">
+            {t.releaseNotes.breakingBannerItems.map((item, i) => {
+              const match = item.match(/^(.+?)\s*\(([^)]+)\)\s*\.?\s*$/);
+              if (match) {
+                return (
+                  <li key={i}>
+                    {match[1]}
+                    <br />
+                    <span className="ml-5 text-orange-300/60">({match[2]})</span>
+                  </li>
+                );
+              }
+              return <li key={i}>{item}</li>;
+            })}
+          </ul>
         </div>
 
         {/* Version entries — newest first */}

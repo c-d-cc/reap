@@ -35,6 +35,10 @@ export const zhCN: Translations = {
     },
   },
 
+  homeBanner: {
+    text: "v0.16 将包含 Breaking Changes",
+    cta: "发布说明 →",
+  },
   // Hero Page
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
@@ -713,7 +717,13 @@ strict:
     title: "发布说明",
     breadcrumb: "其他",
     breakingBannerTitle: "v0.16 Breaking Changes 预告",
-    breakingBannerDesc: "v0.16 将包含 breaking change。v0.15.x 到 v0.16.x 的自动更新将被阻止。需要手动更新: npm install -g @c-d-cc/reap@latest",
+    breakingBannerDesc: "v0.15.x 到 v0.16.x 的自动更新将被阻止。请运行 /reap.update 手动更新。",
+    breakingBannerItems: [
+      "REAP转型为Self Evolving Pipeline — AI与人类协作，通过recursive pipeline自我进化软件。",
+      "生命周期变更: learning → planning → implementation → validation → completion（新增Learning阶段，Objective和Planning合并为Planning）。",
+      "斜杠命令重组: 为优化skill匹配，整理为auto-matching 10个 + direct-invocation 6个。",
+      "CLI命令从用户界面移除。所有操作仅通过斜杠命令进行（CLI命令仅供内部使用）。",
+    ],
     versions: [
       { version: "0.15.13", notes: "用内置CLI库替换commander.js。运行时依赖: 2 -> 1。" },
       { version: "0.15.12", notes: "reap update 自动升级后发布通知正常显示。" },

@@ -34,6 +34,10 @@ export const en = {
   },
 
   // Hero Page
+  homeBanner: {
+    text: "Breaking changes coming in v0.16",
+    cta: "Release Notes →",
+  },
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
     title: "REAP",
@@ -847,7 +851,13 @@ Description of the task.`,
     title: "Release Notes",
     breadcrumb: "Other",
     breakingBannerTitle: "Breaking Changes in v0.16",
-    breakingBannerDesc: "v0.16 introduces breaking changes. Automatic updates from v0.15.x to v0.16.x are blocked. Manual update required: npm install -g @c-d-cc/reap@latest",
+    breakingBannerDesc: "Automatic updates from v0.15.x to v0.16.x are blocked. Run /reap.update to upgrade manually.",
+    breakingBannerItems: [
+      "REAP transitions to a Self Evolving Pipeline — AI collaborates with humans to self-evolve software through a recursive pipeline.",
+      "Lifecycle changed: learning → planning → implementation → validation → completion (new Learning stage added, Objective and Planning merged into Planning).",
+      "Slash commands restructured for optimal skill matching: 10 auto-matching skills + 6 direct-invocation-only skills.",
+      "CLI commands removed from user-facing interface. All operations now through slash commands only (CLI commands reserved for internal use).",
+    ],
     versions: [
       {
         version: "0.15.13",

@@ -48,7 +48,7 @@ export function selfUpgrade(): SelfUpgradeResult {
         blocked: true,
         from: installed,
         to: latest,
-        reason: `Breaking change: v${installed} -> v${latest} requires manual update. See https://reap.cc/docs/release-notes`,
+        reason: `Breaking change: v${installed} -> v${latest}. Run '/reap.update' to upgrade manually. See https://reap.cc/docs/release-notes`,
       };
     }
 
