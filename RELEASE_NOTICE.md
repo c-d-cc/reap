@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.15.15
+### en
+Added v0.16 breaking change pre-announcement to README.
+### ko
+README에 v0.16 breaking change 사전 고지 추가.
+
 ## v0.15.14
 ### en
 Auto-update guard for breaking changes. New Release Notes docs page with v0.16 pre-announcement.

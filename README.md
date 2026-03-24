@@ -23,6 +23,15 @@
 
 REAP captures an application's design knowledge — the Genome (architecture, conventions, constraints) and Environment (external APIs, infrastructure) — then sets objectives for each generation to implement. Defects discovered along the way feed back into the Knowledge Base. As generations accumulate, knowledge evolves and the Source Code (Civilization) grows.
 
+> **⚠️ Breaking Changes in v0.16**
+>
+> - REAP transitions to a Self Evolving Pipeline
+> - Lifecycle changed: learning → planning → implementation → validation → completion (new Learning stage, Objective + Planning merged)
+> - Slash commands restructured for optimal skill matching
+> - CLI commands removed from user-facing interface (internal use only)
+>
+> Automatic updates from v0.15.x → v0.16.x are blocked. See [Release Notes](https://reap.cc/docs/release-notes).
+
 ## Table of Contents
 
 - [Why REAP?](#why-reap)

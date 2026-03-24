@@ -23,6 +23,15 @@
 
 REAPはアプリケーションの設計知識 — Genome（アーキテクチャ、コンベンション、制約）とEnvironment（外部API、インフラ） — を記録し、各世代で目標を設定して実装します。その過程で発見した欠陥はKnowledge Baseにフィードバックされます。世代を重ねるごとに知識が進化し、Source Code（Civilization）が成長します。
 
+> **⚠️ v0.16 Breaking Changes予定**
+>
+> - REAPがSelf Evolving Pipelineへ移行
+> - ライフサイクル変更: learning → planning → implementation → validation → completion（Learning stage新規追加、ObjectiveとPlanningをPlanningに統合）
+> - スラッシュコマンド再編: skillマッチング最適化
+> - CLIコマンドがユーザーインターフェースから削除（内部用途のみ）
+>
+> v0.15.xからv0.16.xへの自動アップデートはブロックされます。[リリースノート](https://reap.cc/docs/release-notes)参照。
+
 ## 目次
 
 - [なぜREAPか？](#なぜreapか)

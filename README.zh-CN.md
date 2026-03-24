@@ -23,6 +23,15 @@
 
 REAP记录应用程序的设计知识 — Genome（架构、约定、约束）和Environment（外部API、基础设施） — 并在每个世代设定目标进行实现。过程中发现的缺陷反馈到Knowledge Base。随着世代的积累，知识不断进化，Source Code（Civilization）持续成长。
 
+> **⚠️ v0.16 Breaking Changes 预告**
+>
+> - REAP转型为Self Evolving Pipeline
+> - 生命周期变更: learning → planning → implementation → validation → completion（新增Learning阶段，Objective和Planning合并为Planning）
+> - 斜杠命令重组: skill匹配优化
+> - CLI命令从用户界面移除（仅供内部使用）
+>
+> v0.15.x到v0.16.x的自动更新将被阻止。参见[发布说明](https://reap.cc/docs/release-notes)。
+
 ## 目录
 
 - [为什么选择REAP？](#为什么选择reap)
