@@ -53,7 +53,7 @@ async function checkDirectoryStructure(
     { path: paths.environment, name: "environment/" },
     { path: paths.life, name: "life/" },
     { path: paths.lineage, name: "lineage/" },
-    { path: paths.backlog, name: "life/backlog/" },
+    { path: paths.backlog, name: "life/backlog/", optional: true },
     { path: paths.hooks, name: "hooks/" },
     { path: paths.hookConditions, name: "hooks/conditions/" },
   ];
@@ -65,7 +65,9 @@ async function checkDirectoryStructure(
         errors.push(`${dir.name} directory missing`);
       }
     } catch {
-      errors.push(`${dir.name} directory missing`);
+      if (!("optional" in dir && dir.optional)) {
+        errors.push(`${dir.name} directory missing`);
+      }
     }
   }
 }

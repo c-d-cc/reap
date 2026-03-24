@@ -242,7 +242,6 @@ export class GenerationManager {
       }
     } catch { /* no backlog items */ }
 
-
     // Clear current
     await writeTextFile(this.paths.currentYml, "");
 
