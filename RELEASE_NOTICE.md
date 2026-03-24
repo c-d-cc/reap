@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.15.13
+### en
+Replaced `commander.js` with built-in CLI library. Runtime dependencies: 2 → 1.
+### ko
+`commander.js`를 자체 CLI 라이브러리로 대체. 런타임 의존성 2개 → 1개.
+
 ## v0.15.12
 ### en
 Release notice now displays correctly after `reap update` auto-upgrade.

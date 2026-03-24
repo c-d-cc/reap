@@ -1,7 +1,7 @@
-## Bug Fixes
+## What's New
 
-- Release notice now displays correctly after `reap update` by delegating to the newly installed binary
+- Replace `commander.js` with a built-in zero-dependency CLI library, reducing runtime dependencies to 1 (`yaml`)
 
 ## Generations
 
-- **gen-169-17c5c0**: selfUpgrade 후 새 바이너리로 notice 표시
+- No new generations since v0.15.12 (internal refactoring only)
