@@ -1,0 +1,9 @@
+id: gen-170-60bde7
+type: normal
+parents:
+  - gen-169-17c5c0
+goal: "auto-update guard 구현: 0.16.0 breaking change 대비 자동 업데이트 차단 +
+  release-notes 문서 페이지 추가"
+genomeHash: c2e6348e
+startedAt: 2026-03-24T16:27:47.585Z
+completedAt: 2026-03-24T16:50:24.858Z
