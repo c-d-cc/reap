@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-import { program } from "commander";
+import { program } from "../libs/cli";
 import { createInterface } from "readline";
 import { initProject } from "./commands/init";
 import { updateProject, selfUpgrade, type SelfUpgradeResult } from "./commands/update";
