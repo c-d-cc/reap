@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.15.14
+### en
+Auto-update guard for breaking changes. New Release Notes docs page with v0.16 pre-announcement.
+### ko
+Breaking change 대비 자동 업데이트 차단 기능 추가. v0.16 사전 고지가 포함된 릴리스 노트 페이지 신규.
+
 ## v0.15.13
 ### en
 Replaced `commander.js` with built-in CLI library. Runtime dependencies: 2 → 1.
