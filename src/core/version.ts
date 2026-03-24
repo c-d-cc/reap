@@ -1,6 +1,37 @@
 import { execSync } from "child_process";
 
 /**
+ * Compare two semver strings: returns true if a >= b.
+ * Handles only numeric major.minor.patch (no pre-release tags).
+ */
+export function semverGte(a: string, b: string): boolean {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] ?? 0) > (pb[i] ?? 0)) return true;
+    if ((pa[i] ?? 0) < (pb[i] ?? 0)) return false;
+  }
+  return true; // equal
+}
+
+/**
+ * Check the autoUpdateMinVersion field from the latest published @c-d-cc/reap.
+ * Returns the minVersion string, or null if the check fails.
+ */
+export function checkAutoUpdateMinVersion(): string | null {
+  try {
+    const result = execSync("npm view @c-d-cc/reap reap.autoUpdateMinVersion", {
+      timeout: 10_000,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return result.trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Check the latest published version of @c-d-cc/reap on npm.
  * Returns the version string, or null if the check fails (network error, timeout, etc.).
  */

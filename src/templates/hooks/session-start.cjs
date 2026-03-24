@@ -117,6 +117,17 @@ if (gl.dirExists(userReapCommands)) {
   }
 }
 
+// Inline semver comparison (no external deps): returns true if a >= b
+function semverGte(a, b) {
+  const pa = a.split('.').map(Number);
+  const pb = b.split('.').map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] || 0) > (pb[i] || 0)) return true;
+    if ((pa[i] || 0) < (pb[i] || 0)) return false;
+  }
+  return true;
+}
+
 // Step 1: Version check + Auto-update
 log('Checking for updates...');
 let autoUpdateMessage = '';
@@ -129,10 +140,17 @@ if (installed && installed.includes('+dev')) {
 } else if (installed && latest && installed !== latest) {
   const autoUpdate = configContent ? /^autoUpdate:\s*true/m.test(configContent) : false;
   if (autoUpdate) {
-    const updated = gl.exec('npm update -g @c-d-cc/reap');
-    if (updated !== null) {
-      gl.exec('reap update');
-      autoUpdateMessage = `REAP auto-updated: v${installed} → v${latest}`;
+    // Auto-update guard: check autoUpdateMinVersion before upgrading
+    const minVersion = gl.exec('npm view @c-d-cc/reap reap.autoUpdateMinVersion');
+    if (minVersion && !semverGte(installed, minVersion)) {
+      // Breaking change detected — block auto-update
+      autoUpdateMessage = `[BREAKING] Auto-update blocked: v${installed} → v${latest} contains breaking changes. Inform the user about this breaking change and ask if they want to update manually: npm install -g @c-d-cc/reap@${latest}. Release notes: https://reap.cc/docs/release-notes`;
+    } else {
+      const updated = gl.exec('npm update -g @c-d-cc/reap');
+      if (updated !== null) {
+        gl.exec('reap update');
+        autoUpdateMessage = `REAP auto-updated: v${installed} → v${latest}`;
+      }
     }
   } else {
     updateAvailableMessage = `update available: v${installed} → v${latest}`;
@@ -178,7 +196,11 @@ if (genomeStaleWarning) {
 // Build auto-update section
 let updateSection = '';
 if (autoUpdateMessage) {
-  updateSection = `\n\n## Auto-Update\n${autoUpdateMessage}. Tell the user: "${autoUpdateMessage}"`;
+  if (autoUpdateMessage.startsWith('[BREAKING]')) {
+    updateSection = `\n\n## Auto-Update (Breaking Change Detected)\n${autoUpdateMessage}\n\nIMPORTANT: On your first response, explain to the user that a new REAP version is available but contains breaking changes. Show them the release notes link and ask for explicit confirmation before they run the manual update command. Do NOT silently skip this.`;
+  } else {
+    updateSection = `\n\n## Auto-Update\n${autoUpdateMessage}. Tell the user: "${autoUpdateMessage}"`;
+  }
 }
 
 // Build session init display

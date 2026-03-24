@@ -29,6 +29,7 @@ export const en = {
       comparison: "Comparison",
       configuration: "Configuration",
       recoveryGeneration: "Recovery Generation",
+      releaseNotes: "Release Notes",
     },
   },
 
@@ -839,6 +840,56 @@ priority: medium
 # Task Title
 
 Description of the task.`,
+  },
+
+  // Release Notes Page
+  releaseNotes: {
+    title: "Release Notes",
+    breadcrumb: "Other",
+    breakingBannerTitle: "Breaking Changes in v0.16",
+    breakingBannerDesc: "v0.16 introduces breaking changes. Automatic updates from v0.15.x to v0.16.x are blocked. Manual update required: npm install -g @c-d-cc/reap@latest",
+    versions: [
+      {
+        version: "0.15.13",
+        notes: "Replaced commander.js with built-in CLI library. Runtime dependencies: 2 -> 1.",
+      },
+      {
+        version: "0.15.12",
+        notes: "Release notice now displays correctly after reap update auto-upgrade.",
+      },
+      {
+        version: "0.15.11",
+        notes: "Fixed reap pull incorrectly recommending merge for ahead-only branches. Now uses git rev-list for accurate ahead/behind/diverged detection.",
+      },
+      {
+        version: "0.15.10",
+        notes: "Fixed release notice language matching (e.g. \"korean\" -> \"ko\").",
+      },
+      {
+        version: "0.15.9",
+        notes: "Fixed release notice not displaying after reap update. Path resolution now uses require.resolve instead of __dirname.",
+      },
+      {
+        version: "0.15.8",
+        notes: "Removed version field from config.yml. No more uncommitted changes after reap update.",
+      },
+      {
+        version: "0.15.7",
+        notes: "Renamed UPDATE_NOTICE.md to RELEASE_NOTICE.md. Notice content now inline (no GitHub Discussions dependency).",
+      },
+      {
+        version: "0.15.6",
+        notes: "Fixed UPDATE_NOTICE.md missing from npm package.",
+      },
+      {
+        version: "0.15.5",
+        notes: "Integrity check no longer warns about source-map.md line count.",
+      },
+      {
+        version: "0.15.4",
+        notes: "Bug fixes and new reap make backlog command. Fixed lineage archiving, reap back nonce chain, added compression protection for 20 recent generations.",
+      },
+    ],
   },
 };
 

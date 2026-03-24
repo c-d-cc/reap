@@ -31,6 +31,7 @@ export const zhCN: Translations = {
       comparison: "对比",
       configuration: "配置",
       recoveryGeneration: "Recovery Generation",
+      releaseNotes: "发布说明",
     },
   },
 
@@ -708,5 +709,23 @@ strict:
   environmentPage: { title: "Environment", breadcrumb: "指南", intro: "Environment存储影响项目的外部上下文 — API、基础设施、组织规则和参考材料。", structureTitle: "3层结构", structure: `.reap/environment/\n├── summary.md      # 会话上下文 (~100行，自动加载)\n├── docs/           # 主要参考文档\n└── resources/      # 原始材料 (用户提供或AI收集)`, layersTitle: "层级", layerHeaders: ["层级", "维护主体", "内容", "限制"], layerItems: [["summary.md", "AI (自动生成)", "docs/全部概述。每次会话加载。", "~100行"], ["docs/", "AI + 用户", "按环境主题的文件。", "每文件~100行"], ["resources/", "用户", "原始文档、PDF、外部链接。", "无限制"]], immutabilityTitle: "Environment不变原则", immutabilityDesc: "与Genome一样，Environment也不在世代进行中直接修改。发现的外部环境变更记录为environment-change backlog项目，在Completion时应用。", immutabilityWhy: "外部环境的变化 — API弃用、基础设施迁移 — 可能使Planning阶段的假设失效。将变更记录到backlog而非即时重写Environment，世代在稳定的外部环境地图上完成。更新在拥有完整构建上下文的情况下，一次性有意识地进行。", flowTitle: "查找流程", flowDesc: "summary.md (始终加载) → docs/ (需要详情时) → resources/ (需要原始来源时)", syncTitle: "手动同步", syncDesc: "使用/reap.sync.environment发现外部依赖并文档化。扫描源代码寻找线索，然后向用户访谈连接的系统、基础设施和组织规则。", syncSources: [{ label: "人类输入", role: "主要来源", desc: "用户直接描述代码无法推断的API、基础设施、组织规则和业务约束。" }, { label: "源代码", role: "辅助来源", desc: "package.json、配置文件、API客户端 — 扫描以引导提问和检测依赖。" }], syncContrast: "与Genome sync相比，源代码是主要来源。而对于Environment，外部世界的信息存在于人的脑中 — 代码只能提供线索。" },
   lifecyclePage: { title: "Lifecycle", breadcrumb: "指南", intro: "生命周期是REAP的心脏 — 每个Generation经历5个阶段（Objective → Planning → Implementation → Validation → Completion），每步生成制品。AI代理引导您完成整个生命周期。", structureTitle: "制品结构", structure: `.reap/life/\n├── current.yml          # 当前世代状态 (id, goal, stage, timeline)\n├── 01-objective.md      # 目标、需求、设计决策\n├── 02-planning.md       # 任务分解、依赖关系\n├── 03-implementation.md # 实现日志、变更记录\n├── 04-validation.md     # 测试结果、完成标准检查\n├── 05-completion.md     # 回顾、genome变更历史\n└── backlog/             # 下一世代的项目\n    ├── fix-auth-bug.md  #   type: task\n    └── add-index.md     #   type: genome-change`, structureDesc: "每个阶段在.reap/life/中生成制品。世代完成后，所有制品归档到.reap/lineage/gen-XXX-hash-slug/，current.yml为下一世代清空。" },
   lineagePage: { title: "Lineage", breadcrumb: "指南", intro: "Lineage是已完成Generation的存档。", structureTitle: "结构", structureDesc: "每个完成的Generation创建包含制品和元数据的目录:", structure: `.reap/lineage/\n├── gen-042-a3f8c2-fix-login-bug/\n│   ├── meta.yml\n│   ├── 01-objective.md ~ 05-completion.md\n├── gen-030-b7e1f2.md     # Level 1压缩\n└── epoch.md              # Level 2压缩`, dagTitle: "DAG", dagDesc: "每个Generation在meta.yml中记录parents，形成DAG。", compressionTitle: "压缩", compressionDesc: "在Completion阶段自动压缩。", compressionHeaders: ["级别", "输入", "输出", "触发", "保护"], compressionItems: [["Level 1", "Generation文件夹", "gen-XXX-{hash}.md (40行)", "> 5,000行 + 5个以上", "最近3个 + DAG leaf"], ["Level 2", "Level 1超过100个", "单一epoch.md", "Level 1 > 100", "最近9个 + fork point"]], compressionSafety: "Level 1在frontmatter中保留元数据。Level 2 epoch.md存储generations hash chain。Fork guard: 扫描所有branch后保护fork point。" },
+  releaseNotes: {
+    title: "发布说明",
+    breadcrumb: "其他",
+    breakingBannerTitle: "v0.16 Breaking Changes 预告",
+    breakingBannerDesc: "v0.16 将包含 breaking change。v0.15.x 到 v0.16.x 的自动更新将被阻止。需要手动更新: npm install -g @c-d-cc/reap@latest",
+    versions: [
+      { version: "0.15.13", notes: "用内置CLI库替换commander.js。运行时依赖: 2 -> 1。" },
+      { version: "0.15.12", notes: "reap update 自动升级后发布通知正常显示。" },
+      { version: "0.15.11", notes: "修复 reap pull 在 ahead 状态下错误推荐 merge 的问题。基于 git rev-list 的准确 ahead/behind/diverged 检测。" },
+      { version: "0.15.10", notes: "修复发布通知语言匹配 (例: \"korean\" -> \"ko\")。" },
+      { version: "0.15.9", notes: "修复 reap update 后发布通知不显示的问题。路径解析改用 require.resolve。" },
+      { version: "0.15.8", notes: "从 config.yml 移除 version 字段。消除 reap update 后的 uncommitted changes 问题。" },
+      { version: "0.15.7", notes: "将 UPDATE_NOTICE.md 重命名为 RELEASE_NOTICE.md。通知内容直接内联（移除 GitHub Discussions 依赖）。" },
+      { version: "0.15.6", notes: "修复 UPDATE_NOTICE.md 未包含在 npm 包中的问题。" },
+      { version: "0.15.5", notes: "integrity check 不再对 source-map.md 行数发出警告。" },
+      { version: "0.15.4", notes: "Bug 修复和新增 reap make backlog 命令。修复 lineage 归档、reap back nonce 链，保护最近20个世代的压缩。" },
+    ],
+  },
   backlogPage: { title: "Backlog", breadcrumb: "指南", intro: "Backlog管理在Generation间传递的项目。", typesTitle: "项目类型", typeHeaders: ["类型", "说明", "应用时机"], typeItems: [["task", "延迟的工作、技术债务、功能想法", "在下一个Objective中作为目标候选参考"], ["genome-change", "Generation期间发现的Genome修改", "在Completion中应用到Genome"], ["environment-change", "Generation期间发现的外部环境变更", "在Completion中应用到Environment"]], statusTitle: "状态", statusHeaders: ["状态", "含义"], statusItems: [["pending", "未处理 (默认)"], ["consumed", "在Generation中已处理 (需要consumedBy: gen-XXX-{hash})"]], archivingTitle: "归档规则", archivingDesc: "归档时consumed项目移至lineage。pending项目结转到下一个Generation的backlog。", deferralTitle: "任务延期", deferralDesc: "部分完成是正常的 — 依赖Genome变更的任务标记为[deferred]传递到下一个Generation。", abortTitle: "Abort Backlog", abortDesc: "通过/reap.abort中止Generation时，可以将目标和进度与abort元数据一起保存到backlog。", formatTitle: "文件格式", format: `---\ntype: task\nstatus: pending\npriority: medium\n---\n\n# 任务标题\n\n任务描述。` },
 };

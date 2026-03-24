@@ -18,12 +18,15 @@ interface UpdateResult {
 
 export interface SelfUpgradeResult {
   upgraded: boolean;
+  blocked?: boolean;
   from?: string;
   to?: string;
+  reason?: string;
 }
 
 /**
  * Check for newer @c-d-cc/reap on npm and upgrade if available.
+ * Blocks auto-upgrade when installed < autoUpdateMinVersion (breaking change guard).
  */
 export function selfUpgrade(): SelfUpgradeResult {
   try {
@@ -36,10 +39,62 @@ export function selfUpgrade(): SelfUpgradeResult {
     if (installed === latest) {
       return { upgraded: false };
     }
+
+    // Auto-update guard: check if installed version meets minimum requirement
+    const minVersion = queryAutoUpdateMinVersion();
+    if (minVersion && !semverGte(installed, minVersion)) {
+      return {
+        upgraded: false,
+        blocked: true,
+        from: installed,
+        to: latest,
+        reason: `Breaking change: v${installed} -> v${latest} requires manual update. See https://reap.cc/docs/release-notes`,
+      };
+    }
+
     execSync("npm update -g @c-d-cc/reap", { encoding: "utf-8", timeout: 60_000, stdio: "pipe" });
     return { upgraded: true, from: installed, to: latest };
   } catch {
     return { upgraded: false };
+  }
+}
+
+/** Inline semver comparison: returns true if a >= b */
+function semverGte(a: string, b: string): boolean {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] ?? 0) > (pb[i] ?? 0)) return true;
+    if ((pa[i] ?? 0) < (pb[i] ?? 0)) return false;
+  }
+  return true;
+}
+
+/**
+ * Force upgrade bypassing the autoUpdateMinVersion guard.
+ * Used after user confirms they want to proceed with a breaking change update.
+ */
+export function forceUpgrade(to: string): SelfUpgradeResult {
+  try {
+    const installed = execSync("reap --version", { encoding: "utf-8", timeout: 5_000 }).trim();
+    execSync(`npm install -g @c-d-cc/reap@${to}`, { encoding: "utf-8", timeout: 60_000, stdio: "pipe" });
+    return { upgraded: true, from: installed, to };
+  } catch {
+    return { upgraded: false };
+  }
+}
+
+/** Query autoUpdateMinVersion from the latest npm package */
+function queryAutoUpdateMinVersion(): string | null {
+  try {
+    const result = execSync("npm view @c-d-cc/reap reap.autoUpdateMinVersion", {
+      encoding: "utf-8",
+      timeout: 10_000,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return result.trim() || null;
+  } catch {
+    return null;
   }
 }
 

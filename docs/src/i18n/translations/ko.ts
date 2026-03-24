@@ -31,6 +31,7 @@ export const ko: Translations = {
       comparison: "비교",
       configuration: "설정",
       recoveryGeneration: "Recovery Generation",
+      releaseNotes: "릴리스 노트",
     },
   },
 
@@ -708,5 +709,23 @@ AI에게 nonce 반환                          ←── AI가 nonce 전달
   environmentPage: { title: "Environment", breadcrumb: "가이드", intro: "Environment는 프로젝트에 영향을 미치는 외부 컨텍스트를 저장합니다 — API, 인프라, 조직 규칙, 참고 자료.", structureTitle: "3-Layer 구조", structure: `.reap/environment/\n├── summary.md      # 세션 컨텍스트 (~100줄, 자동 로딩)\n├── docs/           # 주요 참고 문서\n└── resources/      # 원본 자료 (유저 제공 또는 AI 수집)`, layersTitle: "레이어", layerHeaders: ["레이어", "관리 주체", "내용", "제한"], layerItems: [["summary.md", "AI (자동 생성)", "docs/ 전체 개요. 매 세션에 로딩.", "~100줄"], ["docs/", "AI + 유저", "환경 주제별 파일.", "파일당 ~100줄"], ["resources/", "유저", "원본 문서, PDF, 외부 링크.", "제한 없음"]], immutabilityTitle: "Environment 불변 원칙", immutabilityDesc: "Genome과 마찬가지로, Environment도 세대 진행 중에는 직접 수정하지 않습니다. 발견된 외부 환경 변경은 environment-change backlog 항목으로 기록하고 Completion에서 반영합니다.", immutabilityWhy: "외부 환경의 변화 — API 폐기, 인프라 마이그레이션 — 는 Planning 단계의 가정을 무효화할 수 있습니다. 즉석에서 Environment를 고치는 대신 backlog에 기록하면, 세대는 안정된 외부 환경 지도 위에서 완료됩니다. 업데이트는 무엇이 만들어졌는지 전체 맥락을 갖춘 상태에서 한 번, 의도적으로 이루어집니다.", flowTitle: "탐색 흐름", flowDesc: "summary.md (항상 로딩) → docs/ (상세 필요 시) → resources/ (원본 필요 시)", syncTitle: "수동 동기화", syncDesc: "/reap.sync.environment로 외부 의존성을 탐색하고 문서화합니다. 소스 코드를 스캔하여 단서를 찾은 뒤, 유저에게 연결된 시스템, 인프라, 조직 규칙을 인터뷰합니다.", syncSources: [{ label: "사람의 입력", role: "주요 소스", desc: "코드에서 추론할 수 없는 API, 인프라, 조직 규칙, 비즈니스 제약을 유저가 직접 설명합니다." }, { label: "소스 코드", role: "보조 소스", desc: "package.json, 설정 파일, API 클라이언트 — 질문을 유도하고 의존성을 감지하기 위해 스캔합니다." }], syncContrast: "Genome sync에서는 소스 코드가 주요 소스입니다. 반면 Environment에서는 외부 세계의 정보가 사람의 머릿속에 있으므로, 코드는 힌트만 제공할 뿐입니다." },
   lifecyclePage: { title: "Lifecycle", breadcrumb: "가이드", intro: "라이프사이클은 REAP의 심장입니다 — 각 Generation은 5단계(Objective → Planning → Implementation → Validation → Completion)를 거치며, 매 단계에서 산출물을 생성합니다. AI 에이전트가 전체 라이프사이클을 안내합니다.", structureTitle: "산출물 구조", structure: `.reap/life/\n├── current.yml          # 현재 세대 상태 (id, goal, stage, timeline)\n├── 01-objective.md      # 목표, 요구사항, 설계 결정\n├── 02-planning.md       # 태스크 분해, 의존성\n├── 03-implementation.md # 구현 로그, 변경 내역\n├── 04-validation.md     # 테스트 결과, 완료 기준 확인\n├── 05-completion.md     # 회고, genome 변경 이력\n└── backlog/             # 다음 세대를 위한 항목\n    ├── fix-auth-bug.md  #   type: task\n    └── add-index.md     #   type: genome-change`, structureDesc: "각 단계는 .reap/life/에 산출물을 생성합니다. 세대가 완료되면 모든 산출물이 .reap/lineage/gen-XXX-hash-slug/로 아카이빙되고, current.yml은 다음 세대를 위해 초기화됩니다." },
   lineagePage: { title: "Lineage", breadcrumb: "가이드", intro: "Lineage는 완료된 세대의 아카이브입니다. 라이프사이클을 완료한 모든 세대가 산출물과 DAG 메타데이터와 함께 보존됩니다.", structureTitle: "구조", structureDesc: "완료된 각 세대는 산출물과 메타데이터가 포함된 디렉토리를 생성합니다:", structure: `.reap/lineage/\n├── gen-042-a3f8c2-fix-login-bug/\n│   ├── meta.yml\n│   ├── 01-objective.md ~ 05-completion.md\n├── gen-030-b7e1f2.md     # Level 1 압축\n└── epoch.md              # Level 2 압축`, dagTitle: "DAG", dagDesc: "각 세대는 meta.yml에 parents를 기록하여 DAG를 형성합니다.", compressionTitle: "압축", compressionDesc: "Completion 단계에서 자동 압축됩니다.", compressionHeaders: ["레벨", "입력", "출력", "트리거", "보호"], compressionItems: [["Level 1", "세대 폴더", "gen-XXX-{hash}.md (40줄)", "> 5,000줄 + 5개 이상", "최근 3개 + DAG leaf"], ["Level 2", "Level 1 100개 초과", "싱글 epoch.md", "Level 1 > 100", "최근 9개 + fork point"]], compressionSafety: "Level 1은 frontmatter에 메타데이터 유지. Level 2 epoch.md는 generations hash chain 저장. Fork guard: 모든 branch 스캔 후 fork point 보호." },
+  releaseNotes: {
+    title: "릴리스 노트",
+    breadcrumb: "기타",
+    breakingBannerTitle: "v0.16 Breaking Changes 예정",
+    breakingBannerDesc: "v0.16에서 breaking change가 예정되어 있습니다. v0.15.x에서 v0.16.x로의 자동 업데이트가 차단됩니다. 수동 업데이트 필요: npm install -g @c-d-cc/reap@latest",
+    versions: [
+      { version: "0.15.13", notes: "commander.js를 자체 CLI 라이브러리로 대체. 런타임 의존성 2개 -> 1개." },
+      { version: "0.15.12", notes: "reap update 자동 업그레이드 후 릴리스 공지가 정상 표시됩니다." },
+      { version: "0.15.11", notes: "reap pull이 ahead 상태에서 불필요한 merge를 추천하던 문제 수정. git rev-list 기반 정확한 ahead/behind/diverged 감지." },
+      { version: "0.15.10", notes: "릴리스 공지 언어 매칭 수정 (예: \"korean\" -> \"ko\")." },
+      { version: "0.15.9", notes: "reap update 후 릴리스 공지가 표시되지 않던 문제 수정. 경로 탐색을 __dirname 대신 require.resolve 사용으로 변경." },
+      { version: "0.15.8", notes: "config.yml에서 version 필드 제거. reap update 후 uncommitted changes 발생 문제 해소." },
+      { version: "0.15.7", notes: "UPDATE_NOTICE.md를 RELEASE_NOTICE.md로 변경. notice 내용을 파일에 직접 포함 (GitHub Discussions 의존성 제거)." },
+      { version: "0.15.6", notes: "UPDATE_NOTICE.md가 npm 패키지에 누락된 문제 수정." },
+      { version: "0.15.5", notes: "integrity check에서 source-map.md 줄수 경고 제외." },
+      { version: "0.15.4", notes: "버그 수정 및 reap make backlog 커맨드 추가. lineage archiving, reap back nonce chain 수정, 최근 20세대 압축 보호." },
+    ],
+  },
   backlogPage: { title: "Backlog", breadcrumb: "가이드", intro: "Backlog은 세대 간에 전달되는 항목을 관리합니다 — 미뤄진 작업, genome 변경, environment 변경.", typesTitle: "항목 유형", typeHeaders: ["유형", "설명", "적용 시점"], typeItems: [["task", "미뤄진 작업, 기술 부채, 기능 아이디어", "다음 Objective에서 목표 후보로 참조"], ["genome-change", "세대 진행 중 발견된 Genome 수정", "Completion에서 Genome에 적용"], ["environment-change", "세대 진행 중 발견된 외부 환경 변경", "Completion에서 Environment에 적용"]], statusTitle: "상태", statusHeaders: ["상태", "의미"], statusItems: [["pending", "미처리 (기본값)"], ["consumed", "세대에서 처리됨 (consumedBy: gen-XXX-{hash} 필요)"]], archivingTitle: "보관 규칙", archivingDesc: "보관 시 consumed 항목은 lineage로 이동. pending 항목은 다음 세대의 backlog로 이월.", deferralTitle: "태스크 연기", deferralDesc: "부분 완료는 정상 — Genome 변경에 의존하는 태스크는 [deferred]로 표시되어 다음 세대로 넘어감.", abortTitle: "Abort Backlog", abortDesc: "/reap.abort로 세대를 중단하면 목표와 진행 상황을 abort 메타데이터와 함께 backlog에 저장할 수 있습니다.", formatTitle: "파일 형식", format: `---\ntype: task\nstatus: pending\npriority: medium\n---\n\n# 태스크 제목\n\n태스크 설명.` },
 };

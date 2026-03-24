@@ -2,7 +2,7 @@
 import { program } from "../libs/cli";
 import { createInterface } from "readline";
 import { initProject } from "./commands/init";
-import { updateProject, selfUpgrade, type SelfUpgradeResult } from "./commands/update";
+import { updateProject, selfUpgrade, forceUpgrade, type SelfUpgradeResult } from "./commands/update";
 import { fetchReleaseNotice } from "../core/notice";
 import { getCurrentVersion } from "../core/version";
 import { getStatus } from "./commands/status";
@@ -169,8 +169,28 @@ program
   .action(async (options: { dryRun?: boolean }) => {
     try {
       // Step 1: Self-upgrade npm package
-      const upgrade = !options.dryRun ? selfUpgrade() : { upgraded: false } as SelfUpgradeResult;
-      if (upgrade.upgraded) {
+      let upgrade = !options.dryRun ? selfUpgrade() : { upgraded: false } as SelfUpgradeResult;
+      if (upgrade.blocked) {
+        console.log(`\n⚠ Breaking change detected: v${upgrade.from} → v${upgrade.to}`);
+        console.log(`  This update contains breaking changes that may require manual migration.`);
+        console.log(`  See release notes: https://reap.cc/docs/release-notes\n`);
+        // Interactive confirm
+        const rl = createInterface({ input: process.stdin, output: process.stdout });
+        const answer = await new Promise<string>((resolve) => {
+          rl.question("  Proceed with update? (y/N) ", resolve);
+        });
+        rl.close();
+        if (answer.toLowerCase() === "y" || answer.toLowerCase() === "yes") {
+          upgrade = forceUpgrade(upgrade.to!);
+          if (upgrade.upgraded) {
+            console.log(`Upgraded: v${upgrade.from} → v${upgrade.to}`);
+          } else {
+            console.log("Upgrade failed. Try manually: npm install -g @c-d-cc/reap@latest");
+          }
+        } else {
+          console.log("Update skipped.");
+        }
+      } else if (upgrade.upgraded) {
         console.log(`Upgraded: v${upgrade.from} → v${upgrade.to}`);
       }
 

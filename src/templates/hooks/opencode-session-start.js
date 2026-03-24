@@ -5,6 +5,17 @@ const { execSync } = require("child_process");
 const fs = require("fs");
 const path = require("path");
 
+// Inline semver comparison (no external deps): returns true if a >= b
+function semverGte(a, b) {
+  const pa = a.split(".").map(Number);
+  const pb = b.split(".").map(Number);
+  for (let i = 0; i < 3; i++) {
+    if ((pa[i] || 0) > (pb[i] || 0)) return true;
+    if ((pa[i] || 0) < (pb[i] || 0)) return false;
+  }
+  return true;
+}
+
 module.exports = async (ctx) => {
   return {
     "session.start": async ({ trigger }) => {
@@ -50,9 +61,15 @@ module.exports = async (ctx) => {
               const installed = gl.exec("reap --version 2>/dev/null", execOpts);
               const latest = gl.exec("npm view @c-d-cc/reap version 2>/dev/null", execOpts);
               if (installed && latest && installed !== latest) {
-                execSync("npm update -g @c-d-cc/reap >/dev/null 2>&1", { ...execOpts, stdio: "ignore" });
-                execSync("reap update >/dev/null 2>&1", { ...execOpts, stdio: "ignore" });
-                autoUpdateMessage = `REAP auto-updated: v${installed} → v${latest}`;
+                // Auto-update guard: check autoUpdateMinVersion
+                const minVersion = gl.exec("npm view @c-d-cc/reap reap.autoUpdateMinVersion 2>/dev/null", execOpts);
+                if (minVersion && !semverGte(installed, minVersion)) {
+                  autoUpdateMessage = `[BREAKING] Auto-update blocked: v${installed} -> v${latest} contains breaking changes. Inform the user about this breaking change and ask if they want to update manually: npm install -g @c-d-cc/reap@${latest}. Release notes: https://reap.cc/docs/release-notes`;
+                } else {
+                  execSync("npm update -g @c-d-cc/reap >/dev/null 2>&1", { ...execOpts, stdio: "ignore" });
+                  execSync("reap update >/dev/null 2>&1", { ...execOpts, stdio: "ignore" });
+                  autoUpdateMessage = `REAP auto-updated: v${installed} → v${latest}`;
+                }
               }
             } catch { /* update check failed, skip */ }
           }
@@ -109,7 +126,11 @@ module.exports = async (ctx) => {
       // Build auto-update section
       let updateSection = "";
       if (autoUpdateMessage) {
-        updateSection = `\n\n## Auto-Update\n${autoUpdateMessage}. Tell the user: "${autoUpdateMessage}"`;
+        if (autoUpdateMessage.startsWith("[BREAKING]")) {
+          updateSection = `\n\n## Auto-Update (Breaking Change Detected)\n${autoUpdateMessage}\n\nIMPORTANT: On your first response, explain to the user that a new REAP version is available but contains breaking changes. Show them the release notes link and ask for explicit confirmation before they run the manual update command. Do NOT silently skip this.`;
+        } else {
+          updateSection = `\n\n## Auto-Update\n${autoUpdateMessage}. Tell the user: "${autoUpdateMessage}"`;
+        }
       }
 
       const context = `<REAP_WORKFLOW>\n${reapGuide}\n\n---\n\n## Genome (Project Knowledge)\n${genomeContent}\n\n---\n\n## Current State\n${generationContext}${staleSection}${strictSection}${updateSection}${langSection}\n\n## Rules\n1. ALL development work MUST follow the REAP lifecycle.\n2. Before writing any code, check if a Generation is active and what stage it is in.\n3. If a Generation is active, use \`${nextCmd}\` to proceed with the current stage.\n4. If no Generation is active, use \`/reap.start\` to start a new one.\n5. Do NOT implement features outside of the REAP lifecycle unless explicitly asked.\n6. Genome is the authoritative knowledge source.\n</REAP_WORKFLOW>`;

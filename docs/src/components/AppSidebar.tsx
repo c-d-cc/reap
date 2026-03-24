@@ -46,6 +46,7 @@ export function useNavGroups() {
       items: [
         { title: t.nav.items.recoveryGeneration, href: "/docs/recovery-generation" },
         { title: t.nav.items.configuration, href: "/docs/configuration" },
+        { title: t.nav.items.releaseNotes, href: "/docs/release-notes" },
       ]
     }
   ];

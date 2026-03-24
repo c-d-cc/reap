@@ -1,0 +1,23 @@
+# REAP MANAGED — Do not modify directly. Use 'reap run <stage> --phase <phase>' to update.
+id: gen-170-60bde7
+goal: "auto-update guard 구현: 0.16.0 breaking change 대비 자동 업데이트 차단 +
+  release-notes 문서 페이지 추가"
+stage: validation
+genomeVersion: 78
+startedAt: 2026-03-24T16:27:47.585Z
+timeline:
+  - stage: objective
+    at: 2026-03-24T16:27:47.585Z
+  - stage: planning
+    at: 2026-03-24T16:32:31.539Z
+  - stage: implementation
+    at: 2026-03-24T16:33:11.362Z
+  - stage: validation
+    at: 2026-03-24T16:44:35.346Z
+type: normal
+parents:
+  - gen-169-17c5c0
+genomeHash: c2e6348e
+lastNonce: c570ccaf785061a2a21d1005275c7309
+expectedHash: 691c210f1a64ecd09777ce52359c0092255f4fddeddee09109608ad0319683a7
+phase: entry

@@ -31,6 +31,7 @@ export const ja: Translations = {
       comparison: "比較",
       configuration: "設定",
       recoveryGeneration: "Recovery Generation",
+      releaseNotes: "リリースノート",
     },
   },
 
@@ -708,5 +709,23 @@ AIにnonce返却                              ←── AIがnonceを渡す
   environmentPage: { title: "Environment", breadcrumb: "ガイド", intro: "Environmentはプロジェクトに影響する外部コンテキストを格納します — API、インフラ、組織ルール、参考資料。", structureTitle: "3-Layer構造", structure: `.reap/environment/\n├── summary.md      # セッションコンテキスト (~100行、自動ロード)\n├── docs/           # 主要参考ドキュメント\n└── resources/      # 原本資料 (ユーザー提供またはAI収集)`, layersTitle: "レイヤー", layerHeaders: ["レイヤー", "管理主体", "内容", "制限"], layerItems: [["summary.md", "AI (自動生成)", "docs/全体の概要。毎セッションにロード。", "~100行"], ["docs/", "AI + ユーザー", "環境トピック別ファイル。", "ファイルあたり~100行"], ["resources/", "ユーザー", "原本ドキュメント、PDF、外部リンク。", "制限なし"]], immutabilityTitle: "Environment不変原則", immutabilityDesc: "Genomeと同様に、Environmentも世代進行中は直接修正しません。発見された外部環境の変更はenvironment-change backlog項目として記録し、Completionで適用します。", immutabilityWhy: "外部環境の変化 — APIの廃止、インフラ移行 — はPlanning段階の前提を無効にする可能性があります。その場でEnvironmentを書き換える代わりにbacklogに記録することで、世代は安定した外部環境の地図の上で完了します。更新は何が作られたかの全体的な文脈を持った状態で、一度だけ意図的に行われます。", flowTitle: "参照フロー", flowDesc: "summary.md (常にロード) → docs/ (詳細が必要な場合) → resources/ (原本が必要な場合)", syncTitle: "手動同期", syncDesc: "/reap.sync.environmentで外部依存関係を発見し文書化します。ソースコードをスキャンして手がかりを見つけ、接続システム、インフラ、組織ルールについてユーザーにインタビューします。", syncSources: [{ label: "人間の入力", role: "主要ソース", desc: "コードから推測できないAPI、インフラ、組織ルール、ビジネス制約をユーザーが直接説明します。" }, { label: "ソースコード", role: "補助ソース", desc: "package.json、設定ファイル、APIクライアント — 質問を導き、依存関係を検出するためにスキャンします。" }], syncContrast: "Genome syncではソースコードが主要ソースです。一方Environmentでは外部世界の情報は人間の頭の中にあり、コードはヒントを提供するだけです。" },
   lifecyclePage: { title: "Lifecycle", breadcrumb: "ガイド", intro: "ライフサイクルはREAPの心臓部です — 各Generationは5段階（Objective → Planning → Implementation → Validation → Completion）を経て、各ステップで成果物を生成します。AIエージェントがライフサイクル全体を案内します。", structureTitle: "成果物の構造", structure: `.reap/life/\n├── current.yml          # 現在の世代状態 (id, goal, stage, timeline)\n├── 01-objective.md      # 目標、要件、設計決定\n├── 02-planning.md       # タスク分解、依存関係\n├── 03-implementation.md # 実装ログ、変更内容\n├── 04-validation.md     # テスト結果、完了基準確認\n├── 05-completion.md     # レトロスペクティブ、genome変更履歴\n└── backlog/             # 次世代への項目\n    ├── fix-auth-bug.md  #   type: task\n    └── add-index.md     #   type: genome-change`, structureDesc: "各段階は.reap/life/に成果物を生成します。世代が完了すると全ての成果物が.reap/lineage/gen-XXX-hash-slug/にアーカイブされ、current.ymlは次の世代のためにクリアされます。" },
   lineagePage: { title: "Lineage", breadcrumb: "ガイド", intro: "Lineageは完了したGenerationのアーカイブです。", structureTitle: "構造", structureDesc: "完了した各Generationは成果物とメタデータを含むディレクトリを作成します:", structure: `.reap/lineage/\n├── gen-042-a3f8c2-fix-login-bug/\n│   ├── meta.yml\n│   ├── 01-objective.md ~ 05-completion.md\n├── gen-030-b7e1f2.md     # Level 1圧縮\n└── epoch.md              # Level 2圧縮`, dagTitle: "DAG", dagDesc: "各GenerationはmxOta.ymlにparentsを記録してDAGを形成します。", compressionTitle: "圧縮", compressionDesc: "Completion段階で自動圧縮されます。", compressionHeaders: ["レベル", "入力", "出力", "トリガー", "保護"], compressionItems: [["Level 1", "Generationフォルダ", "gen-XXX-{hash}.md (40行)", "> 5,000行 + 5個以上", "最近3個 + DAG leaf"], ["Level 2", "Level 1 100個超過", "単一epoch.md", "Level 1 > 100", "最近9個 + fork point"]], compressionSafety: "Level 1はfrontmatterにメタデータ保持。Level 2 epoch.mdはgenerations hash chain格納。Fork guard: 全branch scan後fork point保護。" },
+  releaseNotes: {
+    title: "リリースノート",
+    breadcrumb: "その他",
+    breakingBannerTitle: "v0.16 Breaking Changes予定",
+    breakingBannerDesc: "v0.16でbreaking changeが予定されています。v0.15.xからv0.16.xへの自動アップデートはブロックされます。手動アップデートが必要: npm install -g @c-d-cc/reap@latest",
+    versions: [
+      { version: "0.15.13", notes: "commander.jsを自作CLIライブラリに置き換え。ランタイム依存: 2 -> 1。" },
+      { version: "0.15.12", notes: "reap update自動アップグレード後のリリース通知が正常に表示されるようになりました。" },
+      { version: "0.15.11", notes: "reap pullがahead状態で不要なmergeを推奨していた問題を修正。git rev-listベースの正確なahead/behind/diverged検出。" },
+      { version: "0.15.10", notes: "リリース通知の言語マッチング修正 (例: \"korean\" -> \"ko\")。" },
+      { version: "0.15.9", notes: "reap update後にリリース通知が表示されなかった問題を修正。パス解決をrequire.resolveに変更。" },
+      { version: "0.15.8", notes: "config.ymlからversionフィールドを削除。reap update後のuncommitted changes問題を解消。" },
+      { version: "0.15.7", notes: "UPDATE_NOTICE.mdをRELEASE_NOTICE.mdに変更。通知内容をファイルに直接インライン化。" },
+      { version: "0.15.6", notes: "UPDATE_NOTICE.mdがnpmパッケージに含まれていなかった問題を修正。" },
+      { version: "0.15.5", notes: "integrity checkでsource-map.mdの行数警告を除外。" },
+      { version: "0.15.4", notes: "バグ修正とreap make backlogコマンド追加。lineageアーカイブ、reap back nonceチェーン修正、最近20世代の圧縮保護。" },
+    ],
+  },
   backlogPage: { title: "Backlog", breadcrumb: "ガイド", intro: "BacklogはGeneration間で引き継がれるアイテムを管理します。", typesTitle: "アイテムタイプ", typeHeaders: ["タイプ", "説明", "適用タイミング"], typeItems: [["task", "延期された作業、技術的負債、機能アイデア", "次のObjectiveで目標候補として参照"], ["genome-change", "Generation中に発見されたGenome修正", "CompletionでGenomeに適用"], ["environment-change", "Generation中に発見された外部環境変更", "CompletionでEnvironmentに適用"]], statusTitle: "ステータス", statusHeaders: ["ステータス", "意味"], statusItems: [["pending", "未処理 (デフォルト)"], ["consumed", "Generationで処理済み (consumedBy: gen-XXX-{hash} 必要)"]], archivingTitle: "アーカイブルール", archivingDesc: "アーカイブ時、consumed項目はlineageに移動。pending項目は次のGenerationのbacklogに繰り越し。", deferralTitle: "タスク延期", deferralDesc: "部分完了は正常 — Genome変更に依存するタスクは[deferred]とマークされ次のGenerationに引き継ぎ。", abortTitle: "Abort Backlog", abortDesc: "/reap.abortでGenerationを中断すると、目標と進捗をabortメタデータとともにbacklogに保存できます。", formatTitle: "ファイル形式", format: `---\ntype: task\nstatus: pending\npriority: medium\n---\n\n# タスクタイトル\n\nタスクの説明。` },
 };

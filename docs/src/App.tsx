@@ -35,6 +35,7 @@ import DistributedOverviewPage from "@/pages/DistributedOverviewPage";
 import MergeLifecyclePage from "@/pages/MergeLifecyclePage";
 import MergeCommandsPage from "@/pages/MergeCommandsPage";
 import RecoveryGenerationPage from "@/pages/RecoveryGenerationPage";
+import ReleaseNotesPage from "@/pages/ReleaseNotesPage";
 
 const queryClient = new QueryClient();
 
@@ -62,6 +63,7 @@ function Router() {
       <Route path="/docs/distributed-workflow" component={DistributedOverviewPage} />
       <Route path="/docs/merge-generation" component={MergeLifecyclePage} />
       <Route path="/docs/merge-commands" component={MergeCommandsPage} />
+      <Route path="/docs/release-notes" component={ReleaseNotesPage} />
       <Route path="/docs/advanced" component={AdvancedPage} />
       <Route component={NotFound} />
     </Switch>

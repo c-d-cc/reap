@@ -46,5 +46,8 @@
   },
   "dependencies": {
     "yaml": "^2.0.0"
+  },
+  "reap": {
+    "autoUpdateMinVersion": "0.15.0"
   }
 }
