@@ -16,6 +16,7 @@ import { execute as detectExecute } from "./detect.js";
 import { execute as mateExecute } from "./mate.js";
 import { execute as mergeExecute } from "./merge.js";
 import { execute as reconcileExecute } from "./reconcile.js";
+import { execute as pushExecute } from "./push.js";
 
 const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, phase?: string, extra?: string) => Promise<void>> = {
   learning: learningExecute,
@@ -32,6 +33,7 @@ const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, pha
   mate: mateExecute,
   merge: mergeExecute,
   reconcile: reconcileExecute,
+  push: pushExecute,
 };
 
 export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string }): Promise<void> {

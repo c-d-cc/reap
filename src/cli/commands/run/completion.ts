@@ -8,6 +8,7 @@ import { archiveGeneration } from "../../../core/archive.js";
 import { consumeBacklog } from "../../../core/backlog.js";
 import { runHooks } from "../../../core/hooks.js";
 import { parseCruiseCount, advanceCruise } from "../../../core/cruise.js";
+import { gitCommitAll } from "../../../core/git.js";
 import yaml from "js-yaml";
 import type { ReapConfig } from "../../../types/index.js";
 
@@ -211,6 +212,11 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
     const fitnessFeedback = s.fitnessFeedback;
     const archiveDir = await archiveGeneration(paths, s, fitnessFeedback);
 
+    // Auto-commit generation
+    const goalSummary = s.goal.length > 60 ? s.goal.slice(0, 57) + "..." : s.goal;
+    const commitMsg = `feat(${s.id.replace(/-[a-f0-9]+$/, "")}): ${goalSummary}`;
+    const commitHash = gitCommitAll(paths.root, commitMsg);
+
     // Run completion hooks
     const completionEvent = isMerge ? "onMergeCompleted" : "onLifeCompleted";
     await runHooks(paths.hooks, completionEvent, paths.root).catch(() => {});
@@ -222,16 +228,19 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
       status: "ok",
       command: "completion",
       phase: "commit",
-      completed: ["gate", "reflect", "fitness", "adapt", "archive"],
+      completed: ["gate", "reflect", "fitness", "adapt", "archive", ...(commitHash ? ["git-commit"] : [])],
       context: {
         id: s.id,
         goal: s.goal,
         archiveDir,
+        commitHash: commitHash ?? undefined,
         cruiseActive: cruiseStillActive,
       },
-      message: cruiseStillActive
-        ? `Generation ${s.id} archived. Cruise mode active — start next generation.`
-        : `Generation ${s.id} archived. Commit your changes.`,
+      message: commitHash
+        ? `Generation ${s.id} archived and committed (${commitHash}).${cruiseStillActive ? " Cruise mode active — start next generation." : ""}`
+        : cruiseStillActive
+          ? `Generation ${s.id} archived. Cruise mode active — start next generation.`
+          : `Generation ${s.id} archived. Commit your changes.`,
     });
   }
 }

@@ -1,0 +1,70 @@
+import { execSync } from "child_process";
+
+/**
+ * Check if the given directory is inside a git repository.
+ */
+export function isGitRepo(cwd: string): boolean {
+  try {
+    execSync("git rev-parse --is-inside-work-tree", {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Stage all changes and commit with the given message.
+ * Returns the commit hash on success, null on failure or if not a git repo.
+ */
+export function gitCommitAll(cwd: string, message: string): string | null {
+  if (!isGitRepo(cwd)) return null;
+
+  try {
+    execSync("git add -A", { cwd, stdio: ["pipe", "pipe", "pipe"] });
+
+    // Check if there are staged changes
+    const status = execSync("git diff --cached --quiet || echo changed", {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+
+    if (!status) return null; // nothing to commit
+
+    execSync(`git commit -m ${JSON.stringify(message)}`, {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+
+    const hash = execSync("git rev-parse --short HEAD", {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+
+    return hash;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Push to remote. Returns true on success.
+ */
+export function gitPush(cwd: string): boolean {
+  try {
+    execSync("git push", {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
