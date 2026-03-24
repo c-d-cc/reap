@@ -1,229 +1,237 @@
-import { join } from "path";
-import type { ReapPaths } from "../../../core/paths";
-import type { HookResult } from "../../../types";
-import { GenerationManager } from "../../../core/generation";
-import { readTextFile, fileExists } from "../../../core/fs";
-import { scanBacklog, markBacklogConsumed } from "../../../core/backlog";
-import { emitOutput, emitError } from "../../../core/run-output";
-import { executeHooks } from "../../../core/hook-engine";
-import { checkSubmodules } from "../../../core/commit";
-import { execSync } from "child_process";
-import { verifyNonce, setNonce } from "../../../core/stage-transition";
+import type { ReapPaths } from "../../../core/paths.js";
+import { GenerationManager } from "../../../core/generation.js";
+import { readTextFile } from "../../../core/fs.js";
+import { emitOutput, emitError } from "../../../core/output.js";
+import { verifyNonce, setNonce } from "../../../core/stage-transition.js";
+import { copyArtifactTemplate } from "../../../core/template.js";
+import { archiveGeneration } from "../../../core/archive.js";
+import { consumeBacklog } from "../../../core/backlog.js";
+import { runHooks } from "../../../core/hooks.js";
+import { parseCruiseCount, advanceCruise } from "../../../core/cruise.js";
+import yaml from "js-yaml";
+import type { ReapConfig } from "../../../types/index.js";
 
-interface GenomeImpact {
-  newCommands: string[];
-  packageJsonChanged: boolean;
-  coreChanges: string[];
-}
-
-/**
- * Detect files changed in the current generation that may require genome updates.
- * Returns categorized impact for prompt inclusion.
- */
-function detectGenomeImpact(projectRoot: string): GenomeImpact {
-  const impact: GenomeImpact = {
-    newCommands: [],
-    packageJsonChanged: false,
-    coreChanges: [],
-  };
-
-  let changedFiles: string[];
-  try {
-    const output = execSync("git diff --name-only HEAD~1", {
-      cwd: projectRoot,
-      encoding: "utf-8",
-      timeout: 5000,
-    });
-    changedFiles = output.trim().split("\n").filter(Boolean);
-  } catch {
-    return impact; // graceful fallback
-  }
-
-  for (const file of changedFiles) {
-    if (file.startsWith("src/cli/commands/") && file.endsWith(".ts")) {
-      impact.newCommands.push(file);
-    }
-    if (file === "package.json") {
-      impact.packageJsonChanged = true;
-    }
-    if (file.startsWith("src/core/") && file.endsWith(".ts")) {
-      impact.coreChanges.push(file);
-    }
-  }
-
-  return impact;
-}
-
-/**
- * Build a prompt section describing detected genome impact.
- */
-function buildGenomeImpactPrompt(impact: GenomeImpact): string {
-  const lines: string[] = [];
-
-  if (impact.newCommands.length > 0) {
-    lines.push(`- **Commands changed/added** (${impact.newCommands.length}): constraints.md의 Slash Commands 목록 업데이트 필요 여부 확인`);
-  }
-  if (impact.packageJsonChanged) {
-    lines.push("- **package.json changed**: constraints.md의 Tech Stack 및 environment.md 업데이트 필요 여부 확인");
-  }
-  if (impact.coreChanges.length > 0) {
-    lines.push(`- **Core modules changed** (${impact.coreChanges.length}): principles.md 및 source-map.md 업데이트 필요 여부 확인`);
-  }
-
-  if (lines.length === 0) return "";
-
-  return [
-    "",
-    "",
-    "## Genome/Environment Impact Detection",
-    "다음 변경이 감지되었습니다. genome-change 또는 environment-change backlog 작성이 필요한지 검토하라.",
-    "backlog 생성 시 반드시 `reap make backlog --type <type> --title <title> --body <body>` 명령을 사용하라. Write로 직접 파일을 생성하지 마라.",
-    "생성된 backlog 파일에 상세 내용을 추가해야 하면, 생성 후 해당 파일을 편집하라.",
-    "",
-    ...lines,
-  ].join("\n");
-}
-
-/**
- * Collect executed .md hook contents and build a prompt string
- * so the AI subagent follows hook instructions.
- */
-function buildMdHookPrompt(hookResults: HookResult[]): string {
-  const mdHooks = hookResults.filter(
-    (h) => h.type === "md" && h.status === "executed" && h.content,
-  );
-  if (mdHooks.length === 0) return "";
-
-  const sections = mdHooks.map(
-    (h) => `### ${h.name}\n${h.content}`,
-  );
-
-  return [
-    "",
-    "",
-    "## Hook Prompts",
-    "다음 hook prompt를 순서대로 실행하라:",
-    "",
-    ...sections,
-  ].join("\n");
-}
-
-export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
+export async function execute(paths: ReapPaths, phase?: string, feedback?: string): Promise<void> {
   const gm = new GenerationManager(paths);
   const state = await gm.current();
 
-  if (!state) {
-    emitError("completion", "No active Generation.");
-  }
-  if (state.stage !== "completion") {
-    emitError("completion", `Stage is '${state.stage}', expected 'completion'.`);
+  if (!state) emitError("completion", "No active generation.");
+  if (state!.stage !== "completion") emitError("completion", `Current stage is '${state!.stage}', not 'completion'.`);
+
+  const s = state!;
+  const isMerge = s.type === "merge";
+
+  // ── Phase 1: reflect ──────────────────────────────────────
+  if (!phase || phase === "reflect") {
+    verifyNonce("completion", s, "completion", "entry");
+    await copyArtifactTemplate("completion", paths.artifact, isMerge);
+
+    // Load context artifacts based on lifecycle type
+    const context: Record<string, unknown> = { id: s.id, goal: s.goal };
+    const completionArtifact = isMerge ? "06-completion.md" : "05-completion.md";
+
+    if (isMerge) {
+      const mergeContent = await readTextFile(paths.artifact("03-merge.md"));
+      const reconcileContent = await readTextFile(paths.artifact("04-reconcile.md"));
+      const valContent = await readTextFile(paths.artifact("05-validation.md"));
+      context.mergeSummary = mergeContent?.slice(0, 2000);
+      context.reconcileSummary = reconcileContent?.slice(0, 2000);
+      context.valSummary = valContent?.slice(0, 2000);
+    } else {
+      const implContent = await readTextFile(paths.artifact("03-implementation.md"));
+      const valContent = await readTextFile(paths.artifact("04-validation.md"));
+      context.implSummary = implContent?.slice(0, 3000);
+      context.valSummary = valContent?.slice(0, 2000);
+    }
+
+    setNonce(s, "completion", "fitness");
+    await gm.save(s);
+
+    emitOutput({
+      status: "prompt",
+      command: "completion",
+      phase: "reflect",
+      completed: ["gate"],
+      context,
+      prompt: [
+        "## Completion — Reflect Phase",
+        "",
+        "Retrospective + environment update (combined).",
+        "",
+        `1. Write ${completionArtifact}: Summary, Lessons Learned, Next Generation Hints`,
+        "2. Update environment/summary.md with new knowledge from this generation",
+        "",
+        "When done: reap run completion --phase fitness",
+      ].join("\n"),
+      nextCommand: "reap run completion --phase fitness",
+    });
   }
 
-  const validationArtifact = paths.artifact("04-validation.md");
-  if (!(await fileExists(validationArtifact))) {
-    emitError("completion", "04-validation.md does not exist. Complete validation first.");
+  // ── Phase 2: fitness ──────────────────────────────────────
+  if (phase === "fitness") {
+    if (feedback) {
+      // Feedback provided — store and advance
+      verifyNonce("completion", s, "completion", "fitness");
+
+      s.fitnessFeedback = feedback;
+      setNonce(s, "completion", "adapt");
+      await gm.save(s);
+
+      emitOutput({
+        status: "ok",
+        command: "completion",
+        phase: "fitness-collected",
+        completed: ["gate", "reflect", "fitness"],
+        context: { id: s.id },
+        message: "Fitness feedback collected.",
+        nextCommand: "reap run completion --phase adapt",
+      });
+    } else {
+      // No feedback yet — check cruise mode
+      verifyNonce("completion", s, "completion", "fitness");
+
+      const configContent = await readTextFile(paths.config);
+      const config = configContent ? (yaml.load(configContent) as ReapConfig) : null;
+      const cruise = config ? parseCruiseCount(config) : null;
+
+      // Re-set same nonce (don't consume yet, wait for feedback)
+      setNonce(s, "completion", "fitness");
+      await gm.save(s);
+
+      if (cruise) {
+        // Cruise mode — self-assessment prompt
+        emitOutput({
+          status: "prompt",
+          command: "completion",
+          phase: "fitness",
+          completed: ["gate", "reflect"],
+          context: { id: s.id, goal: s.goal, cruiseMode: true, cruiseCount: config!.cruiseCount },
+          prompt: [
+            "## Completion — Fitness Phase (Cruise Mode)",
+            "",
+            `Cruise: ${config!.cruiseCount}`,
+            "",
+            "### Self-Assessment (not self-fitness, but metacognition):",
+            "1. Did this generation proceed as expected?",
+            "2. Are there uncertain areas or risks?",
+            "3. Are there items that need human confirmation?",
+            "",
+            "High confidence → auto-proceed: reap run completion --phase fitness --feedback \"self-assessment: OK\"",
+            "Uncertain/risky → stop cruise and request human feedback",
+          ].join("\n"),
+          nextCommand: "reap run completion --phase fitness",
+        });
+      } else {
+        // Supervised mode — human feedback
+        emitOutput({
+          status: "prompt",
+          command: "completion",
+          phase: "fitness",
+          completed: ["gate", "reflect"],
+          context: { id: s.id, goal: s.goal, cruiseMode: false },
+          prompt: [
+            "## Completion — Fitness Phase",
+            "",
+            "Collect feedback from the human.",
+            "",
+            "Present to the human:",
+            "1. Summary of what was done in this generation",
+            "2. What went well / areas for improvement",
+            "3. Suggested next direction",
+            "",
+            'Submit: reap run completion --phase fitness --feedback "human feedback here"',
+          ].join("\n"),
+          nextCommand: "reap run completion --phase fitness",
+        });
+      }
+    }
   }
 
-  if (!phase || phase === "retrospective") {
-    // Verify entry nonce from previous stage's --phase complete
-    verifyNonce("completion", state, "completion", "entry");
-    await gm.save(state);
-    // Phase 1: Gate passed, collect context for AI creative work
-    const backlogItems = await scanBacklog(paths.backlog);
-    const validationContent = await readTextFile(validationArtifact);
-    const implContent = await readTextFile(paths.artifact("03-implementation.md"));
+  // ── Phase 3: adapt ────────────────────────────────────────
+  if (phase === "adapt") {
+    verifyNonce("completion", s, "completion", "adapt");
 
-    // Create 05-completion.md from template if not exists
-    const destPath = paths.artifact("05-completion.md");
-    if (!(await fileExists(destPath))) {
-      const templateDir = join(require("os").homedir(), ".reap", "templates");
-      const templatePath = join(templateDir, "05-completion.md");
-      if (await fileExists(templatePath)) {
-        const { writeTextFile } = await import("../../../core/fs");
-        const template = await readTextFile(templatePath);
-        if (template) await writeTextFile(destPath, template);
+    const fitnessFeedback = s.fitnessFeedback;
+    const visionGoals = await readTextFile(paths.visionGoals);
+
+    setNonce(s, "completion", "commit");
+    await gm.save(s);
+
+    emitOutput({
+      status: "prompt",
+      command: "completion",
+      phase: "adapt",
+      completed: ["gate", "reflect", "fitness"],
+      context: {
+        id: s.id,
+        goal: s.goal,
+        type: s.type,
+        fitnessFeedback,
+        visionGoals: visionGoals?.slice(0, 2000),
+      },
+      prompt: [
+        "## Completion — Adapt Phase",
+        "",
+        "Genome modifications + suggest next generation direction.",
+        "",
+        "### Fitness Feedback:",
+        fitnessFeedback ? `> ${fitnessFeedback}` : "> (no feedback)",
+        "",
+        s.type === "embryo"
+          ? "**Embryo mode**: genome (application.md, evolution.md) can be freely modified."
+          : "**Normal mode**: propose genome changes via backlog. invariants.md cannot be modified.",
+        "",
+        "### Steps:",
+        "1. **Genome Review**: Based on fitness feedback, determine if application.md or evolution.md need modifications",
+        "2. **Vision Check**: Reference vision/goals.md to check completed goals and determine next goals",
+        visionGoals ? `\n### Current Vision Goals:\n${visionGoals.slice(0, 1000)}\n` : "",
+        "3. **Suggest Next Generation Candidates**: Record as type: task in backlog",
+        "4. **Reflect Environment Changes**: Create environment-change backlog if needed",
+        "",
+        "When done: reap run completion --phase commit",
+      ].filter(Boolean).join("\n"),
+      nextCommand: "reap run completion --phase commit",
+    });
+  }
+
+  // ── Phase 4: commit ───────────────────────────────────────
+  if (phase === "commit") {
+    verifyNonce("completion", s, "completion", "commit");
+
+    // Consume specified backlog items
+    if (feedback) {
+      // feedback param doubles as consume list (comma-separated filenames)
+      const filenames = feedback.split(",").map((f) => f.trim()).filter(Boolean);
+      const { join } = await import("path");
+      for (const filename of filenames) {
+        await consumeBacklog(join(paths.backlog, filename), s.id);
       }
     }
 
-    // Set nonce for feedKnowledge phase entry — prevents skipping retrospective
-    setNonce(state, "completion", "feedKnowledge");
-    await gm.save(state);
+    const fitnessFeedback = s.fitnessFeedback;
+    const archiveDir = await archiveGeneration(paths, s, fitnessFeedback);
+
+    // Run completion hooks
+    const completionEvent = isMerge ? "onMergeCompleted" : "onLifeCompleted";
+    await runHooks(paths.hooks, completionEvent, paths.root).catch(() => {});
+
+    // Advance cruise count if in cruise mode
+    const cruiseStillActive = await advanceCruise(paths.config).catch(() => false);
 
     emitOutput({
-      status: "prompt",
-      command: "completion",
-      phase: "retrospective",
-      completed: ["gate", "artifact-create", "context-scan"],
-      context: {
-        id: state.id,
-        goal: state.goal,
-        genomeVersion: state.genomeVersion,
-        startedAt: state.startedAt,
-        backlogItems: backlogItems.filter(b => b.status !== "consumed"),
-        validationSummary: validationContent?.slice(0, 2000),
-        implSummary: implContent?.slice(0, 2000),
-      },
-      prompt: "Fill 05-completion.md: Summary (goal, period, result, key changes), Lessons Learned (max 5), Genome Change Proposals, Garbage Collection (check conventions violations), Backlog Cleanup (add deferred tasks). Then run: reap run completion --phase feedKnowledge",
-      nextCommand: "reap run completion --phase feedKnowledge",
-    });
-  }
-
-  if (phase === "feedKnowledge") {
-    // Verify feedKnowledge nonce from retrospective phase
-    verifyNonce("completion", state, "completion", "feedKnowledge");
-    await gm.save(state);
-
-    // Phase 2: AI has written retrospective. Now handle genome changes + auto consume/archive.
-    const backlogItems = await scanBacklog(paths.backlog);
-    const genomeChanges = backlogItems.filter(b => b.type === "genome-change" && b.status !== "consumed");
-    const envChanges = backlogItems.filter(b => b.type === "environment-change" && b.status !== "consumed");
-
-    // --- Consume: mark genome/env changes as consumed ---
-    const toConsume = backlogItems.filter(
-      b => (b.type === "genome-change" || b.type === "environment-change") && b.status !== "consumed"
-    );
-    for (const item of toConsume) {
-      await markBacklogConsumed(paths.backlog, item.filename, state.id);
-    }
-
-    // --- Detect genome/environment impact from changed files ---
-    const genomeImpact = detectGenomeImpact(paths.projectRoot);
-    const impactPrompt = buildGenomeImpactPrompt(genomeImpact);
-
-    // --- Archive: execute hooks, check submodules, complete generation ---
-    const hookResults = await executeHooks(paths.hooks, "onLifeCompleted", paths.projectRoot);
-    const submodules = checkSubmodules(paths.projectRoot);
-    const dirtySubmodules = submodules.filter(s => s.dirty);
-    const compression = await gm.complete();
-
-    const hasChanges = genomeChanges.length > 0 || envChanges.length > 0;
-    const completedSteps = [
-      "gate", "artifact-create", "context-scan", "retrospective",
-      ...(hasChanges ? ["genome-apply"] : ["genome-skip"]),
-      "backlog-consume", "hooks", "archive", "compress",
-    ];
-
-    emitOutput({
-      status: "prompt",
+      status: "ok",
       command: "completion",
       phase: "commit",
-      completed: completedSteps,
+      completed: ["gate", "reflect", "fitness", "adapt", "archive"],
       context: {
-        id: state.id,
-        goal: state.goal,
-        genomeChanges: hasChanges ? genomeChanges.map(g => ({ filename: g.filename, title: g.title, body: g.body, target: g.target })) : [],
-        envChanges: hasChanges ? envChanges.map(e => ({ filename: e.filename, title: e.title, body: e.body, target: e.target })) : [],
-        consumedCount: toConsume.length,
-        compression: { level1: compression.level1.length, level2: compression.level2.length },
-        hookResults,
-        dirtySubmodules,
-        genomeImpact,
+        id: s.id,
+        goal: s.goal,
+        archiveDir,
+        cruiseActive: cruiseStillActive,
       },
-      prompt: (dirtySubmodules.length > 0
-        ? `Dirty submodules detected: ${dirtySubmodules.map(s => s.path).join(", ")}. Commit and push inside each submodule first, then commit the parent repo. Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`
-        : `Commit all changes (code + .reap/ artifacts). Commit message: feat/fix/chore(${state.id}): [goal summary]. Generation complete.`) + impactPrompt + buildMdHookPrompt(hookResults),
-      message: `Generation ${state.id} archived. ${hasChanges ? "Genome/env changes applied." : "No genome/environment changes."} ${toConsume.length} backlog item(s) consumed.`,
+      message: cruiseStillActive
+        ? `Generation ${s.id} archived. Cruise mode active — start next generation.`
+        : `Generation ${s.id} archived. Commit your changes.`,
     });
   }
-
 }

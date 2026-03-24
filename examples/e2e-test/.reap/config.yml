@@ -1,0 +1,6 @@
+project: e2e-test
+language: korean
+autoSubagent: true
+strict: false
+agentClient: claude-code
+autoUpdate: true

@@ -1,14 +1,12 @@
-# REAP MANAGED — Do not modify directly. Use 'reap run <stage> --phase <phase>' to update.
-# Completion
+# Completion (Merge)
+
+<!-- This is a structural guide. Add, remove, or modify sections as needed for this generation. -->
 
 ## Summary
-
-
-## Genome Changes Applied
-
+<!-- Core section. Summarize the merge goal, result, and key changes. -->
 
 ## Lessons Learned
+<!-- Optional — include if relevant. What went well and what could be improved in the merge process? -->
 
-
-## Backlog (Genome Modifications Discovered)
-None
+## Merge Quality Assessment
+<!-- Optional — include if relevant. How clean was the merge? Were there areas of concern? Is the merged result stable? -->

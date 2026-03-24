@@ -1,202 +1,80 @@
-export type LifeCycleStage =
-  | "objective"
-  | "planning"
-  | "implementation"
-  | "validation"
-  | "completion";
+// ── Lifecycle ────────────────────────────────────────────────
 
-export const LIFECYCLE_ORDER: readonly LifeCycleStage[] = [
-  "objective", "planning", "implementation",
-  "validation", "completion",
+export const LIFECYCLE_STAGES = [
+  "learning",
+  "planning",
+  "implementation",
+  "validation",
+  "completion",
 ] as const;
 
-export type MergeStage =
-  | "detect"
-  | "mate"
-  | "merge"
-  | "sync"
-  | "validation"
-  | "completion";
+export type LifeCycleStage = (typeof LIFECYCLE_STAGES)[number];
 
-export const MERGE_LIFECYCLE_ORDER: readonly MergeStage[] = [
-  "detect", "mate", "merge",
-  "sync", "validation", "completion",
+export const COMPLETION_PHASES = [
+  "reflect",
+  "fitness",
+  "adapt",
+  "commit",
 ] as const;
 
-/** Any stage type (normal or merge) */
-export type AnyStage = LifeCycleStage | MergeStage;
+export type CompletionPhase = (typeof COMPLETION_PHASES)[number];
 
-export interface TimelineEntry {
-  stage: AnyStage;
-  at: string;
-  from?: AnyStage;          // regression only
-  reason?: string;          // regression only
-  refs?: string[];          // regression only: file paths, artifact sections, code locations
-}
+export const MERGE_STAGES = [
+  "detect",
+  "mate",
+  "merge",
+  "reconcile",
+  "validation",
+  "completion",
+] as const;
 
-export type GenerationType = "normal" | "merge" | "recovery";
+export type MergeStage = (typeof MERGE_STAGES)[number];
+
+// ── Generation ──────────────────────────────────────────────
+
+export type GenerationType = "embryo" | "normal" | "merge";
 
 export interface GenerationState {
   id: string;
-  goal: string;
-  stage: AnyStage;
-  genomeVersion: number;
-  startedAt: string;
-  completedAt?: string;
-  timeline: TimelineEntry[];
-  /** Generation type: normal (default) or merge */
-  type?: GenerationType;
-  /** Parent generation IDs (DAG structure) */
-  parents?: string[];
-  /** Genome content hash at generation start */
-  genomeHash?: string;
-  /** Common ancestor generation ID (merge only) */
-  commonAncestor?: string;
-  /** Generation IDs that this recovery generation corrects (recovery only) */
-  recovers?: string[];
-  /** Last generated nonce — auto-read by next.ts if no explicit nonce argument */
-  lastNonce?: string;
-  /** Token hash — SHA256(nonce + genId + stage[:phase]). Unified for both stage and phase tokens. */
-  expectedHash?: string;
-  /** Current phase within the active stage */
-  phase?: string;
-}
-
-/** Metadata stored in lineage/{gen-dir}/meta.yml */
-export interface GenerationMeta {
-  id: string;
   type: GenerationType;
-  parents: string[];
+  stage: LifeCycleStage | MergeStage;
   goal: string;
-  genomeHash: string;
-  startedAt: string;
-  completedAt: string;
-  /** Generation IDs that this recovery generation corrects (recovery only) */
-  recovers?: string[];
+  parents: string[];
+  commonAncestor?: string;
+  genomeHash?: string;
+  timeline?: Array<{ stage: string; at: string }>;
+  lastNonce?: string;
+  expectedHash?: string;
+  phase?: string;
+  sourceBacklog?: string;
+  fitnessFeedback?: string;
+  backNonce?: string;
+  backExpectedHash?: string;
+  backTarget?: string;
+  backTargetPhase?: string;
 }
 
-export type ReapHookEvent =
-  // Normal lifecycle
-  | "onLifeStarted" | "onLifeObjected" | "onLifePlanned" | "onLifeImplemented"
-  | "onLifeValidated" | "onLifeCompleted" | "onLifeTransited" | "onLifeRegretted"
-  // Merge lifecycle
-  | "onMergeStarted" | "onMergeDetected" | "onMergeMated" | "onMergeMerged"
-  | "onMergeSynced" | "onMergeValidated" | "onMergeCompleted" | "onMergeTransited";
+// ── Config ──────────────────────────────────────────────────
 
 export interface ReapConfig {
   project: string;
-  stack?: string;
-  preset?: string;
-  entryMode: "greenfield" | "migration" | "adoption";
-  /** Override auto-detected agents. If omitted, all detected agents are used. */
-  agents?: AgentName[];
-  /** Project-level language setting. Used by agents that don't have their own language config. */
-  language?: string;
-  /** Auto-update REAP on session start. Default: true */
-  autoUpdate?: boolean;
-  /** Strict mode: boolean (shorthand) or granular { edit, merge } */
-  strict?: boolean | { edit?: boolean; merge?: boolean };
-  /** Auto-report issues to GitHub when malfunction detected. Requires gh CLI. */
-  autoIssueReport?: boolean;
-  /** Auto-delegate evolve to a subagent via Agent tool. Default: true */
-  autoSubagent?: boolean;
-  /** Generation ID of the last successful genome sync. Empty string = never synced. */
-  lastSyncedGeneration?: string;
-  /** Genome version counter. Bumped by update-genome and completion. */
-  genomeVersion?: number;
+  language: string;
+  autoSubagent: boolean;
+  strict: boolean;
+  agentClient: "claude-code" | "opencode" | "codex";
+  autoUpdate: boolean;
+  cruiseCount?: string; // "1/5" format — present = cruise mode
 }
 
-/** Resolved strict mode (always object form) */
-export interface StrictMode {
-  edit: boolean;
-  merge: boolean;
-}
+// ── Output ──────────────────────────────────────────────────
 
-// Agent adapter types
-export type AgentName = "claude-code" | "opencode" | "codex";
-
-export interface AgentAdapter {
-  readonly name: AgentName;
-  readonly displayName: string;
-
-  /** Check if this agent CLI is installed on the system */
-  detect(): Promise<boolean>;
-
-  /** Get the directory where slash commands should be installed */
-  getCommandsDir(): string;
-
-  /** Install slash command files from sourceDir */
-  installCommands(commandNames: string[], sourceDir: string): Promise<void>;
-
-  /** Remove stale commands not in validNames */
-  removeStaleCommands(validNames: Set<string>): Promise<void>;
-
-  /** Register REAP session start hook */
-  registerSessionHook(dryRun?: boolean): Promise<{ action: "created" | "updated" | "skipped" }>;
-
-  /** Sync session hook registration (update path if changed) */
-  syncSessionHook(dryRun?: boolean): Promise<{ action: "updated" | "skipped" }>;
-
-  /** Read language setting from agent config */
-  readLanguage(): Promise<string | null>;
-
-  /** Optional migration from legacy formats */
-  migrate?(dryRun?: boolean): Promise<{ action: string }>;
-
-  /** Clean up legacy user-level slash commands (e.g. ~/.claude/commands/reap.*.md) */
-  cleanupLegacyCommands?(): Promise<string[]>;
-
-  /** @deprecated Use setupAgentMd instead */
-  setupClaudeMd?(projectRoot: string): Promise<{ action: "created" | "updated" | "skipped" }>;
-
-  /** Setup agent-specific instruction file (e.g. .claude/CLAUDE.md, .codex/AGENTS.md) */
-  setupAgentMd?(projectRoot: string): Promise<{ action: "created" | "updated" | "skipped" }>;
-
-  /** Clean up agent-specific project files during destroy (e.g. .claude/commands/, .codex/) */
-  cleanupProjectFiles?(projectRoot: string): Promise<{ removed: string[]; skipped: string[] }>;
-}
-
-export type BacklogItemType = "genome-change" | "environment-change" | "task";
-
-export interface BacklogItem {
-  type: BacklogItemType;
-  target?: string;
-  title: string;
-  description: string;
-}
-
-export interface AdaptationRecord {
-  id: string;
-  generationId: string;
-  targetFile: string;
-  description: string;
-  diff: string;
-  createdAt: string;
-}
-
-// ── hook engine types ───────────────────────────────────────
-
-export interface HookResult {
-  name: string;
-  event: string;
-  type: "sh" | "md";
-  status: "executed" | "skipped";
-  exitCode?: number;
-  stdout?: string;
-  stderr?: string;
-  content?: string;
-  skipReason?: string;
-}
-
-// ── reap run output types ──────────────────────────────────
-
-export interface RunOutput {
+export interface ReapOutput {
   status: "ok" | "prompt" | "error";
   command: string;
-  phase: string;
-  completed: string[];
+  phase?: string;
+  completed?: string[];
   context?: Record<string, unknown>;
+  message?: string;
   prompt?: string;
   nextCommand?: string;
-  message?: string;
 }

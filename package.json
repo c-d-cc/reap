@@ -1,53 +1,22 @@
 {
   "name": "@c-d-cc/reap",
-  "version": "0.15.14",
+  "version": "0.16.0",
   "description": "Recursive Evolutionary Autonomous Pipeline — AI and humans evolve software across generations",
   "type": "module",
-  "license": "MIT",
-  "author": "HyeonIL Choi <hichoi@c-d.cc> (C to D)",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/c-d-cc/reap.git"
-  },
-  "homepage": "https://reap.cc",
-  "keywords": [
-    "ai",
-    "development",
-    "pipeline",
-    "evolutionary",
-    "claude",
-    "genome",
-    "lifecycle"
-  ],
   "bin": {
-    "reap": "dist/cli.js"
-  },
-  "files": [
-    "dist/",
-    "scripts/postinstall.cjs",
-    "scripts/preinstall.cjs",
-    "RELEASE_NOTICE.md"
-  ],
-  "preferGlobal": true,
-  "engines": {
-    "node": ">=18"
+    "reap": "dist/cli/index.js"
   },
   "scripts": {
-    "dev": "bun run src/cli/index.ts",
-    "build": "node scripts/build.js",
-    "preinstall": "node scripts/preinstall.cjs",
-    "postinstall": "node scripts/postinstall.cjs",
-    "prepublishOnly": "npm run build",
-    "test": "bun test"
-  },
-  "devDependencies": {
-    "@types/bun": "latest",
-    "typescript": "^5.0.0"
+    "dev": "bun src/cli/index.ts",
+    "build": "bun build src/cli/index.ts --outdir dist/cli --target node",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "yaml": "^2.0.0"
+    "js-yaml": "^4.1.0"
   },
-  "reap": {
-    "autoUpdateMinVersion": "0.15.0"
+  "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
   }
 }

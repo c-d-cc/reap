@@ -1,12 +1,15 @@
-# REAP MANAGED — Do not modify directly. Use 'reap run <stage> --phase <phase>' to update.
-# Validation
+# Validation Report (Merge)
 
-## Result: pending
+<!-- This is a structural guide. Add, remove, or modify sections as needed for this generation. -->
 
-## Validation Commands
+## Result
+<!-- Core section. One of: pass / partial / fail -->
 
-| Command | Result | Output |
-|---------|--------|--------|
-| | | |
+## Checks
+<!-- Optional — include if relevant. Record each verification item's result and details. -->
 
-## Issues Found
+## Test Coverage Notes
+<!-- Optional — include if relevant. Were there areas of the merged code that lack test coverage? Any new tests added? -->
+
+## Issues
+<!-- Optional — include if relevant. Issues found during validation. -->

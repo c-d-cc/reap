@@ -1,52 +1,68 @@
-import { ReapPaths } from "../../core/paths";
-import { GenerationManager } from "../../core/generation";
-import { ConfigManager } from "../../core/config";
-import { checkIntegrity } from "../../core/integrity";
+import { readdir } from "fs/promises";
+import yaml from "js-yaml";
+import { createPaths } from "../../core/paths.js";
+import { readTextFile, fileExists } from "../../core/fs.js";
+import { emitOutput, emitError } from "../../core/output.js";
+import type { ReapConfig, GenerationState } from "../../types/index.js";
 
-export interface ProjectStatus {
-  version: string;
-  project: string;
-  entryMode: string;
-  lastSyncedGeneration?: string;
-  generation: {
-    id: string;
-    goal: string;
-    stage: string;
-    genomeVersion: number;
-    startedAt: string;
-    type?: string;
-    parents?: string[];
-    genomeHash?: string;
-  } | null;
-  totalGenerations: number;
-  integrity: { errors: number; warnings: number };
-}
+export async function execute(): Promise<void> {
+  const root = process.cwd();
+  const paths = createPaths(root);
 
-export async function getStatus(projectRoot: string): Promise<ProjectStatus> {
-  const paths = new ReapPaths(projectRoot);
-  const config = await ConfigManager.read(paths);
-  const mgr = new GenerationManager(paths);
+  if (!(await fileExists(paths.config))) {
+    emitError("status", "Not a reap project. Run 'reap init' first.");
+  }
 
-  const current = await mgr.current();
-  const totalCompleted = await mgr.countAllCompleted();
-  const integrityResult = await checkIntegrity(paths);
+  // Read config
+  const configContent = await readTextFile(paths.config);
+  const config = configContent ? (yaml.load(configContent) as ReapConfig) : null;
 
-  return {
-    version: process.env.__REAP_VERSION__ || "0.0.0",
-    project: config.project,
-    entryMode: config.entryMode,
-    lastSyncedGeneration: config.lastSyncedGeneration,
-    generation: current ? {
-      id: current.id,
-      goal: current.goal,
-      stage: current.stage,
-      genomeVersion: current.genomeVersion,
-      startedAt: current.startedAt,
-      type: current.type,
-      parents: current.parents,
-      genomeHash: current.genomeHash,
-    } : null,
-    totalGenerations: totalCompleted,
-    integrity: { errors: integrityResult.errors.length, warnings: integrityResult.warnings.length },
+  // Read current generation
+  let generation: GenerationState | null = null;
+  const currentContent = await readTextFile(paths.current);
+  if (currentContent) {
+    generation = yaml.load(currentContent) as GenerationState;
+  }
+
+  // Count lineage
+  let completedGenerations = 0;
+  try {
+    const entries = await readdir(paths.lineage);
+    completedGenerations = entries.filter((e) => e.startsWith("gen-")).length;
+  } catch {
+    /* no lineage */
+  }
+
+  // Check genome existence
+  const hasGenome = {
+    application: await fileExists(paths.application),
+    evolution: await fileExists(paths.evolution),
+    invariants: await fileExists(paths.invariants),
   };
+
+  // Determine execution mode
+  const executionMode = config?.cruiseCount ? "cruise" : "supervised";
+
+  emitOutput({
+    status: "ok",
+    command: "status",
+    context: {
+      project: config?.project ?? "unknown",
+      executionMode,
+      cruiseCount: config?.cruiseCount ?? null,
+      completedGenerations,
+      genome: hasGenome,
+      generation: generation
+        ? {
+            id: generation.id,
+            type: generation.type,
+            stage: generation.stage,
+            goal: generation.goal,
+          }
+        : null,
+    },
+    message: generation
+      ? `Generation ${generation.id} | Stage: ${generation.stage} | Type: ${generation.type}`
+      : `No active generation. Completed: ${completedGenerations}`,
+  });
 }

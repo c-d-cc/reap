@@ -1,6 +1,6 @@
-import { readFile, writeFile, access } from "fs/promises";
+import { readFile, writeFile, mkdir, access } from "fs/promises";
+import { dirname } from "path";
 
-/** Read file contents as string. Returns null if file doesn't exist. */
 export async function readTextFile(path: string): Promise<string | null> {
   try {
     return await readFile(path, "utf-8");
@@ -9,17 +9,11 @@ export async function readTextFile(path: string): Promise<string | null> {
   }
 }
 
-/** Read file contents as string. Throws if file doesn't exist. */
-export async function readTextFileOrThrow(path: string): Promise<string> {
-  return await readFile(path, "utf-8");
-}
-
-/** Write string content to file. */
 export async function writeTextFile(path: string, content: string): Promise<void> {
+  await ensureDir(dirname(path));
   await writeFile(path, content, "utf-8");
 }
 
-/** Check if file exists. */
 export async function fileExists(path: string): Promise<boolean> {
   try {
     await access(path);
@@ -27,4 +21,8 @@ export async function fileExists(path: string): Promise<boolean> {
   } catch {
     return false;
   }
+}
+
+export async function ensureDir(path: string): Promise<void> {
+  await mkdir(path, { recursive: true });
 }

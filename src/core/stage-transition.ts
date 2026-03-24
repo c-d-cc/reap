@@ -1,67 +1,69 @@
-import { join } from "path";
-import type { ReapPaths } from "./paths";
-import type { GenerationState, AnyStage, LifeCycleStage, MergeStage, ReapHookEvent, HookResult } from "../types";
-import { LifeCycle } from "./lifecycle";
-import { MergeLifeCycle } from "./merge-lifecycle";
-import { generateToken, verifyToken } from "./generation";
-import { readTextFile, writeTextFile, fileExists } from "./fs";
-import { executeHooks } from "./hook-engine";
-import { emitError } from "./run-output";
+import type { GenerationState, LifeCycleStage, MergeStage } from "../types/index.js";
+import type { GenerationManager } from "./generation.js";
+import { generateToken, verifyToken } from "./nonce.js";
+import { nextStage, prevStage, nextMergeStage, prevMergeStage } from "./lifecycle.js";
+import { readTextFile } from "./fs.js";
+import { emitError } from "./output.js";
+import { runHooks } from "./hooks.js";
+import type { ReapPaths } from "./paths.js";
 
-// ── Artifact mappings ───────────────────────────────────────
-
-const NORMAL_ARTIFACT: Partial<Record<LifeCycleStage, string>> = {
+const STAGE_ARTIFACTS: Partial<Record<string, string>> = {
+  learning: "01-learning.md",
   planning: "02-planning.md",
   implementation: "03-implementation.md",
   validation: "04-validation.md",
   completion: "05-completion.md",
 };
 
-const MERGE_ARTIFACT: Partial<Record<MergeStage, string>> = {
+const MERGE_STAGE_ARTIFACTS: Partial<Record<string, string>> = {
+  detect: "01-detect.md",
   mate: "02-mate.md",
   merge: "03-merge.md",
-  sync: "04-sync.md",
+  reconcile: "04-reconcile.md",
   validation: "05-validation.md",
   completion: "06-completion.md",
 };
 
-// ── Stage-specific hook mappings ────────────────────────────
+/**
+ * Verify that the stage artifact exists and has minimum content.
+ */
+export async function verifyArtifact(
+  command: string,
+  artifactPath: (name: string) => string,
+  stage: string,
+  isMerge?: boolean,
+): Promise<void> {
+  const map = isMerge ? MERGE_STAGE_ARTIFACTS : STAGE_ARTIFACTS;
+  const filename = map[stage];
+  if (!filename) return;
 
-const STAGE_HOOK: Record<string, ReapHookEvent> = {
-  // Normal lifecycle — hook fires when entering this stage
-  planning: "onLifeObjected",
-  implementation: "onLifePlanned",
-  validation: "onLifeImplemented",
-  completion: "onLifeValidated",
-  // Merge lifecycle
-  mate: "onMergeDetected",
-  merge: "onMergeMated",
-  sync: "onMergeMerged",
-  "validation:merge": "onMergeSynced",
-  "completion:merge": "onMergeValidated",
-};
-
-// ── Unified nonce helpers ────────────────────────────────────
+  const content = await readTextFile(artifactPath(filename));
+  if (!content || content.length < 50) {
+    emitError(command, `${filename} is missing or too short. Complete the ${stage} work before advancing.`);
+  }
+}
 
 /**
- * Verify and consume a nonce token (receiver-based).
- * Token format: hash(nonce + genId + stage:phase).
- * - If lastNonce does not exist: skip (first stage:entry like objective/detect).
- * - If lastNonce exists: verify against expectedHash, clear on success.
- * Mutates state in-place (clears lastNonce + expectedHash + phase on success).
+ * Verify and consume a nonce token.
+ * First stage entry (no lastNonce) is the only exception — skips verification.
  */
-export function verifyNonce(command: string, state: GenerationState, stage: string, phase: string): void {
+export function verifyNonce(
+  command: string,
+  state: GenerationState,
+  stage: string,
+  phase: string,
+): void {
   if (!state.lastNonce) {
     // First stage entry — no token to verify
     return;
   }
 
   if (!state.expectedHash) {
-    emitError(command, "Nonce transition error: lastNonce exists but expectedHash is missing. State may be corrupted.");
+    emitError(command, "Nonce transition error: lastNonce exists but expectedHash is missing.");
   }
 
-  if (!verifyToken(state.lastNonce, state.id, stage, state.expectedHash, phase)) {
-    emitError(command, `Nonce verification failed for ${stage}:${phase}. Re-run the previous phase to get a valid token.`);
+  if (!verifyToken(state.lastNonce, state.id, stage, phase, state.expectedHash!)) {
+    emitError(command, `Nonce verification failed for ${stage}:${phase}. Re-run the previous phase.`);
   }
 
   // Clear consumed token
@@ -71,98 +73,147 @@ export function verifyNonce(command: string, state: GenerationState, stage: stri
 }
 
 /**
- * Generate and set a nonce token for the next entry point (receiver-based).
- * Token format: hash(nonce + genId + stage:phase).
- * Mutates state in-place. Caller must save state after calling this.
+ * Generate and set forward nonce + back nonce simultaneously.
+ * Back nonce targets the previous stage's entry (if exists).
  */
-export function setNonce(state: GenerationState, stage: string, phase: string): void {
-  const { nonce, hash } = generateToken(state.id, stage, phase);
-  state.lastNonce = nonce;
-  state.expectedHash = hash;
+export function setNonce(
+  state: GenerationState,
+  stage: string,
+  phase: string,
+): void {
+  // Forward nonce
+  const forward = generateToken(state.id, stage, phase);
+  state.lastNonce = forward.nonce;
+  state.expectedHash = forward.hash;
   state.phase = phase;
+
+  // Back nonce — target previous stage entry
+  const prev = state.type === "merge"
+    ? prevMergeStage(state.stage as MergeStage)
+    : prevStage(state.stage as LifeCycleStage);
+  if (prev) {
+    const back = generateToken(state.id, prev, "entry");
+    state.backNonce = back.nonce;
+    state.backExpectedHash = back.hash;
+    state.backTarget = prev;
+    state.backTargetPhase = "entry";
+  } else {
+    // First stage — no back possible
+    state.backNonce = undefined;
+    state.backExpectedHash = undefined;
+    state.backTarget = undefined;
+    state.backTargetPhase = undefined;
+  }
 }
 
-// ── Auto-transition ─────────────────────────────────────────
+/**
+ * Verify back nonce and consume it.
+ */
+export function verifyBackNonce(
+  command: string,
+  state: GenerationState,
+): void {
+  if (!state.backNonce) {
+    emitError(command, "Cannot go back — no back nonce available (already at first stage or back not supported here).");
+  }
 
-export interface TransitionResult {
-  nextStage: AnyStage;
-  artifactFile: string | undefined;
-  stageHookResults: HookResult[];
-  transitionHookResults: HookResult[];
+  if (!state.backExpectedHash || !state.backTarget) {
+    emitError(command, "Back nonce state is corrupted.");
+  }
+
+  if (!verifyToken(state.backNonce!, state.id, state.backTarget!, state.backTargetPhase ?? "entry", state.backExpectedHash!)) {
+    emitError(command, "Back nonce verification failed.");
+  }
+
+  // Clear back nonce
+  const target = state.backTarget!;
+  const targetPhase = state.backTargetPhase ?? "entry";
+  state.backNonce = undefined;
+  state.backExpectedHash = undefined;
+  state.backTarget = undefined;
+  state.backTargetPhase = undefined;
+
+  // Set stage to target and issue new forward nonce
+  state.stage = target as LifeCycleStage | MergeStage;
+  const forward = generateToken(state.id, target, targetPhase);
+  state.lastNonce = forward.nonce;
+  state.expectedHash = forward.hash;
+  state.phase = targetPhase;
 }
 
 /**
  * Perform automatic stage transition after --phase complete.
- * - Advances state.stage to next stage
- * - Updates timeline
- * - Copies artifact template for next stage
- * - Runs stage-specific and transition hooks
- * - Saves state
- *
- * Mutates state in-place. Caller MUST call this BEFORE emitOutput.
  */
+// Stage → lifecycle event mapping
+const STAGE_EVENTS: Record<string, string> = {
+  planning: "onLifeLearned",
+  implementation: "onLifePlanned",
+  validation: "onLifeImplemented",
+  completion: "onLifeValidated",
+};
+
 export async function performTransition(
-  paths: ReapPaths,
   state: GenerationState,
-  saveFn: (state: GenerationState) => Promise<void>,
-): Promise<TransitionResult> {
-  const isMerge = state.type === "merge";
-  let nextStage: AnyStage | null;
-
-  if (isMerge) {
-    nextStage = MergeLifeCycle.next(state.stage as MergeStage);
-  } else {
-    nextStage = LifeCycle.next(state.stage as LifeCycleStage);
+  gm: GenerationManager,
+  paths?: ReapPaths,
+): Promise<LifeCycleStage> {
+  const fromStage = state.stage;
+  const next = nextStage(fromStage as LifeCycleStage);
+  if (!next) {
+    throw new Error(`Cannot advance from '${fromStage}' — already at the last stage.`);
   }
 
-  if (!nextStage) {
-    // Should not happen — completion stage doesn't call this
-    throw new Error(`Cannot advance from '${state.stage}' — already at the last stage.`);
-  }
-
-  // Update state
-  state.stage = nextStage;
+  state.stage = next;
   if (!state.timeline) state.timeline = [];
-  state.timeline.push({ stage: nextStage, at: new Date().toISOString() });
+  state.timeline.push({ stage: next, at: new Date().toISOString() });
 
-  // Save state (nonce + hash already set by the caller)
-  await saveFn(state);
+  await gm.save(state);
 
-  // Determine artifact file
-  const artifactFile = isMerge
-    ? MERGE_ARTIFACT[nextStage as MergeStage]
-    : NORMAL_ARTIFACT[nextStage as LifeCycleStage];
+  // Run hooks (non-blocking — errors don't stop transition)
+  if (paths) {
+    const stageEvent = STAGE_EVENTS[next];
+    if (stageEvent) {
+      await runHooks(paths.hooks, stageEvent, paths.root).catch(() => {});
+    }
+    await runHooks(paths.hooks, "onLifeTransited", paths.root).catch(() => {});
+  }
 
-  // Copy artifact template if it exists
-  if (artifactFile) {
-    const templateDir = join(require("os").homedir(), ".reap", "templates");
-    const templatePath = join(templateDir, artifactFile);
-    const destPath = paths.artifact(artifactFile);
+  return next;
+}
 
-    if (await fileExists(templatePath) && !(await fileExists(destPath))) {
-      const templateContent = await readTextFile(templatePath);
-      if (templateContent) {
-        await writeTextFile(destPath, templateContent);
-      }
+// ── Merge Lifecycle Transition ─────────────────────────────
+
+const MERGE_STAGE_EVENTS: Record<string, string> = {
+  mate: "onMergeDetected",
+  merge: "onMergeMated",
+  reconcile: "onMergeMerged",
+  validation: "onMergeReconciled",
+  completion: "onMergeValidated",
+};
+
+export async function performMergeTransition(
+  state: GenerationState,
+  gm: GenerationManager,
+  paths?: ReapPaths,
+): Promise<MergeStage> {
+  const fromStage = state.stage;
+  const next = nextMergeStage(fromStage as MergeStage);
+  if (!next) {
+    throw new Error(`Cannot advance from '${fromStage}' — already at the last merge stage.`);
+  }
+
+  state.stage = next;
+  if (!state.timeline) state.timeline = [];
+  state.timeline.push({ stage: next, at: new Date().toISOString() });
+
+  await gm.save(state);
+
+  if (paths) {
+    const stageEvent = MERGE_STAGE_EVENTS[next];
+    if (stageEvent) {
+      await runHooks(paths.hooks, stageEvent, paths.root).catch(() => {});
     }
   }
 
-  // Stage-specific hook
-  const stageKey = isMerge && (nextStage === "validation" || nextStage === "completion")
-    ? `${nextStage}:merge` : nextStage;
-  const stageHookEvent = STAGE_HOOK[stageKey];
-  const stageHookResults = stageHookEvent
-    ? await executeHooks(paths.hooks, stageHookEvent, paths.projectRoot)
-    : [];
-
-  // Transition hook
-  const transitionEvent: ReapHookEvent = isMerge ? "onMergeTransited" : "onLifeTransited";
-  const transitionHookResults = await executeHooks(paths.hooks, transitionEvent, paths.projectRoot);
-
-  return {
-    nextStage,
-    artifactFile,
-    stageHookResults,
-    transitionHookResults,
-  };
+  return next;
 }

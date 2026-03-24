@@ -1,9 +1,0 @@
-id: gen-159-59e74a
-type: normal
-parents:
-  - gen-158-6d5755
-goal: "Lineage 압축 보호 개수 확대: LEVEL1_PROTECTED_COUNT를 3에서 20으로, LINEAGE_MAX_LINES도
-  함께 조정"
-genomeHash: 6eda03ff
-startedAt: 2026-03-23T05:12:29.223Z
-completedAt: 2026-03-23T05:18:23.741Z

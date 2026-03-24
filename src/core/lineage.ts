@@ -1,116 +1,125 @@
-import YAML from "yaml";
 import { readdir } from "fs/promises";
 import { join } from "path";
-import type { GenerationMeta } from "../types";
-import type { ReapPaths } from "./paths";
-import { readTextFile } from "./fs";
-import { parseFrontmatter } from "./compression";
-import { parseGenSeq } from "./generation";
+import { execSync } from "child_process";
+import yaml from "js-yaml";
+import { readTextFile } from "./fs.js";
 
-/** List completed generation directory names in lineage/ */
-export async function listCompleted(paths: ReapPaths): Promise<string[]> {
+export interface LineageMeta {
+  id: string;
+  type: string;
+  goal: string;
+  parents: string[];
+  dirName: string;
+}
+
+export interface GenomeDiff {
+  conflicts: GenomeConflict[];
+  aOnly: string[];
+  bOnly: string[];
+}
+
+export interface GenomeConflict {
+  file: string;
+  parentA: string;
+  parentB: string;
+  ancestor: string;
+}
+
+// ── Git utilities ──────────────────────────────────────────
+
+export function gitShow(cwd: string, ref: string, path: string): string | null {
   try {
-    const entries = await readdir(paths.lineage);
-    return entries.filter(e => e.startsWith("gen-")).sort();
+    return execSync(`git show ${ref}:${path}`, { cwd, encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] });
   } catch {
-    return [];
+    return null;
   }
 }
 
-/** List generation IDs compressed into epoch.md */
-export async function listEpochGenerations(paths: ReapPaths): Promise<string[]> {
-  const epochPath = join(paths.lineage, "epoch.md");
-  const content = await readTextFile(epochPath);
-  if (!content) return [];
-  const match = content.match(/^---\n([\s\S]*?)\n---/);
-  if (!match) return [];
+export function gitMergeBase(cwd: string, refA: string, refB: string): string | null {
   try {
-    const meta = YAML.parse(match[1]) as { generations?: Array<{ id: string }> } | null;
-    if (!meta?.generations) return [];
-    return meta.generations.map(g => g.id).filter(Boolean);
+    return execSync(`git merge-base ${refA} ${refB}`, { cwd, encoding: "utf-8", stdio: ["pipe", "pipe", "pipe"] }).trim();
   } catch {
-    return [];
+    return null;
   }
 }
 
-/** Count all completed generations (gen-* entries + epoch.md generations) */
-export async function countAllCompleted(paths: ReapPaths): Promise<number> {
-  const genDirs = await listCompleted(paths);
-  const epochGens = await listEpochGenerations(paths);
-  return genDirs.length + epochGens.length;
+// ── Git-based genome diff ──────────────────────────────────
+
+export function findCommonAncestor(cwd: string, refA: string, refB: string): string | null {
+  return gitMergeBase(cwd, refA, refB);
 }
 
-/** Read meta.yml from a lineage directory */
-export async function readMeta(paths: ReapPaths, lineageDirName: string): Promise<GenerationMeta | null> {
-  const metaPath = join(paths.lineage, lineageDirName, "meta.yml");
-  const content = await readTextFile(metaPath);
-  if (content === null) return null;
-  return YAML.parse(content) as GenerationMeta;
-}
+export function extractGenomeDiff(
+  cwd: string,
+  refA: string,
+  refB: string,
+  ancestorRef: string | null,
+): GenomeDiff {
+  const genomeFiles = ["application.md", "evolution.md", "invariants.md"];
+  const conflicts: GenomeConflict[] = [];
+  const aOnly: string[] = [];
+  const bOnly: string[] = [];
 
-/** List all generation metadata (DAG-aware, reads both directories and compressed .md) */
-export async function listMeta(paths: ReapPaths): Promise<GenerationMeta[]> {
-  const metas: GenerationMeta[] = [];
-  try {
-    const entries = await readdir(paths.lineage, { withFileTypes: true });
-    for (const entry of entries) {
-      if (entry.isDirectory() && entry.name.startsWith("gen-")) {
-        const meta = await readMeta(paths, entry.name);
-        if (meta) metas.push(meta);
-      } else if (entry.isFile() && entry.name.startsWith("gen-") && entry.name.endsWith(".md")) {
-        const content = await readTextFile(join(paths.lineage, entry.name));
-        if (content) {
-          const meta = parseFrontmatter(content);
-          if (meta) metas.push(meta);
-        }
-      }
+  for (const file of genomeFiles) {
+    const genomePath = `.reap/genome/${file}`;
+    const contentA = gitShow(cwd, refA, genomePath);
+    const contentB = gitShow(cwd, refB, genomePath);
+    const contentAnc = ancestorRef ? gitShow(cwd, ancestorRef, genomePath) : null;
+
+    if (contentA === contentB) continue;
+
+    if (contentA && !contentB) {
+      aOnly.push(file);
+    } else if (!contentA && contentB) {
+      bOnly.push(file);
+    } else if (contentA !== contentAnc && contentB !== contentAnc) {
+      conflicts.push({
+        file,
+        parentA: contentA ?? "",
+        parentB: contentB ?? "",
+        ancestor: contentAnc ?? "",
+      });
+    } else if (contentA !== contentAnc) {
+      aOnly.push(file);
+    } else {
+      bOnly.push(file);
     }
-  } catch { /* lineage dir may not exist */ }
+  }
+
+  return { conflicts, aOnly, bOnly };
+}
+
+// ── Lineage meta utilities (still useful for context) ──────
+
+export async function readLineageMetas(lineagePath: string): Promise<LineageMeta[]> {
+  let entries: string[];
+  try {
+    entries = await readdir(lineagePath);
+  } catch {
+    return [];
+  }
+
+  const genDirs = entries.filter((e) => e.startsWith("gen-")).sort();
+  const metas: LineageMeta[] = [];
+
+  for (const dir of genDirs) {
+    const metaContent = await readTextFile(join(lineagePath, dir, "meta.yml"));
+    if (!metaContent) continue;
+
+    const meta = yaml.load(metaContent) as Record<string, unknown>;
+    metas.push({
+      id: (meta.id as string) ?? dir,
+      type: (meta.type as string) ?? "normal",
+      goal: (meta.goal as string) ?? "",
+      parents: (meta.parents as string[]) ?? [],
+      dirName: dir,
+    });
+  }
+
   return metas;
 }
 
-/** Calculate next sequence number from lineage */
-export async function nextSeq(paths: ReapPaths, currentId?: string): Promise<number> {
-  const genDirs = await listCompleted(paths);
-  const epochGens = await listEpochGenerations(paths);
-  const allIds = [...genDirs, ...epochGens];
-  if (allIds.length === 0) {
-    if (currentId) {
-      return parseGenSeq(currentId) + 1;
-    }
-    return 1;
-  }
-  let maxSeq = 0;
-  for (const id of allIds) {
-    const seq = parseGenSeq(id);
-    if (seq > maxSeq) maxSeq = seq;
-  }
-  return maxSeq + 1;
-}
-
-const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?)?$/;
-
-/** Safe completedAt to timestamp — returns 0 for non-ISO or invalid dates */
-export function safeCompletedAtTime(dateStr: string): number {
-  if (!ISO_DATE_RE.test(dateStr)) return 0;
-  const t = new Date(dateStr).getTime();
-  return Number.isNaN(t) ? 0 : t;
-}
-
-/** Resolve parent generation IDs (most recently completed) */
-export async function resolveParents(paths: ReapPaths): Promise<string[]> {
-  const metas = await listMeta(paths);
-  if (metas.length > 0) {
-    const sorted = metas.sort((a, b) =>
-      safeCompletedAtTime(b.completedAt) - safeCompletedAtTime(a.completedAt)
-    );
-    return [sorted[0].id];
-  }
-  const dirs = await listCompleted(paths);
-  if (dirs.length > 0) {
-    const lastDir = dirs[dirs.length - 1];
-    const legacyId = lastDir.match(/^(gen-\d{3}(?:-[a-f0-9]{6})?)/)?.[1];
-    if (legacyId) return [legacyId];
-  }
-  return [];
+export function findLineageDir(metas: LineageMeta[], genId: string): string | null {
+  const meta = metas.find((m) => m.id === genId);
+  return meta?.dirName ?? null;
 }

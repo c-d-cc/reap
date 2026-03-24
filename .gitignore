@@ -1,10 +1,7 @@
-.superpowers/
 node_modules/
 dist/
-*.db
-*.db-shm
-*.db-wal
-*.tgz
+*.tsbuildinfo
 
-# REAP command symlinks (managed by session-start hook)
-.claude/skills/reap.*
+# E2E test artifacts (regenerated on each run)
+examples/e2e-test/.reap/lineage/
+examples/e2e-test/.reap/life/

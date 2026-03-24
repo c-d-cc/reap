@@ -1,13 +1,12 @@
-# REAP MANAGED — Do not modify directly. Use 'reap run <stage> --phase <phase>' to update.
-# Mate (Genome Mating)
+# Mate — Genome & Vision Merge
 
-## Conflicts
+<!-- This is a structural guide. Add, remove, or modify sections as needed for this generation. -->
 
-| File | Type | Parent A Change | Parent B Change | Resolution |
-|------|------|-----------------|-----------------|------------|
-| | | | | |
+## Conflict Resolution
+<!-- Core section. For each conflict, record the resolution decision and rationale. How were competing changes reconciled? -->
 
-## Resolution Decisions
+## Confirmed Genome
+<!-- Optional — include if relevant. Summarize the final merged genome state (application.md, evolution.md, invariants.md). What is the resulting identity of the project after merge? -->
 
-
-## Final Genome State
+## Decision Rationale
+<!-- Optional — include if relevant. For complex or non-obvious merge decisions, provide deeper reasoning. Were there trade-offs? Did any resolutions require human input? -->

@@ -1,8 +1,0 @@
-id: gen-169-17c5c0
-type: normal
-parents:
-  - gen-168-f8f638
-goal: selfUpgrade 후 새 바이너리로 notice 표시
-genomeHash: c2e6348e
-startedAt: 2026-03-23T16:27:36.574Z
-completedAt: 2026-03-23T16:31:47.897Z

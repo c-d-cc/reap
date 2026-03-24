@@ -1,458 +1,73 @@
 #!/usr/bin/env node
-import { program } from "../libs/cli";
-import { createInterface } from "readline";
-import { initProject } from "./commands/init";
-import { updateProject, selfUpgrade, forceUpgrade, type SelfUpgradeResult } from "./commands/update";
-import { fetchReleaseNotice } from "../core/notice";
-import { getCurrentVersion } from "../core/version";
-import { getStatus } from "./commands/status";
-import { fixProject, checkProject } from "./commands/fix";
-import { destroyProject, getProjectName } from "./commands/destroy";
-import { cleanProject, hasActiveGeneration } from "./commands/clean";
-import type { CleanOptions } from "./commands/clean";
-import { LifeCycle } from "../core/lifecycle";
-import { ReapPaths } from "../core/paths";
-import { AgentRegistry } from "../core/agents";
-import { readTextFile } from "../core/fs";
-import { formatVersionLine } from "../core/version";
-import { ConfigManager } from "../core/config";
-import { join } from "path";
+
+import { Command } from "../libs/cli.js";
+import { execute as initExecute } from "./commands/init/index.js";
+import { execute as statusExecute } from "./commands/status.js";
+import { execute as runExecute } from "./commands/run/index.js";
+
+const program = new Command();
 
 program
   .name("reap")
-  .description("REAP — Recursive Evolutionary Autonomous Pipeline")
-  .version(process.env.__REAP_VERSION__ || "0.0.0");
+  .description("Recursive Evolutionary Autonomous Pipeline — Self-Evolving")
+  .version("0.0.1");
 
 program
-  .command("init")
-  .description("Initialize a new REAP project (Genesis)")
-  .argument("[project-name]", "Project name (defaults to current directory name)")
-  .option("-m, --mode <mode>", "Entry mode: greenfield, migration, adoption", "greenfield")
-  .option("-p, --preset <preset>", "Bootstrap with a genome preset (e.g., bun-hono-react)")
-  .action(async (projectName: string | undefined, options: { mode: string; preset?: string }) => {
-    try {
-      const cwd = process.cwd();
-      const name = projectName ?? require("path").basename(cwd);
-      let mode = options.mode as "greenfield" | "migration" | "adoption";
-
-      // If existing project signals detected and mode not explicitly set, auto-switch to adoption
-      const modeExplicit = process.argv.some(a => a === "-m" || a === "--mode");
-      if (!modeExplicit && mode === "greenfield") {
-        const { existsSync } = require("fs");
-        const signals = ["package.json", "go.mod", "Cargo.toml", "pom.xml", "pyproject.toml", "Makefile", "CMakeLists.txt"];
-        const hasExistingProject = signals.some(f => existsSync(require("path").join(cwd, f)));
-        if (hasExistingProject) {
-          mode = "adoption";
-          console.log(`Existing project detected. Automatically using adoption mode.`);
-          console.log(`  To force greenfield mode, use: reap init --mode greenfield\n`);
-        }
-      }
-
-      console.log(`\nInitializing REAP project "${name}" (${mode} mode)...\n`);
-      const initResult = await initProject(cwd, name, mode, options.preset, (msg) => {
-        console.log(`  ${msg}`);
-      });
-      console.log(`\n✓ REAP project "${name}" initialized successfully!\n`);
-      console.log(`  Project:  ${name} (${mode})`);
-      if (initResult.agents.length > 0) {
-        console.log(`  Agents:   ${initResult.agents.join(", ")}`);
-      } else {
-        console.log(`  Agents:   None detected`);
-      }
-      console.log(`  Config:   .reap/config.yml`);
-      console.log(`  Genome:   .reap/genome/ (principles, conventions, constraints)`);
-      console.log(`\n  Getting started:`);
-      console.log(`    1. Open your AI agent (${initResult.agents[0] || "Claude Code or OpenCode"})`);
-      console.log(`    2. Run /reap.sync to synchronize Genome with your project`);
-      console.log(`    3. Run /reap.start to begin your first Generation`);
-      console.log(`    4. Or run /reap.evolve for autonomous execution`);
-      if (initResult.agents.length === 0) {
-        console.log(`\n  ⚠ No AI agents detected. Install Claude Code or OpenCode, then run 'reap update'.`);
-      }
-    } catch (e: any) {
-      console.error(`Error: ${e.message}`);
-      process.exit(1);
-    }
+  .command("init [project-name]")
+  .description("Initialize a new reap project")
+  .option("--mode <mode>", "Init mode: greenfield (default) or adoption")
+  .action(async (projectName: string | undefined, options: { mode?: string }) => {
+    await initExecute(projectName, options.mode);
   });
 
 program
   .command("status")
-  .description("Show current project and Generation status")
+  .description("Show current project status")
   .action(async () => {
-    try {
-      const cwd = process.cwd();
-      const status = await getStatus(cwd);
-
-      // Check autoUpdate config to decide whether to check latest
-      const paths = new ReapPaths(cwd);
-      const config = await ConfigManager.read(paths);
-      const skipCheck = config.autoUpdate === false;
-      const installedVersion = process.env.__REAP_VERSION__ || "0.0.0";
-      const versionLine = formatVersionLine(installedVersion, skipCheck);
-
-      console.log(`${versionLine} | Project: ${status.project} (${status.entryMode})`);
-      console.log(`Completed Generations: ${status.totalGenerations}`);
-      const syncLabel = status.lastSyncedGeneration
-        ? `synced (${status.lastSyncedGeneration})`
-        : "never synced";
-      console.log(`Genome Sync: ${syncLabel}`);
-      if (status.integrity.errors > 0 || status.integrity.warnings > 0) {
-        const parts: string[] = [];
-        if (status.integrity.errors > 0) parts.push(`${status.integrity.errors} error${status.integrity.errors > 1 ? "s" : ""}`);
-        if (status.integrity.warnings > 0) parts.push(`${status.integrity.warnings} warning${status.integrity.warnings > 1 ? "s" : ""}`);
-        console.log(`Integrity: ${parts.join(", ")} (run 'reap fix --check' for details)`);
-      } else {
-        console.log(`Integrity: ✓ OK`);
-      }
-      if (status.generation) {
-        console.log(`\nActive Generation: ${status.generation.id}`);
-        console.log(`  Goal: ${status.generation.goal}`);
-        console.log(`  Stage: ${status.generation.stage} (${LifeCycle.label(status.generation.stage as any)})`);
-        console.log(`  Started: ${status.generation.startedAt}`);
-      } else {
-        console.log(`\nNo active Generation. Run '/reap.start' to start one.`);
-      }
-    } catch (e: any) {
-      console.error(`Error: ${e.message}`);
-      process.exit(1);
-    }
+    await statusExecute();
   });
 
 program
-  .command("fix")
-  .description("Diagnose and repair .reap/ directory structure")
-  .option("--check", "Check-only mode: report issues without fixing anything")
-  .action(async (options: { check?: boolean }) => {
-    try {
-      if (options.check) {
-        const result = await checkProject(process.cwd());
-        if (result.errors.length === 0 && result.warnings.length === 0) {
-          console.log("✓ Integrity check passed. No issues found.");
-        } else {
-          if (result.errors.length > 0) {
-            console.log("Errors:");
-            result.errors.forEach(e => console.log(`  ✗ ${e}`));
-          }
-          if (result.warnings.length > 0) {
-            console.log("Warnings:");
-            result.warnings.forEach(w => console.log(`  ⚠ ${w}`));
-          }
-        }
-        if (result.errors.length > 0) {
-          process.exit(1);
-        }
-      } else {
-        const result = await fixProject(process.cwd());
-        if (result.fixed.length === 0 && result.issues.length === 0) {
-          console.log("✓ Project is healthy. No issues found.");
-        } else {
-          if (result.fixed.length > 0) {
-            console.log("Fixed:");
-            result.fixed.forEach(f => console.log(`  ✓ ${f}`));
-          }
-          if (result.issues.length > 0) {
-            console.log("Issues (require manual intervention):");
-            result.issues.forEach(i => console.log(`  ✗ ${i}`));
-          }
-        }
-      }
-    } catch (e: any) {
-      console.error(`Error: ${e.message}`);
-      process.exit(1);
-    }
+  .command("run <stage>")
+  .description("Run a lifecycle stage (start, learning, planning, ...)")
+  .option("--phase <phase>", "Stage phase (work, complete, reflect, fitness, adapt, commit)")
+  .option("--goal <goal>", "Goal for start command")
+  .option("--type <type>", "Generation type (embryo, normal, merge)")
+  .option("--parents <parents>", "Parent generation IDs for merge (comma-separated)")
+  .option("--feedback <feedback>", "Fitness feedback text")
+  .option("--reason <reason>", "Reason for back regression")
+  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string }) => {
+    await runExecute(stage, options);
   });
 
 program
-  .command("update")
-  .description("Upgrade REAP package and sync slash commands, templates, and hooks")
-  .option("--dry-run", "Show changes without applying them")
-  .action(async (options: { dryRun?: boolean }) => {
-    try {
-      // Step 1: Self-upgrade npm package
-      let upgrade = !options.dryRun ? selfUpgrade() : { upgraded: false } as SelfUpgradeResult;
-      if (upgrade.blocked) {
-        console.log(`\n⚠ Breaking change detected: v${upgrade.from} → v${upgrade.to}`);
-        console.log(`  This update contains breaking changes that may require manual migration.`);
-        console.log(`  See release notes: https://reap.cc/docs/release-notes\n`);
-        // Interactive confirm
-        const rl = createInterface({ input: process.stdin, output: process.stdout });
-        const answer = await new Promise<string>((resolve) => {
-          rl.question("  Proceed with update? (y/N) ", resolve);
-        });
-        rl.close();
-        if (answer.toLowerCase() === "y" || answer.toLowerCase() === "yes") {
-          upgrade = forceUpgrade(upgrade.to!);
-          if (upgrade.upgraded) {
-            console.log(`Upgraded: v${upgrade.from} → v${upgrade.to}`);
-          } else {
-            console.log("Upgrade failed. Try manually: npm install -g @c-d-cc/reap@latest");
-          }
-        } else {
-          console.log("Update skipped.");
-        }
-      } else if (upgrade.upgraded) {
-        console.log(`Upgraded: v${upgrade.from} → v${upgrade.to}`);
-      }
-
-      // Step 2: Sync project files
-      const result = await updateProject(process.cwd(), options.dryRun ?? false);
-      if (options.dryRun) {
-        console.log("[dry-run] Changes that would be applied:");
-      }
-      if (result.updated.length === 0 && result.removed.length === 0) {
-        console.log("✓ Everything is up to date.");
-      } else {
-        if (result.updated.length > 0) {
-          console.log(`${options.dryRun ? "Would update" : "Updated"}:`);
-          result.updated.forEach(f => console.log(`  ✓ ${f}`));
-        }
-        if (result.removed.length > 0) {
-          console.log(`${options.dryRun ? "Would remove" : "Removed"}:`);
-          result.removed.forEach(f => console.log(`  ✗ ${f}`));
-        }
-      }
-      if (result.skipped.length > 0) {
-        console.log(`Unchanged: ${result.skipped.length} files`);
-      }
-
-      // Integrity check after update
-      try {
-        const integrityResult = await checkProject(process.cwd());
-        if (integrityResult.errors.length > 0 || integrityResult.warnings.length > 0) {
-          const parts: string[] = [];
-          if (integrityResult.errors.length > 0) parts.push(`${integrityResult.errors.length} error${integrityResult.errors.length > 1 ? "s" : ""}`);
-          if (integrityResult.warnings.length > 0) parts.push(`${integrityResult.warnings.length} warning${integrityResult.warnings.length > 1 ? "s" : ""}`);
-          console.log(`\nIntegrity: ${parts.join(", ")} (run 'reap fix --check' for details)`);
-        } else {
-          console.log(`\nIntegrity: ✓ OK`);
-        }
-      } catch {
-        // Integrity check is best-effort; skip if not a REAP project
-      }
-
-      // Step 4: Show release notice
-      // If selfUpgrade succeeded, delegate to the NEW binary so it reads
-      // the new RELEASE_NOTICE.md (the current process still has old code).
-      try {
-        const version = getCurrentVersion();
-        const lang = (await AgentRegistry.readLanguage()) ?? "en";
-        if (!options.dryRun && upgrade.upgraded) {
-          const { execSync } = await import("child_process");
-          const output = execSync(
-            `reap --show-notice ${upgrade.to} --show-notice-lang ${lang}`,
-            { encoding: "utf-8", timeout: 5_000, stdio: ["pipe", "pipe", "pipe"] },
-          );
-          if (output.trim()) console.log(output.trimEnd());
-        } else {
-          const notice = fetchReleaseNotice(version, lang);
-          if (notice) console.log(notice);
-        }
-      } catch {
-        // Notice fetch is best-effort
-      }
-    } catch (e: any) {
-      console.error(`Error: ${e.message}`);
-      process.exit(1);
-    }
-  });
-
-program
-  .command("help")
-  .description("Show REAP commands, slash commands, and workflow overview")
+  .command("install-skills")
+  .description("Install Claude Code skill files to .claude/commands/")
   .action(async () => {
-    // Detect user language from any installed agent
-    let lang = "en";
-    const detectedLang = await AgentRegistry.readLanguage();
-    if (detectedLang) {
-      const l = detectedLang.toLowerCase();
-      if (l === "korean" || l === "ko") lang = "ko";
-    }
-
-    // Load language-specific help text
-    const helpDir = join(ReapPaths.packageTemplatesDir, "help");
-    let helpText = await readTextFile(join(helpDir, `${lang}.txt`));
-    if (!helpText) helpText = await readTextFile(join(helpDir, "en.txt"));
-    if (!helpText) {
-      console.log("Help file not found. Run 'reap update' to install templates.");
-      return;
-    }
-    console.log(helpText);
+    const { installSkills } = await import("../adapters/claude-code/install.js");
+    await installSkills(process.cwd());
   });
 
 program
-  .command("destroy")
-  .description("Remove all REAP files from this project")
-  .action(async () => {
-    try {
-      const cwd = process.cwd();
-      const projectName = await getProjectName(cwd);
-      if (!projectName) {
-        console.error("Error: Not a REAP project (cannot read .reap/config.yml).");
-        process.exit(1);
-      }
-
-      const expectedInput = "yes destroy";
-      console.log(`\nThis will permanently remove all REAP files from this project.`);
-      console.log(`To confirm, type '${expectedInput}':\n`);
-
-      const answer = await prompt("> ");
-
-      if (answer.trim() !== expectedInput) {
-        console.log("\nConfirmation mismatch. Destroy cancelled.");
-        process.exit(0);
-      }
-
-      console.log("");
-      const result = await destroyProject(cwd);
-
-      if (result.removed.length > 0) {
-        console.log("Removed:");
-        result.removed.forEach(f => console.log(`  - ${f}`));
-      }
-      if (result.skipped.length > 0) {
-        console.log("Skipped:");
-        result.skipped.forEach(f => console.log(`  - ${f}`));
-      }
-      console.log("\nREAP has been removed from this project.");
-    } catch (e: any) {
-      console.error(`Error: ${e.message}`);
-      process.exit(1);
+  .command("cruise <count>")
+  .description("Enable cruise mode for N generations")
+  .action(async (count: string) => {
+    const n = parseInt(count);
+    if (isNaN(n) || n < 1) {
+      const { emitError } = await import("../core/output.js");
+      emitError("cruise", "Count must be a positive integer.");
     }
-  });
-
-program
-  .command("clean")
-  .description("Reset REAP project with interactive options")
-  .action(async () => {
-    try {
-      const cwd = process.cwd();
-      const paths = new ReapPaths(cwd);
-      if (!(await paths.isReapProject())) {
-        console.error("Error: Not a REAP project (.reap/ not found).");
-        process.exit(1);
-      }
-
-      // Warn about active generation
-      if (await hasActiveGeneration(cwd)) {
-        console.log("\n⚠ Warning: There is an active generation in progress.");
-        const proceed = await prompt("Continue and discard it? (y/N): ");
-        if (proceed.trim().toLowerCase() !== "y") {
-          console.log("Clean cancelled.");
-          process.exit(0);
-        }
-      }
-
-      console.log("\n--- REAP Clean ---\n");
-
-      // 1. Lineage
-      console.log("1. Lineage (generation history):");
-      console.log("   [1] Compress into epoch summary");
-      console.log("   [2] Delete entirely");
-      const lineageChoice = await prompt("   Choice (1/2): ");
-      const lineage: CleanOptions["lineage"] = lineageChoice.trim() === "2" ? "delete" : "compress";
-
-      // 2. Hooks
-      console.log("\n2. Hooks:");
-      console.log("   [1] Keep existing hooks");
-      console.log("   [2] Reset to defaults");
-      const hooksChoice = await prompt("   Choice (1/2): ");
-      const hooks: CleanOptions["hooks"] = hooksChoice.trim() === "2" ? "reset" : "keep";
-
-      // 3. Genome/Environment
-      console.log("\n3. Genome / Environment:");
-      console.log("   [1] Override with templates (then run /reap.sync)");
-      console.log("   [2] Keep current files");
-      console.log("   [3] Manual editing (no changes)");
-      const genomeChoice = await prompt("   Choice (1/2/3): ");
-      const genome: CleanOptions["genome"] =
-        genomeChoice.trim() === "1" ? "template" :
-        genomeChoice.trim() === "3" ? "manual" : "keep";
-
-      // 4. Backlog
-      console.log("\n4. Backlog:");
-      console.log("   [1] Keep existing backlog items");
-      console.log("   [2] Delete all");
-      const backlogChoice = await prompt("   Choice (1/2): ");
-      const backlog: CleanOptions["backlog"] = backlogChoice.trim() === "2" ? "delete" : "keep";
-
-      console.log("\nApplying...\n");
-      const result = await cleanProject(cwd, { lineage, hooks, genome, backlog });
-
-      for (const action of result.actions) {
-        console.log(`  - ${action}`);
-      }
-      for (const warning of result.warnings) {
-        console.log(`  ⚠ ${warning}`);
-      }
-
-      console.log("\nClean complete. Run /reap.start to begin a new generation.");
-    } catch (e: any) {
-      console.error(`Error: ${e.message}`);
-      process.exit(1);
-    }
-  });
-
-program
-  .command("make <target>")
-  .description("Create REAP resources (e.g., backlog items)")
-  .allowUnknownOption()
-  .action(async (target: string, _options: any, cmd: any) => {
-    try {
-      const cwd = process.cwd();
-      const paths = new ReapPaths(cwd);
-      if (!(await paths.isReapProject())) {
-        console.error("Error: Not a REAP project. Run 'reap init' first.");
-        process.exit(1);
-      }
-      const passArgs = [target, ...cmd.args.slice(1)];
-      const { execute } = await import("./commands/make/index");
-      await execute(paths, undefined, passArgs);
-    } catch (e: any) {
-      console.error(`Error: ${e.message}`);
-      process.exit(1);
-    }
-  });
-
-program
-  .command("run <command>")
-  .description("Run a REAP command script (internal, used by slash commands)")
-  .option("--phase <phase>", "Start from a specific phase")
-  .allowUnknownOption()
-  .action(async (command: string, options: { phase?: string }, cmd: any) => {
-    // Collect pass-through args: everything after "run <command>" except --phase and its value
-    const rawArgs = cmd.args.slice(1); // skip command name (already parsed)
-    const passArgs: string[] = [];
-    for (let i = 0; i < rawArgs.length; i++) {
-      if (rawArgs[i] === "--phase") { i++; continue; } // skip --phase and its value
-      passArgs.push(rawArgs[i]);
-    }
-    const { runCommand } = await import("./commands/run/index");
-    await runCommand(command, options.phase, passArgs);
-  });
-
-function prompt(question: string): Promise<string> {
-  const rl = createInterface({ input: process.stdin, output: process.stdout });
-  return new Promise((resolve) => {
-    rl.question(question, (answer: string | null) => {
-      rl.close();
-      resolve(answer ?? "");
+    const { setCruise } = await import("../core/cruise.js");
+    const { createPaths } = await import("../core/paths.js");
+    const paths = createPaths(process.cwd());
+    await setCruise(paths.config, n);
+    const { emitOutput } = await import("../core/output.js");
+    emitOutput({
+      status: "ok",
+      command: "cruise",
+      context: { cruiseCount: `1/${n}` },
+      message: `Cruise mode enabled: ${n} generations.`,
     });
   });
-}
-
-// Hidden --show-notice handler: invoked by `reap update` after selfUpgrade
-// to read notice from the NEW binary's RELEASE_NOTICE.md.
-// Usage: reap --show-notice <version> --show-notice-lang <lang>
-const showNoticeIdx = process.argv.indexOf("--show-notice");
-if (showNoticeIdx !== -1) {
-  const version = process.argv[showNoticeIdx + 1] ?? "";
-  const langIdx = process.argv.indexOf("--show-notice-lang");
-  const lang = langIdx !== -1 ? (process.argv[langIdx + 1] ?? "en") : "en";
-  if (version) {
-    const notice = fetchReleaseNotice(version, lang);
-    if (notice) process.stdout.write(notice);
-  }
-  process.exit(0);
-}
 
 program.parse();

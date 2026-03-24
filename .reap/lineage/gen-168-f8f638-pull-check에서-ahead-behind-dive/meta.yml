@@ -1,8 +1,0 @@
-id: gen-168-f8f638
-type: normal
-parents:
-  - gen-167-b369f4
-goal: pull check에서 ahead/behind/diverged 정확히 구분
-genomeHash: c2e6348e
-startedAt: 2026-03-23T16:00:07.836Z
-completedAt: 2026-03-23T16:04:23.132Z

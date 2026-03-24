@@ -1,83 +1,56 @@
-import { execSync } from "child_process";
-import { ReapPaths } from "../../../core/paths";
-import { ConfigManager } from "../../../core/config";
-import { emitError } from "../../../core/run-output";
+import { createPaths } from "../../../core/paths.js";
+import { fileExists } from "../../../core/fs.js";
+import { emitError } from "../../../core/output.js";
+import { execute as startExecute } from "./start.js";
+import { execute as learningExecute } from "./learning.js";
+import { execute as planningExecute } from "./planning.js";
+import { execute as implementationExecute } from "./implementation.js";
+import { execute as validationExecute } from "./validation.js";
+import { execute as completionExecute } from "./completion.js";
+import { execute as evolveExecute } from "./evolve.js";
+import { execute as backExecute } from "./back.js";
+import { execute as nextExecute } from "./next.js";
+import { execute as abortExecute } from "./abort.js";
+import { execute as restartExecute } from "./restart.js";
+import { execute as detectExecute } from "./detect.js";
+import { execute as mateExecute } from "./mate.js";
+import { execute as mergeExecute } from "./merge.js";
+import { execute as reconcileExecute } from "./reconcile.js";
 
-export type CommandExecutor = (paths: ReapPaths, phase?: string, argv?: string[]) => Promise<void>;
-
-const COMMANDS: Record<string, () => Promise<{ execute: CommandExecutor }>> = {
-  next: () => import("./next"),
-  back: () => import("./back"),
-  start: () => import("./start"),
-  completion: () => import("./completion"),
-  abort: () => import("./abort"),
-  push: () => import("./push"),
-  objective: () => import("./objective"),
-  planning: () => import("./planning"),
-  implementation: () => import("./implementation"),
-  validation: () => import("./validation"),
-  evolve: () => import("./evolve"),
-  sync: () => import("./sync"),
-  "sync-genome": () => import("./sync-genome"),
-  "sync-environment": () => import("./sync-environment"),
-  help: () => import("./help"),
-  report: () => import("./report"),
-  "merge-start": () => import("./merge-start"),
-  "merge-detect": () => import("./merge-detect"),
-  "merge-mate": () => import("./merge-mate"),
-  "merge-merge": () => import("./merge-merge"),
-  "merge-sync": () => import("./merge-sync"),
-  "merge-validation": () => import("./merge-validation"),
-  "merge-completion": () => import("./merge-completion"),
-  "merge-evolve": () => import("./merge-evolve"),
-  merge: () => import("./merge"),
-  "evolve-recovery": () => import("./evolve-recovery"),
-  pull: () => import("./pull"),
-  config: () => import("./config"),
-  "update-genome": () => import("./update-genome"),
-  refreshKnowledge: () => import("./refresh-knowledge"),
+const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, phase?: string, extra?: string) => Promise<void>> = {
+  learning: learningExecute,
+  planning: planningExecute,
+  implementation: implementationExecute,
+  validation: validationExecute,
+  completion: completionExecute,
+  evolve: evolveExecute,
+  back: backExecute,
+  next: nextExecute,
+  abort: abortExecute,
+  restart: restartExecute,
+  detect: detectExecute,
+  mate: mateExecute,
+  merge: mergeExecute,
+  reconcile: reconcileExecute,
 };
 
-export async function runCommand(command: string, phase?: string, argv: string[] = []): Promise<void> {
-  const cwd = process.cwd();
-  const paths = new ReapPaths(cwd);
-
-  if (!(await paths.isReapProject())) {
-    emitError(command, "Not a REAP project. Run 'reap init' first.");
+export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string }): Promise<void> {
+  if (stage === "start") {
+    await startExecute(options.goal, options.type, options.parents);
+    return;
   }
 
-  const loader = COMMANDS[command];
-  if (!loader) {
-    emitError(command, `Unknown command: ${command}. Available: ${Object.keys(COMMANDS).join(", ")}`);
+  const paths = createPaths(process.cwd());
+  if (!(await fileExists(paths.config))) {
+    emitError("run", "Not a reap project. Run 'reap init' first.");
   }
 
-  try {
-    const mod = await loader();
-    await mod.execute(paths, phase, argv);
-  } catch (err) {
-    // Intentional errors (emitError → process.exit) don't reach here.
-    // This catches unexpected runtime errors only.
-    try {
-      const config = await ConfigManager.read(paths);
-      if (config.autoIssueReport) {
-        const version = process.env.__REAP_VERSION__ || "unknown";
-        const errMsg = err instanceof Error ? err.message : String(err);
-        const title = `[auto] reap run ${command}: ${errMsg.slice(0, 80)}`;
-        const body = [
-          `**REAP Version**: ${version}`,
-          `**Command**: reap run ${command}${phase ? ` --phase ${phase}` : ""}`,
-          `**Error**: ${errMsg}`,
-          `**OS**: ${process.platform} ${process.arch}`,
-          `**Node**: ${process.version}`,
-        ].join("\\n");
-        execSync(
-          `gh issue create --repo c-d-cc/reap --title "${title}" --label "auto-reported,bug" --body "${body}"`,
-          { stdio: "ignore", timeout: 10000 },
-        );
-      }
-    } catch { /* report is best-effort */ }
-
-    // Re-emit the original error
-    emitError(command, err instanceof Error ? err.message : String(err));
+  const handler = STAGE_HANDLERS[stage];
+  if (!handler) {
+    emitError("run", `Unknown stage '${stage}'. Available: start, ${Object.keys(STAGE_HANDLERS).join(", ")}`);
   }
+
+  // Pass extra: feedback for completion, reason for back, goal for restart
+  const extra = options.feedback || options.reason || options.goal;
+  await handler(paths, options.phase, extra);
 }

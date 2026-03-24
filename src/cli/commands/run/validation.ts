@@ -1,165 +1,79 @@
-import { join } from "path";
-import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager } from "../../../core/generation";
-import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
-import { emitOutput, emitError } from "../../../core/run-output";
-import { executeHooks } from "../../../core/hook-engine";
-import { performTransition, verifyNonce, setNonce } from "../../../core/stage-transition";
+import type { ReapPaths } from "../../../core/paths.js";
+import { GenerationManager } from "../../../core/generation.js";
+import { emitOutput, emitError } from "../../../core/output.js";
+import { verifyNonce, setNonce, performTransition, performMergeTransition, verifyArtifact } from "../../../core/stage-transition.js";
+import { copyArtifactTemplate } from "../../../core/template.js";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
   const state = await gm.current();
 
-  if (!state) {
-    emitError("validation", "No active Generation.");
-  }
-  if (state.stage !== "validation") {
-    emitError("validation", `Current stage is '${state.stage}', not 'validation'.`);
-  }
+  if (!state) emitError("validation", "No active generation.");
+  if (state!.stage !== "validation") emitError("validation", `Current stage is '${state!.stage}', not 'validation'.`);
 
-  const implArtifact = paths.artifact("03-implementation.md");
-  if (!(await fileExists(implArtifact))) {
-    emitError("validation", "03-implementation.md does not exist. Complete the implementation stage first.");
-  }
+  const isMerge = state!.type === "merge";
+
+  const s = state!;
 
   if (!phase || phase === "work") {
-    // Verify entry nonce from previous stage's --phase complete
-    verifyNonce("validation", state, "validation", "entry");
-    await gm.save(state);
+    verifyNonce("validation", s, "validation", "entry");
+    await copyArtifactTemplate("validation", paths.artifact, isMerge);
 
-    // Phase 1: Gate passed — collect context and instruct AI
-
-    const artifactPath = paths.artifact("04-validation.md");
-    const existingArtifact = await readTextFile(artifactPath);
-    const isReentry = !!existingArtifact && existingArtifact.length > 100;
-
-    // Read constraints for validation commands
-    const constraintsContent = await readTextFile(paths.constraints);
-    const conventionsContent = await readTextFile(paths.conventions);
-
-    // Read implementation and objective for completion criteria
-    const implContent = await readTextFile(implArtifact);
-    const objectiveContent = await readTextFile(paths.artifact("01-objective.md"));
-
-    // Create artifact from template if not exists
-    if (!isReentry) {
-      const templateDir = join(require("os").homedir(), ".reap", "templates");
-      const templatePath = join(templateDir, "04-validation.md");
-      if (await fileExists(templatePath)) {
-        const template = await readTextFile(templatePath);
-        if (template) await writeTextFile(artifactPath, template);
-      }
-    }
-
-    // Set nonce for complete phase entry — prevents skipping work phase
-    setNonce(state, "validation", "complete");
-    await gm.save(state);
+    setNonce(s, "validation", "complete");
+    await gm.save(s);
 
     emitOutput({
       status: "prompt",
       command: "validation",
       phase: "work",
-      completed: ["gate", "context-collect", "artifact-ensure"],
+      completed: ["gate"],
       context: {
-        id: state.id,
-        goal: state.goal,
-        genomeVersion: state.genomeVersion,
-        isReentry,
-        constraintsContent: constraintsContent?.slice(0, 2000),
-        conventionsContent: conventionsContent?.slice(0, 2000),
-        implSummary: implContent?.slice(0, 3000),
-        objectiveSummary: objectiveContent?.slice(0, 2000),
-        artifactPath,
+        id: s.id,
+        goal: s.goal,
+        type: s.type,
       },
       prompt: [
-        "## Validation Stage Instructions",
+        "## Validation Stage",
         "",
-        "HARD-GATE:",
-        "- Do NOT declare 'pass' without running the validation commands.",
-        "- Do NOT reuse results from a previous run -- execute them FRESH in this session.",
-        "- 'It will probably pass' or 'It looks fine' is NOT validation.",
-        "- Do NOT make claims without evidence.",
+        "Validate against the completion criteria from 02-planning.md.",
         "",
-        isReentry ? "This is a RE-ENTRY. Reference previous validation report but overwrite with fresh results." : "",
+        "### Verification Items:",
+        "1. **TypeCheck**: tsc --noEmit (or the project's typecheck command)",
+        "2. **Build**: npm run build (or the project's build command)",
+        "3. **Tests**: Run tests if the project has them",
+        "4. **Completion Criteria**: Verify each criterion from 02-planning.md one by one",
         "",
-        "### Steps:",
-        "1. **Run Automated Validation**:",
-        "   - Read Validation Commands from `.reap/genome/constraints.md`.",
-        "   - Execute ALL commands in order: Test -> Lint -> Build -> Type check.",
-        "   - Record actual output and exit code for each.",
+        "### Write 04-validation.md:",
+        "- Result: pass / partial / fail",
+        "- Each verification item's result and details",
+        "- Issues found (if any)",
         "",
-        "2. **Convention Compliance Check**:",
-        "   - Read Enforced Rules from `.reap/genome/conventions.md`.",
-        "   - Execute verification command for each defined rule.",
-        "",
-        "3. **Completion Criteria Review**:",
-        "   - Read criteria from 01-objective.md.",
-        "   - Check deferred tasks in 03-implementation.md.",
-        "   - Determine pass/fail/deferred for each criterion.",
-        "",
-        "4. **Minor Fix** (trivial issues only, under 5 minutes, no design changes):",
-        "   - Fix typos, lint errors, minor bugs directly.",
-        "   - Record all fixes in Minor Fixes section.",
-        "   - Re-run relevant validation commands after fixes.",
-        "",
-        "5. **Verdict**:",
-        "   - All pass + criteria met -> **pass**",
-        "   - All pass + some criteria deferred -> **partial**",
-        "   - Any failure or criteria not met -> **fail**",
-        "   - If fail: provide regression guidance (/reap.back implementation/planning/objective).",
-        "",
-        "### Red Flags -- STOP if you catch yourself thinking:",
-        "- 'It will probably pass' -> Run it.",
-        "- 'It passed before' -> Run it again.",
-        "- 'It's trivial' -> Fix and re-validate.",
-        "",
-        "### Artifact: Update `.reap/life/04-validation.md` progressively (after each command).",
-        "### Language: Write all artifact content in the user's configured language.",
-        "",
-        "When verdict is pass or partial, run: reap run validation --phase complete",
-        "When verdict is fail, provide regression guidance (do NOT run --phase complete).",
-      ].filter(Boolean).join("\n"),
+        "If pass/partial: reap run validation --phase complete",
+        "If fail: reap run back to regress",
+      ].join("\n"),
       nextCommand: "reap run validation --phase complete",
     });
   }
 
   if (phase === "complete") {
-    // Verify complete phase nonce from work phase
-    verifyNonce("validation", state, "validation", "complete");
+    verifyNonce("validation", s, "validation", "complete");
+    await verifyArtifact("validation", paths.artifact, "validation", isMerge);
 
-    const artifactPath = paths.artifact("04-validation.md");
-    if (!(await fileExists(artifactPath))) {
-      emitError("validation", "04-validation.md does not exist. Complete the validation work first.");
-    }
+    setNonce(s, "completion", "entry");
+    await gm.save(s);
 
-    // Generate entry token for next stage (receiver-based)
-    setNonce(state, "completion", "entry");
-    await gm.save(state);
-
-    // Execute hooks (only on pass/partial, not on fail)
-    const hookResults = await executeHooks(paths.hooks, "onLifeValidated", paths.projectRoot);
-
-    // Auto-transition to next stage
-    const transition = await performTransition(paths, state, (s) => gm.save(s));
-
-    const nextCommand = transition.nextStage !== "completion"
-      ? `reap run ${transition.nextStage}`
-      : "reap run completion";
+    const next = isMerge
+      ? await performMergeTransition(s, gm, paths)
+      : await performTransition(s, gm, paths);
 
     emitOutput({
       status: "ok",
       command: "validation",
       phase: "complete",
-      completed: ["gate", "context-collect", "artifact-ensure", "creative-work", "artifact-verify", "hooks", "auto-transition"],
-      context: {
-        id: state.id,
-        hookResults,
-        nextStage: transition.nextStage,
-        artifactFile: transition.artifactFile,
-        transitionHookResults: [...transition.stageHookResults, ...transition.transitionHookResults],
-      },
-      message: `Validation stage complete. Auto-advanced to ${transition.nextStage}. Run: ${nextCommand}`,
-      nextCommand,
+      completed: ["gate", "validation-work", "artifact-verify", "auto-transition"],
+      context: { id: s.id, nextStage: next },
+      message: `Validation complete. Auto-advanced to ${next}. Run: reap run ${next}`,
+      nextCommand: `reap run ${next}`,
     });
   }
 }

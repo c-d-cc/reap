@@ -1,129 +1,33 @@
+import { readdir, rm } from "fs/promises";
 import { join } from "path";
-import { readdir, unlink } from "fs/promises";
-import type { ReapPaths } from "../../../core/paths";
-import { GenerationManager } from "../../../core/generation";
-import { readTextFile, writeTextFile, fileExists } from "../../../core/fs";
-import { revertBacklogConsumed } from "../../../core/backlog";
-import { emitOutput, emitError } from "../../../core/run-output";
+import type { ReapPaths } from "../../../core/paths.js";
+import { GenerationManager } from "../../../core/generation.js";
+import { emitOutput, emitError } from "../../../core/output.js";
 
-function getFlag(args: string[], name: string): string | undefined {
-  const idx = args.indexOf(`--${name}`);
-  return idx !== -1 && args[idx + 1] ? args[idx + 1] : undefined;
-}
-
-function hasFlag(args: string[], name: string): boolean {
-  return args.includes(`--${name}`);
-}
-
-export async function execute(paths: ReapPaths, phase?: string, argv: string[] = []): Promise<void> {
+export async function execute(paths: ReapPaths): Promise<void> {
   const gm = new GenerationManager(paths);
   const state = await gm.current();
 
-  if (!state || !state.id) {
-    emitError("abort", "No active Generation to abort.");
+  if (!state) emitError("abort", "No active generation to abort.");
+
+  const s = state!;
+  const id = s.id;
+
+  // Remove artifacts (keep backlog for potential reuse)
+  const lifeEntries = await readdir(paths.life);
+  for (const entry of lifeEntries) {
+    if (entry === "backlog") continue; // preserve backlog
+    await rm(join(paths.life, entry), { recursive: true, force: true });
   }
 
-  if (!phase || phase === "confirm") {
-    // Phase 1: Gate passed — present state, ask AI to confirm with user
-    emitOutput({
-      status: "prompt",
-      command: "abort",
-      phase: "confirm",
-      completed: ["gate"],
-      context: {
-        id: state.id,
-        goal: state.goal,
-        stage: state.stage,
-      },
-      prompt: [
-        `Active generation: ${state.id} (goal: ${state.goal}, stage: ${state.stage}).`,
-        "Ask the human: '이 generation을 abort 하시겠습니까?'",
-        "If no: STOP.",
-        "If yes: ask for abort reason. Then ask about source code handling:",
-        "  - Check `git diff --name-only` for uncommitted changes.",
-        "  - If changes: offer rollback / stash / hold.",
-        "  - If no changes: skip.",
-        "Ask: 'Goal과 진행 상황을 backlog에 저장할까요? (yes/no)'",
-        "Then run: reap run abort --phase execute --reason \"<reason>\" --source-action <rollback|stash|hold|none> [--save-backlog]",
-      ].join("\n"),
-      nextCommand: "reap run abort --phase execute",
-    });
-  }
-
-  if (phase === "execute") {
-    const reason = getFlag(argv, "reason") ?? "No reason provided";
-    const sourceAction = getFlag(argv, "source-action") ?? "none";
-    const saveBacklog = hasFlag(argv, "save-backlog");
-
-    // Save to backlog if requested
-    let backlogSaved = false;
-    if (saveBacklog) {
-      const objectiveContent = await readTextFile(paths.artifact("01-objective.md"));
-      const implContent = await readTextFile(paths.artifact("03-implementation.md"));
-
-      const goalText = objectiveContent?.match(/^#\s+(.+)/m)?.[1] ?? state.goal;
-      const implSummary = implContent ? implContent.slice(0, 500) : "";
-
-      const backlogContent = [
-        "---",
-        "type: task",
-        "status: pending",
-        "aborted: true",
-        `abortedFrom: ${state.id}`,
-        `abortReason: "${reason}"`,
-        `stage: ${state.stage}`,
-        `sourceAction: ${sourceAction}`,
-        sourceAction === "stash" ? `stashRef: "reap-abort: ${state.id}"` : null,
-        "---",
-        "",
-        `# [Aborted] ${goalText}`,
-        "",
-        "## Original Goal",
-        state.goal,
-        "",
-        "## Progress",
-        `${state.stage} 단계에서 중단.`,
-        implSummary ? implSummary : "",
-        "",
-        "## Resume Guide",
-        sourceAction === "stash" ? "git stash pop으로 코드 복구" :
-          sourceAction === "hold" ? "코드 변경이 working tree에 유지됨" :
-            sourceAction === "rollback" ? "코드 변경이 revert됨. objective부터 재시작 필요" :
-              "소스 코드 변경 없음",
-      ].filter(line => line !== null).join("\n");
-
-      await writeTextFile(join(paths.backlog, `aborted-${state.id}.md`), backlogContent);
-      backlogSaved = true;
-    }
-
-    // Revert consumed backlog items back to pending
-    await revertBacklogConsumed(paths.backlog, state.id);
-
-    // Delete artifact files from life/
-    try {
-      const lifeEntries = await readdir(paths.life);
-      for (const entry of lifeEntries) {
-        if (/^\d{2}-[a-z]+(?:-[a-z]+)*\.md$/.test(entry)) {
-          await unlink(join(paths.life, entry));
-        }
-      }
-    } catch { /* no artifacts */ }
-
-    // Clear current.yml
-    await writeTextFile(paths.currentYml, "");
-
-    emitOutput({
-      status: "ok",
-      command: "abort",
-      phase: "done",
-      completed: ["gate", "confirm", "source-handling", "backlog-save", "cleanup"],
-      context: {
-        id: state.id,
-        reason,
-        sourceAction,
-        backlogSaved,
-      },
-      message: `Generation ${state.id} aborted. ${backlogSaved ? "Backlog saved." : "Backlog not saved."}`,
-    });
-  }
+  emitOutput({
+    status: "ok",
+    command: "abort",
+    completed: ["gate", "clear-life"],
+    context: {
+      abortedGeneration: id,
+      backlogPreserved: true,
+    },
+    message: `Generation ${id} aborted. Backlog preserved. Life/ cleared.`,
+  });
 }

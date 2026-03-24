@@ -1,8 +1,0 @@
-id: gen-164-649f49
-type: normal
-parents:
-  - gen-163-cf5086
-goal: reap update 시 GitHub Discussions 기반 notice 표시
-genomeHash: 7f02153c
-startedAt: 2026-03-23T05:54:39.774Z
-completedAt: 2026-03-23T05:59:19.697Z

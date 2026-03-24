@@ -1,9 +1,0 @@
-id: gen-171-26c479
-type: normal
-parents:
-  - gen-170-60bde7
-goal: "release-notes 페이지 v0.16 breaking change 사전 고지 구체화: self evolving 전환,
-  lifecycle 변경, command 변경 명시"
-genomeHash: c2e6348e
-startedAt: 2026-03-24T16:52:48.132Z
-completedAt: 2026-03-24T17:18:15.098Z
