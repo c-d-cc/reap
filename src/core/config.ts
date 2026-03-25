@@ -2,6 +2,7 @@ import YAML from "yaml";
 import type { ReapConfig, StrictMode } from "../types";
 import type { ReapPaths } from "./paths";
 import { readTextFileOrThrow, writeTextFile } from "./fs";
+import { getCurrentVersion } from "./version";
 
 export class ConfigManager {
   static async read(paths: ReapPaths): Promise<ReapConfig> {
@@ -55,6 +56,13 @@ export class ConfigManager {
       }
       delete (config as any).lastSyncedCommit;
       added.push("lastSyncedCommit(removed)");
+    }
+
+    // Always update lastCliVersion to current version (not in defaults — always overwrite)
+    const currentVersion = getCurrentVersion();
+    if ((config as any).lastCliVersion !== currentVersion) {
+      (config as any).lastCliVersion = currentVersion;
+      added.push("lastCliVersion");
     }
 
     if (added.length > 0) {

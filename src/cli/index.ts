@@ -2,7 +2,7 @@
 import { program } from "../libs/cli";
 import { createInterface } from "readline";
 import { initProject } from "./commands/init";
-import { updateProject, selfUpgrade, forceUpgrade, type SelfUpgradeResult } from "./commands/update";
+import { updateProject, selfUpgrade, forceUpgrade, handOffToNewBinary, type SelfUpgradeResult } from "./commands/update";
 import { fetchReleaseNotice } from "../core/notice";
 import { getCurrentVersion } from "../core/version";
 import { getStatus } from "./commands/status";
@@ -166,32 +166,52 @@ program
   .command("update")
   .description("Upgrade REAP package and sync slash commands, templates, and hooks")
   .option("--dry-run", "Show changes without applying them")
-  .action(async (options: { dryRun?: boolean }) => {
+  .option("--post-upgrade", "Run project sync only (called by previous binary after self-upgrade)")
+  .action(async (options: { dryRun?: boolean; postUpgrade?: boolean }) => {
     try {
-      // Step 1: Self-upgrade npm package
-      let upgrade = !options.dryRun ? selfUpgrade() : { upgraded: false } as SelfUpgradeResult;
-      if (upgrade.blocked) {
-        console.log(`\n⚠ Breaking change detected: v${upgrade.from} → v${upgrade.to}`);
-        console.log(`  This update contains breaking changes that may require manual migration.`);
-        console.log(`  See release notes: https://reap.cc/docs/release-notes\n`);
-        // Interactive confirm
-        const rl = createInterface({ input: process.stdin, output: process.stdout });
-        const answer = await new Promise<string>((resolve) => {
-          rl.question("  Proceed with update? (y/N) ", resolve);
-        });
-        rl.close();
-        if (answer.toLowerCase() === "y" || answer.toLowerCase() === "yes") {
-          upgrade = forceUpgrade(upgrade.to!);
-          if (upgrade.upgraded) {
-            console.log(`Upgraded: v${upgrade.from} → v${upgrade.to}`);
+      // --post-upgrade: called by the OLD binary after installing a new version.
+      // Skip selfUpgrade (already done) and just run project sync + integrity + notice.
+      const isPostUpgrade = options.postUpgrade === true;
+
+      // Step 1: Self-upgrade npm package (skip if --post-upgrade)
+      let upgrade: SelfUpgradeResult = { upgraded: false };
+      if (!isPostUpgrade) {
+        upgrade = !options.dryRun ? selfUpgrade() : { upgraded: false } as SelfUpgradeResult;
+        if (upgrade.blocked) {
+          console.log(`\n⚠ Breaking change detected: v${upgrade.from} → v${upgrade.to}`);
+          console.log(`  This update contains breaking changes that may require manual migration.`);
+          console.log(`  See release notes: https://reap.cc/docs/release-notes\n`);
+          // Interactive confirm
+          const rl = createInterface({ input: process.stdin, output: process.stdout });
+          const answer = await new Promise<string>((resolve) => {
+            rl.question("  Proceed with update? (y/N) ", resolve);
+          });
+          rl.close();
+          if (answer.toLowerCase() === "y" || answer.toLowerCase() === "yes") {
+            upgrade = forceUpgrade(upgrade.to!);
+            if (upgrade.upgraded) {
+              console.log(`Upgraded: v${upgrade.from} → v${upgrade.to}`);
+            } else {
+              console.log("Upgrade failed. Try manually: npm install -g @c-d-cc/reap@latest");
+            }
           } else {
-            console.log("Upgrade failed. Try manually: npm install -g @c-d-cc/reap@latest");
+            console.log("Update skipped.");
           }
-        } else {
-          console.log("Update skipped.");
+        } else if (upgrade.upgraded) {
+          console.log(`Upgraded: v${upgrade.from} → v${upgrade.to}`);
         }
-      } else if (upgrade.upgraded) {
-        console.log(`Upgraded: v${upgrade.from} → v${upgrade.to}`);
+
+        // Hand off to newly installed binary if upgrade succeeded.
+        // The new binary's `reap update --post-upgrade` will handle project sync.
+        if (upgrade.upgraded) {
+          const handedOff = handOffToNewBinary();
+          if (handedOff) {
+            // New binary handled everything — skip our own updateProject.
+            return;
+          }
+          // Hand-off failed (new binary may not support --post-upgrade yet).
+          // Fall through to run updateProject with current (old) code.
+        }
       }
 
       // Step 2: Sync project files

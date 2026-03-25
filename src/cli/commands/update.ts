@@ -98,6 +98,24 @@ function queryAutoUpdateMinVersion(): string | null {
   }
 }
 
+/**
+ * Hand off to the newly installed binary by running `reap update --post-upgrade`.
+ * Returns true if hand-off succeeded, false if it failed (fail-safe).
+ */
+export function handOffToNewBinary(): boolean {
+  try {
+    execSync("reap update --post-upgrade", {
+      stdio: "inherit",
+      timeout: 120_000,
+    });
+    return true;
+  } catch {
+    // New binary may not support --post-upgrade yet (e.g. v0.16.0 not deployed).
+    // Fail silently — the current process will continue with its own updateProject().
+    return false;
+  }
+}
+
 export async function updateProject(projectRoot: string, dryRun: boolean = false): Promise<UpdateResult> {
   const paths = new ReapPaths(projectRoot);
   const result: UpdateResult = { updated: [], skipped: [], removed: [] };

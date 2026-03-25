@@ -1,0 +1,11 @@
+id: gen-172-f42ef1
+type: normal
+parents:
+  - gen-171-26c479
+goal: "v0.16.0 전환 준비 패치: (1) selfUpgrade/forceUpgrade 후 새 바이너리로 hand-off (reap
+  update --post-upgrade), (2) config.yml에 lastCliVersion 기록 시작 (backfill), (3)
+  forceUpgrade 시 breaking change 경고. 테스트는 기존 E2E가 깨지지 않는 것만 확인. v0.16.0 미배포이므로
+  hand-off 경로는 try/catch로 감싸서 실패해도 무해하게."
+genomeHash: c2e6348e
+startedAt: 2026-03-25T03:41:08.351Z
+completedAt: 2026-03-25T03:46:31.572Z
