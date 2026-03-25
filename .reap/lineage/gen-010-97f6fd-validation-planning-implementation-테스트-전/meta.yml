@@ -1,0 +1,20 @@
+id: gen-010-97f6fd
+type: embryo
+goal: Validation + Planning + Implementation 테스트 전략 강화
+parents:
+  - gen-009-d7d0cf
+timeline:
+  - stage: learning
+    at: 2026-03-25T15:18:16.276Z
+  - stage: planning
+    at: 2026-03-25T15:20:40.798Z
+  - stage: implementation
+    at: 2026-03-25T15:21:08.386Z
+  - stage: validation
+    at: 2026-03-25T15:22:14.903Z
+  - stage: completion
+    at: 2026-03-25T15:22:58.951Z
+fitnessFeedback:
+  text: planning/implementation/validation prompt에 테스트 전략 강화 완료. HARD-GATE, Red
+    Flags, Minor Fix 패턴 복원. evolve.ts subagent에도 반영. e2e 78개 전체 통과.
+  evaluatedAt: 2026-03-25T15:23:52.342Z
