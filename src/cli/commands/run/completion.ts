@@ -9,6 +9,13 @@ import { consumeBacklog } from "../../../core/backlog.js";
 import { runHooks } from "../../../core/hooks.js";
 import { parseCruiseCount, advanceCruise } from "../../../core/cruise.js";
 import { gitCommitAll } from "../../../core/git.js";
+import {
+  detectMaturity,
+  getTransitionUrgency,
+  buildTransitionCheckPrompt,
+  getMaturityBehaviorGuide,
+  formatCompletionCriteria,
+} from "../../../core/maturity.js";
 import yaml from "js-yaml";
 import type { ReapConfig } from "../../../types/index.js";
 
@@ -155,8 +162,91 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
     const fitnessFeedback = s.fitnessFeedback;
     const visionGoals = await readTextFile(paths.visionGoals);
 
+    // Load config for maturity detection
+    const configContent = await readTextFile(paths.config);
+    const config = configContent ? (yaml.load(configContent) as ReapConfig) : null;
+    const maturity = detectMaturity(s.type, config?.cruiseCount);
+    const generationCount = await gm.countLineage();
+
     setNonce(s, "completion", "commit");
     await gm.save(s);
+
+    // Build adapt prompt sections
+    const promptSections: string[] = [
+      "## Completion — Adapt Phase",
+      "",
+      "Genome modifications + suggest next generation direction.",
+      "",
+      "### Fitness Feedback:",
+      fitnessFeedback ? `> ${fitnessFeedback}` : "> (no feedback)",
+      "",
+      s.type === "embryo"
+        ? "**Embryo mode**: genome (application.md, evolution.md) can be freely modified."
+        : "**Normal mode**: propose genome changes via backlog. invariants.md cannot be modified.",
+      "",
+    ];
+
+    // ── Maturity behavior guide ──
+    promptSections.push(getMaturityBehaviorGuide(maturity));
+    promptSections.push("");
+
+    // ── Embryo → Normal transition check (Task 1: §2.1) ──
+    if (s.type === "embryo") {
+      const urgency = getTransitionUrgency(generationCount);
+      promptSections.push(buildTransitionCheckPrompt(generationCount, urgency));
+      promptSections.push("");
+    }
+
+    // ── Software Completion Criteria (Task 3: §2.3) ──
+    if (maturity === "bootstrap") {
+      promptSections.push("### Software Completion Criteria (Diagnostic Reference)");
+      promptSections.push("");
+      promptSections.push("Use these criteria to diagnose the project's current state and identify gaps:");
+      promptSections.push(formatCompletionCriteria());
+      promptSections.push("");
+      promptSections.push("For each relevant criterion, assess: current level + target level.");
+      promptSections.push("Discuss with the user which criteria apply to this project and what the targets should be.");
+      promptSections.push("");
+    }
+
+    // ── Gap-driven Evolution with Clarity (Task 4: §3.1) ──
+    promptSections.push("### Gap-driven Next Generation Selection");
+    promptSections.push("");
+    promptSections.push("Assess the current clarity level and adjust your interaction accordingly:");
+    promptSections.push("");
+    promptSections.push("**High clarity** (vision + backlog with clear tasks):");
+    promptSections.push("- Quick confirm current direction → pick next backlog task → propose as next generation goal.");
+    promptSections.push("");
+    promptSections.push("**Medium clarity** (vision exists, details unclear):");
+    promptSections.push("- Vision + lineage analysis → identify gaps → present options:");
+    promptSections.push("  \"Gap A, B, C identified. Which should we address first?\"");
+    promptSections.push("");
+    promptSections.push("**Low clarity** (direction unknown):");
+    promptSections.push("- Summarize current project state → ask \"What direction do you want?\"");
+    promptSections.push("- Use Software Completion Criteria to diagnose gaps and present weak areas.");
+    promptSections.push("- Structured conversation to build clarity before proposing next steps.");
+    promptSections.push("");
+
+    // ── Steps ──
+    promptSections.push("### Steps:");
+    promptSections.push("1. **Genome Review**: Based on fitness feedback, determine if application.md or evolution.md need modifications");
+    promptSections.push("2. **Vision Check**: Review vision/goals.md — mark completed goals with [x], identify next goals");
+
+    // ── Vision auto-update (Task 5: §3.2) ──
+    if (visionGoals) {
+      promptSections.push("");
+      promptSections.push("### Current Vision Goals:");
+      promptSections.push(visionGoals.slice(0, 1000));
+      promptSections.push("");
+      promptSections.push("**Vision Auto-Update**: Check off any goals completed in this generation.");
+      promptSections.push("Update vision/goals.md directly to mark completed items with [x].");
+      promptSections.push("");
+    }
+
+    promptSections.push("3. **Suggest Next Generation Candidates**: Record as type: task in backlog");
+    promptSections.push("4. **Reflect Environment Changes**: Create environment-change backlog if needed");
+    promptSections.push("");
+    promptSections.push("When done: reap run completion --phase commit");
 
     emitOutput({
       status: "prompt",
@@ -167,35 +257,12 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
         id: s.id,
         goal: s.goal,
         type: s.type,
+        maturity,
+        generationCount,
         fitnessFeedback,
         visionGoals: visionGoals?.slice(0, 2000),
       },
-      prompt: [
-        "## Completion — Adapt Phase",
-        "",
-        "Genome modifications + suggest next generation direction.",
-        "",
-        "### Fitness Feedback:",
-        fitnessFeedback ? `> ${fitnessFeedback}` : "> (no feedback)",
-        "",
-        s.type === "embryo"
-          ? "**Embryo mode**: genome (application.md, evolution.md) can be freely modified."
-          : "**Normal mode**: propose genome changes via backlog. invariants.md cannot be modified.",
-        "",
-        "### Clarity-driven Interaction:",
-        "- If uncertain about genome changes, present options with tradeoffs rather than deciding autonomously.",
-        "- If the project direction is unclear (low clarity), suggest broad next-generation candidates and ask the human to choose.",
-        "- If the project is mature with clear direction (high clarity), propose specific next steps confidently.",
-        "",
-        "### Steps:",
-        "1. **Genome Review**: Based on fitness feedback, determine if application.md or evolution.md need modifications",
-        "2. **Vision Check**: Reference vision/goals.md to check completed goals and determine next goals",
-        visionGoals ? `\n### Current Vision Goals:\n${visionGoals.slice(0, 1000)}\n` : "",
-        "3. **Suggest Next Generation Candidates**: Record as type: task in backlog",
-        "4. **Reflect Environment Changes**: Create environment-change backlog if needed",
-        "",
-        "When done: reap run completion --phase commit",
-      ].filter(Boolean).join("\n"),
+      prompt: promptSections.filter(Boolean).join("\n"),
       nextCommand: "reap run completion --phase commit",
     });
   }

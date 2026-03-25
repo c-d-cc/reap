@@ -76,7 +76,7 @@ export class GenerationManager {
     return state;
   }
 
-  private async countLineage(): Promise<number> {
+  async countLineage(): Promise<number> {
     try {
       const entries = await readdir(this.paths.lineage);
       return entries.filter((e) => e.startsWith("gen-")).length;

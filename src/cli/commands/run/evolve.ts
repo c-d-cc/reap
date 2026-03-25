@@ -4,6 +4,11 @@ import type { GenerationState, ReapConfig } from "../../../types/index.js";
 import { GenerationManager } from "../../../core/generation.js";
 import { readTextFile } from "../../../core/fs.js";
 import { emitOutput } from "../../../core/output.js";
+import {
+  detectMaturity,
+  getMaturityBehaviorGuide,
+  formatCompletionCriteria,
+} from "../../../core/maturity.js";
 
 function buildSubagentPrompt(
   paths: ReapPaths,
@@ -11,6 +16,7 @@ function buildSubagentPrompt(
   genome: { application: string; evolution: string; invariants: string },
   environment: string,
   visionGoals: string,
+  cruiseCount?: string,
 ): string {
   const lines: string[] = [];
 
@@ -133,6 +139,23 @@ function buildSubagentPrompt(
   }
   lines.push("");
 
+  // Maturity-based behavior guide
+  if (state && !isMerge) {
+    const maturity = detectMaturity(state.type, cruiseCount);
+    lines.push("## Maturity Behavior Guide");
+    lines.push("");
+    lines.push(getMaturityBehaviorGuide(maturity));
+    lines.push("");
+
+    if (maturity === "bootstrap") {
+      lines.push("## Software Completion Criteria");
+      lines.push("");
+      lines.push("Use these criteria to assess and guide the project toward completeness:");
+      lines.push(formatCompletionCriteria());
+      lines.push("");
+    }
+  }
+
   lines.push("## Backlog Rules");
   lines.push("- Create: Write .md files directly in `.reap/life/backlog/`");
   lines.push("- Filename: kebab-case (e.g., `fix-validation-error.md`)");
@@ -201,7 +224,7 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
     invariants: invariants ?? "(not found)",
   };
 
-  const subagentPrompt = buildSubagentPrompt(paths, state, genome, environment ?? "", visionGoals ?? "");
+  const subagentPrompt = buildSubagentPrompt(paths, state, genome, environment ?? "", visionGoals ?? "", config?.cruiseCount);
 
   if (autoSubagent) {
     emitOutput({
