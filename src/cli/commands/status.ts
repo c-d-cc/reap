@@ -1,5 +1,5 @@
 import { readdir } from "fs/promises";
-import yaml from "js-yaml";
+import YAML from "yaml";
 import { createPaths } from "../../core/paths.js";
 import { readTextFile, fileExists } from "../../core/fs.js";
 import { emitOutput, emitError } from "../../core/output.js";
@@ -15,13 +15,13 @@ export async function execute(): Promise<void> {
 
   // Read config
   const configContent = await readTextFile(paths.config);
-  const config = configContent ? (yaml.load(configContent) as ReapConfig) : null;
+  const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
 
   // Read current generation
   let generation: GenerationState | null = null;
   const currentContent = await readTextFile(paths.current);
   if (currentContent) {
-    generation = yaml.load(currentContent) as GenerationState;
+    generation = YAML.parse(currentContent) as GenerationState;
   }
 
   // Count lineage

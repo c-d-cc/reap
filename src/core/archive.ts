@@ -1,6 +1,6 @@
 import { join } from "path";
 import { readdir, cp, rm } from "fs/promises";
-import yaml from "js-yaml";
+import YAML from "yaml";
 import type { ReapPaths } from "./paths.js";
 import type { GenerationState } from "../types/index.js";
 import { ensureDir, writeTextFile, readTextFile } from "./fs.js";
@@ -47,7 +47,7 @@ export async function archiveGeneration(
       evaluatedAt: new Date().toISOString(),
     };
   }
-  await writeTextFile(join(archiveDir, "meta.yml"), yaml.dump(meta));
+  await writeTextFile(join(archiveDir, "meta.yml"), YAML.stringify(meta));
 
   // Carry-over: pending backlog stays in life/, consumed goes to lineage
   const backlogItems = await scanBacklog(paths.backlog);

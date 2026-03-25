@@ -1,6 +1,6 @@
 import { readdir, rm } from "fs/promises";
 import { join } from "path";
-import yaml from "js-yaml";
+import YAML from "yaml";
 import { readTextFile, writeTextFile } from "./fs.js";
 
 const LEVEL1_THRESHOLD = 5; // minimum generations before compression
@@ -53,7 +53,7 @@ export async function compressLineage(lineageDir: string): Promise<number> {
     const metaContent = await readTextFile(join(dirPath, "meta.yml"));
     let meta: GenMeta = { id: dirName, type: "unknown", goal: "", parents: [] };
     if (metaContent) {
-      try { meta = yaml.load(metaContent) as GenMeta; } catch { /* use default */ }
+      try { meta = YAML.parse(metaContent) as GenMeta; } catch { /* use default */ }
     }
 
     // Read completion for summary
@@ -129,7 +129,7 @@ export async function compressToEpoch(lineageDir: string): Promise<number> {
     let meta: GenMeta = { id: file.replace(".md", ""), type: "unknown", goal: "", parents: [] };
     if (fmMatch) {
       try {
-        const parsed = yaml.load(fmMatch[1]) as GenMeta;
+        const parsed = YAML.parse(fmMatch[1]) as GenMeta;
         meta = { ...meta, ...parsed };
       } catch { /* use default */ }
     }
@@ -149,7 +149,7 @@ export async function compressToEpoch(lineageDir: string): Promise<number> {
     const metaContent = await readTextFile(join(lineageDir, dir, "meta.yml"));
     if (!metaContent) continue;
     try {
-      const m = yaml.load(metaContent) as GenMeta;
+      const m = YAML.parse(metaContent) as GenMeta;
       if (m.parents) m.parents.forEach((p) => dirParents.add(p));
     } catch { /* skip */ }
   }
@@ -162,7 +162,7 @@ export async function compressToEpoch(lineageDir: string): Promise<number> {
     const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
     if (fmMatch) {
       try {
-        const parsed = yaml.load(fmMatch[1]) as Record<string, unknown>;
+        const parsed = YAML.parse(fmMatch[1]) as Record<string, unknown>;
         const lastId = parsed.lastGeneration as string;
         if (lastId) dirParents.add(lastId);
       } catch { /* skip */ }

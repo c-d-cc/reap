@@ -1,7 +1,7 @@
 import { createHash } from "crypto";
 import { hostname } from "os";
 import { readdir } from "fs/promises";
-import yaml from "js-yaml";
+import YAML from "yaml";
 import type { ReapPaths } from "./paths.js";
 import type { GenerationState, GenerationType } from "../types/index.js";
 import { readTextFile, writeTextFile, ensureDir } from "./fs.js";
@@ -13,12 +13,12 @@ export class GenerationManager {
   async current(): Promise<GenerationState | null> {
     const content = await readTextFile(this.paths.current);
     if (!content) return null;
-    return yaml.load(content) as GenerationState;
+    return YAML.parse(content) as GenerationState;
   }
 
   async save(state: GenerationState): Promise<void> {
     const header = "# REAP MANAGED — Do not modify directly.\n";
-    await writeTextFile(this.paths.current, header + yaml.dump(state));
+    await writeTextFile(this.paths.current, header + YAML.stringify(state));
   }
 
   async create(goal: string, type: GenerationType = "embryo"): Promise<GenerationState> {

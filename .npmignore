@@ -1,0 +1,23 @@
+# Source (dist/ is the published artifact)
+src/
+tsconfig.json
+*.test.ts
+
+# Project lifecycle data
+.reap/
+
+# Test fixtures and scripts
+examples/
+scripts/
+
+# Git
+.git*
+.gitignore
+
+# Editor and OS
+.vscode/
+.idea/
+.DS_Store
+
+# Claude Code
+.claude/

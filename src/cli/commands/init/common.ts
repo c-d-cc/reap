@@ -1,4 +1,4 @@
-import yaml from "js-yaml";
+import YAML from "yaml";
 import type { ReapPaths } from "../../../core/paths.js";
 import { writeTextFile, ensureDir } from "../../../core/fs.js";
 import type { ReapConfig } from "../../../types/index.js";
@@ -58,7 +58,7 @@ export async function initCommon(
     agentClient: "claude-code",
     autoUpdate: true,
   };
-  await writeTextFile(paths.config, yaml.dump(config));
+  await writeTextFile(paths.config, YAML.stringify(config));
 
   // Write common genome files (evolution, invariants — same for both modes)
   await writeTextFile(paths.evolution, DEFAULT_EVOLUTION);

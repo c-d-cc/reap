@@ -16,7 +16,7 @@ import {
   getMaturityBehaviorGuide,
   formatCompletionCriteria,
 } from "../../../core/maturity.js";
-import yaml from "js-yaml";
+import YAML from "yaml";
 import type { ReapConfig } from "../../../types/index.js";
 
 export async function execute(paths: ReapPaths, phase?: string, feedback?: string): Promise<void> {
@@ -99,7 +99,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
       verifyNonce("completion", s, "completion", "fitness");
 
       const configContent = await readTextFile(paths.config);
-      const config = configContent ? (yaml.load(configContent) as ReapConfig) : null;
+      const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
       const cruise = config ? parseCruiseCount(config) : null;
 
       // Re-set same nonce (don't consume yet, wait for feedback)
@@ -164,7 +164,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
 
     // Load config for maturity detection
     const configContent = await readTextFile(paths.config);
-    const config = configContent ? (yaml.load(configContent) as ReapConfig) : null;
+    const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
     const maturity = detectMaturity(s.type, config?.cruiseCount);
     const generationCount = await gm.countLineage();
 

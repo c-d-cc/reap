@@ -6,16 +6,19 @@
   "bin": {
     "reap": "dist/cli/index.js"
   },
+  "files": [
+    "dist/",
+    "README.md"
+  ],
   "scripts": {
     "dev": "bun src/cli/index.ts",
     "build": "bun build src/cli/index.ts --outdir dist/cli --target node",
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "js-yaml": "^4.1.0"
+    "yaml": "^2.0.0"
   },
   "devDependencies": {
-    "@types/js-yaml": "^4.0.9",
     "@types/node": "^22.0.0",
     "typescript": "^5.7.0"
   }

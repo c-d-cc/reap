@@ -1,4 +1,4 @@
-import yaml from "js-yaml";
+import YAML from "yaml";
 import type { ReapPaths } from "../../../core/paths.js";
 import type { GenerationState, ReapConfig } from "../../../types/index.js";
 import { GenerationManager } from "../../../core/generation.js";
@@ -207,7 +207,7 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
   const state = await gm.current();
 
   const configContent = await readTextFile(paths.config);
-  const config = configContent ? (yaml.load(configContent) as ReapConfig) : null;
+  const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
   const autoSubagent = config?.autoSubagent ?? true;
 
   const [application, evolution, invariants, environment, visionGoals] = await Promise.all([

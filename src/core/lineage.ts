@@ -1,7 +1,7 @@
 import { readdir } from "fs/promises";
 import { join } from "path";
 import { execSync } from "child_process";
-import yaml from "js-yaml";
+import YAML from "yaml";
 import { readTextFile } from "./fs.js";
 
 export interface LineageMeta {
@@ -106,7 +106,7 @@ export async function readLineageMetas(lineagePath: string): Promise<LineageMeta
     const metaContent = await readTextFile(join(lineagePath, dir, "meta.yml"));
     if (!metaContent) continue;
 
-    const meta = yaml.load(metaContent) as Record<string, unknown>;
+    const meta = YAML.parse(metaContent) as Record<string, unknown>;
     metas.push({
       id: (meta.id as string) ?? dir,
       type: (meta.type as string) ?? "normal",
