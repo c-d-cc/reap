@@ -44,7 +44,7 @@ export const SOFTWARE_COMPLETION_CRITERIA = [
   { id: 10, name: "Code quality", description: "Is code quality and convention usage consistent?" },
   { id: 11, name: "User experience", description: "Is the user experience acceptable?" },
   { id: 12, name: "Visual verification", description: "For UI apps — has the user visually verified the interface?" },
-  { id: 13, name: "Integration layer", description: "For systems with external integrations — are shared layers/logic sufficient?" },
+  { id: 13, name: "Integration layer", description: "For systems with external integrations — are communication logic, API logic, and API error handling well-implemented?" },
   { id: 14, name: "Domain maturity", description: "Are domain feature specs (environment) and implementations (code) in place?" },
   { id: 15, name: "Governance compliance", description: "If governance guidelines exist, are they sufficiently followed?" },
   { id: 16, name: "Genome stability", description: "Has the genome been proven stable across multiple generations?" },
