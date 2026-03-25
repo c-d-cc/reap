@@ -41,7 +41,6 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
         : 'Ask the human for the goal of this generation. Then run: reap run start --phase create --goal "<goal>"',
       nextCommand: "reap run start --phase create",
     });
-    return;
   }
 
   if (effectivePhase === "create") {
@@ -79,7 +78,6 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
         message: `Merge generation ${state.id} created. Run: reap run detect`,
         nextCommand: "reap run detect",
       });
-      return;
     }
 
     const genType = (type === "normal" ? "normal" : "embryo") as import("../../../types/index.js").GenerationType;
@@ -101,7 +99,6 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
       message: `Generation ${state.id} created. Run: reap run learning`,
       nextCommand: "reap run learning",
     });
-    return;
   }
 
   emitError("start", `Unknown phase '${phase}'. Use 'scan' or 'create'.`);
