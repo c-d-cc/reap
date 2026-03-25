@@ -4,7 +4,6 @@ import { Command } from "../libs/cli.js";
 import { execute as initExecute } from "./commands/init/index.js";
 import { execute as statusExecute } from "./commands/status.js";
 import { execute as runExecute } from "./commands/run/index.js";
-import { execute as backlogExecute } from "./commands/backlog.js";
 import { execute as makeExecute } from "./commands/make.js";
 import { execute as cruiseExecute } from "./commands/cruise.js";
 import { execute as installSkillsExecute } from "./commands/install-skills.js";
@@ -43,17 +42,6 @@ program
   .option("--backlog <backlog>", "Backlog filename to consume for this generation")
   .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string }) => {
     await runExecute(stage, options);
-  });
-
-program
-  .command("backlog <action>")
-  .description("Manage backlog items (create, list)")
-  .option("--type <type>", "Backlog type (genome-change, environment-change, task)")
-  .option("--title <title>", "Backlog item title")
-  .option("--body <body>", "Optional description body")
-  .option("--priority <priority>", "Priority (high, medium, low)")
-  .action(async (action: string, options: { type?: string; title?: string; body?: string; priority?: string }) => {
-    await backlogExecute(action, options);
   });
 
 program
