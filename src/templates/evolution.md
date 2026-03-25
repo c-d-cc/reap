@@ -33,6 +33,7 @@ Before writing new code, always read existing code first to understand establish
 - **Consistency over preference**: Codebase consistency takes priority over personal preference. If a better pattern exists, refactor all instances — don't introduce a second pattern alongside the first.
 - **No duplication**: The same logic must not exist in two places. Extract and share when duplication is found.
 - **Verify before commit**: Before committing, verify new code matches existing patterns and contains no duplication.
+- **Enforced conventions in application.md**: Deliberate design decisions that cannot be derived from code alone (especially when violations exist in the codebase) should be recorded in application.md. When stated, application.md conventions take precedence over the current state of the code.
 
 ## Echo Chamber Prevention
 
