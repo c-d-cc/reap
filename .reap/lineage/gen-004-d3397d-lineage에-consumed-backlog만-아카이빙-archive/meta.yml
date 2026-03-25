@@ -1,0 +1,21 @@
+id: gen-004-d3397d
+type: embryo
+goal: lineage에 consumed backlog만 아카이빙 — archive.ts 수정
+parents:
+  - gen-003-851a08
+timeline:
+  - stage: learning
+    at: 2026-03-25T14:06:30.278Z
+  - stage: planning
+    at: 2026-03-25T14:06:58.897Z
+  - stage: implementation
+    at: 2026-03-25T14:07:14.681Z
+  - stage: validation
+    at: 2026-03-25T14:08:23.603Z
+  - stage: completion
+    at: 2026-03-25T14:08:35.897Z
+fitnessFeedback:
+  text: archive.ts consumed-only 로직 수정 완료. 하지만 start.ts에서 backlog consume 마킹 로직이
+    누락되어 있음 — 별도 backlog로 등록. learning artifact에서 backlog 근거 참조도 누락 — 다음 세대에서 개선
+    필요.
+  evaluatedAt: 2026-03-25T14:13:57.266Z
