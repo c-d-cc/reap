@@ -1,0 +1,4 @@
+[submodule "tests"]
+	path = tests
+	url = https://github.com/c-d-cc/reap-test.git
+	branch = self-evolve
