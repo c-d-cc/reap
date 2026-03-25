@@ -119,7 +119,7 @@ check_contains "config autoSubagent" "$GREENFIELD_DIR/.reap/config.yml" "autoSub
 # Verify genome templates
 check_contains "application has Project Identity" "$GREENFIELD_DIR/.reap/genome/application.md" "Project Identity"
 check_contains "invariants has default rules" "$GREENFIELD_DIR/.reap/genome/invariants.md" "Do not skip lifecycle stages"
-check_contains "evolution has AI Behavior" "$GREENFIELD_DIR/.reap/genome/evolution.md" "AI Behavior Guide"
+check_contains "evolution has Clarity-driven Interaction" "$GREENFIELD_DIR/.reap/genome/evolution.md" "Clarity-driven Interaction"
 check_contains "vision has Ultimate Goal" "$GREENFIELD_DIR/.reap/vision/goals.md" "Ultimate Goal"
 
 # ── Test 2: Adoption Init ─────────────────────────────────────────────────

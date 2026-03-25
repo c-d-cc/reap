@@ -24,6 +24,9 @@ export function suggestGenome(scan: ScanResult): string {
   const archHints = inferArchitecture(scan);
   if (archHints.length > 0) {
     for (const hint of archHints) lines.push(`- ${hint}`);
+    lines.push("");
+    lines.push("### Why This Architecture?");
+    lines.push("<!-- What drove these decisions? What alternatives were considered? -->");
   } else {
     lines.push("<!-- Could not infer architecture from directory structure -->");
   }
@@ -42,7 +45,7 @@ export function suggestGenome(scan: ScanResult): string {
 
   // Conventions
   lines.push("## Conventions");
-  lines.push("<!-- Review and confirm these conventions -->");
+  lines.push("<!-- Auto-detected — review, confirm, and add project-specific conventions -->");
   if (scan.hasTypeScript) lines.push("- TypeScript strict mode");
   if (scan.scripts.lint) lines.push("- Linting enabled");
   if (scan.scripts.format || scan.devDependencies.includes("prettier")) lines.push("- Prettier formatting");

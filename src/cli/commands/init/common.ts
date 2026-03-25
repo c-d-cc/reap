@@ -1,16 +1,19 @@
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import YAML from "yaml";
 import type { ReapPaths } from "../../../core/paths.js";
-import { writeTextFile, ensureDir } from "../../../core/fs.js";
+import { readTextFile, writeTextFile, ensureDir } from "../../../core/fs.js";
 import type { ReapConfig } from "../../../types/index.js";
 
-const DEFAULT_EVOLUTION = `# Evolution
-
-## AI Behavior Guide
-<!-- How should AI behave during lifecycle stages -->
-
-## Evolution Direction
-<!-- Current direction for project evolution -->
-`;
+/** Resolve path relative to dist/ root (works both in dev via bun and installed via npm) */
+function distPath(...segments: string[]): string {
+  const __dirname = dirname(fileURLToPath(import.meta.url));
+  // __dirname = dist/cli (built) or src/cli/commands/init (dev)
+  // In both cases, go up to find templates/
+  // Built: dist/cli -> dist/templates
+  // Dev (bun): src/cli/commands/init -> src/templates (via ../../..)
+  return join(__dirname, "..", "templates", ...segments);
+}
 
 const DEFAULT_INVARIANTS = `# Invariants
 
@@ -60,12 +63,34 @@ export async function initCommon(
   };
   await writeTextFile(paths.config, YAML.stringify(config));
 
-  // Write common genome files (evolution, invariants — same for both modes)
-  await writeTextFile(paths.evolution, DEFAULT_EVOLUTION);
+  // Write common genome files from templates
+  const evolution = await readTextFile(distPath("evolution.md"));
+  await writeTextFile(paths.evolution, evolution ?? "# Evolution\n");
   await writeTextFile(paths.invariants, DEFAULT_INVARIANTS);
 
   // Write vision
   await writeTextFile(paths.visionGoals, DEFAULT_GOALS);
 
+  // Write or append CLAUDE.md for AI agent session loading
+  const claudeMdPath = join(paths.root, "CLAUDE.md");
+  const reapSection = await readTextFile(distPath("claude-md-section.md"));
+  if (reapSection) {
+    const existing = await readTextFile(claudeMdPath);
+    if (existing) {
+      if (!existing.includes(".reap/genome/")) {
+        await writeTextFile(claudeMdPath, existing.trimEnd() + "\n" + reapSection);
+      }
+    } else {
+      await writeTextFile(claudeMdPath, `# ${projectName}\n` + reapSection);
+    }
+  }
+
   return config;
+}
+
+/**
+ * Read the CLAUDE.md REAP section template from dist/templates.
+ */
+export async function getClaudeMdSection(): Promise<string> {
+  return (await readTextFile(distPath("claude-md-section.md"))) ?? "";
 }
