@@ -78,3 +78,64 @@ function extractTitle(content: string): string | null {
   const match = withoutFm.match(/^#\s+(.+)/m);
   return match ? match[1].trim() : null;
 }
+
+// ── Create backlog ──────────────────────────────────────────
+
+const VALID_TYPES = ["genome-change", "environment-change", "task"] as const;
+
+export function toKebabCase(title: string): string {
+  return title
+    .toLowerCase()
+    .replace(/[^a-z0-9가-힣\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-")
+    .replace(/^-|-$/g, "");
+}
+
+export interface CreateBacklogOptions {
+  type: string;
+  title: string;
+  body?: string;
+  priority?: string;
+}
+
+/**
+ * Create a backlog item with standard template.
+ * Returns the generated filename.
+ */
+export async function createBacklog(
+  backlogDir: string,
+  opts: CreateBacklogOptions,
+): Promise<string> {
+  if (!(VALID_TYPES as readonly string[]).includes(opts.type)) {
+    throw new Error(`Invalid backlog type: "${opts.type}". Allowed: ${VALID_TYPES.join(", ")}`);
+  }
+
+  const priority = opts.priority ?? "medium";
+  const filename = `${toKebabCase(opts.title)}.md`;
+  const body = opts.body ? `\n${opts.body}\n` : "";
+
+  const content = `---
+type: ${opts.type}
+status: pending
+priority: ${priority}
+---
+
+# ${opts.title}
+${body}
+## Problem
+<!-- Describe the current issue and why this work is needed -->
+
+## Solution
+<!-- Describe the approach, implementation direction, and key ideas -->
+
+## Files to Change
+<!-- List specific file/function/module paths that need modification -->
+`;
+
+  const { mkdir } = await import("fs/promises");
+  await mkdir(backlogDir, { recursive: true });
+  await writeTextFile(join(backlogDir, filename), content);
+
+  return filename;
+}

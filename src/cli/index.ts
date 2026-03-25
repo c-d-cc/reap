@@ -49,6 +49,49 @@ program
   });
 
 program
+  .command("backlog <action>")
+  .description("Manage backlog items (create, list)")
+  .option("--type <type>", "Backlog type (genome-change, environment-change, task)")
+  .option("--title <title>", "Backlog item title")
+  .option("--body <body>", "Optional description body")
+  .option("--priority <priority>", "Priority (high, medium, low)")
+  .action(async (action: string, options: { type?: string; title?: string; body?: string; priority?: string }) => {
+    const { createPaths } = await import("../core/paths.js");
+    const { emitOutput, emitError } = await import("../core/output.js");
+    const paths = createPaths(process.cwd());
+
+    if (action === "create") {
+      if (!options.type || !options.title) {
+        emitError("backlog", 'Usage: reap backlog create --type <type> --title "<title>" [--body "<body>"] [--priority <priority>]');
+      }
+      const { createBacklog } = await import("../core/backlog.js");
+      const filename = await createBacklog(paths.backlog, {
+        type: options.type!,
+        title: options.title!,
+        body: options.body,
+        priority: options.priority,
+      });
+      emitOutput({
+        status: "ok",
+        command: "backlog",
+        context: { action: "create", filename },
+        message: `Backlog item created: ${filename}`,
+      });
+    } else if (action === "list") {
+      const { scanBacklog } = await import("../core/backlog.js");
+      const items = await scanBacklog(paths.backlog);
+      emitOutput({
+        status: "ok",
+        command: "backlog",
+        context: { action: "list", items: items.map((i) => ({ type: i.type, title: i.title, status: i.status, priority: i.priority, filename: i.filename })) },
+        message: `${items.length} backlog items.`,
+      });
+    } else {
+      emitError("backlog", `Unknown action '${action}'. Available: create, list`);
+    }
+  });
+
+program
   .command("cruise <count>")
   .description("Enable cruise mode for N generations")
   .action(async (count: string) => {
