@@ -101,6 +101,13 @@ Embryo → Normal 전환: adapt phase에서 AI 제안, 인간 승인.
 - Skills: `reap.{command}.md`
 - Artifacts: `{NN}-{stage}.md` (01-learning.md ~ 05-completion.md)
 
+### Test Structure
+- tests/ 폴더는 git submodule (https://github.com/c-d-cc/reap-test, branch: self-evolve)
+- Unit tests: `tests/unit/` — core 함수별 테스트
+- E2E tests: `tests/e2e/` 또는 `scripts/e2e-*.sh` — CLI 전체 흐름 테스트
+- Scenario tests: `tests/scenario/` — sandbox 환경에서 실제 사용 시나리오 재현
+- 기존 `scripts/e2e-*.sh`는 점진적으로 `tests/` 구조로 이전
+
 ### Genome Rules
 - Embryo: genome 자유 수정 가능
 - Normal: genome immutable — 변경은 backlog에 등록, adapt에서 적용

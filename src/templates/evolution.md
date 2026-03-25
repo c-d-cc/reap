@@ -35,6 +35,31 @@ Before writing new code, always read existing code first to understand establish
 - **Verify before commit**: Before committing, verify new code matches existing patterns and contains no duplication.
 - **Enforced conventions in application.md**: Deliberate design decisions that cannot be derived from code alone (especially when violations exist in the codebase) should be recorded in application.md. When stated, application.md conventions take precedence over the current state of the code.
 
+## Testing Principles
+
+### Mandatory Rules
+- **New feature = test required**: Every new feature must have corresponding test code. A feature without tests is not complete.
+- **Modified feature = update existing tests**: When modifying existing logic, find and update related tests to match the new behavior, then re-run.
+- **Fresh execution only**: Never reuse previous test results. Always run tests fresh.
+
+### Test Level Guidelines
+- **Unit test**: Verify input/output of isolated functions/modules. Best for pure logic without external dependencies.
+- **E2E test**: CLI command → JSON output verification. Confirms full flow works correctly.
+- **Scenario test**: Reproduce real usage scenarios in a sandbox environment. Tests multi-command combinations, state transitions, error recovery.
+
+### Test Level Selection
+| Change Type | Required Test |
+|------------|--------------|
+| Core function add/modify | unit test |
+| CLI command add/modify | e2e test |
+| Lifecycle flow change | e2e + scenario test |
+| Init/genome/environment structure change | scenario test (sandbox) |
+| Prompt-only change | e2e if functional impact, skip if cosmetic |
+
+### Test Feedback Loop
+- Record environment issues or insights discovered during testing in the completion artifact, and reflect in genome if needed.
+- If test failures stem from environment differences (OS, Node version, etc.), record in environment.
+
 ## Echo Chamber Prevention
 
 - AI autonomous additions are only allowed within the direct cause/impact scope of the current goal
