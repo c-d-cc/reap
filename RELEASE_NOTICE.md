@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.15.17
+### en
+Session-start hook now shows release notes after auto-update. Breaking change blocked message improved with user-friendly guidance.
+### ko
+세션 시작 hook에서 auto-update 후 릴리스 노트 표시. Breaking change blocked 메시지를 유저 친화적으로 개선.
+
 ## v0.15.16
 ### en
 Upgrade hand-off: `reap update` now delegates to the new binary after self-upgrade, ensuring seamless v0.16.0 migration. Config now tracks `lastCliVersion`.

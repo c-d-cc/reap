@@ -128,6 +128,51 @@ function semverGte(a, b) {
   return true;
 }
 
+// Inline CJS version of fetchReleaseNotice (ported from src/core/notice.ts)
+function fetchReleaseNoticeCJS(version, lang) {
+  try {
+    const pkgRoot = path.dirname(require.resolve('@c-d-cc/reap/package.json'));
+    const noticePath = path.join(pkgRoot, 'RELEASE_NOTICE.md');
+    const content = fs.readFileSync(noticePath, 'utf-8');
+    const versionTag = version.startsWith('v') ? version : `v${version}`;
+
+    // Find version section: ## vX.Y.Z
+    const versionPattern = new RegExp(`^## ${versionTag.replace(/\./g, '\\.')}\\s*$`, 'm');
+    const versionMatch = versionPattern.exec(content);
+    if (!versionMatch) return null;
+
+    const start = versionMatch.index + versionMatch[0].length;
+    const rest = content.slice(start);
+    const nextVersion = rest.search(/^## v/m);
+    const section = nextVersion === -1 ? rest : rest.slice(0, nextVersion);
+
+    // Language mapping
+    const LANG_MAP = {
+      korean: 'ko', english: 'en', japanese: 'ja',
+      'chinese': 'zh-cn', spanish: 'es', french: 'fr',
+      german: 'de', portuguese: 'pt',
+    };
+    const rawLang = (lang || 'en').toLowerCase();
+    const mappedLang = LANG_MAP[rawLang] || rawLang;
+    const langPattern = new RegExp(`^### ${mappedLang}\\s*$`, 'im');
+    const langMatch = langPattern.exec(section);
+    if (!langMatch) {
+      const trimmed = section.trim();
+      return trimmed ? `\n--- Release Notes (${versionTag}) ---\n${trimmed}\n` : null;
+    }
+
+    const langStart = langMatch.index + langMatch[0].length;
+    const langRest = section.slice(langStart);
+    const nextLang = langRest.search(/^### /m);
+    const langSection = (nextLang === -1 ? langRest : langRest.slice(0, nextLang)).trim();
+    if (!langSection) return null;
+
+    return `\n--- Release Notes (${versionTag}) ---\n${langSection}\n`;
+  } catch {
+    return null;
+  }
+}
+
 // Step 1: Version check + Auto-update
 log('Checking for updates...');
 let autoUpdateMessage = '';
@@ -144,7 +189,7 @@ if (installed && installed.includes('+dev')) {
     const minVersion = gl.exec('npm view @c-d-cc/reap reap.autoUpdateMinVersion');
     if (minVersion && !semverGte(installed, minVersion)) {
       // Breaking change detected — block auto-update
-      autoUpdateMessage = `[BREAKING] Auto-update blocked: v${installed} → v${latest} contains breaking changes. Inform the user about this breaking change and ask if they want to update via '/reap.update'. Release notes: https://reap.cc/docs/release-notes`;
+      autoUpdateMessage = `[BREAKING] Auto-update blocked: v${installed} → v${latest} contains breaking changes. Run '/reap.update' to upgrade manually.`;
     } else {
       const updated = gl.exec('npm update -g @c-d-cc/reap');
       if (updated !== null) {
@@ -197,15 +242,31 @@ if (genomeStaleWarning) {
 let updateSection = '';
 if (autoUpdateMessage) {
   if (autoUpdateMessage.startsWith('[BREAKING]')) {
-    updateSection = `\n\n## Auto-Update (Breaking Change Detected)\n${autoUpdateMessage}\n\nIMPORTANT: On your first response, explain to the user that a new REAP version is available but contains breaking changes. Show them the release notes link and ask for explicit confirmation before they run the manual update command. Do NOT silently skip this.`;
+    updateSection = `\n\n## Auto-Update (Breaking Change Detected)\n${autoUpdateMessage}\n\nIMPORTANT: You MUST inform the user about this on your FIRST response — do NOT skip or delay this.\n1. Explain that REAP v${latest} is available but contains breaking changes that prevent auto-update.\n2. Show the release notes link: https://reap.cc/docs/release-notes\n3. Tell them to run \`/reap.update\` when they are ready to upgrade manually.\n4. Do NOT proceed with any other task until you have communicated this to the user.`;
   } else {
     updateSection = `\n\n## Auto-Update\n${autoUpdateMessage}. Tell the user: "${autoUpdateMessage}"`;
   }
 }
 
+// Fetch release notice for auto-updated version (language is now available)
+let autoUpdateNotice = '';
+if (autoUpdateMessage && !autoUpdateMessage.startsWith('[BREAKING]')) {
+  try {
+    const notice = fetchReleaseNoticeCJS(latest, language || 'en');
+    if (notice) autoUpdateNotice = notice.trim();
+  } catch { /* best effort */ }
+}
+
 // Build session init display
 const initLines = [];
-if (autoUpdateMessage) initLines.push(`🟢 ${autoUpdateMessage}`);
+if (autoUpdateMessage) {
+  if (autoUpdateMessage.startsWith('[BREAKING]')) {
+    initLines.push(`⚠️ REAP v${latest} available (breaking change). Run /reap.update to upgrade manually.`);
+  } else {
+    initLines.push(`🟢 ${autoUpdateMessage}`);
+  }
+}
+if (autoUpdateNotice) initLines.push(autoUpdateNotice);
 
 // Genome health
 const health = gl.buildGenomeHealth({ l1Lines, genomeDir, configFile, genomeStaleWarning, commitsSince, neverSynced });

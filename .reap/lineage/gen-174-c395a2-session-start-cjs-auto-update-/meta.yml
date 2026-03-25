@@ -1,0 +1,9 @@
+id: gen-174-c395a2
+type: normal
+parents:
+  - gen-173-3150ba
+goal: session-start.cjs auto-update 시 release notice 표시 + breaking change
+  blocked 시 수동 업데이트 안내 강화
+genomeHash: c2e6348e
+startedAt: 2026-03-25T04:29:10.233Z
+completedAt: 2026-03-25T04:35:06.275Z
