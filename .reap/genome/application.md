@@ -104,6 +104,9 @@ Embryo → Normal 전환: adapt phase에서 AI 제안, 인간 승인.
 - Error도 JSON으로 출력 (`emitError`)
 - `process.exit(0)` — error 포함 모든 exit은 code 0 (JSON status로 구분)
 
+### Enforced Conventions
+- CLI entry point (`src/cli/index.ts`)는 라우팅만 — command 로직은 `src/cli/commands/` 아래 별도 파일의 `execute()` 함수로 분리. 현재 일부 위반 존재 (backlog, make, cruise가 inline) — 정리 예정.
+
 ### File Naming
 - Core modules: kebab-case (`stage-transition.ts`, `genome-suggest.ts`)
 - Commands: stage 이름 그대로 (`learning.ts`, `completion.ts`)
