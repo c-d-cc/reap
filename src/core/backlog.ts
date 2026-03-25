@@ -10,6 +10,8 @@ export interface BacklogItem {
   priority: "high" | "medium" | "low";
   title: string;
   consumedBy?: string;
+  createdAt?: string;
+  consumedAt?: string;
 }
 
 /**
@@ -39,6 +41,8 @@ export async function scanBacklog(backlogDir: string): Promise<BacklogItem[]> {
       priority: (frontmatter.priority as BacklogItem["priority"]) ?? "medium",
       title: extractTitle(content) ?? entry.replace(".md", ""),
       consumedBy: frontmatter.consumedBy as string | undefined,
+      createdAt: frontmatter.createdAt as string | undefined,
+      consumedAt: frontmatter.consumedAt as string | undefined,
     });
   }
 
@@ -54,7 +58,7 @@ export async function consumeBacklog(filePath: string, genId: string): Promise<v
 
   // Replace status in frontmatter
   const updated = content
-    .replace(/status:\s*pending/, `status: consumed\nconsumedBy: ${genId}`);
+    .replace(/status:\s*pending/, `status: consumed\nconsumedBy: ${genId}\nconsumedAt: ${new Date().toISOString()}`);
   await writeTextFile(filePath, updated);
 }
 
@@ -119,6 +123,7 @@ export async function createBacklog(
 type: ${opts.type}
 status: pending
 priority: ${priority}
+createdAt: ${new Date().toISOString()}
 ---
 
 # ${opts.title}
