@@ -95,6 +95,53 @@ export function gitResetHard(cwd: string): boolean {
 /**
  * Push to remote. Returns true on success.
  */
+/**
+ * Check if any git submodules have uncommitted changes.
+ * Returns an array of { name, dirty } for each submodule.
+ * Detects both:
+ * - HEAD mismatch: submodule HEAD differs from recorded commit ('+' prefix in `git submodule status`)
+ * - Working tree changes: uncommitted modifications inside the submodule
+ */
+export function checkSubmoduleDirty(cwd: string): { name: string; dirty: boolean }[] {
+  if (!isGitRepo(cwd)) return [];
+
+  try {
+    const output = execSync("git submodule status", {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+
+    if (!output) return [];
+
+    const submodules = output.split("\n").map((line) => {
+      // Format: " <hash> <name> (<desc>)" or "+<hash> <name> (<desc>)"
+      const headDirty = line.startsWith("+");
+      const name = line.replace(/^[+ -]/, "").replace(/^[a-f0-9]+ /, "").replace(/ \(.*\)$/, "").trim();
+      return { name, dirty: headDirty };
+    });
+
+    // Also check for working-tree changes inside each submodule
+    for (const sm of submodules) {
+      if (sm.dirty) continue; // already dirty
+      try {
+        const porcelain = execSync("git status --porcelain", {
+          cwd: `${cwd}/${sm.name}`,
+          encoding: "utf-8",
+          stdio: ["pipe", "pipe", "pipe"],
+        }).trim();
+        if (porcelain) sm.dirty = true;
+      } catch {
+        // ignore — submodule might not be initialized
+      }
+    }
+
+    return submodules;
+  } catch {
+    return [];
+  }
+}
+
 export function gitPush(cwd: string): boolean {
   try {
     execSync("git push", {

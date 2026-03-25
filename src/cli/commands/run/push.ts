@@ -1,6 +1,6 @@
 import type { ReapPaths } from "../../../core/paths.js";
 import { GenerationManager } from "../../../core/generation.js";
-import { isGitRepo, gitPush } from "../../../core/git.js";
+import { isGitRepo, gitPush, checkSubmoduleDirty } from "../../../core/git.js";
 import { emitOutput, emitError } from "../../../core/output.js";
 
 export async function execute(paths: ReapPaths): Promise<void> {
@@ -15,6 +15,16 @@ export async function execute(paths: ReapPaths): Promise<void> {
   // Check git repo
   if (!isGitRepo(paths.root)) {
     emitError("push", "Not a git repository. Cannot push.");
+  }
+
+  // Check submodule dirty state before pushing
+  const dirtySubmodules = checkSubmoduleDirty(paths.root).filter((sm) => sm.dirty);
+  if (dirtySubmodules.length > 0) {
+    const names = dirtySubmodules.map((sm) => sm.name).join(", ");
+    emitError(
+      "push",
+      `Submodule(s) have uncommitted changes: ${names}. Commit inside the submodule(s) first, then retry.`,
+    );
   }
 
   // Push

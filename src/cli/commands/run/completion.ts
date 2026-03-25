@@ -8,7 +8,7 @@ import { archiveGeneration } from "../../../core/archive.js";
 import { consumeBacklog } from "../../../core/backlog.js";
 import { runHooks } from "../../../core/hooks.js";
 import { parseCruiseCount, advanceCruise } from "../../../core/cruise.js";
-import { gitCommitAll } from "../../../core/git.js";
+import { gitCommitAll, checkSubmoduleDirty } from "../../../core/git.js";
 import {
   detectMaturity,
   getTransitionUrgency,
@@ -289,6 +289,16 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
 
     const fitnessFeedback = s.fitnessFeedback;
     const archiveDir = await archiveGeneration(paths, s, fitnessFeedback);
+
+    // Check submodule dirty state before committing
+    const dirtySubmodules = checkSubmoduleDirty(paths.root).filter((sm) => sm.dirty);
+    if (dirtySubmodules.length > 0) {
+      const names = dirtySubmodules.map((sm) => sm.name).join(", ");
+      emitError(
+        "completion",
+        `Submodule(s) have uncommitted changes: ${names}. Commit inside the submodule(s) first, then retry.`,
+      );
+    }
 
     // Auto-commit generation
     const goalSummary = s.goal.length > 60 ? s.goal.slice(0, 57) + "..." : s.goal;
