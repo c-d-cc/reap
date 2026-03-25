@@ -4,9 +4,17 @@
 
 - Source: `~/cdws/reap/` (branch: v0.16.0)
 - Package: `@c-d-cc/reap` v0.16.0
-- Stack: TypeScript 5.7 + Bun (build) + Node.js (runtime)
-- Dependencies: `yaml` v2 (유일한 production dep)
 - Config language: korean
+
+## Tech Stack
+
+- Runtime: Bun (build), Node.js (execution)
+- Build: `bun build` → single bundle (`dist/cli/index.js`, ~370KB)
+- Dependencies: `yaml` v2 (유일한 production dependency)
+- CLI Framework: 자체 구현 (`src/libs/cli.ts`) — commander/yargs 대신
+- Crypto: Node.js native `crypto` (nonce, hash)
+- VCS: Git (child_process 직접 호출)
+- Type System: TypeScript 5.7, strict mode, ESM
 
 ## Source Structure
 

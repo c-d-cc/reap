@@ -1,6 +1,8 @@
 ---
 type: genome-change
-status: pending
+status: consumed
+consumedBy: gen-011-4a835c
+consumedAt: 2026-03-25T15:25:25.898Z
 priority: high
 ---
 

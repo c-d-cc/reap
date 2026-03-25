@@ -6,8 +6,6 @@
 AI와 인간이 세대(generation)를 거치며 소프트웨어를 공동 진화시키는 자기진화형 개발 파이프라인.
 
 - Package: `@c-d-cc/reap` (npm)
-- Version: 0.16.0
-- License: private (배포 준비 중)
 - Language: TypeScript (Bun runtime)
 - Distribution: CLI tool (`reap` command)
 
@@ -85,16 +83,6 @@ detect → mate → merge → reconcile → validation → completion
 
 Embryo → Normal 전환: adapt phase에서 AI 제안, 인간 승인.
 
-## Tech Stack
-
-- **Runtime**: Bun (build), Node.js (execution)
-- **Build**: `bun build` → single bundle (`dist/cli/index.js`, ~370KB)
-- **Dependencies**: `yaml` v2 (유일한 production dependency)
-- **CLI Framework**: 자체 구현 (`src/libs/cli.ts`, ~858 lines) — commander/yargs 대신
-- **Crypto**: Node.js native `crypto` (nonce, hash)
-- **VCS**: Git (child_process 직접 호출)
-- **Type System**: TypeScript 5.7, strict mode, ESM
-
 ## Conventions
 
 ### Code Style
@@ -112,11 +100,6 @@ Embryo → Normal 전환: adapt phase에서 AI 제안, 인간 승인.
 - Commands: stage 이름 그대로 (`learning.ts`, `completion.ts`)
 - Skills: `reap.{command}.md`
 - Artifacts: `{NN}-{stage}.md` (01-learning.md ~ 05-completion.md)
-
-### Testing
-- E2E shell scripts (`scripts/e2e-*.sh`)
-- 4 test suites: init, lifecycle, merge, multi-generation
-- Unit test 없음 — E2E로 전체 흐름 검증
 
 ### Genome Rules
 - Embryo: genome 자유 수정 가능

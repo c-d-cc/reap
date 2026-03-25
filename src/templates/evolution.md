@@ -43,5 +43,13 @@ Before writing new code, always read existing code first to understand establish
 
 ## Environment Refresh at Completion
 
-- Sync environment/summary.md with current state during reflect phase
-- Reflect structural changes, dependency updates, and new knowledge discovered
+Incrementally update environment/summary.md during reflect phase:
+- Based on files changed in implementation, update only affected environment sections
+- Not a full rewrite — reflect only what changed (file additions/deletions, dependency changes, build changes)
+- Primary update targets: Tech Stack, Source Structure, Tests sections
+
+## Genome vs Environment Boundary
+
+- **genome (application.md)**: prescriptive — "how things should be" (principles, design decisions, conventions, rules). Genome is immutable in normal mode, so do not put frequently changing factual information here.
+- **environment (summary.md)**: descriptive — "how things currently are" (tech stack, source structure, build, tests, dependencies). When code changes, only environment is updated.
+- Decision rule: "If this information changes, does the genome need updating?" → Yes = genome, No = environment.
