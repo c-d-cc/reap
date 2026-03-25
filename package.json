@@ -14,6 +14,10 @@
     "dev": "bun src/cli/index.ts",
     "build": "bun build src/cli/index.ts --outdir dist/cli --target node && cp -r src/adapters/claude-code/skills dist/adapters/claude-code/ && cp -r src/templates dist/templates",
     "typecheck": "tsc --noEmit",
+    "test": "npm run test:unit && npm run test:e2e && npm run test:scenario",
+    "test:unit": "bun test tests/unit/",
+    "test:e2e": "bash tests/e2e/run.sh",
+    "test:scenario": "bash tests/scenario/run.sh",
     "postinstall": "node dist/cli/index.js install-skills 2>/dev/null || true"
   },
   "dependencies": {
