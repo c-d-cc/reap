@@ -78,7 +78,13 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "3. **Previous Generation Reference**: Review the latest generation's completion artifact and fitness feedback",
         "4. **Backlog Review**: Check pending backlog items and assess relevance to this generation",
         "5. **Codebase Exploration**: Read code related to this generation's goal and understand current state",
-        "6. **Write 01-learning.md**: Organize learning results (Project Overview, Key Findings, Backlog, Context)",
+        "6. **Clarity Assessment**: Assess project clarity level (high/medium/low) based on:",
+        "   - Does vision/goals.md have specific, actionable goals?",
+        "   - Are backlog items clear and well-defined?",
+        "   - Is this an embryo generation (lower clarity expected)?",
+        "   - How much lineage exists? (short lineage = less context)",
+        "   - Record clarity level in 01-learning.md Context section",
+        "7. **Write 01-learning.md**: Organize learning results (Project Overview, Key Findings, Backlog, Context, Clarity Level)",
         "",
         pendingBacklog.length > 0
           ? `### Pending Backlog (${pendingBacklog.length} items):\n${pendingBacklog.map((b) => `- [${b.type}] ${b.title} (\`${b.filename}\`)`).join("\n")}\n`

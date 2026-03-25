@@ -54,6 +54,45 @@ export function gitCommitAll(cwd: string, message: string): string | null {
 }
 
 /**
+ * Get the diff of all uncommitted changes (staged + unstaged) against HEAD.
+ * Returns the diff string, or null if no changes or not a git repo.
+ */
+export function gitDiff(cwd: string): string | null {
+  if (!isGitRepo(cwd)) return null;
+
+  try {
+    const diff = execSync("git diff HEAD", {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+
+    return diff || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Reset the working directory to HEAD (git reset --hard HEAD).
+ * Returns true on success, false on failure or if not a git repo.
+ */
+export function gitResetHard(cwd: string): boolean {
+  if (!isGitRepo(cwd)) return false;
+
+  try {
+    execSync("git reset --hard HEAD", {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * Push to remote. Returns true on success.
  */
 export function gitPush(cwd: string): boolean {

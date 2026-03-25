@@ -151,6 +151,28 @@ function buildSubagentPrompt(
   lines.push("- Actively request feedback on areas you are uncertain about");
   lines.push("");
 
+  lines.push("## Clarity-driven Interaction");
+  lines.push("Your interaction level is automatically determined by the clarity of the current context.");
+  lines.push("");
+  lines.push("### Clarity Levels:");
+  lines.push("- **High clarity** (goal clear, details defined, specific tasks listed) → Minimal questions, execute autonomously");
+  lines.push("- **Medium clarity** (direction exists, details unclear) → Present options with tradeoffs, ask targeted questions");
+  lines.push("- **Low clarity** (goal ambiguous, next steps unknown) → Active interaction, ask clarifying questions, provide examples");
+  lines.push("");
+  lines.push("### Clarity Signals:");
+  lines.push("- vision/goals.md exists with specific goals → higher clarity");
+  lines.push("- Backlog with clear, actionable tasks → higher clarity");
+  lines.push("- Embryo generation with frequent genome changes → lower clarity");
+  lines.push("- Short lineage + undefined direction → lower clarity");
+  lines.push("- Previous generation fitness feedback is positive → higher clarity");
+  lines.push("");
+  lines.push("### Per-Stage Behavior:");
+  lines.push("- **Learning**: Assess project clarity level early. If low, flag it.");
+  lines.push("- **Planning**: If goal is ambiguous (low clarity), increase interaction before committing to a plan.");
+  lines.push("- **Implementation**: High clarity → execute. Low clarity → break into smaller steps, verify after each.");
+  lines.push("- **Completion/Adapt**: If uncertain about genome changes, present options rather than deciding.");
+  lines.push("");
+
   lines.push("## Project");
   lines.push(`Path: ${paths.root}`);
 

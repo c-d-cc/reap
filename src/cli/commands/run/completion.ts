@@ -182,6 +182,11 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
           ? "**Embryo mode**: genome (application.md, evolution.md) can be freely modified."
           : "**Normal mode**: propose genome changes via backlog. invariants.md cannot be modified.",
         "",
+        "### Clarity-driven Interaction:",
+        "- If uncertain about genome changes, present options with tradeoffs rather than deciding autonomously.",
+        "- If the project direction is unclear (low clarity), suggest broad next-generation candidates and ask the human to choose.",
+        "- If the project is mature with clear direction (high clarity), propose specific next steps confidently.",
+        "",
         "### Steps:",
         "1. **Genome Review**: Based on fitness feedback, determine if application.md or evolution.md need modifications",
         "2. **Vision Check**: Reference vision/goals.md to check completed goals and determine next goals",
