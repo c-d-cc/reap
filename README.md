@@ -56,9 +56,6 @@ REAP solves these with a **self-evolving generation model**:
 > **Global installation required.**
 
 ```bash
-npx @c-d-cc/reap
-
-# or
 npm install -g @c-d-cc/reap
 ```
 
