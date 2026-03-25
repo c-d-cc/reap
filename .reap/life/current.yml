@@ -1,7 +1,7 @@
 # REAP MANAGED — Do not modify directly.
 id: gen-013-d38c9a
 type: embryo
-stage: implementation
+stage: validation
 goal: "Test Phase 2: 테스트 구조 설계 및 실행 환경 구성"
 parents:
   - gen-012-856e91
@@ -12,11 +12,13 @@ timeline:
     at: 2026-03-25T15:58:04.234Z
   - stage: implementation
     at: 2026-03-25T15:58:53.023Z
-lastNonce: fc54a4b1a70eb2552589e6334918f2b4
-expectedHash: 533f6572c2fc530fa331f386b13ab82edd84bb18a9358475503b6edadfa9b8e7
+  - stage: validation
+    at: 2026-03-25T16:03:27.018Z
+lastNonce: 23b2b605647c99ac9b2a878fa895bc8f
+expectedHash: d792a55e82e74bdec6592055bd0da774baa3d09fbf1bc4e92f8ebc4ab06785c7
 phase: complete
 sourceBacklog: test-phase-2-테스트-구조-설계-및-실행-환경-구성.md
-backNonce: 0206d2eade456deb219801b5473e7bcf
-backExpectedHash: 9fffef7149c1b70130a4ae963baebcb534806d252e0e0ada403e70fbf25d498d
-backTarget: planning
+backNonce: 4dafba07d0f4ba60b1d63fba82f0b598
+backExpectedHash: 195191c30c199481960c8d1326da4bf17c22f6f9bd05865830a475d5b682f4fb
+backTarget: implementation
 backTargetPhase: entry
