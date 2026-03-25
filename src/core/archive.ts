@@ -1,5 +1,5 @@
 import { join } from "path";
-import { readdir, cp, rm } from "fs/promises";
+import { readdir, rm, unlink } from "fs/promises";
 import YAML from "yaml";
 import type { ReapPaths } from "./paths.js";
 import type { GenerationState } from "../types/index.js";
@@ -9,6 +9,10 @@ import { compressLineage } from "./compression.js";
 
 /**
  * Archive the current generation to lineage/ and clear life/.
+ *
+ * Backlog handling (v0.15 pattern):
+ * - consumed backlog → copied to lineage, removed from life/backlog/
+ * - pending backlog → stays in life/backlog/ (carry-over to next generation)
  */
 export async function archiveGeneration(
   paths: ReapPaths,
@@ -24,13 +28,31 @@ export async function archiveGeneration(
   const archiveDir = join(paths.lineage, `${state.id}-${goalSlug}`);
   await ensureDir(archiveDir);
 
-  // Copy artifacts
+  // Copy artifacts (excluding backlog/ and current.yml)
   const lifeEntries = await readdir(paths.life);
   for (const entry of lifeEntries) {
-    if (entry === "current.yml") continue;
+    if (entry === "current.yml" || entry === "backlog") continue;
     const src = join(paths.life, entry);
     const dest = join(archiveDir, entry);
+    const { cp } = await import("fs/promises");
     await cp(src, dest, { recursive: true });
+  }
+
+  // Handle backlog separately: only archive consumed items
+  const backlogItems = await scanBacklog(paths.backlog);
+  const consumedItems = backlogItems.filter((b) => b.status === "consumed");
+
+  if (consumedItems.length > 0) {
+    const archiveBacklogDir = join(archiveDir, "backlog");
+    await ensureDir(archiveBacklogDir);
+    for (const item of consumedItems) {
+      const content = await readTextFile(item.path);
+      if (content) {
+        await writeTextFile(join(archiveBacklogDir, item.filename), content);
+      }
+      // Remove consumed item from life/backlog/
+      await unlink(item.path).catch(() => {});
+    }
   }
 
   // Write meta.yml
@@ -49,28 +71,10 @@ export async function archiveGeneration(
   }
   await writeTextFile(join(archiveDir, "meta.yml"), YAML.stringify(meta));
 
-  // Carry-over: pending backlog stays in life/, consumed goes to lineage
-  const backlogItems = await scanBacklog(paths.backlog);
-  const pendingItems = backlogItems.filter((b) => b.status === "pending");
-
-  // Clear life/ (remove artifacts + current.yml, but handle backlog carefully)
+  // Clear life/ artifacts (keep backlog/ — pending items remain)
   for (const entry of lifeEntries) {
-    if (entry === "backlog") continue; // handle separately
+    if (entry === "backlog") continue;
     await rm(join(paths.life, entry), { recursive: true, force: true });
-  }
-
-  // Clear backlog dir (consumed already archived via cp above)
-  await rm(paths.backlog, { recursive: true, force: true });
-
-  // Carry-over pending backlog to fresh life/backlog/
-  if (pendingItems.length > 0) {
-    await ensureDir(paths.backlog);
-    for (const item of pendingItems) {
-      const content = await readTextFile(join(archiveDir, "backlog", item.filename));
-      if (content) {
-        await writeTextFile(join(paths.backlog, item.filename), content);
-      }
-    }
   }
 
   // Run lineage compression (non-blocking)

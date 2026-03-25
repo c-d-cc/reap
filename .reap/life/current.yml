@@ -1,0 +1,21 @@
+# REAP MANAGED — Do not modify directly.
+id: gen-004-d3397d
+type: embryo
+stage: implementation
+goal: lineage에 consumed backlog만 아카이빙 — archive.ts 수정
+parents:
+  - gen-003-851a08
+timeline:
+  - stage: learning
+    at: 2026-03-25T14:06:30.278Z
+  - stage: planning
+    at: 2026-03-25T14:06:58.897Z
+  - stage: implementation
+    at: 2026-03-25T14:07:14.681Z
+lastNonce: 039eb27224cf3af12c177e446ce7a83e
+expectedHash: cd92f6a0991979f163841c0a8bf1f830c8c52ceab994017d80510133bd6286f8
+phase: complete
+backNonce: 21f31b86cb42c0fb4d380f79234d47dc
+backExpectedHash: caee05f13c62ad6428b9e60fcef58a6bd91d291466c470a9cdbc4a6866c73875
+backTarget: planning
+backTargetPhase: entry
