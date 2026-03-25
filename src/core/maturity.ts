@@ -32,22 +32,22 @@ export function getTransitionUrgency(generationCount: number): TransitionUrgency
 // ── Software Completion Criteria (16 items) ──────────────────
 
 export const SOFTWARE_COMPLETION_CRITERIA = [
-  { id: 1, name: "Core functionality", description: "핵심 기능이 동작하는가" },
-  { id: 2, name: "Architecture stability", description: "아키텍처가 안정적으로 완성되었는가" },
-  { id: 3, name: "Modularity", description: "코드 확장을 위한 공통화, 모듈화가 충분한가" },
-  { id: 4, name: "Error handling", description: "에러 처리가 적절한가" },
-  { id: 5, name: "Test coverage", description: "테스트가 충분한가" },
-  { id: 6, name: "Documentation", description: "사용자/개발자 문서가 있는가" },
-  { id: 7, name: "Security", description: "기본 보안 요건을 충족하는가" },
-  { id: 8, name: "Performance", description: "성능이 허용 범위 내인가" },
-  { id: 9, name: "Deployment readiness", description: "배포 가능한 상태인가" },
-  { id: 10, name: "Code quality", description: "코드 품질/컨벤션이 일관적인가" },
-  { id: 11, name: "User experience", description: "사용자 경험이 수용 가능한가" },
-  { id: 12, name: "Visual verification", description: "UI가 있는 경우, 시각적으로 검증했는가" },
-  { id: 13, name: "Integration layer", description: "타 시스템 연계 공통 레이어/로직이 충분한가" },
-  { id: 14, name: "Domain maturity", description: "도메인 기능의 spec과 impl이 갖춰져 있는가" },
-  { id: 15, name: "Governance compliance", description: "governance guideline 준수 여부" },
-  { id: 16, name: "Genome stability", description: "genome이 generation을 거치며 안정적으로 검증되었는가" },
+  { id: 1, name: "Core functionality", description: "Are core features working as expected?" },
+  { id: 2, name: "Architecture stability", description: "Is the architecture stable and well-established?" },
+  { id: 3, name: "Modularity", description: "Is the code sufficiently modular and reusable for extension?" },
+  { id: 4, name: "Error handling", description: "Is error handling appropriate and consistent?" },
+  { id: 5, name: "Test coverage", description: "Is test coverage sufficient?" },
+  { id: 6, name: "Documentation", description: "Is user/developer documentation in place?" },
+  { id: 7, name: "Security", description: "Are basic security requirements met?" },
+  { id: 8, name: "Performance", description: "Is performance within acceptable bounds?" },
+  { id: 9, name: "Deployment readiness", description: "Is the project ready for deployment?" },
+  { id: 10, name: "Code quality", description: "Is code quality and convention usage consistent?" },
+  { id: 11, name: "User experience", description: "Is the user experience acceptable?" },
+  { id: 12, name: "Visual verification", description: "For UI apps — has the user visually verified the interface?" },
+  { id: 13, name: "Integration layer", description: "For systems with external integrations — are shared layers/logic sufficient?" },
+  { id: 14, name: "Domain maturity", description: "Are domain feature specs (environment) and implementations (code) in place?" },
+  { id: 15, name: "Governance compliance", description: "If governance guidelines exist, are they sufficiently followed?" },
+  { id: 16, name: "Genome stability", description: "Has the genome been proven stable across multiple generations?" },
 ] as const;
 
 /**
