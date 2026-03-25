@@ -16,8 +16,8 @@
     "typecheck": "tsc --noEmit",
     "test": "npm run test:unit && npm run test:e2e && npm run test:scenario",
     "test:unit": "bun test tests/unit/",
-    "test:e2e": "bash tests/e2e/run.sh",
-    "test:scenario": "bash tests/scenario/run.sh",
+    "test:e2e": "bun test tests/e2e/",
+    "test:scenario": "bun test tests/scenario/",
     "postinstall": "node dist/cli/index.js install-skills 2>/dev/null || true"
   },
   "dependencies": {

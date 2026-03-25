@@ -44,7 +44,7 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [x] Phase 3: core 함수 unit tests (backlog.ts, archive.ts, generation.ts, nonce.ts 등) (gen-014)
 - [x] Phase 4: gen-002~011 신규 기능 e2e tests (CLAUDE.md, make backlog, --backlog consume, artifact path) (gen-015)
 - [x] Phase 5: init scenario tests (empty, existing no CLAUDE.md, existing with CLAUDE.md) (gen-015, T001)
-- [ ] Phase 6: 기존 scripts/e2e-*.sh를 tests/ 구조로 이전
+- [x] Phase 6: bash 테스트를 TypeScript(bun:test)로 전환 + setup helper (gen-016)
 
 ### Distribution (spec2 §7)
 - [ ] README 재작성 (영어 우선, self-evolving pipeline 강조)
