@@ -26,6 +26,13 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     const invariants = await readTextFile(paths.invariants);
     const envSummary = await readTextFile(paths.environmentSummary);
 
+    // Read source backlog content if this generation was started from a backlog item
+    let sourceBacklogContent: string | null = null;
+    if (s.sourceBacklog) {
+      sourceBacklogContent = await readTextFile(join(paths.backlog, s.sourceBacklog))
+        ?? await readTextFile(join(paths.life, "backlog", s.sourceBacklog));
+    }
+
     // Read pending backlog
     const backlogItems = await scanBacklog(paths.backlog);
     const pendingBacklog = backlogItems.filter((b) => b.status === "pending");
@@ -65,6 +72,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         environmentSummary: envSummary?.slice(0, 2000),
         previousCompletion: prevCompletion?.slice(0, 2000),
         previousFitness: prevFitness,
+        sourceBacklog: s.sourceBacklog ? { filename: s.sourceBacklog, content: sourceBacklogContent?.slice(0, 2000) } : null,
         pendingBacklog: pendingBacklog.map((b) => ({ type: b.type, title: b.title, filename: b.filename })),
       },
       prompt: [
@@ -86,6 +94,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "   - Record clarity level in 01-learning.md Context section",
         "7. **Write 01-learning.md**: Organize learning results (Project Overview, Key Findings, Backlog, Context, Clarity Level)",
         "",
+        s.sourceBacklog
+          ? `### Source Backlog (this generation's basis):\nThis generation was started from backlog item \`${s.sourceBacklog}\`. Read it and include its content as the basis/rationale in 01-learning.md under a "## Source Backlog" section.\n`
+          : "",
         pendingBacklog.length > 0
           ? `### Pending Backlog (${pendingBacklog.length} items):\n${pendingBacklog.map((b) => `- [${b.type}] ${b.title} (\`${b.filename}\`)`).join("\n")}\n`
           : "",

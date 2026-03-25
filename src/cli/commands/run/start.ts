@@ -1,11 +1,12 @@
+import { join } from "path";
 import { createPaths } from "../../../core/paths.js";
 import { GenerationManager } from "../../../core/generation.js";
 import { fileExists } from "../../../core/fs.js";
 import { emitOutput, emitError } from "../../../core/output.js";
 import { runHooks } from "../../../core/hooks.js";
-import { scanBacklog } from "../../../core/backlog.js";
+import { scanBacklog, consumeBacklog } from "../../../core/backlog.js";
 
-export async function execute(phase?: string, goal?: string, type?: string, parents?: string): Promise<void> {
+export async function execute(phase?: string, goal?: string, type?: string, parents?: string, backlog?: string): Promise<void> {
   const paths = createPaths(process.cwd());
 
   if (!(await fileExists(paths.config))) {
@@ -37,7 +38,7 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
         backlogItems: pendingBacklog.map(b => ({ type: b.type, title: b.title, filename: b.filename })),
       },
       prompt: pendingBacklog.length > 0
-        ? `Pending backlog items (${pendingBacklog.length}):\n${pendingBacklog.map(b => `- [${b.type}] ${b.title}`).join("\n")}\n\nPresent these to the human. Ask: select one as the goal or enter a new goal. Then run: reap run start --phase create --goal "<goal>"`
+        ? `Pending backlog items (${pendingBacklog.length}):\n${pendingBacklog.map(b => `- [${b.type}] ${b.title} (\`${b.filename}\`)`).join("\n")}\n\nPresent these to the human. Ask: select one as the goal or enter a new goal.\nIf a backlog item is selected, include --backlog <filename> in the start command.\nThen run: reap run start --phase create --goal "<goal>" [--backlog <filename>]`
         : 'Ask the human for the goal of this generation. Then run: reap run start --phase create --goal "<goal>"',
       nextCommand: "reap run start --phase create",
     });
@@ -45,7 +46,7 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
 
   if (effectivePhase === "create") {
     if (!goal) {
-      emitError("start", 'Goal is required. Usage: reap run start --phase create --goal "<goal>"');
+      emitError("start", 'Goal is required. Usage: reap run start --phase create --goal "<goal>" [--backlog <filename>]');
     }
 
     const existing = await gm.current();
@@ -83,18 +84,31 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
     const genType = (type === "normal" ? "normal" : "embryo") as import("../../../types/index.js").GenerationType;
     const state = await gm.create(goal!, genType);
 
+    // Mark backlog as consumed (after ID generation)
+    if (backlog) {
+      const backlogPath = join(paths.backlog, backlog);
+      if (await fileExists(backlogPath)) {
+        await consumeBacklog(backlogPath, state.id);
+        state.sourceBacklog = backlog;
+        await gm.save(state);
+      }
+    }
+
     // Run onLifeStarted hooks
     await runHooks(paths.hooks, "onLifeStarted", paths.root).catch(() => {});
 
     emitOutput({
       status: "ok",
       command: "start",
-      completed: ["gate", "create-generation"],
+      completed: backlog
+        ? ["gate", "create-generation", "backlog-consumed"]
+        : ["gate", "create-generation"],
       context: {
         generationId: state.id,
         goal: state.goal,
         type: state.type,
         parents: state.parents,
+        sourceBacklog: state.sourceBacklog,
       },
       message: `Generation ${state.id} created. Run: reap run learning`,
       nextCommand: "reap run learning",

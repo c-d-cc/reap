@@ -36,9 +36,9 @@ const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, pha
   push: pushExecute,
 };
 
-export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string }): Promise<void> {
+export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string }): Promise<void> {
   if (stage === "start") {
-    await startExecute(options.phase, options.goal, options.type, options.parents);
+    await startExecute(options.phase, options.goal, options.type, options.parents, options.backlog);
     return;
   }
 

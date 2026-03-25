@@ -36,7 +36,8 @@ program
   .option("--parents <parents>", "Parent generation IDs for merge (comma-separated)")
   .option("--feedback <feedback>", "Fitness feedback text")
   .option("--reason <reason>", "Reason for back regression")
-  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string }) => {
+  .option("--backlog <backlog>", "Backlog filename to consume for this generation")
+  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string }) => {
     await runExecute(stage, options);
   });
 
