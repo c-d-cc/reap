@@ -12,24 +12,35 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [x] Core lifecycle 구현 (learning → completion)
 - [x] Merge lifecycle 구현 (detect → reconcile → completion)
 - [x] Nonce-based stage integrity
-- [x] 2-level lineage compression
+- [x] 2-level lineage compression (threshold 20)
 - [x] Generation commit 자동화
 - [x] reap.push 구현
-- [x] E2E 테스트 4 suites (init, lifecycle, merge, multi-gen)
+- [x] abort 2-phase (confirm → execute) + consumed revert
+- [x] submodule dirty check (completion commit + push에서 자동 차단)
+- [x] backlog CRUD (make backlog, consume, revert, createdAt/consumedAt)
+- [x] restart 제거 → abort로 통합 (gen-017)
 
 ### Clarity-driven Interaction (spec2 §0)
-- [ ] Clarity level 자동 판단 로직 (vision/backlog/genome 상태 기반)
-- [ ] 각 stage prompt에 clarity 가이드 주입
-- [x] evolution.md에 clarity 원칙 내장 (gen-002: template으로 분리, 영어 작성)
+- [x] evolution.md에 clarity 원칙 내장 (template 포함)
+- [x] evolve/stage prompt에 clarity 가이드 주입
+- [ ] Clarity level 자동 판단 로직 (코드 기반 — vision/backlog/genome 상태에서 계산)
 
 ### Maturity System (spec2 §2)
-- [x] Embryo → Normal 전환 제안 (adapt phase)
+- [x] Embryo → Normal 전환 제안 (adapt phase, soft/hard check)
 - [x] 성숙도별 prompt 톤 차별화 (bootstrap/growth/cruise)
 - [x] 소프트웨어 완성 기준 16항목 사전 정의
 
 ### Gap-driven Evolution (spec2 §3)
-- [ ] adapt에서 vision gap 기반 다음 goal 제안
-- [ ] Vision goals 자동 체크 마킹
+- [ ] adapt에서 vision gap 기반 다음 goal 자동 제안 (코드 레벨)
+- [ ] Vision goals 자동 체크 마킹 (adapt에서 완료 항목 자동 [x])
+
+### Test Infrastructure
+- [x] tests/ submodule 설정 (reap-test, self-evolve branch) (gen-012)
+- [x] 테스트 구조 설계 (unit/e2e/scenario, bun:test) (gen-013)
+- [x] core unit tests 60개 (gen-014, gen-019)
+- [x] e2e tests 63개 (gen-015, gen-018)
+- [x] scenario tests 41개 (gen-015, gen-016)
+- [x] TypeScript 전환 + setup helper + 병렬 실행 (gen-016)
 
 ### Self-Hosting (spec2 §5)
 - [x] REAP 자신의 `.reap/` 구조 보유
@@ -38,26 +49,19 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [ ] Self-hosting invariants 정의
 - [ ] 점진적 전환 (prompt → lifecycle → genome)
 
-### Test Infrastructure
-- [x] Phase 1: tests/ submodule 설정 (reap-test repo, self-evolve branch) (gen-012)
-- [x] Phase 2: 테스트 구조 설계 (unit/e2e/scenario 디렉토리, 실행 스크립트) (gen-013)
-- [x] Phase 3: core 함수 unit tests (backlog.ts, archive.ts, generation.ts, nonce.ts 등) (gen-014)
-- [x] Phase 4: gen-002~011 신규 기능 e2e tests (CLAUDE.md, make backlog, --backlog consume, artifact path) (gen-015)
-- [x] Phase 5: init scenario tests (empty, existing no CLAUDE.md, existing with CLAUDE.md) (gen-015, T001)
-- [x] Phase 6: bash 테스트를 TypeScript(bun:test)로 전환 + setup helper (gen-016)
-
 ### Distribution (spec2 §7)
-- [ ] README 재작성 (영어 우선, self-evolving pipeline 강조)
-- [ ] npm 배포 준비 (.npmignore, CI/CD)
+- [ ] README 재작성 (v0.16 기준, self-evolving pipeline 강조)
+- [ ] npm 배포 준비 (.npmignore 최종 정리, CI/CD)
 - [ ] Update agent 구현 (version migration, idempotent)
 
 ### Agent Client 확장 (spec2 §6)
 - [ ] OpenCode adapter
 - [ ] Codex CLI adapter
 
-### Backlog (현재 pending)
-- [ ] reap init 자동 모드 감지 (이미 구현됨 — backlog 정리 필요)
-- [ ] npx @c-d-cc/reap 지원
-- [ ] Presets 기능 제거
-- [ ] restart → abort 통합
-- [x] tests 폴더 git submodule 분리 (gen-012)
+### Genome/Environment
+- [x] genome/environment prescriptive/descriptive 분리 (gen-011)
+- [x] evolution.md Code Quality Principles (gen-007)
+- [x] evolution.md Testing Principles (gen-012 이후)
+- [x] CLAUDE.md 자동 생성/append (gen-002)
+- [x] templates SSOT (evolution.md, claude-md-section.md) (gen-002)
+- [x] CLI Command Structure enforced convention (gen-007)
