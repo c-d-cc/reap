@@ -5,6 +5,55 @@ import { initCommon } from "./common.js";
 import { scanCodebase } from "../../../core/scanner.js";
 import { suggestGenome, generateSourceMap } from "../../../core/genome-suggest.js";
 
+const ADOPTION_CONVERSATION_PROMPT = `## Adoption Init — Interactive Session
+
+You have just initialized reap on an existing project. The codebase has been scanned and a draft genome/application.md was auto-generated. Your job now is to have a conversation with the human to verify, correct, and complete the genome and environment.
+
+### Important
+- Respond in the human's preferred language (ask early if unclear).
+- Be conversational and concise — one question at a time.
+- Update files as you gather corrections — do not wait until the end.
+
+### Conversation Flow
+
+**Step 1: Language Preference**
+Ask the human what language they prefer for all reap artifacts and conversations.
+Update .reap/config.yml with the chosen language.
+
+**Step 2: Review Auto-Generated Genome**
+Read genome/application.md and present its contents to the human.
+Walk through each section:
+- "I detected the project identity as [X]. Is this correct?"
+- "I found these architecture patterns: [X]. Are there others?"
+- "The tech stack appears to be [X]. Anything missing?"
+Ask for corrections and update genome/application.md accordingly.
+
+**Step 3: Review Source Map**
+Briefly summarize what was found in environment/source-map.md.
+Ask: "Is this directory structure accurate? Any important areas I missed?"
+
+**Step 4: What Code Scan Cannot Detect**
+Ask: "What coding conventions does this project follow?" (naming, patterns, formatting)
+Ask: "Are there any technical constraints I should know about?" (performance, compatibility, etc.)
+Ask: "What is the biggest technical debt right now?"
+Update genome/application.md with the answers.
+
+**Step 5: Invariants**
+Ask: "What must NEVER be done in this project?" (critical constraints that must never be violated)
+Write genome/invariants.md with human-confirmed invariants (keep the default pipeline invariants + add project-specific ones).
+
+**Step 6: Confirm Genome**
+Show the final genome/application.md to the human.
+Ask: "Does this accurately represent your project? Any final corrections?"
+Apply corrections if needed.
+
+**Step 7: Vision & First Generation**
+Ask: "What is the future direction for this project? What are the major milestones?"
+Write vision/goals.md with the answers.
+Then suggest: "Ready to start the first embryo generation? What should the first goal be?"
+If the human confirms, run: reap run start --type embryo --goal "<goal>"
+`;
+
 export async function execute(paths: ReapPaths, projectName?: string): Promise<void> {
   // Phase 1: Scan codebase
   const scan = await scanCodebase(paths.root);
@@ -39,7 +88,7 @@ export async function execute(paths: ReapPaths, projectName?: string): Promise<v
     status: "ok",
     command: "init",
     phase: "adoption",
-    completed: ["scan-codebase", "create-dirs", "write-config", "suggest-genome", "write-source-map", "write-environment"],
+    completed: ["auto-detect", "scan-codebase", "create-dirs", "write-config", "suggest-genome", "write-source-map", "write-environment"],
     context: {
       project: config.project,
       mode: "adoption",
@@ -55,22 +104,6 @@ export async function execute(paths: ReapPaths, projectName?: string): Promise<v
       },
     },
     message: `Project '${config.project}' initialized (adoption). Codebase scanned, genome suggested.`,
-    prompt: [
-      "## Adoption Init Complete",
-      "",
-      "Scanned codebase and generated a draft genome/application.md.",
-      "",
-      "### Next steps:",
-      "1. **Review genome/application.md**: Verify/edit the auto-generated draft with the human",
-      "   - Are the architecture decisions correct?",
-      "   - Are there missing conventions or constraints?",
-      "   - Is the project identity accurate?",
-      "2. **Verify environment/source-map.md**: Check if directory structure and deps are correct",
-      "3. **Ask the human additional questions**:",
-      "   - What is the biggest technical debt right now?",
-      "   - What is the future direction? (record in vision/goals.md + backlog)",
-      "   - What must never be done in this project? (record in invariants.md)",
-      "4. Start the first embryo generation with `reap run start --goal \"<goal>\"`",
-    ].join("\n"),
+    prompt: ADOPTION_CONVERSATION_PROMPT,
   });
 }

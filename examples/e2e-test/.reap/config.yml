@@ -1,5 +1,5 @@
 project: e2e-test
-language: korean
+language: english
 autoSubagent: true
 strict: false
 agentClient: claude-code

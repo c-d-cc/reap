@@ -15,7 +15,7 @@ program
 program
   .command("init [project-name]")
   .description("Initialize a new reap project")
-  .option("--mode <mode>", "Init mode: greenfield (default) or adoption")
+  .option("--mode <mode>", "Override auto-detected mode (greenfield or adoption)")
   .action(async (projectName: string | undefined, options: { mode?: string }) => {
     await initExecute(projectName, options.mode);
   });

@@ -52,7 +52,7 @@ export async function initCommon(
   // Write config
   const config: ReapConfig = {
     project: projectName,
-    language: "korean",
+    language: "english",
     autoSubagent: true,
     strict: false,
     agentClient: "claude-code",
