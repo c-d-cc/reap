@@ -5,3 +5,4 @@ dist/
 # E2E test artifacts (regenerated on each run)
 examples/e2e-test/.reap/lineage/
 examples/e2e-test/.reap/life/
+*.tgz
