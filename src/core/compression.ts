@@ -3,8 +3,8 @@ import { join } from "path";
 import YAML from "yaml";
 import { readTextFile, writeTextFile } from "./fs.js";
 
-const LEVEL1_THRESHOLD = 5; // minimum generations before compression
-const PROTECTED_RECENT = 3; // protect last N generations
+const LEVEL1_THRESHOLD = 20; // minimum generations before compression (v0.15: LEVEL1_PROTECTED_COUNT = 20)
+const PROTECTED_RECENT = 20; // protect last N generations
 const LEVEL2_THRESHOLD = 100; // Level 1 files needed to trigger Level 2
 
 interface GenMeta {

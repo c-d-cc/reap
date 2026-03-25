@@ -42,6 +42,11 @@ validation.ts:
 
 ### 4. evolve.ts subagent prompt에도 동일 규칙 반영
 
+### 5. e2e 테스트 환경 기록
+- openshell 기반 e2e 테스트 실행 환경에 대한 정보를 environment 또는 genome에 기록
+- AI가 e2e 테스트를 어떻게 실행해야 하는지 (어떤 스크립트, 어떤 환경, 어떤 순서) 알 수 있도록
+- 현재: scripts/e2e-*.sh 4개 존재하지만 실행 방법/환경에 대한 안내가 prompt에 없음
+
 ## Files to Change
 - src/cli/commands/run/planning.ts — 테스트 계획 안내
 - src/cli/commands/run/implementation.ts — 테스트 구현 안내
