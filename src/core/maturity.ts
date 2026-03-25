@@ -18,15 +18,17 @@ export function detectMaturity(
 
 // ── Embryo Transition Urgency ────────────────────────────────
 
-export type TransitionUrgency = "soft" | "hard" | "mandatory";
+export type TransitionUrgency = "soft" | "hard";
 
 /**
  * Determine how urgently embryo→normal transition should be proposed.
+ * - soft (≤5): optional check, propose only if clearly stable
+ * - hard (6+): must check every adapt, propose if conditions met
+ * No mandatory — genome stabilization takes as long as it needs.
  */
 export function getTransitionUrgency(generationCount: number): TransitionUrgency {
   if (generationCount <= 5) return "soft";
-  if (generationCount <= 9) return "hard";
-  return "mandatory";
+  return "hard";
 }
 
 // ── Software Completion Criteria (16 items) ──────────────────
@@ -120,14 +122,9 @@ export function buildTransitionCheckPrompt(
       lines.push("This is optional. Skip if the genome is still actively evolving.");
       break;
     case "hard":
-      lines.push(`Current generation count: ${generationCount} (Hard check — 6~9 generations)`);
+      lines.push(`Current generation count: ${generationCount} (Hard check — 6+ generations)`);
       lines.push("**You MUST check transition readiness at every adapt phase.**");
-      lines.push("Propose transition if conditions are met.");
-      break;
-    case "mandatory":
-      lines.push(`Current generation count: ${generationCount} (Mandatory — ≥10 generations)`);
-      lines.push("**Embryo beyond 10 generations is abnormal. You MUST propose transition.**");
-      lines.push("Present your assessment and strongly recommend transitioning to normal mode.");
+      lines.push("Propose transition if conditions are met. If genome is still actively evolving, explain why and defer.");
       break;
   }
 
