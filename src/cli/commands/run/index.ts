@@ -11,7 +11,6 @@ import { execute as evolveExecute } from "./evolve.js";
 import { execute as backExecute } from "./back.js";
 import { execute as nextExecute } from "./next.js";
 import { execute as abortExecute } from "./abort.js";
-import { execute as restartExecute } from "./restart.js";
 import { execute as detectExecute } from "./detect.js";
 import { execute as mateExecute } from "./mate.js";
 import { execute as mergeExecute } from "./merge.js";
@@ -28,7 +27,6 @@ const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, pha
   back: backExecute,
   next: nextExecute,
   abort: abortExecute,
-  restart: restartExecute,
   detect: detectExecute,
   mate: mateExecute,
   merge: mergeExecute,
@@ -52,7 +50,7 @@ export async function execute(stage: string, options: { phase?: string; goal?: s
     emitError("run", `Unknown stage '${stage}'. Available: start, ${Object.keys(STAGE_HANDLERS).join(", ")}`);
   }
 
-  // Pass extra: feedback for completion, reason for back, goal for restart
+  // Pass extra: feedback for completion, reason for back
   const extra = options.feedback || options.reason || options.goal;
   await handler(paths, options.phase, extra);
 }

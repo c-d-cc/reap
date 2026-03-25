@@ -1,0 +1,19 @@
+id: gen-017-b9f06b
+type: embryo
+goal: restart 명령어 제거, abort로 통합
+parents:
+  - gen-016-3f239d
+timeline:
+  - stage: learning
+    at: 2026-03-25T17:22:36.137Z
+  - stage: planning
+    at: 2026-03-25T17:24:39.018Z
+  - stage: implementation
+    at: 2026-03-25T17:25:23.935Z
+  - stage: validation
+    at: 2026-03-25T17:27:43.527Z
+  - stage: completion
+    at: 2026-03-25T17:28:19.832Z
+fitnessFeedback:
+  text: restart 제거 완료. abort로 통합.
+  evaluatedAt: 2026-03-25T17:33:05.109Z

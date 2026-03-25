@@ -132,7 +132,7 @@ export function buildTransitionCheckPrompt(
   lines.push("**Assess the following:**");
   lines.push("1. Genome modification frequency trend — are application.md changes decreasing?");
   lines.push("2. Application.md stability — is the core identity and purpose well-defined?");
-  lines.push("3. Restart frequency — are there fewer restarts in recent generations?");
+  lines.push("3. Abort frequency — are there fewer aborts in recent generations?");
   lines.push("4. Vision/goals clarity — does vision/goals.md have clear, actionable items?");
   lines.push("");
   lines.push("**Present your findings and recommendation to the user.**");

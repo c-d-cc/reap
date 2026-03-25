@@ -44,7 +44,7 @@ src/
 │   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, backlog, cruise, install-skills)
 │   └── commands/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지)
-│       ├── run/                — stage 실행 (19 handlers)
+│       ├── run/                — stage 실행 (18 handlers)
 │       │   ├── start.ts        — generation 생성 (scan → create)
 │       │   ├── learning.ts     — 탐구 (work → complete)
 │       │   ├── planning.ts     — 계획 (work → complete)
@@ -59,7 +59,6 @@ src/
 │       │   ├── next.ts         — 다음 stage 자동 진행
 │       │   ├── back.ts         — 이전 stage 회귀
 │       │   ├── abort.ts        — generation 중단
-│       │   ├── restart.ts      — generation 재시작
 │       │   └── push.ts         — git push (상태 검증 포함)
 │       └── status.ts           — 현재 상태 조회
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
@@ -82,8 +81,8 @@ src/
 
 ### tests/ submodule (reap-test repo, self-evolve branch)
 - `tests/unit/` — bun:test 기반 unit tests (`bun test tests/unit/`)
-- `tests/e2e/` — shell script 기반 e2e tests (`bash tests/e2e/run.sh`)
-- `tests/scenario/` — sandbox lifecycle simulation (`bash tests/scenario/run.sh`)
+- `tests/e2e/` — bun:test 기반 e2e tests (`bun test tests/e2e/`)
+- `tests/scenario/` — bun:test 기반 scenario tests (`bun test tests/scenario/`)
 
 ### scripts/ (프로젝트 루트)
 - `scripts/e2e-init.sh` — 초기화 테스트 (62 checks)
