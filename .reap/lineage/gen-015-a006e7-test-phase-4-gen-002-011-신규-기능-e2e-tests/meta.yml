@@ -1,0 +1,21 @@
+id: gen-015-a006e7
+type: embryo
+goal: "Test Phase 4: gen-002~011 신규 기능 e2e tests"
+parents:
+  - gen-014-79409d
+timeline:
+  - stage: learning
+    at: 2026-03-25T16:14:07.417Z
+  - stage: planning
+    at: 2026-03-25T16:16:54.846Z
+  - stage: implementation
+    at: 2026-03-25T16:17:40.554Z
+  - stage: validation
+    at: 2026-03-25T16:23:09.292Z
+  - stage: completion
+    at: 2026-03-25T16:34:01.259Z
+fitnessFeedback:
+  text: e2e 테스트 5개 작성 완료. 총 6/6 테스트 71 assertions 전부 PASS. CLAUDE.md, make
+    backlog, backlog consume, archive 분리, CLI commands 모두 검증됨.
+    typecheck/build/unit 55 모두 통과.
+  evaluatedAt: 2026-03-25T16:35:29.395Z
