@@ -1,0 +1,6 @@
+project: reap-v016
+language: korean
+autoSubagent: true
+strict: false
+agentClient: claude-code
+autoUpdate: true

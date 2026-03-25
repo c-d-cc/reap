@@ -12,8 +12,9 @@
   ],
   "scripts": {
     "dev": "bun src/cli/index.ts",
-    "build": "bun build src/cli/index.ts --outdir dist/cli --target node",
-    "typecheck": "tsc --noEmit"
+    "build": "bun build src/cli/index.ts --outdir dist/cli --target node && cp -r src/adapters/claude-code/skills dist/adapters/claude-code/",
+    "typecheck": "tsc --noEmit",
+    "postinstall": "node dist/cli/index.js install-skills 2>/dev/null || true"
   },
   "dependencies": {
     "yaml": "^2.0.0"
