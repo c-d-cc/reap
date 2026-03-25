@@ -80,10 +80,22 @@ src/
 
 ## Tests
 
-- `scripts/e2e-init.sh` — 초기화 테스트
-- `scripts/e2e-lifecycle.sh` — 단일 generation lifecycle
-- `scripts/e2e-merge.sh` — merge workflow
-- `scripts/e2e-multi-generation.sh` — 다세대 + compression
+### tests/ submodule (reap-test repo, self-evolve branch)
+- `tests/unit/` — bun:test 기반 unit tests (`bun test tests/unit/`)
+- `tests/e2e/` — shell script 기반 e2e tests (`bash tests/e2e/run.sh`)
+- `tests/scenario/` — sandbox lifecycle simulation (`bash tests/scenario/run.sh`)
+
+### scripts/ (프로젝트 루트)
+- `scripts/e2e-init.sh` — 초기화 테스트 (62 checks)
+- `scripts/e2e-lifecycle.sh` — 단일 generation lifecycle (16 checks)
+- `scripts/e2e-merge.sh` — merge workflow (25 checks)
+- `scripts/e2e-multi-generation.sh` — 다세대 + compression (34 checks)
+
+### npm scripts
+- `npm run test:unit` — bun test tests/unit/
+- `npm run test:e2e` — bash tests/e2e/run.sh
+- `npm run test:scenario` — bash tests/scenario/run.sh
+- `npm run test` — 전체 (unit + e2e + scenario)
 
 ## Key Design Decisions
 

@@ -40,7 +40,7 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 
 ### Test Infrastructure
 - [x] Phase 1: tests/ submodule 설정 (reap-test repo, self-evolve branch) (gen-012)
-- [ ] Phase 2: 테스트 구조 설계 (unit/e2e/scenario 디렉토리, 실행 스크립트)
+- [x] Phase 2: 테스트 구조 설계 (unit/e2e/scenario 디렉토리, 실행 스크립트) (gen-013)
 - [ ] Phase 3: core 함수 unit tests (backlog.ts, archive.ts, generation.ts, nonce.ts 등)
 - [ ] Phase 4: gen-002~011 신규 기능 e2e tests (CLAUDE.md, make backlog, --backlog consume, artifact path)
 - [ ] Phase 5: init scenario tests (empty, existing no CLAUDE.md, existing with CLAUDE.md)
@@ -60,4 +60,4 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [ ] npx @c-d-cc/reap 지원
 - [ ] Presets 기능 제거
 - [ ] restart → abort 통합
-- [ ] tests 폴더 git submodule 분리
+- [x] tests 폴더 git submodule 분리 (gen-012)
