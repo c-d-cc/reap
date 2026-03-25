@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.15.16
+### en
+Upgrade hand-off: `reap update` now delegates to the new binary after self-upgrade, ensuring seamless v0.16.0 migration. Config now tracks `lastCliVersion`.
+### ko
+업그레이드 hand-off: `reap update`가 self-upgrade 후 새 바이너리에 위임하여 v0.16.0 마이그레이션을 원활하게 처리. config에 `lastCliVersion` 기록 시작.
+
 ## v0.15.15
 ### en
 Added v0.16 breaking change pre-announcement to README.
