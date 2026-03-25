@@ -1,5 +1,87 @@
 # Environment
 
-Source: ~/cdws/reap/ (branch: v0.16.0)
-Stack: TypeScript, Bun, yaml v2, zero-dependency CLI (src/libs/cli.ts)
-Tests: scripts/e2e-lifecycle.sh (16), scripts/e2e-merge.sh (25), scripts/e2e-multi-generation.sh (34)
+## Project
+
+- Source: `~/cdws/reap/` (branch: v0.16.0)
+- Package: `@c-d-cc/reap` v0.16.0
+- Stack: TypeScript 5.7 + Bun (build) + Node.js (runtime)
+- Dependencies: `yaml` v2 (유일한 production dep)
+- Config language: korean
+
+## Source Structure
+
+```
+src/
+├── types/index.ts              — 타입 정의 (GenerationState, ReapConfig, ReapOutput 등)
+├── core/                       — 핵심 로직 (18 modules)
+│   ├── lifecycle.ts            — stage 순서 정의 (next/prev)
+│   ├── generation.ts           — generation CRUD, ID 생성
+│   ├── paths.ts                — .reap/ 경로 상수
+│   ├── nonce.ts                — 암호학적 token (SHA256)
+│   ├── stage-transition.ts     — nonce 검증, artifact 검증, stage 전환
+│   ├── maturity.ts             — bootstrap/growth/cruise 감지, 완성 기준 16항목
+│   ├── lineage.ts              — 아카이브 DAG, genome diff (3-way)
+│   ├── compression.ts          — 2-level lineage 압축 (L1: 5gen, L2: 100files)
+│   ├── genome-suggest.ts       — init 시 genome 초안 생성
+│   ├── backlog.ts              — backlog scan, frontmatter 파싱
+│   ├── archive.ts              — generation 아카이빙 (life → lineage)
+│   ├── cruise.ts               — cruise mode 관리 ("N/M" 포맷)
+│   ├── git.ts                  — git 연동 (commit, diff, push, merge-base)
+│   ├── hooks.ts                — lifecycle hook 실행 (.sh, .md)
+│   ├── scanner.ts              — 프로젝트 스캔 (init용)
+│   ├── fs.ts                   — 파일 유틸리티
+│   ├── output.ts               — JSON 출력 (emitOutput, emitError)
+│   └── template.ts             — artifact 템플릿 복사
+├── cli/
+│   ├── index.ts                — CLI 진입점, 커맨드 라우팅
+│   └── commands/
+│       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지)
+│       ├── run/                — stage 실행 (19 handlers)
+│       │   ├── start.ts        — generation 생성 (scan → create)
+│       │   ├── learning.ts     — 탐구 (work → complete)
+│       │   ├── planning.ts     — 계획 (work → complete)
+│       │   ├── implementation.ts — 구현 (work → complete)
+│       │   ├── validation.ts   — 검증 (work → complete)
+│       │   ├── completion.ts   — 완료 (reflect → fitness → adapt → commit)
+│       │   ├── evolve.ts       — 전체 lifecycle 자동 실행
+│       │   ├── detect.ts       — merge: 분기점 감지
+│       │   ├── mate.ts         — merge: genome 교차
+│       │   ├── merge.ts        — merge: 소스 병합
+│       │   ├── reconcile.ts    — merge: 정합성 검증
+│       │   ├── next.ts         — 다음 stage 자동 진행
+│       │   ├── back.ts         — 이전 stage 회귀
+│       │   ├── abort.ts        — generation 중단
+│       │   ├── restart.ts      — generation 재시작
+│       │   └── push.ts         — git push (상태 검증 포함)
+│       └── status.ts           — 현재 상태 조회
+├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
+├── adapters/claude-code/       — Claude Code 어댑터
+│   ├── install.ts              — skill 파일 설치 (~/.claude/commands/)
+│   └── skills/                 — 18 slash command files (.md)
+└── templates/artifacts/        — stage별 artifact 템플릿
+    ├── normal/                 — 01~05 (learning~completion)
+    └── merge/                  — 01~06 (detect~completion)
+```
+
+## Build & Scripts
+
+- `npm run build` — bun build → `dist/cli/index.js` (~370KB single bundle) + skill 복사
+- `npm run dev` — bun으로 직접 실행 (빌드 불필요)
+- `npm run typecheck` — tsc --noEmit
+- `postinstall` — skill 자동 설치
+
+## Tests
+
+- `scripts/e2e-init.sh` — 초기화 테스트
+- `scripts/e2e-lifecycle.sh` — 단일 generation lifecycle
+- `scripts/e2e-merge.sh` — merge workflow
+- `scripts/e2e-multi-generation.sh` — 다세대 + compression
+
+## Key Design Decisions
+
+- **Zero-dependency CLI**: 외부 CLI 라이브러리 없음 → supply chain 최소화
+- **File-based state**: DB 없음, 모든 상태는 `.reap/` 내 YAML/Markdown
+- **JSON stdout**: 모든 CLI 출력은 `ReapOutput` JSON → AI agent 파싱 용이
+- **Nonce token**: stage 무결성을 암호학적으로 보장
+- **2-level compression**: lineage 무한 성장 방지 (L1: folder→md, L2: md→epoch)
+- **Adapter pattern**: agent client 교체 가능 (현재 claude-code, 향후 opencode/codex)
