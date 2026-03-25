@@ -25,6 +25,15 @@ AI adjusts communication depth based on the current context's clarity level.
 - **Normal**: Genome is immutable. Changes go to backlog → applied at adapt phase → effective from next generation.
 - **Lessons discovered mid-generation go into the completion artifact**. Genome modifications happen at adapt phase. Changing genome mid-generation undermines the foundation of prior work in that generation.
 
+## Code Quality Principles
+
+Before writing new code, always read existing code first to understand established patterns.
+
+- **Pattern-first**: Identify how existing code with the same role is structured. New code must follow that pattern.
+- **Consistency over preference**: Codebase consistency takes priority over personal preference. If a better pattern exists, refactor all instances — don't introduce a second pattern alongside the first.
+- **No duplication**: The same logic must not exist in two places. Extract and share when duplication is found.
+- **Verify before commit**: Before committing, verify new code matches existing patterns and contains no duplication.
+
 ## Echo Chamber Prevention
 
 - AI autonomous additions are only allowed within the direct cause/impact scope of the current goal
