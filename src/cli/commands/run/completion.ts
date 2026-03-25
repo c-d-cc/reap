@@ -35,8 +35,12 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
     await copyArtifactTemplate("completion", paths.artifact, isMerge);
 
     // Load context artifacts based on lifecycle type
-    const context: Record<string, unknown> = { id: s.id, goal: s.goal };
     const completionArtifact = isMerge ? "06-completion.md" : "05-completion.md";
+    const context: Record<string, unknown> = {
+      id: s.id,
+      goal: s.goal,
+      artifactPath: paths.artifact(completionArtifact),
+    };
 
     if (isMerge) {
       const mergeContent = await readTextFile(paths.artifact("03-merge.md"));
@@ -65,6 +69,8 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
         "## Completion — Reflect Phase",
         "",
         "Retrospective + environment update (combined).",
+        "",
+        `### Artifact: Write \`.reap/life/${completionArtifact}\``,
         "",
         `1. Write ${completionArtifact}: Summary, Lessons Learned, Next Generation Hints`,
         "2. Update environment/summary.md with new knowledge from this generation",

@@ -1,0 +1,22 @@
+# REAP MANAGED — Do not modify directly.
+id: gen-009-d7d0cf
+type: embryo
+stage: implementation
+goal: stage prompt에 artifact 경로 명시 — subagent 정상 동작 보장
+parents:
+  - gen-008-e8af04
+timeline:
+  - stage: learning
+    at: 2026-03-25T15:11:25.946Z
+  - stage: planning
+    at: 2026-03-25T15:12:24.948Z
+  - stage: implementation
+    at: 2026-03-25T15:12:57.348Z
+lastNonce: 871d5fd703ef8780aa80bf376dd7e21e
+expectedHash: 1dfa549c6c24a5d4a745e650db326b04eb99ef364a1931c196f5e54ee03cc663
+phase: complete
+sourceBacklog: artifact-path-in-prompt.md
+backNonce: 65c583c58e1effdd2a7272e433567863
+backExpectedHash: 700a0cc991d014bfe226ccd73799ffafa1c378aeec6b0f9b321d18a2efce6d3c
+backTarget: planning
+backTargetPhase: entry

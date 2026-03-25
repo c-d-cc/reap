@@ -42,6 +42,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       completed: ["gate", "ancestor-search", "genome-diff"],
       context: {
         id: s.id,
+        artifactPath: paths.artifact("01-detect.md"),
         branchA,
         branchB,
         commonAncestor: ancestor,
@@ -72,6 +73,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "2. Analyze the scope of genome divergence between branches",
         "3. Identify potential merge conflicts and resolution strategies",
         "4. Write 01-detect.md with: branch info, common ancestor, genome changes summary, conflict list",
+        "",
+        "### Artifact: Write `.reap/life/01-detect.md`",
         "",
         "When done: reap run detect --phase complete",
       ].filter(Boolean).join("\n"),

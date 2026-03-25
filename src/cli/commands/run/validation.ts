@@ -31,6 +31,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         id: s.id,
         goal: s.goal,
         type: s.type,
+        artifactPath: paths.artifact(isMerge ? "05-validation.md" : "04-validation.md"),
       },
       prompt: [
         "## Validation Stage",
@@ -43,7 +44,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "3. **Tests**: Run tests if the project has them",
         "4. **Completion Criteria**: Verify each criterion from 02-planning.md one by one",
         "",
-        "### Write 04-validation.md:",
+        `### Artifact: Write \`.reap/life/${isMerge ? "05" : "04"}-validation.md\` progressively (after each command).`,
+        "",
+        "### Write validation artifact:",
         "- Result: pass / partial / fail",
         "- Each verification item's result and details",
         "- Issues found (if any)",

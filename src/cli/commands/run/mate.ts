@@ -48,6 +48,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       completed: ["gate", "context-load"],
       context: {
         id: s.id,
+        artifactPath: paths.artifact("02-mate.md"),
         branchA,
         branchB,
         commonAncestor: s.commonAncestor,
@@ -84,6 +85,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "- Architecture/convention conflicts in application.md",
         "- AI behavior rule conflicts in evolution.md",
         "- Any invariants.md changes",
+        "",
+        "### Artifact: Write `.reap/life/02-mate.md`",
         "",
         "When done: reap run mate --phase complete",
       ].filter(Boolean).join("\n"),

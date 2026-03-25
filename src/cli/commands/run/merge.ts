@@ -32,6 +32,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       completed: ["gate", "context-load"],
       context: {
         id: s.id,
+        artifactPath: paths.artifact("03-merge.md"),
         parentA: s.parents[0],
         parentB: s.parents[1],
         commonAncestor: s.commonAncestor,
@@ -52,6 +53,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "   - Style conflicts: follow application.md conventions",
         "4. Do NOT commit — wait for reconcile + validation",
         "5. Write 03-merge.md with: source conflict list, resolution for each, files changed",
+        "",
+        "### Artifact: Write `.reap/life/03-merge.md`",
         "",
         "When done: reap run merge --phase complete",
       ].filter(Boolean).join("\n"),

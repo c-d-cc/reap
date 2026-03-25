@@ -39,6 +39,7 @@ function buildSubagentPrompt(
   lines.push("- NEVER modify `current.yml` directly.");
   lines.push("- Each `--phase complete` verifies the artifact exists (>50 chars), issues a nonce, and auto-transitions.");
   lines.push("- Write artifact content BEFORE running `--phase complete`.");
+  lines.push("- **All artifacts are at `.reap/life/{NN}-{stage}.md`** (e.g., `.reap/life/01-learning.md`, `.reap/life/02-planning.md`). NEVER create artifacts elsewhere.");
   lines.push("");
 
   lines.push("## Genome");

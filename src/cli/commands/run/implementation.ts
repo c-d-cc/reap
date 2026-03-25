@@ -32,6 +32,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         id: s.id,
         goal: s.goal,
         type: s.type,
+        artifactPath: paths.artifact("03-implementation.md"),
         planningContent: planningContent?.slice(0, 5000),
       },
       prompt: [
@@ -57,6 +58,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "- Task requirements unclear",
         "- Architectural decision needed but not in plan",
         "- Scope significantly larger than expected",
+        "",
+        `### Artifact: Write \`.reap/life/03-implementation.md\` continuously (after each task).`,
         "",
         "When done: reap run implementation --phase complete",
       ].join("\n"),

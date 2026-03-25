@@ -40,6 +40,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       completed: ["gate", "context-load"],
       context: {
         id: s.id,
+        artifactPath: paths.artifact("04-reconcile.md"),
         mergeArtifactPreview: mergeArtifact?.slice(0, 2000),
         applicationPreview: application?.slice(0, 1500),
         evolutionPreview: evolution?.slice(0, 1500),
@@ -68,6 +69,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "   - Environment regen summary",
         "   - Genome-source comparison results",
         "   - Inconsistencies found and resolutions",
+        "",
+        "### Artifact: Write `.reap/life/04-reconcile.md`",
         "",
         "When done: reap run reconcile --phase complete",
       ].join("\n"),
