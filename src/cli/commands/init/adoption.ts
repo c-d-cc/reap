@@ -12,13 +12,15 @@ You have just initialized reap on an existing project. The codebase has been sca
 ### Important
 - Respond in the human's preferred language (ask early if unclear).
 - Be conversational and concise — one question at a time.
-- Update files as you gather corrections — do not wait until the end.
+- Update files immediately as you gather corrections — do not batch writes to the end.
+- If the human wants to skip a step, accept it and move on. Write "N/A" or a brief note in the relevant section.
+- Adapt to the project type. Not every project is a typical software product — adjust your questions accordingly.
 
 ### Conversation Flow
 
 **Step 1: Language Preference**
 Ask the human what language they prefer for all reap artifacts and conversations.
-Update .reap/config.yml with the chosen language.
+Update .reap/config.yml with the chosen language immediately.
 
 **Step 2: Review Auto-Generated Genome**
 Read genome/application.md and present its contents to the human.
@@ -26,7 +28,7 @@ Walk through each section:
 - "I detected the project identity as [X]. Is this correct?"
 - "I found these architecture patterns: [X]. Are there others?"
 - "The tech stack appears to be [X]. Anything missing?"
-Ask for corrections and update genome/application.md accordingly.
+Ask for corrections and update genome/application.md immediately.
 
 **Step 3: Review Source Map**
 Briefly summarize what was found in environment/source-map.md.
@@ -36,11 +38,11 @@ Ask: "Is this directory structure accurate? Any important areas I missed?"
 Ask: "What coding conventions does this project follow?" (naming, patterns, formatting)
 Ask: "Are there any technical constraints I should know about?" (performance, compatibility, etc.)
 Ask: "What is the biggest technical debt right now?"
-Update genome/application.md with the answers.
+Update genome/application.md with the answers immediately.
 
 **Step 5: Invariants**
 Ask: "What must NEVER be done in this project?" (critical constraints that must never be violated)
-Write genome/invariants.md with human-confirmed invariants (keep the default pipeline invariants + add project-specific ones).
+Write genome/invariants.md immediately with human-confirmed invariants (keep the default pipeline invariants + add project-specific ones).
 
 **Step 6: Confirm Genome**
 Show the final genome/application.md to the human.
