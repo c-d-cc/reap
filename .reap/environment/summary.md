@@ -31,7 +31,7 @@ src/
 │   ├── lineage.ts              — 아카이브 DAG, genome diff (3-way)
 │   ├── compression.ts          — 2-level lineage 압축 (L1: 5gen, L2: 100files)
 │   ├── genome-suggest.ts       — init 시 genome 초안 생성
-│   ├── backlog.ts              — backlog scan, frontmatter 파싱
+│   ├── backlog.ts              — backlog scan, consume, revert, create
 │   ├── archive.ts              — generation 아카이빙 (life → lineage)
 │   ├── cruise.ts               — cruise mode 관리 ("N/M" 포맷)
 │   ├── git.ts                  — git 연동 (commit, diff, push, merge-base)
@@ -58,7 +58,7 @@ src/
 │       │   ├── reconcile.ts    — merge: 정합성 검증
 │       │   ├── next.ts         — 다음 stage 자동 진행
 │       │   ├── back.ts         — 이전 stage 회귀
-│       │   ├── abort.ts        — generation 중단
+│       │   ├── abort.ts        — generation 중단 (2-phase: confirm → execute)
 │       │   └── push.ts         — git push (상태 검증 포함)
 │       └── status.ts           — 현재 상태 조회
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)

@@ -34,7 +34,7 @@ const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, pha
   push: pushExecute,
 };
 
-export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string }): Promise<void> {
+export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string; sourceAction?: string; saveBacklog?: boolean }): Promise<void> {
   if (stage === "start") {
     await startExecute(options.phase, options.goal, options.type, options.parents, options.backlog);
     return;
@@ -50,7 +50,10 @@ export async function execute(stage: string, options: { phase?: string; goal?: s
     emitError("run", `Unknown stage '${stage}'. Available: start, ${Object.keys(STAGE_HANDLERS).join(", ")}`);
   }
 
-  // Pass extra: feedback for completion, reason for back
-  const extra = options.feedback || options.reason || options.goal;
+  // Pass extra: feedback for completion, reason for back, JSON for abort
+  let extra = options.feedback || options.reason || options.goal;
+  if (stage === "abort") {
+    extra = JSON.stringify({ reason: options.reason, sourceAction: options.sourceAction, saveBacklog: options.saveBacklog });
+  }
   await handler(paths, options.phase, extra);
 }

@@ -38,9 +38,11 @@ program
   .option("--type <type>", "Generation type (embryo, normal, merge)")
   .option("--parents <parents>", "Parent generation IDs for merge (comma-separated)")
   .option("--feedback <feedback>", "Fitness feedback text")
-  .option("--reason <reason>", "Reason for back regression")
+  .option("--reason <reason>", "Reason for back regression or abort")
   .option("--backlog <backlog>", "Backlog filename to consume for this generation")
-  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string }) => {
+  .option("--source-action <sourceAction>", "Source action for abort (rollback, stash, hold, none)")
+  .option("--save-backlog", "Save progress to backlog on abort")
+  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string; sourceAction?: string; saveBacklog?: boolean }) => {
     await runExecute(stage, options);
   });
 

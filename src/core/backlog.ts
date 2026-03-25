@@ -83,6 +83,34 @@ function extractTitle(content: string): string | null {
   return match ? match[1].trim() : null;
 }
 
+/**
+ * Revert backlog items consumed by a generation back to pending.
+ * Scans backlog dir, finds items where consumedBy === genId,
+ * removes consumedBy/consumedAt and sets status back to pending.
+ * Returns count of reverted items.
+ */
+export async function revertBacklogConsumed(backlogDir: string, genId: string): Promise<number> {
+  const items = await scanBacklog(backlogDir);
+  let reverted = 0;
+
+  for (const item of items) {
+    if (item.status !== "consumed" || item.consumedBy !== genId) continue;
+
+    const content = await readTextFile(item.path);
+    if (!content) continue;
+
+    const updated = content
+      .replace(/status:\s*consumed/, "status: pending")
+      .replace(/\nconsumedBy:.*/, "")
+      .replace(/\nconsumedAt:.*/, "");
+
+    await writeTextFile(item.path, updated);
+    reverted++;
+  }
+
+  return reverted;
+}
+
 // ── Create backlog ──────────────────────────────────────────
 
 const VALID_TYPES = ["genome-change", "environment-change", "task"] as const;
