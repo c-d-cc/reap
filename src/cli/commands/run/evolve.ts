@@ -157,6 +157,14 @@ function buildSubagentPrompt(
     }
   }
 
+  lines.push("## Validation Rules");
+  lines.push("- HARD-GATE: Do NOT declare 'pass' without running validation commands. Do NOT reuse previous results.");
+  lines.push("- Run ALL validation commands FRESH: TypeCheck → Build → Tests.");
+  lines.push("- Minor Fix: trivial issues (under 5 minutes) — fix and re-run.");
+  lines.push("- Red Flags: 'It will probably pass' → Run it. 'It passed before' → Run it again.");
+  lines.push("- Verdict: pass (all pass) / partial (minor issues) / fail (critical, must regress).");
+  lines.push("");
+
   lines.push("## Backlog Rules");
   lines.push("- backlog 생성 시 반드시 `reap make backlog --type <type> --title <title> [--body <body>] [--priority <priority>]` 명령을 사용하라.");
   lines.push("- Write 도구로 backlog 파일을 직접 생성하지 마라 (frontmatter 형식 오류 방지).");

@@ -55,6 +55,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         "   - Task decomposition: checklist `- [ ] T001 description`, max 20 tasks.",
         "   - Each task = one logical unit. Specify target file/module.",
         "   - Dependencies and order.",
+        "   - 각 task에 대한 테스트 방법 명시 (unit test, e2e test, 또는 수동 검증).",
+        "   - 기존 테스트 중 이번 변경에 영향받는 것이 있으면 수정 계획에 포함.",
         "4. **Human Confirmation**: Finalize plan with human before proceeding.",
         "",
         "### Echo Chamber Prevention (must follow)",
