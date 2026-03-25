@@ -157,9 +157,9 @@ function buildSubagentPrompt(
   }
 
   lines.push("## Backlog Rules");
-  lines.push("- Create: Write .md files directly in `.reap/life/backlog/`");
-  lines.push("- Filename: kebab-case (e.g., `fix-validation-error.md`)");
-  lines.push("- frontmatter: type(genome-change|environment-change|task), status: pending, priority(high|medium|low)");
+  lines.push("- backlog 생성 시 반드시 `reap make backlog --type <type> --title <title> [--body <body>] [--priority <priority>]` 명령을 사용하라.");
+  lines.push("- Write 도구로 backlog 파일을 직접 생성하지 마라 (frontmatter 형식 오류 방지).");
+  lines.push("- 생성된 backlog 파일에 상세 내용을 추가해야 하면, 생성 후 해당 파일을 Edit 도구로 편집하라.");
   lines.push("- Do NOT modify genome/ or environment/ directly — record changes as backlog.");
   lines.push("");
 

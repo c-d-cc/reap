@@ -1,0 +1,20 @@
+id: gen-006-52bd76
+type: embryo
+goal: reap make 명령어 구현 + backlog 작성 prompt 규칙
+parents:
+  - gen-005-944652
+timeline:
+  - stage: learning
+    at: 2026-03-25T14:26:13.330Z
+  - stage: planning
+    at: 2026-03-25T14:28:37.304Z
+  - stage: implementation
+    at: 2026-03-25T14:29:08.700Z
+  - stage: validation
+    at: 2026-03-25T14:31:20.097Z
+  - stage: completion
+    at: 2026-03-25T14:31:59.892Z
+fitnessFeedback:
+  text: reap make backlog 명령어 구현 완료. evolve/stage prompt에 backlog 규칙 반영.
+    typecheck, build, e2e 통과.
+  evaluatedAt: 2026-03-25T14:33:04.179Z

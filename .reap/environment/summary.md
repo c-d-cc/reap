@@ -33,7 +33,7 @@ src/
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError)
 │   └── template.ts             — artifact 템플릿 복사
 ├── cli/
-│   ├── index.ts                — CLI 진입점, 커맨드 라우팅
+│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, backlog, cruise, install-skills)
 │   └── commands/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지)
 │       ├── run/                — stage 실행 (19 handlers)
@@ -85,3 +85,4 @@ src/
 - **Nonce token**: stage 무결성을 암호학적으로 보장
 - **2-level compression**: lineage 무한 성장 방지 (L1: folder→md, L2: md→epoch)
 - **Adapter pattern**: agent client 교체 가능 (현재 claude-code, 향후 opencode/codex)
+- **`reap make` pattern**: template 기반 resource 생성 (`reap make backlog`). 향후 확장 가능

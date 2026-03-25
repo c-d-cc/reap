@@ -93,6 +93,40 @@ program
   });
 
 program
+  .command("make <resource>")
+  .description("Create a resource from template (backlog)")
+  .option("--type <type>", "Backlog type (genome-change, environment-change, task)")
+  .option("--title <title>", "Resource title")
+  .option("--body <body>", "Optional description body")
+  .option("--priority <priority>", "Priority (high, medium, low)")
+  .action(async (resource: string, options: { type?: string; title?: string; body?: string; priority?: string }) => {
+    const { createPaths } = await import("../core/paths.js");
+    const { emitOutput, emitError } = await import("../core/output.js");
+    const paths = createPaths(process.cwd());
+
+    if (resource === "backlog") {
+      if (!options.type || !options.title) {
+        emitError("make", 'Usage: reap make backlog --type <type> --title "<title>" [--body "<body>"] [--priority <priority>]');
+      }
+      const { createBacklog } = await import("../core/backlog.js");
+      const filename = await createBacklog(paths.backlog, {
+        type: options.type!,
+        title: options.title!,
+        body: options.body,
+        priority: options.priority,
+      });
+      emitOutput({
+        status: "ok",
+        command: "make",
+        context: { resource: "backlog", filename },
+        message: `Backlog item created: ${filename}`,
+      });
+    } else {
+      emitError("make", `Unknown resource '${resource}'. Available: backlog`);
+    }
+  });
+
+program
   .command("cruise <count>")
   .description("Enable cruise mode for N generations")
   .action(async (count: string) => {
