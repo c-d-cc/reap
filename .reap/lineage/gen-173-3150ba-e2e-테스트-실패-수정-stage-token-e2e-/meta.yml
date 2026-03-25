@@ -1,0 +1,9 @@
+id: gen-173-3150ba
+type: normal
+parents:
+  - gen-172-f42ef1
+goal: "E2E 테스트 실패 수정: stage-token-e2e.sh Test 8 기대값 수정 + migration-e2e.sh
+  sandbox 환경 미비 시 skip 처리"
+genomeHash: c2e6348e
+startedAt: 2026-03-25T03:52:21.086Z
+completedAt: 2026-03-25T03:55:55.573Z
