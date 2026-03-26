@@ -14,7 +14,6 @@ export async function execute(paths: ReapPaths): Promise<void> {
   const configContent = await readTextFile(paths.config);
   if (!configContent) {
     emitError("init", ".reap/config.yml not found. This is not a reap project. Run 'reap init' first.");
-    return;
   }
 
   const config = YAML.parse(configContent) as ReapConfig;

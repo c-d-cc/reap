@@ -63,7 +63,6 @@ export async function execute(projectName?: string, mode?: string, repair?: bool
   if (repair) {
     if (!(await fileExists(paths.config))) {
       emitError("init", ".reap/ not found. This is not a reap project. Run 'reap init' first.");
-      return;
     }
     await repairExecute(paths);
     return;

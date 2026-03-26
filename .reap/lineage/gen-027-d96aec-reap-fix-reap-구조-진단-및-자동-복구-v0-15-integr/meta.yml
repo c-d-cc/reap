@@ -1,0 +1,20 @@
+id: gen-027-d96aec
+type: embryo
+goal: reap fix — .reap/ 구조 진단 및 자동 복구 (v0.15 integrity.ts 포팅)
+parents:
+  - gen-026-4e8861
+timeline:
+  - stage: learning
+    at: 2026-03-26T08:26:40.318Z
+  - stage: planning
+    at: 2026-03-26T08:28:43.941Z
+  - stage: implementation
+    at: 2026-03-26T08:29:18.954Z
+  - stage: validation
+    at: 2026-03-26T08:35:03.111Z
+  - stage: completion
+    at: 2026-03-26T08:36:00.084Z
+fitnessFeedback:
+  text: reap fix 명령 구현 완료. checkIntegrity와 fixProject 모두 정상 동작. v16 lineage meta
+    형식(timeline) 적응 잘 처리됨. 232 tests 전체 통과.
+  evaluatedAt: 2026-03-26T08:37:46.564Z

@@ -7,6 +7,7 @@ import { execute as runExecute } from "./commands/run/index.js";
 import { execute as makeExecute } from "./commands/make.js";
 import { execute as cruiseExecute } from "./commands/cruise.js";
 import { execute as installSkillsExecute } from "./commands/install-skills.js";
+import { execute as fixExecute } from "./commands/fix.js";
 
 const program = new Command();
 
@@ -70,6 +71,14 @@ program
   .description("Install Claude Code skill files to .claude/commands/")
   .action(async () => {
     await installSkillsExecute();
+  });
+
+program
+  .command("fix")
+  .description("Diagnose and repair .reap/ directory structure")
+  .option("--check", "Check only — report issues without fixing")
+  .action(async (options: { check?: boolean }) => {
+    await fixExecute(options.check);
   });
 
 program.parse();

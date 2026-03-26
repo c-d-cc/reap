@@ -21,7 +21,7 @@
 ```
 src/
 ├── types/index.ts              — 타입 정의 (GenerationState, ReapConfig, ReapOutput 등)
-├── core/                       — 핵심 로직 (19 modules)
+├── core/                       — 핵심 로직 (20 modules)
 │   ├── lifecycle.ts            — stage 순서 정의 (next/prev)
 │   ├── generation.ts           — generation CRUD, ID 생성
 │   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스)
@@ -40,9 +40,10 @@ src/
 │   ├── scanner.ts              — 프로젝트 스캔 (init용)
 │   ├── fs.ts                   — 파일 유틸리티
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError)
+│   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts)
 │   └── template.ts             — artifact 템플릿 복사
 ├── cli/
-│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, backlog, cruise, install-skills)
+│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, cruise, install-skills, fix)
 │   └── commands/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair 지원)
 │       ├── run/                — stage 실행 (20 handlers)
@@ -63,7 +64,8 @@ src/
 │       │   ├── push.ts         — git push (상태 검증 포함)
 │       │   ├── pull.ts         — git fetch + branch 분석 + prompt 반환
 │       │   └── knowledge.ts    — genome/environment/vision 관리 (reload/genome/environment)
-│       └── status.ts           — 현재 상태 조회
+│       ├── status.ts           — 현재 상태 조회
+│       └── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/claude-code/       — Claude Code 어댑터
 │   ├── install.ts              — skill 파일 설치 (~/.claude/commands/)
