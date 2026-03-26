@@ -1,6 +1,18 @@
 #!/usr/bin/env node
 
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import { Command } from "../libs/cli.js";
+
+function readVersion(): string {
+  const __dir = dirname(fileURLToPath(import.meta.url));
+  // Try bundled location (dist/cli/ → ../../package.json) and dev location (src/cli/ → ../../package.json)
+  for (const rel of [join(__dir, "..", "..", "package.json"), join(__dir, "..", "package.json")]) {
+    try { return JSON.parse(readFileSync(rel, "utf-8")).version; } catch {}
+  }
+  return "0.0.0";
+}
 import { execute as initExecute } from "./commands/init/index.js";
 import { execute as statusExecute } from "./commands/status.js";
 import { execute as runExecute } from "./commands/run/index.js";
@@ -17,7 +29,7 @@ const program = new Command();
 program
   .name("reap")
   .description("Recursive Evolutionary Autonomous Pipeline — Self-Evolving")
-  .version("0.0.1");
+  .version(readVersion());
 
 program
   .command("init [project-name]")
