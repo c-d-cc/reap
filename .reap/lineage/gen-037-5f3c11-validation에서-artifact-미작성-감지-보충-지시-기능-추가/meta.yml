@@ -1,0 +1,20 @@
+id: gen-037-5f3c11
+type: embryo
+goal: validation에서 artifact 미작성 감지 + 보충 지시 기능 추가
+parents:
+  - gen-036-3a6158
+timeline:
+  - stage: learning
+    at: 2026-03-26T17:14:12.221Z
+  - stage: planning
+    at: 2026-03-26T17:15:54.429Z
+  - stage: implementation
+    at: 2026-03-26T17:16:49.991Z
+  - stage: validation
+    at: 2026-03-26T17:20:08.788Z
+  - stage: completion
+    at: 2026-03-26T17:22:16.426Z
+fitnessFeedback:
+  text: artifact 미작성 감지 기능 구현 완료. core placeholder 기반 감지, false positive 방지, unit
+    test 10개 포함. 깔끔한 구현.
+  evaluatedAt: 2026-03-26T17:24:53.046Z

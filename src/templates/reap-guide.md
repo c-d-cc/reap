@@ -275,6 +275,8 @@ For fine-grained control, use `/reap.run` to execute specific stages and phases:
 
 **Signature-based locking**: Each stage transition generates a cryptographic nonce token and verifies the artifact exists (>50 chars). Attempting to skip a stage or execute stages out of order will fail signature verification and produce an error. Slash commands MUST be executed in the order defined by the lifecycle.
 
+**Artifact completeness check**: When entering the validation stage, REAP checks whether previous stage artifacts (01~03 for normal, 01~04 for merge) have been properly filled. If any artifact still contains only template placeholders, validation returns `status: "artifact-incomplete"` with instructions to fill the missing artifacts. This is the only case where modifying previous stage artifacts is allowed — fill them based on the work already performed in this generation, then re-run `reap run validation`.
+
 ## Language
 
 All REAP artifacts and user interactions follow the user's configured language (from config.yml `language` field).

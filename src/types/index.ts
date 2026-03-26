@@ -93,7 +93,7 @@ export interface HookResult {
 // ── Output ──────────────────────────────────────────────────
 
 export interface ReapOutput {
-  status: "ok" | "prompt" | "error";
+  status: "ok" | "prompt" | "error" | "artifact-incomplete";
   command: string;
   phase?: string;
   completed?: string[];

@@ -21,11 +21,12 @@
 ```
 src/
 ├── types/index.ts              — 타입 정의 (GenerationState, ReapConfig, ReapOutput 등)
-├── core/                       — 핵심 로직 (22 modules)
+├── core/                       — 핵심 로직 (23 modules)
 │   ├── lifecycle.ts            — stage 순서 정의 (next/prev)
 │   ├── generation.ts           — generation CRUD, ID 생성
 │   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스, memory 경로 포함)
 │   ├── nonce.ts                — 암호학적 token (SHA256)
+│   ├── artifact-check.ts        — artifact 미작성 감지 (core placeholder 기반)
 │   ├── stage-transition.ts     — nonce 검증, artifact 검증, stage 전환
 │   ├── maturity.ts             — bootstrap/growth/cruise 감지, 완성 기준 16항목
 │   ├── lineage.ts              — 아카이브 DAG, genome diff (3-way), lineage 읽기
@@ -112,6 +113,7 @@ src/
 ## Types (주요 타입)
 - `HookResult` — hook 실행 결과 (name, event, type, status, exitCode, stdout, stderr, content, skipReason)
 - `ReapHookEvent` — 라이프사이클 hook 이벤트 union type (14개 이벤트)
+- `ReapOutput.status` — `"ok" | "prompt" | "error" | "artifact-incomplete"`
 
 ## Key Design Decisions
 

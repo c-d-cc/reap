@@ -3,6 +3,7 @@ import { GenerationManager } from "../../../core/generation.js";
 import { emitOutput, emitError } from "../../../core/output.js";
 import { verifyNonce, setNonce, performTransition, performMergeTransition, verifyArtifact } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
+import { checkArtifactsFilled } from "../../../core/artifact-check.js";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -19,14 +20,49 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     verifyNonce("validation", s, "validation", "entry");
     await copyArtifactTemplate("validation", paths.artifact, isMerge);
 
+    // Check if previous stage artifacts have been filled
+    const artifactCheck = await checkArtifactsFilled(paths.artifact, isMerge);
+
     setNonce(s, "validation", "complete");
     await gm.save(s);
+
+    if (artifactCheck.unfilled.length > 0) {
+      const unfilledList = artifactCheck.unfilled
+        .map((f) => `- ${f} (template placeholder만 존재)`)
+        .join("\n");
+
+      emitOutput({
+        status: "artifact-incomplete",
+        command: "validation",
+        phase: "work",
+        completed: ["gate", "artifact-check"],
+        context: {
+          id: s.id,
+          goal: s.goal,
+          type: s.type,
+          artifactPath: paths.artifact(isMerge ? "05-validation.md" : "04-validation.md"),
+          unfilledArtifacts: artifactCheck.unfilled,
+        },
+        prompt: [
+          "## Artifact Verification — FAILED",
+          "",
+          "다음 artifact가 미작성되었습니다:",
+          unfilledList,
+          "",
+          "이 generation에서 수행한 작업을 바탕으로 위 artifact를 채우세요.",
+          "이것은 validation 단계의 보충 작업이므로 artifact 수정이 허용됩니다.",
+          "보충 완료 후 다시 `reap run validation`을 실행하세요.",
+        ].join("\n"),
+        nextCommand: "reap run validation",
+      });
+      return;
+    }
 
     emitOutput({
       status: "prompt",
       command: "validation",
       phase: "work",
-      completed: ["gate"],
+      completed: ["gate", "artifact-check"],
       context: {
         id: s.id,
         goal: s.goal,
