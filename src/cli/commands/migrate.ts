@@ -431,7 +431,13 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
   await writeTextFile(join(paths.vision, "memory", "midterm.md"), "# Midterm Memory\n");
   await writeTextFile(join(paths.vision, "memory", "shortterm.md"), "# Shortterm Memory\n");
 
-  // 3.10 CLAUDE.md
+  // 3.10 reap-guide.md
+  const guide = await readTextFile(distPath("reap-guide.md"));
+  if (guide) {
+    await writeTextFile(join(paths.reap, "reap-guide.md"), guide);
+  }
+
+  // 3.11 CLAUDE.md
   await ensureClaudeMd(paths.root, v16Config.project);
 
   // Build genome conversion prompt for AI
