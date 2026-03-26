@@ -6,7 +6,14 @@ import { verifyNonce, setNonce } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
 import { archiveGeneration } from "../../../core/archive.js";
 import { consumeBacklog, scanBacklog } from "../../../core/backlog.js";
-import { parseGoals, buildVisionGapAnalysis } from "../../../core/vision.js";
+import {
+  parseGoals,
+  buildVisionGapAnalysis,
+  buildDiagnosisPrompt,
+  analyzeLineageBias,
+  buildVisionDevelopmentSuggestions,
+} from "../../../core/vision.js";
+import { readAllLineageGoals } from "../../../core/lineage.js";
 import { executeHooks } from "../../../core/hooks.js";
 import { parseCruiseCount, advanceCruise } from "../../../core/cruise.js";
 import { gitCommitAll, checkSubmoduleDirty } from "../../../core/git.js";
@@ -15,7 +22,6 @@ import {
   getTransitionUrgency,
   buildTransitionCheckPrompt,
   getMaturityBehaviorGuide,
-  formatCompletionCriteria,
 } from "../../../core/maturity.js";
 import YAML from "yaml";
 import type { ReapConfig } from "../../../types/index.js";
@@ -204,17 +210,9 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
       promptSections.push("");
     }
 
-    // ── Software Completion Criteria (Task 3: §2.3) ──
-    if (maturity === "bootstrap") {
-      promptSections.push("### Software Completion Criteria (Diagnostic Reference)");
-      promptSections.push("");
-      promptSections.push("Use these criteria to diagnose the project's current state and identify gaps:");
-      promptSections.push(formatCompletionCriteria());
-      promptSections.push("");
-      promptSections.push("For each relevant criterion, assess: current level + target level.");
-      promptSections.push("Discuss with the user which criteria apply to this project and what the targets should be.");
-      promptSections.push("");
-    }
+    // ── Project Diagnosis Framework ──
+    promptSections.push(buildDiagnosisPrompt());
+    promptSections.push("");
 
     // ── Gap-driven Evolution with Clarity (Task 4: §3.1) ──
     promptSections.push("### Gap-driven Next Generation Selection");
@@ -256,6 +254,19 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
       promptSections.push("**Vision Auto-Update**: Check off any goals completed in this generation.");
       promptSections.push("Update vision/goals.md directly to mark completed items with [x].");
       promptSections.push("");
+
+      // ── Lineage bias analysis ──
+      const lineageGoals = await readAllLineageGoals(paths.lineage);
+      const biasAnalysis = analyzeLineageBias(lineageGoals, parsedGoals);
+      if (biasAnalysis) {
+        promptSections.push(biasAnalysis);
+      }
+
+      // ── Vision development suggestions ──
+      const devSuggestions = buildVisionDevelopmentSuggestions(parsedGoals, lineageGoals);
+      if (devSuggestions) {
+        promptSections.push(devSuggestions);
+      }
     }
 
     promptSections.push("3. **Suggest Next Generation Candidates**: Write suggestions in the completion artifact's \"Next Generation Hints\" section as plain text. Do NOT create backlog items.");
