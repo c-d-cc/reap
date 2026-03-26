@@ -2,13 +2,13 @@ import { readdir, stat } from "fs/promises";
 import { join } from "path";
 import { homedir } from "os";
 import YAML from "yaml";
-import { createPaths, type ReapPaths } from "./paths.js";
+import type { ReapPaths } from "./paths.js";
 import { readTextFile, fileExists } from "./fs.js";
 import {
   LIFECYCLE_STAGES,
   MERGE_STAGES,
-  type GenerationState,
 } from "../types/index.js";
+import type { GenerationState } from "../types/index.js";
 
 export interface IntegrityResult {
   errors: string[];
@@ -19,13 +19,6 @@ const VALID_BACKLOG_TYPES = ["genome-change", "environment-change", "task"];
 const VALID_BACKLOG_STATUSES = ["pending", "consumed"];
 const VALID_GENERATION_TYPES = ["embryo", "normal", "merge"];
 const GENOME_LINE_WARNING_THRESHOLD = 100;
-const ISO_DATE_RE =
-  /^\d{4}-\d{2}-\d{2}(T\d{2}:\d{2}(:\d{2})?(\.\d+)?(Z|[+-]\d{2}:\d{2})?)?$/;
-
-/** Check if a string is a valid ISO 8601 date */
-function isISODate(s: string): boolean {
-  return ISO_DATE_RE.test(s) && !Number.isNaN(new Date(s).getTime());
-}
 
 /** Structural integrity check for .reap/ directory (read-only, no modifications) */
 export async function checkIntegrity(
@@ -36,7 +29,7 @@ export async function checkIntegrity(
 
   await checkDirectoryStructure(paths, errors);
   await checkConfig(paths, errors, warnings);
-  const state = await checkCurrentYml(paths, errors, warnings);
+  await checkCurrentYml(paths, errors, warnings);
   await checkLineage(paths, errors, warnings);
   await checkGenome(paths, errors, warnings);
   await checkBacklog(paths, errors, warnings);
@@ -164,7 +157,7 @@ async function checkConfig(
 async function checkCurrentYml(
   paths: ReapPaths,
   errors: string[],
-  warnings: string[],
+  _warnings: string[],
 ): Promise<GenerationState | null> {
   const content = await readTextFile(paths.current);
   if (content === null || !content.trim()) {
@@ -236,22 +229,31 @@ async function checkLineage(
   errors: string[],
   warnings: string[],
 ): Promise<void> {
-  let items: import("fs").Dirent[];
+  let items: string[];
   try {
-    items = await readdir(paths.lineage, { withFileTypes: true });
+    items = await readdir(paths.lineage);
   } catch {
     return; // lineage dir may not exist yet
   }
 
   const allMetaIds = new Set<string>();
 
-  for (const item of items) {
-    if (item.isDirectory() && item.name.startsWith("gen-")) {
+  for (const name of items) {
+    if (!name.startsWith("gen-")) continue;
+    const itemPath = join(paths.lineage, name);
+    let itemStat: import("fs").Stats;
+    try {
+      itemStat = await stat(itemPath);
+    } catch {
+      continue;
+    }
+
+    if (itemStat.isDirectory()) {
       // Check meta.yml exists
-      const metaPath = join(paths.lineage, item.name, "meta.yml");
+      const metaPath = join(paths.lineage, name, "meta.yml");
       const metaContent = await readTextFile(metaPath);
       if (metaContent === null) {
-        errors.push(`lineage/${item.name}: missing meta.yml`);
+        errors.push(`lineage/${name}: missing meta.yml`);
         continue;
       }
 
@@ -259,30 +261,26 @@ async function checkLineage(
       try {
         meta = YAML.parse(metaContent) ?? {};
       } catch {
-        errors.push(`lineage/${item.name}/meta.yml: invalid YAML`);
+        errors.push(`lineage/${name}/meta.yml: invalid YAML`);
         continue;
       }
 
       validateLineageMeta(
         meta,
-        `lineage/${item.name}/meta.yml`,
+        `lineage/${name}/meta.yml`,
         errors,
         warnings,
       );
       if (meta.id) allMetaIds.add(meta.id as string);
-    } else if (
-      item.isFile() &&
-      item.name.startsWith("gen-") &&
-      item.name.endsWith(".md")
-    ) {
+    } else if (itemStat.isFile() && name.endsWith(".md")) {
       // Compressed lineage — check frontmatter
-      const content = await readTextFile(join(paths.lineage, item.name));
+      const content = await readTextFile(join(paths.lineage, name));
       if (!content) continue;
 
       const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
       if (!fmMatch) {
         warnings.push(
-          `lineage/${item.name}: compressed file missing frontmatter`,
+          `lineage/${name}: compressed file missing frontmatter`,
         );
         continue;
       }
@@ -291,21 +289,30 @@ async function checkLineage(
       try {
         meta = YAML.parse(fmMatch[1]) ?? {};
       } catch {
-        errors.push(`lineage/${item.name}: invalid frontmatter YAML`);
+        errors.push(`lineage/${name}: invalid frontmatter YAML`);
         continue;
       }
 
-      validateLineageMeta(meta, `lineage/${item.name}`, errors, warnings);
+      validateLineageMeta(meta, `lineage/${name}`, errors, warnings);
       if (meta.id) allMetaIds.add(meta.id as string);
     }
   }
 
   // Verify parent references
-  for (const item of items) {
+  for (const name of items) {
+    if (!name.startsWith("gen-")) continue;
+    const itemPath = join(paths.lineage, name);
     let parents: string[] = [];
-    if (item.isDirectory() && item.name.startsWith("gen-")) {
+    let itemStat: import("fs").Stats;
+    try {
+      itemStat = await stat(itemPath);
+    } catch {
+      continue;
+    }
+
+    if (itemStat.isDirectory()) {
       const metaContent = await readTextFile(
-        join(paths.lineage, item.name, "meta.yml"),
+        join(paths.lineage, name, "meta.yml"),
       );
       if (metaContent) {
         try {
@@ -315,12 +322,8 @@ async function checkLineage(
           /* already reported */
         }
       }
-    } else if (
-      item.isFile() &&
-      item.name.startsWith("gen-") &&
-      item.name.endsWith(".md")
-    ) {
-      const content = await readTextFile(join(paths.lineage, item.name));
+    } else if (itemStat.isFile() && name.endsWith(".md")) {
+      const content = await readTextFile(join(paths.lineage, name));
       if (content) {
         const fmMatch = content.match(/^---\n([\s\S]*?)\n---/);
         if (fmMatch) {
@@ -336,7 +339,6 @@ async function checkLineage(
 
     for (const parent of parents) {
       if (parent && !allMetaIds.has(parent)) {
-        // Check if parent is in epoch.md
         const epochContent = await readTextFile(
           join(paths.lineage, "epoch.md"),
         );
@@ -346,7 +348,7 @@ async function checkLineage(
         }
         if (!inEpoch) {
           warnings.push(
-            `lineage/${item.name}: parent "${parent}" not found in lineage (may be in a compressed epoch)`,
+            `lineage/${name}: parent "${parent}" not found in lineage (may be in a compressed epoch)`,
           );
         }
       }
@@ -446,7 +448,7 @@ async function checkGenome(
 async function checkBacklog(
   paths: ReapPaths,
   errors: string[],
-  warnings: string[],
+  _warnings: string[],
 ): Promise<void> {
   let entries: string[];
   try {

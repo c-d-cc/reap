@@ -1,0 +1,20 @@
+id: gen-028-872529
+type: embryo
+goal: Gap-driven Evolution — adapt에서 vision gap 기반 goal 자동 제안 + goals 자동 체크
+parents:
+  - gen-027-d96aec
+timeline:
+  - stage: learning
+    at: 2026-03-26T08:48:02.216Z
+  - stage: planning
+    at: 2026-03-26T08:50:33.241Z
+  - stage: implementation
+    at: 2026-03-26T08:51:12.934Z
+  - stage: validation
+    at: 2026-03-26T08:54:37.064Z
+  - stage: completion
+    at: 2026-03-26T08:55:24.413Z
+fitnessFeedback:
+  text: vision gap 파싱 + 체크 제안 + 다음 후보 추천까지 구현 완료. vision evaluation/development는
+    다음 generation으로 분리.
+  evaluatedAt: 2026-03-26T09:06:41.059Z

@@ -5,7 +5,8 @@ import { emitOutput, emitError } from "../../../core/output.js";
 import { verifyNonce, setNonce } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
 import { archiveGeneration } from "../../../core/archive.js";
-import { consumeBacklog } from "../../../core/backlog.js";
+import { consumeBacklog, scanBacklog } from "../../../core/backlog.js";
+import { parseGoals, buildVisionGapAnalysis } from "../../../core/vision.js";
 import { executeHooks } from "../../../core/hooks.js";
 import { parseCruiseCount, advanceCruise } from "../../../core/cruise.js";
 import { gitCommitAll, checkSubmoduleDirty } from "../../../core/git.js";
@@ -238,12 +239,20 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
     promptSections.push("1. **Genome Review**: Based on fitness feedback, determine if application.md or evolution.md need modifications");
     promptSections.push("2. **Vision Check**: Review vision/goals.md — mark completed goals with [x], identify next goals");
 
-    // ── Vision auto-update (Task 5: §3.2) ──
+    // ── Vision gap analysis (automated) ──
     if (visionGoals) {
+      const parsedGoals = parseGoals(visionGoals);
+      const pendingBacklog = await scanBacklog(paths.backlog);
+      const pendingItems = pendingBacklog.filter((b) => b.status === "pending");
+
+      // Load completion artifact summary for better matching
+      const completionArtifact = isMerge ? "06-completion.md" : "05-completion.md";
+      const completionContent = await readTextFile(paths.artifact(completionArtifact));
+      const genResult = completionContent?.slice(0, 1500);
+
+      const gapAnalysis = buildVisionGapAnalysis(parsedGoals, pendingItems, s.goal, genResult);
       promptSections.push("");
-      promptSections.push("### Current Vision Goals:");
-      promptSections.push(visionGoals.slice(0, 1000));
-      promptSections.push("");
+      promptSections.push(gapAnalysis);
       promptSections.push("**Vision Auto-Update**: Check off any goals completed in this generation.");
       promptSections.push("Update vision/goals.md directly to mark completed items with [x].");
       promptSections.push("");

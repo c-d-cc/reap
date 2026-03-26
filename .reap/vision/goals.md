@@ -31,8 +31,8 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [x] 소프트웨어 완성 기준 16항목 사전 정의
 
 ### Gap-driven Evolution (spec2 §3)
-- [ ] adapt에서 vision gap 기반 다음 goal 자동 제안 (코드 레벨)
-- [ ] Vision goals 자동 체크 마킹 (adapt에서 완료 항목 자동 [x])
+- [x] adapt에서 vision gap 기반 다음 goal 자동 제안 (코드 레벨) (gen-028)
+- [x] Vision goals 자동 체크 마킹 (adapt에서 완료 항목 자동 [x]) (gen-028)
 
 ### Test Infrastructure
 - [x] tests/ submodule 설정 (reap-test, self-evolve branch) (gen-012)

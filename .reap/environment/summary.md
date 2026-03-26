@@ -21,7 +21,7 @@
 ```
 src/
 ├── types/index.ts              — 타입 정의 (GenerationState, ReapConfig, ReapOutput 등)
-├── core/                       — 핵심 로직 (20 modules)
+├── core/                       — 핵심 로직 (21 modules)
 │   ├── lifecycle.ts            — stage 순서 정의 (next/prev)
 │   ├── generation.ts           — generation CRUD, ID 생성
 │   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스)
@@ -41,7 +41,8 @@ src/
 │   ├── fs.ts                   — 파일 유틸리티
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError)
 │   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts)
-│   └── template.ts             — artifact 템플릿 복사
+│   ├── template.ts             — artifact 템플릿 복사
+│   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안 (adapt phase 지원)
 ├── cli/
 │   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, cruise, install-skills, fix)
 │   └── commands/
