@@ -24,7 +24,7 @@ src/
 ├── core/                       — 핵심 로직 (21 modules)
 │   ├── lifecycle.ts            — stage 순서 정의 (next/prev)
 │   ├── generation.ts           — generation CRUD, ID 생성
-│   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스)
+│   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스, memory 경로 포함)
 │   ├── nonce.ts                — 암호학적 token (SHA256)
 │   ├── stage-transition.ts     — nonce 검증, artifact 검증, stage 전환
 │   ├── maturity.ts             — bootstrap/growth/cruise 감지, 완성 기준 16항목
@@ -36,7 +36,7 @@ src/
 │   ├── cruise.ts               — cruise mode 관리 ("N/M" 포맷)
 │   ├── git.ts                  — git 연동 (commit, diff, push, pull, fetch, branch analysis)
 │   ├── hooks.ts                — lifecycle hook engine (조건부 실행, 순서 제어, 상세 결과)
-│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt)
+│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt, memory 로딩)
 │   ├── scanner.ts              — 프로젝트 스캔 (init용)
 │   ├── fs.ts                   — 파일 유틸리티
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError)
@@ -64,7 +64,7 @@ src/
 │       │   ├── abort.ts        — generation 중단 (2-phase: confirm → execute)
 │       │   ├── push.ts         — git push (상태 검증 포함)
 │       │   ├── pull.ts         — git fetch + branch 분석 + prompt 반환
-│       │   └── knowledge.ts    — genome/environment/vision 관리 (reload/genome/environment)
+│       │   └── knowledge.ts    — genome/environment/vision/memory 관리 (reload/genome/environment/memory)
 │       ├── status.ts           — 현재 상태 조회
 │       └── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)

@@ -50,6 +50,7 @@ export async function initCommon(
   await ensureDir(paths.lineage);
   await ensureDir(paths.vision);
   await ensureDir(paths.visionDocs);
+  await ensureDir(paths.memory);
   await ensureDir(paths.hooks);
 
   // Write config
@@ -70,6 +71,11 @@ export async function initCommon(
 
   // Write vision
   await writeTextFile(paths.visionGoals, DEFAULT_GOALS);
+
+  // Write memory (empty initial files)
+  await writeTextFile(paths.memoryLongterm, "# Longterm Memory\n");
+  await writeTextFile(paths.memoryMidterm, "# Midterm Memory\n");
+  await writeTextFile(paths.memoryShortterm, "# Shortterm Memory\n");
 
   // Write or append CLAUDE.md for AI agent session loading
   await ensureClaudeMd(paths.root, projectName);

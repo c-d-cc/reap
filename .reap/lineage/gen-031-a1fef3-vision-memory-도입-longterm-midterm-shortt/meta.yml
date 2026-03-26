@@ -1,0 +1,20 @@
+id: gen-031-a1fef3
+type: embryo
+goal: Vision Memory 도입 — longterm/midterm/shortterm 3-tier 자유 기록 시스템
+parents:
+  - gen-030-4062aa
+timeline:
+  - stage: learning
+    at: 2026-03-26T09:43:36.207Z
+  - stage: planning
+    at: 2026-03-26T09:45:38.772Z
+  - stage: implementation
+    at: 2026-03-26T09:46:12.500Z
+  - stage: validation
+    at: 2026-03-26T09:49:46.463Z
+  - stage: completion
+    at: 2026-03-26T09:50:43.596Z
+fitnessFeedback:
+  text: Vision Memory 3-tier 시스템 도입 완료. paths, prompt, init, completion,
+    knowledge, reap-guide 모두 반영.
+  evaluatedAt: 2026-03-26T09:56:02.226Z

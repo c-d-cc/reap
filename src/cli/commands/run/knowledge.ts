@@ -17,6 +17,8 @@ export async function execute(paths: ReapPaths, _phase?: string, extra?: string)
           paths.invariants,
           paths.environmentSummary,
           paths.visionGoals,
+          paths.memoryShortterm,
+          paths.memoryMidterm,
         ],
       },
       prompt: [
@@ -29,6 +31,8 @@ export async function execute(paths: ReapPaths, _phase?: string, extra?: string)
         `3. ${paths.invariants}`,
         `4. ${paths.environmentSummary}`,
         `5. ${paths.visionGoals}`,
+        `6. ${paths.memoryShortterm}`,
+        `7. ${paths.memoryMidterm}`,
         "",
         "After reading, confirm to the user that knowledge has been reloaded.",
       ].join("\n"),
@@ -92,6 +96,36 @@ export async function execute(paths: ReapPaths, _phase?: string, extra?: string)
     });
   }
 
+  if (subcommand === "memory") {
+    emitOutput({
+      status: "prompt",
+      command: "knowledge",
+      phase: "memory",
+      completed: ["parse"],
+      context: {
+        files: [
+          paths.memoryShortterm,
+          paths.memoryMidterm,
+          paths.memoryLongterm,
+        ],
+      },
+      prompt: [
+        "## Memory Review",
+        "",
+        "Read the memory files:",
+        "",
+        `1. ${paths.memoryShortterm} (shortterm — 1-2 sessions)`,
+        `2. ${paths.memoryMidterm} (midterm — multi-generation)`,
+        `3. ${paths.memoryLongterm} (longterm — project lifetime)`,
+        "",
+        "Present current memory content to the user.",
+        "Ask if they want to update, reorganize, or clean up any tier.",
+        "Memory is freely writable — apply changes directly.",
+      ].join("\n"),
+    });
+    return;
+  }
+
   // No argument — present choices
   emitOutput({
     status: "prompt",
@@ -103,9 +137,10 @@ export async function execute(paths: ReapPaths, _phase?: string, extra?: string)
       "",
       "Ask the user which action they want:",
       "",
-      "1. **reload** — Reload genome, environment, vision into context",
+      "1. **reload** — Reload genome, environment, vision, memory into context",
       "2. **genome** — Review genome summary + discuss modifications",
       "3. **environment** — Review environment summary + discuss updates",
+      "4. **memory** — Review and update memory (shortterm/midterm/longterm)",
       "",
       "Then run: `reap run knowledge --goal <choice>`",
     ].join("\n"),

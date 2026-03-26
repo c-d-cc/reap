@@ -20,6 +20,8 @@ export interface ReapKnowledge {
   };
   environment: string;
   visionGoals: string;
+  memoryShortterm: string;
+  memoryMidterm: string;
 }
 
 // ── Load ─────────────────────────────────────────────────────
@@ -32,13 +34,15 @@ export async function loadReapKnowledge(paths: ReapPaths): Promise<ReapKnowledge
   const __dirname = dirname(fileURLToPath(import.meta.url));
   const guidePath = join(__dirname, "..", "templates", "reap-guide.md");
 
-  const [guide, application, evolution, invariants, environment, visionGoals] = await Promise.all([
+  const [guide, application, evolution, invariants, environment, visionGoals, memoryShortterm, memoryMidterm] = await Promise.all([
     readTextFile(guidePath),
     readTextFile(paths.application),
     readTextFile(paths.evolution),
     readTextFile(paths.invariants),
     readTextFile(paths.environmentSummary),
     readTextFile(paths.visionGoals),
+    readTextFile(paths.memoryShortterm),
+    readTextFile(paths.memoryMidterm),
   ]);
 
   return {
@@ -50,6 +54,8 @@ export async function loadReapKnowledge(paths: ReapPaths): Promise<ReapKnowledge
     },
     environment: environment ?? "",
     visionGoals: visionGoals ?? "",
+    memoryShortterm: memoryShortterm ?? "",
+    memoryMidterm: memoryMidterm ?? "",
   };
 }
 
@@ -116,6 +122,20 @@ export function buildBasePrompt(
     lines.push("## Vision Goals");
     lines.push(knowledge.visionGoals);
     lines.push("");
+  }
+
+  if (knowledge.memoryShortterm || knowledge.memoryMidterm) {
+    lines.push("## Memory");
+    if (knowledge.memoryShortterm) {
+      lines.push("### Shortterm (1-2 sessions)");
+      lines.push(knowledge.memoryShortterm);
+      lines.push("");
+    }
+    if (knowledge.memoryMidterm) {
+      lines.push("### Midterm (multi-generation)");
+      lines.push(knowledge.memoryMidterm);
+      lines.push("");
+    }
   }
 
   lines.push("## Current State");

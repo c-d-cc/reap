@@ -8,7 +8,7 @@ REAP (Recursive Evolutionary Autonomous Pipeline) is a development pipeline wher
 
 REAP consists of four interconnected layers:
 
-- **Vision** — Long-term goals and direction stored in `.reap/vision/`. Vision is the primary driver of each Generation — it determines what goal to pursue next. During the adapt phase, the AI analyzes gaps between vision and current state to suggest the next generation's goal.
+- **Vision** — Long-term goals and direction stored in `.reap/vision/`. Vision is the primary driver of each Generation — it determines what goal to pursue next. During the adapt phase, the AI analyzes gaps between vision and current state to suggest the next generation's goal. Vision also includes Memory — a 3-tier free-form recording system for AI to persist context across sessions.
 - **Knowledge** — The project's accumulated understanding, split into two layers. Genome (`.reap/genome/`) is prescriptive — architecture decisions, conventions, and constraints that define how the project should be built. Environment (`.reap/environment/`) is descriptive — current tech stack, source structure, build configuration, and test setup. Knowledge serves as the basis for each Generation's work.
 - **Generation** — A single evolution cycle driven by Vision and grounded in Knowledge. Each Generation follows a structured lifecycle (Learning → Planning → Implementation → Validation → Completion), evolves Civilization, and feeds lessons back into Knowledge. Artifacts are archived in Lineage.
 - **Civilization** — The source code and all project artifacts outside `.reap/`. This is what Generations evolve. After each Generation completes, lessons from the code feed back into Knowledge (environment updates, genome adaptations).
@@ -19,6 +19,33 @@ REAP consists of four interconnected layers:
 - **Environment Immutability**: The environment is never modified directly during a generation. Changes are recorded in the backlog and applied at completion's reflect phase.
 - **Human Judges Fitness**: No quantitative metrics. The human's natural language feedback is the only fitness signal.
 - **Self-fitness Prohibited**: The AI never scores its own success. Only self-assessment (metacognition) is allowed.
+
+## Memory
+
+Memory is a free-form recording system under `.reap/vision/memory/` where AI can persist context across sessions and generations. Unlike Genome (which has modification constraints) or Lineage (which gets compressed), Memory is always accessible and freely writable.
+
+### 3-Tier Structure
+
+| Tier | File | Lifespan | Purpose |
+|------|------|----------|---------|
+| **Longterm** | `longterm.md` | Project lifetime | Lessons that bear repeating, recurring patterns, decision rationale, architecture choice reasons |
+| **Midterm** | `midterm.md` | Multiple generations | Ongoing large task context, multi-generation plans, progress tracking |
+| **Shortterm** | `shortterm.md` | 1-2 sessions | Next session handoff, immediate context to pass forward, unfinished discussions |
+
+### Rules
+
+- **Free access**: Read and write at any time — no permission needed, no phase restriction
+- **AI discretion**: Content and timing are the AI's judgment. No mandatory updates
+- **Tier fitness**: Place content in the tier matching its expected lifespan. Promote/demote between tiers as relevance changes
+- **Keep concise**: Memory should be scannable, not exhaustive. Prefer bullet points over paragraphs
+- **Empty is normal**: Memory files may be empty — this is a valid state
+- **Git-committed**: Memory is committed with the project, accessible to any AI agent
+
+### When to Update
+
+- **Reflect phase**: Natural moment to update memory (prompted but not forced)
+- **Any time**: Memory can be updated during any stage if useful context arises
+- **Shortterm cleanup**: Clear shortterm items that have been acted on
 
 ## .reap/ Structure
 
@@ -35,7 +62,11 @@ REAP consists of four interconnected layers:
 │   └── source-map.md          #   Code structure + dependencies (on-demand)
 ├── vision/                    # Long-term goals and direction
 │   ├── goals.md               #   North star objectives
-│   └── docs/                  #   Planning documents
+│   ├── docs/                  #   Planning documents
+│   └── memory/                #   AI memory (3-tier free-form recording)
+│       ├── longterm.md        #     Project lifetime — lasting lessons, patterns, decision rationale
+│       ├── midterm.md         #     Multi-generation — ongoing work context, multi-gen plans
+│       └── shortterm.md       #     1-2 sessions — next session handoff, immediate context
 ├── life/                      # Current generation's life cycle
 │   ├── current.yml            #   Active generation state (REAP managed, never edit manually)
 │   ├── 01-learning.md ~ 05-completion.md  # Stage artifacts

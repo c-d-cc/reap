@@ -19,6 +19,10 @@ export interface ReapPaths {
   vision: string;
   visionGoals: string;
   visionDocs: string;
+  memory: string;
+  memoryLongterm: string;
+  memoryMidterm: string;
+  memoryShortterm: string;
   hooks: string;
   artifact: (name: string) => string;
 }
@@ -29,6 +33,7 @@ export function createPaths(root: string): ReapPaths {
   const environment = join(reap, "environment");
   const life = join(reap, "life");
   const vision = join(reap, "vision");
+  const memory = join(vision, "memory");
 
   return {
     root,
@@ -49,6 +54,10 @@ export function createPaths(root: string): ReapPaths {
     vision,
     visionGoals: join(vision, "goals.md"),
     visionDocs: join(vision, "docs"),
+    memory,
+    memoryLongterm: join(memory, "longterm.md"),
+    memoryMidterm: join(memory, "midterm.md"),
+    memoryShortterm: join(memory, "shortterm.md"),
     hooks: join(reap, "hooks"),
     artifact: (name: string) => join(life, name),
   };

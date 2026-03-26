@@ -79,6 +79,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
         "",
         `1. Write ${completionArtifact}: Summary, Lessons Learned, Next Generation Hints`,
         "2. Update environment/summary.md with new knowledge from this generation",
+        "3. Update memory (`.reap/vision/memory/`) if applicable — shortterm for next session handoff, midterm for ongoing context, longterm for lasting lessons",
         "",
         "When done: reap run completion --phase fitness",
       ].join("\n"),
