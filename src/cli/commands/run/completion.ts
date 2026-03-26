@@ -288,9 +288,8 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
     }
 
     const fitnessFeedback = s.fitnessFeedback;
-    const archiveDir = await archiveGeneration(paths, s, fitnessFeedback);
 
-    // Check submodule dirty state before committing
+    // Check submodule dirty state BEFORE archive (so generation state is preserved on failure)
     const dirtySubmodules = checkSubmoduleDirty(paths.root).filter((sm) => sm.dirty);
     if (dirtySubmodules.length > 0) {
       const names = dirtySubmodules.map((sm) => sm.name).join(", ");
@@ -299,6 +298,8 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
         `Submodule(s) have uncommitted changes: ${names}. Commit inside the submodule(s) first, then retry.`,
       );
     }
+
+    const archiveDir = await archiveGeneration(paths, s, fitnessFeedback);
 
     // Auto-commit generation
     const goalSummary = s.goal.length > 60 ? s.goal.slice(0, 57) + "..." : s.goal;

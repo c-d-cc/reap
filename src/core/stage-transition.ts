@@ -63,7 +63,8 @@ export function verifyNonce(
   }
 
   if (!verifyToken(state.lastNonce, state.id, stage, phase, state.expectedHash!)) {
-    emitError(command, `Nonce verification failed for ${stage}:${phase}. Re-run the previous phase.`);
+    const currentPhase = state.phase ? ` (current phase: ${state.phase})` : "";
+    emitError(command, `Nonce verification failed for ${stage}:${phase}${currentPhase}. Re-run the previous phase.`);
   }
 
   // Clear consumed token
@@ -122,7 +123,8 @@ export function verifyBackNonce(
   }
 
   if (!verifyToken(state.backNonce!, state.id, state.backTarget!, state.backTargetPhase ?? "entry", state.backExpectedHash!)) {
-    emitError(command, "Back nonce verification failed.");
+    const currentPhase = state.phase ? ` (current phase: ${state.phase})` : "";
+    emitError(command, `Back nonce verification failed${currentPhase}. Current stage: ${state.stage}, back target: ${state.backTarget}.`);
   }
 
   // Clear back nonce
@@ -133,12 +135,9 @@ export function verifyBackNonce(
   state.backTarget = undefined;
   state.backTargetPhase = undefined;
 
-  // Set stage to target and issue new forward nonce
+  // Set stage to target and issue forward + back nonce via setNonce()
   state.stage = target as LifeCycleStage | MergeStage;
-  const forward = generateToken(state.id, target, targetPhase);
-  state.lastNonce = forward.nonce;
-  state.expectedHash = forward.hash;
-  state.phase = targetPhase;
+  setNonce(state, target, targetPhase);
 }
 
 /**

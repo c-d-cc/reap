@@ -1,0 +1,20 @@
+id: gen-024-1415bf
+type: embryo
+goal: "core stability 버그 수정: back nonce 재발급 + completion commit 순서 교정"
+parents:
+  - gen-023-5e7967
+timeline:
+  - stage: learning
+    at: 2026-03-26T07:40:43.915Z
+  - stage: planning
+    at: 2026-03-26T07:42:52.133Z
+  - stage: implementation
+    at: 2026-03-26T07:43:19.771Z
+  - stage: validation
+    at: 2026-03-26T07:46:22.742Z
+  - stage: completion
+    at: 2026-03-26T07:47:08.960Z
+fitnessFeedback:
+  text: core stability 버그 2건 수정 완료. back nonce 재발급 + completion commit 순서 교정. 239
+    tests 통과.
+  evaluatedAt: 2026-03-26T07:48:47.557Z

@@ -66,6 +66,16 @@ Before writing new code, always read existing code first to understand establish
 - "Nice to have" items go to backlog for human review
 - Tag autonomous additions with `[autonomous]`
 
+## No Workarounds — Root Cause Tracking
+
+When encountering a problem, never work around it and move on. Always track the root cause and create a fix plan.
+
+- **Fixable now**: Fix within the current generation
+- **Not fixable now**: Analyze root cause + create backlog (include reproduction conditions, root cause, fix direction)
+- **Never do**: Manually bypass an error and move on without mention
+
+Decision rule: "If this problem occurs again, would I have to repeat the same workaround?" → If yes, a root cause fix is required.
+
 ## Environment Refresh at Completion
 
 Incrementally update environment/summary.md during reflect phase:
