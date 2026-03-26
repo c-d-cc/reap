@@ -14,7 +14,7 @@ export async function execute(): Promise<void> {
     emitError("status", "Not a reap project. Run 'reap init' first.");
   }
   if (await detectV15(paths)) {
-    emitError("status", "This project uses REAP v0.15 structure. Run '/reap.migrate' to upgrade to v0.16.");
+    emitError("status", "This project uses REAP v0.15 structure. Run '/reap.update' to upgrade to v0.16.");
   }
 
   // Read config

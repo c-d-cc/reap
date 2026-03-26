@@ -160,7 +160,7 @@ export async function execute(options: CleanOptions): Promise<void> {
   // Verify .reap/ exists
   const paths = createPaths(root);
   if (await detectV15(paths)) {
-    emitError("clean", "This project uses REAP v0.15 structure. Run '/reap.migrate' to upgrade to v0.16.");
+    emitError("clean", "This project uses REAP v0.15 structure. Run '/reap.update' to upgrade to v0.16.");
   }
   if (!(await fileExists(paths.reap))) {
     emitOutput({

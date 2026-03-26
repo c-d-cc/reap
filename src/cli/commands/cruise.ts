@@ -10,7 +10,7 @@ export async function execute(count: string): Promise<void> {
   }
   const paths = createPaths(process.cwd());
   if (await detectV15(paths)) {
-    emitError("cruise", "This project uses REAP v0.15 structure. Run '/reap.migrate' to upgrade to v0.16.");
+    emitError("cruise", "This project uses REAP v0.15 structure. Run '/reap.update' to upgrade to v0.16.");
   }
   await setCruise(paths.config, n);
   emitOutput({

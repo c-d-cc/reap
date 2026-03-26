@@ -18,7 +18,7 @@ export async function execute(): Promise<void> {
   // Check for v0.15 indicator
   if (await fileExists(join(paths.genome, "principles.md"))) {
     console.log(
-      "\n⚠ REAP v0.15 project detected. Run '/reap.migrate' in your AI agent to upgrade to v0.16.\n"
+      "\n⚠ REAP v0.15 project detected. Run '/reap.update' in your AI agent to upgrade to v0.16.\n"
     );
   }
 }

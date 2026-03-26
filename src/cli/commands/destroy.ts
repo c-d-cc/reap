@@ -125,7 +125,7 @@ export async function execute(confirm?: boolean): Promise<void> {
   const root = process.cwd();
   const paths = createPaths(root);
   if (await detectV15(paths)) {
-    emitError("destroy", "This project uses REAP v0.15 structure. Run '/reap.migrate' to upgrade to v0.16.");
+    emitError("destroy", "This project uses REAP v0.15 structure. Run '/reap.update' to upgrade to v0.16.");
   }
 
   if (!confirm) {

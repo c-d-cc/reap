@@ -50,7 +50,7 @@ export async function execute(stage: string, options: { phase?: string; goal?: s
     emitError("run", "Not a reap project. Run 'reap init' first.");
   }
   if (await detectV15(paths)) {
-    emitError("run", "This project uses REAP v0.15 structure. Run '/reap.migrate' to upgrade to v0.16.");
+    emitError("run", "This project uses REAP v0.15 structure. Run '/reap.update' to upgrade to v0.16.");
   }
 
   const handler = STAGE_HANDLERS[stage];
