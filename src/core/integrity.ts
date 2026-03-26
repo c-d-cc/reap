@@ -20,6 +20,14 @@ const VALID_BACKLOG_STATUSES = ["pending", "consumed"];
 const VALID_GENERATION_TYPES = ["embryo", "normal", "merge"];
 const GENOME_LINE_WARNING_THRESHOLD = 100;
 
+/**
+ * Detect v0.15 project structure.
+ * Returns true if .reap/genome/principles.md exists (v0.15 indicator).
+ */
+export async function detectV15(paths: ReapPaths): Promise<boolean> {
+  return fileExists(join(paths.genome, "principles.md"));
+}
+
 /** Structural integrity check for .reap/ directory (read-only, no modifications) */
 export async function checkIntegrity(
   paths: ReapPaths,

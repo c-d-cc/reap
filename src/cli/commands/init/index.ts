@@ -6,6 +6,7 @@ import { emitError } from "../../../core/output.js";
 import { execute as greenfieldExecute } from "./greenfield.js";
 import { execute as adoptionExecute } from "./adoption.js";
 import { execute as repairExecute } from "./repair.js";
+import { execute as migrateExecute } from "../migrate.js";
 
 /**
  * Source indicators — if any of these exist, the project is not greenfield.
@@ -55,9 +56,15 @@ async function detectMode(root: string): Promise<"greenfield" | "adoption"> {
   return "greenfield";
 }
 
-export async function execute(projectName?: string, mode?: string, repair?: boolean): Promise<void> {
+export async function execute(projectName?: string, mode?: string, repair?: boolean, migrate?: boolean, phase?: string): Promise<void> {
   const root = process.cwd();
   const paths = createPaths(root);
+
+  // Migrate mode: v0.15 → v0.16
+  if (migrate) {
+    await migrateExecute(paths, phase);
+    return;
+  }
 
   // Repair mode: supplement missing files in an existing reap project
   if (repair) {

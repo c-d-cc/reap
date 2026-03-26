@@ -5,9 +5,10 @@ import { readTextFile, fileExists, writeTextFile } from "../../core/fs.js";
 import {
   checkIntegrity,
   checkUserLevelArtifacts,
+  detectV15,
   type IntegrityResult,
 } from "../../core/integrity.js";
-import { emitOutput } from "../../core/output.js";
+import { emitOutput, emitError } from "../../core/output.js";
 import { LIFECYCLE_STAGES, MERGE_STAGES } from "../../types/index.js";
 import type { GenerationState } from "../../types/index.js";
 
@@ -128,6 +129,10 @@ export async function fixProject(projectRoot: string): Promise<FixResult> {
 /** CLI entry point for `reap fix` */
 export async function execute(check?: boolean): Promise<void> {
   const root = process.cwd();
+  const paths = createPaths(root);
+  if (await detectV15(paths)) {
+    emitError("fix", "This project uses REAP v0.15 structure. Run '/reap.migrate' to upgrade to v0.16.");
+  }
 
   if (check) {
     const result = await checkProject(root);

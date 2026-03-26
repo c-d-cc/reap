@@ -41,13 +41,15 @@ src/
 │   ├── scanner.ts              — 프로젝트 스캔 (init용)
 │   ├── fs.ts                   — 파일 유틸리티
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError)
-│   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts)
+│   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts, detectV15)
 │   ├── template.ts             — artifact 템플릿 복사
 │   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). lineage 편향 분석 제거됨 (gen-030)
 ├── cli/
-│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, cruise, install-skills, fix, destroy, clean)
+│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, cruise, install-skills, fix, destroy, clean, check-version)
 │   └── commands/
-│       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair 지원)
+│       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair, --migrate 지원)
+│       ├── migrate.ts          — v0.15→v0.16 마이그레이션 (multi-phase: confirm→execute→vision→complete)
+│       ├── check-version.ts    — postinstall용 v0.15 감지 및 안내
 │       ├── run/                — stage 실행 (20 handlers)
 │       │   ├── start.ts        — generation 생성 (scan → create)
 │       │   ├── learning.ts     — 탐구 (work → complete)
@@ -73,7 +75,7 @@ src/
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/claude-code/       — Claude Code 어댑터
 │   ├── install.ts              — skill 파일 설치 (~/.claude/commands/)
-│   └── skills/                 — 18 slash command files (.md)
+│   └── skills/                 — 19 slash command files (.md, reap.migrate.md 포함)
 └── templates/                  — 템플릿 파일
     ├── reap-guide.md           — REAP 도구 가이드 (subagent prompt에 주입)
     └── artifacts/              — stage별 artifact 템플릿
@@ -86,7 +88,7 @@ src/
 - `npm run build` — bun build → `dist/cli/index.js` (~400KB single bundle) + skill 복사
 - `npm run dev` — bun으로 직접 실행 (빌드 불필요)
 - `npm run typecheck` — tsc --noEmit
-- `postinstall` — skill 자동 설치
+- `postinstall` — skill 자동 설치 + v0.15 감지 안내
 
 ## Tests
 

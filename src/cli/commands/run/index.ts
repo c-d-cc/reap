@@ -1,6 +1,7 @@
 import { createPaths } from "../../../core/paths.js";
 import { fileExists } from "../../../core/fs.js";
 import { emitError } from "../../../core/output.js";
+import { detectV15 } from "../../../core/integrity.js";
 import { execute as startExecute } from "./start.js";
 import { execute as learningExecute } from "./learning.js";
 import { execute as planningExecute } from "./planning.js";
@@ -47,6 +48,9 @@ export async function execute(stage: string, options: { phase?: string; goal?: s
   const paths = createPaths(process.cwd());
   if (!(await fileExists(paths.config))) {
     emitError("run", "Not a reap project. Run 'reap init' first.");
+  }
+  if (await detectV15(paths)) {
+    emitError("run", "This project uses REAP v0.15 structure. Run '/reap.migrate' to upgrade to v0.16.");
   }
 
   const handler = STAGE_HANDLERS[stage];

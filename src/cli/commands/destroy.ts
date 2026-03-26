@@ -3,7 +3,8 @@ import { join } from "path";
 import YAML from "yaml";
 import { createPaths } from "../../core/paths.js";
 import { readTextFile, writeTextFile, fileExists } from "../../core/fs.js";
-import { emitOutput } from "../../core/output.js";
+import { emitOutput, emitError } from "../../core/output.js";
+import { detectV15 } from "../../core/integrity.js";
 import type { ReapConfig } from "../../types/index.js";
 
 export interface DestroyResult {
@@ -122,6 +123,10 @@ async function cleanGitignore(
 /** CLI entry point for `reap destroy` */
 export async function execute(confirm?: boolean): Promise<void> {
   const root = process.cwd();
+  const paths = createPaths(root);
+  if (await detectV15(paths)) {
+    emitError("destroy", "This project uses REAP v0.15 structure. Run '/reap.migrate' to upgrade to v0.16.");
+  }
 
   if (!confirm) {
     const projectName = await getProjectName(root) ?? "unknown";

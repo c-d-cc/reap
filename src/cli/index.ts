@@ -10,6 +10,7 @@ import { execute as installSkillsExecute } from "./commands/install-skills.js";
 import { execute as fixExecute } from "./commands/fix.js";
 import { execute as destroyExecute } from "./commands/destroy.js";
 import { execute as cleanExecute } from "./commands/clean.js";
+import { execute as checkVersionExecute } from "./commands/check-version.js";
 
 const program = new Command();
 
@@ -23,8 +24,10 @@ program
   .description("Initialize a new reap project")
   .option("--mode <mode>", "Override auto-detected mode (greenfield or adoption)")
   .option("--repair", "Repair an existing project — supplement missing files (e.g., CLAUDE.md)")
-  .action(async (projectName: string | undefined, options: { mode?: string; repair?: boolean }) => {
-    await initExecute(projectName, options.mode, options.repair);
+  .option("--migrate", "Migrate from v0.15 to v0.16 structure")
+  .option("--phase <phase>", "Migration phase (confirm, execute, vision, complete)")
+  .action(async (projectName: string | undefined, options: { mode?: string; repair?: boolean; migrate?: boolean; phase?: string }) => {
+    await initExecute(projectName, options.mode, options.repair, options.migrate, options.phase);
   });
 
 program
@@ -105,6 +108,13 @@ program
       backlog: options.backlog,
       hooks: options.hooks as "reset" | undefined,
     });
+  });
+
+program
+  .command("check-version")
+  .description("Check for v0.15 project and show migration message")
+  .action(async () => {
+    await checkVersionExecute();
   });
 
 program.parse();

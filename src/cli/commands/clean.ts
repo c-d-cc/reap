@@ -2,7 +2,8 @@ import { rm, readdir, mkdir } from "fs/promises";
 import { join } from "path";
 import { createPaths } from "../../core/paths.js";
 import { fileExists, writeTextFile } from "../../core/fs.js";
-import { emitOutput } from "../../core/output.js";
+import { emitOutput, emitError } from "../../core/output.js";
+import { detectV15 } from "../../core/integrity.js";
 
 export interface CleanOptions {
   lineage?: "compress" | "delete";
@@ -158,6 +159,9 @@ export async function execute(options: CleanOptions): Promise<void> {
 
   // Verify .reap/ exists
   const paths = createPaths(root);
+  if (await detectV15(paths)) {
+    emitError("clean", "This project uses REAP v0.15 structure. Run '/reap.migrate' to upgrade to v0.16.");
+  }
   if (!(await fileExists(paths.reap))) {
     emitOutput({
       status: "error",

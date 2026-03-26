@@ -3,6 +3,7 @@ import YAML from "yaml";
 import { createPaths } from "../../core/paths.js";
 import { readTextFile, fileExists } from "../../core/fs.js";
 import { emitOutput, emitError } from "../../core/output.js";
+import { detectV15 } from "../../core/integrity.js";
 import type { ReapConfig, GenerationState } from "../../types/index.js";
 
 export async function execute(): Promise<void> {
@@ -11,6 +12,9 @@ export async function execute(): Promise<void> {
 
   if (!(await fileExists(paths.config))) {
     emitError("status", "Not a reap project. Run 'reap init' first.");
+  }
+  if (await detectV15(paths)) {
+    emitError("status", "This project uses REAP v0.15 structure. Run '/reap.migrate' to upgrade to v0.16.");
   }
 
   // Read config
