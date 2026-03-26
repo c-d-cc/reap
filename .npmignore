@@ -22,3 +22,6 @@ scripts/
 
 # Claude Code
 .claude/
+
+# Dev-only skills (not for end users)
+dist/adapters/claude-code/skills/reapdev.*.md

@@ -13,3 +13,6 @@ bun build src/cli/index.ts --outdir dist/cli --target node
 mkdir -p dist/adapters/claude-code
 cp -r src/adapters/claude-code/skills dist/adapters/claude-code/
 cp -r src/templates dist/
+
+# Remove dev-only skills from dist (not for end users)
+rm -f dist/adapters/claude-code/skills/reapdev.*.md
