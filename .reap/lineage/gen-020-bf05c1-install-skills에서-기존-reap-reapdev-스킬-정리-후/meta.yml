@@ -1,0 +1,20 @@
+id: gen-020-bf05c1
+type: embryo
+goal: install-skills에서 기존 reap/reapdev 스킬 정리 후 설치하도록 개선
+parents:
+  - gen-019-9ec1a6
+timeline:
+  - stage: learning
+    at: 2026-03-26T04:23:20.566Z
+  - stage: planning
+    at: 2026-03-26T04:25:25.316Z
+  - stage: implementation
+    at: 2026-03-26T04:25:55.441Z
+  - stage: validation
+    at: 2026-03-26T04:27:26.890Z
+  - stage: completion
+    at: 2026-03-26T04:28:18.312Z
+fitnessFeedback:
+  text: cleanup 로직 정상 동작 확인. 수동 통합 테스트 통과. 빌드 스크립트에 dist 정리 추가로 stale artifact 문제도
+    해결.
+  evaluatedAt: 2026-03-26T04:36:59.675Z
