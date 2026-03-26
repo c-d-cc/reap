@@ -28,7 +28,7 @@ src/
 │   ├── nonce.ts                — 암호학적 token (SHA256)
 │   ├── stage-transition.ts     — nonce 검증, artifact 검증, stage 전환
 │   ├── maturity.ts             — bootstrap/growth/cruise 감지, 완성 기준 16항목
-│   ├── lineage.ts              — 아카이브 DAG, genome diff (3-way), 전체 lineage goal 추출
+│   ├── lineage.ts              — 아카이브 DAG, genome diff (3-way), lineage 읽기
 │   ├── compression.ts          — 2-level lineage 압축 (L1: 5gen, L2: 100files)
 │   ├── genome-suggest.ts       — init 시 genome 초안 생성
 │   ├── backlog.ts              — backlog scan, consume, revert, create
@@ -42,7 +42,7 @@ src/
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError)
 │   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts)
 │   ├── template.ts             — artifact 템플릿 복사
-│   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, lineage 편향 분석, vision 발전 제안 (adapt phase 지원)
+│   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). lineage 편향 분석 제거됨 (gen-030)
 ├── cli/
 │   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, cruise, install-skills, fix)
 │   └── commands/

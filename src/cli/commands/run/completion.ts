@@ -10,10 +10,8 @@ import {
   parseGoals,
   buildVisionGapAnalysis,
   buildDiagnosisPrompt,
-  analyzeLineageBias,
   buildVisionDevelopmentSuggestions,
 } from "../../../core/vision.js";
-import { readAllLineageGoals } from "../../../core/lineage.js";
 import { executeHooks } from "../../../core/hooks.js";
 import { parseCruiseCount, advanceCruise } from "../../../core/cruise.js";
 import { gitCommitAll, checkSubmoduleDirty } from "../../../core/git.js";
@@ -255,15 +253,8 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
       promptSections.push("Update vision/goals.md directly to mark completed items with [x].");
       promptSections.push("");
 
-      // ── Lineage bias analysis ──
-      const lineageGoals = await readAllLineageGoals(paths.lineage);
-      const biasAnalysis = analyzeLineageBias(lineageGoals, parsedGoals);
-      if (biasAnalysis) {
-        promptSections.push(biasAnalysis);
-      }
-
       // ── Vision development suggestions ──
-      const devSuggestions = buildVisionDevelopmentSuggestions(parsedGoals, lineageGoals);
+      const devSuggestions = buildVisionDevelopmentSuggestions(parsedGoals);
       if (devSuggestions) {
         promptSections.push(devSuggestions);
       }

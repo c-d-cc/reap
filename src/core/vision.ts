@@ -1,5 +1,4 @@
 import type { BacklogItem } from "./backlog.js";
-import type { LineageGoal } from "./lineage.js";
 import { SOFTWARE_COMPLETION_CRITERIA } from "./maturity.js";
 
 // ── Types ────────────────────────────────────────────────────
@@ -265,105 +264,6 @@ export function buildDiagnosisPrompt(): string {
   return lines.join("\n");
 }
 
-// ── Lineage Bias Analysis ────────────────────────────────────
-
-/**
- * Analyze recent generation goals against vision sections to detect bias.
- * Maps each generation's goal to vision sections using keyword overlap,
- * then identifies over-concentrated and neglected areas.
- */
-export function analyzeLineageBias(
-  lineageGoals: LineageGoal[],
-  visionGoals: VisionGoal[],
-  recentCount: number = 10,
-): string {
-  const lines: string[] = [];
-
-  // Get unique vision sections
-  const sections = [...new Set(visionGoals.map((g) => g.section).filter(Boolean))];
-  if (sections.length === 0 || lineageGoals.length === 0) return "";
-
-  // Take recent N generations
-  const recent = lineageGoals.slice(-recentCount);
-  if (recent.length === 0) return "";
-
-  // Map each recent gen goal to vision sections
-  const sectionHits = new Map<string, number>();
-  const unmappedGoals: string[] = [];
-
-  for (const section of sections) {
-    sectionHits.set(section, 0);
-  }
-
-  for (const gen of recent) {
-    const genTokens = tokenize(gen.goal);
-    if (genTokens.length === 0) continue;
-
-    let matched = false;
-
-    for (const section of sections) {
-      // Collect tokens from all goals in this section
-      const sectionGoals = visionGoals.filter((g) => g.section === section);
-      const sectionTokens = sectionGoals.flatMap((g) => tokenize(g.title));
-      if (sectionTokens.length === 0) continue;
-
-      const overlap = genTokens.filter((t) => sectionTokens.includes(t));
-      const score = overlap.length / genTokens.length;
-
-      if (score >= 0.15) {
-        sectionHits.set(section, (sectionHits.get(section) ?? 0) + 1);
-        matched = true;
-      }
-    }
-
-    if (!matched) {
-      unmappedGoals.push(gen.id);
-    }
-  }
-
-  lines.push("### Lineage Bias Analysis");
-  lines.push("");
-  lines.push(`Analyzed the last ${recent.length} generation(s) for vision section coverage:`);
-  lines.push("");
-
-  // Show distribution
-  const totalHits = [...sectionHits.values()].reduce((a, b) => a + b, 0);
-  const sortedSections = [...sectionHits.entries()].sort((a, b) => b[1] - a[1]);
-
-  for (const [section, hits] of sortedSections) {
-    const bar = hits > 0 ? " " + "█".repeat(hits) : "";
-    lines.push(`- **${section}**: ${hits}/${recent.length} generations${bar}`);
-  }
-  lines.push("");
-
-  // Detect concentration bias (>60% in one section)
-  const concentrated = sortedSections.filter(([, hits]) => totalHits > 0 && hits / totalHits > 0.6);
-  if (concentrated.length > 0) {
-    lines.push("**Concentration warning**: Recent work is heavily focused on:");
-    for (const [section, hits] of concentrated) {
-      lines.push(`- **${section}** (${hits}/${recent.length} generations)`);
-    }
-    lines.push("Consider diversifying to other areas.");
-    lines.push("");
-  }
-
-  // Detect neglected sections (0 hits with unchecked goals)
-  const neglected = sortedSections.filter(([section, hits]) => {
-    if (hits > 0) return false;
-    return visionGoals.some((g) => g.section === section && !g.checked);
-  });
-  if (neglected.length > 0) {
-    lines.push("**Neglected areas** (unchecked goals, no recent work):");
-    for (const [section] of neglected) {
-      const unchecked = visionGoals.filter((g) => g.section === section && !g.checked);
-      lines.push(`- **${section}** (${unchecked.length} unchecked goal${unchecked.length > 1 ? "s" : ""})`);
-    }
-    lines.push("");
-  }
-
-  return lines.join("\n");
-}
-
 // ── Vision Development Suggestions ───────────────────────────
 
 /**
@@ -373,7 +273,6 @@ export function analyzeLineageBias(
  */
 export function buildVisionDevelopmentSuggestions(
   visionGoals: VisionGoal[],
-  lineageGoals: LineageGoal[],
 ): string {
   const lines: string[] = [];
   const suggestions: string[] = [];
@@ -404,31 +303,8 @@ export function buildVisionDevelopmentSuggestions(
     }
   }
 
-  // 2. Detect unchecked goals with no recent lineage work (stale goals)
+  // 2. Detect sections with many unchecked goals (scope might be too large)
   const unchecked = visionGoals.filter((g) => !g.checked);
-  const recentGoals = lineageGoals.slice(-10);
-
-  for (const goal of unchecked) {
-    const goalTokens = tokenize(goal.title);
-    if (goalTokens.length === 0) continue;
-
-    let hasRecentWork = false;
-    for (const gen of recentGoals) {
-      const genTokens = tokenize(gen.goal);
-      const overlap = goalTokens.filter((t) => genTokens.includes(t));
-      const score = goalTokens.length > 0 ? overlap.length / goalTokens.length : 0;
-      if (score >= 0.2) {
-        hasRecentWork = true;
-        break;
-      }
-    }
-
-    if (!hasRecentWork && lineageGoals.length >= 5) {
-      suggestions.push(`- **Stale goal**: "${goal.title}" (${goal.section}) — no related work in the last ${recentGoals.length} generations. Review if still relevant.`);
-    }
-  }
-
-  // 3. Detect sections with many unchecked goals (scope might be too large)
   const sectionUnchecked = new Map<string, number>();
   for (const goal of unchecked) {
     const section = goal.section || "(no section)";

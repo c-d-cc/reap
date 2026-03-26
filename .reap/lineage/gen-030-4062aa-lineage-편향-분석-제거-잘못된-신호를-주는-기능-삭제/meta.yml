@@ -1,0 +1,19 @@
+id: gen-030-4062aa
+type: embryo
+goal: lineage 편향 분석 제거 — 잘못된 신호를 주는 기능 삭제
+parents:
+  - gen-029-a717aa
+timeline:
+  - stage: learning
+    at: 2026-03-26T09:25:50.072Z
+  - stage: planning
+    at: 2026-03-26T09:27:34.274Z
+  - stage: implementation
+    at: 2026-03-26T09:28:06.124Z
+  - stage: validation
+    at: 2026-03-26T09:31:01.893Z
+  - stage: completion
+    at: 2026-03-26T09:32:01.042Z
+fitnessFeedback:
+  text: 편향 분석 제거 완료. 잘못된 신호를 주는 기능을 정확히 식별하고 삭제함.
+  evaluatedAt: 2026-03-26T09:35:25.543Z
