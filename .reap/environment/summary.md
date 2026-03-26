@@ -33,10 +33,10 @@ src/
 │   ├── genome-suggest.ts       — init 시 genome 초안 생성
 │   ├── backlog.ts              — backlog scan, consume, revert, create
 │   ├── archive.ts              — generation 아카이빙 (life → lineage)
-│   ├── cruise.ts               — cruise mode 관리 ("N/M" 포맷)
+│   ├── cruise.ts               — cruise mode 관리 ("N/M" 포맷, parse/advance/clear/set)
 │   ├── git.ts                  — git 연동 (commit, diff, push, pull, fetch, branch analysis)
 │   ├── hooks.ts                — lifecycle hook engine (조건부 실행, 순서 제어, 상세 결과)
-│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt, memory 로딩)
+│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt, memory 로딩, cruise loop 지시)
 │   ├── scanner.ts              — 프로젝트 스캔 (init용)
 │   ├── fs.ts                   — 파일 유틸리티
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError)

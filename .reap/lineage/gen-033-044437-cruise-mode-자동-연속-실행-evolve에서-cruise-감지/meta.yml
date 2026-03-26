@@ -1,0 +1,20 @@
+id: gen-033-044437
+type: embryo
+goal: Cruise mode 자동 연속 실행 — evolve에서 cruise 감지 시 N generation 자동 순회
+parents:
+  - gen-032-4baaef
+timeline:
+  - stage: learning
+    at: 2026-03-26T10:23:05.015Z
+  - stage: planning
+    at: 2026-03-26T10:25:25.121Z
+  - stage: implementation
+    at: 2026-03-26T10:26:10.266Z
+  - stage: validation
+    at: 2026-03-26T10:29:06.443Z
+  - stage: completion
+    at: 2026-03-26T10:29:56.458Z
+fitnessFeedback:
+  text: "self-assessment: OK. Cruise loop prompt 구현 완료. 330 tests 전체 통과. 기존 코드에 영향
+    없음. 명확한 구현 범위로 불확실성 없음."
+  evaluatedAt: 2026-03-26T10:31:42.430Z

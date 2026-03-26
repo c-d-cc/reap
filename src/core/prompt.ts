@@ -279,6 +279,41 @@ export function buildBasePrompt(
   lines.push("- **Completion/Adapt**: If uncertain about genome changes, present options rather than deciding.");
   lines.push("");
 
+  // Cruise Loop instructions (only when cruise mode is active)
+  if (cruiseCount) {
+    lines.push("## Cruise Loop — Auto-Continuation");
+    lines.push("");
+    lines.push(`Current cruise: ${cruiseCount}`);
+    lines.push("");
+    lines.push("Cruise mode is active. After completing the current generation, automatically start the next one.");
+    lines.push("");
+    lines.push("### After Completion Commit:");
+    lines.push("1. Check the `cruiseActive` field in the completion commit output context.");
+    lines.push("2. If `cruiseActive: true`:");
+    lines.push("   a. Read `vision/goals.md` and scan backlog to determine the next goal.");
+    lines.push("   b. Pick the highest-priority unchecked vision goal (prefer goals with related backlog items).");
+    lines.push("   c. If no candidate goal found, **stop cruise** and report to the human.");
+    lines.push('   d. Run: `reap run start --phase create --goal "<selected goal>"`');
+    lines.push("   e. Execute the full lifecycle again (learning → planning → implementation → validation → completion).");
+    lines.push("   f. Repeat from step 1.");
+    lines.push("3. If `cruiseActive: false`: cruise is complete. Report final summary.");
+    lines.push("4. If any error occurs or self-assessment indicates uncertainty/risk: **stop cruise** immediately and report to the human.");
+    lines.push("");
+    lines.push("### Auto Goal Selection:");
+    lines.push("- Use vision/goals.md unchecked items as candidates.");
+    lines.push("- Cross-reference with pending backlog items for priority boost.");
+    lines.push("- Select the top candidate. If multiple candidates have equal priority, pick the first one.");
+    lines.push("- The selected goal should be concise and actionable.");
+    lines.push("");
+    lines.push("### Cruise Stop Conditions:");
+    lines.push("- `cruiseActive: false` from completion commit (count exhausted)");
+    lines.push("- No unchecked vision goals available");
+    lines.push("- Error during any lifecycle stage");
+    lines.push("- Self-assessment during fitness phase indicates uncertainty or risk");
+    lines.push("- Critical architectural decision needed that wasn't planned");
+    lines.push("");
+  }
+
   lines.push("## Project");
   lines.push(`Path: ${paths.root}`);
 
