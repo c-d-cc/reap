@@ -3,6 +3,10 @@
 이 프로젝트는 REAP(Recursive Evolutionary Autonomous Pipeline)를 사용합니다.
 모든 작업은 genome 원칙에 따라 수행해야 합니다.
 
+## REAP Guide (필수 숙지)
+
+- `.reap/reap-guide.md` — REAP 도구 사용법, 아키텍처, lifecycle, 규칙
+
 ## Genome (필수 숙지)
 
 세션 시작 시 아래 파일들을 반드시 읽고 원칙을 따르세요:

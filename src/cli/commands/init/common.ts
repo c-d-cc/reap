@@ -77,6 +77,12 @@ export async function initCommon(
   await writeTextFile(paths.memoryMidterm, "# Midterm Memory\n");
   await writeTextFile(paths.memoryShortterm, "# Shortterm Memory\n");
 
+  // Copy reap-guide.md to .reap/ for agent access
+  const guide = await readTextFile(distPath("reap-guide.md"));
+  if (guide) {
+    await writeTextFile(join(paths.reap, "reap-guide.md"), guide);
+  }
+
   // Write or append CLAUDE.md for AI agent session loading
   await ensureClaudeMd(paths.root, projectName);
 

@@ -1,5 +1,3 @@
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
 import type { ReapPaths } from "./paths.js";
 import type { GenerationState } from "../types/index.js";
 import { readTextFile } from "./fs.js";
@@ -14,13 +12,6 @@ import { getClarityGuide } from "./clarity.js";
 // ── Types ────────────────────────────────────────────────────
 
 export interface ReapKnowledge {
-  guide: string;
-  genome: {
-    application: string;
-    evolution: string;
-    invariants: string;
-  };
-  environment: string;
   visionGoals: string;
   memoryShortterm: string;
   memoryMidterm: string;
@@ -29,32 +20,18 @@ export interface ReapKnowledge {
 // ── Load ─────────────────────────────────────────────────────
 
 /**
- * Load all REAP knowledge: guide + genome + environment + vision.
- * Guide is loaded from the installed package location (dist/templates/).
+ * Load minimal REAP knowledge for subagent prompt.
+ * Guide, genome, environment are NOT loaded here — subagent reads them from files via CLAUDE.md.
+ * Only vision goals and memory (small, session-critical) are included in the prompt.
  */
 export async function loadReapKnowledge(paths: ReapPaths): Promise<ReapKnowledge> {
-  const __dirname = dirname(fileURLToPath(import.meta.url));
-  const guidePath = join(__dirname, "..", "templates", "reap-guide.md");
-
-  const [guide, application, evolution, invariants, environment, visionGoals, memoryShortterm, memoryMidterm] = await Promise.all([
-    readTextFile(guidePath),
-    readTextFile(paths.application),
-    readTextFile(paths.evolution),
-    readTextFile(paths.invariants),
-    readTextFile(paths.environmentSummary),
+  const [visionGoals, memoryShortterm, memoryMidterm] = await Promise.all([
     readTextFile(paths.visionGoals),
     readTextFile(paths.memoryShortterm),
     readTextFile(paths.memoryMidterm),
   ]);
 
   return {
-    guide: guide ?? "",
-    genome: {
-      application: application ?? "(not found)",
-      evolution: evolution ?? "(not found)",
-      invariants: invariants ?? "(not found)",
-    },
-    environment: environment ?? "",
     visionGoals: visionGoals ?? "",
     memoryShortterm: memoryShortterm ?? "",
     memoryMidterm: memoryMidterm ?? "",
@@ -96,30 +73,14 @@ export function buildBasePrompt(
   lines.push("- **All artifacts are at `.reap/life/{NN}-{stage}.md`** (e.g., `.reap/life/01-learning.md`, `.reap/life/02-planning.md`). NEVER create artifacts elsewhere.");
   lines.push("");
 
-  // REAP Guide (tool knowledge)
-  if (knowledge.guide) {
-    lines.push("## REAP Guide");
-    lines.push(knowledge.guide);
-    lines.push("");
-  }
-
-  lines.push("## Genome");
+  lines.push("## Knowledge Loading");
+  lines.push("Before starting work, read these files (CLAUDE.md also instructs this):");
+  lines.push("- `.reap/reap-guide.md` — REAP tool usage, architecture, lifecycle rules");
+  lines.push("- `.reap/genome/application.md` — Project architecture, conventions");
+  lines.push("- `.reap/genome/evolution.md` — AI behavior guide, evolution principles");
+  lines.push("- `.reap/genome/invariants.md` — Absolute constraints");
+  lines.push("- `.reap/environment/summary.md` — Tech stack, source structure, build, tests");
   lines.push("");
-  lines.push("### application.md");
-  lines.push(knowledge.genome.application);
-  lines.push("");
-  lines.push("### evolution.md");
-  lines.push(knowledge.genome.evolution);
-  lines.push("");
-  lines.push("### invariants.md");
-  lines.push(knowledge.genome.invariants);
-  lines.push("");
-
-  if (knowledge.environment) {
-    lines.push("## Environment");
-    lines.push(knowledge.environment);
-    lines.push("");
-  }
 
   if (knowledge.visionGoals) {
     lines.push("## Vision Goals");
