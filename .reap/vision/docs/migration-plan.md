@@ -224,30 +224,10 @@ cp -r .reap-v0_15/life/backlog/* .reap/life/backlog/ 2>/dev/null
 | onLifeRegretted | onLifeRegretted |
 | onMergeSynced | onMergeReconciled |
 
-`onLifeObjected` hook이 발견되면:
-```json
-{
-  "status": "prompt",
-  "command": "migrate",
-  "phase": "hook-mapping",
-  "context": {
-    "hookFile": "onLifeObjected.custom.sh",
-    "hookContent": "(파일 내용)",
-    "options": ["onLifeLearned", "onLifePlanned"]
-  },
-  "prompt": "v0.15의 onLifeObjected hook을 v0.16의 어느 이벤트로 매핑할지 유저에게 물어보세요."
-}
-```
-
-AI가 유저에게:
-```
-v0.15의 `onLifeObjected.custom.sh` hook이 발견되었습니다.
-v0.16에서는 objective 단계가 learning으로 바뀌었습니다.
-이 hook을 어느 시점에 실행할까요?
-
-1. onLifeLearned — learning 단계 완료 후 (탐구 완료 시점)
-2. onLifePlanned — planning 단계 완료 후 (계획 수립 시점)
-```
+`onLifeObjected` hook이 발견되면 AI가 내용을 분석하여 자동 매핑:
+- .sh: lint/typecheck/test 실행 → `onLifePlanned`. context 로딩/탐색 → `onLifeLearned`
+- .md: goal 검토/요구사항 확인 → `onLifeLearned`. 계획 검증/task 확인 → `onLifePlanned`
+- 판단 불가 시 기본값: `onLifeLearned` (v0.15의 objective에 가장 가까운 시점)
 
 ### 3.9 Vision 생성
 - `goals.md` — 빈 템플릿 생성 (Phase 4에서 유저와 함께 채움)
