@@ -210,6 +210,56 @@ AI가 프로젝트의 "완성"을 판단하기 위한 기준점 (최소 10개). 
 - `selfUpgrade()`, `forceUpgrade()`, `updateProject()`, `MigrationRunner`, `detectMigrationGaps()`
 - v0.16.0에서는 이 구조를 계승하되 v-1 문제 해결 원칙 강화
 
+#### v0.15 → v0.16 갭 분석 (2026-03-26 기준)
+
+v0.15의 `reap update`는 아래 기능을 포함. v0.16에서의 현황:
+
+| 기능 | v0.15 | v0.16 현황 | 구현 필요 |
+|------|-------|-----------|----------|
+| selfUpgrade (npm 최신 확인 + 설치) | ✅ | ❌ | Phase 1 |
+| Breaking change guard (autoUpdateMinVersion) | ✅ | ❌ | Phase 1 |
+| Hand-off (업그레이드 후 새 바이너리 위임) | ✅ | ❌ | Phase 1 |
+| Skill/Command sync | ✅ | ✅ `install-skills` | Phase 1에서 통합 |
+| lastCliVersion config 추적 | ✅ | ❌ (필드 미존재) | Phase 1 |
+| Config backfill (새 필드 자동 추가) | ✅ | ❌ | Phase 1 |
+| Template sync (~/.reap/templates/) | ✅ | ❌ | Phase 2 |
+| MigrationRunner (멱등 마이그레이션) | ✅ | ❌ | Phase 2 |
+| Integrity check (checkProject) | ✅ | ❌ | Phase 2 |
+| Structural gap detection | ✅ | ❌ | Phase 2 |
+| Release notice 표시 | ✅ | ❌ (RELEASE_NOTICE.md 미존재) | Phase 3 |
+| Hook migration (migrateHooks) | ✅ | ❌ | Phase 2 |
+| Session hook sync | ✅ | ❌ | Phase 2 |
+| Agent MD sync | ✅ | ❌ | Phase 2 |
+| Legacy cleanup | ✅ | ❌ | Phase 2 |
+| --dry-run 지원 | ✅ | ❌ | Phase 1 |
+| Auto issue report | ✅ | ❌ | Phase 3 |
+
+#### 구현 로드맵
+
+**Phase 1: `reap update` CLI 커맨드 기반** (§7.2 이후)
+- `reap update` 커맨드 추가 (기존 `install-skills`를 흡수)
+- selfUpgrade: npm registry 확인 → 설치 (+dev 빌드 스킵)
+- forceUpgrade + autoUpdateMinVersion guard
+- hand-off: 업그레이드 후 새 바이너리의 `reap update --post-upgrade` 호출
+- lastCliVersion config 필드 추가 + backfill
+- --dry-run 옵션
+- postinstall에서 `install-skills` → `update --post-upgrade`로 전환
+
+**Phase 2: 프로젝트 동기화 + 마이그레이션**
+- MigrationRunner 프레임워크 (멱등, 버전별 마이그레이션 등록)
+- Template sync (artifact 템플릿 → ~/.reap/templates/)
+- Integrity check (checkProject — .reap/ 구조 검증)
+- Structural gap detection + AI 마이그레이션 프롬프트
+- Hook migration + session hook sync
+- Legacy file cleanup
+- Agent MD sync (CLAUDE.md 등)
+
+**Phase 3: 배포 인프라 연동**
+- RELEASE_NOTICE.md 도입 + fetchReleaseNotice()
+- 업데이트 후 release notice 자동 표시
+- Migration failure auto issue report
+- Session init hook에서 버전 불일치 자동 감지 (경로 B)
+
 ---
 
 ## 완료된 항목

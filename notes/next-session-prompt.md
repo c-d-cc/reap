@@ -45,3 +45,13 @@ gen-003~008: 인프라 (backlog, archive, consume, make, CLI 패턴, timestamp)
 gen-009~011: 품질 (artifact path, validation HARD-GATE, genome/environment 경계)
 gen-012~016: 테스트 (submodule → 구조 → unit → e2e → TypeScript 전환)
 gen-017~019: 정리 (restart 제거, abort 2-phase, submodule dirty check)
+
+=======
+
+Vision 에 있느
+
+### Maturity System (spec2 §2)
+
+- [x] Embryo → Normal 전환 제안 (adapt phase, soft/hard check)
+- [x] 성숙도별 prompt 톤 차별화 (bootstrap/growth/cruise) => 확인 필요
+- [x] 소프트웨어 완성 기준 16항목 사전 정의 => 확인 필요

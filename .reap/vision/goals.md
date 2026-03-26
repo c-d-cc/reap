@@ -52,7 +52,9 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 ### Distribution (spec2 §7)
 - [ ] README 재작성 (v0.16 기준, self-evolving pipeline 강조)
 - [ ] npm 배포 준비 (.npmignore 최종 정리, CI/CD)
-- [ ] Update agent 구현 (version migration, idempotent)
+- [ ] Update agent Phase 1: `reap update` CLI (selfUpgrade, hand-off, lastCliVersion, --dry-run)
+- [ ] Update agent Phase 2: 프로젝트 동기화 (MigrationRunner, template sync, integrity check, legacy cleanup)
+- [ ] Update agent Phase 3: 배포 연동 (release notice, auto issue report, session init 자동 감지)
 
 ### Agent Client 확장 (spec2 §6)
 - [ ] OpenCode adapter

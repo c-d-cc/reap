@@ -12,5 +12,4 @@ description: "Local Install — 로컬 빌드 후 글로벌 설치 (테스트용
 2. `npm pack`
 3. `npm install -g ./c-d-cc-reap-*.tgz --force`
 4. `rm c-d-cc-reap-*.tgz`
-5. `node dist/cli/index.js install-skills`
-6. 설치 확인: `reap status`
+5. 설치 확인: `reap status`
