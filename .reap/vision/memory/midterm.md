@@ -20,7 +20,7 @@ gen-028~031에서 gap-driven evolution + vision eval + memory 도입 완료.
 ## Embryo → Normal 전환
 
 31 generation 경과, genome 안정, abort 거의 없음. 전환 조건 충족.
-유저가 아직 결정하지 않음 — 다음 세션에서 다시 논의 필요.
+유저 판단 (2026-03-26): REAP 자체가 아직 완성 단계가 아니고 예상치 못한 genome 변경이 더 있을 수 있으므로 embryo 유지. 배포 후 사용자 프로젝트였다면 전환 시점이지만, self-evolving 중인 REAP 자체는 조금 더 관찰.
 
 ## submodule 관련 반복 문제
 
