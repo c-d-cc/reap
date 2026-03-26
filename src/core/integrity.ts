@@ -36,6 +36,7 @@ export async function checkIntegrity(
   const warnings: string[] = [];
 
   await checkDirectoryStructure(paths, errors);
+  await checkRequiredFiles(paths, errors, warnings);
   await checkConfig(paths, errors, warnings);
   await checkCurrentYml(paths, errors, warnings);
   await checkLineage(paths, errors, warnings);
@@ -64,6 +65,7 @@ async function checkDirectoryStructure(
     { path: paths.backlog, name: "life/backlog/" },
     { path: paths.environmentDomain, name: "environment/domain/" },
     { path: paths.visionDocs, name: "vision/docs/" },
+    { path: paths.memory, name: "vision/memory/" },
   ];
 
   for (const dir of requiredDirs) {
@@ -87,6 +89,46 @@ async function checkDirectoryStructure(
     } catch {
       // Fine — optional
     }
+  }
+}
+
+// ── required files ──────────────────────────────────────────
+
+async function checkRequiredFiles(
+  paths: ReapPaths,
+  errors: string[],
+  warnings: string[],
+): Promise<void> {
+  // reap-guide.md
+  const guidePath = join(paths.reap, "reap-guide.md");
+  if (!(await fileExists(guidePath))) {
+    errors.push("reap-guide.md missing — run 'reap init --repair' or reinstall");
+  }
+
+  // memory tier files
+  const memoryFiles = [
+    { path: paths.memoryLongterm, name: "vision/memory/longterm.md" },
+    { path: paths.memoryMidterm, name: "vision/memory/midterm.md" },
+    { path: paths.memoryShortterm, name: "vision/memory/shortterm.md" },
+  ];
+  for (const f of memoryFiles) {
+    if (!(await fileExists(f.path))) {
+      warnings.push(`${f.name} missing`);
+    }
+  }
+
+  // vision/goals.md
+  if (!(await fileExists(paths.visionGoals))) {
+    warnings.push("vision/goals.md missing");
+  }
+
+  // CLAUDE.md with REAP section
+  const claudeMdPath = join(paths.root, "CLAUDE.md");
+  const claudeMd = await readTextFile(claudeMdPath);
+  if (!claudeMd) {
+    warnings.push("CLAUDE.md missing — run 'reap init --repair'");
+  } else if (!claudeMd.includes(".reap/genome/")) {
+    warnings.push("CLAUDE.md exists but missing REAP section — run 'reap init --repair'");
   }
 }
 

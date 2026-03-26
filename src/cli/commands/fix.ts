@@ -1,4 +1,6 @@
 import { mkdir, stat } from "fs/promises";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import YAML from "yaml";
 import { createPaths } from "../../core/paths.js";
 import { readTextFile, fileExists, writeTextFile } from "../../core/fs.js";
@@ -120,6 +122,50 @@ export async function fixProject(projectRoot: string): Promise<FixResult> {
       issues.push(
         `genome/${gf.name} is missing. Run 'reap init --repair' to restore.`,
       );
+    }
+  }
+
+  // 5. reap-guide.md — auto-restore from package
+  const guidePath = join(paths.reap, "reap-guide.md");
+  if (!(await fileExists(guidePath))) {
+    const __dir = dirname(fileURLToPath(import.meta.url));
+    const srcGuide = await readTextFile(join(__dir, "..", "templates", "reap-guide.md"));
+    if (srcGuide) {
+      await writeTextFile(guidePath, srcGuide);
+      fixed.push("Restored missing reap-guide.md");
+    } else {
+      issues.push("reap-guide.md missing and cannot restore from package");
+    }
+  }
+
+  // 6. Memory tier files — auto-create if missing
+  const memoryDir = paths.memory;
+  if (!(await dirExists(memoryDir))) {
+    await mkdir(memoryDir, { recursive: true });
+    fixed.push("Recreated missing vision/memory/ directory");
+  }
+  const memoryFiles = [
+    { path: paths.memoryLongterm, name: "longterm.md", header: "# Longterm Memory\n" },
+    { path: paths.memoryMidterm, name: "midterm.md", header: "# Midterm Memory\n" },
+    { path: paths.memoryShortterm, name: "shortterm.md", header: "# Shortterm Memory\n" },
+  ];
+  for (const mf of memoryFiles) {
+    if (!(await fileExists(mf.path))) {
+      await writeTextFile(mf.path, mf.header);
+      fixed.push(`Created missing vision/memory/${mf.name}`);
+    }
+  }
+
+  // 7. CLAUDE.md — auto-repair via ensureClaudeMd
+  const claudeMdPath = join(paths.root, "CLAUDE.md");
+  const claudeMd = await readTextFile(claudeMdPath);
+  if (!claudeMd || !claudeMd.includes(".reap/genome/")) {
+    const { ensureClaudeMd } = await import("./init/common.js");
+    const configContent = await readTextFile(paths.config);
+    const projectName = configContent ? (YAML.parse(configContent)?.project ?? "my-project") : "my-project";
+    const action = await ensureClaudeMd(paths.root, projectName);
+    if (action !== "skipped") {
+      fixed.push(`CLAUDE.md ${action} with REAP section`);
     }
   }
 
