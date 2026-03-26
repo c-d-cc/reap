@@ -1,6 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-032-4baaef
+consumedAt: 2026-03-26T10:12:03.427Z
 priority: medium
 createdAt: 2026-03-26T08:25:58.056Z
 ---

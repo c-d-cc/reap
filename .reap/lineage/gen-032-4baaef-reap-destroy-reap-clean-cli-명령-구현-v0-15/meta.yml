@@ -1,0 +1,19 @@
+id: gen-032-4baaef
+type: embryo
+goal: reap destroy + reap clean CLI 명령 구현 (v0.15 패리티)
+parents:
+  - gen-031-a1fef3
+timeline:
+  - stage: learning
+    at: 2026-03-26T10:12:03.423Z
+  - stage: planning
+    at: 2026-03-26T10:14:54.992Z
+  - stage: implementation
+    at: 2026-03-26T10:15:29.583Z
+  - stage: validation
+    at: 2026-03-26T10:19:13.771Z
+  - stage: completion
+    at: 2026-03-26T10:20:06.206Z
+fitnessFeedback:
+  text: destroy/clean 구현 완료. 319 tests 통과. v0.15 패리티 달성.
+  evaluatedAt: 2026-03-26T10:22:37.975Z

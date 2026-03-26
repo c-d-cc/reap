@@ -44,7 +44,7 @@ src/
 │   ├── template.ts             — artifact 템플릿 복사
 │   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). lineage 편향 분석 제거됨 (gen-030)
 ├── cli/
-│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, cruise, install-skills, fix)
+│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, cruise, install-skills, fix, destroy, clean)
 │   └── commands/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair 지원)
 │       ├── run/                — stage 실행 (20 handlers)
@@ -66,7 +66,9 @@ src/
 │       │   ├── pull.ts         — git fetch + branch 분석 + prompt 반환
 │       │   └── knowledge.ts    — genome/environment/vision/memory 관리 (reload/genome/environment/memory)
 │       ├── status.ts           — 현재 상태 조회
-│       └── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
+│       ├── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
+│       ├── destroy.ts          — REAP 완전 제거 (--confirm 필수, .reap/ + CLAUDE.md + .gitignore)
+│       └── clean.ts            — 선택적 상태 초기화 (--lineage, --life, --backlog, --hooks)
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/claude-code/       — Claude Code 어댑터
 │   ├── install.ts              — skill 파일 설치 (~/.claude/commands/)

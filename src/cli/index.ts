@@ -8,6 +8,8 @@ import { execute as makeExecute } from "./commands/make.js";
 import { execute as cruiseExecute } from "./commands/cruise.js";
 import { execute as installSkillsExecute } from "./commands/install-skills.js";
 import { execute as fixExecute } from "./commands/fix.js";
+import { execute as destroyExecute } from "./commands/destroy.js";
+import { execute as cleanExecute } from "./commands/clean.js";
 
 const program = new Command();
 
@@ -79,6 +81,30 @@ program
   .option("--check", "Check only — report issues without fixing")
   .action(async (options: { check?: boolean }) => {
     await fixExecute(options.check);
+  });
+
+program
+  .command("destroy")
+  .description("Completely remove REAP from this project")
+  .option("--confirm", "Confirm destruction without prompt")
+  .action(async (options: { confirm?: boolean }) => {
+    await destroyExecute(options.confirm);
+  });
+
+program
+  .command("clean")
+  .description("Selectively reset REAP project state")
+  .option("--lineage <mode>", "Lineage action (compress or delete)")
+  .option("--life", "Clear current generation and artifacts")
+  .option("--backlog", "Delete all backlog items")
+  .option("--hooks <mode>", "Hooks action (reset)")
+  .action(async (options: { lineage?: string; life?: boolean; backlog?: boolean; hooks?: string }) => {
+    await cleanExecute({
+      lineage: options.lineage as "compress" | "delete" | undefined,
+      life: options.life,
+      backlog: options.backlog,
+      hooks: options.hooks as "reset" | undefined,
+    });
   });
 
 program.parse();
