@@ -16,6 +16,8 @@ import { execute as mateExecute } from "./mate.js";
 import { execute as mergeExecute } from "./merge.js";
 import { execute as reconcileExecute } from "./reconcile.js";
 import { execute as pushExecute } from "./push.js";
+import { execute as pullExecute } from "./pull.js";
+import { execute as knowledgeExecute } from "./knowledge.js";
 
 const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, phase?: string, extra?: string) => Promise<void>> = {
   learning: learningExecute,
@@ -32,6 +34,8 @@ const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, pha
   merge: mergeExecute,
   reconcile: reconcileExecute,
   push: pushExecute,
+  pull: pullExecute,
+  knowledge: knowledgeExecute,
 };
 
 export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string; sourceAction?: string; saveBacklog?: boolean }): Promise<void> {

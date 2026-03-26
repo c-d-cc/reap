@@ -9,7 +9,7 @@
 ## Tech Stack
 
 - Runtime: Bun (build), Node.js (execution)
-- Build: `bun build` → single bundle (`dist/cli/index.js`, ~370KB)
+- Build: `bun build` → single bundle (`dist/cli/index.js`, ~400KB)
 - Dependencies: `yaml` v2 (유일한 production dependency)
 - CLI Framework: 자체 구현 (`src/libs/cli.ts`) — commander/yargs 대신
 - Crypto: Node.js native `crypto` (nonce, hash)
@@ -34,7 +34,7 @@ src/
 │   ├── backlog.ts              — backlog scan, consume, revert, create
 │   ├── archive.ts              — generation 아카이빙 (life → lineage)
 │   ├── cruise.ts               — cruise mode 관리 ("N/M" 포맷)
-│   ├── git.ts                  — git 연동 (commit, diff, push, merge-base)
+│   ├── git.ts                  — git 연동 (commit, diff, push, pull, fetch, branch analysis)
 │   ├── hooks.ts                — lifecycle hook engine (조건부 실행, 순서 제어, 상세 결과)
 │   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt)
 │   ├── scanner.ts              — 프로젝트 스캔 (init용)
@@ -45,7 +45,7 @@ src/
 │   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, backlog, cruise, install-skills)
 │   └── commands/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지)
-│       ├── run/                — stage 실행 (18 handlers)
+│       ├── run/                — stage 실행 (20 handlers)
 │       │   ├── start.ts        — generation 생성 (scan → create)
 │       │   ├── learning.ts     — 탐구 (work → complete)
 │       │   ├── planning.ts     — 계획 (work → complete)
@@ -60,7 +60,9 @@ src/
 │       │   ├── next.ts         — 다음 stage 자동 진행
 │       │   ├── back.ts         — 이전 stage 회귀
 │       │   ├── abort.ts        — generation 중단 (2-phase: confirm → execute)
-│       │   └── push.ts         — git push (상태 검증 포함)
+│       │   ├── push.ts         — git push (상태 검증 포함)
+│       │   ├── pull.ts         — git fetch + branch 분석 + prompt 반환
+│       │   └── knowledge.ts    — genome/environment/vision 관리 (reload/genome/environment)
 │       └── status.ts           — 현재 상태 조회
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/claude-code/       — Claude Code 어댑터
@@ -75,7 +77,7 @@ src/
 
 ## Build & Scripts
 
-- `npm run build` — bun build → `dist/cli/index.js` (~370KB single bundle) + skill 복사
+- `npm run build` — bun build → `dist/cli/index.js` (~400KB single bundle) + skill 복사
 - `npm run dev` — bun으로 직접 실행 (빌드 불필요)
 - `npm run typecheck` — tsc --noEmit
 - `postinstall` — skill 자동 설치

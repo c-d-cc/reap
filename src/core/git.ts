@@ -142,6 +142,113 @@ export function checkSubmoduleDirty(cwd: string): { name: string; dirty: boolean
   }
 }
 
+/**
+ * Get the current branch name.
+ * Returns null if detached HEAD or not a git repo.
+ */
+export function gitCurrentBranch(cwd: string): string | null {
+  if (!isGitRepo(cwd)) return null;
+
+  try {
+    return execSync("git rev-parse --abbrev-ref HEAD", {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim() || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Run git fetch --all. Returns true on success.
+ */
+export function gitFetchAll(cwd: string): boolean {
+  try {
+    execSync("git fetch --all", {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get ahead/behind counts between two refs.
+ * Returns { ahead, behind } or null on error.
+ */
+export function gitAheadBehind(cwd: string, local: string, remote: string): { ahead: number; behind: number } | null {
+  try {
+    const output = execSync(`git rev-list --left-right --count ${local}...${remote}`, {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+
+    const [ahead, behind] = output.split(/\s+/).map(Number);
+    return { ahead, behind };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check if a remote tracking branch exists for the given branch.
+ */
+export function gitHasRemoteBranch(cwd: string, branch: string): boolean {
+  try {
+    execSync(`git rev-parse --verify origin/${branch}`, {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Get list of remote branches not merged into the current branch.
+ */
+export function gitUnmergedRemoteBranches(cwd: string): string[] {
+  try {
+    const output = execSync("git branch -r --no-merged", {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    }).trim();
+
+    if (!output) return [];
+
+    return output
+      .split("\n")
+      .map((b) => b.trim())
+      .filter((b) => b && !b.includes("->"));
+  } catch {
+    return [];
+  }
+}
+
+/**
+ * Execute git pull --ff-only. Returns true on success.
+ */
+export function gitPullFfOnly(cwd: string): boolean {
+  try {
+    execSync("git pull --ff-only", {
+      cwd,
+      encoding: "utf-8",
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 export function gitPush(cwd: string): boolean {
   try {
     execSync("git push", {
