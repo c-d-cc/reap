@@ -249,8 +249,13 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
       promptSections.push("");
     }
 
-    promptSections.push("3. **Suggest Next Generation Candidates**: Record as type: task in backlog");
-    promptSections.push("4. **Reflect Environment Changes**: Create environment-change backlog if needed");
+    promptSections.push("3. **Suggest Next Generation Candidates**: Write suggestions in the completion artifact's \"Next Generation Hints\" section as plain text. Do NOT create backlog items.");
+    promptSections.push("");
+    promptSections.push("### CRITICAL — Backlog Creation Prohibited in Adapt Phase");
+    promptSections.push("- Do NOT run `reap make backlog` during the adapt phase.");
+    promptSections.push("- Do NOT create backlog files by any means.");
+    promptSections.push("- Next generation candidates and improvement ideas go in the **artifact text only** (Next Generation Hints section).");
+    promptSections.push("- The human will decide which suggestions become backlog items after reviewing the artifact.");
     promptSections.push("");
     promptSections.push("When done: reap run completion --phase commit");
 

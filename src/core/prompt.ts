@@ -227,6 +227,8 @@ export function buildBasePrompt(
   lines.push("## Echo Chamber Prevention");
   lines.push("- AI autonomous additions are only allowed within the direct cause/impact scope of the current goal");
   lines.push("- 'Nice to have' items must go to a separate backlog after human review");
+  lines.push("- **Adapt phase**: Do NOT create backlog items. Write next-generation suggestions in the completion artifact text only. The human decides which suggestions become backlog.");
+  lines.push("- **Adapt phase**: Do NOT run `reap make backlog` command.");
   lines.push("");
 
   lines.push("## AI-Human Collaboration Principles");

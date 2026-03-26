@@ -238,3 +238,4 @@ All REAP artifacts and user interactions follow the user's configured language (
 3. **ALL development work MUST follow the REAP lifecycle.** Do NOT bypass it unless the human explicitly asks.
 4. **Genome is the authoritative source of truth.** When making decisions about architecture, conventions, or constraints, ALWAYS consult the Genome first.
 5. **Keep Genome fresh.** If you notice the Genome is missing information or contains outdated information, inform the human.
+6. **Do NOT create backlog items during the adapt phase.** Next generation candidates and suggestions must be written in the completion artifact text only (Next Generation Hints section). The human decides which suggestions become backlog items. Never run `reap make backlog` during adapt.
