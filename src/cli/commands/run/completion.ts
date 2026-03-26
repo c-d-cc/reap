@@ -6,7 +6,7 @@ import { verifyNonce, setNonce } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
 import { archiveGeneration } from "../../../core/archive.js";
 import { consumeBacklog } from "../../../core/backlog.js";
-import { runHooks } from "../../../core/hooks.js";
+import { executeHooks } from "../../../core/hooks.js";
 import { parseCruiseCount, advanceCruise } from "../../../core/cruise.js";
 import { gitCommitAll, checkSubmoduleDirty } from "../../../core/git.js";
 import {
@@ -307,7 +307,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
 
     // Run completion hooks
     const completionEvent = isMerge ? "onMergeCompleted" : "onLifeCompleted";
-    await runHooks(paths.hooks, completionEvent, paths.root).catch(() => {});
+    await executeHooks(paths.hooks, completionEvent, paths.root).catch(() => {});
 
     // Advance cruise count if in cruise mode
     const cruiseStillActive = await advanceCruise(paths.config).catch(() => false);

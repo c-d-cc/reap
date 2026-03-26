@@ -68,6 +68,30 @@ export interface ReapConfig {
 
 // ── Output ──────────────────────────────────────────────────
 
+// ── Hook Engine ────────────────────────────────────────────
+
+export type ReapHookEvent =
+  // Normal lifecycle
+  | "onLifeStarted" | "onLifeLearned" | "onLifePlanned" | "onLifeImplemented"
+  | "onLifeValidated" | "onLifeCompleted" | "onLifeTransited"
+  // Merge lifecycle
+  | "onMergeStarted" | "onMergeDetected" | "onMergeMated" | "onMergeMerged"
+  | "onMergeReconciled" | "onMergeValidated" | "onMergeCompleted" | "onMergeTransited";
+
+export interface HookResult {
+  name: string;
+  event: string;
+  type: "sh" | "md";
+  status: "executed" | "skipped";
+  exitCode?: number;
+  stdout?: string;
+  stderr?: string;
+  content?: string;
+  skipReason?: string;
+}
+
+// ── Output ──────────────────────────────────────────────────
+
 export interface ReapOutput {
   status: "ok" | "prompt" | "error";
   command: string;

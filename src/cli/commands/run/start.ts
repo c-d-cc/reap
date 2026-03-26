@@ -3,7 +3,7 @@ import { createPaths } from "../../../core/paths.js";
 import { GenerationManager } from "../../../core/generation.js";
 import { fileExists } from "../../../core/fs.js";
 import { emitOutput, emitError } from "../../../core/output.js";
-import { runHooks } from "../../../core/hooks.js";
+import { executeHooks } from "../../../core/hooks.js";
 import { scanBacklog, consumeBacklog } from "../../../core/backlog.js";
 
 export async function execute(phase?: string, goal?: string, type?: string, parents?: string, backlog?: string): Promise<void> {
@@ -64,7 +64,7 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
       }
 
       const state = await gm.createMerge(goal!, parentIds);
-      await runHooks(paths.hooks, "onMergeStarted", paths.root).catch(() => {});
+      await executeHooks(paths.hooks, "onMergeStarted", paths.root).catch(() => {});
 
       emitOutput({
         status: "ok",
@@ -95,7 +95,7 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
     }
 
     // Run onLifeStarted hooks
-    await runHooks(paths.hooks, "onLifeStarted", paths.root).catch(() => {});
+    await executeHooks(paths.hooks, "onLifeStarted", paths.root).catch(() => {});
 
     emitOutput({
       status: "ok",

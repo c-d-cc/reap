@@ -4,7 +4,7 @@ import { generateToken, verifyToken } from "./nonce.js";
 import { nextStage, prevStage, nextMergeStage, prevMergeStage } from "./lifecycle.js";
 import { readTextFile } from "./fs.js";
 import { emitError } from "./output.js";
-import { runHooks } from "./hooks.js";
+import { executeHooks } from "./hooks.js";
 import type { ReapPaths } from "./paths.js";
 
 const STAGE_ARTIFACTS: Partial<Record<string, string>> = {
@@ -173,9 +173,9 @@ export async function performTransition(
   if (paths) {
     const stageEvent = STAGE_EVENTS[next];
     if (stageEvent) {
-      await runHooks(paths.hooks, stageEvent, paths.root).catch(() => {});
+      await executeHooks(paths.hooks, stageEvent, paths.root).catch(() => {});
     }
-    await runHooks(paths.hooks, "onLifeTransited", paths.root).catch(() => {});
+    await executeHooks(paths.hooks, "onLifeTransited", paths.root).catch(() => {});
   }
 
   return next;
@@ -211,7 +211,7 @@ export async function performMergeTransition(
   if (paths) {
     const stageEvent = MERGE_STAGE_EVENTS[next];
     if (stageEvent) {
-      await runHooks(paths.hooks, stageEvent, paths.root).catch(() => {});
+      await executeHooks(paths.hooks, stageEvent, paths.root).catch(() => {});
     }
   }
 

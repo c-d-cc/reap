@@ -35,7 +35,7 @@ src/
 │   ├── archive.ts              — generation 아카이빙 (life → lineage)
 │   ├── cruise.ts               — cruise mode 관리 ("N/M" 포맷)
 │   ├── git.ts                  — git 연동 (commit, diff, push, merge-base)
-│   ├── hooks.ts                — lifecycle hook 실행 (.sh, .md)
+│   ├── hooks.ts                — lifecycle hook engine (조건부 실행, 순서 제어, 상세 결과)
 │   ├── scanner.ts              — 프로젝트 스캔 (init용)
 │   ├── fs.ts                   — 파일 유틸리티
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError)
@@ -95,6 +95,10 @@ src/
 - `npm run test:e2e` — bash tests/e2e/run.sh
 - `npm run test:scenario` — bash tests/scenario/run.sh
 - `npm run test` — 전체 (unit + e2e + scenario)
+
+## Types (주요 타입)
+- `HookResult` — hook 실행 결과 (name, event, type, status, exitCode, stdout, stderr, content, skipReason)
+- `ReapHookEvent` — 라이프사이클 hook 이벤트 union type (14개 이벤트)
 
 ## Key Design Decisions
 
