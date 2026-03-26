@@ -7,7 +7,7 @@ import type { ReapPaths } from "../../core/paths.js";
 import { readTextFile, writeTextFile, fileExists, ensureDir } from "../../core/fs.js";
 import { emitOutput, emitError } from "../../core/output.js";
 import { isGitRepo } from "../../core/git.js";
-import { detectV15 } from "../../core/integrity.js";
+import { detectV15, cleanupLegacyProjectSkills } from "../../core/integrity.js";
 import { ensureClaudeMd } from "./init/common.js";
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -417,7 +417,10 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
     } catch { /* empty */ }
   }
 
-  // 3.9 Vision + Memory creation
+  // 3.9 Legacy project-level skills cleanup
+  const legacyCleaned = await cleanupLegacyProjectSkills(paths.root);
+
+  // 3.10 Vision + Memory creation
   const goalsContent = `# Vision Goals
 
 ## Ultimate Goal
@@ -453,6 +456,7 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
       "lineage-copy",
       "backlog-copy",
       "hooks-map",
+      "legacy-cleanup",
       "vision-create",
       "claude-md",
     ],
@@ -465,6 +469,7 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
       evolutionTemplate,
       hooksMapped,
       hooksUnmapped,
+      legacyCleaned,
       targetPaths: {
         application: paths.application,
         evolution: paths.evolution,
@@ -622,7 +627,7 @@ export async function executeComplete(paths: ReapPaths): Promise<void> {
     completed: [
       "backup", "create-dirs", "config-migrate", "genome-convert",
       "environment-copy", "lineage-copy", "backlog-copy", "hooks-map",
-      "vision-create", "claude-md", "vision-setup",
+      "legacy-cleanup", "vision-create", "claude-md", "vision-setup",
     ],
     context: {
       backup: ".reap/v15",

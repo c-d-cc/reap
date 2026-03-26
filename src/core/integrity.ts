@@ -1,4 +1,4 @@
-import { readdir, stat } from "fs/promises";
+import { readdir, stat, rm } from "fs/promises";
 import { join } from "path";
 import { homedir } from "os";
 import YAML from "yaml";
@@ -629,4 +629,64 @@ async function checkGlobPattern(
       target.push(`${displayDir}${entry}: ${message}`);
     }
   }
+}
+
+// ── legacy project-level cleanup ─────────────────────────────
+
+const LEGACY_PREFIX_PATTERN = /^(?:reap|reapdev)\./;
+
+/**
+ * Remove legacy project-level REAP commands and skills.
+ *
+ * v0.15 installed skills at project-level `.claude/commands/reap.*.md`
+ * and `.claude/skills/reap.* /SKILL.md`. v0.16 uses user-level
+ * `~/.claude/commands/` only, so project-level files are unnecessary.
+ *
+ * Only deletes entries matching `reap.` or `reapdev.` prefix.
+ * Preserves the `.claude/commands/` and `.claude/skills/` directories themselves.
+ *
+ * @returns list of deleted paths (relative to projectRoot)
+ */
+export async function cleanupLegacyProjectSkills(
+  projectRoot: string,
+): Promise<string[]> {
+  const deleted: string[] = [];
+
+  // 1. .claude/commands/reap.*.md and .claude/commands/reapdev.*.md
+  const commandsDir = join(projectRoot, ".claude", "commands");
+  try {
+    const entries = await readdir(commandsDir);
+    for (const entry of entries) {
+      if (LEGACY_PREFIX_PATTERN.test(entry)) {
+        await rm(join(commandsDir, entry), { force: true });
+        deleted.push(`.claude/commands/${entry}`);
+      }
+    }
+  } catch {
+    // directory doesn't exist — nothing to clean
+  }
+
+  // 2. .claude/skills/reap.*/ and .claude/skills/reapdev.*/
+  const skillsDir = join(projectRoot, ".claude", "skills");
+  try {
+    const entries = await readdir(skillsDir);
+    for (const entry of entries) {
+      if (LEGACY_PREFIX_PATTERN.test(entry)) {
+        const entryPath = join(skillsDir, entry);
+        try {
+          const s = await stat(entryPath);
+          if (s.isDirectory()) {
+            await rm(entryPath, { recursive: true, force: true });
+            deleted.push(`.claude/skills/${entry}/`);
+          }
+        } catch {
+          // stat failed — skip
+        }
+      }
+    }
+  } catch {
+    // directory doesn't exist — nothing to clean
+  }
+
+  return deleted;
 }

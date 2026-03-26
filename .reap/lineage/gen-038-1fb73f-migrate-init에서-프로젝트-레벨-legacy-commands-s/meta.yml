@@ -1,0 +1,20 @@
+id: gen-038-1fb73f
+type: embryo
+goal: migrate/init에서 프로젝트 레벨 legacy commands/skills 정리
+parents:
+  - gen-037-5f3c11
+timeline:
+  - stage: learning
+    at: 2026-03-26T17:51:20.541Z
+  - stage: planning
+    at: 2026-03-26T17:53:32.819Z
+  - stage: implementation
+    at: 2026-03-26T17:54:01.409Z
+  - stage: validation
+    at: 2026-03-26T17:57:10.441Z
+  - stage: completion
+    at: 2026-03-26T17:58:01.852Z
+fitnessFeedback:
+  text: migrate/init에서 legacy project-level commands/skills 정리 기능 구현 완료.
+    cleanupLegacyProjectSkills 공통 함수, unit 7개 + e2e 2개 포함.
+  evaluatedAt: 2026-03-26T17:59:59.506Z
