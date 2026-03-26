@@ -17,10 +17,3 @@
 
 - `.reap/environment/summary.md` — 소스 구조, 빌드, 테스트, 설계 결정 (항상 로딩)
 - `.reap/environment/domain/` — 도메인 지식 (필요 시 로딩)
-
-## Quick Start
-
-1. `reap status` — 현재 상태 확인
-2. `/reap.start` — 새 generation 시작
-3. `/reap.evolve` — 전체 lifecycle 실행
-4. `/reap.help` — 사용 가능한 명령어 확인

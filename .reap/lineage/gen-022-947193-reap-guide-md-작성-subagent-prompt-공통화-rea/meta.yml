@@ -1,0 +1,20 @@
+id: gen-022-947193
+type: embryo
+goal: reap-guide.md 작성 + subagent prompt 공통화 (reap 지식 주입 체계 구축)
+parents:
+  - gen-021-82a4a0
+timeline:
+  - stage: learning
+    at: 2026-03-26T05:41:56.739Z
+  - stage: planning
+    at: 2026-03-26T05:44:03.749Z
+  - stage: implementation
+    at: 2026-03-26T05:44:46.691Z
+  - stage: validation
+    at: 2026-03-26T05:47:51.096Z
+  - stage: completion
+    at: 2026-03-26T05:48:43.804Z
+fitnessFeedback:
+  text: reap-guide와 prompt 공통화 모두 잘 구현됨. 유저 리뷰를 통해 소스 코드 대조 검증 완료, 미구현 기능 제거, 구조
+    개선 반영됨.
+  evaluatedAt: 2026-03-26T07:01:49.928Z

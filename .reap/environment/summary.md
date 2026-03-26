@@ -21,10 +21,10 @@
 ```
 src/
 ├── types/index.ts              — 타입 정의 (GenerationState, ReapConfig, ReapOutput 등)
-├── core/                       — 핵심 로직 (18 modules)
+├── core/                       — 핵심 로직 (19 modules)
 │   ├── lifecycle.ts            — stage 순서 정의 (next/prev)
 │   ├── generation.ts           — generation CRUD, ID 생성
-│   ├── paths.ts                — .reap/ 경로 상수
+│   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스)
 │   ├── nonce.ts                — 암호학적 token (SHA256)
 │   ├── stage-transition.ts     — nonce 검증, artifact 검증, stage 전환
 │   ├── maturity.ts             — bootstrap/growth/cruise 감지, 완성 기준 16항목
@@ -36,6 +36,7 @@ src/
 │   ├── cruise.ts               — cruise mode 관리 ("N/M" 포맷)
 │   ├── git.ts                  — git 연동 (commit, diff, push, merge-base)
 │   ├── hooks.ts                — lifecycle hook engine (조건부 실행, 순서 제어, 상세 결과)
+│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt)
 │   ├── scanner.ts              — 프로젝트 스캔 (init용)
 │   ├── fs.ts                   — 파일 유틸리티
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError)
@@ -65,7 +66,9 @@ src/
 ├── adapters/claude-code/       — Claude Code 어댑터
 │   ├── install.ts              — skill 파일 설치 (~/.claude/commands/)
 │   └── skills/                 — 18 slash command files (.md)
-└── templates/artifacts/        — stage별 artifact 템플릿
+└── templates/                  — 템플릿 파일
+    ├── reap-guide.md           — REAP 도구 가이드 (subagent prompt에 주입)
+    └── artifacts/              — stage별 artifact 템플릿
     ├── normal/                 — 01~05 (learning~completion)
     └── merge/                  — 01~06 (detect~completion)
 ```
