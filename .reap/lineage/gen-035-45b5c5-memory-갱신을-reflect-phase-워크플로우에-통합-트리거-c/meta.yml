@@ -1,0 +1,19 @@
+id: gen-035-45b5c5
+type: embryo
+goal: Memory 갱신을 reflect phase 워크플로우에 통합 — 트리거 + criteria 명시
+parents:
+  - gen-034-674857
+timeline:
+  - stage: learning
+    at: 2026-03-26T11:03:19.590Z
+  - stage: planning
+    at: 2026-03-26T11:05:14.700Z
+  - stage: implementation
+    at: 2026-03-26T11:05:42.136Z
+  - stage: validation
+    at: 2026-03-26T11:08:35.731Z
+  - stage: completion
+    at: 2026-03-26T11:09:30.727Z
+fitnessFeedback:
+  text: Memory 갱신 워크플로우 통합 완료. criteria가 명확하여 reflect phase에서 자연스럽게 갱신됨.
+  evaluatedAt: 2026-03-26T11:12:19.468Z

@@ -139,6 +139,12 @@ export function buildBasePrompt(
       lines.push(knowledge.memoryMidterm);
       lines.push("");
     }
+    lines.push("### Memory Update Criteria");
+    lines.push("- **Shortterm** (every generation — mandatory): generation summary, next session context, undecided matters, backlog snapshot");
+    lines.push("- **Midterm** (when context changes): large task flow, multi-gen plans, agreed directions");
+    lines.push("- **Longterm** (only when lessons emerge): design lessons, architecture decision background, project transition lessons");
+    lines.push("- **Do NOT write**: code change details (environment), test numbers (artifact), genome-duplicate principles");
+    lines.push("");
   }
 
   lines.push("## Current State");

@@ -46,6 +46,29 @@ Memory 활용 규칙:
 - **간결하게 유지** — 각 tier가 비대해지지 않도록 주기적 정리
 - **아키텍처 변경 시 반드시 반영** — 새 기능/구조 추가 시 evolution.md와 memory 모두 업데이트
 
+### Memory 갱신 Criteria
+
+**Shortterm** (매 generation 갱신 — 필수):
+- 이번 generation에서 한 일 요약
+- 다음 세션에 넘겨야 할 맥락
+- 미결정 사항, 진행 중인 논의
+- 현재 backlog 상태 스냅샷
+
+**Midterm** (맥락이 바뀔 때 갱신):
+- 진행 중인 큰 작업의 흐름
+- 멀티 generation에 걸친 계획
+- 유저와 합의한 방향성
+
+**Longterm** (교훈이 생길 때만):
+- 반복 참조할 설계 교훈
+- 아키텍처 결정의 배경
+- 프로젝트 전환 과정에서 배운 것
+
+**갱신 안 할 것**:
+- 코드 변경 상세 (environment가 담당)
+- 테스트 수치 (artifact가 담당)
+- genome에 이미 있는 원칙 (중복)
+
 ## Self-exploration 우선
 
 첫 generation(또는 genome이 빈약한 상태)에서는 코드 변경보다 자기 탐구를 우선.

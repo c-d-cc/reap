@@ -47,6 +47,29 @@ Memory is a free-form recording system under `.reap/vision/memory/` where AI can
 - **Any time**: Memory can be updated during any stage if useful context arises
 - **Shortterm cleanup**: Clear shortterm items that have been acted on
 
+### Update Criteria
+
+**Shortterm** (update every generation — mandatory):
+- Summary of what was done in this generation
+- Context to hand off to the next session
+- Undecided matters, ongoing discussions
+- Current backlog state snapshot
+
+**Midterm** (update when context changes):
+- Flow of large ongoing tasks
+- Multi-generation plans
+- Directions agreed with the user
+
+**Longterm** (update only when lessons emerge):
+- Design lessons worth repeating
+- Background behind architecture decisions
+- Lessons from project transitions
+
+**Do NOT write**:
+- Code change details (environment handles this)
+- Test numbers (artifact handles this)
+- Principles already in genome (no duplication)
+
 ## .reap/ Structure
 
 ```

@@ -100,6 +100,29 @@ Memory rules:
 - AI decides when to read, write, promote between tiers, or clean up
 - Keep each tier concise
 
+### Memory Update Criteria
+
+**Shortterm** (update every generation — mandatory):
+- Summary of what was done in this generation
+- Context to hand off to the next session
+- Undecided matters, ongoing discussions
+- Current backlog state snapshot
+
+**Midterm** (update when context changes):
+- Flow of large ongoing tasks
+- Multi-generation plans
+- Directions agreed with the user
+
+**Longterm** (update only when lessons emerge):
+- Design lessons worth repeating
+- Background behind architecture decisions
+- Lessons from project transitions
+
+**Do NOT write**:
+- Code change details (environment handles this)
+- Test numbers (artifact handles this)
+- Principles already in genome (no duplication)
+
 ## Environment Refresh at Completion
 
 Incrementally update environment/summary.md during reflect phase:
