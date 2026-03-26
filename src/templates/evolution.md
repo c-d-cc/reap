@@ -76,6 +76,30 @@ When encountering a problem, never work around it and move on. Always track the 
 
 Decision rule: "If this problem occurs again, would I have to repeat the same workaround?" → If yes, a root cause fix is required.
 
+## Architecture Change = Genome Sync
+
+When adding new features/structures or changing architecture, if the change affects how the AI should behave, it MUST be reflected in the genome (evolution.md or application.md).
+
+Decision rule: "If a new agent in the next session doesn't know about this change, can it still work correctly?" → If no, genome update is required.
+
+## Vision
+
+Vision consists of Goals and Memory.
+
+### Goals (`vision/goals.md`)
+Long-term project objectives. During the adapt phase, gap analysis against goals determines the next generation's direction.
+
+### Memory (`vision/memory/`)
+Free-form space for the AI to record project-related knowledge. 3-tier structure:
+- **longterm.md** — Project lifetime. Recurring lessons, decision backgrounds, architecture rationale
+- **midterm.md** — Multi-generation span. Current work context, multi-gen plans
+- **shortterm.md** — 1-2 sessions. Next-session handoff, immediate context
+
+Memory rules:
+- Freely readable/writable at any time — no constraints like genome
+- AI decides when to read, write, promote between tiers, or clean up
+- Keep each tier concise
+
 ## Environment Refresh at Completion
 
 Incrementally update environment/summary.md during reflect phase:
