@@ -1,0 +1,21 @@
+id: gen-034-674857
+type: embryo
+goal: Clarity level 자동 판단 로직 — vision/backlog/genome 상태에서 코드 기반 계산
+parents:
+  - gen-033-044437
+timeline:
+  - stage: learning
+    at: 2026-03-26T10:46:56.963Z
+  - stage: planning
+    at: 2026-03-26T10:49:35.148Z
+  - stage: implementation
+    at: 2026-03-26T10:50:13.280Z
+  - stage: validation
+    at: 2026-03-26T10:53:40.473Z
+  - stage: completion
+    at: 2026-03-26T10:54:48.853Z
+fitnessFeedback:
+  text: "self-assessment: OK. Clarity 자동 판단 로직 구현 완료. calculateClarity pure
+    function + evolve.ts 데이터 수집 + prompt 주입. 20개 신규 테스트, 350 tests 전체 통과. 기존 코드
+    영향 없음."
+  evaluatedAt: 2026-03-26T10:56:47.992Z

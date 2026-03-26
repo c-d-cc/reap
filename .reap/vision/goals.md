@@ -23,7 +23,7 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 ### Clarity-driven Interaction (spec2 §0)
 - [x] evolution.md에 clarity 원칙 내장 (template 포함)
 - [x] evolve/stage prompt에 clarity 가이드 주입
-- [ ] Clarity level 자동 판단 로직 (코드 기반 — vision/backlog/genome 상태에서 계산)
+- [x] Clarity level 자동 판단 로직 (코드 기반 — vision/backlog/genome 상태에서 계산) (gen-034)
 
 ### Maturity System (spec2 §2)
 - [x] Embryo → Normal 전환 제안 (adapt phase, soft/hard check)

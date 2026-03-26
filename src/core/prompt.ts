@@ -8,6 +8,8 @@ import {
   getMaturityBehaviorGuide,
   formatCompletionCriteria,
 } from "./maturity.js";
+import type { ClarityResult } from "./clarity.js";
+import { getClarityGuide } from "./clarity.js";
 
 // ── Types ────────────────────────────────────────────────────
 
@@ -69,6 +71,7 @@ export function buildBasePrompt(
   paths: ReapPaths,
   state: GenerationState | null,
   cruiseCount?: string,
+  clarityResult?: ClarityResult,
 ): string {
   const lines: string[] = [];
   const isMerge = state?.type === "merge";
@@ -260,17 +263,17 @@ export function buildBasePrompt(
   lines.push("## Clarity-driven Interaction");
   lines.push("Your interaction level is automatically determined by the clarity of the current context.");
   lines.push("");
+
+  // Inject calculated clarity result if available
+  if (clarityResult) {
+    lines.push(getClarityGuide(clarityResult));
+    lines.push("");
+  }
+
   lines.push("### Clarity Levels:");
   lines.push("- **High clarity** (goal clear, details defined, specific tasks listed) → Minimal questions, execute autonomously");
   lines.push("- **Medium clarity** (direction exists, details unclear) → Present options with tradeoffs, ask targeted questions");
   lines.push("- **Low clarity** (goal ambiguous, next steps unknown) → Active interaction, ask clarifying questions, provide examples");
-  lines.push("");
-  lines.push("### Clarity Signals:");
-  lines.push("- vision/goals.md exists with specific goals → higher clarity");
-  lines.push("- Backlog with clear, actionable tasks → higher clarity");
-  lines.push("- Embryo generation with frequent genome changes → lower clarity");
-  lines.push("- Short lineage + undefined direction → lower clarity");
-  lines.push("- Previous generation fitness feedback is positive → higher clarity");
   lines.push("");
   lines.push("### Per-Stage Behavior:");
   lines.push("- **Learning**: Assess project clarity level early. If low, flag it.");
