@@ -44,7 +44,7 @@ src/
 ├── cli/
 │   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, backlog, cruise, install-skills)
 │   └── commands/
-│       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지)
+│       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair 지원)
 │       ├── run/                — stage 실행 (20 handlers)
 │       │   ├── start.ts        — generation 생성 (scan → create)
 │       │   ├── learning.ts     — 탐구 (work → complete)

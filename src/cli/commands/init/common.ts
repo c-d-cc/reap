@@ -72,18 +72,7 @@ export async function initCommon(
   await writeTextFile(paths.visionGoals, DEFAULT_GOALS);
 
   // Write or append CLAUDE.md for AI agent session loading
-  const claudeMdPath = join(paths.root, "CLAUDE.md");
-  const reapSection = await readTextFile(distPath("claude-md-section.md"));
-  if (reapSection) {
-    const existing = await readTextFile(claudeMdPath);
-    if (existing) {
-      if (!existing.includes(".reap/genome/")) {
-        await writeTextFile(claudeMdPath, existing.trimEnd() + "\n" + reapSection);
-      }
-    } else {
-      await writeTextFile(claudeMdPath, `# ${projectName}\n` + reapSection);
-    }
-  }
+  await ensureClaudeMd(paths.root, projectName);
 
   return config;
 }
@@ -93,4 +82,28 @@ export async function initCommon(
  */
 export async function getClaudeMdSection(): Promise<string> {
   return (await readTextFile(distPath("claude-md-section.md"))) ?? "";
+}
+
+/**
+ * Ensure CLAUDE.md exists and contains the REAP section.
+ * Returns the action taken: "created", "appended", or "skipped".
+ */
+export async function ensureClaudeMd(root: string, projectName: string): Promise<"created" | "appended" | "skipped"> {
+  const claudeMdPath = join(root, "CLAUDE.md");
+  const reapSection = await readTextFile(distPath("claude-md-section.md"));
+  if (!reapSection) {
+    return "skipped";
+  }
+
+  const existing = await readTextFile(claudeMdPath);
+  if (existing) {
+    if (!existing.includes(".reap/genome/")) {
+      await writeTextFile(claudeMdPath, existing.trimEnd() + "\n" + reapSection);
+      return "appended";
+    }
+    return "skipped";
+  } else {
+    await writeTextFile(claudeMdPath, `# ${projectName}\n` + reapSection);
+    return "created";
+  }
 }

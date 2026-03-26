@@ -5,6 +5,7 @@ import { fileExists } from "../../../core/fs.js";
 import { emitError } from "../../../core/output.js";
 import { execute as greenfieldExecute } from "./greenfield.js";
 import { execute as adoptionExecute } from "./adoption.js";
+import { execute as repairExecute } from "./repair.js";
 
 /**
  * Source indicators — if any of these exist, the project is not greenfield.
@@ -54,9 +55,19 @@ async function detectMode(root: string): Promise<"greenfield" | "adoption"> {
   return "greenfield";
 }
 
-export async function execute(projectName?: string, mode?: string): Promise<void> {
+export async function execute(projectName?: string, mode?: string, repair?: boolean): Promise<void> {
   const root = process.cwd();
   const paths = createPaths(root);
+
+  // Repair mode: supplement missing files in an existing reap project
+  if (repair) {
+    if (!(await fileExists(paths.config))) {
+      emitError("init", ".reap/ not found. This is not a reap project. Run 'reap init' first.");
+      return;
+    }
+    await repairExecute(paths);
+    return;
+  }
 
   if (await fileExists(paths.config)) {
     emitError("init", ".reap/ already exists. Use 'reap status' to check current state.");

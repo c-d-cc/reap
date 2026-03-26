@@ -19,8 +19,9 @@ program
   .command("init [project-name]")
   .description("Initialize a new reap project")
   .option("--mode <mode>", "Override auto-detected mode (greenfield or adoption)")
-  .action(async (projectName: string | undefined, options: { mode?: string }) => {
-    await initExecute(projectName, options.mode);
+  .option("--repair", "Repair an existing project — supplement missing files (e.g., CLAUDE.md)")
+  .action(async (projectName: string | undefined, options: { mode?: string; repair?: boolean }) => {
+    await initExecute(projectName, options.mode, options.repair);
   });
 
 program
