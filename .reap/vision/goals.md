@@ -42,23 +42,42 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [x] scenario tests 41개 (gen-015, gen-016)
 - [x] TypeScript 전환 + setup helper + 병렬 실행 (gen-016)
 
+### v0.15 Parity & Infrastructure (gen-020~027, gen-032)
+- [x] install-skills cleanup — stale 스킬 자동 정리 (gen-020)
+- [x] Hook engine 고급 기능 포팅 — 조건부 실행, 순서 제어 (gen-021)
+- [x] reap-guide.md — v16용 REAP 도구 가이드 작성 (gen-022)
+- [x] Subagent prompt 공통화 — prompt.ts (gen-022)
+- [x] Prompt→CLI script 이전 — merge, pull, knowledge, abort (gen-023)
+- [x] Back nonce 재발급 + completion commit 순서 교정 (gen-024)
+- [x] Adapt echo chamber 방지 (gen-025)
+- [x] init --repair / CLAUDE.md migration (gen-026)
+- [x] reap fix — integrity check (gen-027)
+- [x] reap destroy + reap clean (gen-032)
+
+### Self-evolving Features (gen-028~035)
+- [x] Gap-driven Evolution — vision gap 분석 + goals 자동 체크 (gen-028)
+- [x] Vision evaluation — 16항목 진단 + vision development 제안 (gen-029)
+- [x] Vision Memory 3-tier 시스템 (gen-031)
+- [x] Cruise mode 자동 연속 실행 (gen-033)
+- [x] Clarity level 자동 판단 (gen-034)
+- [x] Memory 갱신 workflow 통합 — criteria + reflect phase (gen-035)
+
 ### Self-Hosting (spec2 §5)
 - [x] REAP 자신의 `.reap/` 구조 보유
-- [ ] 외부 프로젝트에서 core lifecycle 검증
+- [ ] 외부 프로젝트에서 core lifecycle 검증 (npm 배포 후)
 - [ ] Validation에서 자기 CLI 검증 가능
 - [ ] Self-hosting invariants 정의
-- [ ] 점진적 전환 (prompt → lifecycle → genome)
 
 ### Distribution (spec2 §7)
-- [ ] README 재작성 (v0.16 기준, self-evolving pipeline 강조)
-- [ ] npm 배포 준비 (.npmignore 최종 정리, CI/CD)
-- [ ] Update agent Phase 1: `reap update` CLI (selfUpgrade, hand-off, lastCliVersion, --dry-run)
-- [ ] Update agent Phase 2: 프로젝트 동기화 (MigrationRunner, template sync, integrity check, legacy cleanup)
-- [ ] Update agent Phase 3: 배포 연동 (release notice, auto issue report, session init 자동 감지)
+- [ ] README 재작성 (v0.16 기준)
+- [ ] npm 배포 준비 (.npmignore, CI/CD, alpha 배포)
+- [ ] Update agent Phase 1: `reap update` CLI (유저 지시 후 진행)
+- [ ] Update agent Phase 2: 프로젝트 동기화 (유저 지시 후 진행)
+- [ ] Update agent Phase 3: 배포 연동 (유저 지시 후 진행)
 
 ### Agent Client 확장 (spec2 §6)
-- [ ] OpenCode adapter
-- [ ] Codex CLI adapter
+- [ ] OpenCode adapter (당장 불필요)
+- [ ] Codex CLI adapter (당장 불필요)
 
 ### Genome/Environment
 - [x] genome/environment prescriptive/descriptive 분리 (gen-011)
@@ -67,3 +86,5 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [x] CLAUDE.md 자동 생성/append (gen-002)
 - [x] templates SSOT (evolution.md, claude-md-section.md) (gen-002)
 - [x] CLI Command Structure enforced convention (gen-007)
+- [x] Vision/Memory 원칙 + 아키텍처 동기화 원칙 genome 추가
+- [x] Workaround 금지 원칙 genome 추가

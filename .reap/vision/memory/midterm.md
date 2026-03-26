@@ -4,9 +4,9 @@
 
 ### v0.15 기능 패리티
 v0.15에 있었지만 v0.16에 아직 없는 것들:
-- `reap destroy` — 완전 제거 (backlog 있음)
-- `reap clean` — 선택적 초기화 (backlog 있음)
-- `reap update` — self-upgrade + migration (vision §7.3, 3-phase 로드맵 있음, npm 배포 후 진행)
+- ~~`reap destroy`~~ — 완료 (gen-032)
+- ~~`reap clean`~~ — 완료 (gen-032)
+- `reap update` — self-upgrade + migration (vision §7.3, 3-phase 로드맵 있음, 유저 지시 후 진행)
 - Agent adapter 시스템 (AgentRegistry) — vision §6, 당장 불필요
 
 ### Distribution 준비 (vision §7)
