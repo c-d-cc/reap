@@ -1,8 +1,8 @@
-import { readdir, cp, unlink } from "fs/promises";
+import { readdir, cp, unlink, readFile, writeFile } from "fs/promises";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { homedir } from "os";
-import { ensureDir } from "../../core/fs.js";
+import { ensureDir, fileExists } from "../../core/fs.js";
 import { emitOutput } from "../../core/output.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -47,10 +47,13 @@ export async function installSkills(_projectRoot?: string): Promise<void> {
     installed++;
   }
 
+  // Register SessionStart hook for v0.15 legacy cleanup
+  await registerCleanupHook();
+
   emitOutput({
     status: "ok",
     command: "install-skills",
-    completed: ["cleanup-stale-skills", "copy-skills"],
+    completed: ["cleanup-stale-skills", "copy-skills", "register-hook"],
     context: {
       targetDir,
       cleaned: cleaned.length,
@@ -59,4 +62,46 @@ export async function installSkills(_projectRoot?: string): Promise<void> {
     },
     message: `Cleaned ${cleaned.length} stale skills, installed ${installed} skill files to ${targetDir}`,
   });
+}
+
+/**
+ * Register a SessionStart hook in ~/.claude/settings.json that cleans up
+ * v0.15 project-level skills/commands when Claude starts in any project.
+ */
+async function registerCleanupHook(): Promise<void> {
+  const settingsPath = join(homedir(), ".claude", "settings.json");
+  const hookCommand = "reap check-version 2>/dev/null || true";
+
+  try {
+    let settings: Record<string, unknown> = {};
+    if (await fileExists(settingsPath)) {
+      const content = await readFile(settingsPath, "utf-8");
+      settings = JSON.parse(content);
+    }
+
+    if (!settings.hooks || typeof settings.hooks !== "object") {
+      settings.hooks = {};
+    }
+    const hooks = settings.hooks as Record<string, unknown[]>;
+
+    if (!Array.isArray(hooks.SessionStart)) {
+      hooks.SessionStart = [];
+    }
+
+    // Check if our hook already exists
+    const exists = hooks.SessionStart.some((entry: unknown) => {
+      const e = entry as { hooks?: { command?: string }[] };
+      return e.hooks?.some((h) => h.command?.includes("reap check-version"));
+    });
+
+    if (!exists) {
+      hooks.SessionStart.push({
+        matcher: "",
+        hooks: [{ type: "command", command: hookCommand }],
+      });
+      await writeFile(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
+    }
+  } catch {
+    // settings.json doesn't exist or parse error — skip silently
+  }
 }
