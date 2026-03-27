@@ -23,6 +23,7 @@ import { execute as pushExecute } from "./push.js";
 import { execute as pullExecute } from "./pull.js";
 import { execute as knowledgeExecute } from "./knowledge.js";
 import { execute as reportExecute } from "./report.js";
+import { execute as makeHookExecute } from "./make-hook.js";
 
 const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, phase?: string, extra?: string) => Promise<void>> = {
   learning: learningExecute,
@@ -42,6 +43,7 @@ const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, pha
   pull: pullExecute,
   knowledge: knowledgeExecute,
   report: reportExecute,
+  "make-hook": makeHookExecute,
 };
 
 export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string; sourceAction?: string; saveBacklog?: boolean }): Promise<void> {
