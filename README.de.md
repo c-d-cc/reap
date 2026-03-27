@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="media/logo.png" alt="REAP" width="80" height="80" />
+  <img src="https://raw.githubusercontent.com/c-d-cc/reap/main/media/logo.png" alt="REAP" width="80" height="80" />
 </p>
 
 <h1 align="center">REAP</h1>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="media/architecture.png" alt="REAP Architecture" width="600" />
+  <img src="https://raw.githubusercontent.com/c-d-cc/reap/main/media/architecture.png" alt="REAP Architecture" width="600" />
 </p>
 
 REAP ist eine generationsbasierte Entwicklungspipeline, in der KI und Menschen zusammenarbeiten, um Software zu erstellen und weiterzuentwickeln. Der Mensch gibt die Vision vor und trifft die wesentlichen Entscheidungen. Die KI erlernt das Projektwissen — Genome (Architektur, Konventionen, Einschränkungen) und Environment (Codebasis, Abhängigkeiten, Domäne) — und arbeitet dann durch strukturierte Generationen, um zu implementieren, zu überprüfen und anzupassen. Jede abgeschlossene Generation speist gewonnene Erkenntnisse in die Wissensbasis zurück. Im Laufe der Zeit entwickeln sich sowohl das Wissen als auch der Quellcode (Civilization) selbständig weiter.

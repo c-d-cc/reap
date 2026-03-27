@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="media/logo.png" alt="REAP" width="80" height="80" />
+  <img src="https://raw.githubusercontent.com/c-d-cc/reap/main/media/logo.png" alt="REAP" width="80" height="80" />
 </p>
 
 <h1 align="center">REAP</h1>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="media/architecture.png" alt="REAP Architecture" width="600" />
+  <img src="https://raw.githubusercontent.com/c-d-cc/reap/main/media/architecture.png" alt="REAP Architecture" width="600" />
 </p>
 
 REAP 是一个基于代际迭代的开发管道，AI 与人类协作构建和进化软件。人类提供愿景并做出关键决策。AI 学习项目知识——Genome（架构、规范、约束）和 Environment（代码库、依赖、领域）——然后通过结构化的代际迭代来实施、验证和适应。每个完成的代际迭代将经验教训回馈到知识库中。随着时间推移，知识和源代码（Civilization）都在自我进化。

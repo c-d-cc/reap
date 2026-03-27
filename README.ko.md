@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="media/logo.png" alt="REAP" width="80" height="80" />
+  <img src="https://raw.githubusercontent.com/c-d-cc/reap/main/media/logo.png" alt="REAP" width="80" height="80" />
 </p>
 
 <h1 align="center">REAP</h1>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="media/architecture.png" alt="REAP Architecture" width="600" />
+  <img src="https://raw.githubusercontent.com/c-d-cc/reap/main/media/architecture.png" alt="REAP Architecture" width="600" />
 </p>
 
 REAP는 AI와 인간이 협력하여 소프트웨어를 구축하고 진화시키는 세대 기반 개발 파이프라인입니다. 인간은 비전을 제공하고 핵심 의사결정을 내립니다. AI는 프로젝트의 지식 — Genome(아키텍처, 컨벤션, 제약 조건)과 Environment(코드베이스, 의존성, 도메인) — 을 학습한 뒤, 구조화된 세대를 거치며 구현, 검증, 적응합니다. 각 세대가 완료될 때마다 교훈이 지식 기반에 반영됩니다. 시간이 지남에 따라 지식과 소스 코드(Civilization) 모두가 자기 진화합니다.

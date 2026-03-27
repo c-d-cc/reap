@@ -1,5 +1,5 @@
 <p align="center">
-  <img src="media/logo.png" alt="REAP" width="80" height="80" />
+  <img src="https://raw.githubusercontent.com/c-d-cc/reap/main/media/logo.png" alt="REAP" width="80" height="80" />
 </p>
 
 <h1 align="center">REAP</h1>
@@ -10,7 +10,7 @@
 </p>
 
 <p align="center">
-  <img src="media/architecture.png" alt="REAP Architecture" width="600" />
+  <img src="https://raw.githubusercontent.com/c-d-cc/reap/main/media/architecture.png" alt="REAP Architecture" width="600" />
 </p>
 
 REAPは、AIと人間が協力してソフトウェアを構築・進化させるジェネレーションベースの開発パイプラインです。人間がビジョンを提供し、重要な意思決定を行います。AIはプロジェクトの知識 — Genome（アーキテクチャ、コンベンション、制約）と Environment（コードベース、依存関係、ドメイン）— を学習し、構造化されたジェネレーションを通じて実装・検証・適応を行います。各ジェネレーションの完了時に得られた教訓がナレッジベースにフィードバックされます。時間の経過とともに、知識とソースコード（Civilization）の両方が自己進化します。
