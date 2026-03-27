@@ -285,9 +285,9 @@ function buildConfirmPrompt(config: V15Config, scan: Record<string, unknown>): s
    - source-map.md → environment/source-map.md
 
 2. **Config migration**
-   - Remove: entryMode, autoIssueReport, genomeVersion, lastSyncedGeneration, preset
+   - Remove: entryMode, genomeVersion, lastSyncedGeneration, preset
    - Add: agentClient (default: claude-code)
-   - Keep: project, language, autoUpdate, autoSubagent
+   - Keep: project, language, autoUpdate, autoSubagent, autoIssueReport
    - Convert: strict → strictEdit + strictMerge
 
 3. **Vision (new)**
@@ -412,6 +412,7 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
     strictMerge: false,
     agentClient: "claude-code" as const,
     autoUpdate: true,
+    autoIssueReport: true,
   };
   await step("config-migrate", async () => {
     const v15ConfigContent = await readTextFile(join(v15Dir, "config.yml"));
@@ -428,6 +429,7 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
       strictMerge: wasStrict,
       agentClient: "claude-code" as const,
       autoUpdate: v15Config.autoUpdate ?? true,
+      autoIssueReport: v15Config.autoIssueReport ?? true,
     };
     await writeTextFile(paths.config, YAML.stringify(v16Config));
   });

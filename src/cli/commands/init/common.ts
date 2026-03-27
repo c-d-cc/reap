@@ -69,6 +69,7 @@ export async function initCommon(
     strictMerge: false,
     agentClient: "claude-code",
     autoUpdate: true,
+    autoIssueReport: true,
   };
   await writeTextFile(paths.config, YAML.stringify(config));
 

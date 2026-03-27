@@ -1,7 +1,10 @@
+import YAML from "yaml";
 import { createPaths } from "../../../core/paths.js";
-import { fileExists } from "../../../core/fs.js";
+import { fileExists, readTextFile } from "../../../core/fs.js";
 import { emitError } from "../../../core/output.js";
 import { detectV15 } from "../../../core/integrity.js";
+import { autoReport } from "../../../core/report.js";
+import type { ReapConfig } from "../../../types/index.js";
 import { execute as startExecute } from "./start.js";
 import { execute as learningExecute } from "./learning.js";
 import { execute as planningExecute } from "./planning.js";
@@ -19,6 +22,7 @@ import { execute as reconcileExecute } from "./reconcile.js";
 import { execute as pushExecute } from "./push.js";
 import { execute as pullExecute } from "./pull.js";
 import { execute as knowledgeExecute } from "./knowledge.js";
+import { execute as reportExecute } from "./report.js";
 
 const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, phase?: string, extra?: string) => Promise<void>> = {
   learning: learningExecute,
@@ -37,6 +41,7 @@ const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, pha
   push: pushExecute,
   pull: pullExecute,
   knowledge: knowledgeExecute,
+  report: reportExecute,
 };
 
 export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string; sourceAction?: string; saveBacklog?: boolean }): Promise<void> {
@@ -63,5 +68,24 @@ export async function execute(stage: string, options: { phase?: string; goal?: s
   if (stage === "abort") {
     extra = JSON.stringify({ reason: options.reason, sourceAction: options.sourceAction, saveBacklog: options.saveBacklog });
   }
-  await handler(paths, options.phase, extra);
+
+  try {
+    await handler(paths, options.phase, extra);
+  } catch (err) {
+    // Intentional errors (emitError → process.exit) don't reach here.
+    // This catches unexpected runtime errors only.
+    try {
+      const configContent = await readTextFile(paths.config);
+      if (configContent) {
+        const config = YAML.parse(configContent) as ReapConfig;
+        if (config.autoIssueReport !== false) {
+          const cmd = `reap run ${stage}${options.phase ? ` --phase ${options.phase}` : ""}`;
+          autoReport(cmd, err);
+        }
+      }
+    } catch { /* report is best-effort */ }
+
+    // Re-emit the original error
+    emitError(stage, err instanceof Error ? err.message : String(err));
+  }
 }

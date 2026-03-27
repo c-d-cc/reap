@@ -1,0 +1,19 @@
+id: gen-049-3d1b71
+type: embryo
+goal: auto issue report 구현 — 런타임 에러/migration 실패 시 자동 GitHub issue 생성
+parents:
+  - gen-048-cfbd63
+timeline:
+  - stage: learning
+    at: 2026-03-27T14:56:18.798Z
+  - stage: planning
+    at: 2026-03-27T14:58:13.353Z
+  - stage: implementation
+    at: 2026-03-27T14:58:53.869Z
+  - stage: validation
+    at: 2026-03-27T15:07:24.027Z
+  - stage: completion
+    at: 2026-03-27T15:08:36.354Z
+fitnessFeedback:
+  text: ok
+  evaluatedAt: 2026-03-27T15:11:11.802Z

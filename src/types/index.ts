@@ -64,6 +64,7 @@ export interface ReapConfig {
   strictMerge: boolean;
   agentClient: "claude-code" | "opencode" | "codex";
   autoUpdate: boolean;
+  autoIssueReport: boolean;
   cruiseCount?: string; // "1/5" format — present = cruise mode
 }
 

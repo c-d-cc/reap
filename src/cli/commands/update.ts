@@ -8,6 +8,7 @@ import { readTextFile, writeTextFile, fileExists, ensureDir } from "../../core/f
 import { emitOutput, emitError } from "../../core/output.js";
 import { detectV15 } from "../../core/integrity.js";
 import { fetchReleaseNotice } from "../../core/notice.js";
+import { autoReport } from "../../core/report.js";
 import { ensureClaudeMd } from "./init/common.js";
 import { execute as migrateExecute } from "./migrate.js";
 import type { ReapConfig } from "../../types/index.js";
@@ -31,6 +32,7 @@ const CONFIG_DEFAULTS: Omit<ReapConfig, "project" | "cruiseCount"> = {
   strictMerge: false,
   agentClient: "claude-code",
   autoUpdate: true,
+  autoIssueReport: true,
 };
 
 /** All directories that should exist in a v0.16 project */
@@ -129,7 +131,14 @@ export async function execute(phase?: string, postUpgrade?: boolean): Promise<vo
   if (!postUpgrade) {
     // v0.15 → delegate to migrate
     if (await detectV15(paths)) {
-      await migrateExecute(paths, phase);
+      try {
+        await migrateExecute(paths, phase);
+      } catch (err) {
+        try {
+          autoReport("reap update (migration)", err, ["migration"]);
+        } catch { /* best-effort */ }
+        throw err;
+      }
       return;
     }
   }

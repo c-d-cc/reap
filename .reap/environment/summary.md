@@ -21,7 +21,7 @@
 ```
 src/
 ├── types/index.ts              — 타입 정의 (GenerationState, ReapConfig, ReapOutput 등)
-├── core/                       — 핵심 로직 (24 modules)
+├── core/                       — 핵심 로직 (25 modules)
 │   ├── lifecycle.ts            — stage 순서 정의 (next/prev)
 │   ├── generation.ts           — generation CRUD, ID 생성
 │   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스, memory/resources/docs 경로 포함)
@@ -44,6 +44,7 @@ src/
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError)
 │   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts, detectV15, cleanupLegacyProjectSkills)
 │   ├── notice.ts               — release notice (fetchReleaseNotice: RELEASE_NOTICE.md에서 버전+언어별 노트 추출)
+│   ├── report.ts               — auto issue report (autoReport: gh issue create wrapper, best-effort)
 │   ├── template.ts             — artifact 템플릿 복사
 │   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). lineage 편향 분석 제거됨 (gen-030)
 ├── cli/
@@ -52,7 +53,7 @@ src/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair, --migrate 지원)
 │       ├── migrate.ts          — v0.15→v0.16 마이그레이션 (multi-phase: confirm→execute→vision→complete)
 │       ├── check-version.ts    — postinstall/SessionStart용: v0.15 legacy cleanup + autoUpdate 자동 업데이트 + autoUpdateMinVersion guard + release notice 표시 (semverGte, queryAutoUpdateMinVersion, queryLatestVersion, performAutoUpdate, handOffToNewBinary, checkAutoUpdateGuard)
-│       ├── run/                — stage 실행 (20 handlers)
+│       ├── run/                — stage 실행 (21 handlers)
 │       │   ├── start.ts        — generation 생성 (scan → create)
 │       │   ├── learning.ts     — 탐구 (work → complete)
 │       │   ├── planning.ts     — 계획 (work → complete)
@@ -69,7 +70,8 @@ src/
 │       │   ├── abort.ts        — generation 중단 (2-phase: confirm → execute)
 │       │   ├── push.ts         — git push (상태 검증 포함)
 │       │   ├── pull.ts         — git fetch + branch 분석 + prompt 반환
-│       │   └── knowledge.ts    — genome/environment/vision/memory 관리 (reload/genome/environment/memory)
+│       │   ├── knowledge.ts    — genome/environment/vision/memory 관리 (reload/genome/environment/memory)
+│       │   └── report.ts       — 수동 issue report (AI prompt 기반, privacy gate 포함)
 │       ├── config.ts            — 프로젝트 설정 조회 (config.yml → JSON 출력)
 │       ├── status.ts           — 현재 상태 조회
 │       ├── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
@@ -79,7 +81,7 @@ src/
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/claude-code/       — Claude Code 어댑터
 │   ├── install.ts              — skill 파일 설치 (~/.claude/commands/)
-│   └── skills/                 — 19 slash command files (.md, reap.update.md 포함)
+│   └── skills/                 — 20 slash command files (.md, reap.update.md, reap.report.md 포함)
 └── templates/                  — 템플릿 파일
     ├── reap-guide.md           — REAP 도구 가이드 (subagent prompt에 주입)
     └── artifacts/              — stage별 artifact 템플릿
