@@ -100,7 +100,7 @@ export const ja: Translations = {
       { href: "/docs/hook-reference", title: "Hookリファレンス", desc: "ライフサイクルhooks：ファイルベースのイベントhook、条件、実行順序。" },
       { href: "/docs/migration-guide", title: "移行ガイド", desc: "v0.15からのアップグレード — レジューム対応のステップバイステップ移行。" },
       { href: "/docs/comparison", title: "比較", desc: "REAPと従来のスペック駆動開発ツールの比較。" },
-      { href: "/docs/advanced", title: "上級", desc: "署名ベースのロック、lineage圧縮、プリセット、エントリーモード。" },
+      { href: "/docs/advanced", title: "上級", desc: "署名ベースのロック、lineage圧縮、エントリーモード。" },
     ],
   },
 
@@ -546,9 +546,6 @@ return nonce to AI                         ←── AI passes nonce
       ["Level 2", "100件以上のLevel 1ファイル", "単一のepoch.md", "Level 1ファイル > 100件", "直近9件 + フォークポイント"],
     ],
     compressionProtection: "DAGの保存：Level 1ファイルはフロントマターにメタデータを保持します。Level 2のepoch.mdはgenerationハッシュチェーンを保存します。フォークガード：Level 2圧縮前にすべてのローカル/リモートブランチがスキャンされ、フォークポイントが保護されます。epoch圧縮されたGenerationはmergeベースとして使用できません。",
-    presetsTitle: "プリセット",
-    presetsDesc: "プリセットは一般的なスタック向けに事前設定されたGenomeとプロジェクトスキャフォールディングを提供します。",
-    presetsNote: "bun-hono-reactプリセットは、Bun + Hono + Reactスタック向けのコンベンションを含むGenomeを設定します。適切なアーキテクチャ原則、コンベンション、制約が含まれます。",
     entryModes: "エントリーモード",
     entryModesDesc: "reap init --modeで指定します。Genomeの初期構造を制御します。",
     entryModeHeaders: ["モード", "説明"],

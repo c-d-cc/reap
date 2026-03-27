@@ -100,7 +100,7 @@ export const ko: Translations = {
       { href: "/docs/hook-reference", title: "Hook 레퍼런스", desc: "라이프사이클 hooks: 파일 기반 이벤트 hooks, 조건, 실행 순서." },
       { href: "/docs/migration-guide", title: "마이그레이션 가이드", desc: "v0.15에서 업그레이드 — 재개 지원이 포함된 단계별 마이그레이션." },
       { href: "/docs/comparison", title: "비교", desc: "REAP가 기존 스펙 기반 개발 도구와 어떻게 다른가." },
-      { href: "/docs/advanced", title: "고급", desc: "서명 기반 잠금, lineage 압축, 프리셋, 진입 모드." },
+      { href: "/docs/advanced", title: "고급", desc: "서명 기반 잠금, lineage 압축, 진입 모드." },
     ],
   },
 
@@ -546,9 +546,6 @@ return nonce to AI                         ←── AI passes nonce
       ["Level 2", "100+ Level 1 파일", "단일 epoch.md", "Level 1 파일 > 100", "최근 9개 + 포크 포인트"],
     ],
     compressionProtection: "DAG 보존: Level 1 파일은 frontmatter에 메타데이터를 유지합니다. Level 2 epoch.md는 generation 해시 체인을 저장합니다. 포크 가드: 모든 로컬/원격 브랜치가 Level 2 압축 전에 스캔됩니다 — 포크 포인트가 보호됩니다. Epoch 압축된 Generation은 merge base로 사용할 수 없습니다.",
-    presetsTitle: "프리셋",
-    presetsDesc: "프리셋은 일반적인 스택을 위한 사전 구성된 Genome과 프로젝트 스캐폴딩을 제공합니다.",
-    presetsNote: "bun-hono-react 프리셋은 Bun + Hono + React 스택에 맞는 적절한 아키텍처 원칙, 컨벤션, 제약을 포함하여 Genome을 구성합니다.",
     entryModes: "진입 모드",
     entryModesDesc: "reap init --mode로 지정합니다. Genome의 초기 구조를 제어합니다.",
     entryModeHeaders: ["모드", "설명"],

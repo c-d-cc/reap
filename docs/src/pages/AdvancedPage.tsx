@@ -80,15 +80,6 @@ export default function AdvancedPage() {
           {t.advanced.compressionProtection}
         </p>
 
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.advanced.presetsTitle}</h2>
-        <p className="text-sm text-muted-foreground mb-3">
-          {t.advanced.presetsDesc}
-        </p>
-        <CodeBlock language="bash">{`reap init my-project --preset bun-hono-react`}</CodeBlock>
-        <p className="text-xs text-muted-foreground mt-2 mb-6">
-          {t.advanced.presetsNote}
-        </p>
-
         <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.advanced.entryModes}</h2>
         <p className="text-sm text-muted-foreground mb-3">
           {t.advanced.entryModesDesc}

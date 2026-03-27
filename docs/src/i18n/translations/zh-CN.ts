@@ -100,7 +100,7 @@ export const zhCN: Translations = {
       { href: "/docs/hook-reference", title: "Hook 参考", desc: "生命周期钩子：基于文件的事件钩子、条件、排序。" },
       { href: "/docs/migration-guide", title: "迁移指南", desc: "从 v0.15 升级——支持恢复的分步迁移。" },
       { href: "/docs/comparison", title: "对比", desc: "REAP 与传统规格驱动开发工具的对比。" },
-      { href: "/docs/advanced", title: "高级功能", desc: "基于签名的锁定、lineage 压缩、预设、入口模式。" },
+      { href: "/docs/advanced", title: "高级功能", desc: "基于签名的锁定、lineage 压缩、入口模式。" },
     ],
   },
 
@@ -546,9 +546,6 @@ return nonce to AI                         ←── AI passes nonce
       ["Level 2", "100+ Level 1 文件", "单个 epoch.md", "Level 1 文件 > 100", "最近 9 个 + 分叉点"],
     ],
     compressionProtection: "DAG 保留：Level 1 文件在 frontmatter 中保留元数据。Level 2 epoch.md 存储代哈希链。分叉保护：在 Level 2 压缩前扫描所有本地/远程分支——分叉点受保护。经过 epoch 压缩的代不能用作合并基础。",
-    presetsTitle: "预设",
-    presetsDesc: "预设为常见技术栈提供预配置的 Genome 和项目脚手架。",
-    presetsNote: "bun-hono-react 预设为 Bun + Hono + React 技术栈配置 Genome，包括适当的架构原则、约定和约束。",
     entryModes: "入口模式",
     entryModesDesc: "通过 reap init --mode 指定。控制 Genome 的初始结构方式。",
     entryModeHeaders: ["模式", "描述"],

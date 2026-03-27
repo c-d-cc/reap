@@ -98,7 +98,7 @@ export const en = {
       { href: "/docs/hook-reference", title: "Hook Reference", desc: "Lifecycle hooks: file-based event hooks, conditions, ordering." },
       { href: "/docs/migration-guide", title: "Migration Guide", desc: "Upgrading from v0.15 — step-by-step migration with resume support." },
       { href: "/docs/comparison", title: "Comparison", desc: "How REAP compares to traditional spec-driven development tools." },
-      { href: "/docs/advanced", title: "Advanced", desc: "Signature-based locking, lineage compression, presets, entry modes." },
+      { href: "/docs/advanced", title: "Advanced", desc: "Signature-based locking, lineage compression, entry modes." },
     ],
   },
 
@@ -543,9 +543,6 @@ return nonce to AI                         ←── AI passes nonce
       ["Level 2", "100+ Level 1 files", "Single epoch.md", "Level 1 files > 100", "Recent 9 + fork points"],
     ],
     compressionProtection: "DAG preservation: Level 1 files retain metadata in frontmatter. Level 2 epoch.md stores a generations hash chain. Fork guard: all local/remote branches are scanned before Level 2 compression — fork points are protected. Epoch-compressed generations cannot be used as merge bases.",
-    presetsTitle: "Presets",
-    presetsDesc: "Presets provide pre-configured Genome and project scaffolding for common stacks.",
-    presetsNote: "The bun-hono-react preset configures Genome with conventions for a Bun + Hono + React stack, including appropriate architecture principles, conventions, and constraints.",
     entryModes: "Entry Modes",
     entryModesDesc: "Specified with reap init --mode. Controls how the Genome is initially structured.",
     entryModeHeaders: ["Mode", "Description"],

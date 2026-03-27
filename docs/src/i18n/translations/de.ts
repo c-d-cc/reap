@@ -100,7 +100,7 @@ export const de: Translations = {
       { href: "/docs/hook-reference", title: "Hook-Referenz", desc: "Lebenszyklus-Hooks: dateibasierte Event-Hooks, Bedingungen, Reihenfolge." },
       { href: "/docs/migration-guide", title: "Migrationsleitfaden", desc: "Upgrade von v0.15 — schrittweise Migration mit Wiederaufnahme-Unterstützung." },
       { href: "/docs/comparison", title: "Vergleich", desc: "Wie REAP im Vergleich zu traditionellen spezifikationsgesteuerten Entwicklungstools abschneidet." },
-      { href: "/docs/advanced", title: "Erweitert", desc: "Signaturbasierte Sperrung, Lineage-Komprimierung, Presets, Einstiegsmodi." },
+      { href: "/docs/advanced", title: "Erweitert", desc: "Signaturbasierte Sperrung, Lineage-Komprimierung, Einstiegsmodi." },
     ],
   },
 
@@ -546,9 +546,6 @@ return nonce to AI                         ←── AI passes nonce
       ["Level 2", "100+ Level-1-Dateien", "Einzelne epoch.md", "Level-1-Dateien > 100", "Neueste 9 + Verzweigungspunkte"],
     ],
     compressionProtection: "DAG-Erhaltung: Level-1-Dateien behalten Metadaten im Frontmatter. Level-2 epoch.md speichert eine Generations-Hash-Kette. Fork-Schutz: Alle lokalen/Remote-Branches werden vor Level-2-Komprimierung gescannt — Verzweigungspunkte werden geschützt. Epoch-komprimierte Generationen können nicht als Merge-Basis verwendet werden.",
-    presetsTitle: "Presets",
-    presetsDesc: "Presets bieten vorkonfiguriertes Genome und Projektgerüst für gängige Stacks.",
-    presetsNote: "Das bun-hono-react Preset konfiguriert das Genome mit Konventionen für einen Bun + Hono + React Stack, einschließlich geeigneter Architekturprinzipien, Konventionen und Einschränkungen.",
     entryModes: "Einstiegsmodi",
     entryModesDesc: "Wird mit reap init --mode angegeben. Steuert wie das Genome initial strukturiert wird.",
     entryModeHeaders: ["Modus", "Beschreibung"],
