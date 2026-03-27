@@ -48,10 +48,15 @@ export async function makeHook(paths: ReapPaths, options: Record<string, string 
     await chmod(filePath, 0o755);
   }
 
+  const prompt = type === "sh"
+    ? `Hook file created: ${filename}. You MUST now use the Edit tool to replace the TODO placeholder with the actual shell commands this hook should execute.`
+    : `Hook file created: ${filename}. You MUST now use the Edit tool to replace the TODO placeholder with the actual AI prompt instructions this hook should execute when the ${event} event fires.`;
+
   emitOutput({
     status: "ok",
     command: "make",
     context: { resource: "hook", filename, event, name, type, condition, order },
     message: `Hook created: ${filename}`,
+    prompt,
   });
 }

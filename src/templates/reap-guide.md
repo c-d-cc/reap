@@ -212,6 +212,17 @@ Merge: `onMergeStarted`, `onMergeDetected`, `onMergeMated`, `onMergeMerged`, `on
 
 Conditions are executable scripts in `.reap/hooks/conditions/`. Exit code 0 = condition met, non-zero = skip. If no condition is specified, the hook always runs (default: `always`).
 
+Default conditions (installed by `reap init`):
+- `always` — Always true
+- `has-code-changes` — True if the last commit changed `src/`
+- `version-bumped` — True if `package.json` version differs from the last git tag
+
+### Creating Hooks
+
+**Always use the CLI to create hooks**: `reap make hook --event <event> --name <name> [--type md|sh] [--condition <condition>] [--order <order>]`. Never create hook files directly — the CLI ensures correct filename convention and frontmatter format.
+
+After creating a hook, fill in the TODO placeholder with your hook logic (for `.sh`) or prompt (for `.md`).
+
 ## Slash Commands
 
 All REAP interactions go through `/reap.*` slash commands. These are the primary interface for both users and AI agents.
@@ -241,6 +252,7 @@ All REAP interactions go through `/reap.*` slash commands. These are the primary
 
 ## CLI Commands (no slash command equivalent)
 - `reap make backlog --type <type> --title <title> [--body <body>] [--priority <priority>]` — Create backlog item (type: genome-change, environment-change, task)
+- `reap make hook --event <event> --name <name> [--type md|sh] [--condition <condition>] [--order <order>]` — Create hook file with correct naming and frontmatter
 - `reap cruise <count>` — Set cruise mode (pre-approve N generations for autonomous execution)
 - `reap update` — Update project structure to match current REAP version (v0.15 migrate, v0.16 sync)
 
