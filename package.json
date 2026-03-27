@@ -8,6 +8,7 @@
   },
   "files": [
     "dist/",
+    "scripts/postinstall.sh",
     "README.md"
   ],
   "scripts": {
@@ -18,7 +19,7 @@
     "test:unit": "bun test tests/unit/",
     "test:e2e": "bun test tests/e2e/",
     "test:scenario": "bun test tests/scenario/",
-    "postinstall": "node dist/cli/index.js install-skills 2>/dev/null || true; node dist/cli/index.js check-version 2>/dev/null || true"
+    "postinstall": "bash scripts/postinstall.sh || true"
   },
   "dependencies": {
     "yaml": "^2.0.0"
