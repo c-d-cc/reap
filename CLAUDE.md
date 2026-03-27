@@ -5,7 +5,7 @@
 
 ## REAP Guide (필수 숙지)
 
-- `.reap/reap-guide.md` — REAP 도구 사용법, 아키텍처, lifecycle, 규칙
+- `~/.reap/reap-guide.md` — REAP 도구 사용법, 아키텍처, lifecycle, 규칙
 
 ## Genome (필수 숙지)
 

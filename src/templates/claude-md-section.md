@@ -6,7 +6,7 @@ All work must follow the genome principles.
 
 ### REAP Guide (must read at session start)
 
-- `.reap/reap-guide.md` — REAP 도구 사용법, 아키텍처, lifecycle, 규칙
+- `~/.reap/reap-guide.md` — REAP tool usage, architecture, lifecycle, rules
 
 ### Genome (must read at session start)
 

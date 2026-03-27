@@ -1,6 +1,7 @@
 import { mkdir, stat } from "fs/promises";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { homedir } from "os";
 import YAML from "yaml";
 import { createPaths } from "../../core/paths.js";
 import { readTextFile, fileExists, writeTextFile } from "../../core/fs.js";
@@ -125,16 +126,18 @@ export async function fixProject(projectRoot: string): Promise<FixResult> {
     }
   }
 
-  // 5. reap-guide.md — auto-restore from package
-  const guidePath = join(paths.reap, "reap-guide.md");
+  // 5. reap-guide.md — now at ~/.reap/, installed by install-skills
+  const guidePath = join(homedir(), ".reap", "reap-guide.md");
   if (!(await fileExists(guidePath))) {
     const __dir = dirname(fileURLToPath(import.meta.url));
     const srcGuide = await readTextFile(join(__dir, "..", "templates", "reap-guide.md"));
     if (srcGuide) {
+      const { ensureDir: ensDir } = await import("../../core/fs.js");
+      await ensDir(join(homedir(), ".reap"));
       await writeTextFile(guidePath, srcGuide);
-      fixed.push("Restored missing reap-guide.md");
+      fixed.push("Restored missing ~/.reap/reap-guide.md");
     } else {
-      issues.push("reap-guide.md missing and cannot restore from package");
+      issues.push("~/.reap/reap-guide.md missing and cannot restore from package");
     }
   }
 

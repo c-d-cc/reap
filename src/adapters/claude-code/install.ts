@@ -47,6 +47,9 @@ export async function installSkills(_projectRoot?: string): Promise<void> {
     installed++;
   }
 
+  // Copy reap-guide.md to ~/.reap/ (single source, always up-to-date)
+  await installReapGuide();
+
   // Register SessionStart hook for v0.15 legacy cleanup
   await registerCleanupHook();
 
@@ -62,6 +65,24 @@ export async function installSkills(_projectRoot?: string): Promise<void> {
     },
     message: `Cleaned ${cleaned.length} stale skills, installed ${installed} skill files to ${targetDir}`,
   });
+}
+
+/**
+ * Copy reap-guide.md to ~/.reap/ so all projects reference a single, up-to-date copy.
+ */
+async function installReapGuide(): Promise<void> {
+  const reapHome = join(homedir(), ".reap");
+  await ensureDir(reapHome);
+
+  // dist/templates/reap-guide.md
+  const templateDir = __dirname.includes("dist")
+    ? join(__dirname, "..", "templates")
+    : join(__dirname, "..", "..", "templates");
+  const src = join(templateDir, "reap-guide.md");
+
+  if (await fileExists(src)) {
+    await cp(src, join(reapHome, "reap-guide.md"));
+  }
 }
 
 /**

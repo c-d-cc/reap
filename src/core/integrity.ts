@@ -99,10 +99,11 @@ async function checkRequiredFiles(
   errors: string[],
   warnings: string[],
 ): Promise<void> {
-  // reap-guide.md
-  const guidePath = join(paths.reap, "reap-guide.md");
-  if (!(await fileExists(guidePath))) {
-    errors.push("reap-guide.md missing — run 'reap init --repair' or reinstall");
+  // reap-guide.md — check ~/.reap/ (v0.16+) or .reap/ (legacy/fallback)
+  const guideGlobal = join(homedir(), ".reap", "reap-guide.md");
+  const guideLocal = join(paths.reap, "reap-guide.md");
+  if (!(await fileExists(guideGlobal)) && !(await fileExists(guideLocal))) {
+    errors.push("reap-guide.md missing — run 'npm install -g @c-d-cc/reap' to reinstall");
   }
 
   // memory tier files

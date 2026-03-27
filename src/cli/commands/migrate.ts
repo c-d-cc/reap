@@ -2,6 +2,7 @@ import { readdir, cp, rename, mkdir } from "fs/promises";
 import { join, dirname } from "path";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
+import { homedir } from "os";
 import YAML from "yaml";
 import type { ReapPaths } from "../../core/paths.js";
 import { readTextFile, writeTextFile, fileExists, ensureDir } from "../../core/fs.js";
@@ -437,10 +438,12 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
   await writeTextFile(join(paths.vision, "memory", "midterm.md"), "# Midterm Memory\n");
   await writeTextFile(join(paths.vision, "memory", "shortterm.md"), "# Shortterm Memory\n");
 
-  // 3.10 reap-guide.md
+  // 3.10 reap-guide.md (install to ~/.reap/, not per-project)
   const guide = await readTextFile(distPath("reap-guide.md"));
   if (guide) {
-    await writeTextFile(join(paths.reap, "reap-guide.md"), guide);
+    const reapHome = join(homedir(), ".reap");
+    await ensureDir(reapHome);
+    await writeTextFile(join(reapHome, "reap-guide.md"), guide);
   }
 
   // 3.11 CLAUDE.md

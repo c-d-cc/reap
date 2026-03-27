@@ -15,7 +15,7 @@ You inherit what previous generations built — their code, knowledge, and memor
 You MUST read ALL of the following files before doing any work. Do not skip any.
 These files define what REAP is, how the project works, and what constraints you operate under.
 
-1. `.reap/reap-guide.md` — **REAP reference**: architecture, lifecycle, memory, backlog, commands, all rules
+1. `~/.reap/reap-guide.md` — **REAP reference**: architecture, lifecycle, memory, backlog, commands, all rules
 2. `.reap/genome/application.md` — Project architecture, conventions, tech stack
 3. `.reap/genome/evolution.md` — AI behavior guide, interaction principles
 4. `.reap/genome/invariants.md` — Absolute constraints (violation = failure)
