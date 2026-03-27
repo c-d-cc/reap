@@ -45,7 +45,7 @@ REAP solves these with a **self-evolving generation model**:
 - Each generation follows a structured lifecycle: learn the current state, plan a goal, implement, validate, and reflect
 - The AI agent automatically restores full project context at every session start
 - Prescriptive knowledge (Genome) evolves through human-approved adaptations at each generation's completion
-- A maturity system adjusts the AI-human collaboration style as the project grows
+- The AI automatically selects goals by analyzing the gap between vision and current state
 - Clarity-driven interaction ensures the AI communicates with structure, examples, and honest opinions
 - Parallel work across branches is reconciled through a genome-first merge workflow
 
@@ -190,17 +190,13 @@ detect → mate → merge → reconcile → validation → completion
 
 ## Self-Evolving Features [↗](https://reap.cc/docs/self-evolving)
 
-### Maturity System
+### Gap-Driven Goal Selection
 
-The AI-human collaboration style adapts as the project matures:
+The AI automatically selects the next generation's goal by analyzing the gap between vision and current state. It cross-references unchecked goals in `vision/goals.md` with pending backlog items, prioritizes by impact, and proposes the most valuable next step. The human approves or adjusts.
 
-| Stage | AI Role | Human Role | Question:Suggestion |
-|-------|---------|------------|---------------------|
-| **Bootstrap** | Collaborator — asks, suggests, co-builds | Vision, decisions, direction | 60:40 |
-| **Growth** | Driver — analyzes gaps, proposes next goals | Approve/adjust, fitness feedback | 30:70 |
-| **Cruise** | Autonomous — finds improvements, executes | Fitness only | 10:90 |
+### Human Judges Fitness
 
-Maturity transitions are proposed by AI and approved by humans. Embryo generations (where genome is still stabilizing) allow more flexible genome edits.
+No quantitative metrics. The human's natural language feedback during the fitness phase is the only fitness signal. The AI never scores its own success — only self-assessment (metacognition) is allowed.
 
 ### Clarity-Driven Interaction
 
@@ -213,7 +209,7 @@ The AI adjusts its communication style based on how well-defined the current con
 ### Cruise Mode
 
 Pre-approve N generations for autonomous execution:
-- Each generation runs the full lifecycle with self-assessment (not self-fitness)
+- The AI selects goals from vision gaps and runs the full lifecycle autonomously
 - If uncertainty or risk is detected, cruise pauses and requests human feedback
 - After all N generations complete, human reviews the batch
 
@@ -345,13 +341,17 @@ All v0.15 files are preserved at `.reap/v15/`. After verifying the migration, yo
 - Completion is now 4 phases: `reflect` → `fitness` → `adapt` → `commit` (was 5 phases).
 - New concepts: embryo generations, cruise mode, vision-driven planning.
 
+**Vision layer added:**
+- `vision/goals.md` — long-term objectives, gap-driven goal selection at adapt phase
+- `vision/memory/` — 3-tier memory (longterm, midterm, shortterm) for cross-generation context
+- `vision/docs/` — planning documents and specs
+
 **Genome restructured (3 files):**
 - `application.md` — project identity, architecture, conventions, constraints
 - `evolution.md` — AI behavior guide, evolution direction, soft lifecycle rules
 - `invariants.md` — absolute constraints (human-only edits)
 
 **New features:**
-- Maturity system (Bootstrap → Growth → Cruise) adapts AI-human collaboration style
 - Clarity-driven interaction: AI adjusts communication depth based on context clarity
 - Cruise mode: pre-approve N generations, AI runs autonomously with self-assessment
 - Merge lifecycle with reconcile stage for genome-source consistency verification
