@@ -70,7 +70,7 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
   const clarityResult = calculateClarity(clarityInput);
 
   const knowledge = await loadReapKnowledge(paths);
-  const subagentPrompt = buildBasePrompt(knowledge, paths, state, config?.cruiseCount, clarityResult);
+  const subagentPrompt = buildBasePrompt(knowledge, paths, state, config?.cruiseCount, clarityResult, config);
 
   if (autoSubagent) {
     const promptLines = [

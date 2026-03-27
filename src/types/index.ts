@@ -60,7 +60,8 @@ export interface ReapConfig {
   project: string;
   language: string;
   autoSubagent: boolean;
-  strict: boolean;
+  strictEdit: boolean;
+  strictMerge: boolean;
   agentClient: "claude-code" | "opencode" | "codex";
   autoUpdate: boolean;
   cruiseCount?: string; // "1/5" format — present = cruise mode

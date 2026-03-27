@@ -1,5 +1,5 @@
 import type { ReapPaths } from "./paths.js";
-import type { GenerationState } from "../types/index.js";
+import type { GenerationState, ReapConfig } from "../types/index.js";
 import { readTextFile } from "./fs.js";
 import {
   detectMaturity,
@@ -38,6 +38,36 @@ export async function loadReapKnowledge(paths: ReapPaths): Promise<ReapKnowledge
   };
 }
 
+// ── Strict Mode ─────────────────────────────────────────────
+
+/**
+ * Build strict mode HARD-GATE sections for the prompt.
+ * Ported from v0.15 genome-loader.cjs:220-238.
+ */
+export function buildStrictSection(
+  strictEdit: boolean,
+  strictMerge: boolean,
+  stage: string,
+): string {
+  let sections = "";
+
+  if (strictEdit) {
+    if (stage === "implementation") {
+      sections += `\n\n## Strict Mode — Edit (ACTIVE — SCOPED MODIFICATION ALLOWED)\n<HARD-GATE>\nStrict mode is enabled. Code modification is ALLOWED only within the scope of the current Generation's plan.\n- You MUST read \`.reap/life/02-planning.md\` before writing any code.\n- You may ONLY modify files and modules listed in the plan's task list.\n- Changes outside the plan's scope are BLOCKED. If you discover out-of-scope work is needed, add it to the backlog instead of implementing it.\n- If the user explicitly requests to bypass strict mode (e.g., "override", "bypass strict"), you may proceed for that specific action only — but inform them that strict mode is being bypassed. The bypass does NOT persist; strict mode re-engages immediately after the requested action is complete.\n</HARD-GATE>`;
+    } else if (stage === "none") {
+      sections += `\n\n## Strict Mode — Edit (ACTIVE — CODE MODIFICATION BLOCKED)\n<HARD-GATE>\nStrict mode is enabled and there is NO active Generation.\nYou MUST NOT write, edit, or create any source code files.\nAllowed actions: reading files, analyzing code, answering questions, running commands.\nTo start coding, the user must first run \`/reap.start\` and advance to the implementation stage.\nIf the user explicitly requests to bypass strict mode (e.g., "override", "bypass strict", "just do it"), you may proceed for that specific action only — but inform them that strict mode is being bypassed. The bypass does NOT persist; strict mode re-engages immediately after the requested action is complete.\n</HARD-GATE>`;
+    } else {
+      sections += `\n\n## Strict Mode — Edit (ACTIVE — CODE MODIFICATION BLOCKED)\n<HARD-GATE>\nStrict mode is enabled. Current stage is '${stage}', which is NOT the implementation stage.\nYou MUST NOT write, edit, or create any source code files.\nAllowed actions: reading files, analyzing code, answering questions, running commands, writing REAP artifacts.\nAdvance to the implementation stage via the REAP lifecycle to unlock code modification.\nIf the user explicitly requests to bypass strict mode (e.g., "override", "bypass strict", "just do it"), you may proceed for that specific action only — but inform them that strict mode is being bypassed. The bypass does NOT persist; strict mode re-engages immediately after the requested action is complete.\n</HARD-GATE>`;
+    }
+  }
+
+  if (strictMerge) {
+    sections += `\n\n## Strict Mode — Merge (ACTIVE)\n<HARD-GATE>\nDirect git pull, git push, and git merge commands are restricted.\nUse REAP slash commands instead: \`/reap.pull\`, \`/reap.push\`, \`/reap.merge\`.\nThis ensures genome-first conflict resolution and proper lineage tracking.\nIf the user explicitly requests to bypass (e.g., "override", "bypass strict"), you may proceed for that specific action only — but inform them that strict merge mode is being bypassed. The bypass does NOT persist; strict mode re-engages immediately after the requested action is complete.\n</HARD-GATE>`;
+  }
+
+  return sections;
+}
+
 // ── Build ────────────────────────────────────────────────────
 
 /**
@@ -51,6 +81,7 @@ export function buildBasePrompt(
   state: GenerationState | null,
   cruiseCount?: string,
   clarityResult?: ClarityResult,
+  config?: ReapConfig | null,
 ): string {
   const lines: string[] = [];
   const isMerge = state?.type === "merge";
@@ -163,6 +194,20 @@ export function buildBasePrompt(
     lines.push("- Self-assessment during fitness phase indicates uncertainty or risk");
     lines.push("- Critical architectural decision needed that wasn't planned");
     lines.push("");
+  }
+
+  // ── Strict Mode ─────────────────────────────────────────
+  if (config) {
+    const strictStage = state ? state.stage : "none";
+    const strictSection = buildStrictSection(
+      config.strictEdit ?? false,
+      config.strictMerge ?? false,
+      strictStage,
+    );
+    if (strictSection) {
+      lines.push(strictSection.trimStart());
+      lines.push("");
+    }
   }
 
   // ── Project Path ──────────────────────────────────────────

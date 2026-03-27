@@ -20,7 +20,6 @@ language: english              # Artifact/prompt language
 autoSubagent: true             # Auto-delegate to subagent in evolve
 strict: false                  # Strict mode (limit AI's edit scope)
 agentClient: claude-code       # AI agent client
-autoUpdate: true               # Check for CLI updates
 # cruiseCount: 1/5             # Present = cruise mode (current/total)
 `}</CodeBlock>
 

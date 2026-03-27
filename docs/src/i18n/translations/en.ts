@@ -403,7 +403,6 @@ export const en = {
       ["autoSubagent", "Auto-delegate /reap.evolve to a subagent via Agent tool (default: true)"],
       ["strict", "Strict mode: boolean (shorthand) or { edit, merge } for granular control (see below). Default: false"],
       ["agentClient", "AI agent client to use (default: claude-code). Determines which adapter is used for skill deployment and session hooks"],
-      ["autoUpdate", "Check for CLI updates on session start (default: true)"],
       ["cruiseCount", "When present, enables cruise mode. Format: current/total (e.g. 1/5). Removed automatically after cruise completes"],
     ],
     strictMode: "Strict Mode",
@@ -724,12 +723,16 @@ return nonce to AI                         ←── AI passes nonce
     structure: `.reap/environment/
 ├── summary.md      # Always loaded (~100 lines) — tech stack, source structure, build, tests
 ├── domain/         # Domain knowledge (on-demand)
+├── resources/      # External reference docs — API docs, SDK specs (on-demand)
+├── docs/           # Project reference docs — design docs, specs (on-demand)
 └── source-map.md   # Code structure + dependencies (on-demand)`,
     layersTitle: "Tiers",
     layerHeaders: ["Tier", "Loading", "Content", "Limit"],
     layerItems: [
       ["summary.md", "Always loaded at session start", "Tech stack, source structure, build config, test setup. The AI's baseline understanding.", "~100 lines"],
       ["domain/", "On-demand (loaded when needed)", "Domain knowledge — business rules, API specs, infrastructure details.", "No limit"],
+      ["resources/", "On-demand (loaded when needed)", "External reference documents — API docs, SDK specs, third-party documentation.", "No limit"],
+      ["docs/", "On-demand (loaded when needed)", "Project reference documents — design docs, specs, architecture decisions.", "No limit"],
       ["source-map.md", "On-demand (loaded when needed)", "Current code structure and dependency map.", "No limit"],
     ],
     immutabilityTitle: "Environment Immutability",
@@ -741,7 +744,7 @@ return nonce to AI                         ←── AI passes nonce
     syncDesc: "Use /reap.knowledge to review and manage the Environment. During the Completion reflect phase, the AI automatically refreshes the environment to reflect changes made during the generation.",
     syncSources: [
       { label: "summary.md", role: "Always loaded", desc: "Compact overview of the project's technical state. Loaded into every session so the AI has baseline context." },
-      { label: "domain/ + source-map.md", role: "On-demand", desc: "Deeper knowledge loaded when the AI needs specific domain or structural context for the current task." },
+      { label: "domain/ + resources/ + docs/ + source-map.md", role: "On-demand", desc: "Deeper knowledge loaded when the AI needs specific domain, external reference, or structural context for the current task." },
     ],
     syncContrast: "The 2-tier strategy balances context window efficiency (summary.md is small) with depth (domain/ and source-map.md are available when needed).",
   },

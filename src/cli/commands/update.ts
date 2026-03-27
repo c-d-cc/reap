@@ -12,7 +12,8 @@ import type { ReapConfig } from "../../types/index.js";
 const CONFIG_DEFAULTS: Omit<ReapConfig, "project" | "cruiseCount"> = {
   language: "english",
   autoSubagent: true,
-  strict: false,
+  strictEdit: false,
+  strictMerge: false,
   agentClient: "claude-code",
   autoUpdate: true,
 };
@@ -51,6 +52,16 @@ async function backfillConfig(paths: ReapPaths): Promise<string[]> {
   }
 
   const added: string[] = [];
+
+  // Migrate legacy `strict: boolean` → strictEdit + strictMerge
+  if (config.strict !== undefined && config.strictEdit === undefined && config.strictMerge === undefined) {
+    const wasStrict = config.strict === true;
+    config.strictEdit = wasStrict;
+    config.strictMerge = wasStrict;
+    delete config.strict;
+    added.push("strictEdit", "strictMerge");
+  }
+
   for (const [key, defaultValue] of Object.entries(CONFIG_DEFAULTS)) {
     if (config[key] === undefined) {
       config[key] = defaultValue;

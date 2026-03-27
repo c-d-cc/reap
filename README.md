@@ -91,19 +91,6 @@ learning → planning → implementation ⟷ validation → completion
 | **Validation** | Run tests, verify completion criteria | `04-validation.md` |
 | **Completion** | Reflect, collect fitness feedback, adapt genome, archive | `05-completion.md` |
 
-### Completion (4 phases)
-
-```
-reflect → fitness → adapt → commit
-```
-
-| Phase | Purpose |
-|-------|---------|
-| **Reflect** | Retrospective + environment refresh |
-| **Fitness** | Human feedback (supervised) or self-assessment (cruise) |
-| **Adapt** | Genome evolution based on fitness + next generation suggestions |
-| **Commit** | Archive to lineage + git commit |
-
 ## Core Concepts [↗](https://reap.cc/docs/core-concepts)
 
 ### Genome — How to Build [↗](https://reap.cc/docs/genome)
@@ -125,6 +112,8 @@ The project's descriptive knowledge. Two-tier loading strategy:
 .reap/environment/
   summary.md        # Always loaded at session start (~100 lines)
   domain/           # Domain knowledge (on-demand)
+  resources/        # External reference documents — API docs, SDK specs (on-demand)
+  docs/             # Project reference documents — design docs, specs (on-demand)
   source-map.md     # Current code structure + dependencies (on-demand)
 ```
 
@@ -260,6 +249,8 @@ my-project/
     environment/              # Descriptive knowledge (2-tier)
       summary.md
       domain/
+      resources/              # External reference docs (API, SDK)
+      docs/                   # Project reference docs (design, specs)
       source-map.md
     vision/                   # Long-term goals
       goals.md
@@ -282,7 +273,6 @@ language: english              # Artifact/prompt language
 autoSubagent: true             # Auto-delegate to subagent in evolve
 strict: false                  # Strict mode (limit AI's edit scope)
 agentClient: claude-code       # AI agent client
-autoUpdate: true               # Check for CLI updates
 # cruiseCount: 1/5             # Present = cruise mode (current/total)
 ```
 

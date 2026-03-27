@@ -65,7 +65,8 @@ export async function initCommon(
     project: projectName,
     language: "english",
     autoSubagent: true,
-    strict: false,
+    strictEdit: false,
+    strictMerge: false,
     agentClient: "claude-code",
     autoUpdate: true,
   };

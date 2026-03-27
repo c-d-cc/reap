@@ -287,7 +287,8 @@ function buildConfirmPrompt(config: V15Config, scan: Record<string, unknown>): s
 2. **Config migration**
    - Remove: entryMode, autoIssueReport, genomeVersion, lastSyncedGeneration, preset
    - Add: agentClient (default: claude-code)
-   - Keep: project, language, strict, autoUpdate, autoSubagent
+   - Keep: project, language, autoUpdate, autoSubagent
+   - Convert: strict → strictEdit + strictMerge
 
 3. **Vision (new)**
    - goals.md — long-term project goals (set up after migration)
@@ -407,7 +408,8 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
     project: "my-project",
     language: "english",
     autoSubagent: true,
-    strict: false,
+    strictEdit: false,
+    strictMerge: false,
     agentClient: "claude-code" as const,
     autoUpdate: true,
   };
@@ -417,11 +419,13 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
     if (v15ConfigContent) {
       v15Config = YAML.parse(v15ConfigContent) ?? {};
     }
+    const wasStrict = v15Config.strict ?? false;
     v16Config = {
       project: v15Config.project ?? "my-project",
       language: v15Config.language ?? "english",
       autoSubagent: v15Config.autoSubagent ?? true,
-      strict: v15Config.strict ?? false,
+      strictEdit: wasStrict,
+      strictMerge: wasStrict,
       agentClient: "claude-code" as const,
       autoUpdate: v15Config.autoUpdate ?? true,
     };

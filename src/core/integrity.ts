@@ -173,11 +173,20 @@ async function checkConfig(
     warnings.push("config.yml: 'language' should be string");
   }
   if (
-    config.strict !== undefined &&
-    typeof config.strict !== "boolean" &&
-    typeof config.strict !== "object"
+    config.strictEdit !== undefined &&
+    typeof config.strictEdit !== "boolean"
   ) {
-    warnings.push("config.yml: 'strict' should be boolean or object");
+    warnings.push("config.yml: 'strictEdit' should be boolean");
+  }
+  if (
+    config.strictMerge !== undefined &&
+    typeof config.strictMerge !== "boolean"
+  ) {
+    warnings.push("config.yml: 'strictMerge' should be boolean");
+  }
+  // Legacy strict field — warn if still present
+  if (config.strict !== undefined) {
+    warnings.push("config.yml: legacy 'strict' field found — run 'reap update' to migrate to strictEdit/strictMerge");
   }
   if (
     config.autoUpdate !== undefined &&
