@@ -1,5 +1,3 @@
-> [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md)
-
 <p align="center">
   <img src="media/logo.png" alt="REAP" width="80" height="80" />
 </p>
@@ -70,7 +68,7 @@ Open your AI agent (Claude Code) and use slash commands:
 /reap.init
 
 # Run a full generation
-/reap.evolve "Implement user authentication"
+/reap.evolve
 ```
 
 `/reap.evolve` drives the entire generation lifecycle — from learning through completion. The AI explores the project, plans the work, implements it, validates, and reflects. This is the primary command for day-to-day development.
@@ -138,6 +136,7 @@ Long-term goals and direction. The AI references vision during the adapt phase t
 .reap/vision/
   goals.md          # North star objectives
   docs/             # Planning documents
+  memory/           # AI memory (3-tier: longterm, midterm, shortterm)
 ```
 
 ### Backlog [↗](https://reap.cc/docs/backlog)
@@ -243,7 +242,7 @@ REAP integrates with AI agents through slash commands and lifecycle hooks. Curre
 
 ### How It Works
 
-1. **Session hook** runs at every session start, injecting genome, environment, and current state into the AI agent
+1. **CLAUDE.md** instructs the AI to load genome, environment, and reap-guide at session start
 2. **Slash commands** call `reap run <cmd>`, which returns structured JSON instructions for the AI
 3. **Signature-based locking** (nonce chain) enforces stage ordering at the code level — no skipping, no forgery, no replay
 
@@ -269,6 +268,7 @@ my-project/
     vision/                   # Long-term goals
       goals.md
       docs/
+      memory/                 # AI memory (longterm/midterm/shortterm)
     life/                     # Current generation
       current.yml
       backlog/
@@ -299,6 +299,47 @@ Key settings:
 
 REAP v0.16 is a complete rewrite built on the [Self-Evolving Pipeline](https://reap.cc/docs/self-evolving) architecture.
 
+### Migration Steps
+
+1. **Install v0.16:**
+   ```bash
+   npm install -g @c-d-cc/reap
+   ```
+   This automatically installs v0.16 skills to `~/.claude/commands/` and removes legacy v0.15 project-level skills.
+
+2. **Open Claude Code in your project** and run:
+   ```
+   /reap.update
+   ```
+
+3. **Follow the multi-phase migration:**
+
+   | Phase | What happens | Your role |
+   |-------|-------------|-----------|
+   | **Confirm** | Shows what will change, creates backup at `.reap/v15/` | Review and confirm |
+   | **Execute** | Restructures directories, migrates config/hooks/lineage/backlog | Automatic |
+   | **Genome Convert** | AI reconstructs genome from v0.15 files into new 3-file structure | Review AI's work |
+   | **Vision** | Set up vision/goals.md and memory | Provide project direction |
+   | **Complete** | Summary of migration results | Verify |
+
+4. **Verify** your project works:
+   ```
+   /reap.status
+   /reap.evolve
+   ```
+
+### Interrupted Migration
+
+If the migration is interrupted (API error, session disconnect, etc.), your progress is saved in `.reap/migration-state.yml`. Simply run `/reap.update` again — it will resume from where it left off, skipping already completed steps.
+
+To start over instead, delete `.reap/migration-state.yml` and run `/reap.update` again.
+
+### Backup
+
+All v0.15 files are preserved at `.reap/v15/`. After verifying the migration, you can safely delete this directory.
+
+### What Changed
+
 **Lifecycle redesigned:**
 - The first stage is now `learning` (was `objective`). The AI explores the project before setting goals.
 - Completion is now 4 phases: `reflect` → `fitness` → `adapt` → `commit` (was 5 phases).
@@ -314,13 +355,11 @@ REAP v0.16 is a complete rewrite built on the [Self-Evolving Pipeline](https://r
 - Clarity-driven interaction: AI adjusts communication depth based on context clarity
 - Cruise mode: pre-approve N generations, AI runs autonomously with self-assessment
 - Merge lifecycle with reconcile stage for genome-source consistency verification
-- Vision system for long-term goal tracking
+- Vision system with 3-tier memory for cross-generation context
 
 **Deprecated commands:**
 - `/reap.sync` → `/reap.knowledge`
 - `/reap.refreshKnowledge` → `/reap.knowledge`
-
-For the full migration guide, see [Self-Evolving Pipeline Guide](https://reap.cc/docs/self-evolving).
 
 ## Author
 
