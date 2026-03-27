@@ -1,78 +1,76 @@
 import type { ReapPaths } from "../../../core/paths.js";
 import { writeTextFile } from "../../../core/fs.js";
 import { emitOutput } from "../../../core/output.js";
-import { initCommon, getClaudeMdSection } from "./common.js";
+import { initCommon, getClaudeMdSection, buildPromptPreamble, buildSelfReviewBlock, buildHardGateBlock } from "./common.js";
 import { scanCodebase } from "../../../core/scanner.js";
 import { suggestGenome, generateSourceMap } from "../../../core/genome-suggest.js";
 
 function buildConversationPrompt(claudeMdSection: string): string {
   return `## Adoption Init — Interactive Session
 
-You have just initialized reap on an existing project. The codebase has been scanned and a draft genome/application.md was auto-generated. Your job now is to have a conversation with the human to verify, correct, and complete the genome and environment.
+REAP has been initialized on an existing project. The codebase has been scanned and a draft genome/application.md was auto-generated. Your job is to verify, correct, and complete the genome and environment through conversation.
 
-### Important
-- Respond in the human's preferred language (ask early if unclear).
-- Be conversational and concise — one question at a time.
-- Update files immediately as you gather corrections — do not batch writes to the end.
-- If the human wants to skip a step, accept it and move on. Write "N/A" or a brief note in the relevant section.
-- Adapt to the project type. Not every project is a typical software product — adjust your questions accordingly.
+${buildPromptPreamble()}
 
-### Conversation Flow
+### PHASE 1: Language & Scan Summary
+- Detect the user's language from their first message, system locale, or any available context.
+- Confirm briefly: "I'll use [detected language] for all REAP artifacts. Let me know if you'd prefer a different language."
+- Update .reap/config.yml \`language\` field immediately.
+- From this point, conduct **all conversation in the confirmed language**. The questions below are English templates — translate them naturally.
+- Show scan summary: "The codebase has been scanned and a draft genome/application.md was created. Let's review it together."
+- GATE: Language confirmed (explicit or implicit acceptance) before proceeding.
 
-**Step 1: Language Preference**
-Ask the human what language they prefer for all reap artifacts and conversations.
-Update .reap/config.yml with the chosen language immediately.
+### PHASE 2: Genome Review (section-by-section verification)
+Read genome/application.md and walk through each section **one at a time**:
 
-**Step 2: Review Auto-Generated Genome**
-Read genome/application.md and present its contents to the human.
-Walk through each section:
-- "I detected the project identity as [X]. Is this correct? What problem does this project solve, and who is it for?"
-- "I found these architecture patterns: [X]. Are there others? What is the core design philosophy or mental model behind this project?"
-- "The tech stack appears to be [X]. Anything missing?"
-Ask for corrections and update genome/application.md immediately.
+**2a: Project Identity**
+- Present detected identity → "Is this correct? What problem does this project solve, and who is it for?" → confirm/revise → update immediately.
 
-**Step 3: Review Source Map**
-Briefly summarize what was found in environment/source-map.md.
-Ask: "Is this directory structure accurate? Any important areas I missed?"
+**2b: Tech Stack**
+- Present detected stack → "Anything missing or incorrect?" → confirm/revise → update immediately.
 
-**Step 4: What Code Scan Cannot Detect**
-Ask: "Why was this architecture chosen? What were the alternatives considered?" Record the reasoning — it's as important as the choice itself.
-Ask: "Are there any unique patterns or conventions specific to this project?" (things a new developer wouldn't guess from reading the code)
-Ask: "What coding conventions does this project follow?" (naming, patterns, formatting)
-Ask: "Are there any technical constraints I should know about?" (performance, compatibility, etc.)
-Ask: "What is the biggest technical debt right now?"
-Update genome/application.md with the answers immediately.
+**2c: Architecture**
+- Present inferred architecture → "Is this correct?" → if confirmed, follow up: "Why was this architecture chosen?" (record reasoning) → update immediately.
 
-**Step 5: Invariants**
-Ask: "What must NEVER be done in this project?" (critical constraints that must never be violated)
-Write genome/invariants.md immediately with human-confirmed invariants (keep the default pipeline invariants + add project-specific ones).
+**2d: Conventions**
+- Present detected conventions → "Any additional conventions?" (naming, formatting, etc.) → confirm/revise → update immediately.
 
-**Step 6: Environment & Confirm**
-Update environment/summary.md with substantive content:
-- Enrich the auto-generated tech stack info with context from the conversation
-- Add Build & Scripts section from scan data
-- Add Key Design Decisions based on what the human shared
-- Ensure summary.md is self-contained (not just "See source-map.md")
+- GATE: All sub-sections confirmed before proceeding.
 
-Show the final genome/application.md and environment/summary.md to the human.
-Ask: "Does this accurately represent your project? Any final corrections?"
-Apply corrections if needed.
+### PHASE 3: What Code Cannot Tell
+Ask these **one at a time**:
+1. "Are there any patterns unique to this project?" (things a code scan cannot detect)
+2. "What is the biggest technical debt right now?" (skippable)
+3. "Any hard constraints?" (performance, compatibility, etc. Skippable)
+4. "What must NEVER be done in this project?" → add to invariants.md
 
-**Step 6.5: CLAUDE.md**
-1. Read current project's CLAUDE.md and check if a ## REAP section exists. The REAP section contains loading information about Genome, Environment, and additional knowledge pre-loading for AI agents.
-2. If CLAUDE.md file does not exist, create it and add a ## REAP section.
-3. If CLAUDE.md file exists but ## REAP section is not present, append the ## REAP section.
-4. The ## REAP section contents should follow below:
+Update genome/application.md + invariants.md → show drafts → confirm/revise.
+- GATE: User confirms before proceeding.
+
+### PHASE 4: Genome Finalization + Self-Review
+${buildSelfReviewBlock()}
+
+- Show full genome/application.md + invariants.md to user.
+- Report self-review results (any issues found).
+- Ask: "Finalize this genome?" (user must explicitly confirm)
+- GATE: User explicitly confirms finalization.
+
+${buildHardGateBlock()}
+
+### PHASE 5: Environment, CLAUDE.md, Vision
+1. Update environment/summary.md with substantive content:
+   - Enrich auto-generated tech stack info with conversation context
+   - Add Key Design Decisions from what the human shared
+   - Ensure summary.md is self-contained
+2. Briefly summarize environment/source-map.md to user.
+3. Ensure CLAUDE.md has the REAP section:
 
 ${claudeMdSection}
 
-Briefly mention to the human that CLAUDE.md now includes REAP loading instructions.
-
-**Step 7: Vision & First Generation**
-Ask: "What is the future direction for this project? What are the major milestones?"
-Write vision/goals.md with the answers.
-Then suggest: "Ready to start the first embryo generation? What should the first goal be?"
-If the human confirms, run: reap run start --type embryo --goal "<goal>"
+4. Ask: "What is the long-term vision and major milestones for this project?" (skippable)
+5. Write vision/goals.md.
+6. Suggest: "Ready to start the first embryo generation? What should the goal be?"
+7. If confirmed: \`reap run start --type embryo --goal "<goal>"\`
 `;
 }
 

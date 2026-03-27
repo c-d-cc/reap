@@ -104,6 +104,41 @@ export async function getClaudeMdSection(): Promise<string> {
  * Ensure CLAUDE.md exists and contains the REAP section.
  * Returns the action taken: "created", "appended", or "skipped".
  */
+// ── Init Conversation Prompt Builders ────────────────────────
+
+export function buildPromptPreamble(): string {
+  return `### RULES (never violate)
+1. **One question per message.** Never list multiple questions in a single message.
+2. **Prefer multiple choice.** Free input is a last resort.
+3. **"skip" = move on immediately.** Write "N/A" in the relevant section and proceed.
+4. **Do not advance past a GATE without confirmation.** Each Phase ends with user confirmation before the next begins.
+5. **Always show drafts and get confirmation after writing.** No advancing to the next Phase without user approval.
+6. **Speak the user's language.** After Phase 1 confirms the language, conduct all conversation in that language. Questions in this prompt are English templates — translate them naturally.
+7. **Be concise.** Use short examples instead of long explanations.`;
+}
+
+export function buildSelfReviewBlock(): string {
+  return `### Self-Review (perform internally, then report results to user)
+After writing genome/application.md + invariants.md, check:
+- No \`<!-- -->\` placeholder comments remaining?
+- "TBD", "TODO", "N/A" only in sections the user explicitly skipped?
+- No contradiction between Tech Stack and Architecture?
+- invariants.md items do not conflict with application.md content?
+- Each section has at least one concrete piece of content?
+If issues found, report to user and suggest fixes.`;
+}
+
+export function buildHardGateBlock(): string {
+  return `### <HARD-GATE> No generation before genome finalization
+If genome/application.md has NOT been shown to the user and explicitly approved:
+- Do NOT run or suggest \`reap run start\`.
+- "Approved" means the user explicitly agreed after final review.
+- Phrases like "looks good", "ok", "let's go with this" count as approval.
+- If the user requests a generation before approval, respond:
+  "The genome has not been finalized yet. Let's complete the review first."
+</HARD-GATE>`;
+}
+
 export async function ensureClaudeMd(root: string, projectName: string): Promise<"created" | "appended" | "skipped"> {
   const claudeMdPath = join(root, "CLAUDE.md");
   const reapSection = await readTextFile(distPath("claude-md-section.md"));

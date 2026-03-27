@@ -1,7 +1,7 @@
 import type { ReapPaths } from "../../../core/paths.js";
 import { writeTextFile } from "../../../core/fs.js";
 import { emitOutput } from "../../../core/output.js";
-import { initCommon, getClaudeMdSection } from "./common.js";
+import { initCommon, getClaudeMdSection, buildPromptPreamble, buildSelfReviewBlock, buildHardGateBlock } from "./common.js";
 
 const DEFAULT_APPLICATION = `# Application
 
@@ -24,73 +24,70 @@ const DEFAULT_APPLICATION = `# Application
 function buildConversationPrompt(claudeMdSection: string): string {
   return `## Greenfield Init — Interactive Session
 
-You have just initialized a new greenfield project with reap. The .reap/ directory structure has been created with empty templates. Your job now is to have a conversation with the human to fill in the genome (project identity, conventions, constraints) and environment (project context).
+A new greenfield project has been initialized. The .reap/ directory structure is created with empty templates. Your job is to have a conversation with the human to fill in the genome and environment.
 
-### Important
-- Respond in the human's preferred language (ask early if unclear).
-- Be conversational and concise — one question at a time.
-- Write each file immediately after gathering the relevant information — do not batch writes to the end.
-- If the human wants to skip a step (e.g., "no tech stack yet"), write "N/A" or a brief note in the relevant section and move on. Do not push for answers they don't have.
-- Adapt to the project type. Not every project is a typical software product — it could be a test project, a library, a research prototype, etc. Adjust your questions accordingly.
+${buildPromptPreamble()}
 
-### Conversation Flow
+### PHASE 1: Language & Introduction
+- Detect the user's language from their first message, system locale, or any available context.
+- Confirm briefly: "I'll use [detected language] for all REAP artifacts. Let me know if you'd prefer a different language."
+- Update .reap/config.yml \`language\` field immediately.
+- From this point, conduct **all conversation in the confirmed language**. The questions below are English templates — translate them naturally.
+- Introduce yourself briefly: explain that you will help set up the project through a few questions.
+- GATE: Language confirmed (explicit or implicit acceptance) before proceeding.
 
-**Step 1: Language & Introduction**
-Ask the human what language they prefer for all reap artifacts and conversations.
-Then introduce yourself: explain that you will help set up the project through a short conversation.
-Update .reap/config.yml with the chosen language immediately.
+### PHASE 2: Project Identity
+Ask these questions **one at a time**, waiting for a response before the next:
+1. "What is this project? What problem does it solve?" (free input)
+2. "Who is the target user?" (multiple choice: Developers / End users / Internal team / Other)
+3. "Is there a core design philosophy or metaphor?" (examples: "like a pipeline", "event-driven", etc. Skippable)
 
-**Step 2: Project Identity**
-Ask: "What is this project? What problem does it solve?"
-Ask: "Who is the target user or audience?"
-Ask: "Is there a core metaphor, mental model, or design philosophy behind this project?" (e.g., "it's like a pipeline", "we treat everything as an event", etc. If none, skip.)
-Listen carefully. Summarize back to confirm.
-Write genome/application.md Project Identity section immediately after confirmation.
+All answers collected → write genome/application.md Project Identity section → show draft to user → confirm/revise.
+- GATE: User confirms Project Identity before proceeding.
 
-**Step 3: Tech Stack**
-Ask: "What tech stack are you planning to use?" (language, framework, database, etc.)
-If the human is undecided, suggest options based on the project type and ask them to choose.
-If skipped, write "N/A" in the Tech Stack section and move on.
-Write genome/application.md Tech Stack section immediately.
+### PHASE 3: Tech Stack & Architecture
+Ask **one at a time**:
+1. "What tech stack?" (multiple choice presets, skippable)
+   - Language: TypeScript / Python / Go / Rust / Java / Other
+   - Framework: React / Vue / Express / FastAPI / Gin / Other / None
+   - DB: PostgreSQL / MySQL / MongoDB / SQLite / None / Other
+2. "Architecture?" (multiple choice: Monolith / Layered / Microservices / Serverless / Undecided)
+3. If architecture chosen: "Why this architecture?" (record reasoning)
 
-**Step 4: Architecture & Conventions**
-Ask: "Do you have any architecture preferences?" (monolith, microservices, layered, etc.)
-If they choose an architecture, follow up: "Why this architecture? What drove this decision?" Record the reasoning — it helps future AI understand trade-offs.
-Ask: "Any coding conventions?" (naming, file structure, formatting tools, etc.)
-If the human says "no preference," suggest sensible defaults and confirm.
-If skipped, write "N/A" and move on.
-Write genome/application.md Architecture and Conventions sections immediately.
+All answers collected → write genome/application.md Tech Stack + Architecture sections → show draft → confirm/revise.
+- GATE: User confirms before proceeding.
 
-**Step 5: Constraints & Invariants**
-Ask: "Are there any hard constraints?" (performance requirements, compatibility, budget, etc.)
-Ask: "What must NEVER be done in this project?" (these become invariants)
-Write genome/invariants.md with human-confirmed invariants immediately.
-Write genome/application.md Constraints section immediately.
+### PHASE 4: Conventions & Constraints
+Ask **one at a time**:
+1. "Coding conventions?" (multiple choice + free input)
+   - Naming: camelCase / snake_case / framework default / Other
+   - Formatting: Prettier / ESLint / Biome / None / Other
+2. "Any hard constraints?" (e.g. performance, compatibility, budget. Skippable)
+3. "What must NEVER be done in this project?" → add to invariants.md
 
-**Step 6: Environment & Review**
-Write environment/summary.md with substantive project context:
-- Tech stack decisions and why
-- Planned project structure (if discussed)
-- Build/test approach
-- Key design decisions so far
-Then show the human a summary of genome/application.md and environment/summary.md.
-Ask for corrections. Apply any changes.
+Write genome/application.md Conventions + Constraints → write invariants.md → show drafts → confirm/revise.
+- GATE: User confirms before proceeding.
 
-**Step 6.5: CLAUDE.md**
-1. Read current project's CLAUDE.md and check if a ## REAP section exists. The REAP section contains loading information about Genome, Environment, and additional knowledge pre-loading for AI agents.
-2. If CLAUDE.md file does not exist, create it and add a ## REAP section.
-3. If CLAUDE.md file exists but ## REAP section is not present, append the ## REAP section.
-4. The ## REAP section contents should follow below:
+### PHASE 5: Genome Finalization + Self-Review
+${buildSelfReviewBlock()}
+
+- Show full genome/application.md + invariants.md to user.
+- Report self-review results (any issues found).
+- Ask: "Finalize this genome?" (user must explicitly confirm)
+- GATE: User explicitly confirms finalization.
+
+${buildHardGateBlock()}
+
+### PHASE 6: Environment, CLAUDE.md, Vision
+1. Write environment/summary.md based on everything discussed (tech stack, architecture, conventions, constraints).
+2. Ensure CLAUDE.md has the REAP section:
 
 ${claudeMdSection}
 
-Briefly mention to the human that CLAUDE.md now includes REAP loading instructions.
-
-**Step 7: Vision & First Generation**
-Ask: "What is the long-term vision for this project? What are the major milestones?"
-Write vision/goals.md with the answers.
-Then suggest: "Ready to start the first embryo generation? What should the first goal be?"
-If the human confirms, run: reap run start --type embryo --goal "<goal>"
+3. Ask: "What is the long-term vision and major milestones for this project?" (skippable)
+4. Write vision/goals.md.
+5. Suggest: "Ready to start the first embryo generation? What should the goal be?"
+6. If confirmed: \`reap run start --type embryo --goal "<goal>"\`
 `;
 }
 
