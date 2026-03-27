@@ -1,0 +1,19 @@
+id: gen-047-4b8a99
+type: embryo
+goal: hand-off 구현 — 업그레이드 후 새 바이너리 위임
+parents:
+  - gen-046-cd3e60
+timeline:
+  - stage: learning
+    at: 2026-03-27T14:36:06.675Z
+  - stage: planning
+    at: 2026-03-27T14:37:39.202Z
+  - stage: implementation
+    at: 2026-03-27T14:38:15.925Z
+  - stage: validation
+    at: 2026-03-27T14:41:15.275Z
+  - stage: completion
+    at: 2026-03-27T14:42:20.576Z
+fitnessFeedback:
+  text: ok
+  evaluatedAt: 2026-03-27T14:43:57.708Z

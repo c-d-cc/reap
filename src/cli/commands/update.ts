@@ -100,7 +100,7 @@ async function ensureDirectories(paths: ReapPaths): Promise<string[]> {
  * - v0.16 detected → syncs project structure (config backfill, dirs, CLAUDE.md)
  * - No REAP project → error
  */
-export async function execute(phase?: string): Promise<void> {
+export async function execute(phase?: string, postUpgrade?: boolean): Promise<void> {
   const root = process.cwd();
   const paths = createPaths(root);
 
@@ -109,10 +109,14 @@ export async function execute(phase?: string): Promise<void> {
     emitError("update", "No REAP project detected. Run 'reap init' first.");
   }
 
-  // v0.15 → delegate to migrate
-  if (await detectV15(paths)) {
-    await migrateExecute(paths, phase);
-    return;
+  // --post-upgrade: called by the OLD binary after installing a new version.
+  // Skip v0.15 migration check and go straight to v0.16 sync.
+  if (!postUpgrade) {
+    // v0.15 → delegate to migrate
+    if (await detectV15(paths)) {
+      await migrateExecute(paths, phase);
+      return;
+    }
   }
 
   // v0.16 → sync project structure

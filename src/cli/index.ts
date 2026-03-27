@@ -150,8 +150,9 @@ program
   .command("update")
   .description("Update project structure to match current REAP version")
   .option("--phase <phase>", "Migration phase for v0.15 projects (confirm, execute, vision, complete)")
-  .action(async (options: { phase?: string }) => {
-    await updateExecute(options.phase);
+  .option("--post-upgrade", "Run project sync only (called by previous binary after self-upgrade)")
+  .action(async (options: { phase?: string; postUpgrade?: boolean }) => {
+    await updateExecute(options.phase, options.postUpgrade);
   });
 
 program.parse();

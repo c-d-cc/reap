@@ -68,6 +68,26 @@ export function queryLatestVersion(): string | null {
   }
 }
 
+/**
+ * Hand off to the newly installed binary by running `reap update --post-upgrade`.
+ * The new binary performs project sync with its own (newer) code.
+ * Returns true if hand-off succeeded, false if it failed (fail-safe).
+ */
+export function handOffToNewBinary(root: string): boolean {
+  try {
+    execSync("reap update --post-upgrade", {
+      stdio: "inherit",
+      timeout: 120_000,
+      cwd: root,
+    });
+    return true;
+  } catch {
+    // New binary may not support --post-upgrade yet.
+    // Fail silently — caller will fallback to current binary's reap update.
+    return false;
+  }
+}
+
 export interface AutoUpdateResult {
   action: "upgraded" | "blocked" | "skipped";
   from?: string;
@@ -126,16 +146,22 @@ export function performAutoUpdate(root: string): AutoUpdateResult {
       stdio: ["pipe", "pipe", "pipe"],
     });
 
-    // 8. Run reap update for project sync
-    try {
-      execSync("reap update", {
-        encoding: "utf-8",
-        timeout: 30_000,
-        stdio: ["pipe", "pipe", "pipe"],
-        cwd: root,
-      });
-    } catch {
-      // reap update failure is non-fatal — the upgrade itself succeeded
+    // 8. Hand off to new binary for project sync.
+    // The new binary runs `reap update --post-upgrade` which skips self-upgrade
+    // and only performs project sync with the new code.
+    const handedOff = handOffToNewBinary(root);
+    if (!handedOff) {
+      // Fallback: run reap update with current (old) binary
+      try {
+        execSync("reap update", {
+          encoding: "utf-8",
+          timeout: 30_000,
+          stdio: ["pipe", "pipe", "pipe"],
+          cwd: root,
+        });
+      } catch {
+        // reap update failure is non-fatal — the upgrade itself succeeded
+      }
     }
 
     console.error(`[REAP] Auto-updated: v${installed} → v${latest}`);
