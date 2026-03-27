@@ -246,6 +246,7 @@ All REAP interactions go through `/reap.*` slash commands. These are the primary
 ## CLI Commands (no slash command equivalent)
 - `reap make backlog --type <type> --title <title> [--body <body>] [--priority <priority>]` — Create backlog item (type: genome-change, environment-change, task)
 - `reap cruise <count>` — Set cruise mode (pre-approve N generations for autonomous execution)
+- `reap update` — Update project structure to match current REAP version (v0.15 migrate, v0.16 sync)
 
 ## Role Separation
 

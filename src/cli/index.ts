@@ -23,6 +23,7 @@ import { execute as fixExecute } from "./commands/fix.js";
 import { execute as destroyExecute } from "./commands/destroy.js";
 import { execute as cleanExecute } from "./commands/clean.js";
 import { execute as checkVersionExecute } from "./commands/check-version.js";
+import { execute as updateExecute } from "./commands/update.js";
 
 const program = new Command();
 
@@ -127,6 +128,14 @@ program
   .description("Check for v0.15 project and show migration message")
   .action(async () => {
     await checkVersionExecute();
+  });
+
+program
+  .command("update")
+  .description("Update project structure to match current REAP version")
+  .option("--phase <phase>", "Migration phase for v0.15 projects (confirm, execute, vision, complete)")
+  .action(async (options: { phase?: string }) => {
+    await updateExecute(options.phase);
   });
 
 program.parse();

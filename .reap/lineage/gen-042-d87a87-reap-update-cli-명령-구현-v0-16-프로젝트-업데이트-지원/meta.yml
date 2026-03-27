@@ -1,0 +1,19 @@
+id: gen-042-d87a87
+type: embryo
+goal: reap update CLI 명령 구현 — v0.16 프로젝트 업데이트 지원
+parents:
+  - gen-041-243ec9
+timeline:
+  - stage: learning
+    at: 2026-03-27T12:54:42.652Z
+  - stage: planning
+    at: 2026-03-27T12:56:45.303Z
+  - stage: implementation
+    at: 2026-03-27T12:57:26.390Z
+  - stage: validation
+    at: 2026-03-27T13:00:12.539Z
+  - stage: completion
+    at: 2026-03-27T13:01:11.737Z
+fitnessFeedback:
+  text: ok
+  evaluatedAt: 2026-03-27T13:04:42.907Z

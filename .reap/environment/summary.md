@@ -46,7 +46,7 @@ src/
 │   ├── template.ts             — artifact 템플릿 복사
 │   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). lineage 편향 분석 제거됨 (gen-030)
 ├── cli/
-│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, cruise, install-skills, fix, destroy, clean, check-version)
+│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, run, make, cruise, install-skills, fix, destroy, clean, check-version, update)
 │   └── commands/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair, --migrate 지원)
 │       ├── migrate.ts          — v0.15→v0.16 마이그레이션 (multi-phase: confirm→execute→vision→complete)
@@ -72,11 +72,12 @@ src/
 │       ├── status.ts           — 현재 상태 조회
 │       ├── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
 │       ├── destroy.ts          — REAP 완전 제거 (--confirm 필수, .reap/ + CLAUDE.md + .gitignore)
-│       └── clean.ts            — 선택적 상태 초기화 (--lineage, --life, --backlog, --hooks)
+│       ├── clean.ts            — 선택적 상태 초기화 (--lineage, --life, --backlog, --hooks)
+│       └── update.ts           — 프로젝트 업데이트 (v0.15→migrate 위임, v0.16→config backfill/디렉토리 보충/CLAUDE.md 보수)
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/claude-code/       — Claude Code 어댑터
 │   ├── install.ts              — skill 파일 설치 (~/.claude/commands/)
-│   └── skills/                 — 19 slash command files (.md, reap.migrate.md 포함)
+│   └── skills/                 — 19 slash command files (.md, reap.update.md 포함)
 └── templates/                  — 템플릿 파일
     ├── reap-guide.md           — REAP 도구 가이드 (subagent prompt에 주입)
     └── artifacts/              — stage별 artifact 템플릿

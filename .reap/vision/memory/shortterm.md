@@ -2,22 +2,20 @@
 
 ## 세션 요약 (2026-03-27)
 
-### gen-041: environment 구조 개선
-- paths.ts에 environmentResources, environmentDocs 경로 추가
-- init에서 environment/resources/, environment/docs/ 디렉토리 생성
-- migrate에서 v0.15 resources/docs 방어적 복사 추가
-- integrity 검증에 optional dirs로 추가
-- reap-guide.md (template + 로컬) 구조 설명 업데이트
-- 테스트: 406 pass (변경 없음)
+### gen-042: reap update CLI 명령 구현
+- `reap update` CLI 명령 추가 (v0.15 -> migrate 위임, v0.16 -> 프로젝트 동기화)
+- config backfill, 디렉토리 보충, CLAUDE.md 보수 기능
+- `/reap.update` skill을 `reap update` 호출로 변경
+- e2e 테스트 5개 추가 -> 411 pass
 
 ### 다음 세션에서 할 것
+- postinstall에서 `reap update` 자동 실행 검토 (현재 수동)
 - docs 페이지에 environment resources/docs 설명 추가
-- npm publish 후 registry에서 autoUpdateMinVersion 필드 조회 실동작 확인
 - README v0.16 재작성
 
 ### Backlog 상태
-- environment 구조 개선 backlog: consumed (gen-041)
+- reap update CLI 명령: 이번 gen에서 소비 예정
 
 ### 미결정 사항
 - Embryo -> Normal 전환 시점
-- cruise mode 리팩토링 구체 설계
+- postinstall에서 reap update 자동 실행 여부
