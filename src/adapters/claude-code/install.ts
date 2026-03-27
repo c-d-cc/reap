@@ -50,6 +50,9 @@ export async function installSkills(_projectRoot?: string): Promise<void> {
   // Copy reap-guide.md to ~/.reap/ (single source, always up-to-date)
   await installReapGuide();
 
+  // Copy agent definitions to ~/.claude/agents/
+  await installAgents();
+
   // Register SessionStart hook for v0.15 legacy cleanup
   await registerCleanupHook();
 
@@ -65,6 +68,29 @@ export async function installSkills(_projectRoot?: string): Promise<void> {
     },
     message: `Cleaned ${cleaned.length} stale skills, installed ${installed} skill files to ${targetDir}`,
   });
+}
+
+/**
+ * Copy agent definitions to ~/.claude/agents/ (user-level, available to all projects).
+ */
+async function installAgents(): Promise<void> {
+  const agentsDir = join(homedir(), ".claude", "agents");
+  await ensureDir(agentsDir);
+
+  const templateDir = __dirname.includes("dist")
+    ? join(__dirname, "..", "templates", "agents")
+    : join(__dirname, "..", "..", "templates", "agents");
+
+  try {
+    const files = await readdir(templateDir);
+    for (const file of files) {
+      if (file.endsWith(".md")) {
+        await cp(join(templateDir, file), join(agentsDir, file));
+      }
+    }
+  } catch {
+    // agents template dir doesn't exist — skip
+  }
 }
 
 /**
