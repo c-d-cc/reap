@@ -1005,6 +1005,10 @@ Beschreibung der Aufgabe.`,
     ],
     versions: [
       {
+        version: "0.16.1",
+        notes: "npm README-Bilder werden jetzt korrekt angezeigt. SPA-Routing für Docs-Site wiederhergestellt (404.html Fallback). Defekte Docs-Links in README behoben (merge-lifecycle, agent-integration). Fehlende Docs-Link-Zuordnungen hinzugefügt. Docs-Workflow-Trigger-Pfade für README- und Workflow-Änderungen hinzugefügt.",
+      },
+      {
         version: "0.16.0",
         notes: "Vollständige Neuentwicklung als Self-Evolving Pipeline. Neue Genome-Struktur (application.md, evolution.md, invariants.md). Learning-Phase ersetzt Objective. Klarheitsgesteuerte Interaktion. Cruise-Modus für autonome Multi-Generations-Ausführung. Vision-Schicht mit 3-stufigem Memory (longterm/midterm/shortterm). Merge-Lebenszyklus fügt Reconcile-Phase für Genome-Quellcode-Konsistenz hinzu. /reap.knowledge ersetzt /reap.sync. 2-Phasen /reap.abort. Dateibasierte Hooks mit Bedingungen und Reihenfolge.",
       },

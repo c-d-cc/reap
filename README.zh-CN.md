@@ -30,7 +30,7 @@ REAP 是一个基于代际迭代的开发管道，AI 与人类协作构建和进
 - [配置](#配置-)
 - [从 v0.15 升级](#从-v015-升级)
 
-## 什么是 REAP？
+## 什么是 REAP？ [↗](https://reap.cc/docs/introduction)
 
 在使用 AI 智能体进行开发时，你是否遇到过以下问题？
 
@@ -59,7 +59,7 @@ npm install -g @c-d-cc/reap
 
 > **前提条件**：[Node.js](https://nodejs.org) v18+，[Claude Code](https://claude.ai/claude-code) CLI。
 
-## 快速开始
+## 快速开始 [↗](https://reap.cc/docs/quick-start)
 
 打开你的 AI 智能体（Claude Code）并使用斜杠命令：
 
@@ -202,7 +202,7 @@ AI 根据当前上下文的明确程度调整其沟通风格：
 - 如果检测到不确定性或风险，cruise 暂停并请求人类反馈
 - 所有 N 个代际迭代完成后，人类审阅整批结果
 
-## 斜杠命令
+## 斜杠命令 [↗](https://reap.cc/docs/command-reference)
 
 | 命令 | 描述 |
 |------|------|
@@ -283,7 +283,7 @@ agentClient: claude-code       # AI 智能体客户端
 - **`strictMerge`**：限制直接 git pull/push/merge——请改用 `/reap.pull`、`/reap.push`、`/reap.merge`。
 - **`agentClient`**：决定使用哪个适配器进行技能部署。
 
-## 从 v0.15 升级
+## 从 v0.15 升级 [↗](https://reap.cc/docs/migration-guide)
 
 REAP v0.16 是基于[自进化管道](https://reap.cc/docs/self-evolving)架构的完全重写。
 

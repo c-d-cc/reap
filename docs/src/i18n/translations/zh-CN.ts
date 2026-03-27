@@ -1005,6 +1005,10 @@ priority: medium
     ],
     versions: [
       {
+        version: "0.16.1",
+        notes: "修复 npm README 图片不显示的问题。恢复 docs 站点 SPA 路由（404.html fallback）。修复 README 中损坏的文档链接（merge-lifecycle、agent-integration）。添加缺失的文档链接映射。为 README 和 workflow 变更添加 docs workflow 触发路径。",
+      },
+      {
         version: "0.16.0",
         notes: "完全重写为自进化流水线。新的 genome 结构（application.md、evolution.md、invariants.md）。Learning 阶段替代 Objective。清晰度驱动的交互。巡航模式用于自主多代执行。Vision 层包含三层 memory（longterm/midterm/shortterm）。合并生命周期新增 Reconcile 阶段用于 genome-源码一致性验证。/reap.knowledge 替代 /reap.sync。两阶段 /reap.abort。基于文件的 hooks，支持条件和排序。",
       },

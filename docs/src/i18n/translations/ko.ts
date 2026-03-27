@@ -1005,6 +1005,10 @@ priority: medium
     ],
     versions: [
       {
+        version: "0.16.1",
+        notes: "npm README 이미지 미표시 수정. docs 사이트 SPA 라우팅 복원 (404.html fallback). README 문서 링크 수정 (merge-lifecycle, agent-integration). 누락된 docs 링크 매핑 추가. README 및 workflow 변경에 대한 docs workflow 트리거 경로 추가.",
+      },
+      {
         version: "0.16.0",
         notes: "Self-Evolving Pipeline으로 완전 재작성. 새 genome 구조 (application.md, evolution.md, invariants.md). Learning 단계가 Objective를 대체. 명확도 기반 인터랙션. 자율 멀티 Generation 실행을 위한 크루즈 모드. 3계층 메모리(longterm/midterm/shortterm)가 포함된 Vision 레이어. Merge 라이프사이클에 genome-소스 일관성을 위한 Reconcile 단계 추가. /reap.knowledge가 /reap.sync를 대체. 2단계 /reap.abort. 조건과 순서가 있는 파일 기반 hooks.",
       },

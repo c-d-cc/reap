@@ -32,7 +32,7 @@ REAP is a generation-based development pipeline where AI and humans collaborate 
 - [Configuration](#configuration-)
 - [Upgrading from v0.15](#upgrading-from-v015)
 
-## What is REAP?
+## What is REAP? [↗](https://reap.cc/docs/introduction)
 
 Have you ever run into these problems when developing with AI agents?
 
@@ -61,7 +61,7 @@ npm install -g @c-d-cc/reap
 
 > **Requirements**: [Node.js](https://nodejs.org) v18+, [Claude Code](https://claude.ai/claude-code) CLI.
 
-## Quick Start
+## Quick Start [↗](https://reap.cc/docs/quick-start)
 
 Open your AI agent (Claude Code) and use slash commands:
 
@@ -204,7 +204,7 @@ Pre-approve N generations for autonomous execution:
 - If uncertainty or risk is detected, cruise pauses and requests human feedback
 - After all N generations complete, human reviews the batch
 
-## Slash Commands
+## Slash Commands [↗](https://reap.cc/docs/command-reference)
 
 | Command | Description |
 |---------|-------------|
@@ -284,7 +284,7 @@ Key settings:
 - **`strictMerge`**: Restricts direct git pull/push/merge — use `/reap.pull`, `/reap.push`, `/reap.merge` instead.
 - **`agentClient`**: Determines which adapter is used for skill deployment.
 
-## Upgrading from v0.15
+## Upgrading from v0.15 [↗](https://reap.cc/docs/migration-guide)
 
 REAP v0.16 is a complete rewrite built on the [Self-Evolving Pipeline](https://reap.cc/docs/self-evolving) architecture.
 

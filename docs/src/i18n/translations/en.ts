@@ -1002,6 +1002,10 @@ Description of the task.`,
     ],
     versions: [
       {
+        version: "0.16.1",
+        notes: "Fix npm README images not displaying. Restore SPA routing for docs site (404.html fallback). Fix broken docs links in README (merge-lifecycle, agent-integration). Add missing docs link mappings. Add docs workflow trigger paths for README and workflow changes.",
+      },
+      {
         version: "0.16.0",
         notes: "Complete rewrite as a Self-Evolving Pipeline. New genome structure (application.md, evolution.md, invariants.md). Learning stage replaces Objective. Clarity-driven interaction. Cruise mode for autonomous multi-generation execution. Vision layer with 3-tier memory (longterm/midterm/shortterm). Merge lifecycle adds Reconcile stage for genome-source consistency. /reap.knowledge replaces /reap.sync. 2-phase /reap.abort. File-based hooks with conditions and ordering.",
       },

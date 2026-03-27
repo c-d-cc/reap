@@ -1005,6 +1005,10 @@ priority: medium
     ],
     versions: [
       {
+        version: "0.16.1",
+        notes: "npm READMEの画像が表示されない問題を修正。docsサイトのSPAルーティングを復元（404.html fallback）。READMEのドキュメントリンク修正（merge-lifecycle、agent-integration）。不足していたdocsリンクマッピングを追加。READMEおよびworkflow変更に対するdocs workflowトリガーパスを追加。",
+      },
+      {
         version: "0.16.0",
         notes: "自己進化パイプラインとしての完全書き直し。新しいgenome構造（application.md、evolution.md、invariants.md）。Learningステージの追加。明確性駆動インタラクション。自律的マルチ世代実行のためのCruiseモード。3層memory（longterm/midterm/shortterm）を持つVision層。genome-ソース整合性のためのReconcileステージをMergeライフサイクルに追加。/reap.knowledgeが/reap.syncを置換。2フェーズの/reap.abort。条件と実行順序を持つファイルベースhooks。",
       },
