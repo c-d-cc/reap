@@ -19,17 +19,6 @@ Slash Commands (in Claude Code):
   /reap.update         Upgrade project structure
   /reap.help           Show this help
 
-CLI Commands (terminal):
-  reap init [name]     Initialize a new project
-  reap status          Show current state
-  reap update          Upgrade project structure
-  reap fix             Diagnose and repair .reap/
-  reap clean           Reset project state
-  reap destroy         Remove all REAP files
-  reap make backlog    Create a backlog item
-  reap cruise <N>      Enable cruise mode for N generations
-  reap run <stage>     Run a lifecycle stage directly
-
 Quick Start:
   1. npm install -g @c-d-cc/reap
   2. claude
