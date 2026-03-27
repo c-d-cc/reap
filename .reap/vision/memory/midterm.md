@@ -10,12 +10,7 @@
 
 ### v0.15 기능 패리티
 v0.15에 있었지만 v0.16에 아직 없는 것들:
-- `reap update` — self-upgrade + migration (vision §7.3, 3-phase 로드맵 있음, 유저 지시 후 진행)
 - Agent adapter 시스템 (AgentRegistry) — vision §6, 당장 불필요
-
-### Distribution 준비 (vision §7)
-순서: README 재작성 → npm 배포 (.npmignore, CI/CD) → update agent
-README는 현재 v0.15 기준으로 작성되어 있어 v0.16 재작성 필요.
 
 ### Self-evolving 강화
 gen-028~031에서 gap-driven evolution + vision eval + memory 도입 완료.

@@ -1,31 +1,29 @@
 # Shortterm Memory
 
-## 세션 요약 (2026-03-27 ~ 2026-03-28)
+## 세션 요약 (2026-03-28)
 
-### Generation 작업 (gen-039 ~ gen-049, 11개)
-- gen-039: migration 중단/재개 (migration-state.yml)
-- gen-040: autoUpdateMinVersion guard
-- gen-041: environment resources/docs 디렉토리 복원
-- gen-042: reap update CLI 구현
-- gen-043: autoUpdate 자동 업데이트 (항상 동작)
-- gen-044: reap help 고도화 (토픽, 다국어, 상태)
-- gen-045: strictEdit/strictMerge 구현
-- gen-046: reap config CLI + skill 정비
-- gen-047: hand-off (새 바이너리 위임)
-- gen-048: release notice
-- gen-049: auto issue report
-- 테스트: 397 → 474
+### v0.16.1 ~ v0.16.2 배포
+- npm README 이미지 경로 수정 (상대 → GitHub raw URL)
+- docs SPA 라우팅 복원 (404.html fallback, v0.16 rewrite 시 누락된 것)
+- README docs 링크 수정 (merge-lifecycle → merge-generation, agent-integration 제거)
+- README에 누락된 docs 링크 4건 추가 (introduction, quick-start, command-reference, migration-guide)
+- README 언어 링크를 GitHub 절대 URL로 변경 (npm 호환)
+- docs workflow 트리거 경로 추가 (README, workflow 자체)
+- docs Advanced에서 outdated Presets 섹션 제거
+- docs Hook Reference/Hooks에서 Session Context Loading 섹션 제거
+- versionBump 스킬에 RELEASE_NOTICE + docs release notes 업데이트 단계 추가
 
-### Generation 밖 작업
-- reap-evolve agent 리팩토링 + ~/.claude/agents/ 자동 설치
-- init 프롬프트 재설계 (Phase-Gate)
-- docs v0.16 전면 업데이트 + 다국어 번역 (ko, zh-CN, de, ja)
-- CI/CD GitHub Actions 추가
-- v0.16.0 정식 배포 (npm + GitHub Release + reap.cc)
-- main 브랜치 교체 (legacy/v0.15 보존)
-- 로컬 빌드 +dev.{hash} 버전 suffix
+### Hook 시스템 복원
+- 기본 conditions 복원 (always, has-code-changes, version-bumped) + 예시 템플릿
+- `reap make hook` CLI 커맨드 추가
+- `reap make`를 확장 가능한 디렉토리 구조로 리팩토링 (make/index.ts + make/backlog.ts + make/hook.ts)
+- reap init 시 hook conditions + examples 자동 설치
+- reap-guide에 hook 생성법 문서화 + prompt emit
+
+### 브랜치 정리
+- 로컬 브랜치: v0.16.0 → main, 기존 main → legacy
 
 ### 다음 세션
-- lastCliVersion 추적, --dry-run
-- 외부 프로젝트 검증
+- 외부 프로젝트에서 core lifecycle 검증
 - Embryo → Normal 전환 검토
+- docs 사이트 실제 접속 확인 (SPA 라우팅 복원 검증)

@@ -70,9 +70,9 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [ ] Self-hosting invariants 정의
 
 ### Distribution (spec2 §7)
-- [ ] README 재작성 (v0.16 기준)
-- [ ] npm 배포 준비 (.npmignore, CI/CD, alpha 배포)
-- [ ] Update agent Phase 1: `reap update` CLI (유저 지시 후 진행)
+- [x] README 재작성 (v0.16 기준)
+- [x] npm 배포 준비 (.npmignore, CI/CD, alpha 배포)
+- [x] Update agent Phase 1: `reap update` CLI (gen-042)
 - [ ] Update agent Phase 2: 프로젝트 동기화 (유저 지시 후 진행)
 - [ ] Update agent Phase 3: 배포 연동 (유저 지시 후 진행)
 
