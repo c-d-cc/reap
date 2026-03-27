@@ -1,0 +1,11 @@
+#!/usr/bin/env bash
+# condition: always
+# order: 90
+#
+# Example: Send a notification when a generation completes.
+# Rename this file to remove .example suffix to activate.
+#
+# onCompleted.notify.sh
+
+echo "Generation completed at $(date)"
+# osascript -e 'display notification "Generation done" with title "REAP"'

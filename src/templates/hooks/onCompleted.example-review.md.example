@@ -1,0 +1,17 @@
+---
+condition: has-code-changes
+order: 50
+---
+
+<!--
+Example: AI-driven code review after generation completes.
+Rename this file to remove .example suffix to activate.
+
+Filename: onCompleted.review.md
+-->
+
+Review the changes made in this generation:
+
+1. Check for any code quality issues
+2. Verify test coverage for new code
+3. Report findings to the user

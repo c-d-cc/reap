@@ -1,8 +1,9 @@
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { readdir, copyFile, chmod } from "fs/promises";
 import YAML from "yaml";
 import type { ReapPaths } from "../../../core/paths.js";
-import { readTextFile, writeTextFile, ensureDir } from "../../../core/fs.js";
+import { readTextFile, writeTextFile, ensureDir, fileExists } from "../../../core/fs.js";
 import { cleanupLegacyProjectSkills, cleanupLegacyHooks } from "../../../core/integrity.js";
 import type { ReapConfig } from "../../../types/index.js";
 
@@ -85,6 +86,9 @@ export async function initCommon(
   await writeTextFile(paths.memoryLongterm, "# Longterm Memory\n");
   await writeTextFile(paths.memoryMidterm, "# Midterm Memory\n");
   await writeTextFile(paths.memoryShortterm, "# Shortterm Memory\n");
+
+  // Install default hook conditions and examples
+  await installHookTemplates(paths.hooks);
 
   // reap-guide.md is installed to ~/.reap/ by install-skills (not per-project)
 
@@ -169,4 +173,40 @@ export async function ensureClaudeMd(root: string, projectName: string): Promise
     await writeTextFile(rootPath, `# ${projectName}\n` + reapSection);
     return "created";
   }
+}
+
+/**
+ * Install default hook conditions and example hooks from templates.
+ * Only copies files that don't already exist (never overwrites user hooks).
+ */
+async function installHookTemplates(hooksDir: string): Promise<void> {
+  const templateDir = distPath("hooks");
+  const conditionsTemplateDir = join(templateDir, "conditions");
+  const conditionsDir = join(hooksDir, "conditions");
+
+  await ensureDir(conditionsDir);
+
+  // Copy condition scripts
+  try {
+    const conditionFiles = await readdir(conditionsTemplateDir);
+    for (const file of conditionFiles) {
+      const dest = join(conditionsDir, file);
+      if (!(await fileExists(dest))) {
+        await copyFile(join(conditionsTemplateDir, file), dest);
+        await chmod(dest, 0o755);
+      }
+    }
+  } catch { /* template dir may not exist */ }
+
+  // Copy example hooks
+  try {
+    const hookFiles = await readdir(templateDir);
+    for (const file of hookFiles) {
+      if (!file.endsWith(".example")) continue;
+      const dest = join(hooksDir, file);
+      if (!(await fileExists(dest))) {
+        await copyFile(join(templateDir, file), dest);
+      }
+    }
+  } catch { /* template dir may not exist */ }
 }
