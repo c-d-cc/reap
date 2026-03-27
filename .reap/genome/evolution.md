@@ -33,6 +33,7 @@ Vision은 Goals와 Memory 두 가지로 구성된다.
 프로젝트의 장기 목표. adapt phase에서 gap 분석을 통해 다음 generation의 방향을 결정하는 핵심 동력.
 - 미완료 `[ ]` 항목이 다음 goal 후보
 - generation 완료 시 달성한 goal을 `[x]`로 마킹 제안
+- Goals cleanup: goals.md는 **미래** 목표를 위한 공간이지 과거 성과의 아카이브가 아니다. 완료 항목(`[x]`)이 누적되어 문서가 forward-looking 역할을 잃어간다고 판단되면, 구체적으로 어떤 항목을 제거할지 인간에게 제안하고 승인을 받아라. 최근 완료된 항목은 아직 참조 가치가 있을 수 있고, 오래 안정된 항목은 제거해도 된다. 항상 인간 확인 후 제거.
 
 ### Memory (`vision/memory/`)
 AI가 프로젝트에 대해 자유롭게 기록하는 공간. 3-tier 구조:
