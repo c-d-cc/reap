@@ -1,0 +1,19 @@
+id: gen-043-5e6dca
+type: embryo
+goal: autoUpdate 자동 업데이트 구현 — SessionStart에서 최신 버전 확인 및 설치
+parents:
+  - gen-042-d87a87
+timeline:
+  - stage: learning
+    at: 2026-03-27T13:07:46.524Z
+  - stage: planning
+    at: 2026-03-27T13:10:08.831Z
+  - stage: implementation
+    at: 2026-03-27T13:10:51.418Z
+  - stage: validation
+    at: 2026-03-27T13:13:25.050Z
+  - stage: completion
+    at: 2026-03-27T13:14:31.133Z
+fitnessFeedback:
+  text: ok
+  evaluatedAt: 2026-03-27T13:18:39.819Z
