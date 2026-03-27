@@ -35,6 +35,9 @@ jobs:
         working-directory: docs
         run: npx vite build
 
+      - name: Copy index.html to 404.html for SPA routing
+        run: cp docs/dist/public/index.html docs/dist/public/404.html
+
       - uses: actions/upload-pages-artifact@v3
         with:
           path: docs/dist/public

@@ -162,7 +162,7 @@ File-based lifecycle event hooks in `.reap/hooks/`:
 - **Human Judges Fitness**: No quantitative metrics. The human's natural language feedback is the only fitness signal.
 - **Self-fitness Prohibited**: The AI never scores its own success. Only self-assessment (metacognition) is allowed.
 
-## Merge Lifecycle [↗](https://reap.cc/docs/merge-lifecycle)
+## Merge Lifecycle [↗](https://reap.cc/docs/merge-generation)
 
 When multiple developers or agents work in parallel, REAP provides a genome-first merge workflow.
 
@@ -223,8 +223,7 @@ Pre-approve N generations for autonomous execution:
 | `/reap.run` | Execute a lifecycle command directly |
 | `/reap.config` | View/edit project configuration |
 
-## Agent Integration [↗](https://reap.cc/docs/agent-integration)
-
+## Agent Integration
 REAP integrates with AI agents through slash commands and lifecycle hooks. Currently supported: **Claude Code**. The architecture uses an adapter pattern for future agent support.
 
 ### How It Works

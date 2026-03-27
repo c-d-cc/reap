@@ -160,7 +160,7 @@ Dateibasierte Lebenszyklus-Event-Hooks in `.reap/hooks/`:
 - **Der Mensch beurteilt die Fitness**: Keine quantitativen Metriken. Das natürlichsprachliche Feedback des Menschen ist das einzige Fitness-Signal.
 - **Selbstbewertung verboten**: Die KI bewertet ihren eigenen Erfolg nie. Nur Selbsteinschätzung (Metakognition) ist erlaubt.
 
-## Merge-Lebenszyklus [↗](https://reap.cc/docs/merge-lifecycle)
+## Merge-Lebenszyklus [↗](https://reap.cc/docs/merge-generation)
 
 Wenn mehrere Entwickler oder Agenten parallel arbeiten, bietet REAP einen Genome-first-Merge-Workflow.
 
@@ -221,7 +221,7 @@ N Generationen für autonome Ausführung vorab genehmigen:
 | `/reap.run` | Einen Lebenszyklusbefehl direkt ausführen |
 | `/reap.config` | Projektkonfiguration anzeigen/bearbeiten |
 
-## Agentenintegration [↗](https://reap.cc/docs/agent-integration)
+## Agentenintegration
 
 REAP integriert sich über Slash Commands und Lebenszyklus-Hooks mit KI-Agenten. Derzeit unterstützt: **Claude Code**. Die Architektur verwendet ein Adapter-Muster für zukünftige Agentenunterstützung.
 
