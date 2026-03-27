@@ -1,0 +1,19 @@
+id: gen-046-cd3e60
+type: embryo
+goal: reap config CLI 구현 + status/run/config skill 정비
+parents:
+  - gen-045-8324f7
+timeline:
+  - stage: learning
+    at: 2026-03-27T14:17:22.635Z
+  - stage: planning
+    at: 2026-03-27T14:19:19.542Z
+  - stage: implementation
+    at: 2026-03-27T14:19:59.309Z
+  - stage: validation
+    at: 2026-03-27T14:22:58.600Z
+  - stage: completion
+    at: 2026-03-27T14:23:53.571Z
+fitnessFeedback:
+  text: ok
+  evaluatedAt: 2026-03-27T14:26:00.170Z

@@ -23,6 +23,7 @@ import { execute as fixExecute } from "./commands/fix.js";
 import { execute as destroyExecute } from "./commands/destroy.js";
 import { execute as cleanExecute } from "./commands/clean.js";
 import { execute as checkVersionExecute } from "./commands/check-version.js";
+import { execute as configExecute } from "./commands/config.js";
 import { execute as updateExecute } from "./commands/update.js";
 import { execute as helpExecute } from "./commands/help.js";
 
@@ -129,6 +130,13 @@ program
   .description("Check for v0.15 project and show migration message")
   .action(async () => {
     await checkVersionExecute();
+  });
+
+program
+  .command("config")
+  .description("Show current REAP project configuration")
+  .action(async () => {
+    await configExecute();
   });
 
 program
