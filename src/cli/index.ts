@@ -7,11 +7,16 @@ import { Command } from "../libs/cli.js";
 
 function readVersion(): string {
   const __dir = dirname(fileURLToPath(import.meta.url));
-  // Try bundled location (dist/cli/ → ../../package.json) and dev location (src/cli/ → ../../package.json)
+  let version = "0.0.0";
   for (const rel of [join(__dir, "..", "..", "package.json"), join(__dir, "..", "package.json")]) {
-    try { return JSON.parse(readFileSync(rel, "utf-8")).version; } catch {}
+    try { version = JSON.parse(readFileSync(rel, "utf-8")).version; break; } catch {}
   }
-  return "0.0.0";
+  // Check for dev build marker (created by build.sh for local builds)
+  try {
+    const hash = readFileSync(join(__dir, "..", ".dev-build"), "utf-8").trim();
+    if (hash) version += `+dev.${hash}`;
+  } catch {}
+  return version;
 }
 import { execute as initExecute } from "./commands/init/index.js";
 import { execute as statusExecute } from "./commands/status.js";

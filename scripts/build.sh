@@ -13,3 +13,9 @@ bun build src/cli/index.ts --outdir dist/cli --target node
 mkdir -p dist/adapters/claude-code
 cp -r src/adapters/claude-code/skills dist/adapters/claude-code/
 cp -r src/templates dist/
+
+# Stamp dev version marker for local builds
+if [ -z "${CI:-}" ] && [ -z "${npm_config_tag:-}" ]; then
+  COMMIT_HASH=$(git rev-parse --short HEAD 2>/dev/null || echo "unknown")
+  echo "${COMMIT_HASH}" > dist/.dev-build
+fi
