@@ -105,10 +105,6 @@ Memory is a free-form recording system under `.reap/vision/memory/` where AI can
 
 ```
 Learning → Planning → Implementation ⟷ Validation → Completion
-                                                      ├─ reflect
-                                                      ├─ fitness
-                                                      ├─ adapt
-                                                      └─ commit
 ```
 
 | Stage              | Description                    | What it does                                                                                    | Artifact               |

@@ -24,6 +24,7 @@ import { execute as destroyExecute } from "./commands/destroy.js";
 import { execute as cleanExecute } from "./commands/clean.js";
 import { execute as checkVersionExecute } from "./commands/check-version.js";
 import { execute as updateExecute } from "./commands/update.js";
+import { execute as helpExecute } from "./commands/help.js";
 
 const program = new Command();
 
@@ -128,6 +129,13 @@ program
   .description("Check for v0.15 project and show migration message")
   .action(async () => {
     await checkVersionExecute();
+  });
+
+program
+  .command("help")
+  .description("Show REAP commands and workflow overview")
+  .action(async () => {
+    await helpExecute();
   });
 
 program
