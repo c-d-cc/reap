@@ -998,6 +998,10 @@ priority: medium
     ],
     versions: [
       {
+        version: "0.16.2",
+        notes: "'reap make hook' CLI 커맨드 추가 — 올바른 파일명 컨벤션과 frontmatter로 hook 파일 생성. 기본 hook conditions (always, has-code-changes, version-bumped) 및 예시 템플릿 복원. 'reap init' 시 자동 설치. 'reap make' 커맨드를 확장 가능한 디렉토리 구조로 리팩토링. docs에서 outdated된 Presets, Session Context Loading 섹션 제거.",
+      },
+      {
         version: "0.16.1",
         notes: "npm README 이미지 미표시 수정. docs 사이트 SPA 라우팅 복원 (404.html fallback). README 문서 링크 수정 (merge-lifecycle, agent-integration). 누락된 docs 링크 매핑 추가. README 및 workflow 변경에 대한 docs workflow 트리거 경로 추가.",
       },

@@ -998,6 +998,10 @@ priority: medium
     ],
     versions: [
       {
+        version: "0.16.2",
+        notes: "新增 'reap make hook' CLI 命令 — 以正确的文件名规范和 frontmatter 创建 hook 文件。恢复默认 hook conditions（always、has-code-changes、version-bumped）及示例模板。'reap init' 时自动安装。将 'reap make' 重构为可扩展的目录结构。从文档中移除过时的 Presets 和 Session Context Loading 部分。",
+      },
+      {
         version: "0.16.1",
         notes: "修复 npm README 图片不显示的问题。恢复 docs 站点 SPA 路由（404.html fallback）。修复 README 中损坏的文档链接（merge-lifecycle、agent-integration）。添加缺失的文档链接映射。为 README 和 workflow 变更添加 docs workflow 触发路径。",
       },

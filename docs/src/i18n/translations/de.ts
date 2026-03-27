@@ -998,6 +998,10 @@ Beschreibung der Aufgabe.`,
     ],
     versions: [
       {
+        version: "0.16.2",
+        notes: "'reap make hook' CLI-Befehl hinzugefügt — Hook-Dateien mit korrekter Dateinamenskonvention und Frontmatter erstellen. Standard-Hook-Conditions (always, has-code-changes, version-bumped) und Beispielvorlagen wiederhergestellt. Automatische Installation bei 'reap init'. 'reap make' in erweiterbare Verzeichnisstruktur umstrukturiert. Veraltete Presets- und Session Context Loading-Abschnitte aus Docs entfernt.",
+      },
+      {
         version: "0.16.1",
         notes: "npm README-Bilder werden jetzt korrekt angezeigt. SPA-Routing für Docs-Site wiederhergestellt (404.html Fallback). Defekte Docs-Links in README behoben (merge-lifecycle, agent-integration). Fehlende Docs-Link-Zuordnungen hinzugefügt. Docs-Workflow-Trigger-Pfade für README- und Workflow-Änderungen hinzugefügt.",
       },

@@ -998,6 +998,10 @@ priority: medium
     ],
     versions: [
       {
+        version: "0.16.2",
+        notes: "'reap make hook' CLIコマンド追加 — 正しいファイル名規則とfrontmatterでhookファイルを生成。デフォルトhook conditions（always、has-code-changes、version-bumped）と例テンプレートの復元。'reap init'時に自動インストール。'reap make'コマンドを拡張可能なディレクトリ構造にリファクタリング。docsから古いPresetsとSession Context Loadingセクションを削除。",
+      },
+      {
         version: "0.16.1",
         notes: "npm READMEの画像が表示されない問題を修正。docsサイトのSPAルーティングを復元（404.html fallback）。READMEのドキュメントリンク修正（merge-lifecycle、agent-integration）。不足していたdocsリンクマッピングを追加。READMEおよびworkflow変更に対するdocs workflowトリガーパスを追加。",
       },

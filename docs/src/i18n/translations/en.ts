@@ -995,6 +995,10 @@ Description of the task.`,
     ],
     versions: [
       {
+        version: "0.16.2",
+        notes: "Add 'reap make hook' CLI command for creating hooks with correct filename convention and frontmatter. Restore default hook conditions (always, has-code-changes, version-bumped) and example templates. Auto-install hooks on 'reap init'. Refactor 'reap make' into extensible directory structure. Remove outdated Presets and Session Context Loading sections from docs.",
+      },
+      {
         version: "0.16.1",
         notes: "Fix npm README images not displaying. Restore SPA routing for docs site (404.html fallback). Fix broken docs links in README (merge-lifecycle, agent-integration). Add missing docs link mappings. Add docs workflow trigger paths for README and workflow changes.",
       },
