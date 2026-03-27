@@ -9,7 +9,6 @@ description: "Local Install — 로컬 빌드 후 글로벌 설치 (테스트용
 ## Steps
 
 1. `npm run build`
-2. `npm pack`
-3. `npm install -g ./c-d-cc-reap-*.tgz --force`
-4. `rm c-d-cc-reap-*.tgz`
-5. 설치 확인: `reap status`
+2. `npm uninstall -g @c-d-cc/reap`
+3. `npm install -g "file:$(pwd)"`
+4. 설치 확인: `reap --version` (0.16.0+dev.{hash} 형태여야 함)
