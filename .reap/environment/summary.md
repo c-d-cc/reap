@@ -24,7 +24,7 @@ src/
 ├── core/                       — 핵심 로직 (23 modules)
 │   ├── lifecycle.ts            — stage 순서 정의 (next/prev)
 │   ├── generation.ts           — generation CRUD, ID 생성
-│   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스, memory 경로 포함)
+│   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스, memory/resources/docs 경로 포함)
 │   ├── nonce.ts                — 암호학적 token (SHA256)
 │   ├── artifact-check.ts        — artifact 미작성 감지 (core placeholder 기반)
 │   ├── stage-transition.ts     — nonce 검증, artifact 검증, stage 전환

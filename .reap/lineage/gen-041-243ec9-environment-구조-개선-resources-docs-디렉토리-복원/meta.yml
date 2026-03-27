@@ -1,0 +1,19 @@
+id: gen-041-243ec9
+type: embryo
+goal: environment 구조 개선 — resources/docs 디렉토리 복원 + migration 반영
+parents:
+  - gen-040-773bb9
+timeline:
+  - stage: learning
+    at: 2026-03-27T12:30:44.451Z
+  - stage: planning
+    at: 2026-03-27T12:32:45.226Z
+  - stage: implementation
+    at: 2026-03-27T12:33:29.101Z
+  - stage: validation
+    at: 2026-03-27T12:35:25.547Z
+  - stage: completion
+    at: 2026-03-27T12:36:32.726Z
+fitnessFeedback:
+  text: ok
+  evaluatedAt: 2026-03-27T12:38:57.025Z

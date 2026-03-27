@@ -33,37 +33,26 @@ export default function CommandReferencePage() {
       <DocPage title={t.commands.title} breadcrumb={t.commands.breadcrumb}>
 
         <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-          {t.commands.intro}
-        </p>
-        <div className="border-l-2 border-primary pl-3 py-1 mb-6">
-          <p className="text-xs text-muted-foreground leading-relaxed">
-            {t.commands.cliCommandsDesc}
-          </p>
-          <p className="text-xs text-muted-foreground leading-relaxed mt-2">
-            {t.commands.slashCommandsDesc}
-          </p>
-        </div>
-
-        <h2 className="text-base font-semibold text-foreground mb-3 mt-8">{t.commands.slashTitle}</h2>
-        <p className="text-sm text-muted-foreground mb-3">
           {t.commands.slashIntro}
         </p>
 
-        <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{t.commands.normalTitle}</h3>
+        <h2 className="text-base font-semibold text-foreground mb-3">{t.commands.normalTitle}</h2>
         <CommandTable headers={t.commands.commandHeaders} commands={t.commands.normalCommands} />
 
-        <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{t.commands.knowledgeTitle}</h3>
-        <CommandTable headers={t.commands.commandHeaders} commands={t.commands.knowledgeCommands} />
-
-        <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{t.commands.mergeTitle}</h3>
+        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.commands.mergeTitle}</h2>
         <CommandTable headers={t.commands.commandHeaders} commands={t.commands.mergeCommands} />
 
-        <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{t.commands.generalTitle}</h3>
+        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.commands.generalTitle}</h2>
         <CommandTable headers={t.commands.commandHeaders} commands={t.commands.generalCommands} />
 
-        <h3 className="text-sm font-semibold text-foreground mb-2">{t.commands.commandStructure}</h3>
-        <p className="text-xs text-muted-foreground mb-6">
+        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.commands.commandStructure}</h2>
+        <p className="text-xs text-muted-foreground mb-3">
           {t.commands.commandStructureDesc}
+        </p>
+
+        <h3 className="text-sm font-semibold text-muted-foreground mb-2 mt-8">CLI Commands (reference)</h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          {t.commands.cliCommandsDesc}
         </p>
 
       </DocPage>

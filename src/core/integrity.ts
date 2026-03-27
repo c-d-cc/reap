@@ -64,6 +64,8 @@ async function checkDirectoryStructure(
   const optionalDirs = [
     { path: paths.backlog, name: "life/backlog/" },
     { path: paths.environmentDomain, name: "environment/domain/" },
+    { path: paths.environmentResources, name: "environment/resources/" },
+    { path: paths.environmentDocs, name: "environment/docs/" },
     { path: paths.visionDocs, name: "vision/docs/" },
     { path: paths.memory, name: "vision/memory/" },
   ];

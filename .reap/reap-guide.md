@@ -82,6 +82,8 @@ Memory is a free-form recording system under `.reap/vision/memory/` where AI can
 ├── environment/               # Descriptive knowledge (what exists now)
 │   ├── summary.md             #   Always loaded — tech stack, source structure, build, tests
 │   ├── domain/                #   Domain knowledge (on-demand)
+│   ├── resources/             #   External reference documents — API docs, SDK specs (on-demand)
+│   ├── docs/                  #   Project reference documents — design docs, specs (on-demand)
 │   └── source-map.md          #   Code structure + dependencies (on-demand)
 ├── vision/                    # Long-term goals and direction
 │   ├── goals.md               #   North star objectives

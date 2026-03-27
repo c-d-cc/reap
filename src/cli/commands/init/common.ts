@@ -50,6 +50,8 @@ export async function initCommon(
   await ensureDir(paths.genome);
   await ensureDir(paths.environment);
   await ensureDir(paths.environmentDomain);
+  await ensureDir(paths.environmentResources);
+  await ensureDir(paths.environmentDocs);
   await ensureDir(paths.life);
   await ensureDir(paths.backlog);
   await ensureDir(paths.lineage);

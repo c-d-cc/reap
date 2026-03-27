@@ -391,6 +391,8 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
   await step("create-dirs", async () => {
     await ensureDir(paths.genome);
     await ensureDir(join(paths.environment, "domain"));
+    await ensureDir(paths.environmentResources);
+    await ensureDir(paths.environmentDocs);
     await ensureDir(paths.life);
     await ensureDir(paths.backlog);
     await ensureDir(paths.lineage);
@@ -462,6 +464,28 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
         const entries = await readdir(v15EnvDomain);
         for (const e of entries) {
           await cp(join(v15EnvDomain, e), join(paths.environmentDomain, e), { recursive: true });
+        }
+      } catch { /* empty */ }
+    }
+
+    // Copy resources/ if it exists in v0.15
+    const v15EnvResources = join(v15Dir, "environment", "resources");
+    if (await fileExists(v15EnvResources)) {
+      try {
+        const entries = await readdir(v15EnvResources);
+        for (const e of entries) {
+          await cp(join(v15EnvResources, e), join(paths.environmentResources, e), { recursive: true });
+        }
+      } catch { /* empty */ }
+    }
+
+    // Copy docs/ if it exists in v0.15
+    const v15EnvDocs = join(v15Dir, "environment", "docs");
+    if (await fileExists(v15EnvDocs)) {
+      try {
+        const entries = await readdir(v15EnvDocs);
+        for (const e of entries) {
+          await cp(join(v15EnvDocs, e), join(paths.environmentDocs, e), { recursive: true });
         }
       } catch { /* empty */ }
     }

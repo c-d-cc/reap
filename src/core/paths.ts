@@ -11,6 +11,8 @@ export interface ReapPaths {
   environment: string;
   environmentSummary: string;
   environmentDomain: string;
+  environmentResources: string;
+  environmentDocs: string;
   sourceMap: string;
   life: string;
   current: string;
@@ -47,6 +49,8 @@ export function createPaths(root: string): ReapPaths {
     environment,
     environmentSummary: join(environment, "summary.md"),
     environmentDomain: join(environment, "domain"),
+    environmentResources: join(environment, "resources"),
+    environmentDocs: join(environment, "docs"),
     sourceMap: join(environment, "source-map.md"),
     life,
     current: join(life, "current.yml"),
