@@ -1,0 +1,19 @@
+id: gen-040-773bb9
+type: embryo
+goal: autoUpdateMinVersion guard — breaking change 자동 업데이트 차단
+parents:
+  - gen-039-a7a1ea
+timeline:
+  - stage: learning
+    at: 2026-03-27T12:15:24.103Z
+  - stage: planning
+    at: 2026-03-27T12:18:57.667Z
+  - stage: implementation
+    at: 2026-03-27T12:19:37.344Z
+  - stage: validation
+    at: 2026-03-27T12:21:42.497Z
+  - stage: completion
+    at: 2026-03-27T12:23:01.695Z
+fitnessFeedback:
+  text: ok
+  evaluatedAt: 2026-03-27T12:26:11.534Z

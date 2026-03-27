@@ -1,7 +1,10 @@
-# Completion — gen-020-bf05c1
-
-## Summary
-
+---
+id: gen-020-bf05c1
+type: embryo
+goal: "install-skills에서 기존 reap/reapdev 스킬 정리 후 설치하도록 개선"
+parents: ["gen-019-9ec1a6"]
+---
+# gen-020-bf05c1
 `installSkills()`에 stale 스킬 파일 cleanup 로직을 추가. 새 스킬 복사 전에 `~/.claude/commands/`에서 `reap.*.md` + `reapdev.*.md` 패턴의 기존 파일을 삭제하여, 이름 변경/삭제된 스킬이 남지 않도록 개선.
 
 ### Changes
@@ -11,8 +14,3 @@
 
 ### Test Results
 - 182 tests 전체 통과 (unit 69 + e2e 72 + scenario 41)
-
-## Lessons Learned
-
-- 단순한 파일 복사 함수도 lifecycle을 고려하면 cleanup이 필요하다. "설치"는 "이전 상태 정리 → 새 상태 적용"이 올바른 패턴.
-- 정규식 패턴으로 파일을 필터링할 때, bare prefix (reap.md)가 매칭되지 않도록 `.+` 조건이 중요하다.

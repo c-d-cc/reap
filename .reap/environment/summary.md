@@ -50,7 +50,7 @@ src/
 │   └── commands/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair, --migrate 지원)
 │       ├── migrate.ts          — v0.15→v0.16 마이그레이션 (multi-phase: confirm→execute→vision→complete)
-│       ├── check-version.ts    — postinstall용 v0.15 감지 및 안내
+│       ├── check-version.ts    — postinstall/SessionStart용: v0.15 legacy cleanup + autoUpdateMinVersion guard (semverGte, queryAutoUpdateMinVersion, checkAutoUpdateGuard)
 │       ├── run/                — stage 실행 (20 handlers)
 │       │   ├── start.ts        — generation 생성 (scan → create)
 │       │   ├── learning.ts     — 탐구 (work → complete)
