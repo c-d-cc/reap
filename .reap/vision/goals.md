@@ -8,84 +8,15 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 
 ## Goal Items
 
-### Core Stability
-- [x] Core lifecycle 구현 (learning → completion)
-- [x] Merge lifecycle 구현 (detect → reconcile → completion)
-- [x] Nonce-based stage integrity
-- [x] 2-level lineage compression (threshold 20)
-- [x] Generation commit 자동화
-- [x] reap.push 구현
-- [x] abort 2-phase (confirm → execute) + consumed revert
-- [x] submodule dirty check (completion commit + push에서 자동 차단)
-- [x] backlog CRUD (make backlog, consume, revert, createdAt/consumedAt)
-- [x] restart 제거 → abort로 통합 (gen-017)
-- [x] spec2 §1.2 Restart 삭제 — abort와 중복
-
-### Clarity-driven Interaction (spec2 §0)
-- [x] evolution.md에 clarity 원칙 내장 (template 포함)
-- [x] evolve/stage prompt에 clarity 가이드 주입
-- [x] Clarity level 자동 판단 로직 (코드 기반 — vision/backlog/genome 상태에서 계산) (gen-034)
-
-### Maturity System (spec2 §2)
-- [x] Embryo → Normal 전환 제안 (adapt phase, soft/hard check)
-- [x] 성숙도별 prompt 톤 차별화 (bootstrap/growth/cruise)
-- [x] 소프트웨어 완성 기준 16항목 사전 정의
-
-### Gap-driven Evolution (spec2 §3)
-- [x] adapt에서 vision gap 기반 다음 goal 자동 제안 (코드 레벨) (gen-028)
-- [x] Vision goals 자동 체크 마킹 (adapt에서 완료 항목 자동 [x]) (gen-028)
-
-### Test Infrastructure
-- [x] tests/ submodule 설정 (reap-test, self-evolve branch) (gen-012)
-- [x] 테스트 구조 설계 (unit/e2e/scenario, bun:test) (gen-013)
-- [x] core unit tests 60개 (gen-014, gen-019)
-- [x] e2e tests 63개 (gen-015, gen-018)
-- [x] scenario tests 41개 (gen-015, gen-016)
-- [x] TypeScript 전환 + setup helper + 병렬 실행 (gen-016)
-
-### v0.15 Parity & Infrastructure (gen-020~027, gen-032)
-- [x] install-skills cleanup — stale 스킬 자동 정리 (gen-020)
-- [x] Hook engine 고급 기능 포팅 — 조건부 실행, 순서 제어 (gen-021)
-- [x] reap-guide.md — v16용 REAP 도구 가이드 작성 (gen-022)
-- [x] Subagent prompt 공통화 — prompt.ts (gen-022)
-- [x] Prompt→CLI script 이전 — merge, pull, knowledge, abort (gen-023)
-- [x] Back nonce 재발급 + completion commit 순서 교정 (gen-024)
-- [x] Adapt echo chamber 방지 (gen-025)
-- [x] init --repair / CLAUDE.md migration (gen-026)
-- [x] reap fix — integrity check (gen-027)
-- [x] reap destroy + reap clean (gen-032)
-
-### Self-evolving Features (gen-028~035)
-- [x] Gap-driven Evolution — vision gap 분석 + goals 자동 체크 (gen-028)
-- [x] Vision evaluation — 16항목 진단 + vision development 제안 (gen-029)
-- [x] Vision Memory 3-tier 시스템 (gen-031)
-- [x] Cruise mode 자동 연속 실행 (gen-033)
-- [x] Clarity level 자동 판단 (gen-034)
-- [x] Memory 갱신 workflow 통합 — criteria + reflect phase (gen-035)
-
-### Self-Hosting (spec2 §5)
-- [x] REAP 자신의 `.reap/` 구조 보유
+### Self-Hosting
 - [ ] 외부 프로젝트에서 core lifecycle 검증 (npm 배포 후)
 - [ ] Validation에서 자기 CLI 검증 가능
 - [ ] Self-hosting invariants 정의
 
-### Distribution (spec2 §7)
-- [x] README 재작성 (v0.16 기준)
-- [x] npm 배포 준비 (.npmignore, CI/CD, alpha 배포)
-- [x] Update agent Phase 1: `reap update` CLI (gen-042)
+### Distribution
 - [ ] Update agent Phase 2: 프로젝트 동기화 (유저 지시 후 진행)
 - [ ] Update agent Phase 3: 배포 연동 (유저 지시 후 진행)
 
-### Agent Client 확장 (spec2 §6)
+### Agent Client 확장
 - [ ] OpenCode adapter (당장 불필요)
 - [ ] Codex CLI adapter (당장 불필요)
-
-### Genome/Environment
-- [x] genome/environment prescriptive/descriptive 분리 (gen-011)
-- [x] evolution.md Code Quality Principles (gen-007)
-- [x] evolution.md Testing Principles (gen-012 이후)
-- [x] CLAUDE.md 자동 생성/append (gen-002)
-- [x] templates SSOT (evolution.md, claude-md-section.md) (gen-002)
-- [x] CLI Command Structure enforced convention (gen-007)
-- [x] Vision/Memory 원칙 + 아키텍처 동기화 원칙 genome 추가
-- [x] Workaround 금지 원칙 genome 추가

@@ -89,6 +89,8 @@ Vision consists of Goals and Memory.
 ### Goals (`vision/goals.md`)
 Long-term project objectives. During the adapt phase, gap analysis against goals determines the next generation's direction.
 
+Goals cleanup: goals.md is a space for **future** objectives, not an archive of past achievements. When completed items (`[x]`) accumulate and the document loses focus as a forward-looking plan, propose specific items for removal to the human for approval. This is a contextual judgment — recently completed items may still have reference value, while long-stable items can be cleared. Always get human confirmation before removing.
+
 ### Memory (`vision/memory/`)
 Free-form space for the AI to record project-related knowledge. 3-tier structure:
 - **longterm.md** — Project lifetime. Recurring lessons, decision backgrounds, architecture rationale
