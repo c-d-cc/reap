@@ -132,10 +132,10 @@ program
   });
 
 program
-  .command("help")
+  .command("help [topic]")
   .description("Show REAP commands and workflow overview")
-  .action(async () => {
-    await helpExecute();
+  .action(async (topic: string | undefined) => {
+    await helpExecute(topic);
   });
 
 program

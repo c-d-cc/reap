@@ -1,0 +1,19 @@
+id: gen-044-d155b0
+type: embryo
+goal: reap help 고도화 — 토픽 모드, 상태 표시, 다국어 지원
+parents:
+  - gen-043-5e6dca
+timeline:
+  - stage: learning
+    at: 2026-03-27T13:28:49.137Z
+  - stage: planning
+    at: 2026-03-27T13:31:27.068Z
+  - stage: implementation
+    at: 2026-03-27T13:32:00.690Z
+  - stage: validation
+    at: 2026-03-27T13:34:42.065Z
+  - stage: completion
+    at: 2026-03-27T13:36:17.354Z
+fitnessFeedback:
+  text: ok
+  evaluatedAt: 2026-03-27T13:38:06.419Z
