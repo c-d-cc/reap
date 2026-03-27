@@ -1,4 +1,4 @@
-import { readdir, stat, rm } from "fs/promises";
+import { readdir, stat, rm, readFile, writeFile } from "fs/promises";
 import { join } from "path";
 import { homedir } from "os";
 import YAML from "yaml";
@@ -689,4 +689,58 @@ export async function cleanupLegacyProjectSkills(
   }
 
   return deleted;
+}
+
+/**
+ * Remove legacy REAP SessionStart hooks from Claude Code settings.json.
+ * Checks both project-level (.claude/settings.json) and user-level (~/.claude/settings.json).
+ * Only removes hook entries whose command contains "session-start" or "reap".
+ *
+ * @returns list of settings files that were modified
+ */
+export async function cleanupLegacyHooks(projectRoot: string): Promise<string[]> {
+  const modified: string[] = [];
+  const settingsPaths = [
+    join(projectRoot, ".claude", "settings.json"),
+    join(homedir(), ".claude", "settings.json"),
+  ];
+
+  for (const settingsPath of settingsPaths) {
+    try {
+      const content = await readFile(settingsPath, "utf-8");
+      const settings = JSON.parse(content);
+      if (!settings.hooks) continue;
+
+      let changed = false;
+      for (const event of Object.keys(settings.hooks)) {
+        const entries = settings.hooks[event];
+        if (!Array.isArray(entries)) continue;
+
+        const filtered = entries.filter((entry: { hooks?: { command?: string }[] }) => {
+          if (!entry.hooks || !Array.isArray(entry.hooks)) return true;
+          // Remove entries where any hook command references reap's session-start
+          return !entry.hooks.some((h: { command?: string }) =>
+            h.command && (h.command.includes("session-start") && h.command.includes("reap")),
+          );
+        });
+
+        if (filtered.length !== entries.length) {
+          settings.hooks[event] = filtered;
+          if (filtered.length === 0) {
+            delete settings.hooks[event];
+          }
+          changed = true;
+        }
+      }
+
+      if (changed) {
+        await writeFile(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
+        modified.push(settingsPath);
+      }
+    } catch {
+      // file doesn't exist or parse error — skip
+    }
+  }
+
+  return modified;
 }

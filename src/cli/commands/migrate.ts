@@ -7,7 +7,7 @@ import type { ReapPaths } from "../../core/paths.js";
 import { readTextFile, writeTextFile, fileExists, ensureDir } from "../../core/fs.js";
 import { emitOutput, emitError } from "../../core/output.js";
 import { isGitRepo } from "../../core/git.js";
-import { detectV15, cleanupLegacyProjectSkills } from "../../core/integrity.js";
+import { detectV15, cleanupLegacyProjectSkills, cleanupLegacyHooks } from "../../core/integrity.js";
 import { ensureClaudeMd } from "./init/common.js";
 
 // ── Helpers ──────────────────────────────────────────────────
@@ -419,6 +419,9 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
 
   // 3.9 Legacy project-level skills cleanup
   const legacyCleaned = await cleanupLegacyProjectSkills(paths.root);
+
+  // 3.9.1 Legacy SessionStart hooks cleanup (from v0.15)
+  await cleanupLegacyHooks(paths.root);
 
   // 3.10 Vision + Memory creation
   const goalsContent = `# Vision Goals

@@ -3,7 +3,7 @@ import { fileURLToPath } from "url";
 import YAML from "yaml";
 import type { ReapPaths } from "../../../core/paths.js";
 import { readTextFile, writeTextFile, ensureDir } from "../../../core/fs.js";
-import { cleanupLegacyProjectSkills } from "../../../core/integrity.js";
+import { cleanupLegacyProjectSkills, cleanupLegacyHooks } from "../../../core/integrity.js";
 import type { ReapConfig } from "../../../types/index.js";
 
 /** Resolve path relative to dist/ root (works both in dev via bun and installed via npm) */
@@ -42,8 +42,9 @@ export async function initCommon(
   paths: ReapPaths,
   projectName: string,
 ): Promise<ReapConfig> {
-  // Clean up legacy project-level skills (from v0.15)
+  // Clean up legacy project-level skills and hooks (from v0.15)
   await cleanupLegacyProjectSkills(paths.root);
+  await cleanupLegacyHooks(paths.root);
 
   // Create directories
   await ensureDir(paths.genome);

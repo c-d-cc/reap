@@ -1,24 +1,59 @@
 import { join } from "path";
 import { fileExists } from "../../core/fs.js";
 import { createPaths } from "../../core/paths.js";
+import { cleanupLegacyHooks } from "../../core/integrity.js";
 
 /**
- * Check if the current project uses v0.15 structure and print a warning.
- * Used by postinstall — outputs plain text (not JSON) and exits silently.
+ * Post-install check: detect project state and show relevant message.
+ * Outputs plain text (not JSON) and exits silently on error.
  */
 export async function execute(): Promise<void> {
   const root = process.cwd();
   const paths = createPaths(root);
 
-  // Check if .reap/ exists at all
-  if (!(await fileExists(paths.config))) {
-    return; // Not a reap project — silent exit
+  // Clean up legacy v0.15 SessionStart hooks (safe to run always)
+  const cleanedHooks = await cleanupLegacyHooks(root);
+  if (cleanedHooks.length > 0) {
+    console.log("\n✓ Removed legacy REAP v0.15 SessionStart hooks from Claude Code settings.");
   }
 
-  // Check for v0.15 indicator
-  if (await fileExists(join(paths.genome, "principles.md"))) {
-    console.log(
-      "\n⚠ REAP v0.15 project detected. Run '/reap.update' in your AI agent to upgrade to v0.16.\n"
-    );
+  const hasReap = await fileExists(paths.config);
+
+  if (!hasReap) {
+    // New user — no .reap/ directory
+    console.log(`
+┌─────────────────────────────────────────────┐
+│  REAP installed successfully.               │
+│                                             │
+│  Get started:                               │
+│    /reap.init    — Initialize a project     │
+│    /reap.help    — Show available commands   │
+└─────────────────────────────────────────────┘
+`);
+    return;
+  }
+
+  // Existing REAP project — check version
+  const isV15 = await fileExists(join(paths.genome, "principles.md"));
+
+  if (isV15) {
+    console.log(`
+┌─────────────────────────────────────────────┐
+│  ⚠ REAP v0.15 project detected.            │
+│                                             │
+│  Run '/reap.update' in your AI agent        │
+│  to migrate to v0.16.                       │
+└─────────────────────────────────────────────┘
+`);
+  } else {
+    console.log(`
+┌─────────────────────────────────────────────┐
+│  REAP updated successfully.                 │
+│                                             │
+│  /reap.evolve    — Run a generation         │
+│  /reap.status    — Check current state      │
+│  /reap.help      — Show available commands   │
+└─────────────────────────────────────────────┘
+`);
   }
 }
