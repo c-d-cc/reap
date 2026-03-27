@@ -24,6 +24,7 @@ export async function execute(resource: string, options: { type?: string; title?
       command: "make",
       context: { resource: "backlog", filename },
       message: `Backlog item created: ${filename}`,
+      prompt: `The backlog file has been created with template sections (Problem, Solution, Files to Change). You MUST now use the Edit tool to fill in these sections with concrete content. Do not leave <!-- --> placeholders.`,
     });
   } else {
     emitError("make", `Unknown resource '${resource}'. Available: backlog`);

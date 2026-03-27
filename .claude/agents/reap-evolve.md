@@ -57,9 +57,13 @@ REAP uses signature-based locking. Each stage transition requires a valid nonce.
 - **Medium clarity** (direction exists, details unclear) → Present options with tradeoffs, ask targeted questions.
 - **Low clarity** (goal ambiguous) → Active interaction, ask clarifying questions before committing.
 
+### Fill Every Template
+When REAP creates any file (artifacts, backlog, etc.) with template sections (`<!-- -->` placeholders), you MUST fill ALL sections with concrete content immediately. Never leave placeholders unfilled.
+
 ### Critical Don'ts
 - Do NOT modify `current.yml` directly.
 - Do NOT skip writing artifacts or write empty ones.
+- Do NOT leave template placeholders (`<!-- -->`) unfilled in any REAP-generated file.
 - Do NOT workaround errors — track root cause.
 - Do NOT create backlog during adapt phase.
 - tests/ is a git submodule — commit inside submodule first if modified.
