@@ -88,16 +88,9 @@ export default function CoreConceptsPage() {
           <Link href="/docs/backlog" className="text-primary hover:underline">→ Backlog & Deferral</Link>
         </p>
 
-        {/* Session Initialization */}
+        {/* Session Context Loading */}
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{c.sessionInitTitle}</h2>
-        <p className="text-sm text-muted-foreground mb-3">{c.sessionInitDesc}</p>
-        <div className="border border-border rounded-md overflow-hidden mb-6 inline-block">
-          <img
-            src="/session-init-screenshot.png"
-            alt={c.sessionInitAlt}
-            className="max-w-md"
-          />
-        </div>
+        <p className="text-sm text-muted-foreground mb-6">{c.sessionInitDesc}</p>
 
         {/* Evolution Flow */}
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{c.evolutionFlowTitle}</h2>
