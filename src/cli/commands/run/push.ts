@@ -1,6 +1,6 @@
 import type { ReapPaths } from "../../../core/paths.js";
 import { GenerationManager } from "../../../core/generation.js";
-import { isGitRepo, gitPush, checkSubmoduleDirty } from "../../../core/git.js";
+import { isGitRepo, gitPush, checkSubmoduleDirty, pushSubmodules } from "../../../core/git.js";
 import { emitOutput, emitError } from "../../../core/output.js";
 
 export async function execute(paths: ReapPaths): Promise<void> {
@@ -27,7 +27,15 @@ export async function execute(paths: ReapPaths): Promise<void> {
     );
   }
 
-  // Push
+  // Push submodules first (so remote has the refs parent repo references)
+  const smResults = pushSubmodules(paths.root);
+  const failedSm = smResults.filter((r) => !r.success);
+  if (failedSm.length > 0) {
+    const names = failedSm.map((r) => r.name).join(", ");
+    emitError("push", `Failed to push submodule(s): ${names}. Check remote configuration.`);
+  }
+
+  // Push main repo
   const success = gitPush(paths.root);
   if (!success) {
     emitError("push", "git push failed. Check remote configuration and network.");

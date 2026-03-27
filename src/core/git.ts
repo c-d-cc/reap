@@ -261,3 +261,34 @@ export function gitPush(cwd: string): boolean {
     return false;
   }
 }
+
+/**
+ * Push all submodules that have unpushed commits.
+ * Returns list of { name, success } for submodules that were pushed.
+ */
+export function pushSubmodules(cwd: string): { name: string; success: boolean }[] {
+  const submodules = checkSubmoduleDirty(cwd);
+  if (submodules.length === 0) return [];
+
+  const results: { name: string; success: boolean }[] = [];
+
+  for (const sm of submodules) {
+    const smPath = `${cwd}/${sm.name}`;
+    // Check if submodule has unpushed commits
+    try {
+      const ahead = execSync("git rev-list --count @{u}..HEAD", {
+        cwd: smPath,
+        encoding: "utf-8",
+        stdio: ["pipe", "pipe", "pipe"],
+      }).trim();
+      if (parseInt(ahead, 10) > 0) {
+        const success = gitPush(smPath);
+        results.push({ name: sm.name, success });
+      }
+    } catch {
+      // No upstream or not initialized — skip
+    }
+  }
+
+  return results;
+}

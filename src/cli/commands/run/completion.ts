@@ -14,7 +14,7 @@ import {
 } from "../../../core/vision.js";
 import { executeHooks } from "../../../core/hooks.js";
 import { parseCruiseCount, advanceCruise } from "../../../core/cruise.js";
-import { gitCommitAll, checkSubmoduleDirty } from "../../../core/git.js";
+import { gitCommitAll, checkSubmoduleDirty, pushSubmodules } from "../../../core/git.js";
 import {
   detectMaturity,
   getTransitionUrgency,
@@ -329,6 +329,9 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
         `Submodule(s) have uncommitted changes: ${names}. Commit inside the submodule(s) first, then retry.`,
       );
     }
+
+    // Push submodules before archiving (so remote has the refs parent commit will reference)
+    pushSubmodules(paths.root);
 
     const archiveDir = await archiveGeneration(paths, s, fitnessFeedback);
 
