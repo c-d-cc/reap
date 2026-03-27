@@ -109,7 +109,7 @@ export default function MigrationGuidePage() {
               <tr>
                 <td className="px-4 py-2 font-mono text-xs text-primary">Config</td>
                 <td className="px-4 py-2 text-xs text-muted-foreground">JSON-based configuration</td>
-                <td className="px-4 py-2 text-xs text-muted-foreground">YAML-based <code className="bg-muted px-1 rounded">config.yml</code> with cruiseCount, strict, autoSubagent</td>
+                <td className="px-4 py-2 text-xs text-muted-foreground">YAML-based <code className="bg-muted px-1 rounded">config.yml</code> with cruiseCount, strictEdit, strictMerge, autoSubagent</td>
               </tr>
               <tr>
                 <td className="px-4 py-2 font-mono text-xs text-primary">Vision</td>

@@ -401,20 +401,16 @@ export const en = {
       ["project", "Project name (set during init)"],
       ["language", "Language for artifacts and user interactions (e.g. korean, english, japanese). Default: english"],
       ["autoSubagent", "Auto-delegate /reap.evolve to a subagent via Agent tool (default: true)"],
-      ["strict", "Strict mode: boolean (shorthand) or { edit, merge } for granular control (see below). Default: false"],
+      ["strictEdit", "Restrict code changes to REAP lifecycle (default: false). See Strict Mode below."],
+      ["strictMerge", "Restrict direct git pull/push/merge — use REAP commands instead (default: false). See Strict Mode below."],
       ["agentClient", "AI agent client to use (default: claude-code). Determines which adapter is used for skill deployment and session hooks"],
       ["cruiseCount", "When present, enables cruise mode. Format: current/total (e.g. 1/5). Removed automatically after cruise completes"],
     ],
     strictMode: "Strict Mode",
-    strictModeDesc: "Strict mode controls what the AI agent is allowed to do. It supports two forms:",
-    strictConfigExample: `# Shorthand — enables both edit and merge restrictions
-strict: true
-
-# Granular control
-strict:
-  edit: true    # Restrict code changes to REAP lifecycle
-  merge: false  # Restrict raw git pull/push/merge`,
-    strictEditTitle: "strict.edit — Code Modification Control",
+    strictModeDesc: "Strict mode controls what the AI agent is allowed to do. Two independent settings:",
+    strictConfigExample: `strictEdit: true    # Restrict code changes to REAP lifecycle
+strictMerge: true   # Restrict raw git pull/push/merge`,
+    strictEditTitle: "strictEdit — Code Modification Control",
     strictEditDesc: "When enabled, the AI agent cannot modify code outside the REAP workflow.",
     strictHeaders: ["Context", "Behavior"],
     strictRules: [
@@ -422,9 +418,9 @@ strict:
       ["Implementation stage", "Only modifications within the scope of 02-planning.md are allowed"],
       ["Escape hatch", 'User explicitly requests "override" or "bypass strict" — bypass applies to that specific action only, then strict mode re-engages'],
     ],
-    strictMergeTitle: "strict.merge — Git Command Control",
+    strictMergeTitle: "strictMerge — Git Command Control",
     strictMergeDesc: "When enabled, direct git pull, git push, and git merge commands are restricted. The agent will guide users to use REAP slash commands instead (/reap.pull, /reap.push, /reap.merge).",
-    strictNote: "Both are disabled by default. strict: true enables both. Reading files, analyzing code, and answering questions are always allowed regardless of strict mode.",
+    strictNote: "Both are disabled by default. Reading files, analyzing code, and answering questions are always allowed regardless of strict mode.",
     entryModes: "Entry Modes",
     entryModeHeaders: ["Mode", "Use case"],
     entryModeItems: [

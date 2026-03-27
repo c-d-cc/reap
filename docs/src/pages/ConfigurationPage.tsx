@@ -18,7 +18,8 @@ export default function ConfigurationPage() {
 project: my-project           # Project name
 language: english              # Artifact/prompt language
 autoSubagent: true             # Auto-delegate to subagent in evolve
-strict: false                  # Strict mode (limit AI's edit scope)
+strictEdit: false               # Restrict code changes to REAP lifecycle
+strictMerge: false              # Restrict direct git pull/push/merge
 agentClient: claude-code       # AI agent client
 # cruiseCount: 1/5             # Present = cruise mode (current/total)
 `}</CodeBlock>

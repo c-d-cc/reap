@@ -271,15 +271,17 @@ Project settings in `.reap/config.yml`:
 project: my-project           # Project name
 language: english              # Artifact/prompt language
 autoSubagent: true             # Auto-delegate to subagent in evolve
-strict: false                  # Strict mode (limit AI's edit scope)
+strictEdit: false               # Restrict code changes to REAP lifecycle
+strictMerge: false              # Restrict direct git pull/push/merge
 agentClient: claude-code       # AI agent client
 # cruiseCount: 1/5             # Present = cruise mode (current/total)
 ```
 
 Key settings:
 - **`cruiseCount`**: When present, enables cruise mode. Format `current/total`. Removed after cruise completes.
-- **`strict`**: Limits AI's ability to modify files outside the planned scope.
-- **`agentClient`**: Determines which adapter is used for skill deployment and session hooks.
+- **`strictEdit`**: Restricts code changes to the implementation stage within the planned scope.
+- **`strictMerge`**: Restricts direct git pull/push/merge — use `/reap.pull`, `/reap.push`, `/reap.merge` instead.
+- **`agentClient`**: Determines which adapter is used for skill deployment.
 
 ## Upgrading from v0.15
 
