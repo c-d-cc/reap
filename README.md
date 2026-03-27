@@ -1,4 +1,4 @@
-> [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md) | [Deutsch](README.de.md)
+> [한국어](https://github.com/c-d-cc/reap/blob/main/README.ko.md) | [日本語](https://github.com/c-d-cc/reap/blob/main/README.ja.md) | [简体中文](https://github.com/c-d-cc/reap/blob/main/README.zh-CN.md) | [Deutsch](https://github.com/c-d-cc/reap/blob/main/README.de.md)
 
 <p align="center">
   <img src="https://raw.githubusercontent.com/c-d-cc/reap/main/media/logo.png" alt="REAP" width="80" height="80" />
