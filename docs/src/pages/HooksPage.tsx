@@ -96,17 +96,6 @@ export default function HooksPage() {
         <p className="text-sm text-muted-foreground mb-3">{t.hooks.configurationDesc}</p>
         <CodeBlock language="text">{t.hooks.configExample}</CodeBlock>
 
-        <h2 className="text-base font-semibold text-foreground mb-3 mt-8">{t.hooks.sessionStart}</h2>
-        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
-          {t.hooks.sessionStartDesc1}
-        </p>
-        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">
-          {t.hooks.sessionStartDesc2}
-        </p>
-        <p className="text-xs text-muted-foreground mb-6">
-          {t.hooks.sessionStartNote}
-        </p>
-
         <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{t.hooks.hookSuggestion}</h2>
         <p className="text-sm text-muted-foreground mb-6 leading-relaxed">
           {t.hooks.hookSuggestionDesc}
