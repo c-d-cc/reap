@@ -77,6 +77,7 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
       "## AutoSubagent Mode",
       "",
       "Launch a subagent using the Agent tool with:",
+      '- subagent_type: "reap-evolve"',
       "- description: generation goal",
       "- prompt: the subagentPrompt from context",
       "",

@@ -18,3 +18,7 @@ All work must follow the genome principles.
 
 - `.reap/environment/summary.md` — Source structure, build, tests, design decisions (always loaded)
 - `.reap/environment/domain/` — Domain knowledge (load on demand)
+
+### Agent
+
+When delegating a generation to a subagent, use `subagent_type: "reap-evolve"`. This agent has the role, mindset, and rules for executing a REAP generation. Pass dynamic context (generation state, vision, memory) via the prompt parameter.

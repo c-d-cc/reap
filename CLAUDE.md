@@ -21,3 +21,7 @@
 
 - `.reap/environment/summary.md` — 소스 구조, 빌드, 테스트, 설계 결정 (항상 로딩)
 - `.reap/environment/domain/` — 도메인 지식 (필요 시 로딩)
+
+## Agent
+
+Generation을 subagent에 위임할 때 `subagent_type: "reap-evolve"`를 사용하세요. 이 agent에는 REAP generation 실행에 필요한 role, mindset, 행동 규칙이 정의되어 있습니다. 동적 context(generation state, vision, memory)는 prompt 파라미터로 전달하세요.
