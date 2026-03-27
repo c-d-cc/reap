@@ -75,12 +75,16 @@ program
 
 program
   .command("make <resource>")
-  .description("Create a resource from template (backlog)")
-  .option("--type <type>", "Backlog type (genome-change, environment-change, task)")
+  .description("Create a resource from template (backlog, hook)")
+  .option("--type <type>", "Resource type (backlog: genome-change/environment-change/task, hook: sh/md)")
   .option("--title <title>", "Resource title")
   .option("--body <body>", "Optional description body")
   .option("--priority <priority>", "Priority (high, medium, low)")
-  .action(async (resource: string, options: { type?: string; title?: string; body?: string; priority?: string }) => {
+  .option("--event <event>", "Hook event (e.g. onLifeCompleted)")
+  .option("--name <name>", "Hook name")
+  .option("--condition <condition>", "Hook condition (default: always)")
+  .option("--order <order>", "Hook execution order (default: 50)")
+  .action(async (resource: string, options: { type?: string; title?: string; body?: string; priority?: string; event?: string; name?: string; condition?: string; order?: string }) => {
     await makeExecute(resource, options);
   });
 
