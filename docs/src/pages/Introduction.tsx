@@ -57,23 +57,24 @@ export default function Introduction() {
 ├── src/                          # Civilization (your code)
 └── .reap/
     ├── config.yml                # Project configuration
-    ├── genome/                   # Genetic information
-    │   ├── principles.md
-    │   ├── domain/
-    │   ├── conventions.md
-    │   └── constraints.md
-    ├── environment/              # External context
+    ├── genome/                   # Prescriptive knowledge (how to build)
+    │   ├── application.md        #   Project identity, architecture, conventions
+    │   ├── evolution.md          #   AI behavior guide, evolution principles
+    │   └── invariants.md         #   Absolute constraints (human-only edits)
+    ├── environment/              # Descriptive knowledge (what exists now)
+    │   ├── summary.md            #   Always loaded — tech stack, source structure
+    │   ├── domain/               #   Domain knowledge (on-demand)
+    │   ├── resources/            #   External reference docs (on-demand)
+    │   ├── docs/                 #   Project reference docs (on-demand)
+    │   └── source-map.md         #   Code structure + dependencies (on-demand)
+    ├── vision/                   # Long-term goals and direction
+    │   ├── goals.md              #   North star objectives
+    │   └── memory/               #   AI memory (longterm/midterm/shortterm)
     ├── life/                     # Current generation
     │   ├── current.yml
     │   └── backlog/
-    └── lineage/                  # Completed generation archive
-
-~/.claude/                        # Claude Code (installed by reap init)
-├── commands/                     # Slash commands (/reap.*)
-└── settings.json                 # SessionStart hook registration
-
-~/.config/opencode/               # OpenCode (if detected)
-└── plugins/                      # SessionStart plugin`}</CodeBlock>
+    ├── lineage/                  # Completed generation archive
+    └── hooks/                    # Lifecycle hooks (.md/.sh)`}</CodeBlock>
       </DocPage>
     </DocLayout>
   );
