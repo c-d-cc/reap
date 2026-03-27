@@ -1,9 +1,11 @@
 import { useLanguage } from "./context";
 import { en, type Translations } from "./translations/en";
-import type { Locale } from "./types";
+import { ko } from "./translations/ko";
+import { zhCN } from "./translations/zh-CN";
+import { de } from "./translations/de";
+import { ja } from "./translations/ja";
 
-// Translations will be added back when localization is complete
-const translations: Record<string, Translations> = { en };
+const translations: Record<string, Translations> = { en, ko, "zh-CN": zhCN, de, ja };
 
 export function useT(): Translations {
   const { locale } = useLanguage();

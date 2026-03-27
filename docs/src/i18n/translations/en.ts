@@ -172,12 +172,11 @@ export const en = {
       ["Completion", "Reflect, collect fitness feedback, adapt genome, archive", "05-completion.md"],
     ],
     commandLoading: "How commands are loaded",
-    commandLoadingDesc: "REAP slash commands are loaded only in REAP projects — they won't appear in non-REAP projects.",
+    commandLoadingDesc: "REAP slash commands are installed globally and available in all projects.",
     commandLoadingDetails: [
-      { label: "Source", desc: "Command originals are stored in ~/.reap/commands/ (installed by reap init and reap update)" },
-      { label: "Loading", desc: "When you open a REAP project, the session hook automatically symlinks commands to .claude/commands/" },
-      { label: "Non-REAP projects", desc: "No symlinks are created, so no REAP skills appear in the AI agent's skill list" },
-      { label: "Backward compat", desc: "Redirect stubs in ~/.claude/commands/ ensure older setups keep working during migration" },
+      { label: "Install", desc: "npm install -g @c-d-cc/reap copies skill files (.md) directly to ~/.claude/commands/" },
+      { label: "Update", desc: "Each install replaces existing skills with the latest version. Stale skills are cleaned up automatically." },
+      { label: "Scope", desc: "Skills are installed at user level — available in all projects, not just REAP projects." },
     ],
   },
 

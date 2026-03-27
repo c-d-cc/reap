@@ -1,3 +1,5 @@
+> [한국어](README.ko.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md) | [Deutsch](README.de.md)
+
 <p align="center">
   <img src="media/logo.png" alt="REAP" width="80" height="80" />
 </p>
