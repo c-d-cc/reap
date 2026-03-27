@@ -19,6 +19,7 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [x] submodule dirty check (completion commit + push에서 자동 차단)
 - [x] backlog CRUD (make backlog, consume, revert, createdAt/consumedAt)
 - [x] restart 제거 → abort로 통합 (gen-017)
+- [x] spec2 §1.2 Restart 삭제 — abort와 중복
 
 ### Clarity-driven Interaction (spec2 §0)
 - [x] evolution.md에 clarity 원칙 내장 (template 포함)

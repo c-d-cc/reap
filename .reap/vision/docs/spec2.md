@@ -38,14 +38,7 @@ AI의 interaction level은 **현재 맥락의 구체화(clarity) 수준**에 의
 
 ### 1.1 Generation commit 자동화 ✅ (gen-043)
 
-### 1.2 Restart = git reset + 임시 diff backup
-- `reap run restart` 시:
-  1. uncommitted 파일의 diff를 모아서 임시 파일에 저장 (`.reap/restart-backup-{timestamp}.diff`)
-  2. `git reset --hard` to last completion commit
-  3. 새 generation 시작
-  4. 사용자가 restart 이후 작업을 승인하면, backup diff 삭제
-  5. backup이 필요하면 `git apply`로 복원 가능
-- **임시 backup** — archiving 대상 아님. 용도가 끝나면 삭제.
+### ~~1.2 Restart~~ — 삭제 (abort로 통합, 중복)
 
 ### 1.3 reap.push 구현 ✅ (gen-043)
 
@@ -278,8 +271,7 @@ v0.15의 `reap update`는 아래 기능을 포함. v0.16에서의 현황:
 | 순위 | 항목 | 비고 |
 |------|------|------|
 | 1 | §0 Clarity-driven Interaction | 모든 것의 기반 원칙 — evolve prompt + evolution.md에 반영 |
-| 2 | §1.2 Restart = git reset + backup | safety 정책 확정됨 |
-| 3 | §2.1~2.3 성숙도 시스템 | 전환 제안 + 톤 + 완성 기준 |
+| 2 | §2.1~2.3 성숙도 시스템 | 전환 제안 + 톤 + 완성 기준 |
 | 4 | §3.1~3.2 Gap-driven evolution | clarity 연동 adapt |
 | 5 | §7.2 npm 배포 준비 | README + docs + CI |
 | 6 | §7.3 Update Agent | 7.2 이후 |
