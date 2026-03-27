@@ -24,6 +24,7 @@ export interface ReapPaths {
   memoryMidterm: string;
   memoryShortterm: string;
   hooks: string;
+  migrationState: string;
   artifact: (name: string) => string;
 }
 
@@ -59,6 +60,7 @@ export function createPaths(root: string): ReapPaths {
     memoryMidterm: join(memory, "midterm.md"),
     memoryShortterm: join(memory, "shortterm.md"),
     hooks: join(reap, "hooks"),
+    migrationState: join(reap, "migration-state.yml"),
     artifact: (name: string) => join(life, name),
   };
 }

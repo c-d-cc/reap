@@ -1,4 +1,4 @@
-import { readdir, cp, rename, mkdir } from "fs/promises";
+import { readdir, cp, rename, mkdir, rm } from "fs/promises";
 import { join, dirname } from "path";
 import { execSync } from "child_process";
 import { fileURLToPath } from "url";
@@ -32,6 +32,41 @@ function isGitClean(cwd: string): boolean {
   } catch {
     return true; // can't determine = skip
   }
+}
+
+// ── Migration State ──────────────────────────────────────────
+
+interface MigrationState {
+  phase: string;
+  completedSteps: string[];
+  startedAt: string;
+  updatedAt: string;
+}
+
+async function loadMigrationState(paths: ReapPaths): Promise<MigrationState | null> {
+  const content = await readTextFile(paths.migrationState);
+  if (!content) return null;
+  try {
+    return YAML.parse(content) as MigrationState;
+  } catch {
+    return null;
+  }
+}
+
+async function saveMigrationState(paths: ReapPaths, state: MigrationState): Promise<void> {
+  state.updatedAt = new Date().toISOString();
+  await writeTextFile(paths.migrationState, YAML.stringify(state));
+}
+
+async function clearMigrationState(paths: ReapPaths): Promise<void> {
+  if (await fileExists(paths.migrationState)) {
+    await rm(paths.migrationState);
+  }
+}
+
+function createMigrationState(phase: string): MigrationState {
+  const now = new Date().toISOString();
+  return { phase, completedSteps: [], startedAt: now, updatedAt: now };
 }
 
 // ── v0.15 Config type ────────────────────────────────────────
@@ -159,6 +194,24 @@ async function scanV15Structure(paths: ReapPaths): Promise<Record<string, unknow
 }
 
 export async function executePreCheck(paths: ReapPaths): Promise<void> {
+  // 0. Check for interrupted migration — resume if state exists
+  const existingState = await loadMigrationState(paths);
+  if (existingState) {
+    emitOutput({
+      status: "prompt",
+      command: "migrate",
+      phase: "resume",
+      context: {
+        interruptedPhase: existingState.phase,
+        completedSteps: existingState.completedSteps,
+        startedAt: existingState.startedAt,
+        updatedAt: existingState.updatedAt,
+      },
+      prompt: buildResumePrompt(existingState),
+    });
+    return;
+  }
+
   // 1.1 Git clean check
   if (!isGitClean(paths.root)) {
     emitError("migrate",
@@ -257,73 +310,138 @@ All current .reap/ contents will be preserved at .reap/v15/
 Confirm to proceed. Then run: \`reap init --migrate --phase execute\``;
 }
 
+function buildResumePrompt(state: MigrationState): string {
+  const stepList = state.completedSteps.length > 0
+    ? state.completedSteps.map(s => `  - [x] ${s}`).join("\n")
+    : "  (none)";
+
+  const nextPhaseCmd = state.phase === "execute"
+    ? `reap init --migrate --phase execute`
+    : state.phase === "genome-convert"
+    ? `reap init --migrate --phase genome-convert`
+    : state.phase === "vision"
+    ? `reap init --migrate --phase vision`
+    : `reap init --migrate --phase ${state.phase}`;
+
+  return `## Migration Resume Detected
+
+A previous migration was interrupted at phase: **${state.phase}**
+Started: ${state.startedAt}
+Last updated: ${state.updatedAt}
+
+### Completed Steps
+${stepList}
+
+### To Resume
+Run: \`${nextPhaseCmd}\`
+
+The migration will continue from where it left off. Already completed steps will be skipped.
+
+### To Start Over
+Delete \`.reap/migration-state.yml\` and run \`reap init --migrate\` again.`;
+}
+
 // ── Phase 3: Execute ─────────────────────────────────────────
 
 export async function executeMain(paths: ReapPaths): Promise<void> {
-  // Re-verify v0.15
-  if (!(await detectV15(paths))) {
-    emitError("migrate", "v0.15 structure not found. Cannot proceed.");
+  // Load or create migration state
+  let state = await loadMigrationState(paths);
+  if (!state) {
+    // Fresh execute: verify v0.15 exists
+    if (!(await detectV15(paths))) {
+      // Check if backup already exists (interrupted after backup)
+      if (!(await fileExists(join(paths.reap, "v15")))) {
+        emitError("migrate", "v0.15 structure not found. Cannot proceed.");
+      }
+    }
+    state = createMigrationState("execute");
+    await saveMigrationState(paths, state);
   }
 
+  const done = new Set(state.completedSteps);
   const v15Dir = join(paths.reap, "v15");
 
-  // 3.1 Backup — move key directories to .reap/v15/
-  await ensureDir(v15Dir);
+  // Helper to run a step if not already completed
+  async function step(name: string, fn: () => Promise<void>): Promise<void> {
+    if (done.has(name)) return;
+    await fn();
+    state!.completedSteps.push(name);
+    await saveMigrationState(paths, state!);
+  }
 
-  // Items to back up (only if they exist)
-  const backupItems = [
-    { src: paths.genome, dest: join(v15Dir, "genome") },
-    { src: paths.environment, dest: join(v15Dir, "environment") },
-    { src: paths.life, dest: join(v15Dir, "life") },
-    { src: paths.lineage, dest: join(v15Dir, "lineage") },
-    { src: paths.hooks, dest: join(v15Dir, "hooks") },
-    { src: paths.config, dest: join(v15Dir, "config.yml") },
-  ];
+  // 3.1 Backup
+  await step("backup", async () => {
+    await ensureDir(v15Dir);
+    const backupItems = [
+      { src: paths.genome, dest: join(v15Dir, "genome") },
+      { src: paths.environment, dest: join(v15Dir, "environment") },
+      { src: paths.life, dest: join(v15Dir, "life") },
+      { src: paths.lineage, dest: join(v15Dir, "lineage") },
+      { src: paths.hooks, dest: join(v15Dir, "hooks") },
+      { src: paths.config, dest: join(v15Dir, "config.yml") },
+    ];
+    for (const item of backupItems) {
+      if (await fileExists(item.src)) {
+        await rename(item.src, item.dest);
+      }
+    }
+  });
 
-  for (const item of backupItems) {
-    if (await fileExists(item.src)) {
-      await rename(item.src, item.dest);
+  // 3.2 Create new directory structure
+  await step("create-dirs", async () => {
+    await ensureDir(paths.genome);
+    await ensureDir(join(paths.environment, "domain"));
+    await ensureDir(paths.life);
+    await ensureDir(paths.backlog);
+    await ensureDir(paths.lineage);
+    await ensureDir(paths.vision);
+    await ensureDir(join(paths.vision, "docs"));
+    await ensureDir(join(paths.vision, "memory"));
+    await ensureDir(paths.hooks);
+  });
+
+  // 3.3 Config migration
+  let v16Config = {
+    project: "my-project",
+    language: "english",
+    autoSubagent: true,
+    strict: false,
+    agentClient: "claude-code" as const,
+    autoUpdate: true,
+  };
+  await step("config-migrate", async () => {
+    const v15ConfigContent = await readTextFile(join(v15Dir, "config.yml"));
+    let v15Config: V15Config = {};
+    if (v15ConfigContent) {
+      v15Config = YAML.parse(v15ConfigContent) ?? {};
+    }
+    v16Config = {
+      project: v15Config.project ?? "my-project",
+      language: v15Config.language ?? "english",
+      autoSubagent: v15Config.autoSubagent ?? true,
+      strict: v15Config.strict ?? false,
+      agentClient: "claude-code" as const,
+      autoUpdate: v15Config.autoUpdate ?? true,
+    };
+    await writeTextFile(paths.config, YAML.stringify(v16Config));
+  });
+
+  // If config-migrate was already done, reload v16Config from disk
+  if (done.has("config-migrate")) {
+    const existingConfig = await readTextFile(paths.config);
+    if (existingConfig) {
+      const parsed = YAML.parse(existingConfig) ?? {};
+      v16Config = { ...v16Config, ...parsed };
     }
   }
 
-  // 3.2 Create new directory structure
-  await ensureDir(paths.genome);
-  await ensureDir(join(paths.environment, "domain"));
-  await ensureDir(paths.life);
-  await ensureDir(paths.backlog);
-  await ensureDir(paths.lineage);
-  await ensureDir(paths.vision);
-  await ensureDir(join(paths.vision, "docs"));
-  await ensureDir(join(paths.vision, "memory"));
-  await ensureDir(paths.hooks);
-
-  // 3.3 Config migration
-  const v15ConfigContent = await readTextFile(join(v15Dir, "config.yml"));
-  let v15Config: V15Config = {};
-  if (v15ConfigContent) {
-    v15Config = YAML.parse(v15ConfigContent) ?? {};
-  }
-
-  const v16Config = {
-    project: v15Config.project ?? "my-project",
-    language: v15Config.language ?? "english",
-    autoSubagent: v15Config.autoSubagent ?? true,
-    strict: v15Config.strict ?? false,
-    agentClient: "claude-code" as const,
-    autoUpdate: v15Config.autoUpdate ?? true,
-  };
-  await writeTextFile(paths.config, YAML.stringify(v16Config));
-
-  // 3.4 Genome — read originals for AI prompt
+  // 3.4 Read genome originals for AI prompt (always needed for output)
   const principles = await readTextFile(join(v15Dir, "genome", "principles.md")) ?? "";
   const conventions = await readTextFile(join(v15Dir, "genome", "conventions.md")) ?? "";
   const constraints = await readTextFile(join(v15Dir, "genome", "constraints.md")) ?? "";
   const sourceMap = await readTextFile(join(v15Dir, "genome", "source-map.md")) ?? "";
-
-  // Read evolution template
   const evolutionTemplate = await readTextFile(distPath("evolution.md")) ?? "";
 
-  // Read domain file list
   const domainFiles: string[] = [];
   const v15DomainDir = join(v15Dir, "genome", "domain");
   try {
@@ -332,100 +450,106 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
   } catch { /* empty */ }
 
   // 3.5 Environment copy
-  const v15EnvSummary = join(v15Dir, "environment", "summary.md");
-  if (await fileExists(v15EnvSummary)) {
-    await cp(v15EnvSummary, paths.environmentSummary);
-  }
+  await step("environment-copy", async () => {
+    const v15EnvSummary = join(v15Dir, "environment", "summary.md");
+    if (await fileExists(v15EnvSummary)) {
+      await cp(v15EnvSummary, paths.environmentSummary);
+    }
 
-  const v15EnvDomain = join(v15Dir, "environment", "domain");
-  if (await fileExists(v15EnvDomain)) {
-    try {
-      const entries = await readdir(v15EnvDomain);
-      for (const e of entries) {
-        await cp(join(v15EnvDomain, e), join(paths.environmentDomain, e), { recursive: true });
-      }
-    } catch { /* empty */ }
-  }
+    const v15EnvDomain = join(v15Dir, "environment", "domain");
+    if (await fileExists(v15EnvDomain)) {
+      try {
+        const entries = await readdir(v15EnvDomain);
+        for (const e of entries) {
+          await cp(join(v15EnvDomain, e), join(paths.environmentDomain, e), { recursive: true });
+        }
+      } catch { /* empty */ }
+    }
 
-  // Move source-map.md to environment/
-  if (sourceMap) {
-    await writeTextFile(paths.sourceMap, sourceMap);
-  }
+    if (sourceMap) {
+      await writeTextFile(paths.sourceMap, sourceMap);
+    }
 
-  // Copy domain files from genome/domain/ to environment/domain/
-  if (domainFiles.length > 0) {
-    for (const f of domainFiles) {
-      const src = join(v15DomainDir, f);
-      const dest = join(paths.environmentDomain, f);
-      if (await fileExists(src)) {
-        await cp(src, dest);
+    if (domainFiles.length > 0) {
+      for (const f of domainFiles) {
+        const src = join(v15DomainDir, f);
+        const dest = join(paths.environmentDomain, f);
+        if (await fileExists(src)) {
+          await cp(src, dest);
+        }
       }
     }
-  }
+  });
 
   // 3.6 Lineage copy
-  const v15Lineage = join(v15Dir, "lineage");
-  if (await fileExists(v15Lineage)) {
-    try {
-      const entries = await readdir(v15Lineage);
-      for (const e of entries) {
-        await cp(join(v15Lineage, e), join(paths.lineage, e), { recursive: true });
-      }
-    } catch { /* empty */ }
-  }
+  await step("lineage-copy", async () => {
+    const v15Lineage = join(v15Dir, "lineage");
+    if (await fileExists(v15Lineage)) {
+      try {
+        const entries = await readdir(v15Lineage);
+        for (const e of entries) {
+          await cp(join(v15Lineage, e), join(paths.lineage, e), { recursive: true });
+        }
+      } catch { /* empty */ }
+    }
+  });
 
   // 3.7 Backlog copy
-  const v15Backlog = join(v15Dir, "life", "backlog");
-  if (await fileExists(v15Backlog)) {
-    try {
-      const entries = await readdir(v15Backlog);
-      for (const e of entries) {
-        await cp(join(v15Backlog, e), join(paths.backlog, e), { recursive: true });
-      }
-    } catch { /* empty */ }
-  }
+  await step("backlog-copy", async () => {
+    const v15Backlog = join(v15Dir, "life", "backlog");
+    if (await fileExists(v15Backlog)) {
+      try {
+        const entries = await readdir(v15Backlog);
+        for (const e of entries) {
+          await cp(join(v15Backlog, e), join(paths.backlog, e), { recursive: true });
+        }
+      } catch { /* empty */ }
+    }
+  });
 
   // 3.8 Hooks copy + event name mapping
   const hooksMapped: string[] = [];
   const hooksUnmapped: string[] = [];
-  const v15Hooks = join(v15Dir, "hooks");
-  if (await fileExists(v15Hooks)) {
-    try {
-      const entries = await readdir(v15Hooks);
-      for (const e of entries) {
-        // Skip conditions directory (will be handled separately)
-        if (e === "conditions") {
-          const condSrc = join(v15Hooks, "conditions");
-          const condDest = join(paths.hooks, "conditions");
-          await cp(condSrc, condDest, { recursive: true });
-          continue;
-        }
-
-        const mapping = mapHookFilename(e);
-        if (mapping) {
-          await cp(join(v15Hooks, e), join(paths.hooks, mapping.newName));
-          if (mapping.newName !== e) {
-            hooksMapped.push(`${e} → ${mapping.newName}`);
+  await step("hooks-map", async () => {
+    const v15Hooks = join(v15Dir, "hooks");
+    if (await fileExists(v15Hooks)) {
+      try {
+        const entries = await readdir(v15Hooks);
+        for (const e of entries) {
+          if (e === "conditions") {
+            const condSrc = join(v15Hooks, "conditions");
+            const condDest = join(paths.hooks, "conditions");
+            await cp(condSrc, condDest, { recursive: true });
+            continue;
           }
-          if (mapping.needsAiAnalysis) {
-            hooksUnmapped.push(e);
+
+          const mapping = mapHookFilename(e);
+          if (mapping) {
+            await cp(join(v15Hooks, e), join(paths.hooks, mapping.newName));
+            if (mapping.newName !== e) {
+              hooksMapped.push(`${e} → ${mapping.newName}`);
+            }
+            if (mapping.needsAiAnalysis) {
+              hooksUnmapped.push(e);
+            }
+          } else {
+            await cp(join(v15Hooks, e), join(paths.hooks, e));
           }
-        } else {
-          // Copy as-is
-          await cp(join(v15Hooks, e), join(paths.hooks, e));
         }
-      }
-    } catch { /* empty */ }
-  }
+      } catch { /* empty */ }
+    }
+  });
 
-  // 3.9 Legacy project-level skills cleanup
-  const legacyCleaned = await cleanupLegacyProjectSkills(paths.root);
-
-  // 3.9.1 Legacy SessionStart hooks cleanup (from v0.15)
-  await cleanupLegacyHooks(paths.root);
+  // 3.9 Legacy cleanup
+  let legacyCleaned: string[] = [];
+  await step("legacy-cleanup", async () => {
+    legacyCleaned = await cleanupLegacyProjectSkills(paths.root);
+    await cleanupLegacyHooks(paths.root);
+  });
 
   // 3.10 Vision + Memory creation
-  const goalsContent = `# Vision Goals
+  await step("vision-create", async () => {
+    const goalsContent = `# Vision Goals
 
 ## Ultimate Goal
 <!-- What is the end state of this project? -->
@@ -433,39 +557,37 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
 ## Goal Items
 <!-- Checklist of major milestones -->
 `;
-  await writeTextFile(join(paths.vision, "goals.md"), goalsContent);
-  await writeTextFile(join(paths.vision, "memory", "longterm.md"), "# Longterm Memory\n");
-  await writeTextFile(join(paths.vision, "memory", "midterm.md"), "# Midterm Memory\n");
-  await writeTextFile(join(paths.vision, "memory", "shortterm.md"), "# Shortterm Memory\n");
+    await writeTextFile(join(paths.vision, "goals.md"), goalsContent);
+    await writeTextFile(join(paths.vision, "memory", "longterm.md"), "# Longterm Memory\n");
+    await writeTextFile(join(paths.vision, "memory", "midterm.md"), "# Midterm Memory\n");
+    await writeTextFile(join(paths.vision, "memory", "shortterm.md"), "# Shortterm Memory\n");
+  });
 
-  // 3.10 reap-guide.md (install to ~/.reap/, not per-project)
-  const guide = await readTextFile(distPath("reap-guide.md"));
-  if (guide) {
-    const reapHome = join(homedir(), ".reap");
-    await ensureDir(reapHome);
-    await writeTextFile(join(reapHome, "reap-guide.md"), guide);
-  }
+  // 3.11 reap-guide.md
+  await step("reap-guide", async () => {
+    const guide = await readTextFile(distPath("reap-guide.md"));
+    if (guide) {
+      const reapHome = join(homedir(), ".reap");
+      await ensureDir(reapHome);
+      await writeTextFile(join(reapHome, "reap-guide.md"), guide);
+    }
+  });
 
-  // 3.11 CLAUDE.md
-  await ensureClaudeMd(paths.root, v16Config.project);
+  // 3.12 CLAUDE.md
+  await step("claude-md", async () => {
+    await ensureClaudeMd(paths.root, v16Config.project);
+  });
+
+  // Update state to genome-convert phase
+  state.phase = "genome-convert";
+  await saveMigrationState(paths, state);
 
   // Build genome conversion prompt for AI
   emitOutput({
     status: "prompt",
     command: "migrate",
     phase: "genome-convert",
-    completed: [
-      "backup",
-      "create-dirs",
-      "config-migrate",
-      "environment-copy",
-      "lineage-copy",
-      "backlog-copy",
-      "hooks-map",
-      "legacy-cleanup",
-      "vision-create",
-      "claude-md",
-    ],
+    completed: state.completedSteps,
     context: {
       principles,
       conventions,
@@ -561,11 +683,21 @@ After writing all genome files, run: \`reap init --migrate --phase vision\``;
 // ── Phase 4: Vision ──────────────────────────────────────────
 
 export async function executeVision(paths: ReapPaths): Promise<void> {
+  // Update state to vision phase
+  const state = await loadMigrationState(paths);
+  if (state) {
+    state.phase = "vision";
+    if (!state.completedSteps.includes("genome-convert")) {
+      state.completedSteps.push("genome-convert");
+    }
+    await saveMigrationState(paths, state);
+  }
+
   emitOutput({
     status: "prompt",
     command: "migrate",
     phase: "vision",
-    completed: [
+    completed: state?.completedSteps ?? [
       "backup",
       "create-dirs",
       "config-migrate",
@@ -607,6 +739,9 @@ Based on your analysis, suggest 3-5 goals for \`vision/goals.md\`:
 // ── Phase 5: Complete ────────────────────────────────────────
 
 export async function executeComplete(paths: ReapPaths): Promise<void> {
+  // Clear migration state file — migration is done
+  await clearMigrationState(paths);
+
   // Count what was migrated
   let lineageCount = 0;
   try {
@@ -664,6 +799,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     case "execute":
       await executeMain(paths);
       break;
+    case "genome-convert":
+      // Alias: when resuming from genome-convert phase, re-emit the genome-convert prompt
+      await executeMain(paths);
+      break;
     case "vision":
       await executeVision(paths);
       break;
@@ -671,6 +810,6 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       await executeComplete(paths);
       break;
     default:
-      emitError("migrate", `Unknown migration phase: '${phase}'. Valid: confirm, execute, vision, complete`);
+      emitError("migrate", `Unknown migration phase: '${phase}'. Valid: confirm, execute, genome-convert, vision, complete`);
   }
 }

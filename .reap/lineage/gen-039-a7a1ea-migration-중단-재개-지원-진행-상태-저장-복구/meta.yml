@@ -1,0 +1,19 @@
+id: gen-039-a7a1ea
+type: embryo
+goal: migration 중단/재개 지원 — 진행 상태 저장 + 복구
+parents:
+  - gen-038-1fb73f
+timeline:
+  - stage: learning
+    at: 2026-03-27T09:13:47.045Z
+  - stage: planning
+    at: 2026-03-27T09:17:21.241Z
+  - stage: implementation
+    at: 2026-03-27T09:18:16.194Z
+  - stage: validation
+    at: 2026-03-27T09:26:39.357Z
+  - stage: completion
+    at: 2026-03-27T09:28:40.009Z
+fitnessFeedback:
+  text: ok
+  evaluatedAt: 2026-03-27T09:39:04.083Z
