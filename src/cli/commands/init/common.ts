@@ -137,21 +137,32 @@ If genome/application.md has NOT been shown to the user and explicitly approved:
 }
 
 export async function ensureClaudeMd(root: string, projectName: string): Promise<"created" | "appended" | "skipped"> {
-  const claudeMdPath = join(root, "CLAUDE.md");
   const reapSection = await readTextFile(distPath("claude-md-section.md"));
   if (!reapSection) {
     return "skipped";
   }
 
-  const existing = await readTextFile(claudeMdPath);
-  if (existing) {
-    if (!existing.includes(".reap/genome/")) {
-      await writeTextFile(claudeMdPath, existing.trimEnd() + "\n" + reapSection);
-      return "appended";
-    }
+  // Check both locations — prefer the one that already exists
+  const rootPath = join(root, "CLAUDE.md");
+  const dotClaudePath = join(root, ".claude", "CLAUDE.md");
+
+  const rootContent = await readTextFile(rootPath);
+  const dotClaudeContent = await readTextFile(dotClaudePath);
+
+  // If either already has REAP section, skip
+  if (rootContent?.includes(".reap/genome/") || dotClaudeContent?.includes(".reap/genome/")) {
     return "skipped";
+  }
+
+  // Append to whichever exists; if both exist, prefer .claude/CLAUDE.md; if neither, create root
+  if (dotClaudeContent) {
+    await writeTextFile(dotClaudePath, dotClaudeContent.trimEnd() + "\n" + reapSection);
+    return "appended";
+  } else if (rootContent) {
+    await writeTextFile(rootPath, rootContent.trimEnd() + "\n" + reapSection);
+    return "appended";
   } else {
-    await writeTextFile(claudeMdPath, `# ${projectName}\n` + reapSection);
+    await writeTextFile(rootPath, `# ${projectName}\n` + reapSection);
     return "created";
   }
 }
