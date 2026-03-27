@@ -17,7 +17,7 @@ export const ja: Translations = {
       coreConcepts: "コアコンセプト",
       genome: "Genome",
       environment: "Environment",
-      lifecycle: "ライフサイクル",
+      lifecycle: "Life Cycle",
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
@@ -94,7 +94,7 @@ export const ja: Translations = {
       { href: "/docs/introduction", title: "イントロダクション", desc: "REAPとは何か、なぜ使うのか、4層アーキテクチャ。" },
       { href: "/docs/quick-start", title: "クイックスタート", desc: "インストールして最初のGenerationをステップバイステップで実行。" },
       { href: "/docs/core-concepts", title: "コアコンセプト", desc: "Genome、ライフサイクル、BacklogとDeferralの詳細。" },
-      { href: "/docs/lifecycle", title: "ライフサイクル", desc: "/reap.evolve、ステージコマンド、マイクロループ、completionフェーズ。" },
+      { href: "/docs/lifecycle", title: "Life Cycle", desc: "/reap.evolve、ステージコマンド、マイクロループ、completionフェーズ。" },
       { href: "/docs/self-evolving", title: "自己進化", desc: "明確性駆動インタラクション、cruiseモード、memory、ギャップ駆動進化。" },
       { href: "/docs/command-reference", title: "コマンドリファレンス", desc: "/reap.evolve、ステージコマンド、/reap.status — すべてのスラッシュコマンド。" },
       { href: "/docs/hook-reference", title: "Hookリファレンス", desc: "ライフサイクルhooks：ファイルベースのイベントhook、条件、実行順序。" },
@@ -749,7 +749,7 @@ return nonce to AI                         ←── AI passes nonce
 
   // Lifecycle Page (renamed from Workflow)
   lifecyclePage: {
-    title: "ライフサイクル",
+    title: "Life Cycle",
     breadcrumb: "ガイド",
     intro: "ライフサイクルはREAPの心臓部です — 各世代は5つのステージ（Learning → Planning → Implementation → Validation → Completion）を流れ、各ステップでアーティファクトを生成します。Completionには4つのフェーズがあります：reflect → fitness → adapt → commit。",
     structureTitle: "アーティファクト構造",

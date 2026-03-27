@@ -17,7 +17,7 @@ export const ko: Translations = {
       coreConcepts: "핵심 개념",
       genome: "Genome",
       environment: "Environment",
-      lifecycle: "라이프사이클",
+      lifecycle: "Life Cycle",
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
@@ -94,7 +94,7 @@ export const ko: Translations = {
       { href: "/docs/introduction", title: "소개", desc: "REAP란 무엇인가, 왜 사용하는가, 4계층 아키텍처." },
       { href: "/docs/quick-start", title: "빠른 시작", desc: "설치하고 첫 번째 Generation을 단계별로 실행합니다." },
       { href: "/docs/core-concepts", title: "핵심 개념", desc: "Genome, 라이프사이클, Backlog & 지연을 심층적으로 다룹니다." },
-      { href: "/docs/lifecycle", title: "라이프사이클", desc: "/reap.evolve, 단계별 명령어, 마이크로 루프, completion 단계." },
+      { href: "/docs/lifecycle", title: "Life Cycle", desc: "/reap.evolve, 단계별 명령어, 마이크로 루프, completion 단계." },
       { href: "/docs/self-evolving", title: "자기 진화", desc: "명확도 기반 인터랙션, 크루즈 모드, 메모리, 격차 기반 진화." },
       { href: "/docs/command-reference", title: "명령어 레퍼런스", desc: "/reap.evolve, 단계별 명령어, /reap.status — 모든 슬래시 명령어." },
       { href: "/docs/hook-reference", title: "Hook 레퍼런스", desc: "라이프사이클 hooks: 파일 기반 이벤트 hooks, 조건, 실행 순서." },
@@ -749,7 +749,7 @@ return nonce to AI                         ←── AI passes nonce
 
   // Lifecycle Page (renamed from Workflow)
   lifecyclePage: {
-    title: "라이프사이클",
+    title: "Life Cycle",
     breadcrumb: "가이드",
     intro: "라이프사이클은 REAP의 심장 박동입니다 — 각 Generation이 5단계(Learning → Planning → Implementation → Validation → Completion)를 거치며, 매 단계에서 산출물을 생성합니다. Completion은 4개의 phase로 구성됩니다: reflect → fitness → adapt → commit.",
     structureTitle: "산출물 구조",

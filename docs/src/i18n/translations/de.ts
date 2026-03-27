@@ -17,7 +17,7 @@ export const de: Translations = {
       coreConcepts: "Kernkonzepte",
       genome: "Genome",
       environment: "Environment",
-      lifecycle: "Lebenszyklus",
+      lifecycle: "Life Cycle",
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
@@ -94,7 +94,7 @@ export const de: Translations = {
       { href: "/docs/introduction", title: "Einführung", desc: "Was ist REAP, warum es verwenden, 4-Schichten-Architektur." },
       { href: "/docs/quick-start", title: "Schnellstart", desc: "Installation und erste Generation Schritt für Schritt ausführen." },
       { href: "/docs/core-concepts", title: "Kernkonzepte", desc: "Genome, Lebenszyklus, Backlog & Aufschub im Detail." },
-      { href: "/docs/lifecycle", title: "Lebenszyklus", desc: "/reap.evolve, Phasenbefehle, Mikro-Schleife, Completion-Phasen." },
+      { href: "/docs/lifecycle", title: "Life Cycle", desc: "/reap.evolve, Phasenbefehle, Mikro-Schleife, Completion-Phasen." },
       { href: "/docs/self-evolving", title: "Selbstentwicklung", desc: "Klarheitsgesteuerte Interaktion, Cruise-Modus, Memory, lückengesteuerte Evolution." },
       { href: "/docs/command-reference", title: "Befehlsreferenz", desc: "/reap.evolve, Phasenbefehle, /reap.status — alle Slash-Befehle." },
       { href: "/docs/hook-reference", title: "Hook-Referenz", desc: "Lebenszyklus-Hooks: dateibasierte Event-Hooks, Bedingungen, Reihenfolge." },
@@ -749,7 +749,7 @@ return nonce to AI                         ←── AI passes nonce
 
   // Lifecycle Page (renamed from Workflow)
   lifecyclePage: {
-    title: "Lebenszyklus",
+    title: "Life Cycle",
     breadcrumb: "Leitfaden",
     intro: "Der Lebenszyklus ist der Herzschlag von REAP — jede Generation durchläuft 5 Phasen (Learning → Planning → Implementation → Validation → Completion) und erzeugt bei jedem Schritt Artefakte. Completion hat 4 Phasen: reflect → fitness → adapt → commit.",
     structureTitle: "Artefaktstruktur",

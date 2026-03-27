@@ -17,7 +17,7 @@ export const zhCN: Translations = {
       coreConcepts: "核心概念",
       genome: "Genome",
       environment: "Environment",
-      lifecycle: "生命周期",
+      lifecycle: "Life Cycle",
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
@@ -94,7 +94,7 @@ export const zhCN: Translations = {
       { href: "/docs/introduction", title: "简介", desc: "什么是 REAP，为什么使用它，四层架构。" },
       { href: "/docs/quick-start", title: "快速开始", desc: "安装并一步步运行你的第一代。" },
       { href: "/docs/core-concepts", title: "核心概念", desc: "深入了解 Genome、生命周期、Backlog 与延迟。" },
-      { href: "/docs/lifecycle", title: "生命周期", desc: "/reap.evolve、阶段命令、微循环、completion 阶段。" },
+      { href: "/docs/lifecycle", title: "Life Cycle", desc: "/reap.evolve、阶段命令、微循环、completion 阶段。" },
       { href: "/docs/self-evolving", title: "自进化", desc: "清晰度驱动的交互、巡航模式、memory、间隙驱动进化。" },
       { href: "/docs/command-reference", title: "命令参考", desc: "/reap.evolve、阶段命令、/reap.status——所有斜杠命令。" },
       { href: "/docs/hook-reference", title: "Hook 参考", desc: "生命周期钩子：基于文件的事件钩子、条件、排序。" },
@@ -749,7 +749,7 @@ return nonce to AI                         ←── AI passes nonce
 
   // Lifecycle Page (renamed from Workflow)
   lifecyclePage: {
-    title: "生命周期",
+    title: "Life Cycle",
     breadcrumb: "指南",
     intro: "生命周期是 REAP 的心跳——每一代流经 5 个阶段（Learning → Planning → Implementation → Validation → Completion），在每一步产生产物。Completion 有 4 个 phase：reflect → fitness → adapt → commit。",
     structureTitle: "产物结构",
