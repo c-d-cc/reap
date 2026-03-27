@@ -1,5 +1,9 @@
 import { execSync } from "child_process";
+import { readFileSync } from "fs";
+import { join } from "path";
+import YAML from "yaml";
 import { cleanupLegacyHooks, cleanupLegacyProjectSkills } from "../../core/integrity.js";
+import { fetchReleaseNotice } from "../../core/notice.js";
 
 /**
  * Inline semver comparison: returns true if a >= b.
@@ -209,5 +213,19 @@ export async function execute(): Promise<void> {
   await cleanupLegacyProjectSkills(root);
 
   // Auto-update: always attempt (skip dev/alpha, network failure is silent)
-  performAutoUpdate(root);
+  const result = performAutoUpdate(root);
+
+  // Show release notice after successful upgrade
+  if (result.action === "upgraded" && result.to) {
+    try {
+      const configPath = join(root, ".reap", "config.yml");
+      const configContent = readFileSync(configPath, "utf-8");
+      const config = YAML.parse(configContent) as { language?: string };
+      const language = config?.language ?? "english";
+      const notice = fetchReleaseNotice(result.to, language);
+      if (notice) console.error(notice);
+    } catch {
+      // Non-fatal — config read failure should not break postinstall
+    }
+  }
 }

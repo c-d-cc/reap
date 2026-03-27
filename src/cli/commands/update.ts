@@ -1,12 +1,27 @@
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import YAML from "yaml";
 import type { ReapPaths } from "../../core/paths.js";
 import { createPaths } from "../../core/paths.js";
 import { readTextFile, writeTextFile, fileExists, ensureDir } from "../../core/fs.js";
 import { emitOutput, emitError } from "../../core/output.js";
 import { detectV15 } from "../../core/integrity.js";
+import { fetchReleaseNotice } from "../../core/notice.js";
 import { ensureClaudeMd } from "./init/common.js";
 import { execute as migrateExecute } from "./migrate.js";
 import type { ReapConfig } from "../../types/index.js";
+
+/** Read package version from package.json */
+function getPackageVersion(): string {
+  try {
+    const __dir = dirname(fileURLToPath(import.meta.url));
+    for (const rel of [join(__dir, "..", "..", "package.json"), join(__dir, "..", "package.json")]) {
+      try { return JSON.parse(readFileSync(rel, "utf-8")).version; } catch {}
+    }
+  } catch {}
+  return "0.0.0";
+}
 
 /** Default values for ReapConfig fields — used for backfill */
 const CONFIG_DEFAULTS: Omit<ReapConfig, "project" | "cruiseCount"> = {
@@ -164,5 +179,24 @@ export async function execute(phase?: string, postUpgrade?: boolean): Promise<vo
       context: { changes: updated },
       message: `Updated: ${updated.join("; ")}`,
     });
+  }
+
+  // Show release notice for current version
+  try {
+    let language = "english";
+    const raw = configContent ?? "";
+    if (raw) {
+      try {
+        const cfg = YAML.parse(raw) as Record<string, string>;
+        if (cfg?.language) language = cfg.language;
+      } catch { /* use default */ }
+    }
+    const version = getPackageVersion();
+    if (version !== "0.0.0") {
+      const notice = fetchReleaseNotice(version, language);
+      if (notice) console.error(notice);
+    }
+  } catch {
+    // Non-fatal — notice display failure should not break update
   }
 }

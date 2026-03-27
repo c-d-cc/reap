@@ -1,0 +1,19 @@
+id: gen-048-cfbd63
+type: embryo
+goal: release notice 구현 — 버전별 릴리즈 노트 표시
+parents:
+  - gen-047-4b8a99
+timeline:
+  - stage: learning
+    at: 2026-03-27T14:44:02.881Z
+  - stage: planning
+    at: 2026-03-27T14:46:16.732Z
+  - stage: implementation
+    at: 2026-03-27T14:46:53.226Z
+  - stage: validation
+    at: 2026-03-27T14:51:46.507Z
+  - stage: completion
+    at: 2026-03-27T14:53:51.133Z
+fitnessFeedback:
+  text: ok
+  evaluatedAt: 2026-03-27T14:56:11.847Z

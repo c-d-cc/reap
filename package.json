@@ -9,7 +9,8 @@
   "files": [
     "dist/",
     "scripts/postinstall.sh",
-    "README.md"
+    "README.md",
+    "RELEASE_NOTICE.md"
   ],
   "scripts": {
     "dev": "bun src/cli/index.ts",
