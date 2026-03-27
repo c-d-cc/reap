@@ -12,7 +12,7 @@ const SKILLS_DIR = __dirname.includes("dist")
   ? join(__dirname, "..", "adapters", "claude-code", "skills")
   : join(__dirname, "skills");
 
-const SKILL_PATTERN = /^(reap|reapdev)\..+\.md$/;
+const SKILL_PATTERN = /^reap\..+\.md$/;
 
 /**
  * Remove existing reap/reapdev skill files from target directory
