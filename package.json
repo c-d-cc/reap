@@ -1,6 +1,6 @@
 {
   "name": "@c-d-cc/reap",
-  "version": "0.16.2",
+  "version": "0.16.3",
   "description": "Recursive Evolutionary Autonomous Pipeline — AI and humans evolve software across generations",
   "type": "module",
   "bin": {

@@ -1,8 +1,8 @@
 ## What's New
 
-- `reap make hook` CLI 커맨드 추가 — 올바른 파일명/frontmatter로 hook 파일 생성
-- hook 기본 conditions 복원 (always, has-code-changes, version-bumped) + 예시 템플릿
-- `reap init` 시 hook conditions 및 예시 자동 설치
-- `reap make` 커맨드를 확장 가능한 디렉토리 구조로 리팩토링
-- docs Advanced 페이지에서 존재하지 않는 Presets 섹션 제거
-- docs Hook Reference/Hooks 페이지에서 Session Context Loading 섹션 제거
+- `vision/docs/` → `vision/design/` 리네이밍 — 루트 `docs/`와의 혼동 방지
+- Vision에 Design 개념 추가 (Memory와 구분되는 독립 설계 문서 공간)
+- Evaluator Agent 설계 문서 추가 (`vision/design/evaluator-agent.md`)
+- Goals에 Evaluator Agent 목표 항목 등록
+- README 언어 링크를 GitHub 절대 URL로 변경 (npm 페이지 호환)
+- Vision 정리: goals cleanup 원칙 추가, 완료 항목 체크

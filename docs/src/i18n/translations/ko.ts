@@ -998,6 +998,10 @@ priority: medium
     ],
     versions: [
       {
+        version: "0.16.3",
+        notes: "vision/docs를 vision/design으로 리네이밍하여 루트 docs/와의 혼동 방지. Vision에 Design 섹션 추가 (Memory와 구분되는 독립 설계 문서 공간). Evaluator Agent 설계 문서 추가. npm 호환을 위해 README 언어 링크 수정.",
+      },
+      {
         version: "0.16.2",
         notes: "'reap make hook' CLI 커맨드 추가 — 올바른 파일명 컨벤션과 frontmatter로 hook 파일 생성. 기본 hook conditions (always, has-code-changes, version-bumped) 및 예시 템플릿 복원. 'reap init' 시 자동 설치. 'reap make' 커맨드를 확장 가능한 디렉토리 구조로 리팩토링. docs에서 outdated된 Presets, Session Context Loading 섹션 제거.",
       },

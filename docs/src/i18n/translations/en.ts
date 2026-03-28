@@ -995,6 +995,10 @@ Description of the task.`,
     ],
     versions: [
       {
+        version: "0.16.3",
+        notes: "Rename vision/docs to vision/design to avoid confusion with root docs/. Add Design section to Vision (separate from Memory for independent design documents). Add Evaluator Agent design doc. Fix README language links for npm compatibility.",
+      },
+      {
         version: "0.16.2",
         notes: "Add 'reap make hook' CLI command for creating hooks with correct filename convention and frontmatter. Restore default hook conditions (always, has-code-changes, version-bumped) and example templates. Auto-install hooks on 'reap init'. Refactor 'reap make' into extensible directory structure. Remove outdated Presets and Session Context Loading sections from docs.",
       },

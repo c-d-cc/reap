@@ -998,6 +998,10 @@ Beschreibung der Aufgabe.`,
     ],
     versions: [
       {
+        version: "0.16.3",
+        notes: "vision/docs in vision/design umbenannt — Verwechslung mit Root-docs/ vermeiden. Design-Abschnitt zu Vision hinzugefügt (getrennt von Memory für unabhängige Designdokumente). Evaluator Agent Designdokument hinzugefügt. README-Sprachlinks für npm-Kompatibilität korrigiert.",
+      },
+      {
         version: "0.16.2",
         notes: "'reap make hook' CLI-Befehl hinzugefügt — Hook-Dateien mit korrekter Dateinamenskonvention und Frontmatter erstellen. Standard-Hook-Conditions (always, has-code-changes, version-bumped) und Beispielvorlagen wiederhergestellt. Automatische Installation bei 'reap init'. 'reap make' in erweiterbare Verzeichnisstruktur umstrukturiert. Veraltete Presets- und Session Context Loading-Abschnitte aus Docs entfernt.",
       },

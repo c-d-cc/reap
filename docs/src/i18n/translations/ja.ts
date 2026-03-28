@@ -998,6 +998,10 @@ priority: medium
     ],
     versions: [
       {
+        version: "0.16.3",
+        notes: "vision/docsをvision/designにリネーム — ルートdocs/との混同を防止。VisionにDesignセクション追加（Memoryと区別される独立した設計文書スペース）。Evaluator Agent設計ドキュメント追加。npm互換のためREADME言語リンク修正。",
+      },
+      {
         version: "0.16.2",
         notes: "'reap make hook' CLIコマンド追加 — 正しいファイル名規則とfrontmatterでhookファイルを生成。デフォルトhook conditions（always、has-code-changes、version-bumped）と例テンプレートの復元。'reap init'時に自動インストール。'reap make'コマンドを拡張可能なディレクトリ構造にリファクタリング。docsから古いPresetsとSession Context Loadingセクションを削除。",
       },

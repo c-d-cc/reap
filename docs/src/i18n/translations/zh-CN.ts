@@ -998,6 +998,10 @@ priority: medium
     ],
     versions: [
       {
+        version: "0.16.3",
+        notes: "将 vision/docs 重命名为 vision/design — 避免与根目录 docs/ 混淆。在 Vision 中添加 Design 部分（与 Memory 区分的独立设计文档空间）。添加 Evaluator Agent 设计文档。修复 README 语言链接以兼容 npm。",
+      },
+      {
         version: "0.16.2",
         notes: "新增 'reap make hook' CLI 命令 — 以正确的文件名规范和 frontmatter 创建 hook 文件。恢复默认 hook conditions（always、has-code-changes、version-bumped）及示例模板。'reap init' 时自动安装。将 'reap make' 重构为可扩展的目录结构。从文档中移除过时的 Presets 和 Session Context Loading 部分。",
       },
