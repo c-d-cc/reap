@@ -1,7 +1,7 @@
 import type { GenerationState, LifeCycleStage, MergeStage } from "../types/index.js";
 import type { GenerationManager } from "./generation.js";
 import { generateToken, verifyToken } from "./nonce.js";
-import { nextStage, prevStage, nextMergeStage, prevMergeStage } from "./lifecycle.js";
+import { nextStage, nextMergeStage, getTransitions } from "./lifecycle.js";
 import { readTextFile } from "./fs.js";
 import { emitError } from "./output.js";
 import { executeHooks } from "./hooks.js";
@@ -44,100 +44,97 @@ export async function verifyArtifact(
 }
 
 /**
- * Verify and consume a nonce token.
- * First stage entry (no lastNonce) is the only exception — skips verification.
+ * Verify and consume a transition nonce.
+ * Looks up targetStagePhase in pendingTransitions, verifies the hash, and removes it.
+ * First stage entry (no pendingTransitions) is the only exception — skips verification.
  */
-export function verifyNonce(
+export function verifyTransition(
   command: string,
   state: GenerationState,
-  stage: string,
-  phase: string,
+  targetStagePhase: string,
 ): void {
-  if (!state.lastNonce) {
+  if (!state.pendingTransitions) {
     // First stage entry — no token to verify
     return;
   }
 
-  if (!state.expectedHash) {
-    emitError(command, "Nonce transition error: lastNonce exists but expectedHash is missing.");
-  }
-
-  if (!verifyToken(state.lastNonce, state.id, stage, phase, state.expectedHash!)) {
+  const entry = state.pendingTransitions[targetStagePhase];
+  if (!entry) {
+    const available = Object.keys(state.pendingTransitions).join(", ");
     const currentPhase = state.phase ? ` (current phase: ${state.phase})` : "";
-    emitError(command, `Nonce verification failed for ${stage}:${phase}${currentPhase}. Re-run the previous phase.`);
+    emitError(command, `No pending transition for ${targetStagePhase}${currentPhase}. Available: [${available}]. Re-run the previous phase.`);
   }
 
-  // Clear consumed token
-  state.lastNonce = undefined;
-  state.expectedHash = undefined;
-  state.phase = undefined;
+  if (!verifyToken(entry!.nonce, state.id, targetStagePhase.split(":")[0], targetStagePhase.split(":")[1], entry!.hash)) {
+    const currentPhase = state.phase ? ` (current phase: ${state.phase})` : "";
+    emitError(command, `Nonce verification failed for ${targetStagePhase}${currentPhase}. Re-run the previous phase.`);
+  }
+
+  // Consume: remove all pending transitions (new ones will be set by setTransitionNonces)
+  state.pendingTransitions = undefined;
 }
 
 /**
- * Generate and set forward nonce + back nonce simultaneously.
- * Back nonce targets the previous stage's entry (if exists).
+ * Generate nonces for all allowed transitions from currentStagePhase.
+ * Uses the transition graph to determine which targets are valid.
  */
-export function setNonce(
+export function setTransitionNonces(
   state: GenerationState,
-  stage: string,
-  phase: string,
+  currentStagePhase: string,
 ): void {
-  // Forward nonce
-  const forward = generateToken(state.id, stage, phase);
-  state.lastNonce = forward.nonce;
-  state.expectedHash = forward.hash;
-  state.phase = phase;
-
-  // Back nonce — target previous stage entry
-  const prev = state.type === "merge"
-    ? prevMergeStage(state.stage as MergeStage)
-    : prevStage(state.stage as LifeCycleStage);
-  if (prev) {
-    const back = generateToken(state.id, prev, "entry");
-    state.backNonce = back.nonce;
-    state.backExpectedHash = back.hash;
-    state.backTarget = prev;
-    state.backTargetPhase = "entry";
-  } else {
-    // First stage — no back possible
-    state.backNonce = undefined;
-    state.backExpectedHash = undefined;
-    state.backTarget = undefined;
-    state.backTargetPhase = undefined;
+  const targets = getTransitions(state.type, currentStagePhase);
+  if (targets.length === 0) {
+    // Terminal state (e.g., completion:commit) — no transitions to set
+    state.pendingTransitions = undefined;
+    state.phase = currentStagePhase.split(":")[1];
+    return;
   }
+
+  const pending: Record<string, { nonce: string; hash: string }> = {};
+  for (const target of targets) {
+    const [stage, phase] = target.split(":");
+    pending[target] = generateToken(state.id, stage, phase);
+  }
+
+  state.pendingTransitions = pending;
+  state.phase = currentStagePhase.split(":")[1];
 }
 
 /**
- * Verify back nonce and consume it.
+ * Prepare nonces for entering a new stage (used after stage complete phases).
+ * Issues:
+ * 1. Entry nonce for the target stage (ticket to enter)
+ * 2. All graph transitions from the target entry (forward + back from that point)
+ *
+ * This allows both "enter the stage" and "go back" before work phase runs.
  */
-export function verifyBackNonce(
-  command: string,
+export function prepareStageEntry(
   state: GenerationState,
+  targetStageEntry: string,
 ): void {
-  if (!state.backNonce) {
-    emitError(command, "Cannot go back — no back nonce available (already at first stage or back not supported here).");
+  const [, entryPhase] = targetStageEntry.split(":");
+  if (entryPhase !== "entry") {
+    throw new Error(`prepareStageEntry expects a :entry target, got ${targetStageEntry}`);
   }
 
-  if (!state.backExpectedHash || !state.backTarget) {
-    emitError(command, "Back nonce state is corrupted.");
+  const pending: Record<string, { nonce: string; hash: string }> = {};
+
+  // Entry ticket
+  const [stage, phase] = targetStageEntry.split(":");
+  pending[targetStageEntry] = generateToken(state.id, stage, phase);
+
+  // Also include back transitions from this entry point (so back works before work phase)
+  const backTargets = getTransitions(state.type, targetStageEntry).filter((t) => {
+    const [tStage] = t.split(":");
+    return tStage !== stage; // Only back transitions (different stage)
+  });
+  for (const backTarget of backTargets) {
+    const [bStage, bPhase] = backTarget.split(":");
+    pending[backTarget] = generateToken(state.id, bStage, bPhase);
   }
 
-  if (!verifyToken(state.backNonce!, state.id, state.backTarget!, state.backTargetPhase ?? "entry", state.backExpectedHash!)) {
-    const currentPhase = state.phase ? ` (current phase: ${state.phase})` : "";
-    emitError(command, `Back nonce verification failed${currentPhase}. Current stage: ${state.stage}, back target: ${state.backTarget}.`);
-  }
-
-  // Clear back nonce
-  const target = state.backTarget!;
-  const targetPhase = state.backTargetPhase ?? "entry";
-  state.backNonce = undefined;
-  state.backExpectedHash = undefined;
-  state.backTarget = undefined;
-  state.backTargetPhase = undefined;
-
-  // Set stage to target and issue forward + back nonce via setNonce()
-  state.stage = target as LifeCycleStage | MergeStage;
-  setNonce(state, target, targetPhase);
+  state.pendingTransitions = pending;
+  state.phase = "entry";
 }
 
 /**

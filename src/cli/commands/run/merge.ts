@@ -1,7 +1,7 @@
 import type { ReapPaths } from "../../../core/paths.js";
 import { GenerationManager } from "../../../core/generation.js";
 import { emitOutput, emitError } from "../../../core/output.js";
-import { verifyNonce, setNonce, verifyArtifact, performMergeTransition } from "../../../core/stage-transition.js";
+import { verifyTransition, setTransitionNonces, prepareStageEntry, verifyArtifact, performMergeTransition } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
 import { readTextFile } from "../../../core/fs.js";
 
@@ -16,13 +16,13 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const s = state!;
 
   if (!phase || phase === "work") {
-    verifyNonce("merge", s, "merge", "entry");
+    verifyTransition("merge", s, "merge:entry");
     await copyArtifactTemplate("merge", paths.artifact, true);
 
     // Read mate artifact for resolved genome decisions
     const mateArtifact = await readTextFile(paths.artifact("02-mate.md"));
 
-    setNonce(s, "merge", "complete");
+    setTransitionNonces(s, "merge:entry");
     await gm.save(s);
 
     emitOutput({
@@ -63,10 +63,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    verifyNonce("merge", s, "merge", "complete");
+    verifyTransition("merge", s, "merge:complete");
     await verifyArtifact("merge", paths.artifact, "merge", true);
 
-    setNonce(s, "reconcile", "entry");
+    prepareStageEntry(s, "reconcile:entry");
     await gm.save(s);
 
     const next = await performMergeTransition(s, gm, paths);

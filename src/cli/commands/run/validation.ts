@@ -1,7 +1,7 @@
 import type { ReapPaths } from "../../../core/paths.js";
 import { GenerationManager } from "../../../core/generation.js";
 import { emitOutput, emitError } from "../../../core/output.js";
-import { verifyNonce, setNonce, performTransition, performMergeTransition, verifyArtifact } from "../../../core/stage-transition.js";
+import { verifyTransition, setTransitionNonces, prepareStageEntry, performTransition, performMergeTransition, verifyArtifact } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
 import { checkArtifactsFilled } from "../../../core/artifact-check.js";
 
@@ -17,13 +17,13 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const s = state!;
 
   if (!phase || phase === "work") {
-    verifyNonce("validation", s, "validation", "entry");
+    verifyTransition("validation", s, "validation:entry");
     await copyArtifactTemplate("validation", paths.artifact, isMerge);
 
     // Check if previous stage artifacts have been filled
     const artifactCheck = await checkArtifactsFilled(paths.artifact, isMerge);
 
-    setNonce(s, "validation", "complete");
+    setTransitionNonces(s, "validation:entry");
     await gm.save(s);
 
     if (artifactCheck.unfilled.length > 0) {
@@ -105,10 +105,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    verifyNonce("validation", s, "validation", "complete");
+    verifyTransition("validation", s, "validation:complete");
     await verifyArtifact("validation", paths.artifact, "validation", isMerge);
 
-    setNonce(s, "completion", "entry");
+    prepareStageEntry(s, "completion:entry");
     await gm.save(s);
 
     const next = isMerge

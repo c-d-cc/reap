@@ -1,7 +1,7 @@
 import type { ReapPaths } from "../../../core/paths.js";
 import { GenerationManager } from "../../../core/generation.js";
 import { emitOutput, emitError } from "../../../core/output.js";
-import { verifyNonce, setNonce, verifyArtifact, performMergeTransition } from "../../../core/stage-transition.js";
+import { verifyTransition, setTransitionNonces, prepareStageEntry, verifyArtifact, performMergeTransition } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
 import { findCommonAncestor, extractGenomeDiff, gitShow } from "../../../core/lineage.js";
 
@@ -16,7 +16,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const s = state!;
 
   if (!phase || phase === "work") {
-    verifyNonce("detect", s, "detect", "entry");
+    verifyTransition("detect", s, "detect:entry");
     await copyArtifactTemplate("detect", paths.artifact, true);
 
     const [branchA, branchB] = s.parents;
@@ -32,7 +32,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     const genomeA = gitShow(paths.root, branchA, ".reap/genome/application.md");
     const genomeB = gitShow(paths.root, branchB, ".reap/genome/application.md");
 
-    setNonce(s, "detect", "complete");
+    setTransitionNonces(s, "detect:entry");
     await gm.save(s);
 
     emitOutput({
@@ -83,10 +83,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    verifyNonce("detect", s, "detect", "complete");
+    verifyTransition("detect", s, "detect:complete");
     await verifyArtifact("detect", paths.artifact, "detect", true);
 
-    setNonce(s, "mate", "entry");
+    prepareStageEntry(s, "mate:entry");
     await gm.save(s);
 
     const next = await performMergeTransition(s, gm, paths);

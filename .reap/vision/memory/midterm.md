@@ -23,7 +23,8 @@ gen-028~031에서 gap-driven evolution + vision eval + memory 도입 완료.
 
 ## Evaluator Agent (2026-03-28 합의)
 설계 문서: `vision/design/evaluator-agent.md`
-다음 작업: nonce transition graph 리팩토링 (선행 필수)
+- nonce transition graph 리팩토링 완료 (gen-050)
+- 다음: evaluator agent 템플릿 정의 + 새 전이 경로(validation→implementation micro-loop) 추가
 
 ## submodule 관련 반복 문제
 

@@ -43,15 +43,10 @@ export interface GenerationState {
   commonAncestor?: string;
   genomeHash?: string;
   timeline?: Array<{ stage: string; at: string }>;
-  lastNonce?: string;
-  expectedHash?: string;
   phase?: string;
+  pendingTransitions?: Record<string, { nonce: string; hash: string }>;
   sourceBacklog?: string;
   fitnessFeedback?: string;
-  backNonce?: string;
-  backExpectedHash?: string;
-  backTarget?: string;
-  backTargetPhase?: string;
 }
 
 // ── Config ──────────────────────────────────────────────────

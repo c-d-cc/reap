@@ -22,12 +22,12 @@
 src/
 ├── types/index.ts              — 타입 정의 (GenerationState, ReapConfig, ReapOutput 등)
 ├── core/                       — 핵심 로직 (25 modules)
-│   ├── lifecycle.ts            — stage 순서 정의 (next/prev)
+│   ├── lifecycle.ts            — stage 순서 정의 (next/prev) + transition graph (NORMAL_TRANSITIONS, MERGE_TRANSITIONS, getTransitions)
 │   ├── generation.ts           — generation CRUD, ID 생성
 │   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스, memory/resources/docs 경로 포함)
-│   ├── nonce.ts                — 암호학적 token (SHA256)
+│   ├── nonce.ts                — 암호학적 token (SHA256) — 순수 함수, generateToken/verifyToken
 │   ├── artifact-check.ts        — artifact 미작성 감지 (core placeholder 기반)
-│   ├── stage-transition.ts     — nonce 검증, artifact 검증, stage 전환
+│   ├── stage-transition.ts     — transition graph 기반 nonce 검증 (verifyTransition, setTransitionNonces, prepareStageEntry), artifact 검증, stage 전환
 │   ├── maturity.ts             — bootstrap/growth/cruise 감지, 완성 기준 16항목
 │   ├── lineage.ts              — 아카이브 DAG, genome diff (3-way), lineage 읽기
 │   ├── compression.ts          — 2-level lineage 압축 (L1: 5gen, L2: 100files)
@@ -125,7 +125,7 @@ src/
 - **Zero-dependency CLI**: 외부 CLI 라이브러리 없음 → supply chain 최소화
 - **File-based state**: DB 없음, 모든 상태는 `.reap/` 내 YAML/Markdown
 - **JSON stdout**: 모든 CLI 출력은 `ReapOutput` JSON → AI agent 파싱 용이
-- **Nonce token**: stage 무결성을 암호학적으로 보장
+- **Transition graph + nonce**: 선언적 transition graph로 허용 전이 정의, pendingTransitions map으로 다중 nonce 동시 발행, stage 무결성 암호학적 보장
 - **2-level compression**: lineage 무한 성장 방지 (L1: folder→md, L2: md→epoch)
 - **Adapter pattern**: agent client 교체 가능 (현재 claude-code, 향후 opencode/codex)
 - **`reap make` pattern**: template 기반 resource 생성 (`reap make backlog`). 향후 확장 가능

@@ -1,7 +1,7 @@
 import type { ReapPaths } from "../../../core/paths.js";
 import { GenerationManager } from "../../../core/generation.js";
 import { emitOutput, emitError } from "../../../core/output.js";
-import { verifyNonce, setNonce, verifyArtifact, performMergeTransition } from "../../../core/stage-transition.js";
+import { verifyTransition, setTransitionNonces, prepareStageEntry, verifyArtifact, performMergeTransition } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
 import { gitShow } from "../../../core/lineage.js";
 import { readTextFile } from "../../../core/fs.js";
@@ -17,7 +17,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const s = state!;
 
   if (!phase || phase === "work") {
-    verifyNonce("mate", s, "mate", "entry");
+    verifyTransition("mate", s, "mate:entry");
     await copyArtifactTemplate("mate", paths.artifact, true);
 
     // Read detect artifact for conflict info
@@ -38,7 +38,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     const visionA = gitShow(paths.root, branchA, ".reap/vision/goals.md");
     const visionB = gitShow(paths.root, branchB, ".reap/vision/goals.md");
 
-    setNonce(s, "mate", "complete");
+    setTransitionNonces(s, "mate:entry");
     await gm.save(s);
 
     emitOutput({
@@ -95,10 +95,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    verifyNonce("mate", s, "mate", "complete");
+    verifyTransition("mate", s, "mate:complete");
     await verifyArtifact("mate", paths.artifact, "mate", true);
 
-    setNonce(s, "merge", "entry");
+    prepareStageEntry(s, "merge:entry");
     await gm.save(s);
 
     const next = await performMergeTransition(s, gm, paths);

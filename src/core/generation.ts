@@ -31,8 +31,6 @@ export class GenerationManager {
     const genNumber = (await this.countLineage()) + 1;
     const id = `gen-${String(genNumber).padStart(3, "0")}-${genHash}`;
 
-    const { nonce, hash } = generateToken(id, "learning", "entry");
-
     const state: GenerationState = {
       id,
       type,
@@ -40,9 +38,10 @@ export class GenerationManager {
       goal,
       parents,
       timeline: [{ stage: "learning", at: startedAt }],
-      lastNonce: nonce,
-      expectedHash: hash,
       phase: "entry",
+      pendingTransitions: {
+        "learning:entry": generateToken(id, "learning", "entry"),
+      },
     };
 
     await this.save(state);
@@ -58,8 +57,6 @@ export class GenerationManager {
     const genNumber = (await this.countLineage()) + 1;
     const id = `gen-${String(genNumber).padStart(3, "0")}-${genHash}`;
 
-    const { nonce, hash } = generateToken(id, "detect", "entry");
-
     const state: GenerationState = {
       id,
       type: "merge",
@@ -67,9 +64,10 @@ export class GenerationManager {
       goal,
       parents: parentIds,
       timeline: [{ stage: "detect", at: startedAt }],
-      lastNonce: nonce,
-      expectedHash: hash,
       phase: "entry",
+      pendingTransitions: {
+        "detect:entry": generateToken(id, "detect", "entry"),
+      },
     };
 
     await this.save(state);

@@ -2,7 +2,7 @@ import type { ReapPaths } from "../../../core/paths.js";
 import { GenerationManager } from "../../../core/generation.js";
 import { readTextFile } from "../../../core/fs.js";
 import { emitOutput, emitError } from "../../../core/output.js";
-import { verifyNonce, setNonce } from "../../../core/stage-transition.js";
+import { verifyTransition, setTransitionNonces } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
 import { archiveGeneration } from "../../../core/archive.js";
 import { consumeBacklog, scanBacklog } from "../../../core/backlog.js";
@@ -36,7 +36,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
 
   // ── Phase 1: reflect ──────────────────────────────────────
   if (!phase || phase === "reflect") {
-    verifyNonce("completion", s, "completion", "entry");
+    verifyTransition("completion", s, "completion:entry");
     await copyArtifactTemplate("completion", paths.artifact, isMerge);
 
     // Load context artifacts based on lifecycle type
@@ -61,7 +61,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
       context.valSummary = valContent?.slice(0, 2000);
     }
 
-    setNonce(s, "completion", "fitness");
+    setTransitionNonces(s, "completion:entry");
     await gm.save(s);
 
     emitOutput({
@@ -105,10 +105,10 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
   if (phase === "fitness") {
     if (feedback) {
       // Feedback provided — store and advance
-      verifyNonce("completion", s, "completion", "fitness");
+      verifyTransition("completion", s, "completion:fitness");
 
       s.fitnessFeedback = feedback;
-      setNonce(s, "completion", "adapt");
+      setTransitionNonces(s, "completion:fitness");
       await gm.save(s);
 
       emitOutput({
@@ -122,14 +122,14 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
       });
     } else {
       // No feedback yet — check cruise mode
-      verifyNonce("completion", s, "completion", "fitness");
+      verifyTransition("completion", s, "completion:fitness");
 
       const configContent = await readTextFile(paths.config);
       const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
       const cruise = config ? parseCruiseCount(config) : null;
 
-      // Re-set same nonce (don't consume yet, wait for feedback)
-      setNonce(s, "completion", "fitness");
+      // Re-set fitness nonce (self-loop: completion:fitness -> completion:fitness)
+      setTransitionNonces(s, "completion:fitness");
       await gm.save(s);
 
       if (cruise) {
@@ -183,7 +183,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
 
   // ── Phase 3: adapt ────────────────────────────────────────
   if (phase === "adapt") {
-    verifyNonce("completion", s, "completion", "adapt");
+    verifyTransition("completion", s, "completion:adapt");
 
     const fitnessFeedback = s.fitnessFeedback;
     const visionGoals = await readTextFile(paths.visionGoals);
@@ -194,7 +194,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
     const maturity = detectMaturity(s.type, config?.cruiseCount);
     const generationCount = await gm.countLineage();
 
-    setNonce(s, "completion", "commit");
+    setTransitionNonces(s, "completion:adapt");
     await gm.save(s);
 
     // Build adapt prompt sections
@@ -306,7 +306,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
 
   // ── Phase 4: commit ───────────────────────────────────────
   if (phase === "commit") {
-    verifyNonce("completion", s, "completion", "commit");
+    verifyTransition("completion", s, "completion:commit");
 
     // Consume specified backlog items
     if (feedback) {

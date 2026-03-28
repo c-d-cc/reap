@@ -55,10 +55,13 @@ detect → mate → merge → reconcile → validation → completion
 
 각 stage 전환은 nonce token으로 암호학적 검증. Artifact(최소 50자)이 존재해야 다음 stage 진입 가능.
 
-### Nonce System
+### Nonce System — Transition Graph 기반
 
-- Forward nonce: 다음 phase 진입 게이트
-- Back nonce: 이전 stage 회귀 허용
+- **Transition graph**: `lifecycle.ts`에 NORMAL_TRANSITIONS, MERGE_TRANSITIONS로 각 `stage:phase`에서 허용된 전이를 선언적으로 정의
+- **pendingTransitions**: 현재 허용된 모든 전이에 대한 `{ nonce, hash }` map. 한 시점에서 forward + back + self-loop이 동시에 존재 가능
+- **verifyTransition**: 통합 전이 검증 — forward/back 구분 없이 pendingTransitions에서 target을 찾아 검증/소비
+- **setTransitionNonces**: graph lookup → 다중 nonce 동시 발행 (work phase에서 사용)
+- **prepareStageEntry**: entry ticket + back nonce 동시 발행 (complete phase, back command, generation create에서 사용)
 - `SHA256(nonce + genId + stage:phase)` 기반 검증
 - Stage skipping, replay attack, concurrent modification 방지
 

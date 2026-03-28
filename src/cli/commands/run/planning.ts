@@ -2,7 +2,7 @@ import type { ReapPaths } from "../../../core/paths.js";
 import { GenerationManager } from "../../../core/generation.js";
 import { readTextFile } from "../../../core/fs.js";
 import { emitOutput, emitError } from "../../../core/output.js";
-import { verifyNonce, setNonce, performTransition } from "../../../core/stage-transition.js";
+import { verifyTransition, setTransitionNonces, prepareStageEntry, performTransition } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
@@ -15,12 +15,12 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const s = state!;
 
   if (!phase || phase === "work") {
-    verifyNonce("planning", s, "planning", "entry");
+    verifyTransition("planning", s, "planning:entry");
     await copyArtifactTemplate("planning", paths.artifact);
 
     const learningContent = await readTextFile(paths.artifact("01-learning.md"));
 
-    setNonce(s, "planning", "complete");
+    setTransitionNonces(s, "planning:entry");
     await gm.save(s);
 
     emitOutput({
@@ -83,9 +83,9 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   }
 
   if (phase === "complete") {
-    verifyNonce("planning", s, "planning", "complete");
+    verifyTransition("planning", s, "planning:complete");
 
-    setNonce(s, "implementation", "entry");
+    prepareStageEntry(s, "implementation:entry");
     await gm.save(s);
 
     const next = await performTransition(s, gm, paths);

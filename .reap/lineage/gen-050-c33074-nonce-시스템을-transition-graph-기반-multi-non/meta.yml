@@ -1,0 +1,20 @@
+id: gen-050-c33074
+type: embryo
+goal: Nonce 시스템을 transition graph 기반 multi-nonce로 리팩토링하여 evaluator agent 도입을 위한 기반 마련
+parents:
+  - gen-049-3d1b71
+timeline:
+  - stage: learning
+    at: 2026-03-28T03:48:42.353Z
+  - stage: planning
+    at: 2026-03-28T03:51:19.855Z
+  - stage: implementation
+    at: 2026-03-28T03:59:38.735Z
+  - stage: validation
+    at: 2026-03-28T04:19:21.759Z
+  - stage: completion
+    at: 2026-03-28T04:20:44.799Z
+fitnessFeedback:
+  text: Confirmed. Graph 기반 multi-nonce 리팩토링 완료. 모든 phase에서 back transition 보완.
+    Evaluator agent 기반 마련됨.
+  evaluatedAt: 2026-03-28T05:22:51.451Z
