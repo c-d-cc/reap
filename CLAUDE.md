@@ -22,6 +22,16 @@
 - `.reap/environment/summary.md` — 소스 구조, 빌드, 테스트, 설계 결정 (항상 로딩)
 - `.reap/environment/domain/` — 도메인 지식 (필요 시 로딩)
 
+## Vision (필수 숙지)
+
+프로젝트의 장기 방향, 목표, 설계 구상, 그리고 세대를 넘어 축적되는 프로젝트 메모리입니다:
+
+- `.reap/vision/goals.md` — 프로젝트 목표 (self-hosting, distribution, evaluator agent 등)
+- `.reap/vision/design/` — 미래 기능의 설계 문서 (필요 시 로딩)
+- `.reap/vision/memory/longterm.md` — 프로젝트 기원, 핵심 설계 교훈, v0.15→v0.16 차이 (항상 로딩)
+- `.reap/vision/memory/midterm.md` — 현재 진행 중인 큰 작업과 미해결 이슈 (항상 로딩)
+- `.reap/vision/memory/shortterm.md` — 최근 세션 요약과 다음 세션 할 일 (항상 로딩)
+
 ## Agent
 
 Generation을 subagent에 위임할 때 `subagent_type: "reap-evolve"`를 사용하세요. 이 agent에는 REAP generation 실행에 필요한 role, mindset, 행동 규칙이 정의되어 있습니다. 동적 context(generation state, vision, memory)는 prompt 파라미터로 전달하세요.

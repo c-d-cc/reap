@@ -87,7 +87,7 @@ Memory is a free-form recording system under `.reap/vision/memory/` where AI can
 │   └── source-map.md          #   Code structure + dependencies (on-demand)
 ├── vision/                    # Long-term goals and direction
 │   ├── goals.md               #   North star objectives
-│   ├── docs/                  #   Planning documents
+│   ├── design/                #   Design documents for future features
 │   └── memory/                #   AI memory (3-tier free-form recording)
 │       ├── longterm.md        #     Project lifetime — lasting lessons, patterns, decision rationale
 │       ├── midterm.md         #     Multi-generation — ongoing work context, multi-gen plans
