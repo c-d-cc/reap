@@ -998,6 +998,10 @@ priority: medium
     ],
     versions: [
       {
+        version: "0.16.4",
+        notes: "恢复缺失的 npm 元数据（license、author、repository、homepage、keywords）。修复 GitHub Release 不显示发布说明的问题。",
+      },
+      {
         version: "0.16.3",
         notes: "将 vision/docs 重命名为 vision/design — 避免与根目录 docs/ 混淆。在 Vision 中添加 Design 部分（与 Memory 区分的独立设计文档空间）。添加 Evaluator Agent 设计文档。修复 README 语言链接以兼容 npm。",
       },

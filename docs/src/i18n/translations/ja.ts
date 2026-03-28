@@ -998,6 +998,10 @@ priority: medium
     ],
     versions: [
       {
+        version: "0.16.4",
+        notes: "欠落していたnpmメタデータを復元（license、author、repository、homepage、keywords）。GitHub Releaseにリリースノートが表示されない問題を修正。",
+      },
+      {
         version: "0.16.3",
         notes: "vision/docsをvision/designにリネーム — ルートdocs/との混同を防止。VisionにDesignセクション追加（Memoryと区別される独立した設計文書スペース）。Evaluator Agent設計ドキュメント追加。npm互換のためREADME言語リンク修正。",
       },

@@ -1,7 +1,31 @@
 {
   "name": "@c-d-cc/reap",
-  "version": "0.16.3",
+  "version": "0.16.4",
   "description": "Recursive Evolutionary Autonomous Pipeline — AI and humans evolve software across generations",
+  "license": "MIT",
+  "author": "HyeonIL Choi <hichoi@c-d.cc> (C to D)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/c-d-cc/reap.git"
+  },
+  "homepage": "https://reap.cc",
+  "bugs": {
+    "url": "https://github.com/c-d-cc/reap/issues"
+  },
+  "keywords": [
+    "ai",
+    "development pipeline",
+    "evolutionary",
+    "claude",
+    "genome",
+    "lifecycle",
+    "harness",
+    "ai workflow",
+    "agent workflow",
+    "ai driven",
+    "opencode",
+    "codex"
+  ],
   "type": "module",
   "bin": {
     "reap": "dist/cli/index.js"

@@ -995,6 +995,10 @@ Description of the task.`,
     ],
     versions: [
       {
+        version: "0.16.4",
+        notes: "Restore missing npm metadata (license, author, repository, homepage, keywords). Fix GitHub Releases showing empty release notes.",
+      },
+      {
         version: "0.16.3",
         notes: "Rename vision/docs to vision/design to avoid confusion with root docs/. Add Design section to Vision (separate from Memory for independent design documents). Add Evaluator Agent design doc. Fix README language links for npm compatibility.",
       },

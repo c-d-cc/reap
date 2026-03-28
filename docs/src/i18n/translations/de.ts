@@ -998,6 +998,10 @@ Beschreibung der Aufgabe.`,
     ],
     versions: [
       {
+        version: "0.16.4",
+        notes: "Fehlende npm-Metadaten wiederhergestellt (license, author, repository, homepage, keywords). GitHub Releases zeigen jetzt Release Notes an.",
+      },
+      {
         version: "0.16.3",
         notes: "vision/docs in vision/design umbenannt — Verwechslung mit Root-docs/ vermeiden. Design-Abschnitt zu Vision hinzugefügt (getrennt von Memory für unabhängige Designdokumente). Evaluator Agent Designdokument hinzugefügt. README-Sprachlinks für npm-Kompatibilität korrigiert.",
       },
