@@ -19,16 +19,16 @@ REAP ist eine generationsbasierte Entwicklungspipeline, in der KI und Menschen z
 
 - [Was ist REAP?](#was-ist-reap)
 - [Installation](#installation)
-- [Schnellstart](#schnellstart)
+- [Schnellstart](#schnellstart-)
 - [Lebenszyklus](#lebenszyklus-)
 - [Kernkonzepte](#kernkonzepte-)
 - [Merge-Lebenszyklus](#merge-lebenszyklus-)
 - [Selbstentwickelnde Funktionen](#selbstentwickelnde-funktionen-)
-- [Slash Commands](#slash-commands)
+- [Slash Commands](#slash-commands-)
 - [Agentenintegration](#agentenintegration-)
 - [Projektstruktur](#projektstruktur)
 - [Konfiguration](#konfiguration-)
-- [Upgrade von v0.15](#upgrade-von-v015)
+- [Upgrade von v0.15](#upgrade-von-v015-)
 
 ## Was ist REAP? [↗](https://reap.cc/docs/introduction)
 
