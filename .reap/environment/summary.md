@@ -84,9 +84,12 @@ src/
 │   └── skills/                 — 20 slash command files (.md, reap.update.md, reap.report.md 포함)
 └── templates/                  — 템플릿 파일
     ├── reap-guide.md           — REAP 도구 가이드 (subagent prompt에 주입)
+    ├── agents/                 — agent 정의 템플릿
+    │   ├── reap-evolve.md      — evolve agent (generation lifecycle executor)
+    │   └── reap-evaluate.md    — evaluator agent (독립 검증, fitness 평가, vision 관리)
     └── artifacts/              — stage별 artifact 템플릿
-    ├── normal/                 — 01~05 (learning~completion)
-    └── merge/                  — 01~06 (detect~completion)
+        ├── normal/             — 01~05 (learning~completion)
+        └── merge/              — 01~06 (detect~completion)
 ```
 
 ## Build & Scripts

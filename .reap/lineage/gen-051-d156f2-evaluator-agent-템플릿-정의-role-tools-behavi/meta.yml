@@ -1,0 +1,21 @@
+id: gen-051-d156f2
+type: embryo
+goal: Evaluator agent 템플릿 정의 — role, tools, behavior rules, cross-generation
+  orchestration 기반 설계
+parents:
+  - gen-050-c33074
+timeline:
+  - stage: learning
+    at: 2026-03-28T15:05:25.118Z
+  - stage: planning
+    at: 2026-03-28T15:08:07.391Z
+  - stage: implementation
+    at: 2026-03-28T15:13:10.653Z
+  - stage: validation
+    at: 2026-03-28T15:15:44.885Z
+  - stage: completion
+    at: 2026-03-28T15:16:30.262Z
+fitnessFeedback:
+  text: Evaluator agent 템플릿 정의 완료. 승인된 설계 결정 4가지가 템플릿에 잘 반영됨. 코드 통합은 다음
+    generation에서 진행.
+  evaluatedAt: 2026-03-28T15:18:46.225Z

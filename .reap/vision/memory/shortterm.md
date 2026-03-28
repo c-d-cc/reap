@@ -2,21 +2,18 @@
 
 ## 세션 요약 (2026-03-28)
 
-### gen-050: Nonce 시스템 transition graph 리팩토링
-- forward nonce 1개 + back nonce 1개 구조를 pendingTransitions map 기반으로 교체
-- lifecycle.ts에 NORMAL_TRANSITIONS, MERGE_TRANSITIONS 선언적 graph 추가
-- GenerationState에서 6개 nonce 필드 제거, pendingTransitions 1개로 통합
-- setNonce/verifyNonce/verifyBackNonce를 setTransitionNonces/verifyTransition/prepareStageEntry로 교체
-- 13개 command + core 3개 모듈 수정
-- completion:fitness self-loop이 graph에서 자연스럽게 표현
-- back transition 2-step bug 수정 (기존: complete 후 back이 2단계 건너뜀)
-- 491 pass, 8 fail (all pre-existing)
+### gen-051: Evaluator Agent 템플릿 정의
+- `src/templates/agents/reap-evaluate.md` 신규 생성
+- `.reap/vision/design/evaluator-agent.md` 전면 갱신
+- 설계 결정 4가지 반영: Tool(Read+Bash), 에스컬레이션 매트릭스, REAP Memory, 정량 메트릭 금지
+- 코드 수정 없음, 빌드/테스트 regression 없음
+- environment/summary.md Source Structure에 agents/ 디렉토리 추가
 
 ### 다음 세션
-- Evaluator agent 템플릿 정의 (vision/design/evaluator-agent.md 참조)
-- Pre-existing test failures 수정 (integrity, migrate, update 관련 8개)
-- Genome application.md의 Nonce System 섹션을 transition graph 기반으로 갱신
-- Embryo → Normal 전환 검토
+- Evaluator 코드 통합 (prompt.ts, completion.ts 수정)
+- Fitness 위임 로직 (evaluator 1차 평가 -> 인간 에스컬레이션)
+- Pre-existing test failures 수정 (integrity 관련 4개)
+- vision/goals.md에서 "Evaluator agent 템플릿 정의" 완료 마킹
 
 ### Backlog 상태
-- 없음 (empty)
+- `fix-migrate-update-tests` (task) -- integrity/migrate/update 관련 8개 pre-existing test failure
