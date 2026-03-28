@@ -83,6 +83,16 @@ detect → mate → merge → reconcile → validation → completion
 
 Embryo → Normal 전환: adapt phase에서 AI 제안, 인간 승인.
 
+## Dog-fooding
+
+본 프로젝트는 REAP을 정의함과 동시에 REAP으로 개발되는 자기참조적(dog-fooding) 프로젝트다.
+따라서 REAP의 설계, 폴더 구조, CLAUDE.md 등 메타 파일에 변경이 생기면 반드시 `src/templates/` 내 대응하는 템플릿에도 동일한 변경을 반영해야 한다.
+
+주요 대응 관계:
+- `CLAUDE.md` ↔ `src/templates/claude-md-section.md`
+- `.reap/reap-guide.md` ↔ `src/templates/reap-guide.md`
+- `.reap/` 디렉토리 구조 ↔ `src/core/integrity.ts` (구조 검증), `src/cli/commands/init/` (초기화)
+
 ## Conventions
 
 ### Code Style
