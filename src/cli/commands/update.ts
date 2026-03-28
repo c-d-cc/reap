@@ -25,6 +25,12 @@ function getPackageVersion(): string {
 }
 
 /** Default values for ReapConfig fields — used for backfill */
+/** Fields that are valid in config.yml (used to prune deprecated fields) */
+const VALID_CONFIG_FIELDS = new Set<string>([
+  "project", "language", "autoSubagent", "strictEdit", "strictMerge",
+  "agentClient", "autoUpdate", "autoIssueReport", "cruiseCount",
+]);
+
 const CONFIG_DEFAULTS: Omit<ReapConfig, "project" | "cruiseCount"> = {
   language: "english",
   autoSubagent: true,
@@ -57,15 +63,15 @@ function getRequiredDirs(paths: ReapPaths): string[] {
  * Backfill missing config fields with defaults.
  * Returns list of field names that were added (empty if nothing changed).
  */
-async function backfillConfig(paths: ReapPaths): Promise<string[]> {
+async function backfillConfig(paths: ReapPaths): Promise<{ added: string[]; removed: string[] }> {
   const content = await readTextFile(paths.config);
-  if (!content) return [];
+  if (!content) return { added: [], removed: [] };
 
   let config: Record<string, unknown>;
   try {
     config = YAML.parse(content) ?? {};
   } catch {
-    return []; // invalid YAML — don't touch it
+    return { added: [], removed: [] }; // invalid YAML — don't touch it
   }
 
   const added: string[] = [];
@@ -86,11 +92,20 @@ async function backfillConfig(paths: ReapPaths): Promise<string[]> {
     }
   }
 
-  if (added.length > 0) {
+  // Remove deprecated/unknown fields
+  const removed: string[] = [];
+  for (const key of Object.keys(config)) {
+    if (!VALID_CONFIG_FIELDS.has(key)) {
+      delete config[key];
+      removed.push(key);
+    }
+  }
+
+  if (added.length > 0 || removed.length > 0) {
     await writeTextFile(paths.config, YAML.stringify(config));
   }
 
-  return added;
+  return { added, removed };
 }
 
 /**
@@ -146,10 +161,13 @@ export async function execute(phase?: string, postUpgrade?: boolean): Promise<vo
   // v0.16 → sync project structure
   const updated: string[] = [];
 
-  // 1. Config backfill
-  const configAdded = await backfillConfig(paths);
+  // 1. Config backfill + prune
+  const { added: configAdded, removed: configRemoved } = await backfillConfig(paths);
   if (configAdded.length > 0) {
     updated.push(`config.yml: added fields [${configAdded.join(", ")}]`);
+  }
+  if (configRemoved.length > 0) {
+    updated.push(`config.yml: removed deprecated fields [${configRemoved.join(", ")}]`);
   }
 
   // 2. Directory creation
