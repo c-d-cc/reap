@@ -336,7 +336,7 @@ Alle v0.15-Dateien werden unter `.reap/v15/` aufbewahrt. Nach Überprüfung der 
 **Vision-Ebene hinzugefügt:**
 - `vision/goals.md` — Langfristige Ziele, lückengetriebene Zielauswahl in der Adapt-Phase
 - `vision/memory/` — 3-stufiges Gedächtnis (longterm, midterm, shortterm) für generationsübergreifenden Kontext
-- `vision/docs/` — Planungsdokumente und Spezifikationen
+- `vision/design/` — Planungsdokumente und Spezifikationen
 
 **Genome umstrukturiert (3 Dateien):**
 - `application.md` — Projektidentität, Architektur, Konventionen, Einschränkungen

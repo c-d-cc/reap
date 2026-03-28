@@ -84,12 +84,19 @@ Decision rule: "If a new agent in the next session doesn't know about this chang
 
 ## Vision
 
-Vision consists of Goals and Memory.
+Vision consists of Goals, Memory, and Design.
 
 ### Goals (`vision/goals.md`)
 Long-term project objectives. During the adapt phase, gap analysis against goals determines the next generation's direction.
 
 Goals cleanup: goals.md is a space for **future** objectives, not an archive of past achievements. When completed items (`[x]`) accumulate and the document loses focus as a forward-looking plan, propose specific items for removal to the human for approval. This is a contextual judgment — recently completed items may still have reference value, while long-stable items can be cleared. Always get human confirmation before removing.
+
+### Design (`vision/design/`)
+Space for project design documents. Distinction from Memory:
+- **Design** — Documents with a specific scope (architecture designs, feature specs, etc.). Managed as independent documents.
+- **Memory** — General-purpose context records (lessons, progress, handoff). Single file per tier.
+
+Decision rule: "Is this content worth documenting as an independent topic?" → Yes = Design, No = Memory.
 
 ### Memory (`vision/memory/`)
 Free-form space for the AI to record project-related knowledge. 3-tier structure:

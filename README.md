@@ -337,7 +337,7 @@ All v0.15 files are preserved at `.reap/v15/`. After verifying the migration, yo
 **Vision layer added:**
 - `vision/goals.md` — long-term objectives, gap-driven goal selection at adapt phase
 - `vision/memory/` — 3-tier memory (longterm, midterm, shortterm) for cross-generation context
-- `vision/docs/` — planning documents and specs
+- `vision/design/` — planning documents and specs
 
 **Genome restructured (3 files):**
 - `application.md` — project identity, architecture, conventions, constraints
