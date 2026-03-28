@@ -21,16 +21,16 @@ REAP is a generation-based development pipeline where AI and humans collaborate 
 
 - [What is REAP?](#what-is-reap)
 - [Installation](#installation)
-- [Quick Start](#quick-start)
+- [Quick Start](#quick-start-)
 - [Life Cycle](#life-cycle-)
 - [Core Concepts](#core-concepts-)
 - [Merge Lifecycle](#merge-lifecycle-)
 - [Self-Evolving Features](#self-evolving-features-)
-- [Slash Commands](#slash-commands)
+- [Slash Commands](#slash-commands-)
 - [Agent Integration](#agent-integration-)
 - [Project Structure](#project-structure)
 - [Configuration](#configuration-)
-- [Upgrading from v0.15](#upgrading-from-v015)
+- [Upgrading from v0.15](#upgrading-from-v015-)
 
 ## What is REAP? [↗](https://reap.cc/docs/introduction)
 
@@ -85,13 +85,13 @@ Each generation follows a five-stage lifecycle.
 learning → planning → implementation ⟷ validation → completion
 ```
 
-| Stage | What happens | Artifact |
-|-------|-------------|----------|
-| **Learning** | Explore the project, build context, review genome and environment | `01-learning.md` |
-| **Planning** | Define goal, decompose tasks, map dependencies | `02-planning.md` |
-| **Implementation** | Build with AI-human collaboration | `03-implementation.md` |
-| **Validation** | Run tests, verify completion criteria | `04-validation.md` |
-| **Completion** | Reflect, collect fitness feedback, adapt genome, archive | `05-completion.md` |
+| Stage              | What happens                                                      | Artifact               |
+| ------------------ | ----------------------------------------------------------------- | ---------------------- |
+| **Learning**       | Explore the project, build context, review genome and environment | `01-learning.md`       |
+| **Planning**       | Define goal, decompose tasks, map dependencies                    | `02-planning.md`       |
+| **Implementation** | Build with AI-human collaboration                                 | `03-implementation.md` |
+| **Validation**     | Run tests, verify completion criteria                             | `04-validation.md`     |
+| **Completion**     | Reflect, collect fitness feedback, adapt genome, archive          | `05-completion.md`     |
 
 ## Core Concepts [↗](https://reap.cc/docs/core-concepts)
 
@@ -152,6 +152,7 @@ DAG metadata is preserved for branch-aware lineage traversal.
 ### Hooks [↗](https://reap.cc/docs/hooks)
 
 File-based lifecycle event hooks in `.reap/hooks/`:
+
 - `.md` files: AI prompts executed by the agent
 - `.sh` files: Shell scripts executed directly
 
@@ -170,14 +171,14 @@ When multiple developers or agents work in parallel, REAP provides a genome-firs
 detect → mate → merge → reconcile → validation → completion
 ```
 
-| Stage | Purpose |
-|-------|---------|
-| **Detect** | Identify divergence between branches |
-| **Mate** | Resolve genome conflicts first (human decides) |
-| **Merge** | Merge source code guided by finalized genome |
-| **Reconcile** | Verify genome-source consistency |
-| **Validation** | Run tests |
-| **Completion** | Commit merged result and archive |
+| Stage          | Purpose                                        |
+| -------------- | ---------------------------------------------- |
+| **Detect**     | Identify divergence between branches           |
+| **Mate**       | Resolve genome conflicts first (human decides) |
+| **Merge**      | Merge source code guided by finalized genome   |
+| **Reconcile**  | Verify genome-source consistency               |
+| **Validation** | Run tests                                      |
+| **Completion** | Commit merged result and archive               |
 
 ## Self-Evolving Features [↗](https://reap.cc/docs/self-evolving)
 
@@ -200,30 +201,32 @@ The AI adjusts its communication style based on how well-defined the current con
 ### Cruise Mode
 
 Pre-approve N generations for autonomous execution:
+
 - The AI selects goals from vision gaps and runs the full lifecycle autonomously
 - If uncertainty or risk is detected, cruise pauses and requests human feedback
 - After all N generations complete, human reviews the batch
 
 ## Slash Commands [↗](https://reap.cc/docs/command-reference)
 
-| Command | Description |
-|---------|-------------|
-| `/reap.evolve` | Run an entire generation (recommended) |
-| `/reap.start` | Start a new generation |
-| `/reap.next` | Advance to the next stage |
-| `/reap.back` | Return to a previous stage |
-| `/reap.abort` | Abort current generation |
-| `/reap.knowledge` | Review and manage genome/environment |
-| `/reap.merge` | Merge lifecycle operations |
-| `/reap.pull` | Fetch + merge lifecycle |
-| `/reap.push` | Validate + push |
-| `/reap.status` | Check current state |
-| `/reap.help` | Show available commands |
-| `/reap.init` | Initialize REAP in a project |
-| `/reap.run` | Execute a lifecycle command directly |
-| `/reap.config` | View/edit project configuration |
+| Command           | Description                            |
+| ----------------- | -------------------------------------- |
+| `/reap.evolve`    | Run an entire generation (recommended) |
+| `/reap.start`     | Start a new generation                 |
+| `/reap.next`      | Advance to the next stage              |
+| `/reap.back`      | Return to a previous stage             |
+| `/reap.abort`     | Abort current generation               |
+| `/reap.knowledge` | Review and manage genome/environment   |
+| `/reap.merge`     | Merge lifecycle operations             |
+| `/reap.pull`      | Fetch + merge lifecycle                |
+| `/reap.push`      | Validate + push                        |
+| `/reap.status`    | Check current state                    |
+| `/reap.help`      | Show available commands                |
+| `/reap.init`      | Initialize REAP in a project           |
+| `/reap.run`       | Execute a lifecycle command directly   |
+| `/reap.config`    | View/edit project configuration        |
 
 ## Agent Integration
+
 REAP integrates with AI agents through slash commands and lifecycle hooks. Currently supported: **Claude Code**. The architecture uses an adapter pattern for future agent support.
 
 ### How It Works
@@ -269,16 +272,17 @@ my-project/
 Project settings in `.reap/config.yml`:
 
 ```yaml
-project: my-project           # Project name
-language: english              # Artifact/prompt language
-autoSubagent: true             # Auto-delegate to subagent in evolve
-strictEdit: false               # Restrict code changes to REAP lifecycle
-strictMerge: false              # Restrict direct git pull/push/merge
-agentClient: claude-code       # AI agent client
+project: my-project # Project name
+language: english # Artifact/prompt language
+autoSubagent: true # Auto-delegate to subagent in evolve
+strictEdit: false # Restrict code changes to REAP lifecycle
+strictMerge: false # Restrict direct git pull/push/merge
+agentClient: claude-code # AI agent client
 # cruiseCount: 1/5             # Present = cruise mode (current/total)
 ```
 
 Key settings:
+
 - **`cruiseCount`**: When present, enables cruise mode. Format `current/total`. Removed after cruise completes.
 - **`strictEdit`**: Restricts code changes to the implementation stage within the planned scope.
 - **`strictMerge`**: Restricts direct git pull/push/merge — use `/reap.pull`, `/reap.push`, `/reap.merge` instead.
@@ -291,25 +295,28 @@ REAP v0.16 is a complete rewrite built on the [Self-Evolving Pipeline](https://r
 ### Migration Steps
 
 1. **Install v0.16:**
+
    ```bash
    npm install -g @c-d-cc/reap
    ```
+
    This automatically installs v0.16 skills to `~/.claude/commands/` and removes legacy v0.15 project-level skills.
 
 2. **Open Claude Code in your project** and run:
+
    ```
    /reap.update
    ```
 
 3. **Follow the multi-phase migration:**
 
-   | Phase | What happens | Your role |
-   |-------|-------------|-----------|
-   | **Confirm** | Shows what will change, creates backup at `.reap/v15/` | Review and confirm |
-   | **Execute** | Restructures directories, migrates config/hooks/lineage/backlog | Automatic |
-   | **Genome Convert** | AI reconstructs genome from v0.15 files into new 3-file structure | Review AI's work |
-   | **Vision** | Set up vision/goals.md and memory | Provide project direction |
-   | **Complete** | Summary of migration results | Verify |
+   | Phase              | What happens                                                      | Your role                 |
+   | ------------------ | ----------------------------------------------------------------- | ------------------------- |
+   | **Confirm**        | Shows what will change, creates backup at `.reap/v15/`            | Review and confirm        |
+   | **Execute**        | Restructures directories, migrates config/hooks/lineage/backlog   | Automatic                 |
+   | **Genome Convert** | AI reconstructs genome from v0.15 files into new 3-file structure | Review AI's work          |
+   | **Vision**         | Set up vision/goals.md and memory                                 | Provide project direction |
+   | **Complete**       | Summary of migration results                                      | Verify                    |
 
 4. **Verify** your project works:
    ```
@@ -330,27 +337,32 @@ All v0.15 files are preserved at `.reap/v15/`. After verifying the migration, yo
 ### What Changed
 
 **Lifecycle redesigned:**
+
 - The first stage is now `learning` (was `objective`). The AI explores the project before setting goals.
 - Completion is now 4 phases: `reflect` → `fitness` → `adapt` → `commit` (was 5 phases).
 - New concepts: embryo generations, cruise mode, vision-driven planning.
 
 **Vision layer added:**
+
 - `vision/goals.md` — long-term objectives, gap-driven goal selection at adapt phase
 - `vision/memory/` — 3-tier memory (longterm, midterm, shortterm) for cross-generation context
 - `vision/design/` — planning documents and specs
 
 **Genome restructured (3 files):**
+
 - `application.md` — project identity, architecture, conventions, constraints
 - `evolution.md` — AI behavior guide, evolution direction, soft lifecycle rules
 - `invariants.md` — absolute constraints (human-only edits)
 
 **New features:**
+
 - Clarity-driven interaction: AI adjusts communication depth based on context clarity
 - Cruise mode: pre-approve N generations, AI runs autonomously with self-assessment
 - Merge lifecycle with reconcile stage for genome-source consistency verification
 - Vision system with 3-tier memory for cross-generation context
 
 **Deprecated commands:**
+
 - `/reap.sync` → `/reap.knowledge`
 - `/reap.refreshKnowledge` → `/reap.knowledge`
 
