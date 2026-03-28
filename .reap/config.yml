@@ -1,9 +1,9 @@
 project: reap-v016
 language: korean
 autoSubagent: true
-strict: false
 agentClient: claude-code
 autoUpdate: true
 autoIssueReport: false
 lastSyncedGeneration: ""
-lastCliVersion: 0.15.17
+strictEdit: true
+strictMerge: true
