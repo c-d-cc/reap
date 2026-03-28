@@ -36,10 +36,6 @@ export const ko: Translations = {
   },
 
   // Hero Page
-  homeBanner: {
-    text: "v0.16에서 호환성이 깨지는 변경 사항이 있습니다",
-    cta: "릴리즈 노트 →",
-  },
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
     title: "REAP",

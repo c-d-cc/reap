@@ -36,10 +36,6 @@ export const zhCN: Translations = {
   },
 
   // Hero Page
-  homeBanner: {
-    text: "v0.16 即将引入重大变更",
-    cta: "发布说明 →",
-  },
   hero: {
     tagline: "递归进化自治流水线",
     title: "REAP",

@@ -36,10 +36,6 @@ export const de: Translations = {
   },
 
   // Hero Page
-  homeBanner: {
-    text: "Breaking Changes in v0.16",
-    cta: "Versionshinweise →",
-  },
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
     title: "REAP",

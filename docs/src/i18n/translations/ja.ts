@@ -36,10 +36,6 @@ export const ja: Translations = {
   },
 
   // Hero Page
-  homeBanner: {
-    text: "v0.16で破壊的変更があります",
-    cta: "リリースノート →",
-  },
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
     title: "REAP",

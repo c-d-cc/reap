@@ -34,10 +34,6 @@ export const en = {
   },
 
   // Hero Page
-  homeBanner: {
-    text: "Breaking changes coming in v0.16",
-    cta: "Release Notes →",
-  },
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
     title: "REAP",
