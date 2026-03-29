@@ -18,14 +18,14 @@ describe("IndexStorage", () => {
   test("creates schema on open", async () => {
     const { IndexStorage } = await import("../src/indexer/storage.js");
     const storage = new IndexStorage(TEST_DB);
-    storage.open();
+    await storage.open();
     storage.close();
   });
 
   test("saves and loads nodes", async () => {
     const { IndexStorage } = await import("../src/indexer/storage.js");
     const storage = new IndexStorage(TEST_DB);
-    storage.open();
+    await storage.open();
     storage.saveNodes([
       { id: "a.ts::foo", kind: "function", name: "foo", file: "a.ts", line: 1 },
       { id: "a.ts::Bar", kind: "class", name: "Bar", file: "a.ts", line: 10 },
@@ -39,7 +39,7 @@ describe("IndexStorage", () => {
   test("saves and loads edges", async () => {
     const { IndexStorage } = await import("../src/indexer/storage.js");
     const storage = new IndexStorage(TEST_DB);
-    storage.open();
+    await storage.open();
     storage.saveEdges([
       { sourceId: "a.ts::foo", targetId: "b.ts::bar", kind: "CALLS" },
     ]);
@@ -52,7 +52,7 @@ describe("IndexStorage", () => {
   test("saves and loads file metadata", async () => {
     const { IndexStorage } = await import("../src/indexer/storage.js");
     const storage = new IndexStorage(TEST_DB);
-    storage.open();
+    await storage.open();
     storage.saveFile({ path: "a.ts", language: "typescript", mtime: 1234567890, lastCommit: "abc123" });
     const file = storage.getFile("a.ts");
     expect(file).not.toBeNull();
@@ -63,7 +63,7 @@ describe("IndexStorage", () => {
   test("removeByFile clears nodes, edges, and file record", async () => {
     const { IndexStorage } = await import("../src/indexer/storage.js");
     const storage = new IndexStorage(TEST_DB);
-    storage.open();
+    await storage.open();
     storage.saveFile({ path: "a.ts", language: "typescript", mtime: 0, lastCommit: "" });
     storage.saveNodes([{ id: "a.ts::foo", kind: "function", name: "foo", file: "a.ts", line: 1 }]);
     storage.saveEdges([{ sourceId: "a.ts::foo", targetId: "b.ts::bar", kind: "CALLS" }]);
@@ -77,7 +77,7 @@ describe("IndexStorage", () => {
   test("saveMeta and loadMeta", async () => {
     const { IndexStorage } = await import("../src/indexer/storage.js");
     const storage = new IndexStorage(TEST_DB);
-    storage.open();
+    await storage.open();
     storage.saveMeta("lastCommit", "abc123");
     expect(storage.loadMeta("lastCommit")).toBe("abc123");
     storage.close();

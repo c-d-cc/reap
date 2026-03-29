@@ -17,7 +17,7 @@ export class IndexManager {
   }
 
   async init(): Promise<void> {
-    this.storage.open();
+    await this.storage.open();
     await this.extractor.init();
   }
 
