@@ -1,5 +1,6 @@
 import type { ApiResponse, ProjectEntry } from "../types.js";
 import type { RegistryManager } from "../registry.js";
+import type { IndexManager } from "../indexer/index.js";
 
 type Params = Record<string, string>;
 type Query = Record<string, string>;
@@ -12,7 +13,10 @@ interface ProjectsHandlers {
   index: (params: Params, body: unknown, query: Query) => Promise<ApiResponse>;
 }
 
-export function createProjectsHandlers(registry: RegistryManager): ProjectsHandlers {
+export function createProjectsHandlers(
+  registry: RegistryManager,
+  getIndexManager: (projectId: string) => Promise<IndexManager>,
+): ProjectsHandlers {
   return {
     async list() {
       return { status: "ok", data: registry.list() };
@@ -51,7 +55,14 @@ export function createProjectsHandlers(registry: RegistryManager): ProjectsHandl
       if (!entry) {
         return { status: "error", error: `Project not found: ${params.id}` };
       }
-      return { status: "ok", data: { message: "Indexing not yet implemented", id: params.id } };
+      try {
+        const mgr = await getIndexManager(params.id);
+        const result = await mgr.indexProject(entry.path);
+        registry.updateLastIndexed(params.id);
+        return { status: "ok", data: result };
+      } catch (e) {
+        return { status: "error", error: `Indexing failed: ${String(e)}` };
+      }
     },
   };
 }

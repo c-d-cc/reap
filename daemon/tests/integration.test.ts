@@ -1,17 +1,29 @@
-import { describe, test, expect, afterEach } from "bun:test";
-import { mkdirSync, rmSync } from "fs";
+import { describe, test, expect, afterEach, beforeEach } from "bun:test";
+import { mkdirSync, rmSync, writeFileSync } from "fs";
 import { join } from "path";
 import { tmpdir } from "os";
+import { execSync } from "child_process";
 import { createDaemonServer } from "../src/server.js";
 import type { Server } from "http";
 
 const TEST_DIR = join(tmpdir(), "reap-daemon-test-integration");
+const PROJECT_DIR = join(tmpdir(), "reap-daemon-test-integration-project");
 let server: Server;
 let port: number;
+
+beforeEach(() => {
+  rmSync(PROJECT_DIR, { recursive: true, force: true });
+  mkdirSync(join(PROJECT_DIR, "src"), { recursive: true });
+  execSync("git init", { cwd: PROJECT_DIR, stdio: "ignore" });
+  execSync('git config user.email "test@test.com" && git config user.name "test"', { cwd: PROJECT_DIR, stdio: "ignore" });
+  writeFileSync(join(PROJECT_DIR, "src", "index.ts"), `export function hello(): string { return "world"; }`);
+  execSync("git add -A && git commit -m init", { cwd: PROJECT_DIR, stdio: "ignore" });
+});
 
 afterEach(() => {
   if (server) server.close();
   rmSync(TEST_DIR, { recursive: true, force: true });
+  rmSync(PROJECT_DIR, { recursive: true, force: true });
 });
 
 async function startServer(): Promise<number> {
@@ -39,7 +51,7 @@ describe("Full daemon workflow", () => {
     const regRes = await fetch(`${base}/projects/register`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ path: "/tmp/test-project", name: "test-project" }),
+      body: JSON.stringify({ path: PROJECT_DIR, name: "test-project" }),
     });
     const regBody = await regRes.json();
     expect(regBody.status).toBe("ok");
