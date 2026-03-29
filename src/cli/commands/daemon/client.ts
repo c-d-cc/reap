@@ -24,10 +24,8 @@ export async function daemonRequest<T = unknown>(
 }
 
 async function ensureDaemon(): Promise<void> {
-  // Check if already running
   if (await isDaemonRunning()) return;
 
-  // Spawn daemon
   const daemonBin = resolveDaemonBin();
   const runtime = detectRuntime();
   const child = spawn(runtime, [daemonBin], {
@@ -36,7 +34,6 @@ async function ensureDaemon(): Promise<void> {
   });
   child.unref();
 
-  // Wait for daemon to be ready (max 3 seconds)
   const deadline = Date.now() + 3_000;
   while (Date.now() < deadline) {
     if (await isDaemonRunning()) return;
@@ -56,11 +53,9 @@ async function isDaemonRunning(): Promise<boolean> {
 }
 
 function resolveDaemonBin(): string {
-  // Look for daemon entry point relative to reap-daemon package
   try {
     return require.resolve("@c-d-cc/reap-daemon/dist/index.js");
   } catch {
-    // Fallback: try relative path (development mode)
     return join(__dirname, "..", "..", "..", "daemon", "dist", "index.js");
   }
 }
@@ -71,6 +66,17 @@ function detectRuntime(): string {
     return "bun";
   } catch {
     return "node";
+  }
+}
+
+export async function findProjectId(projectRoot: string): Promise<string | null> {
+  try {
+    const result = await daemonRequest<Array<{ id: string; path: string }>>("GET", "/projects");
+    if (result.status !== "ok" || !result.data) return null;
+    const project = result.data.find((p) => p.path === projectRoot);
+    return project?.id ?? null;
+  } catch {
+    return null;
   }
 }
 
