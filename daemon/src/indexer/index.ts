@@ -3,6 +3,8 @@ import { IndexStorage } from "./storage.js";
 import { SymbolExtractor } from "./parser.js";
 import { runFullPipeline, runIncrementalPipeline, type PipelineResult } from "./pipeline.js";
 import { analyzeImpact } from "./impact.js";
+import { detectCommunities } from "./community.js";
+import { traceProcesses } from "./process-tracer.js";
 import type { SymbolNode, GraphEdge, Community, ProcessFlow, ImpactResult } from "../types.js";
 
 export class IndexManager {
@@ -10,6 +12,8 @@ export class IndexManager {
   private storage: IndexStorage;
   private extractor: SymbolExtractor;
   private indexing = false;
+  private communities: Community[] = [];
+  private processes: ProcessFlow[] = [];
 
   constructor(dbPath: string) {
     this.graph = new CodeGraph();
@@ -41,6 +45,8 @@ export class IndexManager {
       }
       return await runFullPipeline(projectRoot, this.graph, this.storage, this.extractor);
     } finally {
+      this.communities = detectCommunities(this.graph);
+      this.processes = traceProcesses(this.graph);
       this.indexing = false;
     }
   }
@@ -73,10 +79,10 @@ export class IndexManager {
     return analyzeImpact(files, this.graph);
   }
 
-  getCommunities(): Community[] { return []; }
-  getCommunity(_id: string): Community | null { return null; }
-  getProcesses(): ProcessFlow[] { return []; }
-  getProcess(_id: string): ProcessFlow | null { return null; }
+  getCommunities(): Community[] { return this.communities; }
+  getCommunity(id: string): Community | null { return this.communities.find(c => c.id === id) ?? null; }
+  getProcesses(): ProcessFlow[] { return this.processes; }
+  getProcess(id: string): ProcessFlow | null { return this.processes.find(p => p.id === id) ?? null; }
 
   stats(): { nodeCount: number; edgeCount: number; fileCount: number } {
     return this.graph.stats();
