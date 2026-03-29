@@ -13,7 +13,9 @@
     "test": "bun test tests/"
   },
   "dependencies": {
-    "better-sqlite3": "^11.0.0"
+    "better-sqlite3": "^11.0.0",
+    "web-tree-sitter": "0.22.6",
+    "tree-sitter-wasms": "^0.1.13"
   },
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.0",
