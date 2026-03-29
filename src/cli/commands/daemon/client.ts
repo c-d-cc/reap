@@ -1,0 +1,93 @@
+import { spawn, execSync } from "child_process";
+import { join } from "path";
+import { homedir } from "os";
+
+const DAEMON_ROOT = join(homedir(), ".reap", "daemon");
+const PID_PATH = join(DAEMON_ROOT, "daemon.pid");
+const DEFAULT_PORT = 17224;
+const BASE_URL = `http://127.0.0.1:${DEFAULT_PORT}`;
+
+export async function daemonRequest<T = unknown>(
+  method: string,
+  path: string,
+  body?: unknown,
+): Promise<{ status: "ok" | "error"; data?: T; error?: string }> {
+  await ensureDaemon();
+
+  const res = await fetch(`${BASE_URL}${path}`, {
+    method,
+    headers: body ? { "Content-Type": "application/json" } : undefined,
+    body: body ? JSON.stringify(body) : undefined,
+  });
+
+  return res.json();
+}
+
+async function ensureDaemon(): Promise<void> {
+  if (await isDaemonRunning()) return;
+
+  const daemonBin = resolveDaemonBin();
+  const runtime = detectRuntime();
+  const child = spawn(runtime, [daemonBin], {
+    detached: true,
+    stdio: "ignore",
+  });
+  child.unref();
+
+  const deadline = Date.now() + 3_000;
+  while (Date.now() < deadline) {
+    if (await isDaemonRunning()) return;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+
+  throw new Error("Failed to start daemon within 3 seconds");
+}
+
+async function isDaemonRunning(): Promise<boolean> {
+  try {
+    const res = await fetch(`${BASE_URL}/health`, { signal: AbortSignal.timeout(500) });
+    return res.ok;
+  } catch {
+    return false;
+  }
+}
+
+function resolveDaemonBin(): string {
+  try {
+    return require.resolve("@c-d-cc/reap-daemon/dist/index.js");
+  } catch {
+    return join(__dirname, "..", "..", "..", "daemon", "dist", "index.js");
+  }
+}
+
+function detectRuntime(): string {
+  try {
+    execSync("bun --version", { stdio: "ignore" });
+    return "bun";
+  } catch {
+    return "node";
+  }
+}
+
+export async function findProjectId(projectRoot: string): Promise<string | null> {
+  try {
+    const result = await daemonRequest<Array<{ id: string; path: string }>>("GET", "/projects");
+    if (result.status !== "ok" || !result.data) return null;
+    const project = result.data.find((p) => p.path === projectRoot);
+    return project?.id ?? null;
+  } catch {
+    return null;
+  }
+}
+
+export function detectWorktree(cwd: string): string | null {
+  try {
+    const gitCommonDir = execSync("git rev-parse --git-common-dir", { cwd, encoding: "utf-8" }).trim();
+    const gitDir = execSync("git rev-parse --git-dir", { cwd, encoding: "utf-8" }).trim();
+    if (gitCommonDir !== gitDir && gitCommonDir !== ".git") {
+      const branch = execSync("git rev-parse --abbrev-ref HEAD", { cwd, encoding: "utf-8" }).trim();
+      return branch;
+    }
+  } catch {}
+  return null;
+}

@@ -31,6 +31,7 @@ import { execute as checkVersionExecute } from "./commands/check-version.js";
 import { execute as configExecute } from "./commands/config.js";
 import { execute as updateExecute } from "./commands/update.js";
 import { execute as helpExecute } from "./commands/help.js";
+import { execute as daemonExecute } from "./commands/daemon/index.js";
 
 const program = new Command();
 
@@ -162,6 +163,14 @@ program
   .option("--post-upgrade", "Run project sync only (called by previous binary after self-upgrade)")
   .action(async (options: { phase?: string; postUpgrade?: boolean }) => {
     await updateExecute(options.phase, options.postUpgrade);
+  });
+
+program
+  .command("daemon <subcommand>")
+  .description("Manage the REAP daemon (status, stop, index, query)")
+  .option("--query <query>", "Search query for daemon query subcommand")
+  .action(async (subcommand: string, options: { query?: string }) => {
+    await daemonExecute(subcommand, options);
   });
 
 program.parse();

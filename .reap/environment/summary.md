@@ -48,7 +48,7 @@ src/
 │   ├── template.ts             — artifact 템플릿 복사
 │   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). lineage 편향 분석 제거됨 (gen-030)
 ├── cli/
-│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, config, run, make, cruise, install-skills, fix, destroy, clean, check-version, update)
+│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, config, run, make, cruise, install-skills, fix, destroy, clean, check-version, update, daemon)
 │   └── commands/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair, --migrate 지원)
 │       ├── migrate.ts          — v0.15→v0.16 마이그레이션 (multi-phase: confirm→execute→vision→complete)
@@ -77,7 +77,11 @@ src/
 │       ├── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
 │       ├── destroy.ts          — REAP 완전 제거 (--confirm 필수, .reap/ + CLAUDE.md + .gitignore)
 │       ├── clean.ts            — 선택적 상태 초기화 (--lineage, --life, --backlog, --hooks)
-│       └── update.ts           — 프로젝트 업데이트 (v0.15→migrate 위임, v0.16→config backfill/디렉토리 보충/CLAUDE.md 보수, --post-upgrade 지원)
+│       ├── update.ts           — 프로젝트 업데이트 (v0.15→migrate 위임, v0.16→config backfill/디렉토리 보충/CLAUDE.md 보수, --post-upgrade 지원)
+│       └── daemon/             — daemon 서브커맨드
+│           ├── index.ts        — daemon 커맨드 라우팅 (start, stop, status, query)
+│           ├── client.ts       — daemon HTTP 클라이언트 (auto-spawn)
+│           └── lifecycle.ts    — generation 시작/완료 시 자동 인덱싱 훅
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/claude-code/       — Claude Code 어댑터
 │   ├── install.ts              — skill 파일 설치 (~/.claude/commands/)
@@ -90,6 +94,30 @@ src/
     └── artifacts/              — stage별 artifact 템플릿
         ├── normal/             — 01~05 (learning~completion)
         └── merge/              — 01~06 (detect~completion)
+
+daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
+├── src/                           — daemon 소스 (9 모듈 + api/ + indexer/)
+│   ├── index.ts                   — daemon 진입점
+│   ├── server.ts                  — HTTP 서버 (localhost:17224)
+│   ├── router.ts                  — HTTP 라우터
+│   ├── registry.ts                — 프로젝트 레지스트리 (CRUD)
+│   ├── process.ts                 — PID 파일, idle timer
+│   ├── paths.ts                   — daemon 경로 상수
+│   ├── types.ts                   — daemon 타입
+│   ├── api/                       — API 핸들러 (health, projects, query)
+│   └── indexer/                   — 인덱싱 파이프라인
+│       ├── parser.ts              — Tree-sitter WASM 파서 (15개 언어)
+│       ├── scanner.ts             — Git 기반 파일 스캔
+│       ├── graph.ts               — 코드 그래프 (인메모리)
+│       ├── storage.ts             — SQLite 영속화
+│       ├── pipeline.ts            — 인덱싱 파이프라인 오케스트레이터
+│       ├── import-resolver.ts     — import 해석
+│       ├── call-resolver.ts       — call 해석
+│       ├── impact.ts              — blast radius 분석
+│       ├── community.ts           — 커뮤니티 탐지
+│       └── process-tracer.ts      — 실행 플로우 추적
+├── queries/                       — Tree-sitter SCM 쿼리 (15개 언어)
+└── tests/                         — daemon 테스트 (21 파일, 114 tests)
 ```
 
 ## Build & Scripts
