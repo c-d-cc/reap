@@ -58,3 +58,26 @@ export interface FileNode {
   mtime: number;
   lastCommit: string;
 }
+
+// === Analysis Types ===
+
+export interface Community {
+  id: string;
+  label: string;
+  nodeIds: string[];
+  cohesion: number;
+}
+
+export interface ProcessFlow {
+  id: string;
+  label: string;
+  entryPoint: string;
+  nodeIds: string[];
+}
+
+export interface ImpactResult {
+  directFiles: string[];
+  indirectFiles: string[];
+  affectedSymbols: string[];
+  blastRadius: number;
+}

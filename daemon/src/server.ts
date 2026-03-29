@@ -6,6 +6,7 @@ import { IdleTimer } from "./process.js";
 import { RegistryManager } from "./registry.js";
 import { createHealthHandler } from "./api/health.js";
 import { createProjectsHandlers } from "./api/projects.js";
+import { createQueryHandlers } from "./api/query.js";
 import { IndexManager } from "./indexer/index.js";
 
 interface ServerConfig {
@@ -43,6 +44,19 @@ export function createDaemonServer(config: ServerConfig): Server {
   router.delete("/projects/:id", projectsHandlers.unregister);
   router.get("/projects/:id/status", projectsHandlers.status);
   router.post("/projects/:id/index", projectsHandlers.index);
+
+  const queryHandlers = createQueryHandlers(getIndexManager);
+  router.get("/projects/:id/symbols", queryHandlers.searchSymbols);
+  router.get("/projects/:id/symbols/:symbolId", queryHandlers.getSymbol);
+  router.get("/projects/:id/symbols/:symbolId/callers", queryHandlers.getCallers);
+  router.get("/projects/:id/symbols/:symbolId/callees", queryHandlers.getCallees);
+  router.get("/projects/:id/files/:path/symbols", queryHandlers.getFileSymbols);
+  router.get("/projects/:id/files/:path/dependencies", queryHandlers.getFileDependencies);
+  router.get("/projects/:id/impact", queryHandlers.getImpact);
+  router.get("/projects/:id/communities", queryHandlers.getCommunities);
+  router.get("/projects/:id/communities/:communityId", queryHandlers.getCommunity);
+  router.get("/projects/:id/processes", queryHandlers.getProcesses);
+  router.get("/projects/:id/processes/:processId", queryHandlers.getProcess);
 
   const server = createServer(async (req: IncomingMessage, res: ServerResponse) => {
     idleTimer.touch();
