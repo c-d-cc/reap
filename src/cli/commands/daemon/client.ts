@@ -74,3 +74,14 @@ function detectRuntime(): string {
     return "node";
   }
 }
+
+export async function findProjectId(projectRoot: string): Promise<string | null> {
+  try {
+    const result = await daemonRequest<Array<{ id: string; path: string }>>("GET", "/projects");
+    if (result.status !== "ok" || !result.data) return null;
+    const project = result.data.find((p) => p.path === projectRoot);
+    return project?.id ?? null;
+  } catch {
+    return null;
+  }
+}

@@ -1,5 +1,5 @@
 import { emitOutput, emitError } from "../../../core/output.js";
-import { daemonRequest } from "./client.js";
+import { daemonRequest, findProjectId } from "./client.js";
 import { createPaths } from "../../../core/paths.js";
 import { fileExists } from "../../../core/fs.js";
 
@@ -105,9 +105,36 @@ async function queryCmd(query?: string): Promise<void> {
   if (!query) {
     emitError("daemon", "Usage: reap daemon query <search-term>");
   }
+
+  const root = process.cwd();
+  const projectId = await findProjectId(root);
+  if (!projectId) {
+    emitError("daemon", "Project not registered. Run 'reap init' first.");
+  }
+
+  const result = await daemonRequest<Array<{ id: string; name: string; kind: string; file: string; line: number }>>(
+    "GET",
+    `/projects/${projectId}/symbols?q=${encodeURIComponent(query!)}`,
+  );
+
+  if (result.status !== "ok" || !result.data) {
+    emitError("daemon", result.error ?? "Query failed");
+  }
+
+  const symbols = result.data!;
+  if (symbols.length === 0) {
+    emitOutput({
+      status: "ok",
+      command: "daemon",
+      message: `No symbols found for "${query}"`,
+    });
+  }
+
+  const lines = symbols.map((s) => `${s.kind.padEnd(10)} ${s.name.padEnd(30)} ${s.file}:${s.line}`);
   emitOutput({
     status: "ok",
     command: "daemon",
-    message: "Query not yet implemented (Phase 3)",
+    context: { query, resultCount: symbols.length },
+    message: `Found ${symbols.length} symbol(s) for "${query}":\n${lines.join("\n")}`,
   });
 }
