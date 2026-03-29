@@ -1,22 +1,23 @@
 # Shortterm Memory
 
-## 세션 요약 (2026-03-28)
+## 세션 요약 (2026-03-29)
 
-### gen-050: Nonce 시스템 transition graph 리팩토링
-- forward nonce 1개 + back nonce 1개 구조를 pendingTransitions map 기반으로 교체
-- lifecycle.ts에 NORMAL_TRANSITIONS, MERGE_TRANSITIONS 선언적 graph 추가
-- GenerationState에서 6개 nonce 필드 제거, pendingTransitions 1개로 통합
-- setNonce/verifyNonce/verifyBackNonce를 setTransitionNonces/verifyTransition/prepareStageEntry로 교체
-- 13개 command + core 3개 모듈 수정
-- completion:fitness self-loop이 graph에서 자연스럽게 표현
-- back transition 2-step bug 수정 (기존: complete 후 back이 2단계 건너뜀)
-- 491 pass, 8 fail (all pre-existing)
+### Daemon Indexer Phase 1-4 구현 완료
+- `daemon/` 별도 앱 (`@c-d-cc/reap-daemon`) — 22개 소스, 21개 테스트, 15개 쿼리 파일
+- Phase 1: HTTP 서버, 라우터, 프로젝트 레지스트리, PID/idle 관리, `reap daemon` CLI
+- Phase 2: Tree-sitter WASM 15개 언어 파싱, 심볼 추출, CodeGraph, SQLite 영속화, import/call 해석
+- Phase 3: 조회 API (심볼 검색, caller/callee, 파일 의존성, blast radius, 커뮤니티, 실행 플로우)
+- Phase 4: CLI query 구현, generation 시작/완료 시 자동 인덱싱, worktree별 인덱스 fork
+- SQLite 어댑터 패턴 적용 (Bun: bun:sqlite, Node: better-sqlite3)
+- 114개 테스트 통과
+- 설계 문서: `.reap/vision/design/daemon-indexer.md`, `daemon-phase{1-4}-plan.md`
+- superpowers 스킬 체인(brainstorming → writing-plans → subagent-driven-development)으로 구현
 
 ### 다음 세션
+- Daemon E2E 테스트 보강 (backlog: daemon-e2e-tests.md) — 증분 인덱싱, 에러 케이스, worktree 분기 등
 - Evaluator agent 템플릿 정의 (vision/design/evaluator-agent.md 참조)
 - Pre-existing test failures 수정 (integrity, migrate, update 관련 8개)
-- Genome application.md의 Nonce System 섹션을 transition graph 기반으로 갱신
-- Embryo → Normal 전환 검토
 
 ### Backlog 상태
-- 없음 (empty)
+- daemon-e2e-tests.md: daemon E2E 테스트 보강 (medium)
+- fix-migrate-update-tests.md: migrate/update 테스트 8건 수정 (medium)
