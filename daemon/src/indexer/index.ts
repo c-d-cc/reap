@@ -2,6 +2,7 @@ import { CodeGraph } from "./graph.js";
 import { IndexStorage } from "./storage.js";
 import { SymbolExtractor } from "./parser.js";
 import { runFullPipeline, runIncrementalPipeline, type PipelineResult } from "./pipeline.js";
+import { analyzeImpact } from "./impact.js";
 import type { SymbolNode, GraphEdge, Community, ProcessFlow, ImpactResult } from "../types.js";
 
 export class IndexManager {
@@ -69,27 +70,7 @@ export class IndexManager {
   }
 
   getImpact(files: string[]): ImpactResult {
-    const directFiles = new Set<string>();
-    const affectedSymbols = new Set<string>();
-    for (const file of files) {
-      const edges = this.graph.getEdgesTo(`file::${file}`, "IMPORTS");
-      for (const e of edges) {
-        directFiles.add(e.sourceId.replace("file::", ""));
-      }
-      for (const node of this.graph.getNodesByFile(file)) {
-        affectedSymbols.add(node.id);
-        for (const callEdge of this.graph.getEdgesTo(node.id, "CALLS")) {
-          affectedSymbols.add(callEdge.sourceId);
-        }
-      }
-    }
-    const totalFiles = this.graph.stats().fileCount || 1;
-    return {
-      directFiles: [...directFiles],
-      indirectFiles: [],
-      affectedSymbols: [...affectedSymbols],
-      blastRadius: (files.length + directFiles.size) / totalFiles,
-    };
+    return analyzeImpact(files, this.graph);
   }
 
   getCommunities(): Community[] { return []; }
