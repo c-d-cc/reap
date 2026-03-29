@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn, execSync } from "child_process";
 import { join } from "path";
 import { homedir } from "os";
 
@@ -67,10 +67,21 @@ function resolveDaemonBin(): string {
 
 function detectRuntime(): string {
   try {
-    const { execSync } = require("child_process");
     execSync("bun --version", { stdio: "ignore" });
     return "bun";
   } catch {
     return "node";
   }
+}
+
+export function detectWorktree(cwd: string): string | null {
+  try {
+    const gitCommonDir = execSync("git rev-parse --git-common-dir", { cwd, encoding: "utf-8" }).trim();
+    const gitDir = execSync("git rev-parse --git-dir", { cwd, encoding: "utf-8" }).trim();
+    if (gitCommonDir !== gitDir && gitCommonDir !== ".git") {
+      const branch = execSync("git rev-parse --abbrev-ref HEAD", { cwd, encoding: "utf-8" }).trim();
+      return branch;
+    }
+  } catch {}
+  return null;
 }

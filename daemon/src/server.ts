@@ -1,6 +1,6 @@
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from "http";
 import { join } from "path";
-import { mkdirSync } from "fs";
+import { mkdirSync, existsSync, copyFileSync } from "fs";
 import { Router } from "./router.js";
 import { IdleTimer } from "./process.js";
 import { RegistryManager } from "./registry.js";
@@ -22,13 +22,26 @@ export function createDaemonServer(config: ServerConfig): Server {
 
   const indexManagers = new Map<string, IndexManager>();
 
-  async function getIndexManager(projectId: string): Promise<IndexManager> {
-    if (indexManagers.has(projectId)) return indexManagers.get(projectId)!;
-    const indexDir = join(config.daemonRoot, "indexes", projectId, "main");
+  async function getIndexManager(projectId: string, worktree?: string): Promise<IndexManager> {
+    const key = worktree ? `${projectId}::wt-${worktree}` : `${projectId}::main`;
+    if (indexManagers.has(key)) return indexManagers.get(key)!;
+
+    const subDir = worktree ? `wt-${worktree}` : "main";
+    const indexDir = join(config.daemonRoot, "indexes", projectId, subDir);
     mkdirSync(indexDir, { recursive: true });
+
+    // Fork from main index if worktree and main exists
+    if (worktree) {
+      const mainDb = join(config.daemonRoot, "indexes", projectId, "main", "index.db");
+      const wtDb = join(indexDir, "index.db");
+      if (!existsSync(wtDb) && existsSync(mainDb)) {
+        copyFileSync(mainDb, wtDb);
+      }
+    }
+
     const mgr = new IndexManager(join(indexDir, "index.db"));
     await mgr.init();
-    indexManagers.set(projectId, mgr);
+    indexManagers.set(key, mgr);
     return mgr;
   }
 

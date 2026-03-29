@@ -15,7 +15,7 @@ interface ProjectsHandlers {
 
 export function createProjectsHandlers(
   registry: RegistryManager,
-  getIndexManager: (projectId: string) => Promise<IndexManager>,
+  getIndexManager: (projectId: string, worktree?: string) => Promise<IndexManager>,
 ): ProjectsHandlers {
   return {
     async list() {
@@ -50,13 +50,13 @@ export function createProjectsHandlers(
       };
     },
 
-    async index(params) {
+    async index(params, _body, query) {
       const entry = registry.get(params.id);
       if (!entry) {
         return { status: "error", error: `Project not found: ${params.id}` };
       }
       try {
-        const mgr = await getIndexManager(params.id);
+        const mgr = await getIndexManager(params.id, query.worktree);
         const result = await mgr.indexProject(entry.path);
         registry.updateLastIndexed(params.id);
         return { status: "ok", data: result };
