@@ -344,6 +344,10 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
     const completionEvent = isMerge ? "onMergeCompleted" : "onLifeCompleted";
     await executeHooks(paths.hooks, completionEvent, paths.root).catch(() => {});
 
+    // Trigger daemon indexing after generation completion
+    const { triggerIndexing } = await import("../daemon/lifecycle.js");
+    await triggerIndexing(paths.root);
+
     // Advance cruise count if in cruise mode
     const cruiseStillActive = await advanceCruise(paths.config).catch(() => false);
 

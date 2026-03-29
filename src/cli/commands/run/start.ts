@@ -97,6 +97,10 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
     // Run onLifeStarted hooks
     await executeHooks(paths.hooks, "onLifeStarted", paths.root).catch(() => {});
 
+    // Trigger daemon indexing (silent fail if daemon not running)
+    const { triggerIndexing } = await import("../daemon/lifecycle.js");
+    await triggerIndexing(paths.root);
+
     emitOutput({
       status: "ok",
       command: "start",
