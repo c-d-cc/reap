@@ -31,3 +31,30 @@ export interface HealthData {
   idleTime: number;
   projectCount: number;
 }
+
+// === Graph Types ===
+
+export type SymbolKind = "function" | "method" | "class" | "interface" | "type" | "enum" | "module";
+export type EdgeKind = "CONTAINS" | "CALLS" | "IMPORTS" | "EXTENDS" | "IMPLEMENTS";
+
+export interface SymbolNode {
+  id: string;
+  kind: SymbolKind;
+  name: string;
+  file: string;
+  line: number;
+  parent?: string;
+}
+
+export interface GraphEdge {
+  sourceId: string;
+  targetId: string;
+  kind: EdgeKind;
+}
+
+export interface FileNode {
+  path: string;
+  language: string;
+  mtime: number;
+  lastCommit: string;
+}
