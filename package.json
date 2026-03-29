@@ -47,6 +47,7 @@
     "postinstall": "bash scripts/postinstall.sh || true"
   },
   "dependencies": {
+    "@c-d-cc/reap-daemon": "file:./daemon",
     "yaml": "^2.0.0"
   },
   "reap": {

@@ -1,0 +1,24 @@
+{
+  "name": "@c-d-cc/reap-daemon",
+  "version": "0.1.0",
+  "description": "REAP Daemon — Code indexing and graph query service",
+  "type": "module",
+  "bin": {
+    "reap-daemon": "dist/index.js"
+  },
+  "scripts": {
+    "dev": "bun src/index.ts",
+    "build": "bun build src/index.ts --outdir dist --target node",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test tests/"
+  },
+  "dependencies": {
+    "better-sqlite3": "^11.0.0"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.0",
+    "@types/bun": "^1.3.11",
+    "@types/node": "^22.0.0",
+    "typescript": "^5.7.0"
+  }
+}
