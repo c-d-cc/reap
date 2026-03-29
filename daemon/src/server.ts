@@ -1,10 +1,12 @@
 import { createServer, type IncomingMessage, type ServerResponse, type Server } from "http";
 import { join } from "path";
+import { mkdirSync } from "fs";
 import { Router } from "./router.js";
 import { IdleTimer } from "./process.js";
 import { RegistryManager } from "./registry.js";
 import { createHealthHandler } from "./api/health.js";
 import { createProjectsHandlers } from "./api/projects.js";
+import { IndexManager } from "./indexer/index.js";
 
 interface ServerConfig {
   port: number;
@@ -17,13 +19,25 @@ export function createDaemonServer(config: ServerConfig): Server {
   const idleTimer = new IdleTimer(config.idleTimeoutMs);
   const registry = new RegistryManager(registryPath);
 
+  const indexManagers = new Map<string, IndexManager>();
+
+  async function getIndexManager(projectId: string): Promise<IndexManager> {
+    if (indexManagers.has(projectId)) return indexManagers.get(projectId)!;
+    const indexDir = join(config.daemonRoot, "indexes", projectId, "main");
+    mkdirSync(indexDir, { recursive: true });
+    const mgr = new IndexManager(join(indexDir, "index.db"));
+    await mgr.init();
+    indexManagers.set(projectId, mgr);
+    return mgr;
+  }
+
   const router = new Router();
 
   // Register routes
   const healthHandler = createHealthHandler(idleTimer, registry);
   router.get("/health", healthHandler);
 
-  const projectsHandlers = createProjectsHandlers(registry);
+  const projectsHandlers = createProjectsHandlers(registry, getIndexManager);
   router.get("/projects", projectsHandlers.list);
   router.post("/projects/register", projectsHandlers.register);
   router.delete("/projects/:id", projectsHandlers.unregister);
