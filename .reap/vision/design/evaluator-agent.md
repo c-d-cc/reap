@@ -110,10 +110,55 @@ Phase 5: Output
 ## 후속 작업 (미구현)
 
 ### 코드 통합 (후속 generation)
-- `src/core/prompt.ts` -- evaluator용 dynamic context 빌더 (`buildEvaluatorPrompt` 등)
-- `src/cli/commands/run/completion.ts` -- fitness phase에서 evaluator 호출 로직
-- `src/types/index.ts` -- evaluator 관련 타입 (config에 evaluator 사용 여부 등)
-- `src/core/agent-prompt.ts` -- evaluator prompt 조립 (if separate from evolve prompt)
+
+> gen-052에서 learning 완료 후 abort. 아래 설계 결정은 승인됨.
+
+#### 승인된 설계 결정 (2026-03-29)
+
+1. **Config 플래그**: `ReapConfig`에 `evaluator?: boolean` (기본 `false`) 추가. Opt-in 방식. REAP 자체는 `evaluator: true`로 dog-fooding.
+2. **Evaluator 호출 위치**: fitness phase 첫 호출 시 evaluator subagent launch 지시를 prompt에 포함
+3. **Cruise mode**: evaluator 사용. High confidence + Low impact → 자동 진행, 에스컬레이션 → cruise 중단
+
+#### 수정 대상 파일
+
+**`src/core/prompt.ts` — `buildEvaluatorPrompt()` 추가**
+- `buildBasePrompt()`와 유사하되 evaluator 전용 context 조립
+- 포함: generation state (id, goal, type), vision goals, memory, project path, artifacts (01~04) 요약, 코드 변경 정보
+- 제외: strict mode, cruise loop, clarity guide, maturity behavior guide
+
+**`src/cli/commands/run/completion.ts` — fitness phase 변경**
+
+현재 flow:
+- Cruise mode: self-assessment prompt → evolve agent 자체 평가 → `--feedback` 제출
+- Supervised mode: 인간에게 피드백 요청 prompt 출력
+
+변경 후 flow (evaluator 활성화 시):
+1. `reap run completion --phase fitness` (feedback 없이 호출)
+2. `buildEvaluatorPrompt()` 호출 → evaluator launch 지시 포함 prompt 반환
+3. Evolve agent가 `Agent` tool로 `subagent_type: "reap-evaluate"` subagent spawn
+4. Evaluator가 독립 검증 + 평가 수행, 결과를 text로 반환
+5. Evolve agent가 evaluator 결과를 인간에게 전달
+6. 인간이 최종 feedback 결정 → `reap run completion --phase fitness --feedback "..."` 실행
+
+**`src/types/index.ts` — ReapConfig 타입 확장**
+```typescript
+interface ReapConfig {
+  // ... 기존 필드
+  evaluator?: boolean;  // evaluator agent 활성화 여부 (기본 false)
+}
+```
+
+#### Subagent 패턴
+
+`evolve.ts`의 기존 패턴과 동일:
+- `buildEvaluatorPrompt()` → `evaluatorPrompt`로 context에 포함
+- Evolve agent가 `Agent` tool로 `subagent_type: "reap-evaluate"` launch
+
+#### 테스트
+
+- `buildEvaluatorPrompt()` 단위 테스트 (context 포함 여부)
+- completion fitness phase에서 evaluator prompt 반환 확인
+- config `evaluator: false`일 때 기존 flow 유지 확인
 
 ### Fitness 위임 (후속 generation)
 - Evaluator 1차 평가 → 인간 에스컬레이션 흐름 구현
