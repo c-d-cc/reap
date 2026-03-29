@@ -101,3 +101,10 @@ export function getLanguageByExtension(ext: string): LanguageConfig | undefined 
     config.extensions.includes(ext)
   );
 }
+
+export function detectLanguage(filePath: string): string | null {
+  const ext = "." + filePath.split(".").pop();
+  if (!filePath.includes(".")) return null;
+  const config = getLanguageByExtension(ext);
+  return config ? config.name : null;
+}
