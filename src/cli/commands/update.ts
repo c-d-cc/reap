@@ -11,6 +11,7 @@ import { fetchReleaseNotice } from "../../core/notice.js";
 import { autoReport } from "../../core/report.js";
 import { ensureClaudeMd } from "./init/common.js";
 import { execute as migrateExecute } from "./migrate.js";
+import { registerSessionHooks } from "../../adapters/claude-code/install.js";
 import type { ReapConfig } from "../../types/index.js";
 
 /** Read package version from package.json */
@@ -190,6 +191,9 @@ export async function execute(phase?: string, postUpgrade?: boolean): Promise<vo
   if (claudeMdAction !== "skipped") {
     updated.push(`CLAUDE.md (${claudeMdAction})`);
   }
+
+  // 4. SessionStart hook sync (idempotent — skips if already registered, best-effort)
+  await registerSessionHooks();
 
   // Report
   // Show release notice for current version (before emitOutput, which calls process.exit)

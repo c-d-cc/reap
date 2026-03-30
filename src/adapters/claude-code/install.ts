@@ -116,7 +116,7 @@ async function installReapGuide(): Promise<void> {
  * 1. `reap check-version` — v0.15 legacy cleanup + auto-update
  * 2. `reap load-context` — inject REAP knowledge into session context
  */
-async function registerSessionHooks(): Promise<void> {
+export async function registerSessionHooks(): Promise<void> {
   const settingsPath = join(homedir(), ".claude", "settings.json");
 
   const requiredHooks = [
