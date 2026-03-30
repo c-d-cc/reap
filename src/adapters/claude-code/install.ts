@@ -53,8 +53,8 @@ export async function installSkills(_projectRoot?: string): Promise<void> {
   // Copy agent definitions to ~/.claude/agents/
   await installAgents();
 
-  // Register SessionStart hook for v0.15 legacy cleanup
-  await registerCleanupHook();
+  // Register SessionStart hooks (check-version + load-context)
+  await registerSessionHooks();
 
   emitOutput({
     status: "ok",
@@ -112,12 +112,17 @@ async function installReapGuide(): Promise<void> {
 }
 
 /**
- * Register a SessionStart hook in ~/.claude/settings.json that cleans up
- * v0.15 project-level skills/commands when Claude starts in any project.
+ * Register SessionStart hooks in ~/.claude/settings.json:
+ * 1. `reap check-version` — v0.15 legacy cleanup + auto-update
+ * 2. `reap load-context` — inject REAP knowledge into session context
  */
-async function registerCleanupHook(): Promise<void> {
+async function registerSessionHooks(): Promise<void> {
   const settingsPath = join(homedir(), ".claude", "settings.json");
-  const hookCommand = "reap check-version 2>/dev/null || true";
+
+  const requiredHooks = [
+    { command: "reap check-version 2>/dev/null || true", marker: "reap check-version" },
+    { command: "reap load-context 2>/dev/null || true", marker: "reap load-context" },
+  ];
 
   try {
     let settings: Record<string, unknown> = {};
@@ -135,17 +140,23 @@ async function registerCleanupHook(): Promise<void> {
       hooks.SessionStart = [];
     }
 
-    // Check if our hook already exists
-    const exists = hooks.SessionStart.some((entry: unknown) => {
-      const e = entry as { hooks?: { command?: string }[] };
-      return e.hooks?.some((h) => h.command?.includes("reap check-version"));
-    });
-
-    if (!exists) {
-      hooks.SessionStart.push({
-        matcher: "",
-        hooks: [{ type: "command", command: hookCommand }],
+    let changed = false;
+    for (const req of requiredHooks) {
+      const exists = hooks.SessionStart.some((entry: unknown) => {
+        const e = entry as { hooks?: { command?: string }[] };
+        return e.hooks?.some((h) => h.command?.includes(req.marker));
       });
+
+      if (!exists) {
+        hooks.SessionStart.push({
+          matcher: "",
+          hooks: [{ type: "command", command: req.command }],
+        });
+        changed = true;
+      }
+    }
+
+    if (changed) {
       await writeFile(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
     }
   } catch {

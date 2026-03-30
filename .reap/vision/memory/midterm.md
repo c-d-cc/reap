@@ -11,6 +11,7 @@
 ### v0.15 기능 패리티
 v0.15에 있었지만 v0.16에 아직 없는 것들:
 - Agent adapter 시스템 (AgentRegistry) — vision §6, 당장 불필요
+- ~~SessionStart knowledge injection~~ — gen-053에서 구현 완료 (`reap load-context`)
 
 ### Self-evolving 강화
 gen-028~031에서 gap-driven evolution + vision eval + memory 도입 완료.
@@ -27,13 +28,6 @@ gen-028~031에서 gap-driven evolution + vision eval + memory 도입 완료.
 - nonce transition graph 리팩토링 완료 (gen-050)
 - evaluator agent 템플릿 정의 완료 (gen-051)
 - 다음: 코드 통합 (prompt.ts에 evaluator context 빌더, completion.ts에 호출 로직)
-
-## Daemon Indexer (2026-03-29 구현 완료)
-- `daemon/` 별도 앱, localhost:17224 HTTP API
-- Tree-sitter WASM 15개 언어, 인메모리 그래프 + SQLite write-through
-- 조회: 심볼 검색, caller/callee, blast radius, 커뮤니티, 실행 플로우
-- CLI/lifecycle 통합, worktree별 인덱스 fork
-- 남은 작업: E2E 테스트 보강, Phase 4 이후 MCP server wrapper (향후 확장)
 
 ## Daemon Indexer (2026-03-29 구현 완료)
 - `daemon/` 별도 앱, localhost:17224 HTTP API

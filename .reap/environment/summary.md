@@ -48,11 +48,12 @@ src/
 │   ├── template.ts             — artifact 템플릿 복사
 │   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). lineage 편향 분석 제거됨 (gen-030)
 ├── cli/
-│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, config, run, make, cruise, install-skills, fix, destroy, clean, check-version, update, daemon)
+│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, config, run, make, cruise, install-skills, fix, destroy, clean, check-version, update, load-context, daemon)
 │   └── commands/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair, --migrate 지원)
 │       ├── migrate.ts          — v0.15→v0.16 마이그레이션 (multi-phase: confirm→execute→vision→complete)
 │       ├── check-version.ts    — postinstall/SessionStart용: v0.15 legacy cleanup + autoUpdate 자동 업데이트 + autoUpdateMinVersion guard + release notice 표시 (semverGte, queryAutoUpdateMinVersion, queryLatestVersion, performAutoUpdate, handOffToNewBinary, checkAutoUpdateGuard)
+│       ├── load-context.ts     — SessionStart hook용: REAP knowledge 주입 (buildKnowledgeContext, hookSpecificOutput JSON 출력). 비-REAP 디렉토리에서는 silent exit
 │       ├── run/                — stage 실행 (21 handlers)
 │       │   ├── start.ts        — generation 생성 (scan → create)
 │       │   ├── learning.ts     — 탐구 (work → complete)
@@ -84,7 +85,7 @@ src/
 │           └── lifecycle.ts    — generation 시작/완료 시 자동 인덱싱 훅
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/claude-code/       — Claude Code 어댑터
-│   ├── install.ts              — skill 파일 설치 (~/.claude/commands/)
+│   ├── install.ts              — skill 파일 설치 (~/.claude/commands/) + SessionStart hook 등록 (check-version + load-context)
 │   └── skills/                 — 20 slash command files (.md, reap.update.md, reap.report.md 포함)
 └── templates/                  — 템플릿 파일
     ├── reap-guide.md           — REAP 도구 가이드 (subagent prompt에 주입)

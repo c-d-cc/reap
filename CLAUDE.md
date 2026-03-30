@@ -1,37 +1,31 @@
 # REAP Project
 
-이 프로젝트는 REAP(Recursive Evolutionary Autonomous Pipeline)를 사용합니다.
-모든 작업은 genome 원칙에 따라 수행해야 합니다.
+This project uses REAP (Recursive Evolutionary Autonomous Pipeline).
+All work must follow genome principles.
 
-## REAP Guide (필수 숙지)
+## Knowledge Loading
 
-- `~/.reap/reap-guide.md` — REAP 도구 사용법, 아키텍처, lifecycle, 규칙
+Session-start hook automatically injects all REAP knowledge (genome, environment, vision, memory, guide) into the session context.
 
-## Genome (필수 숙지)
+If context was compacted and REAP knowledge was lost, re-run the hook:
+```
+/reap.knowledge reload
+```
 
-세션 시작 시 아래 파일들을 반드시 읽고 원칙을 따르세요:
+## Manual Reference (fallback)
 
-- `.reap/genome/application.md` — 프로젝트 아키텍처, 컨벤션, 기술 스택
-- `.reap/genome/evolution.md` — AI 행동 가이드, 소통 원칙
-- `.reap/genome/invariants.md` — 절대 제약 (위반 불가)
+If the hook did not run, read these files manually:
 
-## Environment (필수 숙지)
-
-프로젝트의 기술적 맥락입니다. 세션 시작 시 반드시 읽으세요:
-
-- `.reap/environment/summary.md` — 소스 구조, 빌드, 테스트, 설계 결정 (항상 로딩)
-- `.reap/environment/domain/` — 도메인 지식 (필요 시 로딩)
-
-## Vision (필수 숙지)
-
-프로젝트의 장기 방향, 목표, 설계 구상, 그리고 세대를 넘어 축적되는 프로젝트 메모리입니다:
-
-- `.reap/vision/goals.md` — 프로젝트 목표 (self-hosting, distribution, evaluator agent 등)
-- `.reap/vision/design/` — 미래 기능의 설계 문서 (필요 시 로딩)
-- `.reap/vision/memory/longterm.md` — 프로젝트 기원, 핵심 설계 교훈, v0.15→v0.16 차이 (항상 로딩)
-- `.reap/vision/memory/midterm.md` — 현재 진행 중인 큰 작업과 미해결 이슈 (항상 로딩)
-- `.reap/vision/memory/shortterm.md` — 최근 세션 요약과 다음 세션 할 일 (항상 로딩)
+- `~/.reap/reap-guide.md` — REAP tool usage, architecture, lifecycle, rules
+- `.reap/genome/application.md` — Project architecture, conventions, tech stack
+- `.reap/genome/evolution.md` — AI behavior guide, evolution principles
+- `.reap/genome/invariants.md` — Absolute constraints (never violate)
+- `.reap/environment/summary.md` — Source structure, build, tests, design decisions
+- `.reap/vision/goals.md` — Project goals
+- `.reap/vision/memory/longterm.md` — Project origin, key design lessons
+- `.reap/vision/memory/midterm.md` — Ongoing large tasks and unresolved issues
+- `.reap/vision/memory/shortterm.md` — Recent session summary and next session tasks
 
 ## Agent
 
-Generation을 subagent에 위임할 때 `subagent_type: "reap-evolve"`를 사용하세요. 이 agent에는 REAP generation 실행에 필요한 role, mindset, 행동 규칙이 정의되어 있습니다. 동적 context(generation state, vision, memory)는 prompt 파라미터로 전달하세요.
+When delegating a generation to a subagent, use `subagent_type: "reap-evolve"`. Dynamic context (generation state, vision, memory) is passed via prompt parameters.

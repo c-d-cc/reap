@@ -32,6 +32,7 @@ import { execute as configExecute } from "./commands/config.js";
 import { execute as updateExecute } from "./commands/update.js";
 import { execute as helpExecute } from "./commands/help.js";
 import { execute as daemonExecute } from "./commands/daemon/index.js";
+import { execute as loadContextExecute } from "./commands/load-context.js";
 
 const program = new Command();
 
@@ -163,6 +164,13 @@ program
   .option("--post-upgrade", "Run project sync only (called by previous binary after self-upgrade)")
   .action(async (options: { phase?: string; postUpgrade?: boolean }) => {
     await updateExecute(options.phase, options.postUpgrade);
+  });
+
+program
+  .command("load-context")
+  .description("Output REAP project knowledge for SessionStart hook injection")
+  .action(async () => {
+    await loadContextExecute();
   });
 
 program
