@@ -192,23 +192,7 @@ export async function execute(phase?: string, postUpgrade?: boolean): Promise<vo
   }
 
   // Report
-  if (updated.length === 0) {
-    emitOutput({
-      status: "ok",
-      command: "update",
-      context: { changes: [] },
-      message: "Project is up to date. Nothing to update.",
-    });
-  } else {
-    emitOutput({
-      status: "ok",
-      command: "update",
-      context: { changes: updated },
-      message: `Updated: ${updated.join("; ")}`,
-    });
-  }
-
-  // Show release notice for current version
+  // Show release notice for current version (before emitOutput, which calls process.exit)
   try {
     let language = "english";
     const raw = configContent ?? "";
@@ -225,5 +209,21 @@ export async function execute(phase?: string, postUpgrade?: boolean): Promise<vo
     }
   } catch {
     // Non-fatal — notice display failure should not break update
+  }
+
+  if (updated.length === 0) {
+    emitOutput({
+      status: "ok",
+      command: "update",
+      context: { changes: [] },
+      message: "Project is up to date. Nothing to update.",
+    });
+  } else {
+    emitOutput({
+      status: "ok",
+      command: "update",
+      context: { changes: updated },
+      message: `Updated: ${updated.join("; ")}`,
+    });
   }
 }
