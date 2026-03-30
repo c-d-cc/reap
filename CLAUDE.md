@@ -1,9 +1,16 @@
 # REAP Project
 
+이 프로젝트는 REAP(Recursive Evolutionary Autonomous Pipeline)를 사용합니다.
+모든 작업은 genome 원칙에 따라 수행해야 합니다.
+
+<!-- reap:start 4f4c9ee4 -->
+
+## REAP
+
 This project uses REAP (Recursive Evolutionary Autonomous Pipeline).
 All work must follow genome principles.
 
-## Knowledge Loading
+### Knowledge Loading
 
 Session-start hook automatically injects all REAP knowledge (genome, environment, vision, memory, guide) into the session context.
 
@@ -12,7 +19,7 @@ If context was compacted and REAP knowledge was lost, re-run the hook:
 /reap.knowledge reload
 ```
 
-## Manual Reference (fallback)
+### Manual Reference (fallback)
 
 If the hook did not run, read these files manually:
 
@@ -26,6 +33,7 @@ If the hook did not run, read these files manually:
 - `.reap/vision/memory/midterm.md` — Ongoing large tasks and unresolved issues
 - `.reap/vision/memory/shortterm.md` — Recent session summary and next session tasks
 
-## Agent
+### Agent
 
 When delegating a generation to a subagent, use `subagent_type: "reap-evolve"`. Dynamic context (generation state, vision, memory) is passed via prompt parameters.
+<!-- reap:end -->

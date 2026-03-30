@@ -1,5 +1,6 @@
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
+import { createHash } from "crypto";
 import { readdir, copyFile, chmod } from "fs/promises";
 import YAML from "yaml";
 import type { ReapPaths } from "../../../core/paths.js";
@@ -105,10 +106,52 @@ export async function getClaudeMdSection(): Promise<string> {
   return (await readTextFile(distPath("claude-md-section.md"))) ?? "";
 }
 
+// ── CLAUDE.md REAP Section Sync ─────────────────────────────
+
+const REAP_START_RE = /<!-- reap:start ([a-f0-9]+) -->/;
+const REAP_END_MARKER = "<!-- reap:end -->";
+
+/** Compute SHA256 hash (first 8 hex chars) of the REAP section content (excluding markers). */
+export function computeSectionHash(content: string): string {
+  return createHash("sha256").update(content.trim()).digest("hex").slice(0, 8);
+}
+
+/** Wrap REAP section content with start/end markers including a content hash. */
+export function wrapWithMarkers(content: string): string {
+  const hash = computeSectionHash(content);
+  return `<!-- reap:start ${hash} -->\n${content.trimEnd()}\n<!-- reap:end -->`;
+}
+
 /**
- * Ensure CLAUDE.md exists and contains the REAP section.
- * Returns the action taken: "created", "appended", or "skipped".
+ * Extract the REAP section from a CLAUDE.md file.
+ * Returns { hash, startIdx, endIdx } if markers found, or null.
  */
+export function extractReapSection(fileContent: string): { hash: string; startIdx: number; endIdx: number } | null {
+  const startMatch = REAP_START_RE.exec(fileContent);
+  if (!startMatch) return null;
+  const endIdx = fileContent.indexOf(REAP_END_MARKER, startMatch.index);
+  if (endIdx === -1) return null;
+  return {
+    hash: startMatch[1],
+    startIdx: startMatch.index,
+    endIdx: endIdx + REAP_END_MARKER.length,
+  };
+}
+
+/**
+ * Detect legacy REAP section (without markers) and return its boundaries.
+ * Looks for a markdown heading containing "REAP" (e.g., "## REAP", "# REAP Project")
+ * and extends to the end of the file (since REAP section was always appended last).
+ */
+function detectLegacyReapSection(fileContent: string): { startIdx: number; endIdx: number } | null {
+  // Match a markdown heading line that contains "REAP"
+  const legacyRe = /^(#{1,3}\s+.*REAP.*)/m;
+  const match = legacyRe.exec(fileContent);
+  if (!match) return null;
+  // Legacy sections were always appended at the end, so take from heading to EOF
+  return { startIdx: match.index, endIdx: fileContent.length };
+}
+
 // ── Init Conversation Prompt Builders ────────────────────────
 
 export function buildPromptPreamble(): string {
@@ -144,35 +187,92 @@ If genome/application.md has NOT been shown to the user and explicitly approved:
 </HARD-GATE>`;
 }
 
-export async function ensureClaudeMd(root: string, projectName: string): Promise<"created" | "appended" | "skipped"> {
-  const reapSection = await readTextFile(distPath("claude-md-section.md"));
-  if (!reapSection) {
+export async function ensureClaudeMd(root: string, projectName: string): Promise<"created" | "appended" | "skipped" | "updated"> {
+  const rawTemplate = await readTextFile(distPath("claude-md-section.md"));
+  if (!rawTemplate) {
     return "skipped";
   }
 
-  // Check both locations — prefer the one that already exists
+  // Strip existing markers from template if present (template itself has markers for dogfooding reference)
+  const templateContent = stripMarkers(rawTemplate);
+  const wrappedSection = wrapWithMarkers(templateContent);
+  const newHash = computeSectionHash(templateContent);
+
+  // Check both locations
   const rootPath = join(root, "CLAUDE.md");
   const dotClaudePath = join(root, ".claude", "CLAUDE.md");
 
   const rootContent = await readTextFile(rootPath);
   const dotClaudeContent = await readTextFile(dotClaudePath);
 
-  // If either already has REAP section, skip
-  if (rootContent?.includes(".reap/genome/") || dotClaudeContent?.includes(".reap/genome/")) {
-    return "skipped";
-  }
+  // Try to update each file that has a REAP section (marker-based or legacy)
+  const result = await updateClaudeMdFile(rootPath, rootContent, newHash, wrappedSection);
+  if (result) return result;
 
-  // Append to whichever exists; if both exist, prefer .claude/CLAUDE.md; if neither, create root
+  const dotResult = await updateClaudeMdFile(dotClaudePath, dotClaudeContent, newHash, wrappedSection);
+  if (dotResult) return dotResult;
+
+  // No existing REAP section found — append or create
   if (dotClaudeContent) {
-    await writeTextFile(dotClaudePath, dotClaudeContent.trimEnd() + "\n" + reapSection);
+    await writeTextFile(dotClaudePath, dotClaudeContent.trimEnd() + "\n\n" + wrappedSection + "\n");
     return "appended";
   } else if (rootContent) {
-    await writeTextFile(rootPath, rootContent.trimEnd() + "\n" + reapSection);
+    await writeTextFile(rootPath, rootContent.trimEnd() + "\n\n" + wrappedSection + "\n");
     return "appended";
   } else {
-    await writeTextFile(rootPath, `# ${projectName}\n` + reapSection);
+    await writeTextFile(rootPath, `# ${projectName}\n\n` + wrappedSection + "\n");
     return "created";
   }
+}
+
+/**
+ * Strip reap markers from content, returning inner content only.
+ */
+function stripMarkers(content: string): string {
+  const startMatch = REAP_START_RE.exec(content);
+  if (!startMatch) return content;
+  const afterStart = content.indexOf("\n", startMatch.index);
+  if (afterStart === -1) return content;
+  const endIdx = content.indexOf(REAP_END_MARKER, afterStart);
+  if (endIdx === -1) return content;
+  return content.slice(afterStart + 1, endIdx).trimEnd();
+}
+
+/**
+ * Check a single CLAUDE.md file for REAP section and update if needed.
+ * Returns action taken, or null if no REAP section found in this file.
+ */
+async function updateClaudeMdFile(
+  filePath: string,
+  content: string | null,
+  newHash: string,
+  wrappedSection: string,
+): Promise<"skipped" | "updated" | null> {
+  if (!content) return null;
+
+  // Check for marker-based section
+  const markerSection = extractReapSection(content);
+  if (markerSection) {
+    if (markerSection.hash === newHash) {
+      return "skipped";
+    }
+    // Replace marker section
+    const before = content.slice(0, markerSection.startIdx);
+    const after = content.slice(markerSection.endIdx);
+    await writeTextFile(filePath, before + wrappedSection + after);
+    return "updated";
+  }
+
+  // Check for legacy section (no markers)
+  const legacy = detectLegacyReapSection(content);
+  if (legacy) {
+    const before = content.slice(0, legacy.startIdx);
+    const after = content.slice(legacy.endIdx);
+    await writeTextFile(filePath, before.trimEnd() + "\n\n" + wrappedSection + after);
+    return "updated";
+  }
+
+  return null;
 }
 
 /**

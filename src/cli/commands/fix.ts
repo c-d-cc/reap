@@ -159,10 +159,8 @@ export async function fixProject(projectRoot: string): Promise<FixResult> {
     }
   }
 
-  // 7. CLAUDE.md — auto-repair via ensureClaudeMd
-  const claudeMdPath = join(paths.root, "CLAUDE.md");
-  const claudeMd = await readTextFile(claudeMdPath);
-  if (!claudeMd || !claudeMd.includes(".reap/genome/")) {
+  // 7. CLAUDE.md — auto-repair and sync via ensureClaudeMd (handles missing, legacy, and stale sections)
+  {
     const { ensureClaudeMd } = await import("./init/common.js");
     const configContent = await readTextFile(paths.config);
     const projectName = configContent ? (YAML.parse(configContent)?.project ?? "my-project") : "my-project";

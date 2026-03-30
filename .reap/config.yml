@@ -4,6 +4,5 @@ autoSubagent: true
 agentClient: claude-code
 autoUpdate: true
 autoIssueReport: false
-lastSyncedGeneration: ""
 strictEdit: true
 strictMerge: true

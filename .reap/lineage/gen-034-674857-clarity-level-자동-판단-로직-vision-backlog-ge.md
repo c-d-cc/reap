@@ -1,7 +1,10 @@
-# Completion — gen-034-674857
-
-## Summary
-
+---
+id: gen-034-674857
+type: embryo
+goal: "Clarity level 자동 판단 로직 — vision/backlog/genome 상태에서 코드 기반 계산"
+parents: ["gen-033-044437"]
+---
+# gen-034-674857
 Clarity level 자동 판단 로직을 구현했다. `src/core/clarity.ts` 모듈을 신규 생성하여 vision goals, backlog, generation type, lineage, memory 상태를 기반으로 규칙 기반 clarity level(high/medium/low)을 계산한다. 결과는 evolve.ts에서 수집되어 subagent prompt에 주입된다.
 
 ### Changes
@@ -12,14 +15,3 @@ Clarity level 자동 판단 로직을 구현했다. `src/core/clarity.ts` 모듈
 
 ### Test Results
 - 350 tests 전체 통과 (unit 206 + e2e 103 + scenario 41)
-
-## Lessons Learned
-
-- **maturity.ts 패턴 재활용**: 기존 detectMaturity 패턴(pure function, type export, prompt guide 분리)을 그대로 따르니 일관성 있는 코드가 나왔다. Pattern-first 원칙의 효과.
-- **데이터 수집과 판단 분리**: calculateClarity는 pure function으로 I/O 없이 판단만 하고, 데이터 수집은 evolve.ts에서 담당. 테스트가 단순해지고 관심사가 명확히 분리됨.
-
-## Next Generation Hints
-
-- Embryo → Normal 전환 검토 (유저 승인 필요)
-- README 재작성 (v0.16 기준)
-- stage별 개별 handler에도 clarity 주입 검토 (현재는 evolve prompt에만)

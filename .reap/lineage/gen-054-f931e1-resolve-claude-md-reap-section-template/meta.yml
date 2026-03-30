@@ -1,0 +1,19 @@
+id: gen-054-f931e1
+type: embryo
+goal: "resolve: CLAUDE.md REAP section template sync on reap update"
+parents:
+  - gen-053-5e7d68
+timeline:
+  - stage: learning
+    at: 2026-03-30T05:50:57.005Z
+  - stage: planning
+    at: 2026-03-30T05:53:41.052Z
+  - stage: implementation
+    at: 2026-03-30T05:54:23.519Z
+  - stage: validation
+    at: 2026-03-30T05:59:57.972Z
+  - stage: completion
+    at: 2026-03-30T06:01:28.883Z
+fitnessFeedback:
+  text: CLAUDE.md 마커 기반 동기화 구현 완료. 템플릿 변경이 reap update로 기존 프로젝트에 전파 가능. 레거시 호환 포함.
+  evaluatedAt: 2026-03-30T06:03:31.714Z

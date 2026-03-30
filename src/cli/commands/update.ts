@@ -187,7 +187,7 @@ export async function execute(phase?: string, postUpgrade?: boolean): Promise<vo
   }
 
   const claudeMdAction = await ensureClaudeMd(paths.root, projectName);
-  if (claudeMdAction === "created" || claudeMdAction === "appended") {
+  if (claudeMdAction !== "skipped") {
     updated.push(`CLAUDE.md (${claudeMdAction})`);
   }
 
