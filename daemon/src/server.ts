@@ -13,6 +13,7 @@ interface ServerConfig {
   port: number;
   idleTimeoutMs: number;
   daemonRoot: string;
+  idleCheckIntervalMs?: number;
 }
 
 export function createDaemonServer(config: ServerConfig): Server {
@@ -95,7 +96,7 @@ export function createDaemonServer(config: ServerConfig): Server {
       server.close();
       clearInterval(idleCheck);
     }
-  }, 60_000);
+  }, config.idleCheckIntervalMs ?? 60_000);
   idleCheck.unref();
 
   return server;

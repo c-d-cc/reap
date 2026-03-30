@@ -118,7 +118,7 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 │       ├── community.ts           — 커뮤니티 탐지
 │       └── process-tracer.ts      — 실행 플로우 추적
 ├── queries/                       — Tree-sitter SCM 쿼리 (15개 언어)
-└── tests/                         — daemon 테스트 (21 파일, 114 tests)
+└── tests/                         — daemon 테스트 (25 파일, 130 tests)
 ```
 
 ## Build & Scripts

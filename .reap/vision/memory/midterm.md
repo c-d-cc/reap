@@ -34,7 +34,8 @@ gen-028~031에서 gap-driven evolution + vision eval + memory 도입 완료.
 - Tree-sitter WASM 15개 언어, 인메모리 그래프 + SQLite write-through
 - 조회: 심볼 검색, caller/callee, blast radius, 커뮤니티, 실행 플로우
 - CLI/lifecycle 통합, worktree별 인덱스 fork
-- 남은 작업: E2E 테스트 보강, Phase 4 이후 MCP server wrapper (향후 확장)
+- E2E 테스트 보강 완료 (gen-060): incremental, error-cases, worktree-diverge, idle-timeout
+- 남은 작업: API 레벨 incremental indexing 지원, Phase 4 이후 MCP server wrapper (향후 확장)
 
 ## submodule 관련 반복 문제
 

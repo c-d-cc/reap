@@ -1,0 +1,19 @@
+id: gen-060-e3c492
+type: embryo
+goal: daemon E2E 테스트 보강
+parents:
+  - gen-059-9e9790
+timeline:
+  - stage: learning
+    at: 2026-03-30T07:45:16.634Z
+  - stage: planning
+    at: 2026-03-30T07:47:55.433Z
+  - stage: implementation
+    at: 2026-03-30T07:48:30.415Z
+  - stage: validation
+    at: 2026-03-30T07:51:32.582Z
+  - stage: completion
+    at: 2026-03-30T07:52:17.217Z
+fitnessFeedback:
+  text: pass
+  evaluatedAt: 2026-03-30T07:53:56.141Z
