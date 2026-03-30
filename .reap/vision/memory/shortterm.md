@@ -2,12 +2,11 @@
 
 ## 세션 요약 (2026-03-30)
 
-### gen-054: CLAUDE.md REAP section template sync
-- `ensureClaudeMd()`에 마커 기반 변경 감지/교체 메커니즘 추가
-- `<!-- reap:start {hash} -->` / `<!-- reap:end -->` 마커로 REAP 섹션 경계 명시
-- SHA256 해시 비교로 템플릿 변경 감지, 불일치 시 자동 교체
-- 레거시 하위 호환 (마커 없는 기존 CLAUDE.md도 업그레이드)
-- 12개 unit test 추가
+### gen-055: evolve subagent continuation
+- evolve.ts prompt에 "Subagent Continuation Protocol" 추가
+- reap-evolve.md에 "User Interaction Pattern" 섹션 추가
+- reap.evolve.md skill에 SendMessage 재개 안내 추가
+- 2-layer 방어: 예방(반환 최소화) + 대응(SendMessage 재개)
 
 ### 다음 세션
 - Evaluator 코드 통합 (prompt.ts, completion.ts)
@@ -18,4 +17,3 @@
 - `daemon-e2e-tests.md` (task, medium)
 - `fix-migrate-update-tests.md` (task, medium)
 - `strict-merge-mode-bypass-for-merge-gen.md` (task, medium)
-- `evolve-subagent-continuation.md` (task, high)

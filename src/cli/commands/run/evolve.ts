@@ -81,7 +81,20 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
       "- description: generation goal",
       "- prompt: the subagentPrompt from context",
       "",
-      "After the subagent completes, report the result.",
+      "## Subagent Continuation Protocol",
+      "",
+      "The subagent is the SOLE executor of the generation lifecycle. You (main agent) must NEVER execute lifecycle commands (reap run learning/planning/implementation/validation/completion) directly.",
+      "",
+      "### If the subagent completes successfully:",
+      "Report the result to the user.",
+      "",
+      "### If the subagent returns before completion (e.g., needs user input):",
+      "1. Present the subagent's message/question to the user.",
+      "2. Collect the user's response.",
+      "3. Use **SendMessage** to resume the SAME subagent with the user's response.",
+      "4. Repeat until the subagent reports generation completion.",
+      "",
+      "NEVER take over the lifecycle yourself. Always route back to the subagent via SendMessage.",
     ];
 
     if (cruise) {

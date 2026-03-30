@@ -60,10 +60,17 @@ REAP uses signature-based locking. Each stage transition requires a valid nonce.
 ### Fill Every Template
 When REAP creates any file (artifacts, backlog, etc.) with template sections (`<!-- -->` placeholders), you MUST fill ALL sections with concrete content immediately. Never leave placeholders unfilled.
 
+### User Interaction Pattern
+- You are the sole executor of the generation lifecycle. Do NOT return control to the parent agent mid-lifecycle.
+- When you need user confirmation (e.g., plan review, clarification), ask the user directly within this agent session. Do not return/yield to the parent.
+- The only valid reason to return is when the generation is fully complete (all stages finished) or when an unrecoverable error occurs.
+- If the user needs to make a decision, present the options clearly and wait for their response within this session.
+
 ### Critical Don'ts
 - Do NOT modify `current.yml` directly.
 - Do NOT skip writing artifacts or write empty ones.
 - Do NOT leave template placeholders (`<!-- -->`) unfilled in any REAP-generated file.
 - Do NOT workaround errors — track root cause.
 - Do NOT create backlog during adapt phase.
+- Do NOT return to the parent agent before generation completion — handle user interactions within this session.
 - tests/ is a git submodule — commit inside submodule first if modified.

@@ -1,6 +1,8 @@
 ---
 type: task
-status: pending
+status: consumed
+consumedBy: gen-055-1e33bd
+consumedAt: 2026-03-30T06:05:20.169Z
 priority: high
 createdAt: 2026-03-30T05:27:35.010Z
 ---
