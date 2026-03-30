@@ -128,6 +128,7 @@ export async function buildKnowledgeContext(cwd: string): Promise<string | null>
       config.strictEdit ?? false,
       config.strictMerge ?? false,
       strictStage,
+      state?.type,
     );
     if (strictSection) {
       sections.push(strictSection.trimStart());

@@ -48,6 +48,7 @@ export function buildStrictSection(
   strictEdit: boolean,
   strictMerge: boolean,
   stage: string,
+  generationType?: string,
 ): string {
   let sections = "";
 
@@ -62,7 +63,12 @@ export function buildStrictSection(
   }
 
   if (strictMerge) {
-    sections += `\n\n## Strict Mode — Merge (ACTIVE)\n<HARD-GATE>\nDirect git pull, git push, and git merge commands are restricted.\nUse REAP slash commands instead: \`/reap.pull\`, \`/reap.push\`, \`/reap.merge\`.\nThis ensures genome-first conflict resolution and proper lineage tracking.\nIf the user explicitly requests to bypass (e.g., "override", "bypass strict"), you may proceed for that specific action only — but inform them that strict merge mode is being bypassed. The bypass does NOT persist; strict mode re-engages immediately after the requested action is complete.\n</HARD-GATE>`;
+    // Merge generations need git merge — bypass strict merge restriction
+    if (generationType === "merge") {
+      sections += `\n\n## Strict Mode — Merge (BYPASSED — Merge Generation)\nStrict merge mode is enabled but automatically bypassed for this merge generation.\nDirect \`git merge\` is ALLOWED because the purpose of a merge generation is to perform git merge.\n\`git pull\` and \`git push\` remain restricted — use \`/reap.pull\` and \`/reap.push\` instead.`;
+    } else {
+      sections += `\n\n## Strict Mode — Merge (ACTIVE)\n<HARD-GATE>\nDirect git pull, git push, and git merge commands are restricted.\nUse REAP slash commands instead: \`/reap.pull\`, \`/reap.push\`, \`/reap.merge\`.\nThis ensures genome-first conflict resolution and proper lineage tracking.\nIf the user explicitly requests to bypass (e.g., "override", "bypass strict"), you may proceed for that specific action only — but inform them that strict merge mode is being bypassed. The bypass does NOT persist; strict mode re-engages immediately after the requested action is complete.\n</HARD-GATE>`;
+    }
   }
 
   return sections;
@@ -203,6 +209,7 @@ export function buildBasePrompt(
       config.strictEdit ?? false,
       config.strictMerge ?? false,
       strictStage,
+      state?.type,
     );
     if (strictSection) {
       lines.push(strictSection.trimStart());
