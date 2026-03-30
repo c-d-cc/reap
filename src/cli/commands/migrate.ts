@@ -398,7 +398,7 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
     await ensureDir(paths.backlog);
     await ensureDir(paths.lineage);
     await ensureDir(paths.vision);
-    await ensureDir(join(paths.vision, "docs"));
+    await ensureDir(paths.visionDesign);
     await ensureDir(join(paths.vision, "memory"));
     await ensureDir(paths.hooks);
   });

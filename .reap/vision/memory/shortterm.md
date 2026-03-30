@@ -2,17 +2,18 @@
 
 ## 세션 요약 (2026-03-30)
 
-### gen-058: strict merge mode bypass for merge generation
-- `buildStrictSection()`에 `generationType?` 파라미터 추가
-- merge generation이면 HARD-GATE 대신 BYPASSED 안내 (git merge 허용, pull/push 계속 제한)
-- `prompt.ts` + `load-context.ts` 양쪽 수정, 테스트 6건 추가 (21 pass)
+### gen-059: migrate/update 테스트 8건 수정
+- `integrity.ts`: LEGACY_PREFIX_PATTERN -> LEGACY_COMMAND_PATTERN + LEGACY_SKILL_PATTERN 분리 (reapdev.* 지원)
+- `migrate.ts`: vision/docs -> vision/design 경로 수정
+- `update.test.ts`: vision/docs -> vision/design 경로 수정
+- 결과: unit 342 pass, e2e 147 pass, 1 pre-existing failure (init-repair)
 
 ### 다음 세션
+- `init-repair.test.ts` "skips when REAP section already present" pre-existing failure 수정
 - Evaluator 코드 통합 (prompt.ts, completion.ts)
-- Pre-existing test failures 수정 (integrity 4건)
 - Daemon E2E 테스트 보강
 
 ### Backlog 상태
 - `daemon-e2e-tests.md` (task, medium)
-- `fix-migrate-update-tests.md` (task, medium)
-- `strict-merge-mode-bypass-for-merge-gen.md` (task, medium) — gen-058에서 consumed 예정
+- `fix-migrate-update-tests.md` (task, medium) — gen-059에서 consumed
+- `strict-merge-mode-bypass-for-merge-gen.md` (task, medium) — gen-058에서 consumed

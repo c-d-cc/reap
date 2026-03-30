@@ -645,8 +645,9 @@ async function checkGlobPattern(
 
 // ── legacy project-level cleanup ─────────────────────────────
 
-// Only clean up reap.* (v0.15 project-level skills). Do NOT clean reapdev.* (dev tools).
-const LEGACY_PREFIX_PATTERN = /^reap\.[^.]+\.md$/;
+// Patterns for legacy project-level cleanup (both reap.* and reapdev.*)
+const LEGACY_COMMAND_PATTERN = /^(reap|reapdev)\.[^.]+\.md$/;  // files: reap.*.md, reapdev.*.md
+const LEGACY_SKILL_PATTERN = /^(reap|reapdev)\./;               // directories: reap.*/, reapdev.*/
 
 /**
  * Remove legacy project-level REAP commands and skills.
@@ -670,7 +671,7 @@ export async function cleanupLegacyProjectSkills(
   try {
     const entries = await readdir(commandsDir);
     for (const entry of entries) {
-      if (LEGACY_PREFIX_PATTERN.test(entry)) {
+      if (LEGACY_COMMAND_PATTERN.test(entry)) {
         await rm(join(commandsDir, entry), { force: true });
         deleted.push(`.claude/commands/${entry}`);
       }
@@ -684,7 +685,7 @@ export async function cleanupLegacyProjectSkills(
   try {
     const entries = await readdir(skillsDir);
     for (const entry of entries) {
-      if (LEGACY_PREFIX_PATTERN.test(entry)) {
+      if (LEGACY_SKILL_PATTERN.test(entry)) {
         const entryPath = join(skillsDir, entry);
         try {
           const s = await stat(entryPath);

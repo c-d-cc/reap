@@ -1,0 +1,19 @@
+id: gen-059-9e9790
+type: embryo
+goal: "fix: migrate/update 관련 테스트 8건 수정"
+parents:
+  - gen-058-c24cf8
+timeline:
+  - stage: learning
+    at: 2026-03-30T06:48:31.254Z
+  - stage: planning
+    at: 2026-03-30T06:50:36.894Z
+  - stage: implementation
+    at: 2026-03-30T06:50:55.508Z
+  - stage: validation
+    at: 2026-03-30T06:52:00.408Z
+  - stage: completion
+    at: 2026-03-30T06:54:48.812Z
+fitnessFeedback:
+  text: pass
+  evaluatedAt: 2026-03-30T06:55:55.628Z
