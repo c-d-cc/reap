@@ -645,9 +645,10 @@ async function checkGlobPattern(
 
 // ── legacy project-level cleanup ─────────────────────────────
 
-// Patterns for legacy project-level cleanup (both reap.* and reapdev.*)
-const LEGACY_COMMAND_PATTERN = /^(reap|reapdev)\.[^.]+\.md$/;  // files: reap.*.md, reapdev.*.md
-const LEGACY_SKILL_PATTERN = /^(reap|reapdev)\./;               // directories: reap.*/, reapdev.*/
+// Patterns for legacy project-level cleanup (reap.* only — reapdev.* is reserved
+// for the REAP repo's own project-level dev commands and must not be cleaned)
+const LEGACY_COMMAND_PATTERN = /^reap\.[^.]+\.md$/;  // files: reap.*.md
+const LEGACY_SKILL_PATTERN = /^reap\./;               // directories: reap.*/
 
 /**
  * Remove legacy project-level REAP commands and skills.
@@ -656,7 +657,10 @@ const LEGACY_SKILL_PATTERN = /^(reap|reapdev)\./;               // directories: 
  * and `.claude/skills/reap.* /SKILL.md`. v0.16 uses user-level
  * `~/.claude/commands/` only, so project-level files are unnecessary.
  *
- * Only deletes entries matching `reap.` or `reapdev.` prefix.
+ * Only deletes entries matching the `reap.` prefix. The `reapdev.` prefix
+ * is reserved for project-level dev commands inside the REAP repo itself
+ * and must be preserved (self-hosting concern).
+ *
  * Preserves the `.claude/commands/` and `.claude/skills/` directories themselves.
  *
  * @returns list of deleted paths (relative to projectRoot)
@@ -666,7 +670,7 @@ export async function cleanupLegacyProjectSkills(
 ): Promise<string[]> {
   const deleted: string[] = [];
 
-  // 1. .claude/commands/reap.*.md and .claude/commands/reapdev.*.md
+  // 1. .claude/commands/reap.*.md (reapdev.*.md preserved for REAP self-hosting)
   const commandsDir = join(projectRoot, ".claude", "commands");
   try {
     const entries = await readdir(commandsDir);

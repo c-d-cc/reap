@@ -15,7 +15,8 @@ const SKILLS_DIR = __dirname.includes("dist")
 const SKILL_PATTERN = /^reap\..+\.md$/;
 
 /**
- * Remove existing reap/reapdev skill files from target directory
+ * Remove existing reap.* skill files from target directory before re-installing.
+ * Does not match `reapdev.*` (reserved for REAP repo's own project-level dev commands).
  */
 async function cleanupStaleSkills(targetDir: string): Promise<string[]> {
   const files = await readdir(targetDir);
@@ -35,7 +36,7 @@ export async function installSkills(_projectRoot?: string): Promise<void> {
   const targetDir = join(homedir(), ".claude", "commands");
   await ensureDir(targetDir);
 
-  // Clean up existing reap/reapdev skills before copying new ones
+  // Clean up existing reap.* skills before copying new ones
   const cleaned = await cleanupStaleSkills(targetDir);
 
   const files = await readdir(SKILLS_DIR);
