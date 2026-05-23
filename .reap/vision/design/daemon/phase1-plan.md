@@ -8,7 +8,7 @@
 
 **Tech Stack:** TypeScript, Node.js `http` module, `better-sqlite3` (Phase 2에서 사용 — 이 Phase에서는 dependency만 설정), Bun (개발/테스트)
 
-**설계 문서:** `.reap/vision/design/daemon-indexer.md`
+**설계 문서:** `.reap/vision/design/daemon/indexer.md`
 
 ---
 

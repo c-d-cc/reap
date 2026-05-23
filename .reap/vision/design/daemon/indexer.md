@@ -15,6 +15,8 @@ AI agent가 프로젝트를 더 빠르고 정확하게 이해할 수 있도록 �
 변경의 영향 범위가 어디까지인지 — 는 AI agent가 매번 직접 탐색해야 한다.
 daemon이 이를 사전 인덱싱하면 탐색 시간과 토큰 소비를 크게 줄일 수 있다.
 
+**Primary target은 REAP를 설치한 사용자 workspace** (대규모 codebase 가능). REAP 자체 codebase의 self-hosting은 부수 효과이며, daemon의 가치 명제는 사용자 workspace 규모가 커서 AI agent의 grep/Read 기반 탐색이 비효율적인 시나리오에서 성립한다. 가치/방향성에 대한 미결 결정 사항은 [open-questions.md](./open-questions.md) 참조.
+
 ## 아키텍처
 
 ```

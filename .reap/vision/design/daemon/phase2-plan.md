@@ -8,7 +8,7 @@
 
 **Tech Stack:** web-tree-sitter@0.22.6, tree-sitter-wasms, better-sqlite3 (Phase 1에서 이미 설치), Bun (개발/테스트)
 
-**설계 문서:** `.reap/vision/design/daemon-indexer.md`
+**설계 문서:** `.reap/vision/design/daemon/indexer.md`
 
 **Phase 1 결과:** daemon/ 앱 존재 (HTTP 서버, 라우터, 레지스트리, 프로세스 관리). `POST /projects/:id/index`는 현재 stub.
 

@@ -8,7 +8,7 @@
 
 **Tech Stack:** 기존 Phase 1-2 스택 + Leiden 알고리즘 (자체 구현, 외부 의존성 없음)
 
-**설계 문서:** `.reap/vision/design/daemon-indexer.md`
+**설계 문서:** `.reap/vision/design/daemon/indexer.md`
 
 ---
 
