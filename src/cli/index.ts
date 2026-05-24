@@ -69,9 +69,10 @@ program
   .option("--feedback <feedback>", "Fitness feedback text")
   .option("--reason <reason>", "Reason for back regression or abort")
   .option("--backlog <backlog>", "Backlog filename to consume for this generation")
-  .option("--source-action <sourceAction>", "Source action for abort (rollback, stash, hold, none)")
+  .option("--source-action <sourceAction>", "Source action for abort/early-close (rollback, stash, hold, none — rollback only for abort)")
   .option("--save-backlog", "Save progress to backlog on abort")
-  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string; sourceAction?: string; saveBacklog?: boolean }) => {
+  .option("--defer-tasks <value>", "For early-close: auto-defer unchecked tasks to new backlog (true|false, default true)")
+  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string }) => {
     await runExecute(stage, options);
   });
 

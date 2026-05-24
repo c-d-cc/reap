@@ -37,6 +37,14 @@ gen-028~031에서 gap-driven evolution + vision eval + memory 도입 완료.
 - E2E 테스트 보강 완료 (gen-060): incremental, error-cases, worktree-diverge, idle-timeout
 - 남은 작업: API 레벨 incremental indexing 지원, Phase 4 이후 MCP server wrapper (향후 확장)
 
+## Lifecycle Termination Paths (gen-061, 2026-05-24 완료)
+
+Issue #16 해결. 종료 경로가 abort/completion에서 abort/early-close/completion 셋으로 확장됨.
+- early-close: lightweight 종료 (implementation/validation 한정). lineage에 `status: partial` + closeMeta 기록. fitness/adapt skip. 미완 task 자동 backlog 승계.
+- abort confirm prompt + start scan phase에 사용자 인지 흐름 통합.
+- agent behavior 가이드: 사용자가 "그만/중단/포기/스코프 축소" 의도 표명 시 세 선택지 자동 제시 (reap-guide.md 반영).
+- 다음 단계 관찰: 실사용 시 reflect interactive prompt 품질, 자동 task 추출 적중률, deferred backlog → next gen 의 자연스러운 흐름.
+
 ## submodule 관련 반복 문제
 
 tests/ submodule에서 commit phase마다 dirty check 이슈 반복.

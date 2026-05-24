@@ -50,3 +50,6 @@ buildBasePrompt()는 동적 context(state, vision, memory, clarity, cruise)만 �
 ### Lifecycle 준수는 AI 자신에게도 적용
 이번 세션에서 generation 없이 subagent prompt 슬림화를 진행함 → 유저가 지적.
 "모든 개발 작업은 REAP lifecycle을 따라야 한다"는 규칙은 AI 자신에게도 적용됨.
+
+### 종료 path는 transition graph 외부 (gen-061, 2026-05-24)
+abort/early-close 같은 "탈출 path"는 `NORMAL_TRANSITIONS`/`MERGE_TRANSITIONS` graph 안에 transition으로 추가하지 않고, `verifyTransition` 호출 자체를 건너뛰는 방식으로 구현. 대신 `state.stage` 검사로 명시적 가드. 정상 lifecycle 흐름과 탈출 path의 책임 분리가 명확해짐. 새 종료 path를 추가할 때 abort.ts/early-close.ts 패턴을 차용.

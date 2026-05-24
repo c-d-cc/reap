@@ -1,0 +1,23 @@
+id: gen-061-386e6c
+type: normal
+goal: "resolve #16: early-close lifecycle path 추가 — generation 조기 종료 + 부분 가치 보존
+  + 다음 세대 자연 승계"
+parents:
+  - gen-060-e3c492
+timeline:
+  - stage: learning
+    at: 2026-05-23T18:34:31.773Z
+  - stage: planning
+    at: 2026-05-23T18:38:22.719Z
+  - stage: implementation
+    at: 2026-05-23T18:42:55.836Z
+  - stage: validation
+    at: 2026-05-23T18:56:21.093Z
+  - stage: completion
+    at: 2026-05-23T19:00:56.123Z
+fitnessFeedback:
+  text: "전반적으로 만족 — 구현 결과 OK. agent 자체 결정 사항 모두 수용: (1) commit message tag 포맷
+    'feat(gen-061-386e) [early-close]: ...' 그대로 진행, (2) deferred backlog
+    auto-extraction 정규식 현재 구현 유지. 다음 generation 후보 4건(init-repair, evaluator 통합,
+    daemon test disable 옵션, early-close 실사용 관찰)은 backlog로 자동 등록하지 않고 향후 별도 판단."
+  evaluatedAt: 2026-05-24T04:51:46.024Z

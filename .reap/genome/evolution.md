@@ -125,6 +125,18 @@ Memory 활용 규칙:
 - 예: completion fitness에서 중단 → `reap run completion --phase fitness --feedback "..."` 로 재실행 → adapt → commit.
 - **절대로 current.yml을 수동 편집하지 않는다**. nonce가 꼬이면 abort 후 재시작이 더 안전.
 
+## 조기 종료(early-close) 판단
+
+`reap run early-close` 는 implementation/validation 단계에서만 사용 가능한 lightweight 종료 path 다. 다음 상황에서 고려한다.
+- 작업 일부는 완성되어 가치가 있으나 잔여 task 가 별도 generation 으로 나누는 게 더 합리적인 경우.
+- 외부 의존 차단(API 변경, 환경 이슈)으로 현 generation 에서 마무리 불가하지만 진행분은 살리고 싶을 때.
+- 단순 폐기(abort)와 정식 완료(completion) 둘 다 부적절할 때.
+
+판단 기준:
+- 진행분이 **lineage 에 보존할 가치가 있는가** → No 면 abort 선택.
+- 잔여 task 가 **별도 generation 가치를 가지는가** → No(자잘한 follow-up)면 그대로 completion 까지 가서 hints 에만 기록.
+- `--defer-tasks` 옵션으로 deferred backlog 본문을 명시 지정 가능. 미지정 시 implementation artifact 에서 unchecked `- [ ]` 라인 자동 추출.
+
 ## Echo Chamber 방지
 
 - AI 자율 추가는 현재 goal의 직접 인과 범위 내에서만 허용

@@ -148,6 +148,40 @@ Each item carries a `status` field:
 
 Tasks that depend on genome changes cannot be completed in the current generation. Mark as `[deferred]` and add to backlog as `type: task`. Partial completion is normal.
 
+### Termination Paths — abort / early-close / completion
+
+Generation은 세 가지 방식으로 종료된다. 사용자가 "그만", "중단", "포기", "취소", "스코프 줄이고 싶어"(영: stop, abort, give up, reduce scope, cancel) 같은 의도를 표명하면, agent는 **자동으로 다음 세 선택지를 제시하고 사용자가 선택하게 한다**.
+
+| 항목 | abort | early-close | completion |
+|---|---|---|---|
+| 의미 | 실패/취소 | 부분 완성 종료 | 정상 완료 |
+| artifacts | 삭제 | lineage에 보존 | lineage에 보존 |
+| consumed backlog | pending으로 복귀 | consumed 유지 | consumed 유지 |
+| lineage 기록 | X | `status: partial` | `status: completed` |
+| reflect | X | 사용자 interactive | 자동 + 사용자 |
+| fitness | X | **skip** | O |
+| adapt | X | **skip** | O |
+| git commit | X | `[early-close]` 표기 | 정상 표기 |
+| 다음 generation hint | (없음) | deferred backlog 안내 | gap-driven 제안 |
+| 사용 가능 단계 | 모든 stage | implementation, validation | validation 자연 흐름 |
+
+**Agent behavior — 중단 의도 표명 시 절차**:
+
+1. 사용자 의도 확인: "정말 중단하시려는 건가요, scope를 줄이려는 건가요?"
+2. 세 선택지 제시:
+   - **abort**: 이번 generation 자체를 취소 (실패 처리, 부분 진행은 선택적으로 backlog 저장 가능). `/reap.abort`.
+   - **early-close**: 지금까지 한 만큼만 lineage에 반영하고 다음 세대로 (부분 가치 보존). `/reap.early-close --reason "<r>"`.
+   - **continue completion**: 끝까지 가서 정식 완료.
+3. 사용자가 선택하면 그에 맞는 CLI를 실행.
+
+**early-close 사용 시 reflect는 사용자 interactive로 진행한다**. 자동 판단 금지 — agent가 다음을 사용자에게 묻고 응답 기반으로 정리:
+- 어디까지 진행됐는가? (completed tasks)
+- 무엇이 가치 있었는가? (value preserved)
+- 무엇이 남았는가? (deferred — backlog 본문 보강)
+- 왜 닫는가? (close reason)
+
+**early-close 후 다음 generation `reap run start` 시** scan phase가 직전 lineage entry의 `status: partial`을 감지하면 prompt에 deferred backlog hint를 자동 노출한다. 사용자가 그 deferred backlog를 source backlog로 선택하면 자연스럽게 이어진다.
+
 ### Stage Regression (Micro Loop)
 
 Any stage can regress to a previous stage using `reap run back`. Artifact handling:
@@ -222,6 +256,7 @@ All REAP interactions go through `/reap.*` slash commands. These are the primary
 - `/reap.next` — Advance to the next stage
 - `/reap.back [--reason "<reason>"]` — Return to a previous stage
 - `/reap.abort [--phase execute] [--reason "<reason>"] [--source-action <rollback|stash|hold|none>] [--save-backlog]` — Abort current generation (2-phase: confirm → execute)
+- `/reap.early-close [--phase execute] [--reason "<reason>"] [--source-action <hold|stash|none>] [--defer-tasks <true|false>]` — Close current generation as a partial save. Lightweight: skips fitness/adapt, preserves artifacts to lineage, auto-defers unchecked tasks to a new backlog. Only callable in implementation/validation stages.
 
 ### Knowledge Commands
 - `/reap.knowledge [reload|genome|environment]` — Manage genome, environment, and context knowledge. No argument shows options.

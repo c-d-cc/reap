@@ -15,6 +15,7 @@ import { execute as evolveExecute } from "./evolve.js";
 import { execute as backExecute } from "./back.js";
 import { execute as nextExecute } from "./next.js";
 import { execute as abortExecute } from "./abort.js";
+import { execute as earlyCloseExecute } from "./early-close.js";
 import { execute as detectExecute } from "./detect.js";
 import { execute as mateExecute } from "./mate.js";
 import { execute as mergeExecute } from "./merge.js";
@@ -34,6 +35,7 @@ const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, pha
   back: backExecute,
   next: nextExecute,
   abort: abortExecute,
+  "early-close": earlyCloseExecute,
   detect: detectExecute,
   mate: mateExecute,
   merge: mergeExecute,
@@ -44,7 +46,7 @@ const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, pha
   report: reportExecute,
 };
 
-export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string; sourceAction?: string; saveBacklog?: boolean }): Promise<void> {
+export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string }): Promise<void> {
   if (stage === "start") {
     await startExecute(options.phase, options.goal, options.type, options.parents, options.backlog);
     return;
@@ -63,10 +65,13 @@ export async function execute(stage: string, options: { phase?: string; goal?: s
     emitError("run", `Unknown stage '${stage}'. Available: start, ${Object.keys(STAGE_HANDLERS).join(", ")}`);
   }
 
-  // Pass extra: feedback for completion, reason for back, JSON for abort
+  // Pass extra: feedback for completion, reason for back, JSON for abort/early-close
   let extra = options.feedback || options.reason || options.goal;
   if (stage === "abort") {
     extra = JSON.stringify({ reason: options.reason, sourceAction: options.sourceAction, saveBacklog: options.saveBacklog });
+  }
+  if (stage === "early-close") {
+    extra = JSON.stringify({ reason: options.reason, sourceAction: options.sourceAction, deferTasks: options.deferTasks });
   }
 
   try {

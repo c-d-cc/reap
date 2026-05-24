@@ -5,6 +5,7 @@ import { fileExists } from "../../../core/fs.js";
 import { emitOutput, emitError } from "../../../core/output.js";
 import { executeHooks } from "../../../core/hooks.js";
 import { scanBacklog, consumeBacklog } from "../../../core/backlog.js";
+import { getLastLineageEntry } from "../../../core/lineage.js";
 
 export async function execute(phase?: string, goal?: string, type?: string, parents?: string, backlog?: string): Promise<void> {
   const paths = createPaths(process.cwd());
@@ -29,6 +30,44 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
     const backlogItems = await scanBacklog(paths.backlog);
     const pendingBacklog = backlogItems.filter(b => b.status === "pending");
 
+    // Detect previous early-close to surface a hint
+    const lastEntry = await getLastLineageEntry(paths);
+    const previousEarlyClose = lastEntry?.status === "partial"
+      ? {
+          id: lastEntry.id,
+          closedAtStage: lastEntry.closeMeta?.closedAtStage,
+          reason: lastEntry.closeMeta?.reason,
+          deferredBacklogFile: lastEntry.closeMeta?.deferredBacklogFile,
+          deferredTasks: lastEntry.closeMeta?.deferredTasks,
+        }
+      : null;
+
+    const promptParts: string[] = [];
+    if (previousEarlyClose) {
+      promptParts.push(
+        `## Previous generation was early-closed (${previousEarlyClose.id}, stage: ${previousEarlyClose.closedAtStage ?? "unknown"})`,
+        previousEarlyClose.reason ? `Close reason: ${previousEarlyClose.reason}` : "",
+        previousEarlyClose.deferredBacklogFile
+          ? `Deferred backlog file: \`${previousEarlyClose.deferredBacklogFile}\` (${previousEarlyClose.deferredTasks ?? 0} task(s))`
+          : "Deferred backlog: 없음 (defer-tasks=false 또는 미완 task 없음).",
+        "이전 generation의 미완 작업을 이어가려면 위 deferred backlog를 source backlog로 선택하세요.",
+        "",
+      );
+    }
+
+    if (pendingBacklog.length > 0) {
+      promptParts.push(
+        `Pending backlog items (${pendingBacklog.length}):`,
+        ...pendingBacklog.map((b) => `- [${b.type}] ${b.title} (\`${b.filename}\`)`),
+        "",
+        "Present these to the human. Ask: select one as the goal or enter a new goal.",
+        "If a backlog item is selected, include --backlog <filename> in the start command.",
+        'Then run: reap run start --phase create --goal "<goal>" [--backlog <filename>]',
+      );
+    } else {
+      promptParts.push('Ask the human for the goal of this generation. Then run: reap run start --phase create --goal "<goal>"');
+    }
+
     emitOutput({
       status: "prompt",
       command: "start",
@@ -36,10 +75,9 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
       completed: ["gate", "backlog-scan"],
       context: {
         backlogItems: pendingBacklog.map(b => ({ type: b.type, title: b.title, filename: b.filename })),
+        previousEarlyClose,
       },
-      prompt: pendingBacklog.length > 0
-        ? `Pending backlog items (${pendingBacklog.length}):\n${pendingBacklog.map(b => `- [${b.type}] ${b.title} (\`${b.filename}\`)`).join("\n")}\n\nPresent these to the human. Ask: select one as the goal or enter a new goal.\nIf a backlog item is selected, include --backlog <filename> in the start command.\nThen run: reap run start --phase create --goal "<goal>" [--backlog <filename>]`
-        : 'Ask the human for the goal of this generation. Then run: reap run start --phase create --goal "<goal>"',
+      prompt: promptParts.filter(Boolean).join("\n"),
       nextCommand: "reap run start --phase create",
     });
   }

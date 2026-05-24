@@ -29,11 +29,11 @@ src/
 │   ├── artifact-check.ts        — artifact 미작성 감지 (core placeholder 기반)
 │   ├── stage-transition.ts     — transition graph 기반 nonce 검증 (verifyTransition, setTransitionNonces, prepareStageEntry), artifact 검증, stage 전환
 │   ├── maturity.ts             — bootstrap/growth/cruise 감지, 완성 기준 16항목
-│   ├── lineage.ts              — 아카이브 DAG, genome diff (3-way), lineage 읽기
+│   ├── lineage.ts              — 아카이브 DAG, genome diff (3-way), lineage 읽기, getLastLineageEntry (early-close hint 노출용)
 │   ├── compression.ts          — 2-level lineage 압축 (L1: 5gen, L2: 100files)
 │   ├── genome-suggest.ts       — init 시 genome 초안 생성
-│   ├── backlog.ts              — backlog scan, consume, revert, create
-│   ├── archive.ts              — generation 아카이빙 (life → lineage)
+│   ├── backlog.ts              — backlog scan, consume, revert, create + createDeferredBacklog/extractUncheckedTasks/countCheckedTasks (early-close 승계용)
+│   ├── archive.ts              — generation 아카이빙 (life → lineage). archiveGeneration (status: completed) + archiveEarlyClose (status: partial + closeMeta)
 │   ├── cruise.ts               — cruise mode 관리 ("N/M" 포맷, parse/advance/clear/set)
 │   ├── git.ts                  — git 연동 (commit, diff, push, pull, fetch, branch analysis)
 │   ├── hooks.ts                — lifecycle hook engine (조건부 실행, 순서 제어, 상세 결과)
@@ -72,7 +72,8 @@ src/
 │       │   ├── push.ts         — git push (상태 검증 포함)
 │       │   ├── pull.ts         — git fetch + branch 분석 + prompt 반환
 │       │   ├── knowledge.ts    — genome/environment/vision/memory 관리 (reload/genome/environment/memory)
-│       │   └── report.ts       — 수동 issue report (AI prompt 기반, privacy gate 포함)
+│       │   ├── report.ts       — 수동 issue report (AI prompt 기반, privacy gate 포함)
+│       │   └── early-close.ts  — early-close lifecycle path (lightweight 종료, impl/validation only). 2-phase confirm→execute. status: partial archive + deferred backlog 자동 승계.
 │       ├── config.ts            — 프로젝트 설정 조회 (config.yml → JSON 출력)
 │       ├── status.ts           — 현재 상태 조회
 │       ├── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
@@ -86,7 +87,7 @@ src/
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/claude-code/       — Claude Code 어댑터
 │   ├── install.ts              — skill 파일 설치 (~/.claude/commands/) + SessionStart hook 등록 (check-version + load-context)
-│   └── skills/                 — 20 slash command files (.md, reap.update.md, reap.report.md 포함)
+│   └── skills/                 — 19 slash command files (.md, reap.update.md, reap.report.md, reap.early-close.md 포함)
 └── templates/                  — 템플릿 파일
     ├── reap-guide.md           — REAP 도구 가이드 (subagent prompt에 주입)
     ├── agents/                 — agent 정의 템플릿

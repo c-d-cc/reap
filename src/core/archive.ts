@@ -8,24 +8,29 @@ import { scanBacklog } from "./backlog.js";
 import { compressLineage } from "./compression.js";
 
 /**
- * Archive the current generation to lineage/ and clear life/.
- *
- * Backlog handling (v0.15 pattern):
- * - consumed backlog → copied to lineage, removed from life/backlog/
- * - pending backlog → stays in life/backlog/ (carry-over to next generation)
+ * Build archive directory path under lineage/ using gen id + slugified goal.
  */
-export async function archiveGeneration(
-  paths: ReapPaths,
-  state: GenerationState,
-  fitnessFeedback?: string,
-): Promise<string> {
-  // Build archive directory name
+function buildArchiveDir(lineageRoot: string, state: GenerationState): string {
   const goalSlug = state.goal
     .toLowerCase()
     .replace(/[^a-z0-9가-힣]+/g, "-")
     .slice(0, 40)
     .replace(/-+$/, "");
-  const archiveDir = join(paths.lineage, `${state.id}-${goalSlug}`);
+  return join(lineageRoot, `${state.id}-${goalSlug}`);
+}
+
+/**
+ * Write archive directory, meta.yml, and clean up life/.
+ *
+ * Common path for both full completion and early-close. Caller chooses what
+ * extra metadata to include in meta.yml (e.g. fitnessFeedback or closeMeta).
+ */
+async function writeArchive(
+  paths: ReapPaths,
+  state: GenerationState,
+  archiveDir: string,
+  extraMeta: Record<string, unknown>,
+): Promise<void> {
   await ensureDir(archiveDir);
 
   // Copy artifacts (excluding backlog/ and current.yml)
@@ -62,13 +67,8 @@ export async function archiveGeneration(
     goal: state.goal,
     parents: state.parents,
     timeline: state.timeline,
+    ...extraMeta,
   };
-  if (fitnessFeedback) {
-    meta.fitnessFeedback = {
-      text: fitnessFeedback,
-      evaluatedAt: new Date().toISOString(),
-    };
-  }
   await writeTextFile(join(archiveDir, "meta.yml"), YAML.stringify(meta));
 
   // Clear life/ artifacts (keep backlog/ — pending items remain)
@@ -79,6 +79,75 @@ export async function archiveGeneration(
 
   // Run lineage compression (non-blocking)
   await compressLineage(paths.lineage).catch(() => {});
+}
 
+/**
+ * Archive the current generation to lineage/ and clear life/.
+ *
+ * Backlog handling (v0.15 pattern):
+ * - consumed backlog → copied to lineage, removed from life/backlog/
+ * - pending backlog → stays in life/backlog/ (carry-over to next generation)
+ */
+export async function archiveGeneration(
+  paths: ReapPaths,
+  state: GenerationState,
+  fitnessFeedback?: string,
+): Promise<string> {
+  const archiveDir = buildArchiveDir(paths.lineage, state);
+
+  const extraMeta: Record<string, unknown> = {
+    status: "completed",
+  };
+  if (fitnessFeedback) {
+    extraMeta.fitnessFeedback = {
+      text: fitnessFeedback,
+      evaluatedAt: new Date().toISOString(),
+    };
+  }
+
+  await writeArchive(paths, state, archiveDir, extraMeta);
+  return archiveDir;
+}
+
+export interface EarlyCloseMeta {
+  reason: string;
+  closedAtStage: string;
+  completedTasks: number;
+  deferredTasks: number;
+  deferredBacklogFile?: string;
+  sourceAction: string;
+}
+
+/**
+ * Archive the current generation as a partial close (early-close path).
+ *
+ * Differs from `archiveGeneration` in that meta.yml gets:
+ * - `status: partial` (vs `completed`)
+ * - `closeMeta` object with reason, closedAtStage, task counts, deferred backlog ref
+ * - no fitnessFeedback (fitness is skipped in early-close)
+ */
+export async function archiveEarlyClose(
+  paths: ReapPaths,
+  state: GenerationState,
+  closeMeta: EarlyCloseMeta,
+): Promise<string> {
+  const archiveDir = buildArchiveDir(paths.lineage, state);
+
+  const extraMeta: Record<string, unknown> = {
+    status: "partial",
+    closeMeta: {
+      reason: closeMeta.reason,
+      closedAtStage: closeMeta.closedAtStage,
+      completedTasks: closeMeta.completedTasks,
+      deferredTasks: closeMeta.deferredTasks,
+      sourceAction: closeMeta.sourceAction,
+      ...(closeMeta.deferredBacklogFile
+        ? { deferredBacklogFile: closeMeta.deferredBacklogFile }
+        : {}),
+      closedAt: new Date().toISOString(),
+    },
+  };
+
+  await writeArchive(paths, state, archiveDir, extraMeta);
   return archiveDir;
 }

@@ -1,7 +1,8 @@
-import { readdir } from "fs/promises";
+import { readdir, stat } from "fs/promises";
 import { join } from "path";
 import { execSync } from "child_process";
 import YAML from "yaml";
+import type { ReapPaths } from "./paths.js";
 import { readTextFile } from "./fs.js";
 
 export interface LineageMeta {
@@ -122,5 +123,79 @@ export async function readLineageMetas(lineagePath: string): Promise<LineageMeta
 export function findLineageDir(metas: LineageMeta[], genId: string): string | null {
   const meta = metas.find((m) => m.id === genId);
   return meta?.dirName ?? null;
+}
+
+// ── Last lineage entry (for early-close hint propagation) ───
+
+export interface LastLineageEntry {
+  id: string;
+  status?: string;
+  goal?: string;
+  dirName: string;
+  closeMeta?: {
+    reason?: string;
+    closedAtStage?: string;
+    completedTasks?: number;
+    deferredTasks?: number;
+    deferredBacklogFile?: string;
+  };
+}
+
+/**
+ * Read the most recent lineage entry (sorted by generation directory name).
+ *
+ * Returns null if no entry exists or if the latest entry is a compressed
+ * `.md` file (no meta.yml). Used by `reap run start` to surface a hint when
+ * the previous generation was early-closed.
+ */
+export async function getLastLineageEntry(paths: ReapPaths): Promise<LastLineageEntry | null> {
+  let entries: string[];
+  try {
+    entries = await readdir(paths.lineage);
+  } catch {
+    return null;
+  }
+
+  const genEntries = entries.filter((e) => e.startsWith("gen-")).sort();
+  if (genEntries.length === 0) return null;
+
+  const last = genEntries[genEntries.length - 1];
+  const lastPath = join(paths.lineage, last);
+
+  // Only consider directories (compressed entries are .md files w/o meta.yml).
+  try {
+    const st = await stat(lastPath);
+    if (!st.isDirectory()) return null;
+  } catch {
+    return null;
+  }
+
+  const metaContent = await readTextFile(join(lastPath, "meta.yml"));
+  if (!metaContent) return null;
+
+  let parsed: Record<string, unknown>;
+  try {
+    parsed = (YAML.parse(metaContent) as Record<string, unknown>) ?? {};
+  } catch {
+    return null;
+  }
+
+  const closeMetaRaw = parsed.closeMeta as Record<string, unknown> | undefined;
+  const result: LastLineageEntry = {
+    id: (parsed.id as string) ?? last,
+    dirName: last,
+    status: parsed.status as string | undefined,
+    goal: parsed.goal as string | undefined,
+  };
+  if (closeMetaRaw) {
+    result.closeMeta = {
+      reason: closeMetaRaw.reason as string | undefined,
+      closedAtStage: closeMetaRaw.closedAtStage as string | undefined,
+      completedTasks: closeMetaRaw.completedTasks as number | undefined,
+      deferredTasks: closeMetaRaw.deferredTasks as number | undefined,
+      deferredBacklogFile: closeMetaRaw.deferredBacklogFile as string | undefined,
+    };
+  }
+  return result;
 }
 

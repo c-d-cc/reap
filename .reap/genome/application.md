@@ -55,6 +55,11 @@ detect → mate → merge → reconcile → validation → completion
 
 각 stage 전환은 nonce token으로 암호학적 검증. Artifact(최소 50자)이 존재해야 다음 stage 진입 가능.
 
+**Termination Paths** (3가지 종료 path):
+- `completion` — 정식 완료. 5-phase(gate/reflect/fitness/adapt/commit)를 거쳐 lineage 에 `status: completed` 로 기록.
+- `early-close` — 조기 종료(implementation/validation 단계에서만). 부분 가치를 lineage 에 `status: partial` 로 보존 + 미완 task 를 자동 추출해 다음 세대 deferred backlog 로 승계. 2-phase(confirm → execute).
+- `abort` — 작업 폐기. archive/lineage 미기록, 현재 generation 정리만 수행.
+
 ### Nonce System — Transition Graph 기반
 
 - **Transition graph**: `lifecycle.ts`에 NORMAL_TRANSITIONS, MERGE_TRANSITIONS로 각 `stage:phase`에서 허용된 전이를 선언적으로 정의

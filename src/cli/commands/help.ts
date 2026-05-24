@@ -56,6 +56,12 @@ export const COMMAND_DESCRIPTIONS: Record<string, Record<SupportedLanguage, stri
     ja: "現在のGenerationを中止（2段階）",
     "zh-CN": "中止当前Generation（两阶段）",
   },
+  "/reap.early-close": {
+    en: "Partial-save close (lightweight, between abort and full completion)",
+    ko: "부분 완료 종료 (abort와 정식 completion 사이의 lightweight 경로)",
+    ja: "部分完了クローズ（abortと正式completionの間のライトウェイト）",
+    "zh-CN": "部分保存关闭（abort 与正式 completion 之间的轻量路径）",
+  },
   "/reap.knowledge": {
     en: "Manage genome, environment, context",
     ko: "Genome, environment, context 관리",
