@@ -12,6 +12,9 @@ abort/completion 사이의 세 번째 lightweight 종료 경로 `early-close` �
 - dog-fooding 동기화: `reap-guide.md` + `claude-md-section.md` + `help.ts`.
 - 테스트: unit 18건 + e2e 22건 추가, 모두 pass.
 - 회귀: 없음. init-repair 1건 failure는 pre-existing (gen-060부터).
+- Fitness: 사용자 만족, agent 자체 결정(commit tag 포맷, deferred 정규식) 그대로 수용. 다음 후보 4건(아래)은 즉시 backlog 등록 보류 — 사용자가 향후 별도 판단.
+- Genome 업데이트(adapt 단계): `application.md` 에 Termination Paths 3종 사실 추가, `evolution.md` 에 early-close 판단 가이드 절 추가. invariants 변경 없음.
+- Commit: `74641b3` (parent), tests submodule `d54d95e`. push 보류(유저 컨펌 후).
 
 ### 다음 세션
 
