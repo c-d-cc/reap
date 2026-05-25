@@ -57,11 +57,13 @@ REAP는 이러한 문제를 **자기 진화 세대 모델**로 해결합니다:
 npm install -g @c-d-cc/reap
 ```
 
-> **요구 사항**: [Node.js](https://nodejs.org) v18+, [Claude Code](https://claude.ai/claude-code) CLI.
+> **요구 사항**: [Node.js](https://nodejs.org) v18+ 및 지원되는 AI 에이전트 중 하나:
+> - [Claude Code](https://claude.ai/claude-code) CLI (기본값)
+> - [OpenCode](https://opencode.ai) — `/reap.init` 후 `.reap/config.yml`에서 `agentClient: opencode`로 설정
 
 ## 빠른 시작 [↗](https://reap.cc/docs/quick-start)
 
-AI 에이전트(Claude Code)를 열고 슬래시 명령어를 사용하세요:
+AI 에이전트(Claude Code 또는 OpenCode)를 열고 슬래시 명령어를 사용하세요:
 
 ```bash
 # 프로젝트에 REAP 초기화 (신규 프로젝트 vs 기존 코드베이스 자동 감지)
@@ -72,6 +74,8 @@ AI 에이전트(Claude Code)를 열고 슬래시 명령어를 사용하세요:
 ```
 
 `/reap.evolve`는 학습부터 완료까지 전체 세대 생명 주기를 주도합니다. AI가 프로젝트를 탐색하고, 작업을 계획하고, 구현하고, 검증하고, 회고합니다. 일상적인 개발에서 사용하는 주요 명령어입니다.
+
+> **OpenCode 사용자**: `/reap.init` 후 `.reap/config.yml`에서 `agentClient: opencode`로 설정하고 `reap update`를 실행하여 클라이언트별 자산(`opencode.json`, `.opencode/plugins/reap-plugin.ts`, `AGENTS.md`, `~/.config/opencode/commands/`의 슬래시 명령)을 재생성하세요.
 
 > **참고:** 사용자는 AI 에이전트에서 `/reap.*` 슬래시 명령어를 통해 REAP와 상호작용합니다. CLI는 이러한 명령어를 구동하는 내부 엔진입니다.
 
@@ -210,6 +214,7 @@ N개 세대를 사전 승인하여 자율 실행:
 | `/reap.start` | 새 세대 시작 |
 | `/reap.next` | 다음 단계로 진행 |
 | `/reap.back` | 이전 단계로 돌아감 |
+| `/reap.early-close` | 경량 종료 — 부분 가치 보존, 미완 task 자동 승계 |
 | `/reap.abort` | 현재 세대 중단 |
 | `/reap.knowledge` | genome/environment 검토 및 관리 |
 | `/reap.merge` | 병합 생명 주기 작업 |
@@ -223,13 +228,19 @@ N개 세대를 사전 승인하여 자율 실행:
 
 ## 에이전트 통합
 
-REAP는 슬래시 명령어와 생명 주기 훅을 통해 AI 에이전트와 통합됩니다. 현재 지원: **Claude Code**. 향후 에이전트 지원을 위해 어댑터 패턴 아키텍처를 사용합니다.
+REAP는 `agentClient` config 필드를 기준으로 adapter layer를 통해 AI 에이전트와 통합됩니다. 현재 지원되는 클라이언트:
+
+- **Claude Code** (`agentClient: claude-code`, 기본값) — `CLAUDE.md`의 `@` import로 정적 knowledge 로드; SessionStart hook(`reap load-context`)으로 동적 상태 주입; 슬래시 명령은 `~/.claude/commands/reap.*.md`에 설치.
+- **OpenCode** (`agentClient: opencode`) — `opencode.json`의 `instructions` 필드로 정적 knowledge 로드; `.reap/.session-state.md`로 동적 상태 전달, 번들된 OpenCode plugin(`.opencode/plugins/reap-plugin.ts`)이 `session.created` / `tool.execute.before` 시점에 자동 갱신; 슬래시 명령은 `~/.config/opencode/commands/reap.*.md`에 설치.
+
+`.reap/config.yml`을 편집한 뒤 `reap install-skills`와 `reap update`를 실행하면 클라이언트 전환이 완료됩니다. REAP가 entry-point 파일(CLAUDE.md vs AGENTS.md), 세션 통합, 클라이언트별 자산을 재생성합니다. 슬래시 명령 디렉토리의 `reap.` 접두사는 예약되어 있으며 — 설치는 cleanup-then-copy 방식이라 해당 디렉토리의 `reap.*.md` 파일을 덮어씁니다. 사용자 정의 명령은 다른 접두사(`mytool.md`, `team.md` 등)를 사용하세요.
 
 ### 동작 방식
 
-1. **CLAUDE.md**가 세션 시작 시 genome, environment, reap-guide를 로딩하도록 AI에 지시
-2. **슬래시 명령어**가 `reap run <cmd>`를 호출하고, AI에게 구조화된 JSON 지시를 반환
+1. **Entry-point 파일** (claude-code는 `CLAUDE.md`, opencode는 `AGENTS.md`)이 세션 시작 시 genome, environment, reap-guide를 로딩하도록 AI에 지시
+2. **슬래시 명령** — `/reap.start`, `/reap.status`, `/reap.evolve` 등은 Claude Code와 OpenCode 모두에서 작동; 각각 `reap run <cmd>`를 호출하여 AI에 구조화된 JSON 지시 반환
 3. **서명 기반 잠금** (nonce 체인)이 코드 수준에서 단계 순서를 강제 — 건너뛰기, 위조, 재생 불가
+4. **동적 상태 dump** — 모든 REAP 라이프사이클 명령이 동기적으로 `.reap/.session-state.md`에 기록하므로, OpenCode 사용자는 다음 세션에서 항상 명령 직후 상태를 확인 가능
 
 ### 서브에이전트 모드
 

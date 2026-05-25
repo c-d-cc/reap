@@ -59,11 +59,13 @@ REAP solves these with a **self-evolving generation model**:
 npm install -g @c-d-cc/reap
 ```
 
-> **Requirements**: [Node.js](https://nodejs.org) v18+, [Claude Code](https://claude.ai/claude-code) CLI.
+> **Requirements**: [Node.js](https://nodejs.org) v18+ and one supported AI agent:
+> - [Claude Code](https://claude.ai/claude-code) CLI (default)
+> - [OpenCode](https://opencode.ai) — set `agentClient: opencode` in `.reap/config.yml` after `/reap.init`
 
 ## Quick Start [↗](https://reap.cc/docs/quick-start)
 
-Open your AI agent (Claude Code) and use slash commands:
+Open your AI agent (Claude Code or OpenCode) and use slash commands:
 
 ```bash
 # Initialize REAP in your project (auto-detects greenfield vs existing codebase)
@@ -74,6 +76,8 @@ Open your AI agent (Claude Code) and use slash commands:
 ```
 
 `/reap.evolve` drives the entire generation lifecycle — from learning through completion. The AI explores the project, plans the work, implements it, validates, and reflects. This is the primary command for day-to-day development.
+
+> **OpenCode users**: After `/reap.init`, edit `.reap/config.yml` to set `agentClient: opencode`, then run `reap update` to regenerate client-specific assets (`opencode.json`, `.opencode/plugins/reap-plugin.ts`, `AGENTS.md`, and slash commands at `~/.config/opencode/commands/`).
 
 > **Note:** Users interact with REAP through `/reap.*` slash commands in their AI agent. The CLI is the internal engine that powers those commands.
 
@@ -214,6 +218,7 @@ Pre-approve N generations for autonomous execution:
 | `/reap.start`     | Start a new generation                 |
 | `/reap.next`      | Advance to the next stage              |
 | `/reap.back`      | Return to a previous stage             |
+| `/reap.early-close` | Lightweight termination — preserves partial value, auto-defers incomplete tasks |
 | `/reap.abort`     | Abort current generation               |
 | `/reap.knowledge` | Review and manage genome/environment   |
 | `/reap.merge`     | Merge lifecycle operations             |
@@ -230,7 +235,7 @@ Pre-approve N generations for autonomous execution:
 REAP integrates with AI agents through an adapter layer keyed by the `agentClient` config field. Currently supported clients:
 
 - **Claude Code** (`agentClient: claude-code`, default) — static knowledge via `@` imports in `CLAUDE.md`; dynamic state via `SessionStart` hook (`reap load-context`); slash commands installed to `~/.claude/commands/reap.*.md`.
-- **OpenCode** (`agentClient: opencode`) — static knowledge via `opencode.json`'s `instructions` field; dynamic state via `.reap/.session-state.md`, auto-refreshed by the bundled OpenCode plugin (`.opencode/plugins/reap-plugin.ts`) on `session.created` / `tool.execute.before`; slash commands installed to `~/.config/opencode/commands/reap.*.md` (OpenCode commands API as of 2026-05).
+- **OpenCode** (`agentClient: opencode`) — static knowledge via `opencode.json`'s `instructions` field; dynamic state via `.reap/.session-state.md`, auto-refreshed by the bundled OpenCode plugin (`.opencode/plugins/reap-plugin.ts`) on `session.created` / `tool.execute.before`; slash commands installed to `~/.config/opencode/commands/reap.*.md`.
 
 Switch clients by editing `.reap/config.yml`, then run `reap install-skills` followed by `reap update`. REAP regenerates the entry-point file (CLAUDE.md vs AGENTS.md), the session integration, and any client-specific assets. The `reap.` prefix in slash command directories is reserved — installs are cleanup-then-copy and will overwrite any `reap.*.md` file in those locations. Use a different prefix (`mytool.md`, `team.md`, etc.) for custom commands.
 

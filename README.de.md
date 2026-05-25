@@ -57,11 +57,13 @@ REAP löst diese Probleme mit einem **selbstentwickelnden Generationsmodell**:
 npm install -g @c-d-cc/reap
 ```
 
-> **Voraussetzungen**: [Node.js](https://nodejs.org) v18+, [Claude Code](https://claude.ai/claude-code) CLI.
+> **Voraussetzungen**: [Node.js](https://nodejs.org) v18+ und ein unterstützter KI-Agent:
+> - [Claude Code](https://claude.ai/claude-code) CLI (Standard)
+> - [OpenCode](https://opencode.ai) — setzen Sie `agentClient: opencode` in `.reap/config.yml` nach `/reap.init`
 
 ## Schnellstart [↗](https://reap.cc/docs/quick-start)
 
-Öffnen Sie Ihren KI-Agenten (Claude Code) und verwenden Sie Slash Commands:
+Öffnen Sie Ihren KI-Agenten (Claude Code oder OpenCode) und verwenden Sie Slash Commands:
 
 ```bash
 # REAP in Ihrem Projekt initialisieren (erkennt automatisch Greenfield vs. bestehende Codebasis)
@@ -72,6 +74,8 @@ npm install -g @c-d-cc/reap
 ```
 
 `/reap.evolve` steuert den gesamten Generationslebenszyklus — vom Lernen bis zum Abschluss. Die KI erkundet das Projekt, plant die Arbeit, implementiert sie, validiert und reflektiert. Dies ist der primäre Befehl für die tägliche Entwicklung.
+
+> **OpenCode-Benutzer**: Nach `/reap.init` setzen Sie `agentClient: opencode` in `.reap/config.yml` und führen `reap update` aus, um client-spezifische Assets neu zu generieren (`opencode.json`, `.opencode/plugins/reap-plugin.ts`, `AGENTS.md` und Slash-Befehle unter `~/.config/opencode/commands/`).
 
 > **Hinweis:** Benutzer interagieren mit REAP über `/reap.*` Slash Commands in ihrem KI-Agenten. Die CLI ist die interne Engine, die diese Befehle antreibt.
 
@@ -210,6 +214,7 @@ N Generationen für autonome Ausführung vorab genehmigen:
 | `/reap.start` | Eine neue Generation starten |
 | `/reap.next` | Zur nächsten Phase vorrücken |
 | `/reap.back` | Zu einer vorherigen Phase zurückkehren |
+| `/reap.early-close` | Schlankes Beenden — bewahrt Teilwerte, verschiebt unvollständige Aufgaben automatisch |
 | `/reap.abort` | Aktuelle Generation abbrechen |
 | `/reap.knowledge` | Genome/Environment überprüfen und verwalten |
 | `/reap.merge` | Merge-Lebenszyklus-Operationen |
@@ -223,13 +228,19 @@ N Generationen für autonome Ausführung vorab genehmigen:
 
 ## Agentenintegration
 
-REAP integriert sich über Slash Commands und Lebenszyklus-Hooks mit KI-Agenten. Derzeit unterstützt: **Claude Code**. Die Architektur verwendet ein Adapter-Muster für zukünftige Agentenunterstützung.
+REAP integriert sich über eine Adapterschicht, die auf dem `agentClient`-Konfigurationsfeld basiert, mit KI-Agenten. Aktuell unterstützte Clients:
+
+- **Claude Code** (`agentClient: claude-code`, Standard) — statisches Wissen über `@`-Imports in `CLAUDE.md`; dynamischer Zustand über den `SessionStart`-Hook (`reap load-context`); Slash-Befehle installiert unter `~/.claude/commands/reap.*.md`.
+- **OpenCode** (`agentClient: opencode`) — statisches Wissen über das `instructions`-Feld von `opencode.json`; dynamischer Zustand über `.reap/.session-state.md`, automatisch aktualisiert vom gebündelten OpenCode-Plugin (`.opencode/plugins/reap-plugin.ts`) bei `session.created` / `tool.execute.before`; Slash-Befehle installiert unter `~/.config/opencode/commands/reap.*.md`.
+
+Wechseln Sie Clients, indem Sie `.reap/config.yml` bearbeiten, dann `reap install-skills` gefolgt von `reap update` ausführen. REAP regeneriert die Entry-Point-Datei (CLAUDE.md vs AGENTS.md), die Session-Integration und alle client-spezifischen Assets. Das Präfix `reap.` in Slash-Befehlsverzeichnissen ist reserviert — Installationen sind cleanup-then-copy und überschreiben alle `reap.*.md`-Dateien an diesen Orten. Verwenden Sie für benutzerdefinierte Befehle ein anderes Präfix (`mytool.md`, `team.md` usw.).
 
 ### Funktionsweise
 
-1. **CLAUDE.md** weist die KI an, Genome, Environment und reap-guide beim Sitzungsstart zu laden
-2. **Slash Commands** rufen `reap run <cmd>` auf, das strukturierte JSON-Anweisungen für die KI zurückgibt
+1. **Entry-Point-Datei** (`CLAUDE.md` für claude-code, `AGENTS.md` für opencode) weist die KI an, Genome, Environment und reap-guide beim Sitzungsstart zu laden
+2. **Slash-Befehle** — `/reap.start`, `/reap.status`, `/reap.evolve` usw. funktionieren in Claude Code und OpenCode; jeder ruft `reap run <cmd>` auf, das strukturierte JSON-Anweisungen an die KI zurückgibt
 3. **Signaturbasiertes Locking** (Nonce-Chain) erzwingt die Phasenreihenfolge auf Code-Ebene — kein Überspringen, keine Fälschung, kein Replay
+4. **Dynamischer Zustands-Dump** — jeder REAP-Lebenszyklusbefehl schreibt synchron in `.reap/.session-state.md`, sodass OpenCode-Benutzer in der nächsten Sitzung immer den Zustand nach dem Befehl sehen
 
 ### Subagent-Modus
 

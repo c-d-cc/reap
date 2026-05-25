@@ -1,6 +1,70 @@
+import type { ReactNode } from "react";
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { useT } from "@/i18n";
+
+/**
+ * Render inline backticks as <code> spans, leaving other text untouched.
+ */
+function renderInline(text: string): ReactNode[] {
+  return text.split(/(`[^`]+`)/g).map((seg, i) => {
+    if (seg.startsWith("`") && seg.endsWith("`") && seg.length > 1) {
+      return (
+        <code
+          key={i}
+          className="px-1.5 py-0.5 bg-muted text-foreground/90 rounded text-[0.85em] font-mono"
+        >
+          {seg.slice(1, -1)}
+        </code>
+      );
+    }
+    return <span key={i}>{seg}</span>;
+  });
+}
+
+/**
+ * Render notes string with optional `**Title**` section markers.
+ *  - With markers: each `**Title**` starts a new section (bold heading + description).
+ *  - Without markers: rendered as plain paragraph (backward compat with older entries).
+ */
+function renderNotes(notes: string): ReactNode {
+  const parts = notes.split(/\*\*([^*]+)\*\*/g);
+
+  if (parts.length === 1) {
+    // No section markers — plain paragraph.
+    return (
+      <p className="text-sm text-muted-foreground leading-relaxed">
+        {renderInline(notes)}
+      </p>
+    );
+  }
+
+  const sections: { title: string; desc: string }[] = [];
+  for (let i = 1; i < parts.length; i += 2) {
+    sections.push({
+      title: parts[i],
+      desc: (parts[i + 1] || "").trim().replace(/^[.,:;]\s*/, ""),
+    });
+  }
+
+  return (
+    <ul className="space-y-3 list-none p-0 m-0">
+      {sections.map((s, i) => (
+        <li key={i} className="leading-relaxed">
+          <span className="font-semibold text-foreground">{s.title}</span>
+          {s.desc && (
+            <>
+              <span className="text-muted-foreground"> — </span>
+              <span className="text-sm text-muted-foreground">
+                {renderInline(s.desc)}
+              </span>
+            </>
+          )}
+        </li>
+      ))}
+    </ul>
+  );
+}
 
 export default function ReleaseNotesPage() {
   const t = useT();
@@ -8,41 +72,14 @@ export default function ReleaseNotesPage() {
     <DocLayout>
       <DocPage title={t.releaseNotes.title} breadcrumb={t.releaseNotes.breadcrumb}>
 
-        {/* Breaking change banner card */}
-        <div className="rounded-lg border-2 border-orange-500/50 bg-orange-500/10 p-5 mb-8">
-          <h2 className="text-lg font-bold text-orange-400 mb-2">
-            {t.releaseNotes.breakingBannerTitle}
-          </h2>
-          <p className="text-sm text-orange-300/90 leading-relaxed mb-3">
-            {t.releaseNotes.breakingBannerDesc}
-          </p>
-          <ul className="list-disc list-inside space-y-2 text-sm text-orange-300/80">
-            {t.releaseNotes.breakingBannerItems.map((item, i) => {
-              const match = item.match(/^(.+?)\s*\(([^)]+)\)\s*\.?\s*$/);
-              if (match) {
-                return (
-                  <li key={i}>
-                    {match[1]}
-                    <br />
-                    <span className="ml-5 text-orange-300/60">({match[2]})</span>
-                  </li>
-                );
-              }
-              return <li key={i}>{item}</li>;
-            })}
-          </ul>
-        </div>
-
         {/* Version entries — newest first */}
         <div className="space-y-6">
           {t.releaseNotes.versions.map((entry) => (
-            <div key={entry.version} className="border border-border rounded-md p-4">
-              <h3 className="text-base font-semibold text-foreground mb-2">
+            <div key={entry.version} className="border border-border rounded-md p-5">
+              <h3 className="text-base font-semibold text-foreground mb-3">
                 v{entry.version}
               </h3>
-              <p className="text-sm text-muted-foreground leading-relaxed">
-                {entry.notes}
-              </p>
+              {renderNotes(entry.notes)}
             </div>
           ))}
         </div>

@@ -70,7 +70,7 @@ export const ko: Translations = {
     stageHeaders: ["단계", "수행 내용", "산출물"],
     installation: "설치",
     installStep1: "1. 전역 설치",
-    installStep2: "2. Claude Code를 열고, 초기화 및 시작",
+    installStep2: "2. AI 에이전트(Claude Code 또는 OpenCode)를 열고, 초기화 및 시작",
     installStep3: "",
     installNote: [
       { before: "", code: "/reap.evolve", after: "은 전체 Generation 라이프사이클 — Learning부터 Completion까지 — 을 자율적으로 수행합니다. " },
@@ -155,7 +155,7 @@ export const ko: Translations = {
     install: "설치",
     initProject: "프로젝트 초기화",
     runFirst: "첫 번째 Generation 실행",
-    runFirstDesc: "프로젝트 디렉토리에서 Claude Code를 엽니다:",
+    runFirstDesc: "프로젝트 디렉토리에서 AI 에이전트(Claude Code 또는 OpenCode)를 엽니다:",
     evolveTitle: "/reap.evolve이 주요 명령어입니다",
     evolveDesc: "전체 Generation 라이프사이클 — Learning, Planning, Implementation, Validation, Completion — 을 자율적으로 수행합니다. AI 에이전트가 모든 단계를 진행하며, 진정으로 막혔을 때만 멈춥니다. 일상적인 개발에서 가장 많이 사용하게 될 명령어입니다.",
     manualControl: "수동 단계 제어",
@@ -246,7 +246,7 @@ export const ko: Translations = {
       },
       {
         title: "5. Completion (4단계)",
-        desc: "Reflect: 회고 작성 + environment 갱신. Fitness: 인간 피드백 수집 (또는 크루즈 모드에서 자체 평가). Adapt: genome 검토, backlog 변경 적용, 다음 Generation 목표 제안. Commit: lineage에 아카이브 + git commit.",
+        desc: "Reflect: 회고 작성 + environment 갱신. Fitness: 인간 피드백 수집 (또는 크루즈 모드에서 자체 평가). Adapt: genome 검토, backlog 변경 적용, 다음 Generation 목표 제안. Commit: lineage에 아카이브 + git commit. /reap.early-close(경량, 부분 가치 보존, 미완 task 자동 승계) 또는 /reap.abort(취소, lineage 미기록)로 generation을 조기 종료할 수도 있다.",
         output: "05-completion.md — 회고, 적합도 피드백, genome 변경 로그, 다음 Generation 힌트.",
       },
     ],
@@ -320,9 +320,10 @@ export const ko: Translations = {
     normalTitle: "라이프사이클 명령어",
     normalCommands: [
       ["/reap.evolve", "전체 Generation 라이프사이클을 실행합니다(권장). 일상 개발의 주요 명령어입니다. 모든 단계를 순환합니다 — learning, planning, implementation, validation, completion."],
-      ["/reap.start", "새 Generation을 시작합니다. 목표를 입력받고, current.yml을 생성하고, 단계를 learning으로 설정합니다."],
+      ["/reap.start", "새 Generation을 시작합니다. 목표를 입력받고, current.yml을 생성하고, 단계를 learning으로 설정합니다. 대기 중 backlog가 있는데 --backlog <filename>이 누락되면 선택 prompt를 표시하며, --no-backlog로 명시적으로 건너뛸 수 있습니다."],
       ["/reap.next", "다음 라이프사이클 단계로 진행합니다. 산출물 존재와 nonce 체인을 검증한 후 진행합니다."],
       ["/reap.back", "이전 단계로 돌아갑니다(마이크로 루프). 사용법: /reap.back [--reason \"<reason>\"]"],
+      ["/reap.early-close", "implementation/validation에서 사용하는 경량 종료. 부분 가치를 보존하고, 간소화된 reflect만 수행하며(fitness/adapt 없음), 미완 task를 다음 generation용 backlog로 자동 승계합니다. 옵션: --reason, --source-action <hold|stash|none>(기본 hold), --defer-tasks <true|false>(기본 true)."],
       ["/reap.abort", "현재 Generation을 중단합니다. 2단계 프로세스: confirm(무엇이 일어나는지 표시) 후 execute. 옵션: --phase execute, --reason, --source-action <rollback|stash|hold|none>, --save-backlog."],
     ],
     mergeTitle: "협업 명령어",
@@ -401,7 +402,7 @@ export const ko: Translations = {
       ["autoSubagent", "Agent 도구를 통해 /reap.evolve를 서브에이전트에 자동 위임 (기본값: true)"],
       ["strictEdit", "코드 변경을 REAP 라이프사이클로 제한 (기본값: false). 아래 Strict 모드 참조."],
       ["strictMerge", "직접 git pull/push/merge 제한 — 대신 REAP 명령어 사용 (기본값: false). 아래 Strict 모드 참조."],
-      ["agentClient", "사용할 AI 에이전트 클라이언트 (기본값: claude-code). 스킬 배포와 세션 hooks에 사용할 어댑터를 결정"],
+      ["agentClient", "AI 에이전트 클라이언트 (claude-code | opencode | codex). 어댑터 layer를 제어 — 슬래시 명령 위치, manifest 파일 (CLAUDE.md vs AGENTS.md), plugin/hook 전략. 기본값: claude-code. Codex는 현재 미지원."],
       ["cruiseCount", "존재 시 크루즈 모드 활성화. 형식: current/total (예: 1/5). 크루즈 완료 후 자동 제거"],
     ],
     strictMode: "Strict 모드",
@@ -984,15 +985,11 @@ priority: medium
   releaseNotes: {
     title: "릴리즈 노트",
     breadcrumb: "기타",
-    breakingBannerTitle: "v0.16의 호환성이 깨지는 변경",
-    breakingBannerDesc: "v0.15.x에서 v0.16.x로의 자동 업데이트가 차단됩니다. /reap.update를 실행하여 수동으로 업그레이드하세요.",
-    breakingBannerItems: [
-      "REAP가 Self Evolving Pipeline으로 전환됩니다 — AI가 인간과 협업하여 재귀적 파이프라인을 통해 소프트웨어를 자기 진화시킵니다.",
-      "라이프사이클 변경: learning → planning → implementation → validation → completion (새 Learning 단계 추가, Objective와 Planning이 Planning으로 통합).",
-      "최적의 스킬 매칭을 위해 슬래시 명령어가 재구조화됨: 10개 자동 매칭 스킬 + 6개 직접 호출 전용 스킬.",
-      "사용자 인터페이스에서 CLI 명령어가 제거됨. 모든 작업이 슬래시 명령어만을 통해 이루어짐 (CLI 명령어는 내부 사용으로 예약).",
-    ],
     versions: [
+      {
+        version: "0.16.5",
+        notes: "**OpenCode 어댑터** — `agentClient: opencode` 설정으로 멀티 클라이언트 정식 지원. `opencode.json` instructions, `.opencode/plugins/reap-plugin.ts`, AGENTS.md, 그리고 `~/.config/opencode/commands/`의 슬래시 명령이 자동 관리됨. **Early-close 라이프사이클 path** — implementation/validation 단계에서 사용하는 경량 종료 (`reap run early-close`, `/reap.early-close`). 부분 가치를 보존하고 간소화된 reflect를 거쳐, 미완 task를 다음 generation용 backlog로 자동 승계. 사용자가 중단/스코프 축소 의도를 표명하면 agent가 abort/early-close/continue 세 선택지를 명시적으로 안내.",
+      },
       {
         version: "0.16.4",
         notes: "누락된 npm 메타데이터 복원 (license, author, repository, homepage, keywords). GitHub Release에 release notes가 표시되지 않던 문제 수정.",

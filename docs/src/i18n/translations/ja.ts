@@ -70,7 +70,7 @@ export const ja: Translations = {
     stageHeaders: ["ステージ", "内容", "アーティファクト"],
     installation: "インストール",
     installStep1: "1. グローバルにインストール",
-    installStep2: "2. Claude Codeを開き、初期化して開始",
+    installStep2: "2. AIエージェント（Claude Code または OpenCode）を開き、初期化して開始",
     installStep3: "",
     installNote: [
       { before: "", code: "/reap.evolve", after: " はLearningからCompletionまでの完全なGenerationライフサイクルを自律的に実行します。" },
@@ -155,7 +155,7 @@ export const ja: Translations = {
     install: "インストール",
     initProject: "プロジェクトの初期化",
     runFirst: "最初のGenerationを実行",
-    runFirstDesc: "プロジェクトディレクトリでClaude Codeを開きます：",
+    runFirstDesc: "プロジェクトディレクトリでAIエージェント（Claude Code または OpenCode）を開きます：",
     evolveTitle: "/reap.evolve がメインコマンドです",
     evolveDesc: "Generationライフサイクル全体 — Learning、Planning、Implementation、Validation、Completion — を自律的に実行します。AIエージェントがすべてのステージを駆動し、本当にブロックされた場合にのみ停止します。日常の開発で最も使用するコマンドです。",
     manualControl: "手動ステージ制御",
@@ -984,14 +984,6 @@ priority: medium
   releaseNotes: {
     title: "リリースノート",
     breadcrumb: "その他",
-    breakingBannerTitle: "v0.16の破壊的変更",
-    breakingBannerDesc: "v0.15.xからv0.16.xへの自動更新はブロックされています。手動でアップグレードするには/reap.updateを実行してください。",
-    breakingBannerItems: [
-      "REAPは自己進化パイプラインに移行 — AIが人間と協力して再帰的パイプラインを通じてソフトウェアを自己進化させます。",
-      "ライフサイクルの変更：learning → planning → implementation → validation → completion（新しいLearningステージの追加、ObjectiveとPlanningの統合）。",
-      "最適なスキルマッチングのためにスラッシュコマンドを再構成：10の自動マッチングスキル + 6の直接呼び出し専用スキル。",
-      "CLIコマンドをユーザー向けインターフェースから削除。すべての操作はスラッシュコマンドのみに（CLIコマンドは内部使用に限定）。",
-    ],
     versions: [
       {
         version: "0.16.4",

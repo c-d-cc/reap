@@ -70,7 +70,7 @@ export const zhCN: Translations = {
     stageHeaders: ["阶段", "执行内容", "产物"],
     installation: "安装",
     installStep1: "1. 全局安装",
-    installStep2: "2. 打开 Claude Code，初始化并开始",
+    installStep2: "2. 打开你的 AI 智能体（Claude Code 或 OpenCode），初始化并开始",
     installStep3: "",
     installNote: [
       { before: "", code: "/reap.evolve", after: " 运行完整的代生命周期——从 Learning 到 Completion——自主执行。你也可以使用" },
@@ -155,7 +155,7 @@ export const zhCN: Translations = {
     install: "安装",
     initProject: "初始化项目",
     runFirst: "运行你的第一代",
-    runFirstDesc: "在项目目录中打开 Claude Code：",
+    runFirstDesc: "在项目目录中打开你的 AI 智能体（Claude Code 或 OpenCode）：",
     evolveTitle: "/reap.evolve 是主要命令",
     evolveDesc: "它自主运行整个代的生命周期——Learning、Planning、Implementation、Validation 和 Completion。AI 代理驱动所有阶段，仅在真正遇到阻碍时才停下。这是日常开发中最常用的命令。",
     manualControl: "手动阶段控制",
@@ -984,14 +984,6 @@ priority: medium
   releaseNotes: {
     title: "发布说明",
     breadcrumb: "其他",
-    breakingBannerTitle: "v0.16 中的重大变更",
-    breakingBannerDesc: "从 v0.15.x 到 v0.16.x 的自动更新已被阻止。运行 /reap.update 手动升级。",
-    breakingBannerItems: [
-      "REAP 过渡为自进化流水线——AI 与人类协作，通过递归流水线自我进化软件。",
-      "生命周期变更：learning → planning → implementation → validation → completion（新增 Learning 阶段，Objective 和 Planning 合并为 Planning）。",
-      "斜杠命令重构以优化技能匹配：10 个自动匹配技能 + 6 个仅限直接调用的技能。",
-      "CLI 命令从用户界面中移除。所有操作现在仅通过斜杠命令进行（CLI 命令保留供内部使用）。",
-    ],
     versions: [
       {
         version: "0.16.4",

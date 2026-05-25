@@ -57,11 +57,13 @@ REAP 通过**自进化代际模型**解决这些问题：
 npm install -g @c-d-cc/reap
 ```
 
-> **前提条件**：[Node.js](https://nodejs.org) v18+，[Claude Code](https://claude.ai/claude-code) CLI。
+> **前提条件**：[Node.js](https://nodejs.org) v18+ 以及以下任一受支持的 AI 智能体：
+> - [Claude Code](https://claude.ai/claude-code) CLI（默认）
+> - [OpenCode](https://opencode.ai) — `/reap.init` 后在 `.reap/config.yml` 中设置 `agentClient: opencode`
 
 ## 快速开始 [↗](https://reap.cc/docs/quick-start)
 
-打开你的 AI 智能体（Claude Code）并使用斜杠命令：
+打开你的 AI 智能体（Claude Code 或 OpenCode）并使用斜杠命令：
 
 ```bash
 # 在你的项目中初始化 REAP（自动检测是全新项目还是已有代码库）
@@ -72,6 +74,8 @@ npm install -g @c-d-cc/reap
 ```
 
 `/reap.evolve` 驱动整个代际迭代生命周期——从学习到完成。AI 探索项目、规划工作、实施、验证并反思。这是日常开发的主要命令。
+
+> **OpenCode 用户**：`/reap.init` 后，在 `.reap/config.yml` 中设置 `agentClient: opencode`，然后运行 `reap update` 以重新生成客户端特定的资产（`opencode.json`、`.opencode/plugins/reap-plugin.ts`、`AGENTS.md` 以及 `~/.config/opencode/commands/` 中的斜杠命令）。
 
 > **注意：** 用户通过 AI 智能体中的 `/reap.*` 斜杠命令与 REAP 交互。CLI 是驱动这些命令的内部引擎。
 
@@ -210,6 +214,7 @@ AI 根据当前上下文的明确程度调整其沟通风格：
 | `/reap.start` | 开始一个新的代际迭代 |
 | `/reap.next` | 推进到下一阶段 |
 | `/reap.back` | 返回上一阶段 |
+| `/reap.early-close` | 轻量级终止 — 保留部分价值，自动延迟未完成任务 |
 | `/reap.abort` | 中止当前代际迭代 |
 | `/reap.knowledge` | 审阅和管理 genome/environment |
 | `/reap.merge` | 合并生命周期操作 |
@@ -223,13 +228,19 @@ AI 根据当前上下文的明确程度调整其沟通风格：
 
 ## 智能体集成
 
-REAP 通过斜杠命令和生命周期钩子与 AI 智能体集成。当前支持：**Claude Code**。架构使用适配器模式以支持未来的智能体。
+REAP 通过基于 `agentClient` 配置字段的适配器层与 AI 智能体集成。当前支持的客户端：
+
+- **Claude Code** (`agentClient: claude-code`，默认) — 通过 `CLAUDE.md` 中的 `@` 导入加载静态知识；通过 SessionStart 钩子 (`reap load-context`) 注入动态状态；斜杠命令安装到 `~/.claude/commands/reap.*.md`。
+- **OpenCode** (`agentClient: opencode`) — 通过 `opencode.json` 的 `instructions` 字段加载静态知识；通过 `.reap/.session-state.md` 传递动态状态，捆绑的 OpenCode 插件 (`.opencode/plugins/reap-plugin.ts`) 在 `session.created` / `tool.execute.before` 时自动刷新；斜杠命令安装到 `~/.config/opencode/commands/reap.*.md`。
+
+通过编辑 `.reap/config.yml`，然后运行 `reap install-skills` 和 `reap update` 即可切换客户端。REAP 会重新生成入口点文件 (CLAUDE.md vs AGENTS.md)、会话集成以及任何客户端特定的资产。斜杠命令目录中的 `reap.` 前缀已保留 — 安装为先清理后复制方式，将覆盖这些位置中的任何 `reap.*.md` 文件。自定义命令请使用其他前缀 (`mytool.md`、`team.md` 等)。
 
 ### 工作原理
 
-1. **CLAUDE.md** 指示 AI 在会话开始时加载 genome、environment 和 reap-guide
-2. **斜杠命令** 调用 `reap run <cmd>`，返回结构化 JSON 指令给 AI
+1. **入口点文件** (claude-code 为 `CLAUDE.md`，opencode 为 `AGENTS.md`) 指示 AI 在会话开始时加载 genome、environment 和 reap-guide
+2. **斜杠命令** — `/reap.start`、`/reap.status`、`/reap.evolve` 等在 Claude Code 和 OpenCode 中均可工作；每个命令调用 `reap run <cmd>`，向 AI 返回结构化的 JSON 指令
 3. **基于签名的锁定**（nonce 链）在代码层面强制执行阶段顺序——不可跳过、不可伪造、不可重放
+4. **动态状态转储** — 每个 REAP 生命周期命令同步写入 `.reap/.session-state.md`，因此 OpenCode 用户在下次会话中始终能看到命令执行后的状态
 
 ### Subagent 模式
 

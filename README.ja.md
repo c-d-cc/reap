@@ -57,11 +57,13 @@ REAPはこれらを**自己進化型ジェネレーションモデル**で解決
 npm install -g @c-d-cc/reap
 ```
 
-> **要件**: [Node.js](https://nodejs.org) v18以上、[Claude Code](https://claude.ai/claude-code) CLI。
+> **要件**: [Node.js](https://nodejs.org) v18以上、およびサポートされるAIエージェントの1つ:
+> - [Claude Code](https://claude.ai/claude-code) CLI（デフォルト）
+> - [OpenCode](https://opencode.ai) — `/reap.init` 後に `.reap/config.yml` で `agentClient: opencode` に設定
 
 ## クイックスタート [↗](https://reap.cc/docs/quick-start)
 
-AIエージェント（Claude Code）を開き、スラッシュコマンドを使います：
+AIエージェント（Claude Code または OpenCode）を開き、スラッシュコマンドを使います：
 
 ```bash
 # プロジェクトにREAPを初期化（新規/既存コードベースを自動判別）
@@ -72,6 +74,8 @@ AIエージェント（Claude Code）を開き、スラッシュコマンドを�
 ```
 
 `/reap.evolve` はジェネレーションライフサイクル全体を駆動します — 学習から完了まで。AIがプロジェクトを探索し、作業を計画し、実装し、検証し、振り返ります。日常の開発で使うメインコマンドです。
+
+> **OpenCodeユーザー**: `/reap.init` 後、`.reap/config.yml` で `agentClient: opencode` に設定し、`reap update` を実行してクライアント固有のアセット（`opencode.json`、`.opencode/plugins/reap-plugin.ts`、`AGENTS.md`、`~/.config/opencode/commands/` のスラッシュコマンド）を再生成してください。
 
 > **注意:** ユーザーはAIエージェント内の `/reap.*` スラッシュコマンドを通じてREAPとやり取りします。CLIはそれらのコマンドを動かす内部エンジンです。
 
@@ -210,6 +214,7 @@ N世代分の自律実行を事前承認：
 | `/reap.start` | 新しいジェネレーションを開始 |
 | `/reap.next` | 次のステージへ進む |
 | `/reap.back` | 前のステージに戻る |
+| `/reap.early-close` | 軽量終了 — 部分的な価値を保存、未完了タスクを自動的に次世代へ繰り越し |
 | `/reap.abort` | 現在のジェネレーションを中止 |
 | `/reap.knowledge` | genome/environment のレビューと管理 |
 | `/reap.merge` | マージライフサイクル操作 |
@@ -223,13 +228,19 @@ N世代分の自律実行を事前承認：
 
 ## エージェント統合
 
-REAPはスラッシュコマンドとライフサイクルフックを通じてAIエージェントと統合します。現在サポート: **Claude Code**。アーキテクチャはアダプターパターンを採用しており、将来のエージェントサポートに対応しています。
+REAPは`agentClient` configフィールドをキーとするアダプタレイヤーを通じてAIエージェントと統合します。現在サポートされているクライアント:
+
+- **Claude Code** (`agentClient: claude-code`, デフォルト) — `CLAUDE.md`の`@`インポートで静的ナレッジ; SessionStartフック(`reap load-context`)で動的状態を注入; スラッシュコマンドは`~/.claude/commands/reap.*.md`にインストール。
+- **OpenCode** (`agentClient: opencode`) — `opencode.json`の`instructions`フィールドで静的ナレッジ; `.reap/.session-state.md`で動的状態を伝達、バンドルされたOpenCodeプラグイン(`.opencode/plugins/reap-plugin.ts`)が`session.created` / `tool.execute.before`時に自動更新; スラッシュコマンドは`~/.config/opencode/commands/reap.*.md`にインストール。
+
+`.reap/config.yml`を編集してから`reap install-skills`に続いて`reap update`を実行することでクライアントを切り替えます。REAPはエントリーポイントファイル(CLAUDE.md vs AGENTS.md)、セッション統合、およびクライアント固有のアセットを再生成します。スラッシュコマンドディレクトリの`reap.`プレフィックスは予約されています — インストールはcleanup-then-copy方式で、その場所の`reap.*.md`ファイルを上書きします。カスタムコマンドには別のプレフィックス(`mytool.md`、`team.md`など)を使用してください。
 
 ### 仕組み
 
-1. **CLAUDE.md** がセッション開始時に genome、environment、reap-guide をロードするようAIに指示
-2. **スラッシュコマンド** が `reap run <cmd>` を呼び出し、AI向けの構造化されたJSON命令を返す
+1. **エントリーポイントファイル** (claude-codeでは`CLAUDE.md`、opencodeでは`AGENTS.md`)がセッション開始時にgenome、environment、reap-guideをロードするようAIに指示
+2. **スラッシュコマンド** — `/reap.start`、`/reap.status`、`/reap.evolve`などはClaude CodeとOpenCodeの両方で動作; それぞれが`reap run <cmd>`を呼び出し、AIに構造化されたJSON指示を返す
 3. **署名ベースのロック**（nonceチェーン）がコードレベルでステージの順序を強制 — スキップ・偽造・リプレイ不可
+4. **動的状態ダンプ** — すべてのREAPライフサイクルコマンドが同期的に`.reap/.session-state.md`に書き込むため、OpenCodeユーザーは次のセッションで常にコマンド後の状態を確認可能
 
 ### Subagent Mode
 

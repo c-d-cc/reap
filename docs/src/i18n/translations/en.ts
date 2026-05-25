@@ -68,7 +68,7 @@ export const en = {
     stageHeaders: ["Stage", "What happens", "Artifact"],
     installation: "Installation",
     installStep1: "1. Install globally",
-    installStep2: "2. Open Claude Code, initialize and start",
+    installStep2: "2. Open your AI agent (Claude Code or OpenCode), initialize and start",
     installStep3: "",
     installNote: [
       { before: "", code: "/reap.evolve", after: " runs the full generation lifecycle — Learning through Completion — autonomously. You can also control stages manually with " },
@@ -153,7 +153,7 @@ export const en = {
     install: "Install",
     initProject: "Initialize a project",
     runFirst: "Run your first generation",
-    runFirstDesc: "Open Claude Code in your project directory:",
+    runFirstDesc: "Open your AI agent (Claude Code or OpenCode) in your project directory:",
     evolveTitle: "/reap.evolve is the primary command",
     evolveDesc: "It runs the entire generation lifecycle — Learning, Planning, Implementation, Validation, and Completion — autonomously. The AI agent drives through all stages, only stopping when genuinely blocked. This is the command you'll use most for day-to-day development.",
     manualControl: "Manual stage control",
@@ -243,7 +243,7 @@ export const en = {
       },
       {
         title: "5. Completion (4 phases)",
-        desc: "Reflect: write retrospective + refresh environment. Fitness: collect human feedback (or self-assessment in cruise mode). Adapt: review genome, apply backlog changes, propose next generation goals. Commit: archive to lineage + git commit.",
+        desc: "Reflect: write retrospective + refresh environment. Fitness: collect human feedback (or self-assessment in cruise mode). Adapt: review genome, apply backlog changes, propose next generation goals. Commit: archive to lineage + git commit. A generation can also terminate early via /reap.early-close (lightweight, preserves partial value, auto-defers incomplete tasks) or /reap.abort (cancellation, no lineage entry).",
         output: "05-completion.md — retrospective, fitness feedback, genome changelog, next generation hints.",
       },
     ],
@@ -317,9 +317,10 @@ export const en = {
     normalTitle: "Lifecycle Commands",
     normalCommands: [
       ["/reap.evolve", "Run an entire generation lifecycle (recommended). The primary command for day-to-day development. Loops through all stages — learning, planning, implementation, validation, completion."],
-      ["/reap.start", "Start a new generation. Prompts for a goal, creates current.yml, and sets stage to learning."],
+      ["/reap.start", "Start a new generation. Prompts for a goal, creates current.yml, and sets stage to learning. If pending backlog exists and --backlog <filename> is omitted, prompts for selection; use --no-backlog to explicitly skip."],
       ["/reap.next", "Advance to the next lifecycle stage. Verifies artifact exists and nonce chain before advancing."],
       ["/reap.back", "Return to a previous stage (micro loop). Usage: /reap.back [--reason \"<reason>\"]"],
+      ["/reap.early-close", "Lightweight termination from implementation/validation — preserves partial value, runs streamlined reflect (no fitness/adapt), and auto-defers incomplete tasks to a new backlog item for the next generation. Options: --reason, --source-action <hold|stash|none> (default hold), --defer-tasks <true|false> (default true)."],
       ["/reap.abort", "Abort current generation. 2-phase process: confirm (shows what will happen) then execute. Options: --phase execute, --reason, --source-action <rollback|stash|hold|none>, --save-backlog."],
     ],
     mergeTitle: "Collaboration Commands",
@@ -398,7 +399,7 @@ export const en = {
       ["autoSubagent", "Auto-delegate /reap.evolve to a subagent via Agent tool (default: true)"],
       ["strictEdit", "Restrict code changes to REAP lifecycle (default: false). See Strict Mode below."],
       ["strictMerge", "Restrict direct git pull/push/merge — use REAP commands instead (default: false). See Strict Mode below."],
-      ["agentClient", "AI agent client to use (default: claude-code). Determines which adapter is used for skill deployment and session hooks"],
+      ["agentClient", "AI agent client (claude-code | opencode | codex). Controls adapter layer — slash command location, manifest file (CLAUDE.md vs AGENTS.md), plugin/hook strategy. Default: claude-code. Codex is currently unsupported."],
       ["cruiseCount", "When present, enables cruise mode. Format: current/total (e.g. 1/5). Removed automatically after cruise completes"],
     ],
     strictMode: "Strict Mode",
@@ -981,15 +982,11 @@ Description of the task.`,
   releaseNotes: {
     title: "Release Notes",
     breadcrumb: "Other",
-    breakingBannerTitle: "Breaking Changes in v0.16",
-    breakingBannerDesc: "Automatic updates from v0.15.x to v0.16.x are blocked. Run /reap.update to upgrade manually.",
-    breakingBannerItems: [
-      "REAP transitions to a Self Evolving Pipeline — AI collaborates with humans to self-evolve software through a recursive pipeline.",
-      "Lifecycle changed: learning → planning → implementation → validation → completion (new Learning stage added, Objective and Planning merged into Planning).",
-      "Slash commands restructured for optimal skill matching: 10 auto-matching skills + 6 direct-invocation-only skills.",
-      "CLI commands removed from user-facing interface. All operations now through slash commands only (CLI commands reserved for internal use).",
-    ],
     versions: [
+      {
+        version: "0.16.5",
+        notes: "**OpenCode adapter** — full multi-client support via `agentClient: opencode`. Auto-manages `opencode.json` instructions, `.opencode/plugins/reap-plugin.ts`, AGENTS.md, and slash commands at `~/.config/opencode/commands/`. **Early-close lifecycle path** — lightweight termination (`reap run early-close`, `/reap.early-close`) from implementation or validation. Preserves partial value, runs streamlined reflect, and auto-defers incomplete tasks to a new backlog item for the next generation. When a user expresses stop or scope-reduction intent, the agent now offers abort/early-close/continue as three explicit options.",
+      },
       {
         version: "0.16.4",
         notes: "Restore missing npm metadata (license, author, repository, homepage, keywords). Fix GitHub Releases showing empty release notes.",

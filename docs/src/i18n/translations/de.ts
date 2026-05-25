@@ -70,7 +70,7 @@ export const de: Translations = {
     stageHeaders: ["Phase", "Was passiert", "Artefakt"],
     installation: "Installation",
     installStep1: "1. Global installieren",
-    installStep2: "2. Claude Code öffnen, initialisieren und starten",
+    installStep2: "2. KI-Agenten (Claude Code oder OpenCode) öffnen, initialisieren und starten",
     installStep3: "",
     installNote: [
       { before: "", code: "/reap.evolve", after: " führt den gesamten Generationslebenszyklus — von Learning bis Completion — autonom aus. Sie können die Phasen auch manuell mit " },
@@ -155,7 +155,7 @@ export const de: Translations = {
     install: "Installation",
     initProject: "Ein Projekt initialisieren",
     runFirst: "Erste Generation ausführen",
-    runFirstDesc: "Öffnen Sie Claude Code in Ihrem Projektverzeichnis:",
+    runFirstDesc: "Öffnen Sie Ihren KI-Agenten (Claude Code oder OpenCode) in Ihrem Projektverzeichnis:",
     evolveTitle: "/reap.evolve ist der primäre Befehl",
     evolveDesc: "Er führt den gesamten Generationslebenszyklus — Learning, Planning, Implementation, Validation und Completion — autonom aus. Der KI-Agent steuert durch alle Phasen und hält nur an, wenn er wirklich blockiert ist. Dies ist der Befehl, den Sie am häufigsten für die tägliche Entwicklung verwenden werden.",
     manualControl: "Manuelle Phasensteuerung",
@@ -984,14 +984,6 @@ Beschreibung der Aufgabe.`,
   releaseNotes: {
     title: "Versionshinweise",
     breadcrumb: "Sonstiges",
-    breakingBannerTitle: "Breaking Changes in v0.16",
-    breakingBannerDesc: "Automatische Updates von v0.15.x auf v0.16.x sind blockiert. Führen Sie /reap.update aus, um manuell zu aktualisieren.",
-    breakingBannerItems: [
-      "REAP wird zu einer Self Evolving Pipeline — KI arbeitet mit Menschen zusammen, um Software durch eine rekursive Pipeline selbst weiterzuentwickeln.",
-      "Lebenszyklus geändert: learning → planning → implementation → validation → completion (neue Learning-Phase hinzugefügt, Objective und Planning zu Planning zusammengeführt).",
-      "Slash-Befehle für optimale Skill-Zuordnung umstrukturiert: 10 automatisch zuordnende Skills + 6 nur direkt aufrufbare Skills.",
-      "CLI-Befehle aus der Benutzeroberfläche entfernt. Alle Operationen jetzt nur noch über Slash-Befehle (CLI-Befehle für interne Nutzung reserviert).",
-    ],
     versions: [
       {
         version: "0.16.4",
