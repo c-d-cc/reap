@@ -25,5 +25,5 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [ ] 세대별 작업 기록 및 다음 작업 할당
 
 ### Agent Client 확장
-- [x] OpenCode adapter (gen-063 완료 — opencode.json + plugin + AGENTS.md + dump-state. slash commands 등록은 follow-up opencode-slash-commands)
+- [x] OpenCode adapter (gen-063~064 완료 — opencode.json + plugin + AGENTS.md + dump-state + slash commands `/reap.*`. 4-항목 verification: static load / dynamic refresh / entry-point / slash trigger 모두 충족)
 - [ ] Codex CLI adapter

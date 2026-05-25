@@ -30,13 +30,22 @@ async function cleanupStaleSkills(targetDir: string): Promise<string[]> {
 }
 
 /**
- * Install Claude Code skill files to user-level ~/.claude/commands/
+ * Sync user-level `~/.claude/commands/reap.*.md` files: cleanup stale REAP
+ * commands, then copy the bundled skill files. Silent — does NOT emit output.
+ * Used by both the noisy `installSkills` (which wraps this in emitOutput) and
+ * the silent `registerSessionIntegration` (called by `reap update`).
+ *
+ * @returns `{ cleaned, installed, files, targetDir }` for the caller's report.
  */
-export async function installSkills(_projectRoot?: string): Promise<void> {
+export async function installSlashCommandsOnly(): Promise<{
+  cleaned: string[];
+  installed: number;
+  files: string[];
+  targetDir: string;
+}> {
   const targetDir = join(homedir(), ".claude", "commands");
   await ensureDir(targetDir);
 
-  // Clean up existing reap.* skills before copying new ones
   const cleaned = await cleanupStaleSkills(targetDir);
 
   const files = await readdir(SKILLS_DIR);
@@ -47,6 +56,15 @@ export async function installSkills(_projectRoot?: string): Promise<void> {
     await cp(join(SKILLS_DIR, file), join(targetDir, file));
     installed++;
   }
+
+  return { cleaned, installed, files: mdFiles, targetDir };
+}
+
+/**
+ * Install Claude Code skill files to user-level ~/.claude/commands/
+ */
+export async function installSkills(_projectRoot?: string): Promise<void> {
+  const { cleaned, installed, files, targetDir } = await installSlashCommandsOnly();
 
   // Copy reap-guide.md to ~/.reap/ (single source, always up-to-date)
   await installReapGuide();
@@ -65,7 +83,7 @@ export async function installSkills(_projectRoot?: string): Promise<void> {
       targetDir,
       cleaned: cleaned.length,
       installed,
-      files: mdFiles,
+      files,
     },
     message: `Cleaned ${cleaned.length} stale skills, installed ${installed} skill files to ${targetDir}`,
   });

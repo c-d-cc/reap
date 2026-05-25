@@ -601,14 +601,10 @@ export async function checkUserLevelArtifacts(
     warnings,
   );
 
-  // ~/.config/opencode/commands/reap.* — legacy opencode commands
-  await checkGlobPattern(
-    join(home, ".config", "opencode", "commands"),
-    /^reap\./,
-    "~/.config/opencode/commands/",
-    "legacy reap command at user level (Phase 2 remnant)",
-    warnings,
-  );
+  // (Note) `~/.config/opencode/commands/reap.*` is now the canonical install
+  // location for OpenCode slash commands (gen-064). The legacy warning that
+  // used to live here has been removed — REAP-managed reap.*.md files in that
+  // directory are expected when agentClient is opencode.
 
   // .claude/commands/reap.* — legacy project-level commands (should be in skills/)
   await checkGlobPattern(

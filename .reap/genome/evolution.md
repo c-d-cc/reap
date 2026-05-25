@@ -166,6 +166,15 @@ Memory 활용 규칙:
 
 판단 기준: "이 client/통합을 처음 받은 사용자가 5분 안에 평소처럼 REAP를 호출할 수 있는가?" — Yes면 OK, No면 (1)~(4) 중 누락이 있다.
 
+### 사용자 직접 테스트가 e2e가 못 잡는 갭을 잡는다 (gen-064 사례)
+
+gen-064는 (4) slash trigger 등록을 구현했고, e2e (`installSkills` 직접 호출) 가 모두 통과했다. 그러나 사용자가 fitness 직전 코드 직접 검토 중 결정적 갭 발견: **`reap update` 흐름은 `installSkills` 가 아닌 `registerSessionIntegration` 만 호출**하므로, user-level sync가 그쪽에 없으면 backlog verification ("`reap update` 후 reap.* 19 자동 배치") 과 코드 불일치. e2e는 verification scenario의 **일부 CLI entry point만 cover** 했고, 사용자가 실제 시나리오의 다른 entry point에서 갭을 잡아냄.
+
+교훈:
+- **fitness 전 self-audit 체크리스트**: (1) backlog verification 의 각 시나리오가 e2e 1:1 mirror 되는가, (2) 변경 함수의 caller 가 모두 검증되었는가, (3) 사용자가 따라할 명령 시퀀스를 e2e 가 그대로 재현하는가.
+- **agent의 추상적 추론보다 사용자가 코드를 직접 읽기가 강력**. plan 단계의 잘못된 가정(`registerSessionIntegration`이 SessionStart 매번 호출이라는 추정)이 implementation까지 그대로 흘러갔지만 fitness 직전 사용자 검토에서 catch → back regression path가 graceful 하게 처리. lifecycle이 정상 작동한 사례.
+- **사용자 인 더 루프(human-in-the-loop)는 자동화 신뢰의 마지막 safety net**. AI는 자기 작업의 모든 entry point를 자기 검증할 수 없다 — 사용자 직접 테스트와 코드 직접 검토가 그 갭을 메운다. 본 사례가 fitness phase 의 가치를 입증.
+
 ## 아키텍처 변경 시 genome 동기화
 
 새 기능/구조를 추가하거나 아키텍처를 변경했을 때, 해당 변경이 AI의 행동 방식에 영향을 준다면 반드시 genome(evolution.md 또는 application.md)에 반영해야 한다.

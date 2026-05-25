@@ -19,6 +19,20 @@ For REAP CLI usage, lifecycle stages, memory model, and behavioral rules, see `~
 
 When running REAP commands, follow the structured lifecycle (`reap run <stage>`). Do not edit `.reap/life/current.yml` directly — REAP uses signature-based locking and direct edits will produce errors.
 
+## Slash Commands
+
+REAP installs `/reap.*` slash commands into `~/.config/opencode/commands/` when `reap install-skills` (or `reap update`) runs with `agentClient: opencode`. Available commands include:
+
+- `/reap.evolve` — Run a full generation lifecycle
+- `/reap.start`, `/reap.next`, `/reap.back` — Lifecycle control
+- `/reap.status` — Show current generation state
+- `/reap.early-close`, `/reap.abort` — Termination paths
+- `/reap.knowledge`, `/reap.config` — Knowledge / configuration
+- `/reap.merge`, `/reap.pull`, `/reap.push` — Collaboration
+- `/reap.update`, `/reap.help`, `/reap.report` — Maintenance
+
+The `reap.` prefix (with the literal dot) is reserved by REAP — any file matching `reap.*.md` in that directory will be overwritten on the next install. User-defined commands should use a different prefix (e.g., `mytool.md`, `team-review.md`).
+
 ## Plugin Compatibility
 
 The bundled plugin (`.opencode/plugins/reap-plugin.ts`) targets the OpenCode plugin API as of 2026-05. Plugin signature: `async ({ $, directory }) => hooksObject`. If your OpenCode version changes the plugin API, rerun `reap install-skills` to refresh the plugin file.

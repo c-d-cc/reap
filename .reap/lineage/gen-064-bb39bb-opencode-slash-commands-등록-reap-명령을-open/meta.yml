@@ -1,0 +1,37 @@
+id: gen-064-bb39bb
+type: normal
+goal: OpenCode slash commands 등록 — /reap.* 명령을 OpenCode 환경에서 사용 가능하게
+parents:
+  - gen-063-830a29
+timeline:
+  - stage: learning
+    at: 2026-05-25T14:01:04.972Z
+  - stage: planning
+    at: 2026-05-25T14:06:27.495Z
+  - stage: implementation
+    at: 2026-05-25T14:09:57.244Z
+  - stage: validation
+    at: 2026-05-25T14:18:43.338Z
+  - stage: completion
+    at: 2026-05-25T14:21:33.518Z
+  - stage: validation
+    at: 2026-05-25T14:54:16.860Z
+    from: completion
+    reason: registerSessionIntegration 에 user-level slash commands sync 추가 — reap
+      update 흐름의 verification 갭 fix (사용자 지적)
+  - stage: implementation
+    at: 2026-05-25T14:54:21.006Z
+    from: validation
+    reason: implementation 단계에 fix 내용 추가 기록 필요
+  - stage: validation
+    at: 2026-05-25T14:55:55.326Z
+  - stage: completion
+    at: 2026-05-25T14:58:55.846Z
+status: completed
+fitnessFeedback:
+  text: "전반적으로 만족 (build + reinstall 없이 OK). 이전 build로 OpenCode 환경 테스트는 이미 잘 됐고,
+    이번 update 흐름 fix는 e2e (unit 4 + e2e 5)로 검증 충분. 재install + 사용자 정식 테스트는
+    push/release 시점에 진행. 부수 성과: gen-061 reapdev 사고의 근본 원인이
+    registerSessionIntegration의 user-level skills sync 누락임을 본 generation 에서 밝혀냈고
+    같은 fix로 자동 해소됨."
+  evaluatedAt: 2026-05-25T15:14:43.643Z

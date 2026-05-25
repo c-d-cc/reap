@@ -51,6 +51,15 @@ All adapters fulfill the `AdapterModule` contract: `installSkills`, `ensureProje
 
 **When adding a new AI client adapter, the verification checklist MUST include**: (a) static knowledge auto-loading mechanism, (b) dynamic state refresh trigger, (c) entry-point file (CLAUDE.md-equivalent), AND (d) **slash command / shortcut trigger registration** in the client's native location. Item (d) is the most easily-missed item — gen-063 shipped (a)/(b)/(c) but discovered (d) only after fitness, triggering a follow-up generation.
 
+**`installSkills` vs `registerSessionIntegration` — user-level sync is required in both** (gen-064 교훈). `reap update` only calls `adapter.ensureProjectIntegration` + `adapter.registerSessionIntegration` — NOT `installSkills`. Therefore any **user-level asset that must stay in sync with the bundled REAP version** (slash command files, agent definitions, etc.) must be refreshed from inside `registerSessionIntegration` too, not only from `installSkills`. The two functions have overlapping responsibilities:
+
+| Function | Caller(s) | Must refresh |
+|---|---|---|
+| `installSkills` | `reap install-skills` CLI + npm `postinstall` | full install — user-level assets + project-level wiring + emitOutput |
+| `registerSessionIntegration` | `reap update` (every project update) | user-level assets that must stay current + project-level wiring. Silent (no emitOutput — caller handles output). |
+
+Concretely: both adapters' `registerSessionIntegration` MUST call the same user-level slash command sync helper as `installSkills`. Skipping this leaves `reap update` users with stale (or absent) slash commands until they manually re-run `reap install-skills`. The standard pattern is to extract the slash-command sync into a silent helper (e.g. `installSlashCommands(home?)` for opencode, `installSlashCommandsOnly()` for claude-code) and have both callers invoke it. Same gap caused gen-061 reapdev incident's persistence — `reap update` couldn't auto-clean stale skills because user-level sync wasn't wired into that path.
+
 ### Generation Lifecycle
 
 **Normal** (5 stages):

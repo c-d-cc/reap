@@ -1,4 +1,4 @@
-import { cp, readFile, writeFile } from "fs/promises";
+import { cp, readFile, writeFile, readdir, unlink } from "fs/promises";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import { homedir } from "os";
@@ -241,11 +241,106 @@ async function installReapGuide(): Promise<void> {
   }
 }
 
+// ── slash commands installation ─────────────────────────────────────────────
+
+/**
+ * Pattern for REAP-managed slash command files: `reap.<name>.md`.
+ * The `reap.` prefix (with the literal dot) is reserved by REAP. Variants such
+ * as `reapdev.*`, `reap-x.*`, or `myreap.*` are user space and never matched.
+ * (Mirrors the Claude Code adapter's SKILL_PATTERN — identical semantics across
+ * adapters.)
+ */
+const SLASH_COMMAND_PATTERN = /^reap\..+\.md$/;
+
+/**
+ * Resolve the directory holding the Claude Code skill `.md` files. The same
+ * skill files are used as OpenCode slash commands (format is compatible:
+ * frontmatter `description` + body + `$ARGUMENTS`).
+ *
+ *   - Bundled: __dirname = dist/cli (single bundle, even though this code
+ *     conceptually lives under adapters/opencode). Skills are copied by the
+ *     build script to dist/adapters/claude-code/skills/.
+ *   - Dev (bun runtime): __dirname = src/adapters/opencode. Sibling skills
+ *     dir = ../claude-code/skills.
+ */
+function claudeCodeSkillsDir(): string {
+  return __dirname.includes("dist")
+    ? join(__dirname, "..", "adapters", "claude-code", "skills")
+    : join(__dirname, "..", "claude-code", "skills");
+}
+
+/**
+ * User-level OpenCode commands directory.
+ * Per https://opencode.ai/docs/commands/, OpenCode reads markdown commands
+ * from `~/.config/opencode/commands/` (global) or `.opencode/commands/`
+ * (per-project). REAP installs globally to match the Claude Code adapter's
+ * `~/.claude/commands/` parity model.
+ */
+export function opencodeCommandsDir(home: string = homedir()): string {
+  return join(home, ".config", "opencode", "commands");
+}
+
+/**
+ * Install REAP-managed slash command files into the user's OpenCode commands
+ * directory. The flow is cleanup-then-copy, identical in shape to the Claude
+ * Code adapter's `installSkills`:
+ *
+ *   1. Ensure target dir exists.
+ *   2. Remove every existing file matching `reap.*.md` (so a removed or
+ *      renamed REAP command does not leave a stale entry on the user's
+ *      machine).
+ *   3. Copy every `.md` from the Claude Code skills directory.
+ *
+ * User-supplied commands that do NOT start with `reap.` (e.g., `mytool.md`,
+ * `reapdev.publish.md`) are never touched.
+ *
+ * @returns counts + the target directory used (for tests/logging).
+ */
+export async function installSlashCommands(
+  home: string = homedir(),
+): Promise<{ cleaned: number; installed: number; targetDir: string }> {
+  const targetDir = opencodeCommandsDir(home);
+  await ensureDir(targetDir);
+
+  // Cleanup stale REAP commands.
+  let cleaned = 0;
+  try {
+    const existing = await readdir(targetDir);
+    for (const file of existing) {
+      if (SLASH_COMMAND_PATTERN.test(file)) {
+        await unlink(join(targetDir, file));
+        cleaned++;
+      }
+    }
+  } catch {
+    // Empty / missing target — nothing to clean.
+  }
+
+  // Copy fresh skills.
+  let installed = 0;
+  const srcDir = claudeCodeSkillsDir();
+  try {
+    const sources = await readdir(srcDir);
+    for (const file of sources) {
+      if (!file.endsWith(".md")) continue;
+      await cp(join(srcDir, file), join(targetDir, file));
+      installed++;
+    }
+  } catch {
+    // Source dir missing — broken bundle. Surface zero installs rather than
+    // throw, so install-skills emits a useful "0 installed" instead of failing
+    // the whole flow (downstream e2e will catch it).
+  }
+
+  return { cleaned, installed, targetDir };
+}
+
 /**
  * Adapter entry — install user-level + project-level OpenCode integration:
  *   - copy plugin source to .opencode/plugins/
  *   - ensure opencode.json has REAP instructions + plugin entry
  *   - install ~/.reap/reap-guide.md
+ *   - install ~/.config/opencode/commands/reap.*.md slash commands
  *
  * Does NOT touch AGENTS.md — that is handled by `ensureProjectIntegration`
  * via the dispatcher (uniform with claude-code's CLAUDE.md flow).
@@ -254,26 +349,52 @@ export async function installSkills(projectRoot: string): Promise<void> {
   await installPluginFile(projectRoot);
   const opencodeJsonAction = await ensureOpencodeJson(projectRoot);
   await installReapGuide();
+  const slashCommands = await installSlashCommands();
 
   emitOutput({
     status: "ok",
     command: "install-skills",
-    completed: ["install-plugin", "ensure-opencode-json", "install-reap-guide"],
+    completed: [
+      "install-plugin",
+      "ensure-opencode-json",
+      "install-reap-guide",
+      "install-slash-commands",
+    ],
     context: {
       agentClient: "opencode",
       pluginPath: join(projectRoot, ".opencode", "plugins", PLUGIN_FILENAME),
       opencodeJson: opencodeJsonAction,
+      slashCommands: {
+        cleaned: slashCommands.cleaned,
+        installed: slashCommands.installed,
+        targetDir: slashCommands.targetDir,
+      },
     },
-    message: `OpenCode integration installed (opencode.json: ${opencodeJsonAction}).`,
+    message:
+      `OpenCode integration installed (opencode.json: ${opencodeJsonAction}, ` +
+      `slash commands: ${slashCommands.installed} installed, ` +
+      `${slashCommands.cleaned} cleaned).`,
   });
 }
 
 /**
- * `registerSessionIntegration` for OpenCode is the same as `installSkills`
- * minus the user-level reap-guide step — it ensures the project-level wiring
- * (plugin file + opencode.json) is in place. Idempotent and silent on success.
+ * `registerSessionIntegration` for OpenCode ensures both project-level wiring
+ * (plugin file + opencode.json) AND user-level slash commands are up to date.
+ * Called by `reap update` — must keep the user's OpenCode environment in sync
+ * with the bundled REAP version every time the project is updated.
+ *
+ *   - `installPluginFile`    → `.opencode/plugins/reap-plugin.ts` (project)
+ *   - `ensureOpencodeJson`   → `opencode.json` instructions + plugin entries
+ *   - `installSlashCommands` → `~/.config/opencode/commands/reap.*.md`
+ *
+ * The slash command sync is idempotent and prefix-anchored (only `reap.*.md`
+ * is touched). User-supplied commands are preserved on every run. The
+ * reap-guide.md install is intentionally skipped here — that is bundled with
+ * the npm package's `postinstall` and the explicit `install-skills` flow, not
+ * with per-project `update`.
  */
 export async function registerSessionIntegration(projectRoot: string): Promise<void> {
   await installPluginFile(projectRoot);
   await ensureOpencodeJson(projectRoot);
+  await installSlashCommands();
 }

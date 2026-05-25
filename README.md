@@ -229,15 +229,15 @@ Pre-approve N generations for autonomous execution:
 
 REAP integrates with AI agents through an adapter layer keyed by the `agentClient` config field. Currently supported clients:
 
-- **Claude Code** (`agentClient: claude-code`, default) — static knowledge via `@` imports in `CLAUDE.md`; dynamic state via `SessionStart` hook (`reap load-context`).
-- **OpenCode** (`agentClient: opencode`) — static knowledge via `opencode.json`'s `instructions` field; dynamic state via `.reap/.session-state.md`, auto-refreshed by the bundled OpenCode plugin (`.opencode/plugins/reap-plugin.ts`) on `session.created` / `tool.execute.before`.
+- **Claude Code** (`agentClient: claude-code`, default) — static knowledge via `@` imports in `CLAUDE.md`; dynamic state via `SessionStart` hook (`reap load-context`); slash commands installed to `~/.claude/commands/reap.*.md`.
+- **OpenCode** (`agentClient: opencode`) — static knowledge via `opencode.json`'s `instructions` field; dynamic state via `.reap/.session-state.md`, auto-refreshed by the bundled OpenCode plugin (`.opencode/plugins/reap-plugin.ts`) on `session.created` / `tool.execute.before`; slash commands installed to `~/.config/opencode/commands/reap.*.md` (OpenCode commands API as of 2026-05).
 
-Switch clients by editing `.reap/config.yml`, then run `reap install-skills` followed by `reap update`. REAP regenerates the entry-point file (CLAUDE.md vs AGENTS.md), the session integration, and any client-specific assets.
+Switch clients by editing `.reap/config.yml`, then run `reap install-skills` followed by `reap update`. REAP regenerates the entry-point file (CLAUDE.md vs AGENTS.md), the session integration, and any client-specific assets. The `reap.` prefix in slash command directories is reserved — installs are cleanup-then-copy and will overwrite any `reap.*.md` file in those locations. Use a different prefix (`mytool.md`, `team.md`, etc.) for custom commands.
 
 ### How It Works
 
 1. **Entry-point file** (`CLAUDE.md` for claude-code, `AGENTS.md` for opencode) instructs the AI to load genome, environment, and reap-guide at session start
-2. **Slash commands** (claude-code) or **plain CLI calls** (opencode) invoke `reap run <cmd>`, which returns structured JSON instructions for the AI
+2. **Slash commands** — `/reap.start`, `/reap.status`, `/reap.evolve`, etc. work in both Claude Code and OpenCode; each invokes `reap run <cmd>`, which returns structured JSON instructions for the AI
 3. **Signature-based locking** (nonce chain) enforces stage ordering at the code level — no skipping, no forgery, no replay
 4. **Dynamic state dump** — every REAP lifecycle command synchronously writes `.reap/.session-state.md`, so OpenCode users always see the post-command state on the next session
 

@@ -92,16 +92,16 @@ src/
 │   ├── index.ts                — dispatcher: `getAdapter(agentClient)` → AdapterModule. codex는 helpful Error throw, unknown은 claude-code fallback
 │   ├── types.ts                — AdapterModule interface (installSkills / ensureProjectIntegration / registerSessionIntegration)
 │   ├── claude-code/
-│   │   ├── index.ts            — AdapterModule wrapper (install.ts 함수를 인터페이스 shape으로 export)
-│   │   ├── install.ts          — skill 파일 설치 (~/.claude/commands/) + SessionStart hook 등록 (check-version + load-context)
-│   │   └── skills/             — 19 slash command files (.md)
-│   └── opencode/               — OpenCode 어댑터 (gen-063)
+│   │   ├── index.ts            — AdapterModule wrapper. **registerSessionIntegration 이 installSlashCommandsOnly + registerSessionHooks 양쪽 호출 — `reap update` 흐름에서 ~/.claude/commands/ user-level sync 보장 (gen-064 T012)**
+│   │   ├── install.ts          — skill 파일 설치 (~/.claude/commands/) + SessionStart hook 등록 (check-version + load-context). **installSlashCommandsOnly() export — installSkills 내부와 adapter registerSessionIntegration 양쪽이 silent 재사용 (gen-064 T011)**
+│   │   └── skills/             — 19 slash command files (.md). OpenCode adapter 도 본 디렉토리를 source 로 재사용 (single source, gen-064)
+│   └── opencode/               — OpenCode 어댑터 (gen-063, gen-064 slash commands)
 │       ├── index.ts            — AdapterModule wrapper
-│       ├── install.ts          — opencode.json instructions/plugin sync (REAP_INSTRUCTIONS 9 + REAP_PLUGIN_ENTRY), AGENTS.md marker-hash sync, .opencode/plugins/reap-plugin.ts 배치
+│       ├── install.ts          — opencode.json instructions/plugin sync (REAP_INSTRUCTIONS 9 + REAP_PLUGIN_ENTRY), AGENTS.md marker-hash sync, .opencode/plugins/reap-plugin.ts 배치, **installSlashCommands(home?) ~/.config/opencode/commands/reap.*.md cleanup-then-copy (gen-064)**, opencodeCommandsDir/claudeCodeSkillsDir helpers. **registerSessionIntegration 도 installSlashCommands 호출 — `reap update` 흐름에서 user-level sync 보장 (gen-064 T013)**
 │       ├── plugin/
 │       │   └── reap-plugin.ts  — OpenCode plugin source (session.created + tool.execute.before, inline 타입)
 │       └── templates/
-│           └── agents.md       — AGENTS.md template (client-agnostic, reap-guide reference)
+│           └── agents.md       — AGENTS.md template (client-agnostic, reap-guide reference, slash commands 안내 절 포함)
 └── templates/                  — 템플릿 파일
     ├── reap-guide.md           — REAP 도구 가이드 (subagent prompt에 주입)
     ├── agents/                 — agent 정의 템플릿
@@ -145,16 +145,16 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 
 ## Tests
 
-### tests/ submodule (reap-test repo, self-evolve branch)
-- `tests/unit/` — bun:test 기반 unit tests (`bun test tests/unit/`)
-- `tests/e2e/` — bun:test 기반 e2e tests (`bun test tests/e2e/`)
+### tests/ submodule (reap-test repo, main branch)
+- `tests/unit/` — bun:test 기반 unit tests (`bun test tests/unit/`). 402 pass / 0 fail (gen-064 시점).
+- `tests/e2e/` — bun:test 기반 e2e tests (`bun test tests/e2e/`). 185 pass / 1 fail (pre-existing init-repair).
 - `tests/scenario/` — bun:test 기반 scenario tests (`bun test tests/scenario/`)
 
 ### scripts/ (프로젝트 루트)
-- `scripts/e2e-init.sh` — 초기화 테스트 (62 checks)
-- `scripts/e2e-lifecycle.sh` — 단일 generation lifecycle (16 checks)
-- `scripts/e2e-merge.sh` — merge workflow (25 checks)
-- `scripts/e2e-multi-generation.sh` — 다세대 + compression (34 checks)
+- `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates)
+- `scripts/alpha-publish.sh` — alpha 배포 헬퍼
+- `scripts/postinstall.sh` — npm postinstall hook
+- (참고) 이전의 `e2e-*.sh` shell scripts 는 bun:test 로 일원화되어 제거됨
 
 ### npm scripts
 - `npm run test:unit` — bun test tests/unit/

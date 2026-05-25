@@ -84,3 +84,25 @@ gen-063에서 OpenCode adapter 신설 시 backlog/verification에 (a) static kno
 - **판단 기준**: "이 통합을 처음 받은 사용자가 5분 안에 평소처럼 REAP를 호출할 수 있는가?"
 - application.md "Adapter Layer" 절 + evolution.md "사용자 UX gap" 절에 4-항목 체크리스트 명문화. 다음 세대가 누락 반복 방지.
 - 메타 교훈: agent가 작성한 backlog는 implementation 관점에 치우치기 쉽다 — "어떤 파일을 만들 것인가"는 잘 잡지만 "사용자가 어떻게 호출할 것인가"는 빠지기 쉬움. 사용자 진입점 적극 점검 필요.
+
+### 여러 adapter 가 같은 형식을 채택하면 source 도 single source (gen-064, 2026-05-25)
+OpenCode 명령 docs 조사 결과 Claude Code skill 형식과 거의 100% 호환 (frontmatter `description` + `$ARGUMENTS`). 별도 `src/adapters/opencode/commands/` 를 만들지 않고 `src/adapters/claude-code/skills/` 를 OpenCode adapter 도 그대로 read.
+- **결과**: 19 파일 중복 회피, 명령 추가/수정 시 한 곳만 수정. dogfooding 부담 최소.
+- **판단 기준**: "두 client 가 같은 형식을 그대로 받아들이는가?" — Yes 면 single source. 향후 client-specific 필드 필요 시 (예: OpenCode `subtask`/`model`) 그 시점에 분리.
+- **반대 원칙 (gen-063 의 교훈)**: "adapter 는 client 별 mechanism 을 호환 layer 로 추상화하는 것이지, 동일 메커니즘을 강제하는 것이 아니다" — 두 원칙은 모순이 아님. **mechanism (client-native 호출 방식) 은 client 별로 다를 수 있지만, format (data 파일의 schema) 이 같다면 source 단일화가 자연스러움**.
+- **응용 영역**: 향후 Codex adapter 가 같은 markdown 형식을 받아들인다면 source 3중 재사용. 다른 형식을 요구하면 그 시점에 분리.
+
+### Plan 단계에서 함수 caller 를 직접 읽어라 (gen-064 fitness 직전 사용자 갭 지적)
+
+gen-064 planning Q4 에서 `installSkills` vs `registerSessionIntegration` 의 경계를 추론으로 결정: "registerSessionIntegration 은 SessionStart 매번 호출이라 noisy". 그러나 실제 caller (`src/cli/commands/update.ts`) 를 읽지 않음. 실제로는 `reap update` 시점에만 호출됨. 결과: `reap update` 만으로는 commands 등록 안 되는 코드/verification 불일치. 사용자가 fitness 직전 검토에서 갭 발견 → back regression (T011~T015) 으로 fix.
+
+- **교훈**: 함수의 호출 의미를 결정할 때 *언제 호출되는가* 를 추상적으로 추론하지 말고, **실제 caller (`grep -rn "functionName"`) 를 읽어라**. 추론은 caller 확인 후 보강용.
+- **e2e 가 verification scenario 의 모든 CLI entry point 를 cover 해야 한다**. backlog 가 "`reap update` 후 X" 라 명시하면 e2e 가 정확히 `reap update` 를 호출하는 케이스가 있어야 한다. 추상적 기능 검증 ("installSkills 가 X 한다") 만으로는 부족.
+- **fitness 전 self-audit 체크리스트**: (1) backlog verification 의 각 시나리오가 e2e 1:1 mirror 되는가, (2) 변경 함수의 caller 가 모두 검증되었는가, (3) 사용자가 따라할 명령 시퀀스를 e2e 가 그대로 재현하는가.
+- **메타 교훈**: 사용자가 마지막 safety net 으로 작동했다. agent 의 추상적 추론보다 사용자가 코드를 직접 읽기가 강력. plan 단계의 잘못된 가정이 implementation 까지 그대로 흘러갔지만 fitness 직전 사용자 검토에서 catch → back regression path 가 graceful 하게 처리. lifecycle 이 정상 작동한 사례.
+
+### Cross-adapter 자산 경로는 항상 dist/dev 분기 (gen-064 실수에서)
+새 helper 작성 시 `__dirname.includes("dist")` 분기를 빠뜨리면 dist 환경에서 잘못된 경로로 풀린다. dist 는 `dist/cli/index.js` single bundle 이므로 `__dirname = dist/cli/` 이고, `..` 가 `dist/` 다. dev 는 `src/adapters/<adapter>/install.ts` 이므로 `..` 가 `src/adapters/`.
+- **패턴**: `__dirname.includes("dist") ? join(__dirname, "..", "adapters", "<adapter>", "<asset>") : join(__dirname, "..", "<adapter>", "<asset>")`
+- gen-064 에서 `claudeCodeSkillsDir()` 작성 시 이 분기를 빠뜨려 첫 e2e 가 0-install 로 즉시 잡아냄. 같은 파일 안의 기존 `assetPath()` 가 이미 그 패턴이라 참조했으면 한 번에 맞았을 일.
+- **교훈**: 새 helper 작성 시 **같은 파일의 기존 helper 패턴부터 확인**. cross-asset 경로는 단일 분기 패턴으로 통일.
