@@ -2,6 +2,9 @@
 title: migrate/update 관련 테스트 8건 수정
 priority: medium
 created: 2026-03-28
+status: consumed
+consumedBy: gen-059-9e9790
+consumedAt: 2026-03-30T15:55:55+09:00
 ---
 
 ## 실패 테스트 목록

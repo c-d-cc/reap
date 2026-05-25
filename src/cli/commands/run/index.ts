@@ -46,7 +46,7 @@ const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, pha
   report: reportExecute,
 };
 
-export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string }): Promise<void> {
+export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string | boolean; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string }): Promise<void> {
   if (stage === "start") {
     await startExecute(options.phase, options.goal, options.type, options.parents, options.backlog);
     return;

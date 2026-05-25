@@ -5,6 +5,9 @@ created: 2026-05-25
 resolves: 19
 issueUrl: https://github.com/c-d-cc/reap/issues/19
 dependsOn: claude-md-knowledge-loading-separation
+status: consumed
+consumedBy: gen-063-830a29
+consumedAt: 2026-05-25T21:29:54+09:00
 ---
 
 ## 배경

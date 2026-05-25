@@ -4,6 +4,9 @@ priority: medium
 created: 2026-05-24
 resolves: 16
 issueUrl: https://github.com/c-d-cc/reap/issues/16
+status: consumed
+consumedBy: gen-061-386e6c
+consumedAt: 2026-05-24T13:51:46+09:00
 ---
 
 ## 배경

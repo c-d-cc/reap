@@ -2,6 +2,9 @@
 title: daemon E2E 테스트 보강
 priority: medium
 created: 2026-03-29
+status: consumed
+consumedBy: gen-060-e3c492
+consumedAt: 2026-03-30T16:53:56+09:00
 ---
 
 ## 개요

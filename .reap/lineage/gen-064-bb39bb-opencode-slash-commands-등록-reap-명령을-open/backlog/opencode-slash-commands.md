@@ -4,6 +4,9 @@ priority: high
 created: 2026-05-25
 dependsOn: opencode-adapter
 relatedIssue: 19
+status: consumed
+consumedBy: gen-064-bb39bb
+consumedAt: 2026-05-26T00:15:33+09:00
 ---
 
 ## 배경

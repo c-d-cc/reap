@@ -32,7 +32,7 @@ src/
 │   ├── lineage.ts              — 아카이브 DAG, genome diff (3-way), lineage 읽기, getLastLineageEntry (early-close hint 노출용)
 │   ├── compression.ts          — 2-level lineage 압축 (L1: 5gen, L2: 100files)
 │   ├── genome-suggest.ts       — init 시 genome 초안 생성
-│   ├── backlog.ts              — backlog scan, consume, revert, create + createDeferredBacklog/extractUncheckedTasks/countCheckedTasks (early-close 승계용)
+│   ├── backlog.ts              — backlog scan, consume, revert, create + createDeferredBacklog/extractUncheckedTasks/countCheckedTasks (early-close 승계용). **gen-065부터 `consumeBacklog`는 `Promise<ConsumeBacklogResult>` ("ok"/"already"/"warning") 반환 — YAML.parse로 idempotency 판단 + 라인 단위 manipulation으로 사용자 frontmatter 형식 보존. 4 케이스 graceful (status:pending 있음/없음/이미 consumed/frontmatter 없음). silent fail 0.**
 │   ├── archive.ts              — generation 아카이빙 (life → lineage). archiveGeneration (status: completed) + archiveEarlyClose (status: partial + closeMeta)
 │   ├── cruise.ts               — cruise mode 관리 ("N/M" 포맷, parse/advance/clear/set)
 │   ├── git.ts                  — git 연동 (commit, diff, push, pull, fetch, branch analysis)
@@ -58,7 +58,7 @@ src/
 │       ├── load-context.ts     — SessionStart hook용: dynamic context 주입 (buildKnowledgeContext, hookSpecificOutput JSON 출력). gen-062에서 정/동 분리 — Current State/Strict/Language 3개 dynamic 섹션만 출력 (~1KB). static knowledge(genome/env/vision/memory/reap-guide)는 CLAUDE.md의 `@` import refs로 Claude Code가 직접 로드. 비-REAP 디렉토리에서는 silent exit
 │       ├── dump-state.ts       — `.reap/.session-state.md`에 동일 dynamic context 기록 (--stdout/--silent 지원). OpenCode plugin과 외부 도구용. emitOutput이 lifecycle 명령 종료 시 sync 버전(dump-state-sync.ts)으로 자동 dump
 │       ├── run/                — stage 실행 (21 handlers)
-│       │   ├── start.ts        — generation 생성 (scan → create)
+│       │   ├── start.ts        — generation 생성 (scan → create). **gen-065부터 create phase에 backlog gate: `--backlog`/`--no-backlog` 모두 없고 pending > 0 시 `status: prompt`/`phase: select-backlog` emit + return. idempotent. `consumeBacklog` warning을 emitOutput `context.backlogWarning` 으로 surface (silent fail 방지).**
 │       │   ├── learning.ts     — 탐구 (work → complete)
 │       │   ├── planning.ts     — 계획 (work → complete)
 │       │   ├── implementation.ts — 구현 (work → complete)

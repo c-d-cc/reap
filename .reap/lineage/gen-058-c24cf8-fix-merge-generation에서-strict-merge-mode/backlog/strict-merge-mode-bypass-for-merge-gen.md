@@ -2,6 +2,9 @@
 title: Merge generation에서 strict merge mode 자동 bypass
 priority: high
 created: 2026-03-29
+status: consumed
+consumedBy: gen-058-c24cf8
+consumedAt: 2026-03-30T15:48:15+09:00
 ---
 
 ## 문제

@@ -69,11 +69,12 @@ program
   .option("--parents <parents>", "Parent generation IDs for merge (comma-separated)")
   .option("--feedback <feedback>", "Fitness feedback text")
   .option("--reason <reason>", "Reason for back regression or abort")
-  .option("--backlog <backlog>", "Backlog filename to consume for this generation")
+  .option("--backlog <backlog>", "Backlog filename to consume for this generation (use --no-backlog to explicitly declare no relevant backlog)")
+  .option("--no-backlog", "Explicitly declare no backlog item is relevant to this generation (suppresses pending-backlog prompt). Negates --backlog.")
   .option("--source-action <sourceAction>", "Source action for abort/early-close (rollback, stash, hold, none — rollback only for abort)")
   .option("--save-backlog", "Save progress to backlog on abort")
   .option("--defer-tasks <value>", "For early-close: auto-defer unchecked tasks to new backlog (true|false, default true)")
-  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string }) => {
+  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string | false; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string }) => {
     await runExecute(stage, options);
   });
 

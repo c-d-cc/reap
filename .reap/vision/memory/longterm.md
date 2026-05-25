@@ -101,6 +101,38 @@ gen-064 planning Q4 에서 `installSkills` vs `registerSessionIntegration` 의 �
 - **fitness 전 self-audit 체크리스트**: (1) backlog verification 의 각 시나리오가 e2e 1:1 mirror 되는가, (2) 변경 함수의 caller 가 모두 검증되었는가, (3) 사용자가 따라할 명령 시퀀스를 e2e 가 그대로 재현하는가.
 - **메타 교훈**: 사용자가 마지막 safety net 으로 작동했다. agent 의 추상적 추론보다 사용자가 코드를 직접 읽기가 강력. plan 단계의 잘못된 가정이 implementation 까지 그대로 흘러갔지만 fitness 직전 사용자 검토에서 catch → back regression path 가 graceful 하게 처리. lifecycle 이 정상 작동한 사례.
 
+### Library/CLI option semantics는 추론보다 실증 (gen-065)
+
+gen-065 planning에서 `--backlog` + `--no-backlog` 의 libs/cli.ts 동작을 commander.js convention 추론으로 결정할 수도 있었으나, `/tmp/test-cli.ts` minimal repro로 즉시 검증 → tri-state (`true` default / `false` `--no-X` / `string` `--X value`) 확인 후 implementation. **추론은 그것대로 일관성 있게 들리지만 framework마다 미묘한 차이가 있고, 그 차이가 user-facing 동작 (e.g. `defaultValue: true`) 으로 흘러간다.**
+
+- gen-064 longterm "Plan 단계에서 함수 caller 를 직접 읽어라"의 일반화: **internal API behavior 도 caller 그래프뿐 아니라 실증 (minimal repro) 으로 결정**.
+- 응용 영역: 외부 라이브러리의 edge case (YAML.parse null 처리, JSON.parse 예외), CLI framework의 자동 변환 (kebab-case → camelCase, negate semantics), filesystem race condition 등.
+
+### YAML round-trip 손실 회피 — 분석은 parser, write는 라인 단위 (gen-065)
+
+사용자가 손으로 작성한 YAML frontmatter 를 modify 할 때, `YAML.parse → mutate → YAML.stringify` round-trip 은 다음을 손실:
+- comment 손실
+- key 순서 재배치
+- string quote 정규화 (e.g. `"123"` → `123`)
+- numeric 추론 (e.g. `issueUrl: 18` → number `18`)
+
+본 generation의 `consumeBacklog` 견고화는 다음 패턴 채택:
+- YAML.parse: idempotency check 등 *분석* 용도만
+- 실제 write: 라인 단위 manipulation (`split("\n")` → key별 정규식 match → replace/append)
+
+**판단 기준**: "원본 형식 보존이 사용자 가치인가" → Yes 면 라인 단위. AI/시스템이 만든 file이라면 round-trip OK. 본 generation의 7개 누적 cleanup도 같은 알고리즘으로 처리되어 사용자 frontmatter (priority, dependsOn, resolves, issueUrl 등 다양한 field) 모두 보존됨을 head 검증으로 확인.
+
+### 인과적으로 묶인 버그/작업은 한 묶음으로 (gen-065)
+
+gen-065는 세 영역을 한 generation에서 처리:
+1. Issue #18 (start --backlog 누락 prompt) — 공식 버그
+2. consumeBacklog regex silent fail — 신규 발견 버그
+3. 누적 7개 cleanup — 두 버그의 결과로 archive 실패한 backlog
+
+**분리 시 위험**: (1)만 fix하면 (2)가 살아있어 cleanup이 또 누락됨. (2)만 fix하면 (1)이 살아있어 향후 같은 사례 재발. cleanup은 두 fix가 모두 적용된 후에만 안전. **인과로 묶인 작업은 separate 안 됨 — 인과 chain의 어느 한 곳만 끊으면 새로운 누락 path 생성**.
+
+- 판단 기준: "이 fix A가 적용된 상태에서 fix B가 별 generation으로 미뤄지면, 그 사이 generation들이 같은 사고를 또 일으키나?" — Yes 면 한 묶음.
+
 ### Cross-adapter 자산 경로는 항상 dist/dev 분기 (gen-064 실수에서)
 새 helper 작성 시 `__dirname.includes("dist")` 분기를 빠뜨리면 dist 환경에서 잘못된 경로로 풀린다. dist 는 `dist/cli/index.js` single bundle 이므로 `__dirname = dist/cli/` 이고, `..` 가 `dist/` 다. dev 는 `src/adapters/<adapter>/install.ts` 이므로 `..` 가 `src/adapters/`.
 - **패턴**: `__dirname.includes("dist") ? join(__dirname, "..", "adapters", "<adapter>", "<asset>") : join(__dirname, "..", "<adapter>", "<asset>")`

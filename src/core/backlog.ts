@@ -1,5 +1,6 @@
 import { readdir } from "fs/promises";
 import { join } from "path";
+import YAML from "yaml";
 import { readTextFile, writeTextFile } from "./fs.js";
 
 export interface BacklogItem {
@@ -49,17 +50,95 @@ export async function scanBacklog(backlogDir: string): Promise<BacklogItem[]> {
   return items;
 }
 
+export interface ConsumeBacklogResult {
+  /**
+   * - "ok" — frontmatter was updated to mark this generation as the consumer.
+   * - "already" — same generation already marked; no write performed.
+   * - "warning" — could not mark (file empty / no frontmatter). Caller should surface `warning`.
+   */
+  status: "ok" | "already" | "warning";
+  warning?: string;
+}
+
 /**
  * Mark a backlog item as consumed by a generation.
+ *
+ * Robust against frontmatter variations (gen-065 fix):
+ * - `status: pending` present → replaced in-place
+ * - `status:` absent → field appended to frontmatter (no silent fail)
+ * - `status: consumed` already, same gen → idempotent ("already")
+ * - `status: consumed` different gen → consumedBy/consumedAt overwritten
+ * - no frontmatter at all → returns "warning" (visible result, not silent fail)
+ *
+ * Uses YAML parser for analysis but line-level write to preserve the user's
+ * frontmatter formatting (comments, key order, quoting). YAML.stringify would
+ * round-trip-lose those.
  */
-export async function consumeBacklog(filePath: string, genId: string): Promise<void> {
+export async function consumeBacklog(filePath: string, genId: string): Promise<ConsumeBacklogResult> {
   const content = await readTextFile(filePath);
-  if (!content) return;
+  if (!content) {
+    return { status: "warning", warning: `${filePath}: file empty or unreadable — backlog not marked` };
+  }
 
-  // Replace status in frontmatter
-  const updated = content
-    .replace(/status:\s*pending/, `status: consumed\nconsumedBy: ${genId}\nconsumedAt: ${new Date().toISOString()}`);
+  const fmMatch = content.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+  if (!fmMatch) {
+    return { status: "warning", warning: `${filePath}: frontmatter not found — backlog not marked (use 'reap make backlog' to create well-formed items)` };
+  }
+
+  const fmRaw = fmMatch[1];
+
+  // Parse with YAML for semantic analysis (idempotency check).
+  let parsed: Record<string, unknown> = {};
+  try {
+    parsed = (YAML.parse(fmRaw) ?? {}) as Record<string, unknown>;
+  } catch {
+    // Malformed YAML — fall through to line-level fix attempt; warn on it.
+    return { status: "warning", warning: `${filePath}: malformed YAML frontmatter — backlog not marked` };
+  }
+
+  // Idempotency: same gen already marked → no-op.
+  if (parsed.status === "consumed" && parsed.consumedBy === genId) {
+    return { status: "already" };
+  }
+
+  const now = new Date().toISOString();
+
+  // Line-level manipulation to preserve formatting.
+  const lines = fmRaw.split(/\r?\n/);
+  let hasStatus = false;
+  let hasConsumedBy = false;
+  let hasConsumedAt = false;
+  const newLines = lines.map((line) => {
+    if (/^status\s*:/.test(line)) {
+      hasStatus = true;
+      return `status: consumed`;
+    }
+    if (/^consumedBy\s*:/.test(line)) {
+      hasConsumedBy = true;
+      return `consumedBy: ${genId}`;
+    }
+    if (/^consumedAt\s*:/.test(line)) {
+      hasConsumedAt = true;
+      return `consumedAt: ${now}`;
+    }
+    return line;
+  });
+
+  if (!hasStatus) newLines.push(`status: consumed`);
+  if (!hasConsumedBy) newLines.push(`consumedBy: ${genId}`);
+  if (!hasConsumedAt) newLines.push(`consumedAt: ${now}`);
+
+  // Trim trailing blank lines we may have introduced from split, but preserve
+  // any intentional structure within.
+  while (newLines.length > 0 && newLines[newLines.length - 1] === "") {
+    newLines.pop();
+  }
+
+  const newFm = newLines.join("\n");
+  // Reconstruct: replace exact match span with new frontmatter block.
+  const updated = content.replace(fmMatch[0], `---\n${newFm}\n---\n`);
   await writeTextFile(filePath, updated);
+  return { status: "ok" };
 }
 
 function parseFrontmatter(content: string): Record<string, string> {

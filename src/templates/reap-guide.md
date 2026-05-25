@@ -142,7 +142,18 @@ Each item carries a `status` field:
 - `status: pending` — Not yet processed (default)
 - `status: consumed` — Processed in the current generation (requires `consumedBy: gen-XXX-{hash}`)
 
-**Create backlog items using CLI only**: `reap make backlog --type <type> --title <title> [--body <body>] [--priority <priority>]`. Never create backlog files directly.
+**Create backlog items using CLI only**: `reap make backlog --type <type> --title <title> [--body <body>] [--priority <priority>]`. Never create backlog files directly — `reap make backlog` injects the required `status: pending` frontmatter field. Files created via Write tool (no `status:` field) will be silently skipped by archive in older REAP versions; gen-065 fixes this with explicit warning + auto-append, but `reap make backlog` remains the only supported creation path.
+
+### Starting a Generation — Backlog Selection (Issue #18)
+
+`reap run start --phase create --goal "<goal>"` requires an explicit decision about pending backlog when pending items exist:
+
+- `--backlog <filename>` — Consume the named backlog as the source of this generation. The file's frontmatter is marked `status: consumed` + `consumedBy: <gen-id>`.
+- `--no-backlog` — Explicitly declare that no pending backlog is relevant to this goal. Proceeds without consuming any.
+- (neither flag, pending exists) → REAP returns `status: "prompt"` with the pending list and stops without creating a generation. The AI must review the list against the goal and re-call with one of the two flags. This is **idempotent** — re-calling with a flag advances; the prompt never loops.
+- (neither flag, no pending) → Proceeds silently (backward-compatible).
+
+**AI behavior**: When you receive the `select-backlog` prompt, read each pending item title against the current goal. If any item directly supports the goal, choose `--backlog <filename>` (must match `b.filename` exactly). If none is relevant, choose `--no-backlog`. Do not ask the human a second time once the judgment is clear — the human's goal was already explicit.
 
 ### Task Deferral
 

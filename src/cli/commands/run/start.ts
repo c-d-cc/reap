@@ -7,7 +7,7 @@ import { executeHooks } from "../../../core/hooks.js";
 import { scanBacklog, consumeBacklog } from "../../../core/backlog.js";
 import { getLastLineageEntry } from "../../../core/lineage.js";
 
-export async function execute(phase?: string, goal?: string, type?: string, parents?: string, backlog?: string): Promise<void> {
+export async function execute(phase?: string, goal?: string, type?: string, parents?: string, backlog?: string | boolean): Promise<void> {
   const paths = createPaths(process.cwd());
 
   if (!(await fileExists(paths.config))) {
@@ -15,6 +15,13 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
   }
 
   const gm = new GenerationManager(paths);
+
+  // Normalize backlog tri-state (libs/cli.ts negate option semantics):
+  //   undefined / true  → flag not explicitly given (treated as missing)
+  //   false             → --no-backlog explicitly given (suppress prompt)
+  //   string            → --backlog <filename> given
+  const backlogFilename = typeof backlog === "string" ? backlog : undefined;
+  const noBacklogFlag = backlog === false;
 
   // Backward compatibility: if goal is provided without phase, treat as "create"
   const effectivePhase = (!phase && goal) ? "create" : phase;
@@ -84,12 +91,48 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
 
   if (effectivePhase === "create") {
     if (!goal) {
-      emitError("start", 'Goal is required. Usage: reap run start --phase create --goal "<goal>" [--backlog <filename>]');
+      emitError("start", 'Goal is required. Usage: reap run start --phase create --goal "<goal>" [--backlog <filename> | --no-backlog]');
     }
 
     const existing = await gm.current();
     if (existing) {
       emitError("start", `Generation ${existing.id} is already active at stage '${existing.stage}'. Abort or complete it first.`);
+    }
+
+    // Issue #18 fix — guard against silent backlog skip.
+    // If neither --backlog nor --no-backlog is given AND pending backlog exists,
+    // emit a prompt and ask AI/human to decide. Idempotent: re-call with one of
+    // the two flags advances. Skipped for merge (parents-driven).
+    if (type !== "merge" && !backlogFilename && !noBacklogFlag) {
+      const allItems = await scanBacklog(paths.backlog);
+      const pendingItems = allItems.filter((b) => b.status === "pending");
+      if (pendingItems.length > 0) {
+        const promptLines: string[] = [
+          `Goal: "${goal}"`,
+          "",
+          `Pending backlog items (${pendingItems.length}):`,
+          ...pendingItems.map((b) => `- [${b.type}] ${b.title} (\`${b.filename}\`)`),
+          "",
+          "본 goal과 관련된 backlog가 있는지 검토하세요.",
+          "- 관련된 backlog 있음 → `--backlog <filename>` 추가하여 재호출",
+          "- 관련된 backlog 없음 → `--no-backlog` 추가하여 재호출",
+          "",
+          "두 flag 중 하나가 명시되어야 generation이 생성됩니다. (Issue #18 fix)",
+        ];
+        emitOutput({
+          status: "prompt",
+          command: "start",
+          phase: "select-backlog",
+          completed: ["gate"],
+          context: {
+            goal,
+            pendingBacklog: pendingItems.map((b) => ({ type: b.type, title: b.title, filename: b.filename })),
+          },
+          prompt: promptLines.join("\n"),
+          nextCommand: `reap run start --phase create --goal "${goal}" --backlog <filename>`,
+        });
+        return;
+      }
     }
 
     if (type === "merge") {
@@ -123,12 +166,18 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
     const state = await gm.create(goal!, genType);
 
     // Mark backlog as consumed (after ID generation)
-    if (backlog) {
-      const backlogPath = join(paths.backlog, backlog);
+    let consumeWarning: string | undefined;
+    if (backlogFilename) {
+      const backlogPath = join(paths.backlog, backlogFilename);
       if (await fileExists(backlogPath)) {
-        await consumeBacklog(backlogPath, state.id);
-        state.sourceBacklog = backlog;
+        const result = await consumeBacklog(backlogPath, state.id);
+        if (result.status === "warning" && result.warning) {
+          consumeWarning = result.warning;
+        }
+        state.sourceBacklog = backlogFilename;
         await gm.save(state);
+      } else {
+        consumeWarning = `backlog file not found: ${backlogPath}`;
       }
     }
 
@@ -139,10 +188,15 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
     const { triggerIndexing } = await import("../daemon/lifecycle.js");
     await triggerIndexing(paths.root);
 
+    const messageLines = [`Generation ${state.id} created. Run: reap run learning`];
+    if (consumeWarning) {
+      messageLines.unshift(`[backlog warning] ${consumeWarning}`);
+    }
+
     emitOutput({
       status: "ok",
       command: "start",
-      completed: backlog
+      completed: backlogFilename
         ? ["gate", "create-generation", "backlog-consumed"]
         : ["gate", "create-generation"],
       context: {
@@ -151,8 +205,9 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
         type: state.type,
         parents: state.parents,
         sourceBacklog: state.sourceBacklog,
+        ...(consumeWarning ? { backlogWarning: consumeWarning } : {}),
       },
-      message: `Generation ${state.id} created. Run: reap run learning`,
+      message: messageLines.join("\n"),
       nextCommand: "reap run learning",
     });
   }
