@@ -53,3 +53,15 @@ buildBasePrompt()는 동적 context(state, vision, memory, clarity, cruise)만 �
 
 ### 종료 path는 transition graph 외부 (gen-061, 2026-05-24)
 abort/early-close 같은 "탈출 path"는 `NORMAL_TRANSITIONS`/`MERGE_TRANSITIONS` graph 안에 transition으로 추가하지 않고, `verifyTransition` 호출 자체를 건너뛰는 방식으로 구현. 대신 `state.stage` 검사로 명시적 가드. 정상 lifecycle 흐름과 탈출 path의 책임 분리가 명확해짐. 새 종료 path를 추가할 때 abort.ts/early-close.ts 패턴을 차용.
+
+### Template = single source of truth + marker-hash sync (gen-054, 재발견 gen-062)
+gen-054에서 도입된 marker-hash sync(`<!-- reap:start {hash} -->...<!-- reap:end -->` + `extractReapSection` + `detectLegacyReapSection` + `updateClaudeMdFile`)는 본래 CLAUDE.md 자동 갱신용이었으나, gen-062에서 그 가치가 재확인됨:
+- template 한 줄만 수정해도 모든 사용자(plain-path legacy + marker-wrapped stale 둘 다) 자동 처리.
+- migration 전용 코드 0줄 추가로 issue 해결 가능.
+- "template만 바꾸면 사용자 모두 다음 update 시 자동 반영" 패턴은 dog-fooding 자동화의 핵심.
+- 응용 가치: `.reap/reap-guide.md`, hooks template 등 다른 dog-fooding 영역으로 확대 가능. `onLifeCompleted` hook으로 자동 sync 트리거하면 drift가 원천 차단됨.
+
+### Claude Code native 메커니즘 활용 + REAP hook의 역할 분리 (gen-062, 2026-05-25)
+초기에는 SessionStart hook이 9 static 파일을 모두 inject했음(gen-053). Claude Code가 native `@` import를 지원한다는 사실을 활용해 static은 `@` ref로, dynamic만 hook으로 분리.
+- 결과: hook 출력 89% 감소, 정보 손실 0(`@` import lazy load).
+- 교훈: 플랫폼 native 메커니즘을 활용할 수 있는 곳에서는 자체 구현을 미루지 말 것. 단, hook 자체를 제거하지는 않음 — dynamic context(generation state, strict mode, language)는 `@` 로 표현 불가하므로 hook이 여전히 필수. 정/동 분리가 답이지 hook 전면 제거가 답이 아님.

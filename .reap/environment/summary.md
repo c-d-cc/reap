@@ -53,7 +53,7 @@ src/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair, --migrate 지원)
 │       ├── migrate.ts          — v0.15→v0.16 마이그레이션 (multi-phase: confirm→execute→vision→complete)
 │       ├── check-version.ts    — postinstall/SessionStart용: v0.15 legacy cleanup + autoUpdate 자동 업데이트 + autoUpdateMinVersion guard + release notice 표시 (semverGte, queryAutoUpdateMinVersion, queryLatestVersion, performAutoUpdate, handOffToNewBinary, checkAutoUpdateGuard)
-│       ├── load-context.ts     — SessionStart hook용: REAP knowledge 주입 (buildKnowledgeContext, hookSpecificOutput JSON 출력). 비-REAP 디렉토리에서는 silent exit
+│       ├── load-context.ts     — SessionStart hook용: dynamic context 주입 (buildKnowledgeContext, hookSpecificOutput JSON 출력). gen-062에서 정/동 분리 — Current State/Strict/Language 3개 dynamic 섹션만 출력 (~1KB). static knowledge(genome/env/vision/memory/reap-guide)는 CLAUDE.md의 `@` import refs로 Claude Code가 직접 로드. 비-REAP 디렉토리에서는 silent exit
 │       ├── run/                — stage 실행 (21 handlers)
 │       │   ├── start.ts        — generation 생성 (scan → create)
 │       │   ├── learning.ts     — 탐구 (work → complete)

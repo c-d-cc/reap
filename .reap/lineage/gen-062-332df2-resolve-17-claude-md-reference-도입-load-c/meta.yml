@@ -1,0 +1,24 @@
+id: gen-062-332df2
+type: normal
+goal: "resolve #17: CLAUDE.md @ reference 도입 + load-context 정/동 분리 (Claude Code)"
+parents:
+  - gen-061-386e6c
+timeline:
+  - stage: learning
+    at: 2026-05-25T08:09:20.896Z
+  - stage: planning
+    at: 2026-05-25T08:13:03.051Z
+  - stage: implementation
+    at: 2026-05-25T08:14:12.402Z
+  - stage: validation
+    at: 2026-05-25T08:19:35.454Z
+  - stage: completion
+    at: 2026-05-25T08:22:07.842Z
+status: completed
+fitnessFeedback:
+  text: 전반적으로 만족 — 구현 결과 OK. agent의 자체 결정 사항(template 형식, dog-fooding 즉시 적용,
+    .reap/reap-guide.md sync) 모두 수용. follow-up 4건 중 1번(Gen-N+1 OpenCode adapter,
+    opencode-adapter.md backlog)는 본 generation 직후 바로 진행 예정. 2~4번(reap-guide sync
+    hook, detectLegacyReapSection heading-less 강화, root vs .claude/CLAUDE.md 공존
+    안내)는 본 generation에서는 처리 안 함, 추후 별도 판단.
+  evaluatedAt: 2026-05-25T09:12:38.891Z

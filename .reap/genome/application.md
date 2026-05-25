@@ -101,6 +101,21 @@ Embryo → Normal 전환: adapt phase에서 AI 제안, 인간 승인.
 - `.reap/reap-guide.md` ↔ `src/templates/reap-guide.md`
 - `.reap/` 디렉토리 구조 ↔ `src/core/integrity.ts` (구조 검증), `src/cli/commands/init/` (초기화)
 
+## Knowledge Loading — Static / Dynamic 분리
+
+Claude Code 어댑터의 knowledge 전달은 두 layer로 명확히 분리된다 (gen-062부터 채택).
+
+| Layer | 메커니즘 | 대상 | 위치 |
+|---|---|---|---|
+| **Static** | Claude Code `@` import (CLAUDE.md 본문) | genome×3 + environment summary + vision goals + memory×3 + reap-guide (총 9) | `src/templates/claude-md-section.md` 의 "Static Knowledge (auto-imported)" 블록 |
+| **Dynamic** | SessionStart hook (`reap load-context`) | Current State (current.yml 가공) + Strict Mode + Language 지시 | `src/cli/commands/load-context.ts` 의 `buildKnowledgeContext()` |
+
+원칙:
+- static knowledge는 코드가 직접 read/inject 하지 않는다. Claude Code의 native `@` import를 신뢰한다.
+- 새 static 파일을 추가하려면 (a) `claude-md-section.md` 의 `@` ref 블록에 한 줄 추가, (b) integrity.ts 의 검증 대상 추가만으로 충분.
+- 새 dynamic context를 추가하려면 `buildKnowledgeContext()` 에 섹션을 추가하되, 반드시 dynamic 자격이 있어야 한다(파일로 표현 불가능한 generation state 의존성). 그렇지 않은 정보는 static으로 분류.
+- migration: template 변경 시 `ensureClaudeMd` (`src/cli/commands/init/common.ts`) 의 marker-hash sync 로직(gen-054)이 모든 사용자(plain-path legacy + marker-stale 둘 다) 자동 처리.
+
 ## Conventions
 
 ### Code Style

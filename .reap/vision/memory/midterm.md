@@ -37,6 +37,15 @@ gen-028~031에서 gap-driven evolution + vision eval + memory 도입 완료.
 - E2E 테스트 보강 완료 (gen-060): incremental, error-cases, worktree-diverge, idle-timeout
 - 남은 작업: API 레벨 incremental indexing 지원, Phase 4 이후 MCP server wrapper (향후 확장)
 
+## Knowledge Loading 정/동 분리 (gen-062, 2026-05-25 완료)
+
+Issue #17 해결. Claude Code의 native `@` import 메커니즘 활용.
+- Static knowledge(genome×3 + env summary + vision goals + memory×3 + reap-guide 9개)는 CLAUDE.md `@` ref로 Claude Code가 직접 import.
+- Dynamic context(Current State + Strict Mode + Language 3개)만 SessionStart hook이 inject.
+- migration은 gen-054 marker-hash sync infra가 자동 처리(추가 코드 0).
+- 다음 단계 (Gen-N+1): `opencode-adapter.md` backlog를 source로 OpenCode 지원. 본 generation의 dynamic-only `buildKnowledgeContext()` 가 `reap dump-state` 의 기반이 됨.
+- gen-054 marker sync infra의 가치 재확인: "template = single source of truth" 패턴이 dog-fooding 자동화 영역으로 확대 가능.
+
 ## Lifecycle Termination Paths (gen-061, 2026-05-24 완료)
 
 Issue #16 해결. 종료 경로가 abort/completion에서 abort/early-close/completion 셋으로 확장됨.

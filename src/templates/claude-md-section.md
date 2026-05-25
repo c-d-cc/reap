@@ -6,26 +6,27 @@ All work must follow genome principles.
 
 ### Knowledge Loading
 
-Session-start hook automatically injects all REAP knowledge (genome, environment, vision, memory, guide) into the session context.
+REAP knowledge is loaded in two layers:
 
-If context was compacted and REAP knowledge was lost, re-run the hook:
+1. **Static knowledge** (genome, environment, vision, memory, reap-guide) is auto-loaded by Claude Code via the `@` import references below — no hook required.
+2. **Dynamic context** (current generation state, strict mode, language directive) is injected by the SessionStart hook (`reap load-context`).
+
+If dynamic context was lost (e.g. after a context compaction), re-run the hook:
 ```
 /reap.knowledge reload
 ```
 
-### Manual Reference (fallback)
+### Static Knowledge (auto-imported)
 
-If the hook did not run, read these files manually:
-
-- `~/.reap/reap-guide.md` — REAP tool usage, architecture, lifecycle, rules
-- `.reap/genome/application.md` — Project architecture, conventions, tech stack
-- `.reap/genome/evolution.md` — AI behavior guide, evolution principles
-- `.reap/genome/invariants.md` — Absolute constraints (never violate)
-- `.reap/environment/summary.md` — Source structure, build, tests, design decisions
-- `.reap/vision/goals.md` — Project goals
-- `.reap/vision/memory/longterm.md` — Project origin, key design lessons
-- `.reap/vision/memory/midterm.md` — Ongoing large tasks and unresolved issues
-- `.reap/vision/memory/shortterm.md` — Recent session summary and next session tasks
+@~/.reap/reap-guide.md
+@.reap/genome/application.md
+@.reap/genome/evolution.md
+@.reap/genome/invariants.md
+@.reap/environment/summary.md
+@.reap/vision/goals.md
+@.reap/vision/memory/longterm.md
+@.reap/vision/memory/midterm.md
+@.reap/vision/memory/shortterm.md
 
 ### Termination Paths
 
