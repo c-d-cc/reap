@@ -46,6 +46,23 @@ Issue #17 해결. Claude Code의 native `@` import 메커니즘 활용.
 - 다음 단계 (Gen-N+1): `opencode-adapter.md` backlog를 source로 OpenCode 지원. 본 generation의 dynamic-only `buildKnowledgeContext()` 가 `reap dump-state` 의 기반이 됨.
 - gen-054 marker sync infra의 가치 재확인: "template = single source of truth" 패턴이 dog-fooding 자동화 영역으로 확대 가능.
 
+## OpenCode adapter + dispatcher 패턴 (gen-063, 2026-05-25 완료)
+
+Issue #19 해결. claude-code 단독에서 멀티-client 구조로 전환.
+- `src/adapters/{index,types}.ts` dispatcher + AdapterModule interface 신설. agentClient 기준 분기. codex는 helpful Error throw, unknown은 claude-code fallback.
+- OpenCode adapter: opencode.json instructions/plugin sync(상수 리스트 + dedupe, 사용자 필드 보존), AGENTS.md marker-hash sync(CLAUDE.md와 동일 패턴), .opencode/plugins/reap-plugin.ts 배치.
+- Plugin signature: `async ({ $, directory }) => { session.created, tool.execute.before }`. inline 타입으로 `@opencode-ai/plugin` 의존성 강제 X.
+- `reap dump-state` CLI 신규: `--stdout`/`--silent`. emitOutput이 lifecycle 명령 종료 시 sync 버전(`dump-state-sync.ts`)으로 자동 dump (DUMP_COMMANDS 화이트리스트). sync와 async builder는 byte-identical 출력(unit test 보장).
+- AGENTS.md 위치 = 프로젝트 루트 (OpenCode docs 재확인, `.opencode/AGENTS.md`는 비공식). 사용자 영역 marker로 보존.
+
+### Slash commands 누락 — follow-up 필요
+
+- gen-063 fitness 단계에서 발견: Claude Code의 `~/.claude/commands/*.md` slash commands가 OpenCode 환경에 자동 복사 안 됨. 사용자가 `/reap.start` 같은 슬래시 트리거 불가.
+- 사용자가 follow-up backlog `opencode-slash-commands.md` (priority: high, dependsOn: opencode-adapter) 등록.
+- 사용자 명시 목표: "다음 업데이트(v0.16.6 또는 v0.17.0) 받았을 때 OpenCode에서도 reap 사용 가능".
+- **교훈 → genome 반영**: 새 client adapter는 4-항목 verification 필수 — (1) static load, (2) dynamic refresh, (3) entry-point, (4) **slash trigger 등록**. application.md "Adapter Layer" + evolution.md "사용자 UX gap" 절에 명문화.
+- 다음 generation에서 OpenCode 환경 slash commands 등록 메커니즘 구현 후, 사용자가 OpenCode 환경에서 실사용 테스트 가능 — `aresstokrat` 사용자 feedback도 그때 요청.
+
 ## Lifecycle Termination Paths (gen-061, 2026-05-24 완료)
 
 Issue #16 해결. 종료 경로가 abort/completion에서 abort/early-close/completion 셋으로 확장됨.

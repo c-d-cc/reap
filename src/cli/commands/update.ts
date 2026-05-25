@@ -9,9 +9,8 @@ import { emitOutput, emitError } from "../../core/output.js";
 import { detectV15 } from "../../core/integrity.js";
 import { fetchReleaseNotice } from "../../core/notice.js";
 import { autoReport } from "../../core/report.js";
-import { ensureClaudeMd } from "./init/common.js";
 import { execute as migrateExecute } from "./migrate.js";
-import { registerSessionHooks } from "../../adapters/claude-code/install.js";
+import { getAdapter } from "../../adapters/index.js";
 import type { ReapConfig } from "../../types/index.js";
 
 /** Read package version from package.json */
@@ -177,23 +176,30 @@ export async function execute(phase?: string, postUpgrade?: boolean): Promise<vo
     updated.push(`directories created: [${dirsCreated.join(", ")}]`);
   }
 
-  // 3. CLAUDE.md repair
+  // 3. Project-integration entry-point sync (CLAUDE.md for claude-code,
+  //    AGENTS.md + opencode.json for opencode — dispatched by agentClient).
   const configContent = await readTextFile(paths.config);
   let projectName = "my-project";
+  let agentClient: ReapConfig["agentClient"] | undefined;
   if (configContent) {
     try {
       const config = YAML.parse(configContent) as ReapConfig;
       projectName = config.project ?? "my-project";
-    } catch { /* use default */ }
+      agentClient = config.agentClient;
+    } catch { /* use defaults */ }
   }
 
-  const claudeMdAction = await ensureClaudeMd(paths.root, projectName);
-  if (claudeMdAction !== "skipped") {
-    updated.push(`CLAUDE.md (${claudeMdAction})`);
+  const adapter = getAdapter(agentClient);
+  const integrationAction = await adapter.ensureProjectIntegration(paths.root, projectName);
+  if (integrationAction !== "skipped") {
+    const fileLabel = agentClient === "opencode" ? "AGENTS.md" : "CLAUDE.md";
+    updated.push(`${fileLabel} (${integrationAction})`);
   }
 
-  // 4. SessionStart hook sync (idempotent — skips if already registered, best-effort)
-  await registerSessionHooks();
+  // 4. Session integration sync (claude-code: ~/.claude/settings.json hooks;
+  //    opencode: opencode.json + .opencode/plugins/reap-plugin.ts).
+  //    Idempotent — best-effort, silent on success.
+  await adapter.registerSessionIntegration(paths.root);
 
   // Report
   // Show release notice for current version (before emitOutput, which calls process.exit)

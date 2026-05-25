@@ -1,0 +1,27 @@
+id: gen-063-830a29
+type: normal
+goal: "resolve #19: OpenCode adapter 신설 — opencode.json + reap dump-state +
+  plugin (session.created/tool.execute.before) + AGENTS.md"
+parents:
+  - gen-062-332df2
+timeline:
+  - stage: learning
+    at: 2026-05-25T09:16:52.225Z
+  - stage: planning
+    at: 2026-05-25T09:21:37.450Z
+  - stage: implementation
+    at: 2026-05-25T09:56:08.366Z
+  - stage: validation
+    at: 2026-05-25T10:09:46.600Z
+  - stage: completion
+    at: 2026-05-25T10:12:13.528Z
+status: completed
+fitnessFeedback:
+  text: "OK — OpenCode adapter 신설 결과 만족. 다만 OpenCode 환경에서의 실제 사용 가능 여부는 next
+    generation 후로 미룸. 이유: 사용자가 OpenCode 테스트 시도 중 UX gap 발견 — Claude Code 측 slash
+    commands(~/.claude/commands/*.md, /reap.start /reap.status 등)가 OpenCode
+    환경(~/.config/opencode/commands/ 등 별도 위치)에 자동 복사되지 않아 사용자가 슬래시 트리거 불가.
+    Gen-063 backlog/verification에 포함되지 않았던 누락된 갭. 이미 follow-up backlog
+    'opencode-slash-commands.md' (priority: high, dependsOn: opencode-adapter)
+    사용자가 등록함. 다음 generation 강력 추천 source."
+  evaluatedAt: 2026-05-25T12:29:54.725Z

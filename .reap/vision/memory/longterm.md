@@ -65,3 +65,22 @@ gen-054에서 도입된 marker-hash sync(`<!-- reap:start {hash} -->...<!-- reap
 초기에는 SessionStart hook이 9 static 파일을 모두 inject했음(gen-053). Claude Code가 native `@` import를 지원한다는 사실을 활용해 static은 `@` ref로, dynamic만 hook으로 분리.
 - 결과: hook 출력 89% 감소, 정보 손실 0(`@` import lazy load).
 - 교훈: 플랫폼 native 메커니즘을 활용할 수 있는 곳에서는 자체 구현을 미루지 말 것. 단, hook 자체를 제거하지는 않음 — dynamic context(generation state, strict mode, language)는 `@` 로 표현 불가하므로 hook이 여전히 필수. 정/동 분리가 답이지 hook 전면 제거가 답이 아님.
+
+### Adapter dispatch 패턴 + client별 mechanism 활용 (gen-063, 2026-05-25)
+gen-062의 "정/동 분리" 원칙이 client-agnostic하므로, OpenCode에 같은 원칙을 적용 가능. 단 client별 native mechanism이 다르다 — Claude Code는 `@` import + SessionStart hook, OpenCode는 `opencode.json instructions` + plugin (session.created/tool.execute.before).
+- 두 client 모두 "static = native auto-load, dynamic = client-specific refresh trigger" 패턴을 따름.
+- 구현은 dispatcher (`src/adapters/index.ts`) + AdapterModule interface 패턴. claude-code adapter는 기존 install.ts를 얇은 wrapper로 감싸 회귀 위험 최소화.
+- emitOutput sync dump 통합: lifecycle 명령 종료 시 자동으로 `.reap/.session-state.md` 작성. claude-code 환경에서도 호출되지만 (gitignored, 미사용) 무해. OpenCode 환경에서는 다음 세션 instructions auto-load에 활용.
+- sync/async builder duplication 발생 (`load-context.ts`의 async와 `dump-state-sync.ts`의 sync). unit test로 byte-identical 보장하지만, 향후 logic 변경 시 양쪽 동시 수정 필요. 합치는 refactor 후보.
+- 교훈: adapter는 client별 mechanism을 호환 layer로 추상화하는 것이지, 동일 메커니즘을 강제하는 것이 아니다. 같은 원칙(정/동 분리)이라도 client마다 다른 형태로 표현됨.
+
+### 사용자 UX gap은 backlog verification에 적극 포함 (gen-063 교훈)
+gen-063에서 OpenCode adapter 신설 시 backlog/verification에 (a) static knowledge auto-load, (b) dynamic state refresh, (c) entry-point file (AGENTS.md) 세 가지를 명시했으나, **(d) slash commands / shortcut trigger 등록**을 빠뜨림. 결과: 구현은 7 completion criteria 모두 충족하고 사용자 fitness OK 받았지만, 실제 사용자 환경에서는 "agent는 동작하나 슬래시 트리거 불가" UX gap이 발견됨. follow-up backlog로 처리 가능하지만, 처음부터 verification에 포함됐으면 본 generation에서 끝났을 작업.
+- **교훈**: 새 client / 외부 도구 / 사용자 진입점 추가 시 verification에 네 가지를 반드시 포함:
+  1. Static knowledge 자동 로드 메커니즘
+  2. Dynamic state refresh trigger
+  3. Entry-point 파일
+  4. **사용자 native UI에서 REAP를 호출할 수 있는 trigger (slash commands / shortcuts / commands palette 등)**
+- **판단 기준**: "이 통합을 처음 받은 사용자가 5분 안에 평소처럼 REAP를 호출할 수 있는가?"
+- application.md "Adapter Layer" 절 + evolution.md "사용자 UX gap" 절에 4-항목 체크리스트 명문화. 다음 세대가 누락 반복 방지.
+- 메타 교훈: agent가 작성한 backlog는 implementation 관점에 치우치기 쉽다 — "어떤 파일을 만들 것인가"는 잘 잡지만 "사용자가 어떻게 호출할 것인가"는 빠지기 쉬움. 사용자 진입점 적극 점검 필요.

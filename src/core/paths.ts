@@ -27,6 +27,8 @@ export interface ReapPaths {
   memoryShortterm: string;
   hooks: string;
   migrationState: string;
+  /** Dynamic session-state dump file (written by `reap dump-state`). */
+  sessionState: string;
   artifact: (name: string) => string;
 }
 
@@ -65,6 +67,7 @@ export function createPaths(root: string): ReapPaths {
     memoryShortterm: join(memory, "shortterm.md"),
     hooks: join(reap, "hooks"),
     migrationState: join(reap, "migration-state.yml"),
+    sessionState: join(reap, ".session-state.md"),
     artifact: (name: string) => join(life, name),
   };
 }

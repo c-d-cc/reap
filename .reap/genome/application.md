@@ -27,7 +27,7 @@ AI와 인간이 세대(generation)를 거치며 소프트웨어를 공동 진화
 
 ```
 ┌─────────────────────────────────────────┐
-│  Adapter Layer (Claude Code skills)     │  18 skill files (.md)
+│  Adapter Layer (src/adapters/)          │  dispatcher + per-client modules
 ├─────────────────────────────────────────┤
 │  CLI Layer (src/cli/)                   │  Command routing, phase dispatch
 ├─────────────────────────────────────────┤
@@ -36,6 +36,20 @@ AI와 인간이 세대(generation)를 거치며 소프트웨어를 공동 진화
 │  State Layer (.reap/)                   │  File-based state (YAML + Markdown)
 └─────────────────────────────────────────┘
 ```
+
+### Adapter Layer — Multi-Client Support
+
+REAP supports multiple AI clients through an adapter dispatcher (`src/adapters/index.ts`). The `agentClient` config field selects the adapter at runtime; every install/update/init flow goes through `getAdapter(agentClient)` rather than calling client-specific code directly.
+
+Currently registered adapters:
+
+- **`claude-code`** — `src/adapters/claude-code/` — `~/.claude/commands/*.md` skill files, `~/.claude/settings.json` SessionStart hook, `CLAUDE.md` entry-point with `@` import references for static knowledge.
+- **`opencode`** — `src/adapters/opencode/` — `.opencode/plugins/reap-plugin.ts` (session.created + tool.execute.before), `opencode.json` `instructions`/`plugin` arrays for static + dynamic loading, `AGENTS.md` entry-point with marker-hash sync. Plugin uses inline types to avoid forcing `@opencode-ai/plugin` dependency.
+- **`codex`** — not yet implemented; dispatcher throws a helpful error.
+
+All adapters fulfill the `AdapterModule` contract: `installSkills`, `ensureProjectIntegration` (CLAUDE.md vs AGENTS.md), `registerSessionIntegration` (settings.json hooks vs opencode.json plugin entry). Adding a new client = creating a new module + adding a case in the dispatcher. No changes to install-skills/update/init call sites.
+
+**When adding a new AI client adapter, the verification checklist MUST include**: (a) static knowledge auto-loading mechanism, (b) dynamic state refresh trigger, (c) entry-point file (CLAUDE.md-equivalent), AND (d) **slash command / shortcut trigger registration** in the client's native location. Item (d) is the most easily-missed item — gen-063 shipped (a)/(b)/(c) but discovered (d) only after fitness, triggering a follow-up generation.
 
 ### Generation Lifecycle
 

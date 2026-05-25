@@ -33,6 +33,7 @@ import { execute as updateExecute } from "./commands/update.js";
 import { execute as helpExecute } from "./commands/help.js";
 import { execute as daemonExecute } from "./commands/daemon/index.js";
 import { execute as loadContextExecute } from "./commands/load-context.js";
+import { execute as dumpStateExecute } from "./commands/dump-state.js";
 
 const program = new Command();
 
@@ -172,6 +173,15 @@ program
   .description("Output REAP project knowledge for SessionStart hook injection")
   .action(async () => {
     await loadContextExecute();
+  });
+
+program
+  .command("dump-state")
+  .description("Dump dynamic REAP context to .reap/.session-state.md (for OpenCode and external tools)")
+  .option("--stdout", "Write to stdout instead of the file")
+  .option("--silent", "Exit 0 silently on any error / non-REAP project")
+  .action(async (options: { stdout?: boolean; silent?: boolean }) => {
+    await dumpStateExecute({ stdout: options.stdout, silent: options.silent });
   });
 
 program

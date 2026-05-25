@@ -153,6 +153,19 @@ Memory 활용 규칙:
 
 판단 기준: "이 문제가 다음에 또 발생하면 같은 workaround를 반복해야 하는가?" → Yes이면 반드시 근본 수정 필요.
 
+## 사용자 UX gap은 verification 항목으로 명시 (gen-063 교훈)
+
+새 client adapter / 외부 도구 통합 / 사용자 진입점 추가 시, planning의 verification 체크리스트에는 다음 4가지를 **모두 명시**해야 한다:
+
+1. **Static knowledge 자동 로드 메커니즘** — client native 방식 (e.g., `@` import / `instructions` 필드)
+2. **Dynamic state refresh trigger** — session 시작 / 도구 호출 시점 갱신
+3. **Entry-point 파일** — 사용자가 첫 진입 시 보는 안내 (CLAUDE.md / AGENTS.md / 등)
+4. **Trigger 등록 — slash commands / shortcuts** — 사용자가 native UI로 REAP를 호출할 수 있는 경로
+
+(4)는 가장 잊기 쉬운 항목이다. gen-063에서 OpenCode adapter는 (1)~(3)을 모두 갖췄지만 (4)가 누락되어, 사용자가 fitness 단계에서 "agent는 동작하지만 슬래시 트리거가 안 됨"을 발견함. follow-up backlog `opencode-slash-commands.md`로 처리하기로 했지만, 처음부터 verification에 포함됐으면 본 generation에서 끝났을 작업.
+
+판단 기준: "이 client/통합을 처음 받은 사용자가 5분 안에 평소처럼 REAP를 호출할 수 있는가?" — Yes면 OK, No면 (1)~(4) 중 누락이 있다.
+
 ## 아키텍처 변경 시 genome 동기화
 
 새 기능/구조를 추가하거나 아키텍처를 변경했을 때, 해당 변경이 AI의 행동 방식에 영향을 준다면 반드시 genome(evolution.md 또는 application.md)에 반영해야 한다.
