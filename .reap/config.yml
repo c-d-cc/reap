@@ -6,3 +6,4 @@ autoUpdate: true
 autoIssueReport: false
 strictEdit: true
 strictMerge: true
+evaluator: true

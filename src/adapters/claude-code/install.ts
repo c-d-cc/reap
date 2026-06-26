@@ -89,27 +89,69 @@ export async function installSkills(_projectRoot?: string): Promise<void> {
   });
 }
 
-/**
- * Copy agent definitions to ~/.claude/agents/ (user-level, available to all projects).
- */
-async function installAgents(): Promise<void> {
-  const agentsDir = join(homedir(), ".claude", "agents");
-  await ensureDir(agentsDir);
+// Prefix-anchored pattern (gen-066) — cleanup only touches `reap-*.md` so any
+// user-supplied agent definition (e.g. `my-tool.md`, `reapdev.review.md`) in
+// `~/.claude/agents/` survives. Mirrors the SKILL_PATTERN approach proven safe
+// in gen-064.
+const AGENT_PATTERN = /^reap-.+\.md$/;
 
-  const templateDir = __dirname.includes("dist")
+function agentsTemplateDir(): string {
+  return __dirname.includes("dist")
     ? join(__dirname, "..", "templates", "agents")
     : join(__dirname, "..", "..", "templates", "agents");
+}
 
+/**
+ * Sync user-level `~/.claude/agents/reap-*.md` files: cleanup stale REAP agent
+ * definitions, then copy the bundled agent templates. Silent — does NOT emit
+ * output. Mirrors `installSlashCommandsOnly` so `reap install-skills` (full
+ * install) and `reap update` (silent re-sync via `registerSessionIntegration`)
+ * keep the user's agents directory current.
+ *
+ * Without the `reap update` caller (gen-064 longterm lesson) users who never
+ * re-run `reap install-skills` end up with stale agent definitions when the
+ * bundled REAP version ships new agent fields.
+ *
+ * @returns `{ cleaned, installed, files, targetDir }` for the caller's report.
+ */
+export async function installAgents(home: string = homedir()): Promise<{
+  cleaned: string[];
+  installed: number;
+  files: string[];
+  targetDir: string;
+}> {
+  const targetDir = join(home, ".claude", "agents");
+  await ensureDir(targetDir);
+
+  // Cleanup stale REAP agents (prefix-anchored — user agents untouched).
+  let cleaned: string[] = [];
   try {
-    const files = await readdir(templateDir);
-    for (const file of files) {
-      if (file.endsWith(".md")) {
-        await cp(join(templateDir, file), join(agentsDir, file));
-      }
+    const existing = await readdir(targetDir);
+    cleaned = existing.filter((f) => AGENT_PATTERN.test(f));
+    for (const file of cleaned) {
+      await unlink(join(targetDir, file));
     }
   } catch {
-    // agents template dir doesn't exist — skip
+    // Empty / missing target — nothing to clean.
   }
+
+  // Copy fresh agents.
+  let installed = 0;
+  const files: string[] = [];
+  const templateDir = agentsTemplateDir();
+  try {
+    const sources = await readdir(templateDir);
+    for (const file of sources) {
+      if (!file.endsWith(".md")) continue;
+      await cp(join(templateDir, file), join(targetDir, file));
+      files.push(file);
+      installed++;
+    }
+  } catch {
+    // agents template dir doesn't exist — skip silently (broken bundle).
+  }
+
+  return { cleaned, installed, files, targetDir };
 }
 
 /**

@@ -250,6 +250,31 @@ Switch clients by editing `.reap/config.yml`, then run `reap install-skills` fol
 
 `/reap.evolve` can delegate the entire generation to a subagent that runs autonomously through all stages, surfacing only when genuinely blocked.
 
+### Evaluator Agent (opt-in)
+
+REAP ships a second subagent definition, `reap-evaluate`, that runs as an **independent reviewer** of the builder's work. It is read-only (Read/Glob/Grep/Bash only), produces qualitative assessments (no scores), and acts as an **advisor** — its concerns surface to you, but the builder owns the final lifecycle verdict.
+
+Enable it by adding one line to `.reap/config.yml`:
+
+```yaml
+evaluator: true   # default: false
+```
+
+When enabled, the validation stage instructs the builder to launch `reap-evaluate` as a subagent before declaring pass/partial/fail. The evaluator:
+
+- runs typecheck, build, and the full test suite independently,
+- cross-checks completion criteria from `02-planning.md` against the implementation,
+- surfaces concerns about genome convention drift, sycophancy red flags, and regression risk,
+- escalates per a confidence × impact matrix.
+
+If the subagent invocation fails for any reason, the builder continues normal validation — the evaluator is opt-in advice, not a gate.
+
+Agent definitions are installed automatically by `reap install-skills` **and** `reap update`:
+- Claude Code → `~/.claude/agents/reap-*.md`
+- OpenCode → `~/.config/opencode/agent/reap-*.md`
+
+The fitness-phase integration and cruise-mode auto-stop on escalation are tracked in a follow-up backlog (`cruise-mode-evaluator-escalation-통합-validationfitness.md`).
+
 ## Project Structure
 
 ```
@@ -290,6 +315,7 @@ strictEdit: false # Restrict code changes to REAP lifecycle
 strictMerge: false # Restrict direct git pull/push/merge
 agentClient: claude-code # AI agent client
 # cruiseCount: 1/5             # Present = cruise mode (current/total)
+# evaluator: true              # Opt-in: launch reap-evaluate during validation
 ```
 
 Key settings:
@@ -298,6 +324,7 @@ Key settings:
 - **`strictEdit`**: Restricts code changes to the implementation stage within the planned scope.
 - **`strictMerge`**: Restricts direct git pull/push/merge — use `/reap.pull`, `/reap.push`, `/reap.merge` instead.
 - **`agentClient`**: Determines which adapter is used for skill deployment.
+- **`evaluator`**: Opt-in independent reviewer. When `true`, the validation stage launches the `reap-evaluate` subagent as an advisor (read-only, qualitative-only). Default `false` keeps validation byte-identical to pre-gen-066 behaviour. See [Evaluator Agent](#evaluator-agent-opt-in) above.
 
 ## Upgrading from v0.15 [↗](https://reap.cc/docs/migration-guide)
 

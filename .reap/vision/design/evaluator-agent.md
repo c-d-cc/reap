@@ -1,6 +1,6 @@
 # Evaluator Agent 설계
 
-> 2026-03-28 합의, 템플릿 정의 완료. 상태: 템플릿 확정, 코드 통합 전.
+> 2026-03-28 합의, 템플릿 정의 완료. 상태: **validation 통합 완료 (gen-066)**. fitness 통합 + cruise escalation 자동 중단은 후속 (`cruise-mode-evaluator-escalation-통합-validationfitness.md` backlog).
 
 ## 동기
 
@@ -107,66 +107,44 @@ Phase 5: Output
 - Transition graph 기반 multi-nonce 발행 완료
 - Evaluator가 validation-implementation micro-loop 등 유연한 전이를 활용할 수 있는 기반 마련
 
-## 후속 작업 (미구현)
+## 구현 상태
 
-### 코드 통합 (후속 generation)
+### Validation 통합 — 완료 (gen-066, Issue #20)
 
-> gen-052에서 learning 완료 후 abort. 아래 설계 결정은 승인됨.
+승인된 설계 결정 (gen-052, 2026-03-29) 중 다음 항목을 gen-066 에서 실현:
 
-#### 승인된 설계 결정 (2026-03-29)
+1. **Config 플래그**: `ReapConfig.evaluator?: boolean` (기본 `false`) 추가됨. REAP 자체는 `.reap/config.yml` 에 `evaluator: true` 로 dog-fooding 시작.
+2. **Evaluator 호출 위치 — validation 우선**: 원래 design 은 fitness 단계만 가정했으나, Issue #20 의 요청에 따라 **validation work phase** 에서 먼저 호출. fitness 통합은 후속 backlog 로 분리.
+3. **Advisor 관계 명시**: evaluator 결과는 builder 의 verdict 를 override 하지 않고 user 에게 surface (Q3 결정). escalation matrix 인용.
+4. **양 adapter agent 배치**: Claude Code (`~/.claude/agents/`) + OpenCode (`~/.config/opencode/agent/`) 모두 `installSkills` + `registerSessionIntegration` 양쪽 caller 에서 silent helper 로 호출. `reap update` 만으로도 sync.
 
-1. **Config 플래그**: `ReapConfig`에 `evaluator?: boolean` (기본 `false`) 추가. Opt-in 방식. REAP 자체는 `evaluator: true`로 dog-fooding.
-2. **Evaluator 호출 위치**: fitness phase 첫 호출 시 evaluator subagent launch 지시를 prompt에 포함
-3. **Cruise mode**: evaluator 사용. High confidence + Low impact → 자동 진행, 에스컬레이션 → cruise 중단
+구현된 모듈:
+- `src/core/prompt.ts` — `buildEvaluatorPrompt(knowledge, paths, state, { stage })` 신설. stage = `"validation" | "fitness"` (fitness 분기는 후속 generation 이 사용).
+- `src/cli/commands/run/validation.ts` — config 조건부 분기 + evaluator 절 + `context.evaluator.prompt` emit. `evaluator: false` 일 때 기존 prompt 와 byte-identical.
+- `src/adapters/claude-code/install.ts` — `installAgents(home?)` export, prefix-anchored cleanup (`^reap-.+\.md$`).
+- `src/adapters/opencode/install.ts` — `installAgents(home?)` 신설, target `~/.config/opencode/agent/` (singular).
 
-#### 수정 대상 파일
+테스트:
+- `tests/unit/evaluator-prompt.test.ts` — 10 케이스 (validation/fitness 분기, merge/normal, defensive null/empty).
+- `tests/e2e/validation-evaluator.test.ts` — 3 케이스 (false/true/absent 옵트인 분기).
+- `tests/e2e/install-agents.test.ts` — 6 케이스 (양 adapter × `install-skills`/`update` × prefix anchor 보호).
 
-**`src/core/prompt.ts` — `buildEvaluatorPrompt()` 추가**
-- `buildBasePrompt()`와 유사하되 evaluator 전용 context 조립
-- 포함: generation state (id, goal, type), vision goals, memory, project path, artifacts (01~04) 요약, 코드 변경 정보
-- 제외: strict mode, cruise loop, clarity guide, maturity behavior guide
+## 후속 작업 (미구현 — 별도 backlog/generation)
 
-**`src/cli/commands/run/completion.ts` — fitness phase 변경**
+> **`cruise-mode-evaluator-escalation-통합-validationfitness.md`** 가 아래 세 항목을 묶어 후속 generation 으로 분리함 (gen-066, Q5).
 
-현재 flow:
-- Cruise mode: self-assessment prompt → evolve agent 자체 평가 → `--feedback` 제출
-- Supervised mode: 인간에게 피드백 요청 prompt 출력
+### Fitness 단계 evaluator 통합
+- `completion.ts` 의 fitness phase 에 evaluator 호출 지시 추가.
+- gen-066 에서 만든 `buildEvaluatorPrompt({ stage: "fitness" })` 분기를 활용 — prompt builder 재설계 불필요.
+- 인간이 최종 feedback 을 결정하되, evaluator 의 6 차원 평가가 결정을 가속.
 
-변경 후 flow (evaluator 활성화 시):
-1. `reap run completion --phase fitness` (feedback 없이 호출)
-2. `buildEvaluatorPrompt()` 호출 → evaluator launch 지시 포함 prompt 반환
-3. Evolve agent가 `Agent` tool로 `subagent_type: "reap-evaluate"` subagent spawn
-4. Evaluator가 독립 검증 + 평가 수행, 결과를 text로 반환
-5. Evolve agent가 evaluator 결과를 인간에게 전달
-6. 인간이 최종 feedback 결정 → `reap run completion --phase fitness --feedback "..."` 실행
+### Cruise mode 자동 중단
+- design 원칙 "High confidence + Low impact → 자동 진행, escalation → cruise 중단" 의 메커니즘 구현.
+- validation 의 evaluator concern 을 후속 phase (fitness self-assessment) 가 참조하도록 state 채널 신설 (`GenerationState.evaluatorConcerns?` 또는 life/ 메타 파일).
 
-**`src/types/index.ts` — ReapConfig 타입 확장**
-```typescript
-interface ReapConfig {
-  // ... 기존 필드
-  evaluator?: boolean;  // evaluator agent 활성화 여부 (기본 false)
-}
-```
-
-#### Subagent 패턴
-
-`evolve.ts`의 기존 패턴과 동일:
-- `buildEvaluatorPrompt()` → `evaluatorPrompt`로 context에 포함
-- Evolve agent가 `Agent` tool로 `subagent_type: "reap-evaluate"` launch
-
-#### 테스트
-
-- `buildEvaluatorPrompt()` 단위 테스트 (context 포함 여부)
-- completion fitness phase에서 evaluator prompt 반환 확인
-- config `evaluator: false`일 때 기존 flow 유지 확인
-
-### Fitness 위임 (후속 generation)
-- Evaluator 1차 평가 → 인간 에스컬레이션 흐름 구현
-- Cruise mode에서 evaluator 자동 판단 지원
-
-### Vision/Goal 관리 위임 (후속 generation)
-- Adapt phase에서 evaluator가 vision gap 분석 수행
-- Goal 추천 로직 evaluator에 위임
+### Vision/Goal 관리 위임
+- Adapt phase 에서 evaluator 가 vision gap 분석 수행.
+- Goal 추천 로직 evaluator 에 위임.
 
 ## 설계 원칙
 

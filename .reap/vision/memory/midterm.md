@@ -22,12 +22,21 @@ gen-028~031에서 gap-driven evolution + vision eval + memory 도입 완료.
 31+ generation 경과, genome 안정, abort 거의 없음. 전환 조건 충족.
 유저 판단 (2026-03-26): REAP 자체가 아직 완성 단계가 아니고 예상치 못한 genome 변경이 더 있을 수 있으므로 embryo 유지. 배포 후 사용자 프로젝트였다면 전환 시점이지만, self-evolving 중인 REAP 자체는 조금 더 관찰.
 
-## Evaluator Agent (2026-03-28 합의 + 템플릿 완료)
-설계 문서: `vision/design/evaluator-agent.md`
-템플릿: `src/templates/agents/reap-evaluate.md`
-- nonce transition graph 리팩토링 완료 (gen-050)
-- evaluator agent 템플릿 정의 완료 (gen-051)
-- 다음: 코드 통합 (prompt.ts에 evaluator context 빌더, completion.ts에 호출 로직)
+## Evaluator Agent — 점진 통합 트랙 (gen-051 ~ 진행 중)
+
+설계 문서: `vision/design/evaluator-agent.md` (gen-066 에서 구현 상태 갱신)
+템플릿: `src/templates/agents/reap-evaluate.md` (gen-051 정의)
+
+진행 상태:
+- ✅ nonce transition graph 리팩토링 (gen-050)
+- ✅ evaluator agent 템플릿 정의 (gen-051)
+- ✅ 설계 결정 확정 (gen-052: opt-in flag / advisor / 코드 통합 plan)
+- ✅ **Validation 단계 코드 통합 (gen-066, Issue #20)** — `ReapConfig.evaluator?: boolean` + `buildEvaluatorPrompt({ stage })` + `validation.ts` 조건부 분기 + 양 adapter `installAgents` 양 caller. dog-fooding `.reap/config.yml: evaluator: true`.
+- ⏳ Fitness 단계 통합 — backlog `cruise-mode-evaluator-escalation-통합-validationfitness.md` 신설 (gen-066). `buildEvaluatorPrompt({ stage: "fitness" })` 분기 이미 준비됨.
+- ⏳ Cruise mode escalation 자동 중단 — 같은 backlog 에 묶임. state 채널 (`GenerationState.evaluatorConcerns?`) 설계 필요.
+- ⏳ Vision/Goal 위임 — adapt phase evaluator 가 gap 분석 + goal 추천. 같은 backlog.
+
+gen-066 의 메타 관찰: 본 트랙은 gen-051~052 의 abort 후 design 만 보존된 채로 14 generation 이 흐른 뒤 자연스럽게 이어졌음. **design 문서가 lineage 의 anchor 역할** — abort 가 진짜 abort 가 아니었음.
 
 ## Daemon Indexer (2026-03-29 구현 완료)
 - `daemon/` 별도 앱, localhost:17224 HTTP API

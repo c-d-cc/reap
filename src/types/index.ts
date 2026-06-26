@@ -61,6 +61,12 @@ export interface ReapConfig {
   autoUpdate: boolean;
   autoIssueReport: boolean;
   cruiseCount?: string; // "1/5" format — present = cruise mode
+  // Opt-in: when true, the validation stage prompt instructs the orchestrator
+  // to launch the `reap-evaluate` subagent for independent verification.
+  // Default (omitted / false): no evaluator subagent, identical to pre-gen-066
+  // behaviour. Evaluator runs in advisor mode — its assessment surfaces to the
+  // user but does not override the builder's verdict.
+  evaluator?: boolean;
 }
 
 // ── Output ──────────────────────────────────────────────────

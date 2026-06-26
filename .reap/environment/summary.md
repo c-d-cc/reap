@@ -38,7 +38,7 @@ src/
 │   ├── git.ts                  — git 연동 (commit, diff, push, pull, fetch, branch analysis)
 │   ├── hooks.ts                — lifecycle hook engine (조건부 실행, 순서 제어, 상세 결과)
 │   ├── clarity.ts              — clarity level 자동 판단 (규칙 기반, high/medium/low + signals)
-│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt, buildStrictSection, memory 로딩, cruise loop 지시, clarity 주입, strict mode HARD-GATE)
+│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt, buildStrictSection, memory 로딩, cruise loop 지시, clarity 주입, strict mode HARD-GATE) + **gen-066: `buildEvaluatorPrompt(knowledge, paths, state, { stage: "validation" | "fitness" })` — reap-evaluate subagent 용 dynamic context, advisor 모델 HARD-GATE 포함, fitness 통합용 stage 분기 미리 준비**
 │   ├── scanner.ts              — 프로젝트 스캔 (init용)
 │   ├── fs.ts                   — 파일 유틸리티
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError). lifecycle 명령(DUMP_COMMANDS 화이트리스트) 종료 시 sync dump를 자동 트리거 (gen-063)
@@ -62,7 +62,7 @@ src/
 │       │   ├── learning.ts     — 탐구 (work → complete)
 │       │   ├── planning.ts     — 계획 (work → complete)
 │       │   ├── implementation.ts — 구현 (work → complete)
-│       │   ├── validation.ts   — 검증 (work → complete)
+│       │   ├── validation.ts   — 검증 (work → complete). **gen-066부터 `config.evaluator === true` 시 work prompt 에 "Evaluator Subagent Invocation" 절 + `context.evaluator.{enabled, prompt}` append. `evaluator: false` 시 prompt byte-identical (회귀 보장). advisor 모델 — builder 가 verdict 결정, evaluator concern surface, 호출 실패 시 통상 진행.**
 │       │   ├── completion.ts   — 완료 (reflect → fitness → adapt → commit)
 │       │   ├── evolve.ts       — 전체 lifecycle 자동 실행
 │       │   ├── detect.ts       — merge: 분기점 감지
@@ -93,11 +93,11 @@ src/
 │   ├── types.ts                — AdapterModule interface (installSkills / ensureProjectIntegration / registerSessionIntegration)
 │   ├── claude-code/
 │   │   ├── index.ts            — AdapterModule wrapper. **registerSessionIntegration 이 installSlashCommandsOnly + registerSessionHooks 양쪽 호출 — `reap update` 흐름에서 ~/.claude/commands/ user-level sync 보장 (gen-064 T012)**
-│   │   ├── install.ts          — skill 파일 설치 (~/.claude/commands/) + SessionStart hook 등록 (check-version + load-context). **installSlashCommandsOnly() export — installSkills 내부와 adapter registerSessionIntegration 양쪽이 silent 재사용 (gen-064 T011)**
+│   │   ├── install.ts          — skill 파일 설치 (~/.claude/commands/) + SessionStart hook 등록 (check-version + load-context). **installSlashCommandsOnly() export — installSkills 내부와 adapter registerSessionIntegration 양쪽이 silent 재사용 (gen-064 T011)**. **gen-066: installAgents(home?) prefix-anchored (`^reap-.+\.md$`) silent helper export — Claude Code agent definitions (`~/.claude/agents/reap-*.md`) sync 도 installSkills + registerSessionIntegration 양 caller (gen-064 패턴 적용).**
 │   │   └── skills/             — 19 slash command files (.md). OpenCode adapter 도 본 디렉토리를 source 로 재사용 (single source, gen-064)
 │   └── opencode/               — OpenCode 어댑터 (gen-063, gen-064 slash commands)
 │       ├── index.ts            — AdapterModule wrapper
-│       ├── install.ts          — opencode.json instructions/plugin sync (REAP_INSTRUCTIONS 9 + REAP_PLUGIN_ENTRY), AGENTS.md marker-hash sync, .opencode/plugins/reap-plugin.ts 배치, **installSlashCommands(home?) ~/.config/opencode/commands/reap.*.md cleanup-then-copy (gen-064)**, opencodeCommandsDir/claudeCodeSkillsDir helpers. **registerSessionIntegration 도 installSlashCommands 호출 — `reap update` 흐름에서 user-level sync 보장 (gen-064 T013)**
+│       ├── install.ts          — opencode.json instructions/plugin sync (REAP_INSTRUCTIONS 9 + REAP_PLUGIN_ENTRY), AGENTS.md marker-hash sync, .opencode/plugins/reap-plugin.ts 배치, **installSlashCommands(home?) ~/.config/opencode/commands/reap.*.md cleanup-then-copy (gen-064)**, opencodeCommandsDir/claudeCodeSkillsDir helpers. **registerSessionIntegration 도 installSlashCommands 호출 — `reap update` 흐름에서 user-level sync 보장 (gen-064 T013)**. **gen-066: installAgents(home?) + opencodeAgentsDir(home?) 신설 — target `~/.config/opencode/agent/` (singular, OpenCode TUI tip 공식), AGENT_PATTERN `^reap-.+\.md$` (slash-command 의 dot 와 비대칭, frontmatter name 필드 따름). installSkills emitOutput + registerSessionIntegration 양 caller.**
 │       ├── plugin/
 │       │   └── reap-plugin.ts  — OpenCode plugin source (session.created + tool.execute.before, inline 타입)
 │       └── templates/
@@ -146,9 +146,10 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 ## Tests
 
 ### tests/ submodule (reap-test repo, main branch)
-- `tests/unit/` — bun:test 기반 unit tests (`bun test tests/unit/`). 402 pass / 0 fail (gen-064 시점).
-- `tests/e2e/` — bun:test 기반 e2e tests (`bun test tests/e2e/`). 185 pass / 1 fail (pre-existing init-repair).
+- `tests/unit/` — bun:test 기반 unit tests (`bun test tests/unit/`). 422 pass / 0 fail (gen-066 시점).
+- `tests/e2e/` — bun:test 기반 e2e tests (`bun test tests/e2e/`). 207 pass / 1 fail (pre-existing init-repair).
 - `tests/scenario/` — bun:test 기반 scenario tests (`bun test tests/scenario/`)
+- 신규 (gen-066): `tests/unit/evaluator-prompt.test.ts` (10 case), `tests/e2e/validation-evaluator.test.ts` (3 case), `tests/e2e/install-agents.test.ts` (6 case).
 
 ### scripts/ (프로젝트 루트)
 - `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates)

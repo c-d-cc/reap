@@ -223,3 +223,190 @@ export function buildBasePrompt(
 
   return lines.join("\n");
 }
+
+// ── Evaluator Prompt ────────────────────────────────────────
+
+export interface EvaluatorPromptOptions {
+  /**
+   * The lifecycle stage that is invoking the evaluator. The evaluator's
+   * verification framing differs between stages:
+   *  - `"validation"`: independent verification of the builder's validation
+   *    work (build/typecheck/tests + completion criteria from 02-planning.md).
+   *  - `"fitness"`: cross-generation fitness assessment using the 6 dimensions
+   *    in reap-evaluate.md (goal achievement, code quality, regression safety,
+   *    artifact quality, vision alignment, cross-generation coherence).
+   *
+   * gen-066 wires only the `"validation"` invocation. The `"fitness"` branch
+   * is included so the same builder can be reused without re-design when the
+   * follow-up backlog (`cruise-mode-evaluator-escalation-통합-validationfitness.md`)
+   * lands. Until then, callers should pass `"validation"`.
+   */
+  stage: "validation" | "fitness";
+}
+
+/**
+ * Build the dynamic context prompt for the `reap-evaluate` subagent.
+ *
+ * The evaluator is an independent reviewer (fresh context, read-only) that
+ * surfaces concerns the builder cannot see. This prompt provides only the
+ * dynamic context — the static role/behavior is in `~/.claude/agents/reap-evaluate.md`
+ * (Claude Code) or `~/.config/opencode/agent/reap-evaluate.md` (OpenCode).
+ *
+ * Design (gen-051): produces a string consumable as a subagent prompt. Output
+ * deliberately excludes strict mode, cruise loop, clarity guide, and maturity
+ * guide — those are builder concerns, not evaluator concerns. The evaluator's
+ * own behavior rules (no code modification, no git modification, no quantitative
+ * metrics, advisor-not-verdict) live in the static agent definition.
+ *
+ * Advisor framing: the HARD-GATE section reminds the evaluator that its
+ * assessment is a recommendation. The builder owns the final lifecycle verdict.
+ */
+export function buildEvaluatorPrompt(
+  knowledge: ReapKnowledge,
+  paths: ReapPaths,
+  state: GenerationState | null,
+  opts: EvaluatorPromptOptions,
+): string {
+  const lines: string[] = [];
+  const isMerge = state?.type === "merge";
+
+  // ── Stage context ─────────────────────────────────────────
+  lines.push(`## Evaluator Invocation — ${opts.stage} stage`);
+  lines.push("");
+  if (opts.stage === "validation") {
+    lines.push(
+      "You are being invoked during the **validation** stage of a REAP generation. " +
+        "The builder (reap-evolve) has completed implementation and run validation checks. " +
+        "Your role is independent verification: confirm the build is sound, tests pass, " +
+        "completion criteria from 02-planning.md are met, and the code changes follow " +
+        "genome conventions. Surface any concern the builder may have missed.",
+    );
+  } else {
+    lines.push(
+      "You are being invoked during the **fitness** phase of completion. " +
+        "Assess the generation against the 6 fitness dimensions in your agent definition " +
+        "(goal achievement, code quality, regression safety, artifact quality, vision alignment, " +
+        "cross-generation coherence). Cross-reference with vision goals and recent lineage.",
+    );
+  }
+  lines.push("");
+
+  // ── Current State ─────────────────────────────────────────
+  lines.push("## Current Generation");
+  if (state) {
+    lines.push(`- ID: ${state.id}`);
+    lines.push(`- Type: ${state.type}`);
+    lines.push(`- Goal: ${state.goal}`);
+    lines.push(`- Stage: ${state.stage}`);
+    if (isMerge) {
+      lines.push(`- Parents: ${state.parents.join(", ")}`);
+      if (state.commonAncestor) lines.push(`- Common Ancestor: ${state.commonAncestor}`);
+    }
+  } else {
+    lines.push("- (no active generation — abort and report to the user)");
+  }
+  lines.push("");
+
+  // ── Artifacts to read ─────────────────────────────────────
+  lines.push("## Artifacts to Read");
+  lines.push("");
+  if (isMerge) {
+    lines.push(`- ${paths.artifact("01-detect.md")}`);
+    lines.push(`- ${paths.artifact("02-mate.md")}`);
+    lines.push(`- ${paths.artifact("03-merge.md")}`);
+    lines.push(`- ${paths.artifact("04-reconcile.md")}`);
+    lines.push(`- ${paths.artifact("05-validation.md")}`);
+  } else {
+    lines.push(`- ${paths.artifact("01-learning.md")}`);
+    lines.push(`- ${paths.artifact("02-planning.md")}`);
+    lines.push(`- ${paths.artifact("03-implementation.md")}`);
+    lines.push(`- ${paths.artifact("04-validation.md")}`);
+  }
+  lines.push("");
+
+  // ── Vision Goals ──────────────────────────────────────────
+  if (knowledge.visionGoals) {
+    lines.push("## Vision Goals (current)");
+    lines.push(knowledge.visionGoals);
+    lines.push("");
+  }
+
+  // ── Memory ────────────────────────────────────────────────
+  if (knowledge.memoryShortterm || knowledge.memoryMidterm) {
+    lines.push("## Memory");
+    if (knowledge.memoryShortterm) {
+      lines.push("### Shortterm (1-2 sessions)");
+      lines.push(knowledge.memoryShortterm);
+      lines.push("");
+    }
+    if (knowledge.memoryMidterm) {
+      lines.push("### Midterm (multi-generation)");
+      lines.push(knowledge.memoryMidterm);
+      lines.push("");
+    }
+  }
+
+  // ── Verification tasks ────────────────────────────────────
+  lines.push("## Verification Tasks");
+  lines.push("");
+  if (opts.stage === "validation") {
+    lines.push("1. Run `npm run typecheck` (or the project's typecheck command) and record the result.");
+    lines.push("2. Run `npm run build` (or the project's build command) and record the result.");
+    lines.push("3. Run the full test suite (unit/e2e/scenario as defined by the project) and record each.");
+    lines.push("4. Read 02-planning.md and verify each completion criterion against the implementation + validation artifacts.");
+    lines.push("5. Read `git diff` against the parent commit and check for genome convention compliance.");
+    lines.push("6. Check 04-validation.md for sycophancy red flags (\"it will probably pass\", \"it passed before\").");
+    lines.push("");
+  } else {
+    lines.push("1. Read all completed artifacts and validate goal achievement.");
+    lines.push("2. Cross-reference the implementation against genome conventions (application.md, evolution.md).");
+    lines.push("3. Run the test suite and confirm no regression.");
+    lines.push("4. Compare this generation's contribution against vision/goals.md and recent lineage.");
+    lines.push("5. Assess each of the 6 fitness dimensions qualitatively (no scores).");
+    lines.push("");
+  }
+
+  // ── Output format ─────────────────────────────────────────
+  lines.push("## Output Format");
+  lines.push("");
+  lines.push("Apply the escalation matrix from your agent definition:");
+  lines.push("");
+  lines.push("| Confidence | Impact | Action |");
+  lines.push("| --- | --- | --- |");
+  lines.push("| High | Low | Direct judgment |");
+  lines.push("| High | High | Escalate with judgment |");
+  lines.push("| Low | Any | Escalate without judgment (facts only) |");
+  lines.push("");
+  lines.push("Structure your reply as:");
+  lines.push("- **Summary** (1-2 sentences)");
+  lines.push("- **Verification results** (typecheck / build / tests / criteria)");
+  lines.push("- **Concerns** (if any — call out the severity)");
+  lines.push("- **Recommendation** (per the matrix)");
+  lines.push("");
+
+  // ── HARD-GATE ─────────────────────────────────────────────
+  lines.push("## HARD-GATE — Evaluator Constraints");
+  lines.push("");
+  lines.push("- You MUST NOT write, edit, or create any source files. Use Read/Grep/Glob/Bash only.");
+  lines.push("- You MUST NOT run git commands that modify state (`git commit`, `git push`, `git checkout`, `git reset`).");
+  lines.push("- You MUST NOT run `reap run` commands — the lifecycle is the builder's responsibility.");
+  lines.push("- You MUST NOT produce numerical scores, ratings, or percentages (Goodhart's Law).");
+  lines.push("- Your verdict is an **advisor recommendation**, not a binding judgment. The builder owns the lifecycle verdict; the human owns final fitness.");
+  lines.push("");
+
+  // ── Fallback ──────────────────────────────────────────────
+  lines.push("## If You Cannot Proceed");
+  lines.push("");
+  lines.push(
+    "If you cannot complete verification (missing tools, broken state, ambiguous artifacts), " +
+      "report the obstacle in your reply with enough context for the human to act. Do not block " +
+      "the builder's lifecycle — the builder will continue validation if you cannot.",
+  );
+  lines.push("");
+
+  // ── Project Path ──────────────────────────────────────────
+  lines.push("## Project");
+  lines.push(`Path: ${paths.root}`);
+
+  return lines.join("\n");
+}

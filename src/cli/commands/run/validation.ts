@@ -1,9 +1,13 @@
+import YAML from "yaml";
 import type { ReapPaths } from "../../../core/paths.js";
+import type { ReapConfig } from "../../../types/index.js";
 import { GenerationManager } from "../../../core/generation.js";
+import { readTextFile } from "../../../core/fs.js";
 import { emitOutput, emitError } from "../../../core/output.js";
 import { verifyTransition, setTransitionNonces, prepareStageEntry, performTransition, performMergeTransition, verifyArtifact } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
 import { checkArtifactsFilled } from "../../../core/artifact-check.js";
+import { buildEvaluatorPrompt, loadReapKnowledge } from "../../../core/prompt.js";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -58,48 +62,92 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       return;
     }
 
+    // Base validation prompt (always present, byte-identical regardless of
+    // evaluator opt-in — this guarantees the `evaluator: false` regression check).
+    const basePromptLines = [
+      "## Validation Stage",
+      "",
+      "### HARD-GATE:",
+      "- Do NOT declare 'pass' without running the validation commands.",
+      "- Do NOT reuse results from a previous run — execute them FRESH.",
+      "- 'It will probably pass' is NOT validation.",
+      "",
+      "### Steps:",
+      "1. **TypeCheck**: Run `npm run typecheck` (or project's typecheck command). Record result.",
+      "2. **Build**: Run `npm run build` (or project's build command). Record result.",
+      "3. **Tests**: Run ALL test commands the project has (e.g., e2e scripts). Record each result.",
+      "4. **Completion Criteria**: Verify EACH criterion from 02-planning.md one by one.",
+      "5. **Minor Fix** (trivial issues only, under 5 minutes): Fix and re-run the failed command.",
+      "6. **Verdict**: Determine pass / partial / fail.",
+      "",
+      "### Red Flags (sycophancy prevention):",
+      "- 'It will probably pass' → Run it.",
+      "- 'It passed before' → Run it again.",
+      "- 'It\\'s trivial, no need to test' → Test it anyway.",
+      "",
+      "### Verdict Criteria:",
+      "- **pass**: All checks pass, all completion criteria met.",
+      "- **partial**: Minor issues remain but core functionality works. Document what's incomplete.",
+      "- **fail**: Critical failures. Must regress to implementation.",
+      "",
+      `### Artifact: Write \`.reap/life/${isMerge ? "05" : "04"}-validation.md\` progressively (after each command).`,
+      "",
+      "If pass/partial: reap run validation --phase complete",
+      "If fail: reap run back to regress",
+    ];
+
+    // Opt-in: when `evaluator: true` is set in `.reap/config.yml`, append an
+    // "Evaluator Subagent Invocation" section and surface the evaluator prompt
+    // via context. The orchestrator launches `reap-evaluate` as a subagent.
+    //
+    // Advisor model: the evaluator's assessment surfaces to the user but does
+    // NOT override the builder's verdict. If the subagent invocation fails for
+    // any reason, the builder continues validation normally.
+    const configContent = await readTextFile(paths.config);
+    const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
+    const evaluatorEnabled = config?.evaluator === true;
+
+    const context: Record<string, unknown> = {
+      id: s.id,
+      goal: s.goal,
+      type: s.type,
+      artifactPath: paths.artifact(isMerge ? "05-validation.md" : "04-validation.md"),
+      evaluator: { enabled: evaluatorEnabled },
+    };
+
+    const promptLines = [...basePromptLines];
+
+    if (evaluatorEnabled) {
+      const knowledge = await loadReapKnowledge(paths);
+      const evaluatorPrompt = buildEvaluatorPrompt(knowledge, paths, s, { stage: "validation" });
+      (context.evaluator as { enabled: boolean; prompt?: string }).prompt = evaluatorPrompt;
+
+      promptLines.push("");
+      promptLines.push("### Evaluator Subagent Invocation (opt-in via `evaluator: true`)");
+      promptLines.push("");
+      promptLines.push("Before declaring your verdict, launch an independent reviewer using the Agent tool:");
+      promptLines.push("");
+      promptLines.push("- subagent_type: `reap-evaluate`");
+      promptLines.push("- description: independent validation review");
+      promptLines.push("- prompt: the `evaluator.prompt` value from the context above");
+      promptLines.push("");
+      promptLines.push("**Advisor model** — the evaluator's assessment is a recommendation, not a verdict:");
+      promptLines.push("- You (the builder) decide the final pass/partial/fail verdict.");
+      promptLines.push("- Surface every evaluator concern to the user in your validation report, even if you disagree.");
+      promptLines.push("- If the evaluator escalates a high-impact concern, lean toward `partial` and document the concern in 04-validation.md.");
+      promptLines.push("");
+      promptLines.push("**Fallback** — if the evaluator subagent fails (tool unavailable, model error, malformed reply):");
+      promptLines.push("- Tell the user the evaluator could not run and why.");
+      promptLines.push("- Continue normal validation. The evaluator is opt-in advice, not a gate.");
+    }
+
     emitOutput({
       status: "prompt",
       command: "validation",
       phase: "work",
       completed: ["gate", "artifact-check"],
-      context: {
-        id: s.id,
-        goal: s.goal,
-        type: s.type,
-        artifactPath: paths.artifact(isMerge ? "05-validation.md" : "04-validation.md"),
-      },
-      prompt: [
-        "## Validation Stage",
-        "",
-        "### HARD-GATE:",
-        "- Do NOT declare 'pass' without running the validation commands.",
-        "- Do NOT reuse results from a previous run — execute them FRESH.",
-        "- 'It will probably pass' is NOT validation.",
-        "",
-        "### Steps:",
-        "1. **TypeCheck**: Run `npm run typecheck` (or project's typecheck command). Record result.",
-        "2. **Build**: Run `npm run build` (or project's build command). Record result.",
-        "3. **Tests**: Run ALL test commands the project has (e.g., e2e scripts). Record each result.",
-        "4. **Completion Criteria**: Verify EACH criterion from 02-planning.md one by one.",
-        "5. **Minor Fix** (trivial issues only, under 5 minutes): Fix and re-run the failed command.",
-        "6. **Verdict**: Determine pass / partial / fail.",
-        "",
-        "### Red Flags (sycophancy prevention):",
-        "- 'It will probably pass' → Run it.",
-        "- 'It passed before' → Run it again.",
-        "- 'It\\'s trivial, no need to test' → Test it anyway.",
-        "",
-        "### Verdict Criteria:",
-        "- **pass**: All checks pass, all completion criteria met.",
-        "- **partial**: Minor issues remain but core functionality works. Document what's incomplete.",
-        "- **fail**: Critical failures. Must regress to implementation.",
-        "",
-        `### Artifact: Write \`.reap/life/${isMerge ? "05" : "04"}-validation.md\` progressively (after each command).`,
-        "",
-        "If pass/partial: reap run validation --phase complete",
-        "If fail: reap run back to regress",
-      ].join("\n"),
+      context,
+      prompt: promptLines.join("\n"),
       nextCommand: "reap run validation --phase complete",
     });
   }

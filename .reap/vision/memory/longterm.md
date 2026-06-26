@@ -138,3 +138,26 @@ gen-065는 세 영역을 한 generation에서 처리:
 - **패턴**: `__dirname.includes("dist") ? join(__dirname, "..", "adapters", "<adapter>", "<asset>") : join(__dirname, "..", "<adapter>", "<asset>")`
 - gen-064 에서 `claudeCodeSkillsDir()` 작성 시 이 분기를 빠뜨려 첫 e2e 가 0-install 로 즉시 잡아냄. 같은 파일 안의 기존 `assetPath()` 가 이미 그 패턴이라 참조했으면 한 번에 맞았을 일.
 - **교훈**: 새 helper 작성 시 **같은 파일의 기존 helper 패턴부터 확인**. cross-asset 경로는 단일 분기 패턴으로 통일.
+
+### Design 문서가 abort 후에도 lineage 의 anchor 가 된다 (gen-066, 2026-06-26)
+
+gen-051 (template 정의) → gen-052 (learning + design 결정 확정 후 abort) → **gen-066 (validation 통합 구현)**. 두 번째 generation 이 abort 했지만 `vision/design/evaluator-agent.md` 가 보존된 덕분에 14 generation 뒤에 자연스럽게 이어졌다. gen-066 의 planning 비용이 거의 zero — 설계 결정 (opt-in flag / advisor 모델 / 수정 대상 파일 / subagent 패턴) 모두 그대로 사용. 유일한 추가 결정은 위치 변경 (fitness → validation) + Q1-Q5 의사결정.
+
+- **교훈**: **abort 결정 시 design 문서를 살릴지 의식적으로 판단하라**. abort 가 정말 "포기" 인지 "잠시 보류" 인지를 design 문서 보존 여부로 결정. design 만 살리면 abort 가 진짜 abort 가 아니게 됨.
+- **판단 기준**: "이 작업이 미래 어떤 generation 에서 자연스럽게 이어질 가능성이 있는가?" — Yes 면 design 보존. abort artifact 만 lineage 에 남기지 말고 design 문서를 `vision/design/` 에 따로 둬라.
+- **응용**: backlog 의 "처리해야 할 사항" 도 design 문서로 분리할 가치가 있는 큰 트랙은 별도 design 으로 두는 게 lineage anchor 역할을 극대화.
+
+### Builder 가 manual workflow 로 실행될 때 subagent 권한 부재 가능 (gen-066)
+
+gen-066 의 self-dogfooding 검증 (`evaluator: true` 활성화 + `npx reap run validation` 직접 실행) 에서 발견: builder agent 의 권한 set 에 `Agent` (Task) tool 이 없는 경우가 있다. 통상 `/reap.evolve` 흐름이면 main agent → reap-evolve subagent → reap-evaluate subagent 의 2-level spawn 이라 작동, manual builder 호출이면 첫 level 의 권한이 그대로라 subagent spawn 불가.
+
+- **결과**: prompt 의 fallback 절 ("호출 실패 시 lifecycle 미차단, advisor / not gate") 가 정상 작동 → lifecycle 멈춤 없이 진행. **design 의 advisor 원칙 (Q3) 가 의도하지 않은 환경 차이에서도 보호 막**.
+- **교훈**: subagent 호출을 lifecycle gate 로 만들면 안 됨. advisor 패턴 + fallback path 가 그 어떤 환경 (Claude Code, OpenCode, manual builder, CI, 등) 에서도 lifecycle 멈춤을 막는 안전망.
+- **응용**: 향후 fitness phase evaluator 통합도 같은 원칙 — evaluator 결과를 gate 가 아닌 advisor 로. cruise 자동 중단 메커니즘 도 evaluator 호출 자체가 아닌 evaluator concern 의 명시적 표명을 기준으로.
+
+### Self-dogfooding 시점은 implementation 마지막 (gen-066)
+
+gen-066 의 T009 (`.reap/config.yml` 에 `evaluator: true` 추가) 는 implementation 의 마지막 task. 그 결과 본 generation 의 validation 단계가 자기 변경의 첫 사용자가 됨 — `npx reap run validation` 호출이 evaluator 절을 자기 prompt 에 포함. self-referential 검증 성공.
+
+- **판단 기준**: dog-fooding config / opt-in flag 활성화는 본 generation 의 다음 단계 (validation/completion) 에 영향을 주려면 implementation 안에서 처리. 이전 단계에 영향 주려면 planning 직후. **본 generation 안에서 영향 검증을 의도하면 활성화 시점을 의도적으로 선택**.
+- **응용**: 향후 새 feature 의 dog-fooding 활성화 시점을 plan 단계에서 미리 결정 (어느 lifecycle 단계가 처음 사용자가 될지). gen-066 은 validation 이 첫 사용자가 되도록 implementation 마지막에 활성화 → T014 self-test 성공.

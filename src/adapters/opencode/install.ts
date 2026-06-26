@@ -335,12 +335,103 @@ export async function installSlashCommands(
   return { cleaned, installed, targetDir };
 }
 
+// ── agent definitions installation ──────────────────────────────────────────
+
+/**
+ * Pattern for REAP-managed agent definition files: `reap-<name>.md` (note the
+ * **hyphen**, not the dot used by slash commands). Prefix-anchored so any user
+ * agent (e.g. `my-tool.md`, `reapdev-review.md`) survives cleanup.
+ */
+const AGENT_PATTERN = /^reap-.+\.md$/;
+
+/**
+ * Resolve the directory holding REAP's bundled agent definition templates
+ * (`src/templates/agents/`). Same dist/dev split as `claudeCodeSkillsDir`.
+ *
+ *   - Bundled: __dirname = dist/cli (single bundle). Agents copied by the
+ *     build script to `dist/templates/agents/`.
+ *   - Dev (bun runtime): __dirname = src/adapters/opencode. Templates dir =
+ *     `../../templates/agents`.
+ */
+function agentsTemplateDir(): string {
+  return __dirname.includes("dist")
+    ? join(__dirname, "..", "templates", "agents")
+    : join(__dirname, "..", "..", "templates", "agents");
+}
+
+/**
+ * User-level OpenCode agent definitions directory.
+ *
+ * OpenCode discovers agent definitions from `agent/` (singular) or `agents/`
+ * (plural) under either `.opencode/` (project) or `~/.config/opencode/`
+ * (global). The TUI's own tip uses the singular form
+ *   ("Add .md files to .opencode/agent/ for specialized AI personas")
+ * so REAP installs into the singular `agent/` to match upstream's stated
+ * preference. The plural `commands/` directory used by slash commands is a
+ * separate OpenCode convention — naming is asymmetric (commands plural,
+ * agents singular) but that is OpenCode's choice, not ours.
+ */
+export function opencodeAgentsDir(home: string = homedir()): string {
+  return join(home, ".config", "opencode", "agent");
+}
+
+/**
+ * Install REAP-managed agent definition files into the user's OpenCode agents
+ * directory. Idempotent cleanup-then-copy, prefix-anchored on `reap-*.md`.
+ *
+ * Called from both `installSkills` and `registerSessionIntegration` so users
+ * who only run `reap update` (no `reap install-skills`) still receive bundled
+ * agent updates. This mirrors the gen-064 longterm lesson applied to the
+ * claude-code adapter — without the `registerSessionIntegration` caller, agent
+ * files stale between REAP versions.
+ *
+ * @returns `{ cleaned, installed, targetDir }` for the caller's report.
+ */
+export async function installAgents(
+  home: string = homedir(),
+): Promise<{ cleaned: number; installed: number; targetDir: string }> {
+  const targetDir = opencodeAgentsDir(home);
+  await ensureDir(targetDir);
+
+  // Cleanup stale REAP agents.
+  let cleaned = 0;
+  try {
+    const existing = await readdir(targetDir);
+    for (const file of existing) {
+      if (AGENT_PATTERN.test(file)) {
+        await unlink(join(targetDir, file));
+        cleaned++;
+      }
+    }
+  } catch {
+    // Empty / missing target — nothing to clean.
+  }
+
+  // Copy fresh agents.
+  let installed = 0;
+  const srcDir = agentsTemplateDir();
+  try {
+    const sources = await readdir(srcDir);
+    for (const file of sources) {
+      if (!file.endsWith(".md")) continue;
+      await cp(join(srcDir, file), join(targetDir, file));
+      installed++;
+    }
+  } catch {
+    // Source dir missing — broken bundle. Surface zero installs rather than
+    // throw; downstream e2e will catch a 0-install regression.
+  }
+
+  return { cleaned, installed, targetDir };
+}
+
 /**
  * Adapter entry — install user-level + project-level OpenCode integration:
  *   - copy plugin source to .opencode/plugins/
  *   - ensure opencode.json has REAP instructions + plugin entry
  *   - install ~/.reap/reap-guide.md
  *   - install ~/.config/opencode/commands/reap.*.md slash commands
+ *   - install ~/.config/opencode/agent/reap-*.md agent definitions  ← gen-066
  *
  * Does NOT touch AGENTS.md — that is handled by `ensureProjectIntegration`
  * via the dispatcher (uniform with claude-code's CLAUDE.md flow).
@@ -350,6 +441,7 @@ export async function installSkills(projectRoot: string): Promise<void> {
   const opencodeJsonAction = await ensureOpencodeJson(projectRoot);
   await installReapGuide();
   const slashCommands = await installSlashCommands();
+  const agents = await installAgents();
 
   emitOutput({
     status: "ok",
@@ -359,6 +451,7 @@ export async function installSkills(projectRoot: string): Promise<void> {
       "ensure-opencode-json",
       "install-reap-guide",
       "install-slash-commands",
+      "install-agents",
     ],
     context: {
       agentClient: "opencode",
@@ -369,32 +462,40 @@ export async function installSkills(projectRoot: string): Promise<void> {
         installed: slashCommands.installed,
         targetDir: slashCommands.targetDir,
       },
+      agents: {
+        cleaned: agents.cleaned,
+        installed: agents.installed,
+        targetDir: agents.targetDir,
+      },
     },
     message:
       `OpenCode integration installed (opencode.json: ${opencodeJsonAction}, ` +
       `slash commands: ${slashCommands.installed} installed, ` +
-      `${slashCommands.cleaned} cleaned).`,
+      `${slashCommands.cleaned} cleaned; ` +
+      `agents: ${agents.installed} installed, ${agents.cleaned} cleaned).`,
   });
 }
 
 /**
- * `registerSessionIntegration` for OpenCode ensures both project-level wiring
- * (plugin file + opencode.json) AND user-level slash commands are up to date.
- * Called by `reap update` — must keep the user's OpenCode environment in sync
- * with the bundled REAP version every time the project is updated.
+ * `registerSessionIntegration` for OpenCode ensures project-level wiring
+ * (plugin file + opencode.json) AND user-level slash commands + agent
+ * definitions are up to date. Called by `reap update` — must keep the user's
+ * OpenCode environment in sync with the bundled REAP version every time the
+ * project is updated.
  *
  *   - `installPluginFile`    → `.opencode/plugins/reap-plugin.ts` (project)
  *   - `ensureOpencodeJson`   → `opencode.json` instructions + plugin entries
  *   - `installSlashCommands` → `~/.config/opencode/commands/reap.*.md`
+ *   - `installAgents`        → `~/.config/opencode/agent/reap-*.md`  ← gen-066
  *
- * The slash command sync is idempotent and prefix-anchored (only `reap.*.md`
- * is touched). User-supplied commands are preserved on every run. The
- * reap-guide.md install is intentionally skipped here — that is bundled with
- * the npm package's `postinstall` and the explicit `install-skills` flow, not
- * with per-project `update`.
+ * Both user-level syncs are idempotent and prefix-anchored. User-supplied
+ * files are preserved on every run. The reap-guide.md install is intentionally
+ * skipped here — that is bundled with the npm package's `postinstall` and the
+ * explicit `install-skills` flow, not with per-project `update`.
  */
 export async function registerSessionIntegration(projectRoot: string): Promise<void> {
   await installPluginFile(projectRoot);
   await ensureOpencodeJson(projectRoot);
   await installSlashCommands();
+  await installAgents();
 }

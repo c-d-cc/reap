@@ -1,0 +1,20 @@
+id: gen-066-567761
+type: embryo
+goal: "resolve #20: validation phase에서 reap-evaluate 독립 검증 호출"
+parents:
+  - gen-065-b1b391
+timeline:
+  - stage: learning
+    at: 2026-06-26T19:32:31.495Z
+  - stage: planning
+    at: 2026-06-26T19:47:52.247Z
+  - stage: implementation
+    at: 2026-06-26T19:54:36.151Z
+  - stage: validation
+    at: 2026-06-26T20:08:11.713Z
+  - stage: completion
+    at: 2026-06-26T20:12:40.661Z
+status: completed
+fitnessFeedback:
+  text: ok 잘했어.
+  evaluatedAt: 2026-06-26T20:31:24.110Z
