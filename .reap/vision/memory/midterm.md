@@ -40,13 +40,24 @@ gen-066 의 메타 관찰: 본 트랙은 gen-051~052 의 abort 후 design 만 �
 
 gen-067 의 메타 관찰: gen-066 이 `buildEvaluatorPrompt({ stage: "fitness" })` 분기를 미리 만들어두었기 때문에 본 generation 은 그 분기를 그대로 활성화만 함. **선행 generation 의 "미리 만든 hook" 가 후행 generation 의 비용을 줄이는 패턴** — 점진 통합 트랙에서 반복됨.
 
-## Daemon Indexer (2026-03-29 구현 완료)
+## Daemon Indexer (2026-03-29 구현 완료, 2026-06-27 gen-068 통합 강화)
 - `daemon/` 별도 앱, localhost:17224 HTTP API
 - Tree-sitter WASM 15개 언어, 인메모리 그래프 + SQLite write-through
 - 조회: 심볼 검색, caller/callee, blast radius, 커뮤니티, 실행 플로우
 - CLI/lifecycle 통합, worktree별 인덱스 fork
 - E2E 테스트 보강 완료 (gen-060): incremental, error-cases, worktree-diverge, idle-timeout
-- 남은 작업: API 레벨 incremental indexing 지원, Phase 4 이후 MCP server wrapper (향후 확장)
+
+### gen-068 통합 강화 — config opt-in + agent 인지
+
+- `ReapConfig.daemon?: boolean` opt-in flag. 4 lifecycle 진입점 (start/learning/implementation/completion) 게이트.
+- 함수 자체에 config inject 하지 않고 호출 측 게이트 — 미사용 사용자는 dynamic import 도 안 함.
+- daemon `lastIndexedCommit` 노출 → agent prompt 가 git HEAD 와 비교하여 staleness 판단.
+- static knowledge (load-context / dump-state-sync 양 builder) + agent prompt (buildBasePrompt) + reap-guide + agent 템플릿 (evolve / evaluate) 모두 daemon 절 추가.
+
+### 남은 작업
+- **MCP server wrapper (백로그 항목 5 잔여)**: AI agent 가 daemon 의 코드 지식을 표준화된 protocol (Model Context Protocol) 로 쿼리. claude-code / opencode 양 client 가 같은 형식으로 사용. 다음 generation 1순위 후보. design 문서 필요 (`vision/design/daemon-mcp.md`).
+- API 레벨 incremental indexing 지원 (향후 확장).
+- 자동 staleness 판단 + 자동 reindex (현재는 `lastIndexedCommit` 노출까지만, CLI 자동 비교 + reindex trigger 는 향후).
 
 ## Knowledge Loading 정/동 분리 (gen-062, 2026-05-25 완료)
 

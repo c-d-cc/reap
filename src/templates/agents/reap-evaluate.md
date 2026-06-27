@@ -152,6 +152,27 @@ You evaluate the evolve agent's work, not your own. If asked to assess your own 
    - Pattern consistency with existing codebase
    - No unintended side effects
 4. Verify artifact completeness (all stages filled, no placeholders)
+5. **Impact analysis via daemon (when `config.daemon: true`)** — for each
+   changed file in the diff, query the daemon's impact endpoint to
+   surface dependent files the builder may not have re-validated:
+
+   ```bash
+   curl -sf http://127.0.0.1:17224/health || exit 0   # skip if down
+   PROJECT_ID=$(curl -s http://127.0.0.1:17224/projects \
+     | jq -r --arg p "$PWD" '.data[] | select(.path==$p) | .id')
+   git diff --name-only HEAD~1..HEAD | while read f; do
+     curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/impact?file=$f"
+   done
+   ```
+
+   Cross-reference the daemon's `directFiles` / `indirectFiles` against
+   the validation artifact's test coverage. If indirect-impacted files
+   were not exercised by the test run, surface this as a concern.
+   Index staleness: check `lastIndexedCommit` from
+   `/projects/$PROJECT_ID/status` against `git rev-parse HEAD` —
+   trigger a re-index (`POST /projects/$PROJECT_ID/index`) if they
+   differ before relying on impact output. Daemon-down or
+   daemon-opted-out projects skip this step silently.
 
 ### Phase 3: Fitness Assessment
 

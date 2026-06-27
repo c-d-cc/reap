@@ -36,7 +36,7 @@ export class IndexManager {
 
   async indexProject(projectRoot: string, incremental?: boolean): Promise<PipelineResult> {
     if (this.indexing) {
-      return { filesProcessed: 0, nodesCreated: 0, edgesCreated: 0, duration: 0 };
+      return { filesProcessed: 0, nodesCreated: 0, edgesCreated: 0, duration: 0, lastCommit: null };
     }
     this.indexing = true;
     try {

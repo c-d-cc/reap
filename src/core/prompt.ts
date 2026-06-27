@@ -217,6 +217,26 @@ export function buildBasePrompt(
     }
   }
 
+  // ── Code Intelligence (Daemon) — gen-068 opt-in ─────────
+  // Surfaces the daemon usage protocol to the subagent ONLY when the user
+  // opted in (`config.daemon: true`). When omitted/false, this section is
+  // absent and the prompt is byte-identical to pre-gen-068.
+  if (config?.daemon === true) {
+    lines.push("## Code Intelligence (Daemon)");
+    lines.push("");
+    lines.push("REAP daemon is enabled. Prefer daemon queries over full-text search when possible.");
+    lines.push("");
+    lines.push("- Health: `curl -sf http://127.0.0.1:17224/health` — if it fails, daemon is down; skip silently.");
+    lines.push("- Project ID lookup: `curl -s http://127.0.0.1:17224/projects | jq '.data[] | select(.path==\"<cwd>\")'`.");
+    lines.push("- Symbol search: `GET /projects/{id}/symbols?q=<query>` — find function/class/type definitions.");
+    lines.push("- Callers: `GET /projects/{id}/symbols/{symbolId}/callers` — who calls this symbol?");
+    lines.push("- Impact: `GET /projects/{id}/impact?file=<path>` — blast radius of changes to a file.");
+    lines.push("- Staleness: `GET /projects/{id}/status` includes `lastIndexedCommit`. Compare against `git rev-parse HEAD`; if different, the index is stale.");
+    lines.push("");
+    lines.push("See `~/.reap/reap-guide.md` § Code Intelligence (Daemon) for the full protocol.");
+    lines.push("");
+  }
+
   // ── Project Path ──────────────────────────────────────────
   lines.push("## Project");
   lines.push(`Path: ${paths.root}`);

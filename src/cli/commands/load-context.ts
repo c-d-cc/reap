@@ -96,7 +96,37 @@ export async function buildKnowledgeContext(cwd: string): Promise<string | null>
     );
   }
 
+  // ── Daemon (gen-068) ─────────────────────────────────────
+  // Only surface this section when the user has opted in. If `config.daemon`
+  // is absent or false, this section is omitted entirely so existing users
+  // see byte-identical SessionStart output.
+  //
+  // The static section below is shared with the sync builder
+  // (`buildKnowledgeContextSync`) so both produce byte-identical content.
+  // Daemon readiness is intentionally NOT probed here — the SessionStart
+  // hook should remain fast and dependency-free, and probing requires a
+  // network round-trip that can stall. Agents may query the daemon's
+  // `/health` endpoint directly when needed.
+  if (config?.daemon === true) {
+    sections.push(buildDaemonStaticSection());
+  }
+
   return sections.join("\n\n---\n\n");
+}
+
+/**
+ * Static portion of the daemon dynamic-context section. Shared between the
+ * async (`buildKnowledgeContext`) and sync (`buildKnowledgeContextSync`)
+ * builders so they remain byte-identical when daemon readiness is not probed.
+ */
+export function buildDaemonStaticSection(): string {
+  return [
+    "# Code Intelligence (Daemon)",
+    "",
+    "- Enabled: true",
+    "- Base URL: http://127.0.0.1:17224",
+    "- See `~/.reap/reap-guide.md` § Code Intelligence (Daemon) for query examples and protocol.",
+  ].join("\n");
 }
 
 /**

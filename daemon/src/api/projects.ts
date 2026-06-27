@@ -1,4 +1,4 @@
-import type { ApiResponse, ProjectEntry } from "../types.js";
+import type { ApiResponse } from "../types.js";
 import type { RegistryManager } from "../registry.js";
 import type { IndexManager } from "../indexer/index.js";
 
@@ -58,7 +58,9 @@ export function createProjectsHandlers(
       try {
         const mgr = await getIndexManager(params.id, query.worktree);
         const result = await mgr.indexProject(entry.path);
-        registry.updateLastIndexed(params.id);
+        // gen-068: propagate the pipeline's HEAD commit to the registry so
+        // staleness can be queried via /projects/:id/status.
+        registry.updateLastIndexed(params.id, result.lastCommit ?? null);
         return { status: "ok", data: result };
       } catch (e) {
         return { status: "error", error: `Indexing failed: ${String(e)}` };

@@ -1,12 +1,14 @@
 import type { ReapPaths } from "../../../core/paths.js";
 import { GenerationManager } from "../../../core/generation.js";
 import { readdir } from "fs/promises";
-import { join } from "path";
+import { basename, join } from "path";
+import YAML from "yaml";
 import { readTextFile } from "../../../core/fs.js";
 import { scanBacklog } from "../../../core/backlog.js";
 import { emitOutput, emitError } from "../../../core/output.js";
 import { verifyTransition, setTransitionNonces, prepareStageEntry, performTransition } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
+import type { ReapConfig } from "../../../types/index.js";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -56,6 +58,18 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
 
     setTransitionNonces(s, "learning:entry");
     await gm.save(s);
+
+    // gen-068: when daemon is opted-in, ensure the project is registered and
+    // re-trigger indexing at the start of learning. This keeps the symbol
+    // graph fresh against the working tree before the agent begins
+    // exploration. Silent-fail when the daemon is unreachable.
+    const configContent = await readTextFile(paths.config);
+    const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
+    if (config?.daemon === true) {
+      const { ensureRegistered, triggerIndexing } = await import("../daemon/lifecycle.js");
+      await ensureRegistered(paths.root, basename(paths.root));
+      await triggerIndexing(paths.root);
+    }
 
     emitOutput({
       status: "prompt",

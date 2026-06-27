@@ -74,3 +74,52 @@ When REAP creates any file (artifacts, backlog, etc.) with template sections (`<
 - Do NOT create backlog during adapt phase.
 - Do NOT return to the parent agent before generation completion — handle user interactions within this session.
 - tests/ is a git submodule — commit inside submodule first if modified.
+
+## Code Intelligence (Daemon) — opt-in
+
+REAP optionally integrates with a local code-intelligence daemon
+(`localhost:17224`) that maintains a Tree-sitter symbol graph for the
+project. When `config.daemon: true` is set, REAP auto-indexes at key
+lifecycle moments (start, learning, implementation complete, completion
+commit) and the daemon protocol section appears in your subagent prompt
+and the SessionStart context. Use it to make exploration and impact
+analysis faster.
+
+### When to use the daemon
+
+- **Learning stage** — find existing implementations by name before
+  reading source. Symbol search (`GET /projects/{id}/symbols?q=`)
+  returns file:line positions you can `Read` directly. Faster than
+  Grep for symbol-shaped queries (function/class/type names).
+- **Implementation stage** — before editing a function, query its
+  callers (`GET /projects/{id}/symbols/{id}/callers`) to understand
+  the change's blast radius. Helps avoid breaking out-of-sight call
+  sites.
+- **Validation stage** — for each changed file in your diff, query
+  `GET /projects/{id}/impact?file=<path>` to enumerate dependent
+  files. Cross-reference with your validation evidence.
+
+### Protocol
+
+Always probe first — daemon may be down or the user may not have
+opted in:
+
+```bash
+curl -sf http://127.0.0.1:17224/health || true   # silent skip if down
+```
+
+If healthy, look up the current project's ID once, then reuse it:
+
+```bash
+PROJECT_ID=$(curl -s http://127.0.0.1:17224/projects \
+  | jq -r --arg p "$PWD" '.data[] | select(.path==$p) | .id')
+```
+
+See `~/.reap/reap-guide.md` § Code Intelligence (Daemon) for the full
+query reference and staleness check protocol.
+
+### Fallback behaviour
+
+- Daemon down or `config.daemon !== true` → continue with normal
+  Read/Grep/Glob tools. The daemon is an accelerator, not a
+  requirement. Never block the lifecycle on a daemon problem.

@@ -101,6 +101,24 @@ export interface ReapConfig {
   // behaviour. Evaluator runs in advisor mode — its assessment surfaces to the
   // user but does not override the builder's verdict.
   evaluator?: boolean;
+  /**
+   * Opt-in: when true, REAP integrates with the local code-intelligence
+   * daemon (`@c-d-cc/reap-daemon`, localhost:17224). Lifecycle moments
+   * (start, learning, implementation complete, completion commit) call
+   * `ensureRegistered` + `triggerIndexing`; `buildBasePrompt` and the
+   * SessionStart hook context surface daemon usage hints to the agent.
+   *
+   * Default (omitted / false): all daemon-related CLI behaviour is a no-op
+   * — byte-identical to pre-gen-068. Existing users see zero behaviour
+   * change. The daemon helpers (`triggerIndexing`/`ensureRegistered`)
+   * already silent-fail when the daemon process is unreachable, but the
+   * gate at the call site avoids the spawn-attempt + 3s timeout cost when
+   * the user has not opted in.
+   *
+   * Added in gen-068 (Issue #21 follow-up). MCP server interface is a
+   * separate track (deferred to a future generation).
+   */
+  daemon?: boolean;
 }
 
 // ── Output ──────────────────────────────────────────────────

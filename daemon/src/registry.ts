@@ -37,6 +37,7 @@ export class RegistryManager {
       name,
       registeredAt: new Date().toISOString(),
       lastIndexedAt: null,
+      lastIndexedCommit: null,
     };
     this.save(registry);
     return id;
@@ -65,10 +66,20 @@ export class RegistryManager {
     return registry.projects[id] ? id : null;
   }
 
-  updateLastIndexed(id: string): void {
+  /**
+   * Update the entry's `lastIndexedAt` timestamp and, if provided, the
+   * `lastIndexedCommit` git hash. The optional commit parameter (added in
+   * gen-068) lets the indexing pipeline propagate the HEAD at the moment of
+   * indexing to the registry so it can be queried via `/projects/:id/status`
+   * for staleness detection.
+   */
+  updateLastIndexed(id: string, commit?: string | null): void {
     const registry = this.load();
     if (registry.projects[id]) {
       registry.projects[id].lastIndexedAt = new Date().toISOString();
+      if (commit !== undefined) {
+        registry.projects[id].lastIndexedCommit = commit ?? null;
+      }
       this.save(registry);
     }
   }

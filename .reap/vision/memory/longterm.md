@@ -194,3 +194,24 @@ gen-067 의 T009 (fitness prompt 구조 unit test) 는 implementation 단계에�
 - **휴리스틱**: "함수가 1개 초과 disk 파일을 paths injection 으로 읽으면 e2e 우선." unit 으로 가려면 모든 read 를 mock 해야 하는데, 그 mock 자체가 e2e 보다 maintenance cost 가 크다.
 - **반례 (pure unit)**: 외부 의존 없는 logic (e.g., backlog.ts 의 `consumeBacklog` 같이 파일 1개 read/write) 은 unit 적합.
 - **다음 적용**: planning 단계에서 task 의 "input source 가 몇 개인지" 를 확인. >=2 면 testing strategy 에 e2e 명시. evolution.md Testing Principles 의 표에 추가 가능 (gen-067 shortterm deferred 후보 16번).
+
+### Opt-in flag 패턴 — config 게이트 + dynamic import + 호출 측 분기 (gen-068)
+
+gen-068 의 daemon 통합은 4 lifecycle 진입점 게이트 + agent prompt 절 + static knowledge 절을 모두 추가하지만, **기존 사용자 회귀 0** 이 핵심 제약. 채택한 패턴:
+
+1. **`ReapConfig.daemon?: boolean`** opt-in flag — JSDoc 에 명시적으로 "미설정 시 기존 동작 유지".
+2. **호출 측 게이트** — `config?.daemon === true` 비교 후 `await import(...)` dynamic import. 미사용 사용자는 모듈 코드 자체가 로드되지 않음 (cold path).
+3. **함수 내부 silent fail 도 그대로 존속** — 게이트가 추가 안전망. daemon 미설정인데 잘못 호출되어도 daemon down 시 silent skip.
+4. **agent prompt + static knowledge 절도 동일 게이트** — `config?.daemon === true` 시에만 emit. opt-out 사용자의 prompt / hook 출력은 byte-identical.
+
+**판단 기준**: 외부 도구 / 데이터 통합 / 자동 인덱싱 시 (a) opt-in flag 필수 (b) 호출 측 게이트 + (c) silent fail 의 2단 안전망 (d) 모든 emit (prompt / hook) 의 회귀 안전 확인. 적용 영역: 향후 daemon MCP wrapper, 외부 API 통합, telemetry 등.
+
+**메타 교훈**: 이번 패턴이 evaluator 트랙 (gen-066) 의 `evaluator?: boolean` 와 동형. **opt-in 통합은 "config flag → 호출 측 게이트 → 양 prompt/hook builder 동시 갱신" 으로 표준화 가능**. application.md 의 verification checklist 에 추가 후보 (deferred 후보 21번).
+
+### Debug 목적의 stash 시도 전 — 인과 매칭 먼저 (gen-068 실수)
+
+gen-068 validation 단계에서 scenario 5건 fail 의 원인 확인을 위해 `git stash` 를 시도 → 시스템 리마인더가 즉시 알려준 덕분에 `stash pop` 으로 복원. 비효율적 시도였음.
+
+- **올바른 순서**: (a) 변경된 파일 list 확인 (b) fail 의 원인 출력 확인 (c) **변경 파일과 fail 원인의 인과 매칭 — git log 로 보존된 히스토리에서 즉시 결정 가능한 경우 stash 불필요** (d) 매칭 결과 모호하면 stash.
+- **gen-068 의 경우**: scenario fail 은 `reap run start --goal "..."` 가 `prompt` 를 반환하기 때문이고, 이는 gen-065 (Issue #18) 의 변경. git log 로 즉시 확인 가능. stash 불필요했음.
+- **응용**: debug 의 첫 단계는 항상 "원인이 본 branch 의 변경인지, base branch 의 기존 동작인지" 를 git history (log / blame) 로 확인. stash 는 그 다음.

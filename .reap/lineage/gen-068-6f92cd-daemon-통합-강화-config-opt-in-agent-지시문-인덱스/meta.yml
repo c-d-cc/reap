@@ -1,0 +1,23 @@
+id: gen-068-6f92cd
+type: embryo
+goal: daemon 통합 강화 — config opt-in, agent 지시문, 인덱스 갱신 시점, 생명주기 관리, commit hash
+  staleness check
+parents:
+  - gen-067-187ad4
+timeline:
+  - stage: learning
+    at: 2026-06-27T02:26:12.092Z
+  - stage: planning
+    at: 2026-06-27T02:29:22.313Z
+  - stage: implementation
+    at: 2026-06-27T02:31:18.403Z
+  - stage: validation
+    at: 2026-06-27T08:30:23.717Z
+  - stage: completion
+    at: 2026-06-27T08:33:50.827Z
+status: completed
+fitnessFeedback:
+  text: "OK — daemon 통합 강화 완료 승인. backlog 5 항목 중 4 항목 완료 + MCP server interface 는
+    다음 generation 으로 이월. self-dogfooding (config.yml daemon: true) 활성화로 본
+    generation 이 자기 검증. 회귀 0."
+  evaluatedAt: 2026-06-27T08:59:45.697Z

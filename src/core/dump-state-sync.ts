@@ -3,6 +3,7 @@ import { join, dirname } from "path";
 import YAML from "yaml";
 import { createPaths } from "./paths.js";
 import { buildStrictSection } from "./prompt.js";
+import { buildDaemonStaticSection } from "../cli/commands/load-context.js";
 import type { ReapConfig, GenerationState } from "../types/index.js";
 
 /**
@@ -98,6 +99,14 @@ export function buildKnowledgeContextSync(cwd: string): string | null {
     sections.push(
       `# Language\nAlways respond in ${config.language}. Use ${config.language} for all explanations, comments, and communications. Technical terms and code identifiers remain in their original form.`,
     );
+  }
+
+  // ── Daemon (gen-068) ─────────────────────────────────────
+  // Sync builder cannot probe daemon readiness (no async fetch). It emits
+  // the static "Enabled" section only — agents see the same content the
+  // async builder produces minus the readiness line.
+  if (config?.daemon === true) {
+    sections.push(buildDaemonStaticSection());
   }
 
   return sections.join("\n\n---\n\n");

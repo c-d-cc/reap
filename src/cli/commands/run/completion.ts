@@ -222,7 +222,6 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
           prompt: fallbackPrompt.join("\n"),
           nextCommand: "reap run completion --phase fitness",
         });
-        return;
       }
 
       if (cruise) {
@@ -462,9 +461,16 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
     const completionEvent = isMerge ? "onMergeCompleted" : "onLifeCompleted";
     await executeHooks(paths.hooks, completionEvent, paths.root).catch(() => {});
 
-    // Trigger daemon indexing after generation completion
-    const { triggerIndexing } = await import("../daemon/lifecycle.js");
-    await triggerIndexing(paths.root);
+    // gen-068: daemon integration is opt-in. Only trigger a final re-index
+    // after the commit when `config.daemon === true` — otherwise this is a
+    // silent no-op so users who have not opted in pay no daemon-related
+    // cost (no spawn attempt, no 3s timeout).
+    const completionConfigContent = await readTextFile(paths.config);
+    const completionConfig = completionConfigContent ? (YAML.parse(completionConfigContent) as ReapConfig) : null;
+    if (completionConfig?.daemon === true) {
+      const { triggerIndexing } = await import("../daemon/lifecycle.js");
+      await triggerIndexing(paths.root);
+    }
 
     // Advance cruise count if in cruise mode
     const cruiseStillActive = await advanceCruise(paths.config).catch(() => false);

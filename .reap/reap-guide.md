@@ -302,6 +302,84 @@ All REAP interactions go through `/reap.*` slash commands. These are the primary
 - `reap cruise <count>` — Set cruise mode (pre-approve N generations for autonomous execution)
 - `reap update` — Update project structure to match current REAP version (v0.15 migrate, v0.16 sync)
 - `reap dump-state [--stdout] [--silent]` — Dump dynamic REAP context to `.reap/.session-state.md` (used by OpenCode plugin; useful for any external tool that needs current generation state)
+- `reap daemon status|stop|index|query` — Inspect or control the local code-intelligence daemon (see § Code Intelligence below)
+
+## Code Intelligence (Daemon)
+
+REAP ships with a local code-intelligence daemon (`@c-d-cc/reap-daemon`) that runs on `localhost:17224`. It maintains a Tree-sitter–backed symbol graph (functions, classes, types, calls, imports) persisted to SQLite, supports incremental updates, and exposes a small HTTP API for symbol search, caller/callee lookup, and change-impact analysis.
+
+### Opt-in
+
+Daemon integration is opt-in via `.reap/config.yml`:
+
+```yaml
+daemon: true
+```
+
+When opted in, REAP lifecycle commands (`start`, `learning`, `implementation complete`, `completion commit`) automatically register the project and trigger indexing. When omitted or `false`, daemon-related CLI behaviour is a no-op — byte-identical to projects that have never enabled it.
+
+### Auto-trigger points
+
+| Lifecycle moment | What runs |
+|---|---|
+| `reap run start` (generation created) | `ensureRegistered` + full `triggerIndexing` |
+| `reap run learning` (work phase) | `ensureRegistered` + `triggerIndexing` (keeps graph fresh before exploration) |
+| `reap run implementation` (complete phase) | `triggerIndexing` (so validation/evaluator see the just-written code) |
+| `reap run completion` (commit phase, post-archive) | `triggerIndexing` (graph reflects the committed state for the next generation) |
+
+All four call sites silent-fail when the daemon process is unreachable. The CLI lifecycle is never blocked by a daemon problem.
+
+### Querying the daemon
+
+Always verify the daemon is alive before querying — otherwise skip silently:
+
+```bash
+curl -sf http://127.0.0.1:17224/health || echo "daemon down"
+```
+
+Look up the current project's ID (set `CWD` to your project path):
+
+```bash
+PROJECT_ID=$(curl -s http://127.0.0.1:17224/projects \
+  | jq -r --arg p "$CWD" '.data[] | select(.path==$p) | .id')
+```
+
+Common queries:
+
+```bash
+# Symbol search by name (function, class, type, etc.)
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols?q=consumeBacklog"
+
+# Callers of a specific symbol
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callers"
+
+# Callees of a specific symbol
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callees"
+
+# Impact (blast radius) of a file change
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/impact?file=src/core/lifecycle.ts"
+
+# Project status — includes lastIndexedAt and lastIndexedCommit (gen-068)
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status"
+```
+
+### Index staleness
+
+`/projects/:id/status` returns `lastIndexedCommit` — the `git rev-parse HEAD` at the moment of the most recent successful indexing. To check whether the index is stale before a query:
+
+```bash
+INDEXED=$(curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status" | jq -r '.data.lastIndexedCommit // "none"')
+HEAD=$(git rev-parse HEAD)
+[ "$INDEXED" = "$HEAD" ] && echo "fresh" || echo "stale — trigger reindex"
+```
+
+If stale, you can request a re-index with `curl -X POST "http://127.0.0.1:17224/projects/$PROJECT_ID/index"`. The lifecycle auto-triggers above usually keep the index fresh; manual re-index is only needed for between-stage tweaks or out-of-band edits.
+
+### When to use daemon vs filesystem search
+
+- **Daemon-first**: symbol definition lookup, caller/callee traversal, multi-file impact analysis.
+- **Filesystem-first (Grep/Glob)**: literal string search, comment search, files with no parser support, daemon down.
+- The two are complementary — symbol-graph queries return file:line positions you can `Read` immediately.
 
 ## AI Client Support
 

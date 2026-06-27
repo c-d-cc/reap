@@ -1,11 +1,13 @@
-import { join } from "path";
+import { basename, join } from "path";
+import YAML from "yaml";
 import { createPaths } from "../../../core/paths.js";
 import { GenerationManager } from "../../../core/generation.js";
-import { fileExists } from "../../../core/fs.js";
+import { fileExists, readTextFile } from "../../../core/fs.js";
 import { emitOutput, emitError } from "../../../core/output.js";
 import { executeHooks } from "../../../core/hooks.js";
 import { scanBacklog, consumeBacklog } from "../../../core/backlog.js";
 import { getLastLineageEntry } from "../../../core/lineage.js";
+import type { ReapConfig } from "../../../types/index.js";
 
 export async function execute(phase?: string, goal?: string, type?: string, parents?: string, backlog?: string | boolean): Promise<void> {
   const paths = createPaths(process.cwd());
@@ -131,7 +133,6 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
           prompt: promptLines.join("\n"),
           nextCommand: `reap run start --phase create --goal "${goal}" --backlog <filename>`,
         });
-        return;
       }
     }
 
@@ -184,9 +185,17 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
     // Run onLifeStarted hooks
     await executeHooks(paths.hooks, "onLifeStarted", paths.root).catch(() => {});
 
-    // Trigger daemon indexing (silent fail if daemon not running)
-    const { triggerIndexing } = await import("../daemon/lifecycle.js");
-    await triggerIndexing(paths.root);
+    // gen-068: daemon integration is opt-in via `config.daemon: true`. The
+    // call-site gate avoids the spawn-attempt + 3s timeout cost when the
+    // user has not opted in. When enabled, register the project first (in
+    // case the daemon was reset) before triggering a full index.
+    const configContent = await readTextFile(paths.config);
+    const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
+    if (config?.daemon === true) {
+      const { ensureRegistered, triggerIndexing } = await import("../daemon/lifecycle.js");
+      await ensureRegistered(paths.root, basename(paths.root));
+      await triggerIndexing(paths.root);
+    }
 
     const messageLines = [`Generation ${state.id} created. Run: reap run learning`];
     if (consumeWarning) {

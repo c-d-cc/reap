@@ -2,36 +2,35 @@
 
 ## 세션 요약 (2026-06-27)
 
-### gen-067: cruise mode + evaluator escalation 통합 — validation/fitness 연결, cruise 자동 중단, state 채널
+### gen-068: daemon 통합 강화 — config opt-in + lifecycle 자동 인덱싱 + agent 지시문 + commit staleness 노출
 
-gen-066 의 validation-stage evaluator 통합을 fitness/cruise 단으로 확장. design 문서 `evaluator-agent.md` 의 잔여 항목 두 가지 완성:
+backlog `daemon-mcp-server-interface-추가-ai-agent가-코드-지식-직접-쿼리-가능.md` 의 5 항목 중 4 항목 (config opt-in / agent 지시문 / 인덱스 갱신 시점 / commit staleness check) 완료. 항목 5 (MCP server interface) 는 명시적 다음 generation 이월.
 
-- **Part 1 (state 채널)**: `EvaluatorConcern` interface 신설 + `GenerationState.evaluatorConcerns?: EvaluatorConcern[]` optional 필드. `current.yml` round-trip 검증.
-- **Part 2 (`reap run validation --phase report-evaluator`)**: nonce-graph 외부 phase. `--severity high|low|none` + `--summary "<text>"` (none 시 short-circuit, --summary 검증 skip). state append-only. builder 가 evaluator 답신을 받은 직후 호출하도록 validation prompt 에 8 라인 instruction 추가. 4 case (high/low/none + 잘못된 severity error) e2e 검증.
-- **Part 3 (fitness phase rewrite)**: `completion.ts` fitness 가 config 읽어 `buildEvaluatorPrompt({ stage: "fitness" })` 조건부 활성화. `priorConcernsSection` (state.evaluatorConcerns 가 있으면 prompt 에 marker section + `context.evaluatorConcerns` 동봉). cruise/supervised 양 분기 동일.
-- **Part 4 (cruise 자동 중단)**: fitness 진입 시 `state.evaluatorConcerns` 에 `severity: high` 가 하나라도 있으면 `clearCruise()` + 별도 fallback prompt + `context.previousCruiseCount` emit. 사용자에게 명시적으로 cruise 가 중단되었음을 알림. self-loop nonce 는 보존 (재시도 가능).
-- **Part 5 (dog-fooding 검증)**: 본 generation 의 `npx reap run validation` 호출이 새 prompt 절을 자기 prompt 에 포함 — self-referential 검증 성공 (gen-066 패턴 재사용).
+- **Part 1 (config opt-in)**: `ReapConfig.daemon?: boolean` 신설. 미설정 시 기존 사용자 회귀 0. JSDoc 명시.
+- **Part 2 (4 lifecycle 진입점 게이트)**: `start.ts` (create 직후) / `learning.ts` (work) / `implementation.ts` (complete auto-transition 직후) / `completion.ts` (commit) 가 `config?.daemon === true` 시 dynamic import 후 `ensureRegistered` + `triggerIndexing`. 함수 자체에 config inject 하지 않고 호출 측 게이트 — daemon 미사용 사용자는 모듈 로드도 안 함 (dynamic import 효과). silent fail 도 그대로 존속 → 게이트 + 내부 fallback 2단 안전망.
+- **Part 3 (daemon `lastIndexedCommit` 노출)**: `ProjectEntry.lastIndexedCommit?: string | null` + `register` null 초기화 + `updateLastIndexed(id, commit?)` 시그니처 확장. `PipelineResult.lastCommit?` 4 path (full/incremental/no-change/concurrent-guard) 모두 반환. `api/projects.ts` index handler 가 registry 에 전달.
+- **Part 4 (static knowledge daemon 절)**: `buildDaemonStaticSection()` export 신설. async (`load-context.ts`) / sync (`dump-state-sync.ts`) 양 builder 동일 helper 호출 → byte-identical 보장. readiness probe 의도적 제외 (sync 환경 제약 + caller 위임).
+- **Part 5 (agent prompt daemon 절)**: `buildBasePrompt` 가 `config?.daemon === true` 시 "Code Intelligence (Daemon)" 절 추가. 단계별 활용 + 정체성 검사 protocol + fallback 명시.
+- **Part 6 (reap-guide + agent 템플릿 갱신)**: template + 양 reap-guide.md (`~/.reap/`, `.reap/`) sync. `reap-evolve.md` 의 daemon 단계별 지시, `reap-evaluate.md` Phase 2 Verification 5번 (impact 분석, silent skip).
+- **Part 7 (dog-fooding)**: `.reap/config.yml: daemon: true` 활성화 — 본 generation 의 validation/completion 호출이 자기 변경의 첫 사용자.
 
-**결과**: typecheck/build pass. unit 427/0 (+5 신규). e2e 218/1 (+11 신규: report-evaluator CLI matrix 7 + cruise abort matrix 4. pre-existing init-repair 1, 회귀 0).
+**결과**: typecheck/build pass. unit 427/0. e2e 218/1 (pre-existing init-repair). scenario 35/5 (pre-existing multi-generation, gen-065 fix 이후 update 안 된 sandbox). 본 generation 회귀 0.
 
-### 다음 세션 / 다음 generation
+### 다음 세션 / 다음 generation 후보
 
-**1. Release v0.16.6** — 가장 자연스러운 다음 action. gen-061~067 묶음 (26+ commits ahead).
-- Release notes 권장 주제:
-  - Lifecycle termination paths (gen-061, Issue #16)
-  - Static/dynamic knowledge 분리 (gen-062, Issue #17)
-  - OpenCode adapter + slash commands (gen-063~064, Issue #19)
-  - Backlog UX 견고화 (gen-065, Issue #18)
-  - **Evaluator agent end-to-end** (gen-066~067, Issue #20) — opt-in 으로 validation + fitness + cruise abort 가 모두 동작
-- Issue close: #16, #17, #18, #19, #20
+**1. MCP server interface (백로그 항목 5 잔여)** — daemon 의 코드 지식을 표준화된 protocol (Model Context Protocol) 로 노출. claude-code / opencode 양 client 가 같은 형식으로 query. design 문서 후보 (`vision/design/daemon-mcp.md`). adapter 트랙 (gen-063~064) 의 4-항목 verification 체크리스트 적용.
 
-**2. Vision/Goal management 위임 (evaluator 트랙 마지막 큰 항목)** — `vision/design/evaluator-agent.md` 의 잔여 항목. adapt phase 에서 evaluator 가 vision goals.md ↔ 최근 lineage 의 gap 분석 → 다음 goal 후보 추천. validation + fitness wiring 이 완료된 지금이 자연스러운 다음 step.
+**2. Release v0.16.7 검토** — gen-066~068 묶음 (evaluator end-to-end + daemon opt-in). gen-066~067 의 evaluator 변경분이 release 전인 상태에서 gen-068 가 진행됐으므로 묶어서 v0.16.7 가능. Release notes 권장 주제:
+- Evaluator end-to-end (gen-066~067): validation + fitness + cruise abort.
+- Daemon opt-in 통합 (gen-068): config flag + lifecycle 자동 인덱싱 + agent 지시문 + commit staleness 노출.
 
-**3. 사용자 직접 `/reap.evolve` 흐름에서 evaluator 실호출 검증** — fitness 단의 evaluator subagent 가 실제로 호출되는지, prior concerns section 이 도움 / 방해 둘 중 무엇인지, cruise 자동 중단이 깔끔하게 작동하는지 관찰.
+**3. Vision/Goal management 위임** — evaluator 트랙의 마지막 큰 항목 (gen-067 shortterm 에서 이월). adapt phase 에서 evaluator 가 vision goals.md ↔ 최근 lineage 의 gap 분석 → 다음 goal 후보 추천. daemon 통합 완료된 지금이 자연스러운 다음 step.
+
+**4. Scenario / e2e 테스트 sync 누락 정리** — `tests/scenario/multi-generation.test.ts` 5건 (gen-065 fix 이후 update 안 됨) + `tests/e2e/init-repair.test.ts` 1건 (gen-067 deferred 후보 3번). 묶어서 작은 generation.
 
 ### deferred 후보 (사용자 판단 후 backlog 화)
 
-기존 13 (gen-066 shortterm) + 신규 3:
+기존 16 (gen-067 shortterm) + 신규 5:
 
 기존 (간단 list):
 1. `opencode-init-agent-flag`
@@ -42,35 +41,46 @@ gen-066 의 validation-stage evaluator 통합을 fitness/cruise 단으로 확장
 6. prefix 충돌 marker 기반 cleanup 강화
 7. OpenCode plugin `tool.execute.after` dump
 8. Codex adapter (큰 트랙)
-9. Evaluator agent 코드 통합 — **본 generation 으로 fitness + cruise 완성**. 잔여 (vision/goal 위임) 가 마지막 큰 항목.
+9. Evaluator agent 코드 통합 — fitness + cruise 완성 (gen-067). 잔여 vision/goal 위임이 마지막 큰 항목.
 10. `reap consume backlog <filename> --gen <id>` helper
 11. `reap make backlog` 외 경로로 만든 backlog warn
 12. TS `noUnusedLocals` / `noUnusedParameters` 옵션 활성화 검토
 13. validation prompt 의 fallback 절 "Agent tool 부재" 케이스 명시 강화
+14. `evaluatorConcerns` 중복 detection 경고
+15. `report-evaluator` 의 resolve/dismiss CLI (cross-generation 이월 시)
+16. 테스트 레벨 선택 휴리스틱 명문화 (gen-067 의 unit→e2e 재분류)
 
-**신규 (gen-067)**:
-14. **`evaluatorConcerns` 중복 detection 경고** — `report-evaluator` 가 같은 (severity, summary) 를 두 번 append 시 warning 출력. 의도된 append-only 유지, but UX 개선.
-15. **`reap run validation --phase report-evaluator` 의 "resolve / dismiss" CLI** — 현재 append-only. cross-generation 으로 concern 을 이월할 일이 생기면 필요. 현 generation 별 reset 모델에서는 불필요. 향후 관찰.
-16. **테스트 레벨 선택 휴리스틱 명문화** — gen-067 의 T009 (unit → e2e 재분류) 가 보여준 "함수가 paths injection 으로 디스크 다중 파일을 읽으면 e2e 우선" 패턴을 `evolution.md` Testing Principles 의 테스트 레벨 선택 표에 추가 검토.
+**신규 (gen-068)**:
+17. **MCP server interface** (큰 트랙 — 다음 generation 1순위 후보).
+18. **`tests/scenario/multi-generation.test.ts` gen-065 fix sync** — `--no-backlog` 명시 또는 sandbox setup 단계의 pending backlog 정리.
+19. **daemon `storage.ts` 의 `bun:sqlite` 타입 정리** — `@types/bun` 설치 또는 conditional import 분기 (gen-052 이후 누적 noise).
+20. **자동 staleness 판단으로 자동 reindex** — 본 generation 은 `lastIndexedCommit` 노출까지만. CLI 가 자동 비교 + reindex 트리거 흐름은 향후.
+21. **Daemon 통합 verification 4-항목 체크리스트** — application.md 의 adapter 4-항목과 유사하게 "외부 도구 / 데이터 인덱싱 통합" 시 (a) opt-in flag (b) lifecycle 진입점 게이트 (c) static knowledge 절 (d) agent prompt 지시. 명문화 검토.
 
 ### 본 generation 의 self-evolving 작동 사례
 
-- **design 문서가 anchor**: gen-051 (template) → gen-052 (design 확정 후 abort) → gen-066 (validation 통합) → gen-067 (fitness + cruise) 의 4-generation 진화. design 이 abort 후에도 보존되어 매번 planning 비용을 낮춤.
-- **gen-066 의 prepared 분기 활용**: `buildEvaluatorPrompt({ stage: "fitness" })` 분기는 gen-066 에서 미리 만들어져 있어 본 generation 이 그대로 활성화. **선행 generation 의 "미리 만든 hook" 가 후행 generation 의 비용을 줄임**.
+- **gen-066 패턴 재사용 — self-dogfooding 시점 의도적 선택**: T016 (`config.yml: daemon: true`) 을 implementation 의 마지막 task 로 배치. 본 generation 의 validation/completion 호출이 자기 변경의 첫 사용자. evaluator 트랙 (gen-066) 과 같은 패턴.
+- **gen-064 패턴 재사용 — sync/async 양 builder 같은 helper 호출**: `installSkills` / `registerSessionIntegration` 양쪽 helper 호출 (gen-064) 과 동일하게 `buildDaemonStaticSection()` 을 양 builder 가 공유. byte-identical 보장.
+- **gen-066 longterm "Builder manual workflow 시 subagent 권한 부재" 케이스 재현**: 본 generation 의 builder 가 `npx reap run validation` 직접 호출 환경 → Task tool 미보장. validation prompt 의 fallback 절이 자연스럽게 작동 → lifecycle 진행 중단 0.
 
 ### 코드 변경 위치 (다음 세션 참조용)
 
-- `src/types/index.ts` — `EvaluatorConcern` interface + `GenerationState.evaluatorConcerns?: EvaluatorConcern[]`
-- `src/cli/index.ts` + `src/cli/commands/run/index.ts` — `--severity` / `--summary` options, JSON-encoded `extra` forward
-- `src/cli/commands/run/validation.ts` — `report-evaluator` phase (state append-only) + work-phase prompt 의 evaluator 호출 instruction 8 라인
-- `src/cli/commands/run/completion.ts` — fitness phase rewrite: evaluator 조건부 활성화 + `priorConcernsSection` + `cruiseAborted` 분기 (`clearCruise()` + fallback prompt + `previousCruiseCount`)
-- `tests/unit/state-evaluator-concerns.test.ts` — 5 case (yaml round-trip)
-- `tests/e2e/report-evaluator.test.ts` — 7 case (severity matrix + validation)
-- `tests/e2e/cruise-evaluator-abort.test.ts` — 4 case (cruise abort matrix)
-- `.reap/vision/design/evaluator-agent.md` — 구현 상태 업데이트 (fitness + cruise 표시)
-- `README.md` — Evaluator Agent 절 cruise/escalation 노트
+- `src/types/index.ts` — `ReapConfig.daemon?: boolean` (JSDoc 회귀 안전 명시)
+- `src/cli/commands/run/start.ts` — create 직후 daemon gate
+- `src/cli/commands/run/learning.ts` — work phase daemon gate
+- `src/cli/commands/run/implementation.ts` — complete (auto-transition 직후) daemon gate
+- `src/cli/commands/run/completion.ts` — commit phase daemon gate
+- `src/cli/commands/load-context.ts` — `buildDaemonStaticSection()` import + 호출
+- `src/core/dump-state-sync.ts` — `buildDaemonStaticSection()` export + 자기 호출
+- `src/core/prompt.ts` — `buildBasePrompt` 의 daemon 절
+- `src/templates/reap-guide.md` — "Code Intelligence (Daemon)" 섹션
+- `src/templates/agents/reap-evolve.md` — daemon 단계별 활용
+- `src/templates/agents/reap-evaluate.md` — Phase 2 Verification 5번
+- `.reap/reap-guide.md`, `~/.reap/reap-guide.md` — template sync (cp)
+- `.reap/config.yml` — `daemon: true` 활성화
+- daemon: `src/types.ts` / `src/registry.ts` / `src/indexer/pipeline.ts` / `src/indexer/index.ts` / `src/api/projects.ts` — `lastIndexedCommit` 관련
 
-### Backlog 상태 (gen-067 commit 직후 예상)
+### Backlog 상태 (gen-068 commit 직후 예상)
 
-- `cruise-mode-evaluator-escalation-통합-validationfitness.md` (gen-066 작성) — gen-067 consumed → `lineage/gen-067-*/backlog/` 로 archive.
+- `daemon-mcp-server-interface-추가-ai-agent가-코드-지식-직접-쿼리-가능.md` — gen-068 consumed → `lineage/gen-068-*/backlog/` 로 archive.
 - `.reap/life/backlog/` 비어있을 예정 (pending 0개).

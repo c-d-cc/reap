@@ -1,9 +1,11 @@
 import type { ReapPaths } from "../../../core/paths.js";
+import YAML from "yaml";
 import { GenerationManager } from "../../../core/generation.js";
 import { readTextFile } from "../../../core/fs.js";
 import { emitOutput, emitError } from "../../../core/output.js";
 import { verifyTransition, setTransitionNonces, prepareStageEntry, performTransition, verifyArtifact } from "../../../core/stage-transition.js";
 import { copyArtifactTemplate } from "../../../core/template.js";
+import type { ReapConfig } from "../../../types/index.js";
 
 export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const gm = new GenerationManager(paths);
@@ -84,6 +86,17 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     await gm.save(s);
 
     const next = await performTransition(s, gm, paths);
+
+    // gen-068: re-index after implementation completes so that validation
+    // (and any subsequent evaluator subagent run) queries an up-to-date
+    // graph reflecting the code just written. Silent-fail if daemon is
+    // unreachable or the user has not opted in.
+    const configContent = await readTextFile(paths.config);
+    const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
+    if (config?.daemon === true) {
+      const { triggerIndexing } = await import("../daemon/lifecycle.js");
+      await triggerIndexing(paths.root);
+    }
 
     emitOutput({
       status: "ok",

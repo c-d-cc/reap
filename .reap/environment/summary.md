@@ -38,11 +38,11 @@ src/
 │   ├── git.ts                  — git 연동 (commit, diff, push, pull, fetch, branch analysis)
 │   ├── hooks.ts                — lifecycle hook engine (조건부 실행, 순서 제어, 상세 결과)
 │   ├── clarity.ts              — clarity level 자동 판단 (규칙 기반, high/medium/low + signals)
-│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt, buildStrictSection, memory 로딩, cruise loop 지시, clarity 주입, strict mode HARD-GATE) + **gen-066: `buildEvaluatorPrompt(knowledge, paths, state, { stage: "validation" | "fitness" })` — reap-evaluate subagent 용 dynamic context, advisor 모델 HARD-GATE 포함, fitness 통합용 stage 분기 미리 준비**
+│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt, buildStrictSection, memory 로딩, cruise loop 지시, clarity 주입, strict mode HARD-GATE) + **gen-066: `buildEvaluatorPrompt(knowledge, paths, state, { stage: "validation" | "fitness" })` — reap-evaluate subagent 용 dynamic context, advisor 모델 HARD-GATE 포함, fitness 통합용 stage 분기 미리 준비**. **gen-068: `buildBasePrompt` 가 `config?.daemon === true` 시 "Code Intelligence (Daemon)" 절 추가 — 단계별 활용 + 정체성 검사 protocol + fallback (daemon down / opt-out 시 silent skip).**
 │   ├── scanner.ts              — 프로젝트 스캔 (init용)
 │   ├── fs.ts                   — 파일 유틸리티
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError). lifecycle 명령(DUMP_COMMANDS 화이트리스트) 종료 시 sync dump를 자동 트리거 (gen-063)
-│   ├── dump-state-sync.ts      — `buildKnowledgeContextSync` + `dumpStateSync` (gen-063). emitOutput용 sync 버전. async load-context와 byte-identical 출력 (unit test로 검증)
+│   ├── dump-state-sync.ts      — `buildKnowledgeContextSync` + `dumpStateSync` (gen-063). emitOutput용 sync 버전. async load-context와 byte-identical 출력 (unit test로 검증). **gen-068: `buildDaemonStaticSection()` export — async builder(`load-context.ts`)와 같은 helper 공유. `config?.daemon === true` 시 daemon static knowledge 절 emit. readiness probe는 의도적으로 제외 (sync 환경 제약 + caller 위임).**
 │   ├── dump-state-helper.ts    — `dumpStateBestEffort` (async, silent on error). 향후 async caller용 (gen-063)
 │   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts, detectV15, cleanupLegacyProjectSkills)
 │   ├── notice.ts               — release notice (fetchReleaseNotice: RELEASE_NOTICE.md에서 버전+언어별 노트 추출)
@@ -58,12 +58,12 @@ src/
 │       ├── load-context.ts     — SessionStart hook용: dynamic context 주입 (buildKnowledgeContext, hookSpecificOutput JSON 출력). gen-062에서 정/동 분리 — Current State/Strict/Language 3개 dynamic 섹션만 출력 (~1KB). static knowledge(genome/env/vision/memory/reap-guide)는 CLAUDE.md의 `@` import refs로 Claude Code가 직접 로드. 비-REAP 디렉토리에서는 silent exit
 │       ├── dump-state.ts       — `.reap/.session-state.md`에 동일 dynamic context 기록 (--stdout/--silent 지원). OpenCode plugin과 외부 도구용. emitOutput이 lifecycle 명령 종료 시 sync 버전(dump-state-sync.ts)으로 자동 dump
 │       ├── run/                — stage 실행 (21 handlers)
-│       │   ├── start.ts        — generation 생성 (scan → create). **gen-065부터 create phase에 backlog gate: `--backlog`/`--no-backlog` 모두 없고 pending > 0 시 `status: prompt`/`phase: select-backlog` emit + return. idempotent. `consumeBacklog` warning을 emitOutput `context.backlogWarning` 으로 surface (silent fail 방지).**
-│       │   ├── learning.ts     — 탐구 (work → complete)
+│       │   ├── start.ts        — generation 생성 (scan → create). **gen-065부터 create phase에 backlog gate: `--backlog`/`--no-backlog` 모두 없고 pending > 0 시 `status: prompt`/`phase: select-backlog` emit + return. idempotent. `consumeBacklog` warning을 emitOutput `context.backlogWarning` 으로 surface (silent fail 방지).** **gen-068부터 create 직후 (state 저장 완료 시점) `config?.daemon === true` 시 `ensureRegistered` + `triggerIndexing` (dynamic import).**
+│       │   ├── learning.ts     — 탐구 (work → complete). **gen-068부터 work phase 가 `config?.daemon === true` 시 `ensureRegistered` + `triggerIndexing` (dynamic import, silent on failure).**
 │       │   ├── planning.ts     — 계획 (work → complete)
-│       │   ├── implementation.ts — 구현 (work → complete)
+│       │   ├── implementation.ts — 구현 (work → complete). **gen-068부터 complete phase (auto-transition 직후) 에 `config?.daemon === true` 시 `triggerIndexing` 추가.**
 │       │   ├── validation.ts   — 검증 (work → complete). **gen-066부터 `config.evaluator === true` 시 work prompt 에 "Evaluator Subagent Invocation" 절 + `context.evaluator.{enabled, prompt}` append. `evaluator: false` 시 prompt byte-identical (회귀 보장). advisor 모델 — builder 가 verdict 결정, evaluator concern surface, 호출 실패 시 통상 진행. gen-067부터 새 `report-evaluator` sub-phase 신설 — `reap run validation --phase report-evaluator --severity <high|low|none> --summary "..."` 가 transition graph 외부에서 `state.evaluatorConcerns` 배열에 append (nonce 검증/발급 없음). severity=none 은 no-op + ok. work prompt 에 builder 가 evaluator 응답 후 본 CLI 를 호출하라는 지시 (3 사용법) 자동 포함.**
-│       │   ├── completion.ts   — 완료 (reflect → fitness → adapt → commit). **gen-067부터 fitness work 분기: (1) `evaluator: true` 시 `buildEvaluatorPrompt({ stage: "fitness" })` 호출 + `context.evaluator.{enabled, prompt}` emit (양 cruise/supervised 분기 공통), (2) `state.evaluatorConcerns` 비어있지 않으면 prompt 에 "Prior Evaluator Concerns" 절 추가 + `context.evaluatorConcerns` emit, (3) cruise + high-severity concern 시 `clearCruise()` 호출 + 별도 fallback prompt (`completed: [..., "cruise-aborted"]`, `context.cruiseAborted: true`, `previousCruiseCount`) emit + 즉시 return. self-loop nonce 보존 (builder 가 supervised feedback 재호출 가능).**
+│       │   ├── completion.ts   — 완료 (reflect → fitness → adapt → commit). **gen-067부터 fitness work 분기: (1) `evaluator: true` 시 `buildEvaluatorPrompt({ stage: "fitness" })` 호출 + `context.evaluator.{enabled, prompt}` emit (양 cruise/supervised 분기 공통), (2) `state.evaluatorConcerns` 비어있지 않으면 prompt 에 "Prior Evaluator Concerns" 절 추가 + `context.evaluatorConcerns` emit, (3) cruise + high-severity concern 시 `clearCruise()` 호출 + 별도 fallback prompt (`completed: [..., "cruise-aborted"]`, `context.cruiseAborted: true`, `previousCruiseCount`) emit + 즉시 return. self-loop nonce 보존 (builder 가 supervised feedback 재호출 가능).** **gen-068부터 commit phase 의 `triggerIndexing` 호출에 `config?.daemon === true` 게이트.**
 │       │   ├── evolve.ts       — 전체 lifecycle 자동 실행
 │       │   ├── detect.ts       — merge: 분기점 감지
 │       │   ├── mate.ts         — merge: genome 교차
@@ -169,6 +169,8 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 - `ReapHookEvent` — 라이프사이클 hook 이벤트 union type (14개 이벤트)
 - `ReapOutput.status` — `"ok" | "prompt" | "error" | "artifact-incomplete"`
 - `EvaluatorConcern` (gen-067) — `{ stage: "validation" | "fitness", severity: "low" | "high", summary: string, recordedAt: string }`. Validation→fitness signalling channel. severity는 binary (Goodhart 회피). high = cruise auto-abort 트리거. `GenerationState.evaluatorConcerns?: EvaluatorConcern[]` 로 노출.
+- `ReapConfig.daemon?: boolean` (gen-068) — opt-in flag. 미설정/false 시 4 lifecycle 진입점 (start/learning/implementation/completion) 의 daemon trigger 게이트 비활성. true 시 dynamic import 후 `ensureRegistered` + `triggerIndexing` 호출. 기존 사용자 회귀 0 보장.
+- `ProjectEntry.lastIndexedCommit?: string \| null` (daemon, gen-068) — registry entry 의 마지막 인덱스 git HEAD commit. `register` 시 null 초기화. `PipelineResult.lastCommit?` 4 path (full/incremental/no-change/concurrent-guard) 모두 반환 → index handler 가 registry 에 전달. agent prompt 가 git HEAD 와 비교하여 staleness 판단.
 
 ## Key Design Decisions
 

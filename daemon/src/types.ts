@@ -13,6 +13,17 @@ export interface ProjectEntry {
   name: string;
   registeredAt: string;
   lastIndexedAt: string | null;
+  /**
+   * Git commit hash (HEAD) at the moment of the most recent successful
+   * indexing run. `null` (or absent for legacy entries) means either the
+   * project has never been indexed or the indexing pipeline could not read
+   * the commit (e.g. non-git project).
+   *
+   * Added in gen-068 — exposed via `/projects/:id/status` so agents can
+   * compare against the project's current `HEAD` to decide whether
+   * `triggerIndexing` is needed before querying symbols/impact.
+   */
+  lastIndexedCommit?: string | null;
 }
 
 export interface Registry {

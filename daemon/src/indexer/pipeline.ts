@@ -1,18 +1,25 @@
 import { readFileSync } from "fs";
 import { execSync } from "child_process";
 import { scanFiles, getChangedFiles } from "./scanner.js";
-import { SymbolExtractor, type ExtractResult } from "./parser.js";
+import { SymbolExtractor } from "./parser.js";
 import { CodeGraph } from "./graph.js";
 import { IndexStorage } from "./storage.js";
 import { resolveImports } from "./import-resolver.js";
 import { resolveCalls } from "./call-resolver.js";
-import type { SymbolNode, GraphEdge } from "../types.js";
+import type { SymbolNode } from "../types.js";
 
 export interface PipelineResult {
   filesProcessed: number;
   nodesCreated: number;
   edgesCreated: number;
   duration: number;
+  /**
+   * `git rev-parse HEAD` at the moment the pipeline finished. `null` if the
+   * project is not a git repository or the command fails. Propagated to the
+   * registry (`updateLastIndexed`) by the `/projects/:id/index` API handler
+   * for staleness detection (gen-068).
+   */
+  lastCommit?: string | null;
 }
 
 export async function runFullPipeline(
@@ -65,9 +72,10 @@ export async function runFullPipeline(
   storage.saveNodes(graph.allNodes());
   storage.saveEdges(graph.allEdges());
 
+  let headCommit: string | null = null;
   try {
-    const head = execSync("git rev-parse HEAD", { cwd: projectRoot, encoding: "utf-8" }).trim();
-    storage.saveMeta("lastCommit", head);
+    headCommit = execSync("git rev-parse HEAD", { cwd: projectRoot, encoding: "utf-8" }).trim();
+    storage.saveMeta("lastCommit", headCommit);
   } catch {}
   storage.saveMeta("lastIndexedAt", new Date().toISOString());
 
@@ -76,6 +84,7 @@ export async function runFullPipeline(
     nodesCreated: graph.allNodes().length,
     edgesCreated: graph.allEdges().length,
     duration: Date.now() - start,
+    lastCommit: headCommit,
   };
 }
 
@@ -94,7 +103,9 @@ export async function runIncrementalPipeline(
 
   const changedFiles = await getChangedFiles(projectRoot, lastCommit);
   if (changedFiles.length === 0) {
-    return { filesProcessed: 0, nodesCreated: 0, edgesCreated: 0, duration: Date.now() - start };
+    // No changes since last index — preserve the previously-recorded commit
+    // so registry staleness check still sees the latest known good hash.
+    return { filesProcessed: 0, nodesCreated: 0, edgesCreated: 0, duration: Date.now() - start, lastCommit };
   }
 
   const allFiles = await scanFiles(projectRoot);
@@ -149,11 +160,12 @@ export async function runIncrementalPipeline(
   storage.saveNodes(graph.allNodes());
   storage.saveEdges(graph.allEdges());
 
+  let headCommit: string | null = null;
   try {
-    const head = execSync("git rev-parse HEAD", { cwd: projectRoot, encoding: "utf-8" }).trim();
-    storage.saveMeta("lastCommit", head);
+    headCommit = execSync("git rev-parse HEAD", { cwd: projectRoot, encoding: "utf-8" }).trim();
+    storage.saveMeta("lastCommit", headCommit);
   } catch {}
   storage.saveMeta("lastIndexedAt", new Date().toISOString());
 
-  return { filesProcessed: changedFiles.length, nodesCreated, edgesCreated, duration: Date.now() - start };
+  return { filesProcessed: changedFiles.length, nodesCreated, edgesCreated, duration: Date.now() - start, lastCommit: headCommit };
 }
