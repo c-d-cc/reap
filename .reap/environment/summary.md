@@ -2,8 +2,8 @@
 
 ## Project
 
-- Source: `~/cdws/reap/` (branch: v0.16.0)
-- Package: `@c-d-cc/reap` v0.16.0
+- Source: `~/cdws/reap/` (branch: main)
+- Package: `@c-d-cc/reap` v0.17.0
 - Config language: korean
 
 ## Tech Stack

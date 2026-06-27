@@ -21,6 +21,7 @@ export const ko: Translations = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
+      daemon: "Code Intelligence Daemon",
       advanced: "고급",
       collaborationOverview: "분산 워크플로우",
       mergeGeneration: "Merge Generation",
@@ -404,6 +405,8 @@ export const ko: Translations = {
       ["strictMerge", "직접 git pull/push/merge 제한 — 대신 REAP 명령어 사용 (기본값: false). 아래 Strict 모드 참조."],
       ["agentClient", "AI 에이전트 클라이언트 (claude-code | opencode | codex). 어댑터 layer를 제어 — 슬래시 명령 위치, manifest 파일 (CLAUDE.md vs AGENTS.md), plugin/hook 전략. 기본값: claude-code. Codex는 현재 미지원."],
       ["cruiseCount", "존재 시 크루즈 모드 활성화. 형식: current/total (예: 1/5). 크루즈 완료 후 자동 제거"],
+      ["evaluator", "opt-in 독립 검토자. true 설정 시 validation/fitness 단계에서 reap-evaluate를 advisor로 실행. high-severity concern은 cruise mode를 자동 중단. 기본값: false."],
+      ["daemon", "opt-in 로컬 코드 인텔리전스 데몬. true 설정 시 lifecycle 주요 시점(learning, implementation 완료, completion commit)에 자동 인덱싱하고 agent 프롬프트에 데몬 쿼리 지침 포함. 기본값: false."],
     ],
     strictMode: "Strict 모드",
     strictModeDesc: "Strict 모드는 AI 에이전트가 할 수 있는 작업을 제어합니다. 두 개의 독립적인 설정:",
@@ -821,6 +824,64 @@ priority: medium
 작업에 대한 설명.`,
   },
 
+  // Daemon Page
+  daemonPage: {
+    title: "Code Intelligence Daemon",
+    breadcrumb: "가이드",
+    intro: "REAP는 세대에 걸쳐 Tree-sitter 심볼 그래프를 유지하는 로컬 코드 인텔리전스 데몬을 제공합니다. 에이전트에게 심볼 검색, caller/callee 순회, blast-radius 영향 분석을 localhost:17224의 로컬 HTTP API를 통해 제공합니다.",
+    optInTitle: "설정 (opt-in)",
+    optInDesc: "데몬은 기본적으로 비활성화되어 있습니다. .reap/config.yml에 한 줄을 추가하여 활성화합니다:",
+    optInConfig: `daemon: true   # 기본값: false`,
+    optInNote: "false(또는 미설정) 시 모든 데몬 관련 동작이 건너뜁니다. 에이전트 프롬프트, lifecycle 훅, CLI 출력은 데몬을 한 번도 활성화하지 않은 프로젝트와 완전히 동일합니다.",
+    autoTriggerTitle: "자동 트리거 시점",
+    autoTriggerDesc: "활성화 시 REAP가 주요 lifecycle 시점에 자동으로 프로젝트를 등록하고 재인덱싱합니다:",
+    autoTriggerHeaders: ["Lifecycle 시점", "실행 내용"],
+    autoTriggerItems: [
+      ["reap run start (generation 생성)", "ensureRegistered + 전체 triggerIndexing"],
+      ["reap run learning (work phase)", "ensureRegistered + triggerIndexing (탐구 전 그래프 최신화)"],
+      ["reap run implementation (complete phase)", "triggerIndexing (validation이 방금 작성한 코드를 볼 수 있도록)"],
+      ["reap run completion (commit phase, 아카이브 후)", "triggerIndexing (다음 세대를 위해 커밋된 상태 반영)"],
+    ],
+    autoTriggerNote: "4개의 호출 위치 모두 데몬 프로세스에 접근할 수 없을 때 조용히 실패합니다. CLI lifecycle은 데몬 문제로 절대 차단되지 않습니다.",
+    queryTitle: "데몬 쿼리",
+    queryDesc: "쿼리 전에 항상 데몬이 실행 중인지 확인하세요 — 아니면 조용히 건너뜁니다:",
+    queryHealth: `curl -sf http://127.0.0.1:17224/health || echo "daemon down"`,
+    queryProjectId: `PROJECT_ID=$(curl -s http://127.0.0.1:17224/projects \\
+  | jq -r --arg p "$CWD" '.data[] | select(.path==$p) | .id')`,
+    queryExamples: `# 이름으로 심볼 검색
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols?q=consumeBacklog"
+
+# 특정 심볼의 callers
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callers"
+
+# 특정 심볼의 callees
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callees"
+
+# 파일 변경의 영향 범위 (blast radius)
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/impact?file=src/core/lifecycle.ts"
+
+# 프로젝트 상태 — lastIndexedAt과 lastIndexedCommit 포함
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status"`,
+    stalenessTitle: "Staleness 확인",
+    stalenessDesc: "/projects/:id/status는 lastIndexedCommit(최근 인덱싱 시점의 git rev-parse HEAD)을 반환합니다. 쿼리 전에 인덱스가 오래됐는지 확인하려면:",
+    stalenessCode: `INDEXED=$(curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status" | jq -r '.data.lastIndexedCommit // "none"')
+HEAD=$(git rev-parse HEAD)
+[ "$INDEXED" = "$HEAD" ] && echo "최신" || echo "오래됨 — 재인덱싱 필요"`,
+    cliTitle: "CLI 관리",
+    cliDesc: "데몬은 첫 사용 시 자동으로 시작되고 30분 유휴 후 자동 종료됩니다. 명시적으로 관리할 수도 있습니다:",
+    cliCode: `reap daemon status   # 실행 여부 확인, 마지막 인덱싱 커밋 표시
+reap daemon stop     # 데몬 종료
+reap daemon index    # 수동 재인덱싱 트리거
+reap daemon query    # 심볼 쿼리 실행`,
+    fallbackTitle: "데몬 사용 불가 시",
+    fallbackDesc: "데몬은 읽기 전용 가속기 — 코드를 절대 수정하지 않습니다. 어떤 이유로 사용 불가 시 에이전트는 표준 Read/Grep/Glob 도구로 폴백하며 lifecycle이 중단되지 않습니다. 데몬 우선 vs 파일시스템 우선 가이드:",
+    fallbackHeaders: ["접근 방식", "사용 시기"],
+    fallbackItems: [
+      ["데몬 우선", "심볼 정의 조회, caller/callee 순회, 다중 파일 영향 분석"],
+      ["파일시스템 우선 (Grep/Glob)", "리터럴 문자열 검색, 주석 검색, 파서 미지원 파일, 데몬 다운"],
+    ],
+  },
+
   // Self-Evolving Page
   selfEvolvingPage: {
     title: "자기 진화 기능",
@@ -986,6 +1047,10 @@ priority: medium
     title: "릴리즈 노트",
     breadcrumb: "기타",
     versions: [
+      {
+        version: "0.17.0",
+        notes: "**코드 인텔리전스 데몬** (opt-in) — `.reap/config.yml`에 `daemon: true` 설정 시 로컬 Tree-sitter 심볼 그래프 활성화 (localhost:17224). generation 시작, implementation 완료, completion commit 시점에 자동 인덱싱. agent 프롬프트에 심볼 검색/caller-callee/blast-radius 쿼리 예시 포함. `/projects/:id/status`에 `lastIndexedCommit` 노출로 staleness 확인 가능. **Evaluator Agent** — fitness phase 통합 완료: fitness 단계에서 evaluator 실행, prior concerns 프롬프트 표시, high-severity concern 시 cruise mode 자동 중단.",
+      },
       {
         version: "0.16.6",
         notes: "**Evaluator Agent** (opt-in) — `.reap/config.yml`에 `evaluator: true` 설정 시 validation/fitness 단계에서 `reap-evaluate` 서브에이전트가 독립 검토자로 실행됨 (advisor 모델, 필수 게이트 아님). high-severity concern 발생 시 cruise mode 자동 중단.",

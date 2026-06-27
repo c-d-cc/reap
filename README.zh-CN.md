@@ -246,6 +246,52 @@ REAP 通过基于 `agentClient` 配置字段的适配器层与 AI 智能体集�
 
 `/reap.evolve` 可以将整个代际迭代委托给一个子智能体，该子智能体自主运行所有阶段，仅在真正受阻时才浮出。
 
+### Evaluator Agent（可选功能）
+
+REAP 提供第二个子智能体定义 `reap-evaluate`，作为构建者工作的**独立审查者**运行。只读（仅 Read/Glob/Grep/Bash），定性评估（无评分），**顾问**角色 — 将关注点呈现给用户，但由构建者做出最终生命周期判决。
+
+在 `.reap/config.yml` 中添加一行即可启用：
+
+```yaml
+evaluator: true   # 默认值: false
+```
+
+启用后，validation 阶段将在构建者声明 pass/partial/fail 之前启动 `reap-evaluate` 子智能体。Evaluator 将：
+- 独立运行 typecheck、构建和完整测试套件，
+- 对照 `02-planning.md` 的完成标准交叉验证实现，
+- 发现 genome 约定偏离、讨好信号、回归风险等问题，
+- 根据置信度 × 影响度矩阵进行升级处理。
+
+子智能体调用失败时，构建者继续正常 validation — evaluator 是可选建议，而非门控。
+
+**Fitness 阶段 + Cruise 模式**: evaluator 也在 fitness 阶段运行。validation 期间记录的 high-severity concern 在下次 fitness 阶段运行时会**自动中止 cruise 模式** — `cruiseCount` 从 `config.yml` 中清除，cruise 提示被替换为 supervised fallback，用户审查问题后再撰写 fitness 反馈。
+
+### Code Intelligence Daemon（可选功能）
+
+REAP 内置本地代码智能守护进程（`localhost:17224`），跨代际维护 Tree-sitter 符号图。解析 15+ 种语言，将图存储在 SQLite 中，并提供符号搜索、调用关系分析、blast-radius 影响、社区检测和进程流追踪的 HTTP API。
+
+在 `.reap/config.yml` 中添加一行即可启用：
+
+```yaml
+daemon: true   # 默认值: false
+```
+
+启用后，REAP 自动：
+- 在 generation 开始时向 daemon 注册项目，
+- 在关键生命周期时刻（learning、implementation 完成、completion commit）重新索引，
+- 在构建者/evaluator 提示中添加包含查询示例和 staleness 检查协议的"Code Intelligence"部分。
+
+守护进程首次使用时自动启动，30 分钟空闲后自动关闭：
+
+```bash
+reap daemon status   # 检查运行状态
+reap daemon stop     # 停止守护进程
+```
+
+守护进程是只读加速器 — 绝不修改代码。不可用时智能体回退到标准 Read/Grep/Glob 工具，生命周期不会中断。
+
+**Staleness 检查**: 每次索引运行记录 `lastIndexedCommit`（索引时的 `HEAD` 哈希）。智能体可通过 `GET /projects/:id/status` 与当前 `HEAD` 比较，决定查询前是否需要重新索引。
+
 ## 项目结构
 
 ```
@@ -286,6 +332,8 @@ strictEdit: false               # 将代码变更限制在 REAP 生命周期内
 strictMerge: false              # 限制直接 git pull/push/merge
 agentClient: claude-code       # AI 智能体客户端
 # cruiseCount: 1/5             # 存在时 = cruise 模式（当前/总计）
+# evaluator: true              # 可选：在 validation/fitness 中启动 reap-evaluate
+# daemon: true                 # 可选：本地代码智能守护进程
 ```
 
 关键设置：
@@ -293,6 +341,8 @@ agentClient: claude-code       # AI 智能体客户端
 - **`strictEdit`**：将代码变更限制在计划范围内的 implementation 阶段。
 - **`strictMerge`**：限制直接 git pull/push/merge——请改用 `/reap.pull`、`/reap.push`、`/reap.merge`。
 - **`agentClient`**：决定使用哪个适配器进行技能部署。
+- **`evaluator`**：可选独立审查者。`true` 时在 validation 阶段启动 `reap-evaluate` 子智能体作为顾问。默认 `false`。参见上方 [Evaluator Agent](#evaluator-agent可选功能)。
+- **`daemon`**：可选本地代码智能守护进程。`true` 时 REAP 在生命周期检查点自动索引，并在智能体提示中包含 daemon 查询指示。默认 `false`。参见上方 [Code Intelligence Daemon](#code-intelligence-daemon可选功能)。
 
 ## 从 v0.15 升级 [↗](https://reap.cc/docs/migration-guide)
 

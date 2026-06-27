@@ -246,6 +246,50 @@ REAPは`agentClient` configフィールドをキーとするアダプタレイ�
 
 `/reap.evolve` はジェネレーション全体を subagent に委任でき、subagent は本当にブロックされた場合のみ介入を求めながら、全ステージを自律的に実行します。
 
+### Evaluator Agent（オプトイン）
+
+REAP は2つ目のサブエージェント定義 `reap-evaluate` を提供します。ビルダーの作業を独立してレビューする**独立レビュアー**として機能します。読み取り専用（Read/Glob/Grep/Bashのみ）、定性的評価（スコアなし）、**アドバイザー**として動作 — 懸念事項をユーザーに表面化しますが、ビルダーが最終的なライフサイクル判断を下します。
+
+`.reap/config.yml` に1行追加して有効化：
+
+```yaml
+evaluator: true   # デフォルト: false
+```
+
+有効化すると、validationステージでビルダーがpass/partial/failを宣言する前に `reap-evaluate` をサブエージェントとして起動します。Evaluatorは：
+- typecheck、ビルド、完全なテストスイートを独立して実行し、
+- `02-planning.md`の完了基準と実装をクロスチェックし、
+- genomコンベンション逸脱、sycophancyの危険信号、リグレッションリスクへの懸念を表面化し、
+- 信頼度 × 影響度マトリクスに従ってエスカレーションします。
+
+サブエージェントの呼び出しが失敗しても、ビルダーは通常のvalidationを続行します — evaluatorはオプトインのアドバイスであり、ゲートではありません。
+
+**Fitness phase + cruise mode**: evaluatorはfitnessフェーズでも実行されます。validationで記録されたhigh-severity concernは次のfitnessフェーズ実行時に**cruise modeを自動停止**します — `cruiseCount`が `config.yml` から削除され、cruiseプロンプトがsupervised fallbackに置き換えられ、ユーザーが懸念事項を確認した後にfeedbackを作成できます。
+
+### Code Intelligence Daemon（オプトイン）
+
+REAPはローカルコードインテリジェンスデーモン（`localhost:17224`）を提供します。世代をまたいでTree-sitterシンボルグラフを維持し、15以上の言語を解析し、グラフをSQLiteに保存し、シンボル検索、caller/callee分析、blast-radius影響、コミュニティ検出、プロセスフロートレースのHTTP APIを公開します。
+
+`.reap/config.yml` に1行追加して有効化：
+
+```yaml
+daemon: true   # デフォルト: false
+```
+
+有効化すると、REAPが自動的に：
+- generation開始時にデーモンにプロジェクトを登録し、
+- 主要なライフサイクル時点（learning、implementation完了、completion commit）で再インデックスし、
+- ビルダー/evaluatorプロンプトにクエリ例とstaleness確認プロトコルを含む「Code Intelligence」セクションを追加します。
+
+デーモンは最初の使用時に自動起動し、30分のアイドル後に自動シャットダウンします：
+
+```bash
+reap daemon status   # 実行状況を確認
+reap daemon stop     # デーモンを停止
+```
+
+デーモンは読み取り専用アクセラレーター — コードを決して変更しません。何らかの理由で利用できない場合、エージェントは標準のRead/Grep/Globツールにフォールバックし、ライフサイクルは中断されません。
+
 ## プロジェクト構造
 
 ```
@@ -286,6 +330,8 @@ strictEdit: false               # コード変更をREAPライフサイクルに
 strictMerge: false              # 直接の git pull/push/merge を制限
 agentClient: claude-code       # AIエージェントクライアント
 # cruiseCount: 1/5             # 存在する場合 = cruise mode（現在/合計）
+# evaluator: true              # オプトイン: validation/fitnessで reap-evaluate を起動
+# daemon: true                 # オプトイン: ローカルコードインテリジェンスデーモン
 ```
 
 主要な設定項目：
@@ -293,6 +339,8 @@ agentClient: claude-code       # AIエージェントクライアント
 - **`strictEdit`**: コード変更を、計画されたスコープ内の implementation ステージに制限します。
 - **`strictMerge`**: 直接の git pull/push/merge を制限します — 代わりに `/reap.pull`、`/reap.push`、`/reap.merge` を使用してください。
 - **`agentClient`**: スキルのデプロイに使用するアダプターを決定します。
+- **`evaluator`**: オプトインの独立レビュアー。`true`のとき、validationステージで `reap-evaluate` サブエージェントをアドバイザーとして起動します。デフォルト `false`。上記の [Evaluator Agent](#evaluator-agentオプトイン) を参照。
+- **`daemon`**: オプトインのローカルコードインテリジェンスデーモン。`true`のとき、REAPがライフサイクルチェックポイントで自動インデックスし、エージェントプロンプトにデーモンクエリ指示を含めます。デフォルト `false`。上記の [Code Intelligence Daemon](#code-intelligence-daemonオプトイン) を参照。
 
 ## v0.15からのアップグレード [↗](https://reap.cc/docs/migration-guide)
 

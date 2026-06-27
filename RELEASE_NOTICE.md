@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.17.0
+### en
+Code Intelligence Daemon (opt-in `daemon: true`): local Tree-sitter symbol graph at localhost:17224. Auto-indexes at generation start, implementation complete, and completion commit. Agents receive symbol search / caller-callee / blast-radius guidance in prompts. `lastIndexedCommit` exposed for staleness checks. Evaluator Agent fitness-phase integration complete: high-severity concerns now auto-abort cruise mode.
+### ko
+코드 인텔리전스 데몬 (opt-in `daemon: true`): localhost:17224 로컬 Tree-sitter 심볼 그래프. generation 시작, implementation 완료, completion commit 시 자동 인덱싱. agent 프롬프트에 심볼 검색/caller-callee/blast-radius 안내 포함. staleness 확인을 위한 `lastIndexedCommit` 노출. Evaluator Agent fitness phase 통합 완료: high-severity concern 발생 시 cruise mode 자동 중단.
+
 ## v0.16.6
 ### en
 Evaluator Agent integration (opt-in `evaluator: true`): independent `reap-evaluate` subagent runs during validation and fitness phases as an advisor. High-severity concerns automatically abort cruise mode for human review.

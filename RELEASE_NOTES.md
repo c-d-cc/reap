@@ -1,13 +1,30 @@
 ## What's New
 
-- **Evaluator Agent — validation phase** (opt-in) — set `evaluator: true` in `.reap/config.yml` to launch `reap-evaluate` as an independent reviewer during validation. Advisor model: the evaluator surfaces concerns to the user but the builder owns the lifecycle verdict. Enabled for Claude Code and OpenCode via `reap update` or `reap install-skills`.
-- **Evaluator Agent — fitness phase + cruise auto-abort** — with `evaluator: true`, the evaluator also runs during the fitness phase. High-severity concerns recorded via `reap run validation --phase report-evaluator` automatically abort cruise mode, replacing the auto-fitness prompt with a supervised fallback so the user can review the concern before continuing.
+- **Code Intelligence Daemon** (opt-in) — set `daemon: true` in `.reap/config.yml` to activate a local Tree-sitter symbol graph (localhost:17224). REAP auto-indexes at generation start, implementation complete, and completion commit. Agents receive daemon query instructions (symbol search, caller/callee, blast-radius impact) in their prompts. `lastIndexedCommit` exposed on `/projects/:id/status` for staleness checks.
+- **Evaluator Agent — fitness phase + cruise auto-abort** — with `evaluator: true`, the evaluator now runs during the fitness phase as well as validation. High-severity concerns recorded via `reap run validation --phase report-evaluator` automatically abort cruise mode, replacing the auto-fitness prompt with a supervised fallback so the user can review before continuing.
 
-## Evaluator Setup
+## Daemon Setup
 
 ```bash
 npm install -g @c-d-cc/reap
 ```
+
+Add to `.reap/config.yml`:
+
+```yaml
+daemon: true   # default: false
+```
+
+Then start the daemon and register your project:
+
+```bash
+reap daemon start
+reap daemon status
+```
+
+The daemon runs at `localhost:17224`. REAP automatically triggers indexing at key lifecycle points. Agents receive symbol query guidance in their prompts when `daemon: true` is set.
+
+## Evaluator Setup
 
 Add to `.reap/config.yml`:
 

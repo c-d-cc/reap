@@ -246,6 +246,52 @@ REAP는 `agentClient` config 필드를 기준으로 adapter layer를 통해 AI �
 
 `/reap.evolve`는 전체 세대를 서브에이전트에 위임하여 모든 단계를 자율적으로 수행하게 할 수 있으며, 진정으로 막혔을 때만 사용자에게 알립니다.
 
+### Evaluator Agent (opt-in)
+
+REAP는 두 번째 서브에이전트 정의인 `reap-evaluate`를 제공합니다. 빌더의 작업을 독립적으로 검토하는 **독립 검토자**로 동작합니다. 읽기 전용(Read/Glob/Grep/Bash만 사용), 정성적 평가(점수 없음), **어드바이저** 역할 — 우려 사항을 사용자에게 전달하지만 빌더가 최종 lifecycle 판정을 내립니다.
+
+`.reap/config.yml`에 한 줄을 추가하여 활성화합니다:
+
+```yaml
+evaluator: true   # 기본값: false
+```
+
+활성화 시, validation 단계에서 빌더가 pass/partial/fail을 선언하기 전에 `reap-evaluate`를 서브에이전트로 실행합니다. Evaluator는:
+- typecheck, 빌드, 전체 테스트 스위트를 독립적으로 실행하고,
+- `02-planning.md`의 완료 기준과 구현을 교차 검증하며,
+- genome 컨벤션 이탈, sycophancy 위험 신호, 회귀 위험에 대한 우려를 표면화하고,
+- 신뢰도 × 영향도 매트릭스에 따라 에스컬레이션합니다.
+
+서브에이전트 호출이 어떤 이유로 실패해도 빌더는 정상 validation을 계속합니다 — evaluator는 opt-in 조언이지 게이트가 아닙니다.
+
+**Fitness phase + cruise mode**: evaluator는 fitness 단계에서도 실행됩니다. validation 중 기록된 high-severity concern은 다음 fitness phase 실행 시 **cruise mode를 자동 중단**합니다 — `cruiseCount`가 `config.yml`에서 삭제되고, cruise 프롬프트가 supervised fallback으로 교체되어 사용자가 우려 사항을 검토한 후 fitness 피드백을 작성할 수 있습니다. 우려가 해소되면 `reap cruise <N>`으로 cruise를 재개할 수 있습니다.
+
+### Code Intelligence Daemon (opt-in)
+
+REAP는 로컬 코드 인텔리전스 데몬(`localhost:17224`)을 제공합니다. 세대에 걸쳐 Tree-sitter 심볼 그래프를 유지하며, 15개 이상의 언어를 파싱하고, 그래프를 SQLite에 저장하고, 심볼 검색, caller/callee 분석, blast-radius 영향, 커뮤니티 감지, 프로세스 흐름 추적을 위한 HTTP API를 제공합니다.
+
+`.reap/config.yml`에 한 줄을 추가하여 활성화합니다:
+
+```yaml
+daemon: true   # 기본값: false
+```
+
+활성화 시 REAP가 자동으로:
+- generation 시작 시 데몬에 프로젝트를 등록하고,
+- 주요 lifecycle 시점(learning, implementation 완료, completion commit)에 재인덱싱하며,
+- 빌더/evaluator 프롬프트에 쿼리 예시와 staleness 확인 프로토콜을 포함한 "Code Intelligence" 섹션을 추가합니다.
+
+데몬은 첫 사용 시 자동으로 시작되고 30분 유휴 후 자동 종료됩니다. 명시적으로 관리할 수도 있습니다:
+
+```bash
+reap daemon status   # 실행 여부 확인
+reap daemon stop     # 데몬 종료
+```
+
+데몬은 읽기 전용 가속기입니다 — 코드를 절대 수정하지 않습니다. 어떤 이유로 사용 불가 시 에이전트는 표준 Read/Grep/Glob 도구로 폴백하며 lifecycle이 중단되지 않습니다.
+
+**Staleness 확인**: 각 인덱싱 실행 시 `lastIndexedCommit`(인덱싱 시점의 `HEAD` 해시)을 기록합니다. 에이전트는 `GET /projects/:id/status`로 현재 `HEAD`와 비교하여 쿼리 전에 재인덱싱이 필요한지 판단할 수 있습니다.
+
 ## 프로젝트 구조
 
 ```
@@ -286,6 +332,8 @@ strictEdit: false               # 코드 변경을 REAP 생명 주기로 제한
 strictMerge: false              # 직접 git pull/push/merge 제한
 agentClient: claude-code       # AI 에이전트 클라이언트
 # cruiseCount: 1/5             # 존재 시 = cruise 모드 (현재/전체)
+# evaluator: true              # Opt-in: validation/fitness에서 reap-evaluate 실행
+# daemon: true                 # Opt-in: 로컬 코드 인텔리전스 데몬
 ```
 
 주요 설정:
@@ -293,6 +341,8 @@ agentClient: claude-code       # AI 에이전트 클라이언트
 - **`strictEdit`**: 코드 변경을 계획된 범위 내 구현 단계로 제한합니다.
 - **`strictMerge`**: 직접 git pull/push/merge를 제한합니다 — 대신 `/reap.pull`, `/reap.push`, `/reap.merge`를 사용하세요.
 - **`agentClient`**: 스킬 배포에 사용할 어댑터를 결정합니다.
+- **`evaluator`**: Opt-in 독립 검토자. `true`일 때 validation 단계에서 `reap-evaluate` 서브에이전트를 어드바이저로 실행합니다. 기본값 `false`. 위의 [Evaluator Agent](#evaluator-agent-opt-in) 참조.
+- **`daemon`**: Opt-in 로컬 코드 인텔리전스 데몬. `true`일 때 REAP가 lifecycle 체크포인트에서 자동 인덱싱하고 에이전트 프롬프트에 데몬 쿼리 지시를 포함합니다. 기본값 `false`. 위의 [Code Intelligence Daemon](#code-intelligence-daemon-opt-in) 참조.
 
 ## v0.15에서 업그레이드 [↗](https://reap.cc/docs/migration-guide)
 

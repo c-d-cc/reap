@@ -246,6 +246,50 @@ Wechseln Sie Clients, indem Sie `.reap/config.yml` bearbeiten, dann `reap instal
 
 `/reap.evolve` kann die gesamte Generation an einen Subagenten delegieren, der autonom alle Phasen durchläuft und sich nur meldet, wenn er tatsächlich blockiert ist.
 
+### Evaluator Agent (opt-in)
+
+REAP liefert eine zweite Subagenten-Definition, `reap-evaluate`, die als **unabhängiger Reviewer** der Builder-Arbeit fungiert. Nur lesend (Read/Glob/Grep/Bash), qualitative Bewertungen (keine Scores), **Advisor**-Rolle — Bedenken werden dem Benutzer angezeigt, aber der Builder trifft das finale Lifecycle-Urteil.
+
+Aktivierung durch eine Zeile in `.reap/config.yml`:
+
+```yaml
+evaluator: true   # Standard: false
+```
+
+Wenn aktiviert, startet der Builder `reap-evaluate` als Subagent, bevor er pass/partial/fail erklärt. Der Evaluator:
+- führt typecheck, Build und die vollständige Test-Suite unabhängig aus,
+- gleicht die Fertigstellungskriterien aus `02-planning.md` mit der Implementierung ab,
+- zeigt Bedenken zu Genome-Konventions-Abweichungen, Sycophancy-Warnsignalen und Regressionsrisiken,
+- eskaliert gemäß einer Konfidenz × Einfluss-Matrix.
+
+Wenn der Subagenten-Aufruf fehlschlägt, setzt der Builder die normale Validierung fort — der Evaluator ist optionale Beratung, kein Gate.
+
+**Fitness-Phase + Cruise-Modus**: Der Evaluator läuft auch in der Fitness-Phase. High-severity-Befunde aus der Validierung **stoppen Cruise-Modus automatisch** beim nächsten Fitness-Phase-Lauf — `cruiseCount` wird aus `config.yml` gelöscht, der Cruise-Prompt durch einen supervised Fallback ersetzt, sodass der Benutzer den Befund prüfen kann.
+
+### Code Intelligence Daemon (opt-in)
+
+REAP enthält einen lokalen Code-Intelligence-Daemon (`localhost:17224`), der generationsübergreifend einen Tree-sitter-Symbolgraph pflegt. Er parst 15+ Sprachen, speichert den Graph in SQLite und stellt eine HTTP-API für Symbolsuche, Caller/Callee-Analyse, Blast-Radius-Impact, Community-Erkennung und Prozessfluss-Tracing bereit.
+
+Aktivierung durch eine Zeile in `.reap/config.yml`:
+
+```yaml
+daemon: true   # Standard: false
+```
+
+Wenn aktiviert, führt REAP automatisch:
+- Projektregistrierung beim Daemon bei Generation-Start,
+- Re-Indexierung an wichtigen Lifecycle-Momenten (learning, implementation complete, completion commit),
+- fügt einen "Code Intelligence"-Abschnitt mit Query-Beispielen und Staleness-Prüfprotokoll in Builder/Evaluator-Prompts ein.
+
+Der Daemon startet automatisch beim ersten Gebrauch und fährt nach 30 Minuten Inaktivität herunter:
+
+```bash
+reap daemon status   # Status prüfen
+reap daemon stop     # Daemon stoppen
+```
+
+Der Daemon ist ein Read-only-Beschleuniger — er modifiziert niemals Ihren Code. Bei Nichtverfügbarkeit fallen Agenten auf Standard-Read/Grep/Glob-Tools zurück, ohne den Lifecycle zu unterbrechen.
+
 ## Projektstruktur
 
 ```
@@ -286,6 +330,8 @@ strictEdit: false               # Code-Änderungen auf REAP-Lebenszyklus beschr�
 strictMerge: false              # Direktes git pull/push/merge einschränken
 agentClient: claude-code       # KI-Agenten-Client
 # cruiseCount: 1/5             # Vorhanden = Cruise-Modus (aktuell/gesamt)
+# evaluator: true              # Opt-in: reap-evaluate in Validierung/Fitness starten
+# daemon: true                 # Opt-in: Lokaler Code-Intelligence-Daemon
 ```
 
 Wichtige Einstellungen:
@@ -293,6 +339,8 @@ Wichtige Einstellungen:
 - **`strictEdit`**: Beschränkt Code-Änderungen auf die Implementierungsphase innerhalb des geplanten Umfangs.
 - **`strictMerge`**: Beschränkt direktes git pull/push/merge — verwenden Sie stattdessen `/reap.pull`, `/reap.push`, `/reap.merge`.
 - **`agentClient`**: Bestimmt, welcher Adapter für die Skill-Bereitstellung verwendet wird.
+- **`evaluator`**: Opt-in unabhängiger Reviewer. Startet bei `true` den `reap-evaluate` Subagenten als Advisor. Standard `false`. Siehe [Evaluator Agent](#evaluator-agent-opt-in) oben.
+- **`daemon`**: Opt-in lokaler Code-Intelligence-Daemon. Bei `true` indexiert REAP an Lifecycle-Checkpoints automatisch und fügt Daemon-Query-Anweisungen in Agent-Prompts ein. Standard `false`. Siehe [Code Intelligence Daemon](#code-intelligence-daemon-opt-in) oben.
 
 ## Upgrade von v0.15 [↗](https://reap.cc/docs/migration-guide)
 

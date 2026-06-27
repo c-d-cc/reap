@@ -276,6 +276,32 @@ Agent definitions are installed automatically by `reap install-skills` **and** `
 
 **Fitness phase + cruise mode** (gen-067): the evaluator also runs during the fitness phase. After receiving its reply, the builder persists the verdict on the generation state via `reap run validation --phase report-evaluator --severity <high|low|none> --summary "..."`. High-severity concerns recorded during validation **automatically abort cruise mode** when the next fitness phase runs — `cruiseCount` is cleared from `config.yml`, the cruise prompt is replaced with a supervised fallback, and the human reviews the concern before composing fitness feedback. Cruise can be resumed manually with `reap cruise <N>` once the concern is resolved. Low-severity concerns surface in the prompt's "Prior Evaluator Concerns" section without aborting cruise.
 
+### Code Intelligence Daemon (opt-in)
+
+REAP ships a local code-intelligence daemon (`localhost:17224`) that maintains a Tree-sitter symbol graph across generations. It parses 15+ languages, stores the graph in SQLite, and exposes an HTTP API for symbol search, caller/callee analysis, blast-radius impact, community detection, and process flow tracing.
+
+Enable it by adding one line to `.reap/config.yml`:
+
+```yaml
+daemon: true   # default: false
+```
+
+When enabled, REAP automatically:
+- registers the project with the daemon on generation start,
+- re-indexes at key lifecycle moments (learning, implementation complete, completion commit),
+- includes a "Code Intelligence" section in the builder/evaluator prompt with query examples and a staleness check protocol.
+
+The daemon starts automatically on first use and shuts itself down after 30 minutes of idle time. It can also be managed explicitly:
+
+```bash
+reap daemon status   # Check if running
+reap daemon stop     # Stop the daemon
+```
+
+The daemon is a read-only accelerator — it never modifies your code. If it is unreachable for any reason, agents fall back to standard Read/Grep/Glob tools without interrupting the lifecycle.
+
+**Staleness check**: each indexing run records `lastIndexedCommit` (the `HEAD` hash at the time of indexing). Agents can compare this against the current `HEAD` via `GET /projects/:id/status` to decide whether to trigger a re-index before querying.
+
 ## Project Structure
 
 ```
@@ -317,6 +343,7 @@ strictMerge: false # Restrict direct git pull/push/merge
 agentClient: claude-code # AI agent client
 # cruiseCount: 1/5             # Present = cruise mode (current/total)
 # evaluator: true              # Opt-in: launch reap-evaluate during validation
+# daemon: true                 # Opt-in: local code-intelligence daemon
 ```
 
 Key settings:
@@ -326,6 +353,7 @@ Key settings:
 - **`strictMerge`**: Restricts direct git pull/push/merge — use `/reap.pull`, `/reap.push`, `/reap.merge` instead.
 - **`agentClient`**: Determines which adapter is used for skill deployment.
 - **`evaluator`**: Opt-in independent reviewer. When `true`, the validation stage launches the `reap-evaluate` subagent as an advisor (read-only, qualitative-only). Default `false` keeps validation byte-identical to pre-gen-066 behaviour. See [Evaluator Agent](#evaluator-agent-opt-in) above.
+- **`daemon`**: Opt-in local code-intelligence daemon. When `true`, REAP auto-indexes at lifecycle checkpoints and includes daemon query instructions in agent prompts. Default `false`. See [Code Intelligence Daemon](#code-intelligence-daemon-opt-in) above.
 
 ## Upgrading from v0.15 [↗](https://reap.cc/docs/migration-guide)
 

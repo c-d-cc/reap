@@ -21,6 +21,7 @@ export const ja: Translations = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
+      daemon: "Code Intelligence Daemon",
       advanced: "上級",
       collaborationOverview: "分散ワークフロー",
       mergeGeneration: "Merge Generation",
@@ -403,6 +404,8 @@ export const ja: Translations = {
       ["strictMerge", "直接のgit pull/push/mergeを制限 — 代わりにREAPコマンドを使用（デフォルト：false）。下記のStrictモードを参照。"],
       ["agentClient", "使用するAIエージェントクライアント（デフォルト：claude-code）。スキルデプロイメントとセッションhookに使用するアダプターを決定"],
       ["cruiseCount", "存在する場合、cruiseモードを有効にします。形式：current/total（例：1/5）。cruise完了後に自動削除"],
+      ["evaluator", "validationおよびfitnessフェーズで独立したreap-evaluate サブエージェントを有効にします（デフォルト：false）。high-severity懸念時にクルーズモードを自動停止"],
+      ["daemon", "ローカルTree-sitterシンボルグラフを有効にします（デフォルト：false）。agentプロンプトにシンボル検索・caller/callee・blast-radius分析ガイドを追加"],
     ],
     strictMode: "Strictモード",
     strictModeDesc: "StrictモードはAIエージェントが実行できる操作を制御します。2つの独立した設定：",
@@ -820,6 +823,64 @@ priority: medium
 タスクの説明。`,
   },
 
+  // Daemon Page
+  daemonPage: {
+    title: "Code Intelligence Daemon",
+    breadcrumb: "ガイド",
+    intro: "REAPは世代をまたいでTree-sitterシンボルグラフを維持するローカルコードインテリジェンスデーモンを提供します。localhost:17224のローカルHTTP APIを通じて、エージェントにシンボル検索、caller/calleeトラバーサル、blast-radius影響分析を提供します。",
+    optInTitle: "セットアップ（オプトイン）",
+    optInDesc: "デーモンはデフォルトで無効です。.reap/config.ymlに1行追加して有効化します：",
+    optInConfig: `daemon: true   # デフォルト: false`,
+    optInNote: "falseまたは未設定の場合、デーモン関連の動作はすべてスキップされます。エージェントプロンプト、lifecycleフック、CLI出力はデーモンを有効にしたことのないプロジェクトと完全に同一です。",
+    autoTriggerTitle: "自動トリガーポイント",
+    autoTriggerDesc: "有効化すると、REAPが主要なlifecycle時点で自動的にプロジェクトを登録し再インデックスします：",
+    autoTriggerHeaders: ["Lifecycle時点", "実行内容"],
+    autoTriggerItems: [
+      ["reap run start (generation作成)", "ensureRegistered + 全triggerIndexing"],
+      ["reap run learning (work phase)", "ensureRegistered + triggerIndexing (探索前にグラフを最新化)"],
+      ["reap run implementation (complete phase)", "triggerIndexing (validationが書いたばかりのコードを参照できるように)"],
+      ["reap run completion (commit phase、アーカイブ後)", "triggerIndexing (次世代のためにコミット済み状態を反映)"],
+    ],
+    autoTriggerNote: "4つの呼び出し箇所すべてで、デーモンプロセスに到達できない場合は静かに失敗します。CLIライフサイクルはデーモンの問題でブロックされることはありません。",
+    queryTitle: "デーモンへのクエリ",
+    queryDesc: "クエリ前に必ずデーモンが起動しているか確認してください — そうでなければ静かにスキップします：",
+    queryHealth: `curl -sf http://127.0.0.1:17224/health || echo "daemon down"`,
+    queryProjectId: `PROJECT_ID=$(curl -s http://127.0.0.1:17224/projects \\
+  | jq -r --arg p "$CWD" '.data[] | select(.path==$p) | .id')`,
+    queryExamples: `# 名前でシンボルを検索
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols?q=consumeBacklog"
+
+# 特定シンボルのcallers
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callers"
+
+# 特定シンボルのcallees
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callees"
+
+# ファイル変更の影響範囲（blast radius）
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/impact?file=src/core/lifecycle.ts"
+
+# プロジェクトステータス — lastIndexedAtとlastIndexedCommitを含む
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status"`,
+    stalenessTitle: "Staleness確認",
+    stalenessDesc: "/projects/:id/statusはlastIndexedCommit（最近のインデックス時点のgit rev-parse HEAD）を返します。クエリ前にインデックスが古くなっているか確認するには：",
+    stalenessCode: `INDEXED=$(curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status" | jq -r '.data.lastIndexedCommit // "none"')
+HEAD=$(git rev-parse HEAD)
+[ "$INDEXED" = "$HEAD" ] && echo "最新" || echo "古い — 再インデックスをトリガー"`,
+    cliTitle: "CLI管理",
+    cliDesc: "デーモンは最初の使用時に自動起動し、30分のアイドル後に自動シャットダウンします。明示的に管理することもできます：",
+    cliCode: `reap daemon status   # 実行状況を確認、最終インデックスコミットを表示
+reap daemon stop     # デーモンを停止
+reap daemon index    # 手動再インデックスをトリガー
+reap daemon query    # シンボルクエリを実行`,
+    fallbackTitle: "デーモン使用不可時",
+    fallbackDesc: "デーモンは読み取り専用アクセラレーター — コードを決して変更しません。何らかの理由で利用できない場合、エージェントは標準のRead/Grep/Globツールにフォールバックし、ライフサイクルは中断されません。デーモン優先 vs ファイルシステム優先のガイド：",
+    fallbackHeaders: ["アプローチ", "使用場面"],
+    fallbackItems: [
+      ["デーモン優先", "シンボル定義の検索、caller/calleeトラバーサル、複数ファイルの影響分析"],
+      ["ファイルシステム優先（Grep/Glob）", "リテラル文字列検索、コメント検索、パーサー非対応ファイル、デーモンダウン時"],
+    ],
+  },
+
   // Self-Evolving Page
   selfEvolvingPage: {
     title: "自己進化機能",
@@ -985,6 +1046,10 @@ priority: medium
     title: "リリースノート",
     breadcrumb: "その他",
     versions: [
+      {
+        version: "0.17.0",
+        notes: "**コードインテリジェンスデーモン**（オプトイン）— `.reap/config.yml`に`daemon: true`を設定するとローカルTree-sitterシンボルグラフを有効化（localhost:17224）。generation開始・implementation完了・completionコミット時に自動インデックス更新。agentプロンプトにシンボル検索/caller-callee/blast-radiusクエリ例を含む。`/projects/:id/status`に`lastIndexedCommit`を公開し鮮度確認が可能。**Evaluator Agent** — fitnessフェーズ統合完了: fitnessフェーズでevaluator実行、prior concernsをプロンプトに表示、high-severity懸念時にクルーズモードを自動停止。",
+      },
       {
         version: "0.16.6",
         notes: "**Evaluator Agent**（オプトイン）— `.reap/config.yml` に `evaluator: true` を設定すると、validation/fitnessフェーズで `reap-evaluate` サブエージェントが独立レビュアーとして実行されます（アドバイザーモデル）。high-severityの懸念が検出された場合、クルーズモードを自動停止します。",

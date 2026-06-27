@@ -21,6 +21,7 @@ export const zhCN: Translations = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
+      daemon: "Code Intelligence Daemon",
       advanced: "高级功能",
       collaborationOverview: "分布式工作流",
       mergeGeneration: "合并代",
@@ -403,6 +404,8 @@ export const zhCN: Translations = {
       ["strictMerge", "限制直接使用 git pull/push/merge——改用 REAP 命令（默认：false）。见下方严格模式。"],
       ["agentClient", "使用的 AI 代理客户端（默认：claude-code）。决定技能部署和会话钩子使用哪个适配器"],
       ["cruiseCount", "存在时启用巡航模式。格式：当前/总计（如 1/5）。巡航完成后自动移除"],
+      ["evaluator", "在 validation 和 fitness 阶段启用独立的 reap-evaluate 子代理（默认：false）。检测到高严重性问题时自动中止 cruise 模式"],
+      ["daemon", "启用本地 Tree-sitter 符号图（默认：false）。在代理提示中添加符号搜索、调用关系和影响范围分析指南"],
     ],
     strictMode: "严格模式",
     strictModeDesc: "严格模式控制 AI 代理被允许做什么。两个独立设置：",
@@ -820,6 +823,64 @@ priority: medium
 任务描述。`,
   },
 
+  // Daemon Page
+  daemonPage: {
+    title: "Code Intelligence Daemon",
+    breadcrumb: "指南",
+    intro: "REAP 内置本地代码智能守护进程，跨代际维护 Tree-sitter 符号图。通过 localhost:17224 的本地 HTTP API，为智能体提供符号搜索、调用关系遍历和 blast-radius 影响分析。",
+    optInTitle: "设置（可选功能）",
+    optInDesc: "守护进程默认禁用。在 .reap/config.yml 中添加一行即可启用：",
+    optInConfig: `daemon: true   # 默认值: false`,
+    optInNote: "设置为 false 或未设置时，所有守护进程相关行为均跳过。智能体提示、生命周期钩子和 CLI 输出与从未启用守护进程的项目完全相同。",
+    autoTriggerTitle: "自动触发点",
+    autoTriggerDesc: "启用后，REAP 在关键生命周期时刻自动注册并重新索引项目：",
+    autoTriggerHeaders: ["生命周期时刻", "执行内容"],
+    autoTriggerItems: [
+      ["reap run start（generation 创建）", "ensureRegistered + 完整 triggerIndexing"],
+      ["reap run learning（work phase）", "ensureRegistered + triggerIndexing（探索前保持图最新）"],
+      ["reap run implementation（complete phase）", "triggerIndexing（让 validation 看到刚写的代码）"],
+      ["reap run completion（commit phase，归档后）", "triggerIndexing（图反映下一代的已提交状态）"],
+    ],
+    autoTriggerNote: "所有四个调用位置在守护进程不可达时均静默失败。CLI 生命周期永远不会被守护进程问题阻塞。",
+    queryTitle: "查询守护进程",
+    queryDesc: "查询前务必验证守护进程是否运行——否则静默跳过：",
+    queryHealth: `curl -sf http://127.0.0.1:17224/health || echo "daemon down"`,
+    queryProjectId: `PROJECT_ID=$(curl -s http://127.0.0.1:17224/projects \\
+  | jq -r --arg p "$CWD" '.data[] | select(.path==$p) | .id')`,
+    queryExamples: `# 按名称搜索符号
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols?q=consumeBacklog"
+
+# 特定符号的调用者
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callers"
+
+# 特定符号的被调用者
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callees"
+
+# 文件变更的影响范围（blast radius）
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/impact?file=src/core/lifecycle.ts"
+
+# 项目状态——包含 lastIndexedAt 和 lastIndexedCommit
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status"`,
+    stalenessTitle: "新鲜度检查",
+    stalenessDesc: "/projects/:id/status 返回 lastIndexedCommit（最近成功索引时的 git rev-parse HEAD）。查询前检查索引是否过时：",
+    stalenessCode: `INDEXED=$(curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status" | jq -r '.data.lastIndexedCommit // "none"')
+HEAD=$(git rev-parse HEAD)
+[ "$INDEXED" = "$HEAD" ] && echo "最新" || echo "过时——触发重新索引"`,
+    cliTitle: "CLI 管理",
+    cliDesc: "守护进程首次使用时自动启动，30 分钟空闲后自动关闭。也可以显式管理：",
+    cliCode: `reap daemon status   # 检查运行状态，显示最后索引提交
+reap daemon stop     # 停止守护进程
+reap daemon index    # 触发手动重新索引
+reap daemon query    # 运行符号查询`,
+    fallbackTitle: "守护进程不可用时",
+    fallbackDesc: "守护进程是只读加速器——绝不修改代码。不可用时智能体回退到标准 Read/Grep/Glob 工具，生命周期不会中断。守护进程优先 vs 文件系统优先指南：",
+    fallbackHeaders: ["方法", "使用场景"],
+    fallbackItems: [
+      ["守护进程优先", "符号定义查找、调用关系遍历、多文件影响分析"],
+      ["文件系统优先（Grep/Glob）", "字面字符串搜索、注释搜索、无解析器支持的文件、守护进程宕机时"],
+    ],
+  },
+
   // Self-Evolving Page
   selfEvolvingPage: {
     title: "自我进化功能",
@@ -985,6 +1046,10 @@ priority: medium
     title: "发布说明",
     breadcrumb: "其他",
     versions: [
+      {
+        version: "0.17.0",
+        notes: "**代码智能守护进程**（可选功能）— 在 `.reap/config.yml` 中设置 `daemon: true` 可激活本地 Tree-sitter 符号图（localhost:17224）。在 generation 开始、implementation 完成和 completion 提交时自动更新索引。代理提示包含符号搜索/调用关系/影响范围查询示例。`/projects/:id/status` 公开 `lastIndexedCommit` 以检查索引新鲜度。**Evaluator Agent** — fitness 阶段集成完成：fitness 阶段运行 evaluator，提示中显示历史问题，检测到高严重性问题时自动中止 cruise 模式。",
+      },
       {
         version: "0.16.6",
         notes: "**Evaluator Agent**（可选功能）— 在 `.reap/config.yml` 中设置 `evaluator: true`，可在 validation 和 fitness 阶段启动 `reap-evaluate` 子代理作为独立审查者（顾问模式，非强制门控）。检测到高严重性问题时自动中止 cruise 模式。",

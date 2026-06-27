@@ -19,6 +19,7 @@ export const en = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
+      daemon: "Code Intelligence Daemon",
       advanced: "Advanced",
       collaborationOverview: "Distributed Workflow",
       mergeGeneration: "Merge Generation",
@@ -401,6 +402,8 @@ export const en = {
       ["strictMerge", "Restrict direct git pull/push/merge — use REAP commands instead (default: false). See Strict Mode below."],
       ["agentClient", "AI agent client (claude-code | opencode | codex). Controls adapter layer — slash command location, manifest file (CLAUDE.md vs AGENTS.md), plugin/hook strategy. Default: claude-code. Codex is currently unsupported."],
       ["cruiseCount", "When present, enables cruise mode. Format: current/total (e.g. 1/5). Removed automatically after cruise completes"],
+      ["evaluator", "Opt-in independent reviewer. When true, launches reap-evaluate as an advisor during validation and fitness phases. High-severity concerns abort cruise mode. Default: false."],
+      ["daemon", "Opt-in local code-intelligence daemon. When true, REAP auto-indexes at lifecycle checkpoints (learning, implementation complete, completion commit) and includes daemon query instructions in agent prompts. Default: false."],
     ],
     strictMode: "Strict Mode",
     strictModeDesc: "Strict mode controls what the AI agent is allowed to do. Two independent settings:",
@@ -818,6 +821,64 @@ priority: medium
 Description of the task.`,
   },
 
+  // Daemon Page
+  daemonPage: {
+    title: "Code Intelligence Daemon",
+    breadcrumb: "Guide",
+    intro: "REAP ships a local code-intelligence daemon that maintains a Tree-sitter symbol graph across generations. It provides agents with symbol search, caller/callee traversal, and blast-radius impact analysis — all through a local HTTP API at localhost:17224.",
+    optInTitle: "Setup (opt-in)",
+    optInDesc: "The daemon is disabled by default. Enable it by adding one line to .reap/config.yml:",
+    optInConfig: `daemon: true   # default: false`,
+    optInNote: "When set to false (or omitted), all daemon-related behavior is skipped. Agent prompts, lifecycle hooks, and CLI output remain byte-identical to projects that have never enabled the daemon.",
+    autoTriggerTitle: "Auto-trigger Points",
+    autoTriggerDesc: "When enabled, REAP automatically registers and re-indexes the project at key lifecycle moments:",
+    autoTriggerHeaders: ["Lifecycle Moment", "What Runs"],
+    autoTriggerItems: [
+      ["reap run start (generation created)", "ensureRegistered + full triggerIndexing"],
+      ["reap run learning (work phase)", "ensureRegistered + triggerIndexing (keeps graph fresh before exploration)"],
+      ["reap run implementation (complete phase)", "triggerIndexing (so validation sees the just-written code)"],
+      ["reap run completion (commit phase, post-archive)", "triggerIndexing (graph reflects the committed state for the next generation)"],
+    ],
+    autoTriggerNote: "All four call sites silent-fail when the daemon process is unreachable. The CLI lifecycle is never blocked by a daemon problem.",
+    queryTitle: "Querying the Daemon",
+    queryDesc: "Always verify the daemon is alive before querying — otherwise skip silently:",
+    queryHealth: `curl -sf http://127.0.0.1:17224/health || echo "daemon down"`,
+    queryProjectId: `PROJECT_ID=$(curl -s http://127.0.0.1:17224/projects \\
+  | jq -r --arg p "$CWD" '.data[] | select(.path==$p) | .id')`,
+    queryExamples: `# Symbol search by name
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols?q=consumeBacklog"
+
+# Callers of a specific symbol
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callers"
+
+# Callees of a specific symbol
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callees"
+
+# Impact (blast radius) of a file change
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/impact?file=src/core/lifecycle.ts"
+
+# Project status — includes lastIndexedAt and lastIndexedCommit
+curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status"`,
+    stalenessTitle: "Staleness Check",
+    stalenessDesc: "/projects/:id/status returns lastIndexedCommit — the git rev-parse HEAD at the moment of the most recent successful indexing. To check whether the index is stale before a query:",
+    stalenessCode: `INDEXED=$(curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status" | jq -r '.data.lastIndexedCommit // "none"')
+HEAD=$(git rev-parse HEAD)
+[ "$INDEXED" = "$HEAD" ] && echo "fresh" || echo "stale — trigger reindex"`,
+    cliTitle: "CLI Management",
+    cliDesc: "The daemon starts automatically on first use and shuts itself down after 30 minutes of idle time. You can also manage it explicitly:",
+    cliCode: `reap daemon status   # Check if running, show last indexed commit
+reap daemon stop     # Stop the daemon
+reap daemon index    # Trigger manual re-index
+reap daemon query    # Run a symbol query`,
+    fallbackTitle: "When Daemon is Unavailable",
+    fallbackDesc: "The daemon is a read-only accelerator — it never modifies your code. If unreachable for any reason, agents fall back to standard Read/Grep/Glob tools without interrupting the lifecycle. Daemon-first vs filesystem-first guidance:",
+    fallbackHeaders: ["Approach", "When to Use"],
+    fallbackItems: [
+      ["Daemon-first", "Symbol definition lookup, caller/callee traversal, multi-file impact analysis"],
+      ["Filesystem-first (Grep/Glob)", "Literal string search, comment search, files with no parser support, daemon down"],
+    ],
+  },
+
   // Self-Evolving Page
   selfEvolvingPage: {
     title: "Self-Evolving Features",
@@ -983,6 +1044,10 @@ Description of the task.`,
     title: "Release Notes",
     breadcrumb: "Other",
     versions: [
+      {
+        version: "0.17.0",
+        notes: "**Code Intelligence Daemon** (opt-in) — set `daemon: true` in `.reap/config.yml` to activate a local Tree-sitter symbol graph (localhost:17224). REAP auto-indexes at generation start, implementation complete, and completion commit. Agents receive daemon query instructions (symbol search, caller/callee, blast-radius impact) in their prompts. `lastIndexedCommit` exposed on `/projects/:id/status` for staleness checks. **Evaluator Agent** — fitness phase integration complete: evaluator runs during fitness, prior concerns surface in prompt, high-severity concerns automatically abort cruise mode.",
+      },
       {
         version: "0.16.6",
         notes: "**Evaluator Agent** (opt-in) — set `evaluator: true` in `.reap/config.yml` to launch `reap-evaluate` as an independent reviewer during validation and fitness phases (advisor model, not a gate). High-severity concerns automatically abort cruise mode for human review.",
