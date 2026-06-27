@@ -1,0 +1,22 @@
+id: gen-071-c9cdd9
+type: embryo
+goal: REAP migration instruction layer — reap update 시 버전별 migration 지시 주입
+parents:
+  - gen-070-828bad
+timeline:
+  - stage: learning
+    at: 2026-06-27T15:42:52.645Z
+  - stage: planning
+    at: 2026-06-27T15:46:06.577Z
+  - stage: implementation
+    at: 2026-06-27T15:47:28.303Z
+  - stage: validation
+    at: 2026-06-27T19:25:14.397Z
+  - stage: completion
+    at: 2026-06-27T19:25:25.387Z
+status: completed
+fitnessFeedback:
+  text: "자율 진행 사전 승인. migration instruction layer 구현 완료: detectPendingMigrations +
+    buildPendingMigrationsSection + --mark-migrated 플래그 + SessionStart 주입. 테스트
+    445-0/249-1(pre-existing). 중단된 서브에이전트 작업 이어받아 TypeScript 오류 및 경로 버그까지 수정."
+  evaluatedAt: 2026-06-27T19:28:03.171Z

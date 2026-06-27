@@ -119,6 +119,34 @@ export interface ReapConfig {
    * separate track (deferred to a future generation).
    */
   daemon?: boolean;
+  /**
+   * The last REAP version up to which this project has applied per-version
+   * migration instructions. Used by the migration instruction layer
+   * (gen-071) to detect version gaps between the installed REAP package
+   * and the project's last-migrated state.
+   *
+   * When `reap update` runs, REAP loads any `src/templates/migration/v*.md`
+   * file whose version satisfies `lastMigratedVersion < v <= packageVersion`
+   * and surfaces those instructions in:
+   *   - `reap update` output (context.pendingMigrations)
+   *   - SessionStart context (`# Pending Migrations` section)
+   *   - the sync `.reap/.session-state.md` dump
+   *
+   * After the agent has applied the listed migrations, it (or the user)
+   * runs `reap update --mark-migrated` which sets this field to the
+   * current package version. Subsequent `reap update` runs then see no
+   * pending migrations until the next REAP version ships a new
+   * migration note.
+   *
+   * Default (omitted) is treated as `"0.0.0"` — meaning every migration
+   * file ever shipped is pending. `backfillConfig` will populate the
+   * default on first `reap update` so the field is always present after
+   * one sync.
+   *
+   * Added in gen-071. Opt-in by virtue of being a no-op when no migration
+   * files exist for versions newer than `lastMigratedVersion`.
+   */
+  lastMigratedVersion?: string;
 }
 
 // ── Output ──────────────────────────────────────────────────

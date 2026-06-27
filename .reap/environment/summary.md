@@ -9,7 +9,7 @@
 ## Tech Stack
 
 - Runtime: Bun (build), Node.js (execution)
-- Build: `bun build` → single bundle (`dist/cli/index.js`, ~400KB)
+- Build: `bun build` → single bundle (`dist/cli/index.js`, ~770KB)
 - Dependencies: `yaml` v2 (유일한 production dependency)
 - CLI Framework: 자체 구현 (`src/libs/cli.ts`) — commander/yargs 대신
 - Crypto: Node.js native `crypto` (nonce, hash)
@@ -42,7 +42,8 @@ src/
 │   ├── scanner.ts              — 프로젝트 스캔 (init용)
 │   ├── fs.ts                   — 파일 유틸리티
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError). lifecycle 명령(DUMP_COMMANDS 화이트리스트) 종료 시 sync dump를 자동 트리거 (gen-063)
-│   ├── dump-state-sync.ts      — `buildKnowledgeContextSync` + `dumpStateSync` (gen-063). emitOutput용 sync 버전. async load-context와 byte-identical 출력 (unit test로 검증). **gen-068: `buildDaemonStaticSection()` export — async builder(`load-context.ts`)와 같은 helper 공유. `config?.daemon === true` 시 daemon static knowledge 절 emit. readiness probe는 의도적으로 제외 (sync 환경 제약 + caller 위임).**
+│   ├── migration.ts            — Migration instruction layer (gen-071). `detectPendingMigrations(config, pkgVersion, templatesDir?)` — `lastMigratedVersion < v <= pkgVersion` 범위의 `src/templates/migration/vX.Y.Z.md` 파일 로드, semver 정렬. `buildPendingMigrationsSection` — pending 있을 때만 markdown 절 반환. `migrationTemplatesDir()` — dist/dev 분기 (gen-064 패턴). 3 caller (update.ts / load-context.ts / dump-state-sync.ts) 공유.
+│   ├── dump-state-sync.ts      — `buildKnowledgeContextSync` + `dumpStateSync` (gen-063). emitOutput용 sync 버전. async load-context와 byte-identical 출력 (unit test로 검증). **gen-068: `buildDaemonStaticSection()` export — async builder(`load-context.ts`)와 같은 helper 공유. `config?.daemon === true` 시 daemon static knowledge 절 emit. readiness probe는 의도적으로 제외 (sync 환경 제약 + caller 위임).** **gen-071: pending migrations 절 추가 (migration.ts 공유).**
 │   ├── dump-state-helper.ts    — `dumpStateBestEffort` (async, silent on error). 향후 async caller용 (gen-063)
 │   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts, detectV15, cleanupLegacyProjectSkills)
 │   ├── notice.ts               — release notice (fetchReleaseNotice: RELEASE_NOTICE.md에서 버전+언어별 노트 추출)
@@ -177,6 +178,8 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 - `REAP_DAEMON_PORT` env var (gen-069) — daemon binary + REAP CLI client 양방향 인식. 미설정 시 17224 fallback (회귀 0). 테스트 격리 (e2e 가 17225 사용) + 다중 daemon 인스턴스 가능. daemon `daemon/src/index.ts:resolvePort()` + client `src/cli/commands/daemon/client.ts:resolvePort()` + `getBaseUrl()` (module-load 시 아닌 call-time resolve).
 - `ensureRegistered`, `triggerIndexing` (gen-069) — return type `Promise<boolean>`. 성공/실패 시그널을 caller 가 활용. silent fail 정책 유지. learning emit 의 `daemonReady = ensureOK && triggerOK` 패턴.
 - learning emit context `daemonEnabled` (boolean, 항상) + `daemonReady` (boolean, daemon=true 시에만 spread) — gen-069. agent / test 가 config 분기 검증.
+- `ReapConfig.lastMigratedVersion?: string` (gen-071) — 이 프로젝트가 어디까지 migration 됐는지 추적. 미설정 시 "0.0.0" fallback. `reap update --mark-migrated` 가 현재 패키지 버전으로 갱신. **CONFIG_DEFAULTS에 포함 금지** — optional tracking 필드이며 spurious config diff 유발.
+- `PendingMigration` (gen-071) — `{ version: string, instructions: string }`. `detectPendingMigrations` 반환 타입. `reap update` context + load-context SessionStart + dump-state.md sync 3곳에서 동일 데이터 emit.
 
 ## Key Design Decisions
 

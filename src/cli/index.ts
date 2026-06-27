@@ -167,8 +167,9 @@ program
   .description("Update project structure to match current REAP version")
   .option("--phase <phase>", "Migration phase for v0.15 projects (confirm, execute, vision, complete)")
   .option("--post-upgrade", "Run project sync only (called by previous binary after self-upgrade)")
-  .action(async (options: { phase?: string; postUpgrade?: boolean }) => {
-    await updateExecute(options.phase, options.postUpgrade);
+  .option("--mark-migrated", "Mark this project as migrated for the current REAP version (gen-071 migration layer)")
+  .action(async (options: { phase?: string; postUpgrade?: boolean; markMigrated?: boolean }) => {
+    await updateExecute(options.phase, options.postUpgrade, options.markMigrated);
   });
 
 program

@@ -1,9 +1,23 @@
-import { join } from "path";
+import { readFileSync } from "fs";
+import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import YAML from "yaml";
 import { createPaths } from "../../core/paths.js";
 import { readTextFile, fileExists } from "../../core/fs.js";
 import { buildStrictSection } from "../../core/prompt.js";
+import { buildPendingMigrationsSection } from "../../core/migration.js";
 import type { ReapConfig, GenerationState } from "../../types/index.js";
+
+/** Read package version from package.json (mirrors update.ts helper). */
+function getPackageVersion(): string {
+  try {
+    const __dir = dirname(fileURLToPath(import.meta.url));
+    for (const rel of [join(__dir, "..", "..", "..", "package.json"), join(__dir, "..", "..", "package.json"), join(__dir, "..", "package.json")]) {
+      try { return JSON.parse(readFileSync(rel, "utf-8")).version; } catch {}
+    }
+  } catch {}
+  return "0.0.0";
+}
 
 /**
  * Build the dynamic context string for the SessionStart hook.
@@ -109,6 +123,18 @@ export async function buildKnowledgeContext(cwd: string): Promise<string | null>
   // `/health` endpoint directly when needed.
   if (config?.daemon === true) {
     sections.push(buildDaemonStaticSection());
+  }
+
+  // ── Pending Migrations (gen-071) ─────────────────────────
+  // Only present when the project's `lastMigratedVersion` lags behind the
+  // installed REAP package. Section is omitted entirely otherwise so older
+  // projects without the migration layer see byte-identical SessionStart
+  // output. Detection is best-effort and silent on failure (returns null).
+  try {
+    const migrationsSection = buildPendingMigrationsSection(config, getPackageVersion());
+    if (migrationsSection) sections.push(migrationsSection);
+  } catch {
+    // Never block SessionStart — silently skip on any error.
   }
 
   return sections.join("\n\n---\n\n");

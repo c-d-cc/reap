@@ -11,6 +11,10 @@ import { fetchReleaseNotice } from "../../core/notice.js";
 import { autoReport } from "../../core/report.js";
 import { execute as migrateExecute } from "./migrate.js";
 import { getAdapter } from "../../adapters/index.js";
+import {
+  detectPendingMigrations,
+  type PendingMigration,
+} from "../../core/migration.js";
 import type { ReapConfig } from "../../types/index.js";
 
 /** Read package version from package.json */
@@ -29,6 +33,11 @@ function getPackageVersion(): string {
 const VALID_CONFIG_FIELDS = new Set<string>([
   "project", "language", "autoSubagent", "strictEdit", "strictMerge",
   "agentClient", "autoUpdate", "autoIssueReport", "cruiseCount",
+  // Opt-in fields — present only when user enables, but listed here so
+  // `backfillConfig`'s deprecated-field pruning does not strip them.
+  "evaluator", "daemon",
+  // gen-071: per-project marker tracking last applied migration note set.
+  "lastMigratedVersion",
 ]);
 
 const CONFIG_DEFAULTS: Omit<ReapConfig, "project" | "cruiseCount"> = {
@@ -39,6 +48,10 @@ const CONFIG_DEFAULTS: Omit<ReapConfig, "project" | "cruiseCount"> = {
   agentClient: "claude-code",
   autoUpdate: true,
   autoIssueReport: true,
+  // Note: `lastMigratedVersion` is intentionally NOT in CONFIG_DEFAULTS.
+  // Detection falls back to "0.0.0" via `config?.lastMigratedVersion ?? "0.0.0"`.
+  // Injecting it as a default would trigger spurious config-changed diffs for
+  // every existing project on first `reap update` after gen-071.
 };
 
 /** All directories that should exist in a v0.16 project */
@@ -109,6 +122,26 @@ async function backfillConfig(paths: ReapPaths): Promise<{ added: string[]; remo
 }
 
 /**
+ * Set `lastMigratedVersion` to the given version. Reads the config, mutates
+ * the field, writes back. Returns the previous value (for caller reporting).
+ *
+ * gen-071: backs `reap update --mark-migrated`.
+ */
+async function markMigratedNow(paths: ReapPaths, version: string): Promise<string> {
+  const content = (await readTextFile(paths.config)) ?? "";
+  let config: Record<string, unknown> = {};
+  try {
+    config = (YAML.parse(content) as Record<string, unknown>) ?? {};
+  } catch {
+    // Treat unparseable config as empty — overwrite produces a clean file.
+  }
+  const previous = (config.lastMigratedVersion as string | undefined) ?? "0.0.0";
+  config.lastMigratedVersion = version;
+  await writeTextFile(paths.config, YAML.stringify(config));
+  return previous;
+}
+
+/**
  * Ensure all required directories exist.
  * Returns list of directories that were created (empty if all existed).
  */
@@ -132,13 +165,41 @@ async function ensureDirectories(paths: ReapPaths): Promise<string[]> {
  * - v0.16 detected → syncs project structure (config backfill, dirs, CLAUDE.md)
  * - No REAP project → error
  */
-export async function execute(phase?: string, postUpgrade?: boolean): Promise<void> {
+export async function execute(
+  phase?: string,
+  postUpgrade?: boolean,
+  markMigrated?: boolean,
+): Promise<void> {
   const root = process.cwd();
   const paths = createPaths(root);
 
   // No REAP project at all
   if (!(await fileExists(paths.config)) && !(await detectV15(paths))) {
     emitError("update", "No REAP project detected. Run 'reap init' first.");
+  }
+
+  // gen-071: `--mark-migrated` short-circuits the normal sync flow.
+  // The agent calls this after applying the pending migration notes so the
+  // project records that it is now up-to-date with the installed REAP version.
+  // Re-runs are safe (overwrite to the same value), but to keep the contract
+  // clean we still go through backfillConfig first so any other drift is
+  // healed in the same pass.
+  if (markMigrated) {
+    await backfillConfig(paths);
+    const version = getPackageVersion();
+    const previous = await markMigratedNow(paths, version);
+    emitOutput({
+      status: "ok",
+      command: "update",
+      context: {
+        markMigrated: true,
+        lastMigratedVersion: version,
+        previous,
+      },
+      message: previous === version
+        ? `Already marked as migrated for v${version}.`
+        : `Marked project as migrated for v${version} (was ${previous}).`,
+    });
   }
 
   // --post-upgrade: called by the OLD binary after installing a new version.
@@ -221,19 +282,41 @@ export async function execute(phase?: string, postUpgrade?: boolean): Promise<vo
     // Non-fatal — notice display failure should not break update
   }
 
-  if (updated.length === 0) {
-    emitOutput({
-      status: "ok",
-      command: "update",
-      context: { changes: [] },
-      message: "Project is up to date. Nothing to update.",
-    });
-  } else {
-    emitOutput({
-      status: "ok",
-      command: "update",
-      context: { changes: updated },
-      message: `Updated: ${updated.join("; ")}`,
-    });
+  // gen-071: Surface pending migration notes for AI agent.
+  // We re-read the config (it may have just been backfilled) so the
+  // lastMigratedVersion field is up to date.
+  const refreshedRaw = await readTextFile(paths.config);
+  let refreshedConfig: ReapConfig | null = null;
+  if (refreshedRaw) {
+    try { refreshedConfig = YAML.parse(refreshedRaw) as ReapConfig; } catch { /* keep null */ }
   }
+  const pkgVersion = getPackageVersion();
+  let pendingMigrations: PendingMigration[] = [];
+  try {
+    pendingMigrations = detectPendingMigrations(refreshedConfig, pkgVersion);
+  } catch {
+    // Detection must never block update — silent fallback to empty.
+    pendingMigrations = [];
+  }
+
+  const baseMessage = updated.length === 0
+    ? "Project is up to date. Nothing to update."
+    : `Updated: ${updated.join("; ")}`;
+  const migrationMessage = pendingMigrations.length === 0
+    ? ""
+    : ` ${pendingMigrations.length} pending migration${pendingMigrations.length === 1 ? "" : "s"} ` +
+      `(${pendingMigrations.map((m) => "v" + m.version).join(", ")}) — see context.pendingMigrations. ` +
+      `Run \`reap update --mark-migrated\` after applying them.`;
+
+  emitOutput({
+    status: "ok",
+    command: "update",
+    context: {
+      changes: updated,
+      pendingMigrations,
+      packageVersion: pkgVersion,
+      lastMigratedVersion: refreshedConfig?.lastMigratedVersion ?? "0.0.0",
+    },
+    message: baseMessage + migrationMessage,
+  });
 }

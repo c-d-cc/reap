@@ -319,7 +319,8 @@ All REAP interactions go through `/reap.*` slash commands. These are the primary
 - `reap make backlog --type <type> --title <title> [--body <body>] [--priority <priority>]` — Create backlog item (type: genome-change, environment-change, task)
 - `reap make hook --event <event> --name <name> [--type md|sh] [--condition <condition>] [--order <order>]` — Create hook file with correct naming and frontmatter
 - `reap cruise <count>` — Set cruise mode (pre-approve N generations for autonomous execution)
-- `reap update` — Update project structure to match current REAP version (v0.15 migrate, v0.16 sync)
+- `reap update` — Update project structure to match current REAP version (v0.15 migrate, v0.16 sync). When the project's `lastMigratedVersion` lags behind the installed package, pending per-version migration notes are surfaced in `context.pendingMigrations` (see § Migration Instruction Layer).
+- `reap update --mark-migrated` — Mark this project as having applied all pending migration notes up to the current package version (gen-071 migration layer).
 - `reap dump-state [--stdout] [--silent]` — Dump dynamic REAP context to `.reap/.session-state.md` (used by OpenCode plugin; useful for any external tool that needs current generation state)
 - `reap daemon status|stop|index|query` — Inspect or control the local code-intelligence daemon (see § Code Intelligence below)
 
@@ -399,6 +400,41 @@ If stale, you can request a re-index with `curl -X POST "http://127.0.0.1:17224/
 - **Daemon-first**: symbol definition lookup, caller/callee traversal, multi-file impact analysis.
 - **Filesystem-first (Grep/Glob)**: literal string search, comment search, files with no parser support, daemon down.
 - The two are complementary — symbol-graph queries return file:line positions you can `Read` immediately.
+
+## Migration Instruction Layer
+
+When REAP itself evolves (e.g. memory tier semantics change in v0.17.1), existing user projects need to reorganize their artifacts to match the new conventions. The migration instruction layer (gen-071) closes this gap.
+
+### How it works
+
+1. Each REAP release that requires user-side reorganization ships a `vX.Y.Z.md` note at `src/templates/migration/` (bundled to `dist/templates/migration/` on install).
+2. `config.yml` carries `lastMigratedVersion: "X.Y.Z"` — the most recent REAP version this project has acknowledged.
+3. On every `reap update` and on every SessionStart (`reap load-context`), REAP compares `lastMigratedVersion` against the installed package version. Any `vX.Y.Z.md` file whose version falls in the gap (`lastMigratedVersion < v <= packageVersion`) is surfaced to the agent.
+4. After the agent applies the listed reorganizations, it runs `reap update --mark-migrated`. This sets `lastMigratedVersion` to the current package version and the notes stop surfacing.
+
+### Where pending migrations appear
+
+- `reap update` output: `context.pendingMigrations: [{ version, instructions }, ...]` + a summary line in `message`.
+- SessionStart context: a `# Pending Migrations` section in the additionalContext (Claude Code hookSpecificOutput / OpenCode instructions).
+- `.reap/.session-state.md` sync dump (written by lifecycle commands): same section, byte-identical.
+
+When `lastMigratedVersion >= packageVersion`, no section is added and output is byte-identical to pre-gen-071 behavior.
+
+### Agent behavior
+
+When you see a `# Pending Migrations` section:
+
+1. Read each `## vX.Y.Z` subsection in order.
+2. Apply the listed actions to the project's artifacts (memory, backlog, env, etc. — never to source code unless the note explicitly says so).
+3. Once **all** pending migrations are applied, run `reap update --mark-migrated`. Do not call this halfway through — it marks every gap version as done.
+4. Migration is best-effort and non-blocking. If you cannot apply a step (missing file, ambiguous instruction), record the partial state in the next reflect and skip `--mark-migrated` so the note re-surfaces in the next session.
+
+### Authoring migration notes (REAP maintainers)
+
+- File: `src/templates/migration/vX.Y.Z.md` (must match `^v\d+\.\d+\.\d+\.md$`).
+- Audience: an AI agent that has *not* yet read the new REAP version's guide. Be explicit about what to read, what to change, and how to verify.
+- Scope: artifact reorganization only by default. Source-code migrations belong in a separate generation, not in a migration note.
+- Build is automatic — `scripts/build.sh` copies `src/templates/` wholesale to `dist/templates/`. No additional sync step.
 
 ## AI Client Support
 

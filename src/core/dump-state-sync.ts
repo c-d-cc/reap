@@ -1,10 +1,23 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
+import { fileURLToPath } from "url";
 import YAML from "yaml";
 import { createPaths } from "./paths.js";
 import { buildStrictSection } from "./prompt.js";
 import { buildDaemonStaticSection } from "../cli/commands/load-context.js";
+import { buildPendingMigrationsSection } from "./migration.js";
 import type { ReapConfig, GenerationState } from "../types/index.js";
+
+/** Read package version from package.json (mirrors update.ts helper). */
+function getPackageVersion(): string {
+  try {
+    const __dir = dirname(fileURLToPath(import.meta.url));
+    for (const rel of [join(__dir, "..", "..", "package.json"), join(__dir, "..", "package.json")]) {
+      try { return JSON.parse(readFileSync(rel, "utf-8")).version; } catch {}
+    }
+  } catch {}
+  return "0.0.0";
+}
 
 /**
  * Lifecycle commands that should trigger a synchronous dump of dynamic REAP
@@ -107,6 +120,16 @@ export function buildKnowledgeContextSync(cwd: string): string | null {
   // async builder produces minus the readiness line.
   if (config?.daemon === true) {
     sections.push(buildDaemonStaticSection());
+  }
+
+  // ── Pending Migrations (gen-071) ─────────────────────────
+  // Mirrors the async builder in load-context.ts. Same omit-when-empty
+  // contract — older projects without pending migrations see no diff.
+  try {
+    const migrationsSection = buildPendingMigrationsSection(config, getPackageVersion());
+    if (migrationsSection) sections.push(migrationsSection);
+  } catch {
+    // Never block dump-state — silently skip on any error.
   }
 
   return sections.join("\n\n---\n\n");

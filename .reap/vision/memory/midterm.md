@@ -29,7 +29,9 @@
 완료 (gen-060/068/069): incremental, worktree, idle-timeout 검증 + config opt-in + 4 lifecycle 진입점 + lastIndexedCommit 노출 + 21 e2e + 격리 인프라.
 
 남은 작업:
-- **MCP server wrapper** — AI agent가 daemon 지식을 표준 protocol로 쿼리 (claude-code / opencode 공용). 다음 generation 1순위 후보. design 문서 필요 (`vision/design/daemon-mcp.md`).
+- **daemon 가이드 문서 강화** — MCP wrapper 대신 HTTP API 직접 활용 가이드를 docs/reap-guide.md에 충실히 기술. curl 패턴, 주요 쿼리 시나리오 포함.
 - **daemon dist queries path resolution fix** — gen-064 패턴 (`__dirname.includes("dist")` 분기) 적용. npm postinstall auto-spawn 영향.
 - **import-resolver `.js` extension 자동 strip** — TS ESM 규약 (`import { x } from "./foo.js"`)이 IMPORTS edge에 잡히도록.
 - **자동 staleness 판단 + 자동 reindex** — 현재는 `lastIndexedCommit` 노출까지만. CLI 비교 + reindex trigger는 향후.
+
+MCP server wrapper는 보류 (2026-06-28 사용자 결정): 가이드 문서 강화로 충분, 별도 프로세스 복잡도 불필요.
