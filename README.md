@@ -229,6 +229,7 @@ Pre-approve N generations for autonomous execution:
 | `/reap.init`      | Initialize REAP in a project           |
 | `/reap.run`       | Execute a lifecycle command directly   |
 | `/reap.config`    | View/edit project configuration        |
+| `/reap.report`    | Submit a bug report or feature request |
 
 ## Agent Integration
 

@@ -1,17 +1,18 @@
 ## What's New
 
-- **OpenCode adapter** — REAP now supports OpenCode as a first-class AI agent client. Set `agentClient: opencode` in `.reap/config.yml`, then `reap update` to install OpenCode-specific assets: `opencode.json` instructions, `.opencode/plugins/reap-plugin.ts`, `AGENTS.md`, and slash commands at `~/.config/opencode/commands/`.
-- **Early-close lifecycle path** — new lightweight termination from implementation/validation (`reap run early-close`, `/reap.early-close`). Preserves partial value, runs streamlined reflect, and auto-defers incomplete tasks to a new backlog item for the next generation. When users express stop or scope-reduction intent, the AI agent now offers abort/early-close/continue as three explicit options.
+- **Evaluator Agent — validation phase** (opt-in) — set `evaluator: true` in `.reap/config.yml` to launch `reap-evaluate` as an independent reviewer during validation. Advisor model: the evaluator surfaces concerns to the user but the builder owns the lifecycle verdict. Enabled for Claude Code and OpenCode via `reap update` or `reap install-skills`.
+- **Evaluator Agent — fitness phase + cruise auto-abort** — with `evaluator: true`, the evaluator also runs during the fitness phase. High-severity concerns recorded via `reap run validation --phase report-evaluator` automatically abort cruise mode, replacing the auto-fitness prompt with a supervised fallback so the user can review the concern before continuing.
 
-## OpenCode Setup
+## Evaluator Setup
 
 ```bash
 npm install -g @c-d-cc/reap
-
-# In your project:
-reap init                                # initializes with default agentClient: claude-code
-# Edit .reap/config.yml — set agentClient: opencode
-reap update                              # regenerates OpenCode-specific assets
 ```
 
-`/reap.start`, `/reap.evolve`, `/reap.early-close`, and other slash commands work in OpenCode just like Claude Code.
+Add to `.reap/config.yml`:
+
+```yaml
+evaluator: true   # default: false — enabling increases token usage
+```
+
+Then run `/reap.evolve` as normal. During validation and fitness, the builder launches `reap-evaluate` as an independent subagent (read-only, qualitative assessment). If you use cruise mode, high-severity evaluator concerns automatically pause cruise for human review.

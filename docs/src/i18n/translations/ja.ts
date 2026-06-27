@@ -986,6 +986,10 @@ priority: medium
     breadcrumb: "その他",
     versions: [
       {
+        version: "0.16.6",
+        notes: "**Evaluator Agent**（オプトイン）— `.reap/config.yml` に `evaluator: true` を設定すると、validation/fitnessフェーズで `reap-evaluate` サブエージェントが独立レビュアーとして実行されます（アドバイザーモデル）。high-severityの懸念が検出された場合、クルーズモードを自動停止します。",
+      },
+      {
         version: "0.16.4",
         notes: "欠落していたnpmメタデータを復元（license、author、repository、homepage、keywords）。GitHub Releaseにリリースノートが表示されない問題を修正。",
       },

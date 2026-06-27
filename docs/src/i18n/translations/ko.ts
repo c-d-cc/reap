@@ -987,6 +987,10 @@ priority: medium
     breadcrumb: "기타",
     versions: [
       {
+        version: "0.16.6",
+        notes: "**Evaluator Agent** (opt-in) — `.reap/config.yml`에 `evaluator: true` 설정 시 validation/fitness 단계에서 `reap-evaluate` 서브에이전트가 독립 검토자로 실행됨 (advisor 모델, 필수 게이트 아님). high-severity concern 발생 시 cruise mode 자동 중단.",
+      },
+      {
         version: "0.16.5",
         notes: "**OpenCode 어댑터** — `agentClient: opencode` 설정으로 멀티 클라이언트 정식 지원. `opencode.json` instructions, `.opencode/plugins/reap-plugin.ts`, AGENTS.md, 그리고 `~/.config/opencode/commands/`의 슬래시 명령이 자동 관리됨. **Early-close 라이프사이클 path** — implementation/validation 단계에서 사용하는 경량 종료 (`reap run early-close`, `/reap.early-close`). 부분 가치를 보존하고 간소화된 reflect를 거쳐, 미완 task를 다음 generation용 backlog로 자동 승계. 사용자가 중단/스코프 축소 의도를 표명하면 agent가 abort/early-close/continue 세 선택지를 명시적으로 안내.",
       },

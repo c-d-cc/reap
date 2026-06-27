@@ -986,6 +986,10 @@ Beschreibung der Aufgabe.`,
     breadcrumb: "Sonstiges",
     versions: [
       {
+        version: "0.16.6",
+        notes: "**Evaluator Agent** (opt-in) — `evaluator: true` in `.reap/config.yml` startet `reap-evaluate` als unabhängigen Reviewer in Validierungs- und Fitness-Phasen (Advisor-Modell, kein Hard-Gate). Bei high-severity-Befunden wird der Cruise-Modus automatisch unterbrochen.",
+      },
+      {
         version: "0.16.4",
         notes: "Fehlende npm-Metadaten wiederhergestellt (license, author, repository, homepage, keywords). GitHub Releases zeigen jetzt Release Notes an.",
       },

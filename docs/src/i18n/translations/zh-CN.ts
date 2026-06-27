@@ -986,6 +986,10 @@ priority: medium
     breadcrumb: "其他",
     versions: [
       {
+        version: "0.16.6",
+        notes: "**Evaluator Agent**（可选功能）— 在 `.reap/config.yml` 中设置 `evaluator: true`，可在 validation 和 fitness 阶段启动 `reap-evaluate` 子代理作为独立审查者（顾问模式，非强制门控）。检测到高严重性问题时自动中止 cruise 模式。",
+      },
+      {
         version: "0.16.4",
         notes: "恢复缺失的 npm 元数据（license、author、repository、homepage、keywords）。修复 GitHub Release 不显示发布说明的问题。",
       },

@@ -984,6 +984,10 @@ Description of the task.`,
     breadcrumb: "Other",
     versions: [
       {
+        version: "0.16.6",
+        notes: "**Evaluator Agent** (opt-in) — set `evaluator: true` in `.reap/config.yml` to launch `reap-evaluate` as an independent reviewer during validation and fitness phases (advisor model, not a gate). High-severity concerns automatically abort cruise mode for human review.",
+      },
+      {
         version: "0.16.5",
         notes: "**OpenCode adapter** — full multi-client support via `agentClient: opencode`. Auto-manages `opencode.json` instructions, `.opencode/plugins/reap-plugin.ts`, AGENTS.md, and slash commands at `~/.config/opencode/commands/`. **Early-close lifecycle path** — lightweight termination (`reap run early-close`, `/reap.early-close`) from implementation or validation. Preserves partial value, runs streamlined reflect, and auto-defers incomplete tasks to a new backlog item for the next generation. When a user expresses stop or scope-reduction intent, the agent now offers abort/early-close/continue as three explicit options.",
       },
