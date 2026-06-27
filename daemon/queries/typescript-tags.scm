@@ -42,3 +42,14 @@
 
 (enum_declaration
   name: (identifier) @name.definition.enum) @definition.enum
+
+;; gen-069: surface plain function-call references so call-resolver can
+;; build CALLS edges for TypeScript sources (caller/callee endpoints
+;; previously returned empty for all .ts files; .js worked because
+;; javascript-tags.scm already had this capture).
+(call_expression
+  function: (identifier) @name.reference.call) @reference.call
+
+(call_expression
+  function: (member_expression
+    property: (property_identifier) @name.reference.call)) @reference.call

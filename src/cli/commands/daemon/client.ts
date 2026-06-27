@@ -5,7 +5,22 @@ import { homedir } from "os";
 const DAEMON_ROOT = join(homedir(), ".reap", "daemon");
 const PID_PATH = join(DAEMON_ROOT, "daemon.pid");
 const DEFAULT_PORT = 17224;
-const BASE_URL = `http://127.0.0.1:${DEFAULT_PORT}`;
+
+// gen-069: port is resolved at call time (not at module load) so tests
+// can spawn a child CLI process with REAP_DAEMON_PORT set without
+// requiring re-import. Falls back to DEFAULT_PORT (17224) when env
+// is unset or non-numeric — preserves byte-identical behavior for
+// existing users.
+function resolvePort(): number {
+  const raw = process.env.REAP_DAEMON_PORT;
+  if (!raw) return DEFAULT_PORT;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_PORT;
+}
+
+function getBaseUrl(): string {
+  return `http://127.0.0.1:${resolvePort()}`;
+}
 
 export async function daemonRequest<T = unknown>(
   method: string,
@@ -14,7 +29,7 @@ export async function daemonRequest<T = unknown>(
 ): Promise<{ status: "ok" | "error"; data?: T; error?: string }> {
   await ensureDaemon();
 
-  const res = await fetch(`${BASE_URL}${path}`, {
+  const res = await fetch(`${getBaseUrl()}${path}`, {
     method,
     headers: body ? { "Content-Type": "application/json" } : undefined,
     body: body ? JSON.stringify(body) : undefined,
@@ -45,7 +60,7 @@ async function ensureDaemon(): Promise<void> {
 
 async function isDaemonRunning(): Promise<boolean> {
   try {
-    const res = await fetch(`${BASE_URL}/health`, { signal: AbortSignal.timeout(500) });
+    const res = await fetch(`${getBaseUrl()}/health`, { signal: AbortSignal.timeout(500) });
     return res.ok;
   } catch {
     return false;

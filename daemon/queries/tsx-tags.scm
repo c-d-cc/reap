@@ -42,3 +42,12 @@
 
 (enum_declaration
   name: (identifier) @name.definition.enum) @definition.enum
+
+;; gen-069: surface plain function-call references so call-resolver can
+;; build CALLS edges for TSX sources.
+(call_expression
+  function: (identifier) @name.reference.call) @reference.call
+
+(call_expression
+  function: (member_expression
+    property: (property_identifier) @name.reference.call)) @reference.call

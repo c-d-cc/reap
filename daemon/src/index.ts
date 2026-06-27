@@ -5,8 +5,20 @@ import { writePid, removePid } from "./process.js";
 import { createDaemonServer } from "./server.js";
 import { DEFAULT_CONFIG } from "./types.js";
 
+// gen-069: REAP_DAEMON_PORT env override enables test isolation (e2e
+// tests spawn a daemon on port 17225 to avoid colliding with a user's
+// running daemon on 17224). Falls back to DEFAULT_CONFIG.port (17224)
+// when env is unset or non-numeric — preserves byte-identical behavior
+// for existing users.
+function resolvePort(): number {
+  const raw = process.env.REAP_DAEMON_PORT;
+  if (!raw) return DEFAULT_CONFIG.port;
+  const n = Number(raw);
+  return Number.isFinite(n) && n > 0 ? n : DEFAULT_CONFIG.port;
+}
+
 const config = {
-  port: DEFAULT_CONFIG.port,
+  port: resolvePort(),
   idleTimeoutMs: DEFAULT_CONFIG.idleTimeoutMs,
   daemonRoot: daemonPaths.root,
 };

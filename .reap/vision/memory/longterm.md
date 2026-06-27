@@ -215,3 +215,41 @@ gen-068 validation 단계에서 scenario 5건 fail 의 원인 확인을 위해 `
 - **올바른 순서**: (a) 변경된 파일 list 확인 (b) fail 의 원인 출력 확인 (c) **변경 파일과 fail 원인의 인과 매칭 — git log 로 보존된 히스토리에서 즉시 결정 가능한 경우 stash 불필요** (d) 매칭 결과 모호하면 stash.
 - **gen-068 의 경우**: scenario fail 은 `reap run start --goal "..."` 가 `prompt` 를 반환하기 때문이고, 이는 gen-065 (Issue #18) 의 변경. git log 로 즉시 확인 가능. stash 불필요했음.
 - **응용**: debug 의 첫 단계는 항상 "원인이 본 branch 의 변경인지, base branch 의 기존 동작인지" 를 git history (log / blame) 로 확인. stash 는 그 다음.
+
+### 검증 인프라 generation 의 "discovered fix" 범위 판단 (gen-069)
+
+검증 인프라 (e2e fixture + helper + tests) 구축 generation 은 검증 대상 (production code) 의 fix 와 본질적으로 다르다. 그러나 검증 대상이 정상 작동하지 않으면 검증이 의미가 없다. 따라서:
+
+- **판단 기준**: "이 fix 없이 본 generation 의 검증 인프라가 의도한 검증을 수행할 수 있는가?" → No 면 본 generation 에서 fix.
+- **gen-069 적용 사례**: daemon 의 typescript-tags.scm 에 `call_expression` 캡처가 없어 모든 .ts callers/callees 가 empty. backlog 의 case 2, 3 이 이 동작을 검증. fix 안 하면 cases pass 불가 → workaround (case 정의 변경) 는 검증의 의미를 잃음. 1-line fix 라 본 generation 에서 처리. evolution.md "Workaround 금지" + gen-065 longterm "인과로 묶인 fix" 의 응용.
+- **반례 (deferred 가 적절한 case)**: daemon dist 의 queries path resolution bug — 검증 인프라가 `bun src/index.ts` 로 회피 가능. dist 사용자 영향이 있지만 본 generation 검증은 영향 없음. **별도 generation 으로 deferred**.
+- **메타**: 검증 인프라 generation 도 "본 generation 의 직접 인과 범위 = 검증이 의미 있게 작동하기 위한 모든 fix" 로 해석. echo chamber 방지 원칙의 응용.
+
+### 검증 인프라 자동화의 자기-진화 패턴 (gen-068 → gen-069)
+
+gen-068 은 daemon 통합을 manual self-dogfooding (config.daemon: true) 으로 검증. gen-069 는 그 manual 검증을 21 e2e 로 자동화. **이 두 단계가 self-evolving 의 자연스러운 progression**:
+
+1. **gen-068 패턴**: 기능 구현 + dog-fooding 활성화 → "본 generation 이 자기 자신의 첫 사용자" → manual verification only.
+2. **gen-069 패턴**: 같은 기능을 e2e 로 자동화 → "모든 미래 generation 이 자동 사용자" → regression suite.
+
+- **판단 기준**: 새 기능을 dog-fooding 한 generation 이 완료된 후, 그 dog-fooding 패턴이 자동화 가능한가? Yes 면 다음 generation 으로 자동화. 분리는 의도적 — fitness 단계가 fresh design 의 valid signal 을 잡고, 이후 generation 이 자동화 layer 를 쌓음.
+- **응용**: gen-066 (validation evaluator wiring) → gen-067 (fitness + cruise abort) 도 유사 progression. 미래의 새 통합 (예: codex adapter, MCP wrapper) 도 같은 2단계 적용 가능 — N: dog-fooding, N+1: 자동화.
+
+### Test isolation의 두 축 — port + path (gen-069)
+
+외부 도구 (daemon, subprocess HTTP 서버 등) 를 e2e 로 검증할 때 사용자 영역 오염 위험. **port + path 두 축의 격리** 가 표준 패턴:
+
+- **port 격리**: `REAP_DAEMON_PORT=17225` (사용자 17224 와 충돌 X). 환경 변수로 모든 호출 site (binary spawn + CLI client fetch) 가 인식.
+- **path 격리**: `HOME` override (`/var/tmp/fakeHome`). 도구가 `homedir()` 만 의존하면 자동 격리.
+
+판단 기준: 외부 도구가 (a) port 사용, (b) 파일 시스템 사용 — 둘 다 있으면 양 격리 모두 필요. port 만 격리하고 path 격리 안 하면 사용자 `~/.reap/daemon/` 오염. path 만 하고 port 안 하면 다중 인스턴스 동시 실행 불가능 + 사용자 daemon 과 race.
+
+응용: 미래의 외부 도구 통합 (MCP server, telemetry, 등) 도 같은 2축 격리. test infrastructure 첫 단계에서 두 축 모두 확보.
+
+### Macro tip — `realpath()` 가 macOS symlink 갭을 메운다 (gen-069)
+
+`mkdtemp(tmpdir())` 가 macOS 에서 `/var/folders/...` 반환. CLI 자식 프로세스의 `process.cwd()` 는 `/private/var/folders/...` (symlink resolve). 두 path 를 직접 비교하면 always mismatch.
+
+- **현상**: daemon registry 에 등록된 path (자식 cwd) 와 테스트의 fixtureDir mismatch → registry lookup fail → 모든 후속 검증 fail.
+- **대응**: 테스트의 fixtureDir 를 `realpath(await copyFixture(...))` 로 normalize. 자식의 cwd 가 풀어주는 동일 path 와 일치.
+- **응용**: 향후 path 매칭이 필요한 모든 e2e 에서 `realpath()` 미리 적용. `tests/helpers/setup.ts` 의 `setupGitProject` 같은 헬퍼가 자동 normalize 하면 모든 호출 site 에서 일관 처리 (gen-069 deferred 후보 19번).

@@ -63,12 +63,20 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     // re-trigger indexing at the start of learning. This keeps the symbol
     // graph fresh against the working tree before the agent begins
     // exploration. Silent-fail when the daemon is unreachable.
+    //
+    // gen-069: surface `daemonEnabled` (always) + `daemonReady` (only when
+    // opted in) in the emit context so e2e tests can assert on the config
+    // branch without inspecting the prompt body. `daemonReady` reflects
+    // whether the live daemon actually accepted the register + index calls.
     const configContent = await readTextFile(paths.config);
     const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
-    if (config?.daemon === true) {
+    const daemonEnabled = config?.daemon === true;
+    let daemonReady: boolean | undefined;
+    if (daemonEnabled) {
       const { ensureRegistered, triggerIndexing } = await import("../daemon/lifecycle.js");
-      await ensureRegistered(paths.root, basename(paths.root));
-      await triggerIndexing(paths.root);
+      const registered = await ensureRegistered(paths.root, basename(paths.root));
+      const indexed = await triggerIndexing(paths.root);
+      daemonReady = registered && indexed;
     }
 
     emitOutput({
@@ -89,6 +97,8 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         artifactPath: paths.artifact("01-learning.md"),
         sourceBacklog: s.sourceBacklog ? { filename: s.sourceBacklog, content: sourceBacklogContent?.slice(0, 2000) } : null,
         pendingBacklog: pendingBacklog.map((b) => ({ type: b.type, title: b.title, filename: b.filename })),
+        daemonEnabled,
+        ...(daemonEnabled ? { daemonReady } : {}),
       },
       prompt: [
         "## Learning Stage — Explore and Build Context",

@@ -54,8 +54,19 @@ gen-067 의 메타 관찰: gen-066 이 `buildEvaluatorPrompt({ stage: "fitness" 
 - daemon `lastIndexedCommit` 노출 → agent prompt 가 git HEAD 와 비교하여 staleness 판단.
 - static knowledge (load-context / dump-state-sync 양 builder) + agent prompt (buildBasePrompt) + reap-guide + agent 템플릿 (evolve / evaluate) 모두 daemon 절 추가.
 
+### gen-069 검증 인프라 — fixture + helper + 21 e2e + 격리 + TS call references fix
+
+- **격리**: `REAP_DAEMON_PORT` env var 양방향 (daemon binary + REAP CLI client). 미설정 시 17224 fallback. 사용자 daemon 무영향.
+- **`daemonReady` 의미 보존**: `lifecycle.ts` 의 두 함수 `Promise<boolean>` return. learning emit context 가 `daemonEnabled` + `daemonReady` 노출.
+- **fixture**: `tests/fixtures/daemon-sample/` (TS 3 파일, 명확한 callee/caller graph). helper 가 매번 git init (nested `.git` 회피).
+- **helper**: `tests/helpers/daemon.ts` 8 export. `bun src/index.ts` 로 daemon spawn (dist queries path bug 회피).
+- **21 e2e cases**: 4 파일 (config 5 / lifecycle 4 / indexing 6 / query 6). 모두 pass. 회귀 0.
+- **Discovered fix**: typescript-tags.scm + tsx-tags.scm 의 `call_expression` 캡처 추가 (daemon 의 TS call references 미감지 버그). 1-line, 검증 인프라 가 의존하는 동작이라 본 generation 에서 처리 (workaround 금지 + 인과 묶음 원칙 적용).
+
 ### 남은 작업
 - **MCP server wrapper (백로그 항목 5 잔여)**: AI agent 가 daemon 의 코드 지식을 표준화된 protocol (Model Context Protocol) 로 쿼리. claude-code / opencode 양 client 가 같은 형식으로 사용. 다음 generation 1순위 후보. design 문서 필요 (`vision/design/daemon-mcp.md`).
+- **daemon dist queries path resolution fix** (gen-069 deferred) — gen-064 패턴 (`__dirname.includes("dist")`) 적용. 본 generation 의 helper 는 dev 모드로 회피했으나 dist 사용자 (npm postinstall auto-spawn) 영향 잔존.
+- **import-resolver `.js` extension 자동 strip** (gen-069 deferred) — TS ESM 규약이 IMPORTS edge 에 잡히도록.
 - API 레벨 incremental indexing 지원 (향후 확장).
 - 자동 staleness 판단 + 자동 reindex (현재는 `lastIndexedCommit` 노출까지만, CLI 자동 비교 + reindex trigger 는 향후).
 

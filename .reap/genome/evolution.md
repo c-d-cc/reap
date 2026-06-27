@@ -112,6 +112,20 @@ Memory 활용 규칙:
 | lifecycle 흐름 변경 (stage 전환, nonce 등) | e2e + scenario test |
 | init/genome/environment 구조 변경 | scenario test (sandbox) |
 | prompt 변경 | 기능적 영향 있으면 e2e, 없으면 skip |
+| 외부 도구 / subprocess / daemon 통합 | e2e (subprocess + 포트/HOME 격리 + git init fixture) |
+
+### 외부 도구 / subprocess / daemon e2e 패턴 (gen-069)
+
+REAP daemon 같은 별도 프로세스로 동작하는 컴포넌트를 e2e 검증할 때 다음 패턴 차용:
+
+1. **포트 격리** — env var (예: `REAP_DAEMON_PORT`) 로 user 영역의 default port (17224) 와 충돌 회피. helper 가 비어있는 포트 할당.
+2. **HOME 격리** — `HOME` env var override 로 user 영역 `~/.reap/daemon/` 미접근 보장. 모든 daemon side-effect 가 test 임시 디렉토리에 갇힘.
+3. **Fixture = git project** — 실제 daemon 이 기대하는 입력 (git-init 된 source tree) 그대로 재현. fixture 는 별도 `tests/fixtures/<name>/` 디렉토리.
+4. **macOS realpath 정규화** — `/var` → `/private/var` symlink 가 path comparison fail 유발. fixture path 는 `realpath()` 로 정규화 후 비교 (현재 deferred — gen-069 의 디버깅 cost 사례).
+5. **Helper 단일 import** — spawn/stop/register/copy 를 `tests/helpers/<tool>.ts` 한 곳으로 추출. e2e 파일은 helper 만 import.
+6. **격리 효과 보장 — 외부 사용자 영역 미접근**: 이 패턴은 user 가 자기 환경에서 같은 도구를 동시에 실행 중이어도 e2e 가 user state 를 건드리지 않음을 의미.
+
+향후 외부 도구 통합 (예: MCP server, 다른 sidecar) 도 같은 4-축 (process / port / HOME / fixture) 으로 격리.
 
 ### 테스트 피드백 루프
 - 테스트 실행 중 환경 문제나 새로운 깨달음이 발생하면, completion artifact에 기록하고 필요 시 genome에 반영.
@@ -152,6 +166,19 @@ Memory 활용 규칙:
 - **절대 하지 않을 것**: 에러를 수동으로 우회하고 언급 없이 넘어가기
 
 판단 기준: "이 문제가 다음에 또 발생하면 같은 workaround를 반복해야 하는가?" → Yes이면 반드시 근본 수정 필요.
+
+### 인과로 묶인 검증 동작 fix 는 본 generation 에서 처리 (gen-069)
+
+본 generation 의 목적이 X 의 검증 인프라 구축인데, 검증을 돌리면서 X 가 의존하는 다른 동작 Y 가 실제로 깨져있음을 발견한 경우:
+
+- **fix Y 가 본 generation scope 가 아니라도 인과로 묶여있다 — 분리하면 검증이 의미를 잃는다**.
+- **gen-065 lesson 의 일반화**: 인과 chain 의 어느 한 곳만 끊으면 새 누락 path 생성. 본 generation 에서 X+Y 를 같은 묶음으로 처리.
+- **gen-069 사례**: daemon e2e 검증 인프라 (X) 구축 중 typescript-tags.scm 의 call_expression 캡처 누락 (Y) 발견. fix 가 1-line 이고 본 generation 의 case 2/3 가 직접 의존 → 즉시 fix. 분리했으면 본 generation e2e 가 fail 한 채 commit 됐을 것.
+
+판단 기준:
+- fix 가 small scope (1~수 라인) 인가 → Yes 면 본 generation.
+- fix 누락 시 본 generation 의 검증이 실패하거나 의미를 잃는가 → Yes 면 본 generation 강제.
+- fix 가 큰 design 변경을 동반하는가 → Yes 면 backlog 화 + 본 generation 의 해당 검증 cases 만 skip + 다음 generation 에서 enable.
 
 ## 사용자 UX gap은 verification 항목으로 명시 (gen-063 교훈)
 

@@ -2,85 +2,67 @@
 
 ## 세션 요약 (2026-06-27)
 
-### gen-068: daemon 통합 강화 — config opt-in + lifecycle 자동 인덱싱 + agent 지시문 + commit staleness 노출
+### gen-069: daemon e2e 검증 인프라 구축 — fixture + helper + 21 cases + 격리 + 발견된 TS call references bug fix
 
-backlog `daemon-mcp-server-interface-추가-ai-agent가-코드-지식-직접-쿼리-가능.md` 의 5 항목 중 4 항목 (config opt-in / agent 지시문 / 인덱스 갱신 시점 / commit staleness check) 완료. 항목 5 (MCP server interface) 는 명시적 다음 generation 이월.
+gen-068 의 daemon 통합 강화 (config opt-in, agent prompt 절, 4 lifecycle 진입점 auto-trigger, lastIndexedCommit 노출) 가 자동화된 검증 없이 진행됨. 본 generation 은 그 갭을 메움.
 
-- **Part 1 (config opt-in)**: `ReapConfig.daemon?: boolean` 신설. 미설정 시 기존 사용자 회귀 0. JSDoc 명시.
-- **Part 2 (4 lifecycle 진입점 게이트)**: `start.ts` (create 직후) / `learning.ts` (work) / `implementation.ts` (complete auto-transition 직후) / `completion.ts` (commit) 가 `config?.daemon === true` 시 dynamic import 후 `ensureRegistered` + `triggerIndexing`. 함수 자체에 config inject 하지 않고 호출 측 게이트 — daemon 미사용 사용자는 모듈 로드도 안 함 (dynamic import 효과). silent fail 도 그대로 존속 → 게이트 + 내부 fallback 2단 안전망.
-- **Part 3 (daemon `lastIndexedCommit` 노출)**: `ProjectEntry.lastIndexedCommit?: string | null` + `register` null 초기화 + `updateLastIndexed(id, commit?)` 시그니처 확장. `PipelineResult.lastCommit?` 4 path (full/incremental/no-change/concurrent-guard) 모두 반환. `api/projects.ts` index handler 가 registry 에 전달.
-- **Part 4 (static knowledge daemon 절)**: `buildDaemonStaticSection()` export 신설. async (`load-context.ts`) / sync (`dump-state-sync.ts`) 양 builder 동일 helper 호출 → byte-identical 보장. readiness probe 의도적 제외 (sync 환경 제약 + caller 위임).
-- **Part 5 (agent prompt daemon 절)**: `buildBasePrompt` 가 `config?.daemon === true` 시 "Code Intelligence (Daemon)" 절 추가. 단계별 활용 + 정체성 검사 protocol + fallback 명시.
-- **Part 6 (reap-guide + agent 템플릿 갱신)**: template + 양 reap-guide.md (`~/.reap/`, `.reap/`) sync. `reap-evolve.md` 의 daemon 단계별 지시, `reap-evaluate.md` Phase 2 Verification 5번 (impact 분석, silent skip).
-- **Part 7 (dog-fooding)**: `.reap/config.yml: daemon: true` 활성화 — 본 generation 의 validation/completion 호출이 자기 변경의 첫 사용자.
+**핵심 변경**:
 
-**결과**: typecheck/build pass. unit 427/0. e2e 218/1 (pre-existing init-repair). scenario 35/5 (pre-existing multi-generation, gen-065 fix 이후 update 안 된 sandbox). 본 generation 회귀 0.
+- **Part 1 (격리 인프라)**: `REAP_DAEMON_PORT` env var 양방향 (daemon binary `resolvePort()` + REAP CLI client `getBaseUrl()` 함수화). 미설정 시 17224 fallback. 사용자 daemon 무영향 보장.
+- **Part 2 (`daemonReady` 노출)**: `lifecycle.ts` 의 `ensureRegistered` + `triggerIndexing` return type `Promise<void>` → `Promise<boolean>` 변경. `learning.ts` emit context 에 `daemonEnabled` (항상) + `daemonReady` (daemon=true 시에만, spread 패턴 으로 회귀 0).
+- **Part 3 (fixture)**: `tests/fixtures/daemon-sample/` — TS 3 파일 (User / formatUser+validateId / main). `.git` 은 submodule 미커밋, helper 가 매번 git init.
+- **Part 4 (helper)**: `tests/helpers/daemon.ts` — 8 export (`spawnTestDaemon`, `stopTestDaemon`, `waitForDaemon`, `registerFixture`, `copyFixture` + bonus `triggerIndex`, `getProjectStatus`, `cleanupFixture`). `bun src/index.ts` 로 daemon spawn (dist queries path bug 회피).
+- **Part 5 (21 e2e cases)**: 4 파일 (`daemon-config` 5 + `daemon-lifecycle` 4 + `daemon-indexing` 6 + `daemon-query` 6). 모두 pass.
+- **Discovered fix (Part 6)**: `daemon/queries/typescript-tags.scm` + `tsx-tags.scm` 에 `(call_expression function: (identifier) @name.reference.call)` + member call 캡처 추가 — 본 generation 의 case 2/3 (callers/callees) fail 디버그 중 발견. daemon 의 TS call references 미감지 버그. 1-line fix, 검증 인프라 의 검증 대상이 정상 작동하려면 필수. workaround 금지 + 인과 묶음 원칙 (gen-065) 적용.
 
-### 다음 세션 / 다음 generation 후보
+**결과**: typecheck pass / build pass / unit 427/0 / e2e 239 pass 1 fail (pre-existing init-repair). 21/21 신규 pass. 회귀 0.
 
-**1. MCP server interface (백로그 항목 5 잔여)** — daemon 의 코드 지식을 표준화된 protocol (Model Context Protocol) 로 노출. claude-code / opencode 양 client 가 같은 형식으로 query. design 문서 후보 (`vision/design/daemon-mcp.md`). adapter 트랙 (gen-063~064) 의 4-항목 verification 체크리스트 적용.
+### 다음 세션 / 다음 generation
 
-**2. Release v0.16.7 검토** — gen-066~068 묶음 (evaluator end-to-end + daemon opt-in). gen-066~067 의 evaluator 변경분이 release 전인 상태에서 gen-068 가 진행됐으므로 묶어서 v0.16.7 가능. Release notes 권장 주제:
-- Evaluator end-to-end (gen-066~067): validation + fitness + cruise abort.
-- Daemon opt-in 통합 (gen-068): config flag + lifecycle 자동 인덱싱 + agent 지시문 + commit staleness 노출.
+**1. Release v0.16.6** — gen-068 + gen-069 묶음 권장. 핵심 주제:
+- gen-068: daemon 통합 강화 (config opt-in / 4 lifecycle 진입점 / lastIndexedCommit 노출)
+- gen-069: daemon e2e 검증 인프라 + typescript-tags.scm fix (TS callers/callees 본래 동작)
 
-**3. Vision/Goal management 위임** — evaluator 트랙의 마지막 큰 항목 (gen-067 shortterm 에서 이월). adapt phase 에서 evaluator 가 vision goals.md ↔ 최근 lineage 의 gap 분석 → 다음 goal 후보 추천. daemon 통합 완료된 지금이 자연스러운 다음 step.
+**2. daemon dist 의 queries path resolution fix** — gen-064 패턴 (`__dirname.includes("dist")` 분기) 적용 권장. 본 generation 의 helper 는 `bun src/index.ts` 로 회피했으나 dist 사용자 (npm postinstall auto-spawn) 영향 잔존.
 
-**4. Scenario / e2e 테스트 sync 누락 정리** — `tests/scenario/multi-generation.test.ts` 5건 (gen-065 fix 이후 update 안 됨) + `tests/e2e/init-repair.test.ts` 1건 (gen-067 deferred 후보 3번). 묶어서 작은 generation.
+**3. import-resolver `.js` extension 자동 strip** — TypeScript ESM 규약 (`import { x } from "./foo.js"`) 이 daemon impact 분석 에 잡히도록. fix 후 fixture import specifier 를 production-realistic 형태로 복원 가능.
+
+**4. Vision/Goal management 위임 (evaluator 트랙 마지막 큰 항목)** — `vision/design/evaluator-agent.md` 의 잔여 항목. validation + fitness wiring 이 gen-066~067 으로 완료, daemon 인프라 가 gen-068~069 로 완료. 다음 큰 트랙.
 
 ### deferred 후보 (사용자 판단 후 backlog 화)
 
-기존 16 (gen-067 shortterm) + 신규 5:
+**신규 (gen-069)**:
+1. **daemon dist queries path fix** — 위 2번. `__dirname.includes("dist")` 분기.
+2. **import-resolver `.js` extension strip** — 위 3번. `resolveJsPath` 의 candidates 에 `.js` strip 버전 추가.
+3. **`copyFixture()` 가 realpath() 자동 적용** — 본 generation 의 daemon-indexing.test.ts 가 lifecycle describe 에서 명시적으로 `realpath()` 호출. helper 가 자동 normalize 하면 모든 호출 site 가 동일 처리.
+4. **typescript-tags.scm 의 추가 캡처 검토** — 본 generation 은 plain function call 만 추가. member call 추가 했으나 `new_expression` 의 인자, decorator 등은 미커버. 사용 사례 보이면 확장.
 
-기존 (간단 list):
-1. `opencode-init-agent-flag`
-2. `unify-sync-async-knowledge-builder`
-3. `init-repair-skipped-message-fix` (1 pre-existing e2e fail)
-4. `tests/helpers/setup.ts fileExists` 디렉토리 버그 fix
-5. `disable-model-invocation` variant 분리
-6. prefix 충돌 marker 기반 cleanup 강화
-7. OpenCode plugin `tool.execute.after` dump
-8. Codex adapter (큰 트랙)
-9. Evaluator agent 코드 통합 — fitness + cruise 완성 (gen-067). 잔여 vision/goal 위임이 마지막 큰 항목.
-10. `reap consume backlog <filename> --gen <id>` helper
-11. `reap make backlog` 외 경로로 만든 backlog warn
-12. TS `noUnusedLocals` / `noUnusedParameters` 옵션 활성화 검토
-13. validation prompt 의 fallback 절 "Agent tool 부재" 케이스 명시 강화
-14. `evaluatorConcerns` 중복 detection 경고
-15. `report-evaluator` 의 resolve/dismiss CLI (cross-generation 이월 시)
-16. 테스트 레벨 선택 휴리스틱 명문화 (gen-067 의 unit→e2e 재분류)
-
-**신규 (gen-068)**:
-17. **MCP server interface** (큰 트랙 — 다음 generation 1순위 후보).
-18. **`tests/scenario/multi-generation.test.ts` gen-065 fix sync** — `--no-backlog` 명시 또는 sandbox setup 단계의 pending backlog 정리.
-19. **daemon `storage.ts` 의 `bun:sqlite` 타입 정리** — `@types/bun` 설치 또는 conditional import 분기 (gen-052 이후 누적 noise).
-20. **자동 staleness 판단으로 자동 reindex** — 본 generation 은 `lastIndexedCommit` 노출까지만. CLI 가 자동 비교 + reindex 트리거 흐름은 향후.
-21. **Daemon 통합 verification 4-항목 체크리스트** — application.md 의 adapter 4-항목과 유사하게 "외부 도구 / 데이터 인덱싱 통합" 시 (a) opt-in flag (b) lifecycle 진입점 게이트 (c) static knowledge 절 (d) agent prompt 지시. 명문화 검토.
+**기존 (gen-066~067 shortterm 누적, 사용자 판단 후 backlog 화)**:
+- `opencode-init-agent-flag`, `unify-sync-async-knowledge-builder`, `init-repair-skipped-message-fix` (pre-existing e2e fail), `fileExists 디렉토리 버그`, `disable-model-invocation` 분리, prefix marker cleanup 강화, OpenCode plugin `tool.execute.after` dump, Codex adapter (큰 트랙), evaluator vision/goal 위임 (위 4번과 중복 — 단일화), `reap consume backlog` helper, `reap make backlog` 외 경로로 만든 backlog warn, TS `noUnusedLocals`/`noUnusedParameters` 활성화 검토, validation prompt fallback "Agent tool 부재" 강화, evaluatorConcerns 중복 detection 경고, `report-evaluator` resolve/dismiss CLI (현재 append-only), 테스트 레벨 선택 휴리스틱 명문화.
 
 ### 본 generation 의 self-evolving 작동 사례
 
-- **gen-066 패턴 재사용 — self-dogfooding 시점 의도적 선택**: T016 (`config.yml: daemon: true`) 을 implementation 의 마지막 task 로 배치. 본 generation 의 validation/completion 호출이 자기 변경의 첫 사용자. evaluator 트랙 (gen-066) 과 같은 패턴.
-- **gen-064 패턴 재사용 — sync/async 양 builder 같은 helper 호출**: `installSkills` / `registerSessionIntegration` 양쪽 helper 호출 (gen-064) 과 동일하게 `buildDaemonStaticSection()` 을 양 builder 가 공유. byte-identical 보장.
-- **gen-066 longterm "Builder manual workflow 시 subagent 권한 부재" 케이스 재현**: 본 generation 의 builder 가 `npx reap run validation` 직접 호출 환경 → Task tool 미보장. validation prompt 의 fallback 절이 자연스럽게 작동 → lifecycle 진행 중단 0.
+- **gen-068 의 self-dogfooding → gen-069 의 자동화 승격**: gen-068 의 `config.daemon: true` 가 자기 자신을 첫 사용자 (manual self-test). gen-069 가 그 검증을 21 e2e 로 자동화 → 미래 모든 generation 의 안전망. **patterns 가 generation 을 거치며 자동화 layer 를 누적**.
+- **discovery 기반 fix 의 적절한 범위 판단 (workaround 금지 + 인과 묶음)**: typescript-tags.scm 의 call references 미정의는 검증 인프라 의 범위 외였으나, 검증 자체가 그 동작에 의존 → 본 generation 에서 fix. 분리 시 검증이 의미 없음. gen-065 의 "인과로 묶인 fix" 원칙의 testing infrastructure context 적용.
 
 ### 코드 변경 위치 (다음 세션 참조용)
 
-- `src/types/index.ts` — `ReapConfig.daemon?: boolean` (JSDoc 회귀 안전 명시)
-- `src/cli/commands/run/start.ts` — create 직후 daemon gate
-- `src/cli/commands/run/learning.ts` — work phase daemon gate
-- `src/cli/commands/run/implementation.ts` — complete (auto-transition 직후) daemon gate
-- `src/cli/commands/run/completion.ts` — commit phase daemon gate
-- `src/cli/commands/load-context.ts` — `buildDaemonStaticSection()` import + 호출
-- `src/core/dump-state-sync.ts` — `buildDaemonStaticSection()` export + 자기 호출
-- `src/core/prompt.ts` — `buildBasePrompt` 의 daemon 절
-- `src/templates/reap-guide.md` — "Code Intelligence (Daemon)" 섹션
-- `src/templates/agents/reap-evolve.md` — daemon 단계별 활용
-- `src/templates/agents/reap-evaluate.md` — Phase 2 Verification 5번
-- `.reap/reap-guide.md`, `~/.reap/reap-guide.md` — template sync (cp)
-- `.reap/config.yml` — `daemon: true` 활성화
-- daemon: `src/types.ts` / `src/registry.ts` / `src/indexer/pipeline.ts` / `src/indexer/index.ts` / `src/api/projects.ts` — `lastIndexedCommit` 관련
+**메인 repo**:
+- `daemon/src/index.ts` — `resolvePort()` 헬퍼 + env var 반영
+- `src/cli/commands/daemon/client.ts` — `getBaseUrl()` 함수화 + 3 곳 fetch 교체
+- `src/cli/commands/daemon/lifecycle.ts` — return Promise<boolean>
+- `src/cli/commands/run/learning.ts` — emit context daemonEnabled / daemonReady
+- `daemon/queries/typescript-tags.scm` + `tsx-tags.scm` — call_expression 캡처 추가
 
-### Backlog 상태 (gen-068 commit 직후 예상)
+**tests submodule**:
+- `tests/fixtures/daemon-sample/{package.json, .gitignore, src/{types,utils,index}.ts}`
+- `tests/helpers/daemon.ts`
+- `tests/e2e/daemon-{config,lifecycle,indexing,query}.test.ts`
 
-- `daemon-mcp-server-interface-추가-ai-agent가-코드-지식-직접-쿼리-가능.md` — gen-068 consumed → `lineage/gen-068-*/backlog/` 로 archive.
-- `.reap/life/backlog/` 비어있을 예정 (pending 0개).
+**메타**:
+- `.reap/environment/summary.md` — Tests 절 + Types 절 갱신
+
+### Backlog 상태 (gen-069 commit 직후 예상)
+
+- `daemon-e2e-테스트-계획-및-fixture-프로젝트-구축.md` (consumedBy: gen-069-8d6f0e) — gen-069 archive → `lineage/gen-069-*/backlog/` 로 이동.
+- `.reap/life/backlog/` 의 pending 항목: 0 예상.

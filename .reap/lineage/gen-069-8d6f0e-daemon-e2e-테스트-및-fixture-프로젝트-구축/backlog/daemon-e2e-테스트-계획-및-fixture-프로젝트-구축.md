@@ -1,9 +1,11 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: medium
 createdAt: 2026-06-27T02:21:29.561Z
 dependsOn: daemon-mcp-server-interface-추가-ai-agent가-코드-지식-직접-쿼리-가능.md
+consumedBy: gen-069-8d6f0e
+consumedAt: 2026-06-27T09:01:23.531Z
 ---
 
 # daemon e2e 테스트 계획 및 fixture 프로젝트 구축

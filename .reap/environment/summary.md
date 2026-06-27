@@ -146,11 +146,14 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 ## Tests
 
 ### tests/ submodule (reap-test repo, main branch)
-- `tests/unit/` — bun:test 기반 unit tests (`bun test tests/unit/`). 427 pass / 0 fail (gen-067 시점, +5 evaluator-concerns-state).
-- `tests/e2e/` — bun:test 기반 e2e tests (`bun test tests/e2e/`). 218 pass / 1 fail (gen-067 시점, +11 신규, pre-existing init-repair).
+- `tests/unit/` — bun:test 기반 unit tests (`bun test tests/unit/`). 427 pass / 0 fail (gen-067~069 동일).
+- `tests/e2e/` — bun:test 기반 e2e tests (`bun test tests/e2e/`). 239 pass / 1 fail (gen-069 시점, +21 신규 daemon e2e, pre-existing init-repair 1 fail 유지).
 - `tests/scenario/` — bun:test 기반 scenario tests (`bun test tests/scenario/`)
+- `tests/fixtures/daemon-sample/` (gen-069) — daemon e2e 용 소형 TypeScript 프로젝트 fixture (5 파일: package.json, .gitignore, src/{types,utils,index}.ts). 심볼 관계 `main → validateId + formatUser` 명확. helper 가 매번 tmpdir 복사 + git init.
+- `tests/helpers/daemon.ts` (gen-069) — daemon 격리 helper. `spawnTestDaemon(port, fakeHome)` 가 `bun src/index.ts` spawn (daemon dist 의 queries path bug 회피). port `TEST_DAEMON_PORT=17225` + HOME override 로 사용자 daemon (17224) 영향 0.
 - 신규 (gen-066): `tests/unit/evaluator-prompt.test.ts` (10 case), `tests/e2e/validation-evaluator.test.ts` (3 case), `tests/e2e/install-agents.test.ts` (6 case).
 - 신규 (gen-067): `tests/unit/evaluator-concerns-state.test.ts` (5 case — yaml round-trip), `tests/e2e/validation-report-evaluator.test.ts` (7 case — CLI input matrix), `tests/e2e/completion-cruise-abort.test.ts` (4 case — cruise + concern combinations).
+- 신규 (gen-069): `tests/e2e/daemon-config.test.ts` (5 case — config opt-in 분기), `tests/e2e/daemon-lifecycle.test.ts` (4 case — spawn/stop/stale/silent fail), `tests/e2e/daemon-indexing.test.ts` (6 case — full/stable/auto-trigger), `tests/e2e/daemon-query.test.ts` (6 case — symbols/callers/callees/impact/status/error).
 
 ### scripts/ (프로젝트 루트)
 - `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates)
@@ -171,6 +174,9 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 - `EvaluatorConcern` (gen-067) — `{ stage: "validation" | "fitness", severity: "low" | "high", summary: string, recordedAt: string }`. Validation→fitness signalling channel. severity는 binary (Goodhart 회피). high = cruise auto-abort 트리거. `GenerationState.evaluatorConcerns?: EvaluatorConcern[]` 로 노출.
 - `ReapConfig.daemon?: boolean` (gen-068) — opt-in flag. 미설정/false 시 4 lifecycle 진입점 (start/learning/implementation/completion) 의 daemon trigger 게이트 비활성. true 시 dynamic import 후 `ensureRegistered` + `triggerIndexing` 호출. 기존 사용자 회귀 0 보장.
 - `ProjectEntry.lastIndexedCommit?: string \| null` (daemon, gen-068) — registry entry 의 마지막 인덱스 git HEAD commit. `register` 시 null 초기화. `PipelineResult.lastCommit?` 4 path (full/incremental/no-change/concurrent-guard) 모두 반환 → index handler 가 registry 에 전달. agent prompt 가 git HEAD 와 비교하여 staleness 판단.
+- `REAP_DAEMON_PORT` env var (gen-069) — daemon binary + REAP CLI client 양방향 인식. 미설정 시 17224 fallback (회귀 0). 테스트 격리 (e2e 가 17225 사용) + 다중 daemon 인스턴스 가능. daemon `daemon/src/index.ts:resolvePort()` + client `src/cli/commands/daemon/client.ts:resolvePort()` + `getBaseUrl()` (module-load 시 아닌 call-time resolve).
+- `ensureRegistered`, `triggerIndexing` (gen-069) — return type `Promise<boolean>`. 성공/실패 시그널을 caller 가 활용. silent fail 정책 유지. learning emit 의 `daemonReady = ensureOK && triggerOK` 패턴.
+- learning emit context `daemonEnabled` (boolean, 항상) + `daemonReady` (boolean, daemon=true 시에만 spread) — gen-069. agent / test 가 config 분기 검증.
 
 ## Key Design Decisions
 
