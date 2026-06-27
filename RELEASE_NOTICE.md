@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.17.1
+### en
+Vision memory classification improved: content-type-based tiers (session handoff / ongoing tracks / design lessons) replace time-based tiers. Mandatory pruning policy added to reflect phase — prevents memory bloat across generations.
+### ko
+Vision memory 분류 기준 개선: 시간 기반 계층 → content-type 기반 계층 (세션 핸드오프 / 진행 중 트랙 / 설계 교훈). reflect phase에 필수 pruning 정책 추가 — 세대 간 memory 비대화 방지.
+
 ## v0.17.0
 ### en
 Code Intelligence Daemon (opt-in `daemon: true`): local Tree-sitter symbol graph at localhost:17224. Auto-indexes at generation start, implementation complete, and completion commit. Agents receive symbol search / caller-callee / blast-radius guidance in prompts. `lastIndexedCommit` exposed for staleness checks. Evaluator Agent fitness-phase integration complete: high-severity concerns now auto-abort cruise mode.
