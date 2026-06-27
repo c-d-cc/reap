@@ -43,39 +43,67 @@ Vision은 Goals, Memory, Design 세 가지로 구성된다.
 판단 기준: "이 내용이 하나의 독립된 주제로 문서화할 만한가?" → Yes면 Design, No면 Memory.
 
 ### Memory (`vision/memory/`)
-AI가 프로젝트에 대해 자유롭게 기록하는 공간. 3-tier 구조:
-- **longterm.md** — 프로젝트 전체 수명. 반복 참조할 교훈, 결정 배경, 아키텍처 선택 이유
-- **midterm.md** — 수 generation 수명. 진행 중인 큰 작업 맥락, 멀티 gen 계획
-- **shortterm.md** — 1-2 session 수명. 다음 세션 핸드오프, 미완료 논의
+AI가 프로젝트 맥락을 자유롭게 기록하는 공간. 3-tier 구조는 **"무엇을 위한 내용인가"(content-type)** 기준으로 분류한다. lifespan으로 판단하지 마라 — AI는 미래를 모르므로 그 추론이 매번 부담이 되고 오분류를 누적시킨다.
 
-Memory 활용 규칙:
-- **언제든 자유롭게 읽기/쓰기** — genome처럼 제약 없음, AI 재량으로 작성
-- **tier 간 이동도 자율** — shortterm에서 반복적으로 참조되는 내용은 longterm으로 승격
-- **간결하게 유지** — 각 tier가 비대해지지 않도록 주기적 정리
-- **아키텍처 변경 시 반드시 반영** — 새 기능/구조 추가 시 evolution.md와 memory 모두 업데이트
+| 파일 | 역할 | 1-line 판단 기준 |
+|------|------|------------------|
+| `shortterm.md` | **Session handoff** — 다음 세션에 넘길 즉각적 맥락 | "지금 당장 필요한가?" |
+| `midterm.md` | **Ongoing tracks** — 진행 중인 멀티-generation 작업 | "아직 완료 안 된 큰 트랙인가?" |
+| `longterm.md` | **Design lessons** — 반복 참조할 설계 교훈 | "이 교훈이 미래 generation에서 같은 실수를 막는가?" |
 
-### Memory 갱신 Criteria
+### Memory 분류 Decision Tree (AI용 의무 절차)
 
-**Shortterm** (매 generation 갱신 — 필수):
-- 이번 generation에서 한 일 요약
-- 다음 세션에 넘겨야 할 맥락
-- 미결정 사항, 진행 중인 논의
-- 현재 backlog 상태 스냅샷
+memory에 무언가를 쓰려고 할 때 위에서 아래로 적용한다.
 
-**Midterm** (맥락이 바뀔 때 갱신):
-- 진행 중인 큰 작업의 흐름
-- 멀티 generation에 걸친 계획
-- 유저와 합의한 방향성
+```
+1. 다음 세션에서 즉시 필요한가?
+   → Yes: shortterm.md
 
-**Longterm** (교훈이 생길 때만):
-- 반복 참조할 설계 교훈
-- 아키텍처 결정의 배경
-- 프로젝트 전환 과정에서 배운 것
+2. 아직 완료되지 않은 진행 중인 트랙/계획인가?
+   → Yes: midterm.md
 
-**갱신 안 할 것**:
-- 코드 변경 상세 (environment가 담당)
-- 테스트 수치 (artifact가 담당)
-- genome에 이미 있는 원칙 (중복)
+3. 완료됐지만 설계 교훈으로 남겨야 하는가?
+   → Yes: longterm.md
+
+4. 완료됐고 특별한 교훈도 없는가?
+   → 기록하지 않는다 (memory에 보관 불필요, lineage에 보존됨)
+```
+
+**중요**: "혹시 쓸모 있을지도" 같은 추측으로 longterm에 쌓지 마라. 사라져도 lineage/git history에 보존된다.
+
+### Memory Pruning 정책 — reflect phase 의무
+
+`reap run completion --phase reflect` 시 다음 cleanup을 **의무적으로** 수행한다:
+
+**Shortterm — 매 generation 의무 cleanup**:
+- 이전 세션의 핸드오프 중 "이미 처리됨" 항목은 삭제
+- 새 generation의 핸드오프로 **교체** (덮어쓰기). 누적 금지.
+- 결과적으로 shortterm.md는 항상 "최근 1~2 generation 분량".
+
+**Midterm — 트랙 완료 시 cleanup**:
+- 트랙이 완료되면 핵심 결정만 longterm으로 **승격** 후 midterm에서 해당 섹션 **삭제**
+- 판단 기준: "이 트랙에 다음 step이 있는가?" — No 면 삭제
+- 결과적으로 midterm.md는 항상 "현재 살아있는 트랙만".
+
+**Longterm — 주기적 cleanup (10 generation마다 또는 reflect에서 비대화 감지 시)**:
+- 섹션이 genome(application.md / evolution.md)에 이미 명문화됐으면 **중복 → 삭제**
+- 프로젝트 초기 전환 맥락(e.g., v0.X→v0.Y 차이)이 더 이상 행동 지침이 아니면 **삭제**
+- 판단 기준: "이 교훈이 없으면 다음 agent가 같은 실수를 할 것인가?" — No 면 삭제
+- 결과적으로 longterm.md는 항상 "지금도 행동 지침이 되는 교훈만".
+
+### Memory에 쓰지 않을 것
+
+- 코드 변경 상세 (environment/summary.md가 담당)
+- 테스트 수치, 실행 로그 (artifact가 담당)
+- genome (application.md / evolution.md) 에 이미 있는 원칙 (중복 금지)
+- generation-specific debug 일지 (lineage에 자연 보존, memory 자리 차지 금지)
+
+### Memory 활용 — 자유와 책임
+
+- **자유로운 읽기/쓰기** — genome처럼 제약 없음
+- **tier 간 이동도 자율** — shortterm 의 항목이 트랙으로 발전하면 midterm으로, 트랙이 완료되어 교훈만 남으면 longterm으로
+- **아키텍처 변경 시 반드시 반영** — 새 기능/구조 추가 시 evolution.md / application.md / memory 모두 동기화
+- **비대화는 실패 신호** — longterm 30~50줄 / midterm 50~70줄을 넘으면 pruning 미수행 의심. reflect에서 정리.
 
 ## Self-exploration 우선
 

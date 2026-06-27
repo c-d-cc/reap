@@ -22,53 +22,72 @@ REAP consists of four interconnected layers:
 
 ## Memory
 
-Memory is a free-form recording system under `.reap/vision/memory/` where AI can persist context across sessions and generations. Unlike Genome (which has modification constraints) or Lineage (which gets compressed), Memory is always accessible and freely writable.
+Memory is a free-form recording system under `.reap/vision/memory/` where AI can persist project context across sessions and generations. Unlike Genome (which has modification constraints) or Lineage (which gets compressed), Memory is always accessible and freely writable.
 
-### 3-Tier Structure
+### 3-Tier Structure — content-type based
 
-| Tier | File | Lifespan | Purpose |
-|------|------|----------|---------|
-| **Longterm** | `longterm.md` | Project lifetime | Lessons that bear repeating, recurring patterns, decision rationale, architecture choice reasons |
-| **Midterm** | `midterm.md` | Multiple generations | Ongoing large task context, multi-generation plans, progress tracking |
-| **Shortterm** | `shortterm.md` | 1-2 sessions | Next session handoff, immediate context to pass forward, unfinished discussions |
+Tiers are classified by **what the content is for** (content-type), NOT by how long it will live (lifespan). Lifespan requires predicting the future, which the AI can't reliably do — that judgment burden has historically led to misclassification and bloat.
 
-### Rules
+| File | Role | 1-line decision rule |
+|------|------|----------------------|
+| `shortterm.md` | **Session handoff** — immediate context to pass to the next session | "Is this needed right now?" |
+| `midterm.md` | **Ongoing tracks** — multi-generation work in progress | "Is this an incomplete large track?" |
+| `longterm.md` | **Design lessons** — recurring lessons worth re-reading | "Does this lesson prevent the next generation from making the same mistake?" |
 
-- **Free access**: Read and write at any time — no permission needed, no phase restriction
-- **AI discretion**: Content and timing are the AI's judgment. No mandatory updates
-- **Tier fitness**: Place content in the tier matching its expected lifespan. Promote/demote between tiers as relevance changes
-- **Keep concise**: Memory should be scannable, not exhaustive. Prefer bullet points over paragraphs
-- **Empty is normal**: Memory files may be empty — this is a valid state
-- **Git-committed**: Memory is committed with the project, accessible to any AI agent
+### Memory Classification Decision Tree (mandatory for AI)
 
-### When to Update
+When you have something to write to memory, apply top-to-bottom:
 
-- **Reflect phase**: Natural moment to update memory (prompted but not forced)
-- **Any time**: Memory can be updated during any stage if useful context arises
-- **Shortterm cleanup**: Clear shortterm items that have been acted on
+```
+1. Is this needed in the next session immediately?
+   → Yes: shortterm.md
 
-### Update Criteria
+2. Is this an ongoing, incomplete track or plan?
+   → Yes: midterm.md
 
-**Shortterm** (update every generation — mandatory):
-- Summary of what was done in this generation
-- Context to hand off to the next session
-- Undecided matters, ongoing discussions
-- Current backlog state snapshot
+3. Is this a finished design lesson worth preserving?
+   → Yes: longterm.md
 
-**Midterm** (update when context changes):
-- Flow of large ongoing tasks
-- Multi-generation plans
-- Directions agreed with the user
+4. Is this finished with no special lesson?
+   → Do NOT record (memory keeps no junk; lineage/git history preserves it)
+```
 
-**Longterm** (update only when lessons emerge):
-- Design lessons worth repeating
-- Background behind architecture decisions
-- Lessons from project transitions
+**Important**: Do not stash "might-be-useful" notes in longterm. If it disappears, it's still in lineage and git history.
 
-**Do NOT write**:
-- Code change details (environment handles this)
-- Test numbers (artifact handles this)
-- Principles already in genome (no duplication)
+### Memory Pruning Policy — mandatory in reflect phase
+
+During `reap run completion --phase reflect`, the AI **must** perform cleanup:
+
+**Shortterm — every generation, mandatory**:
+- Delete previous handoff items that are "already acted on"
+- **Replace** (overwrite) with the new generation's handoff. No accumulation.
+- Result: shortterm.md stays within "last 1~2 generations of content".
+
+**Midterm — at track completion**:
+- When a track completes, **promote** its key decisions to longterm and **delete** the section from midterm
+- Decision rule: "Does this track have a next step?" — No → delete
+- Result: midterm.md stays within "tracks that are alive right now".
+
+**Longterm — periodic (every ~10 generations or when bloat is detected in reflect)**:
+- If a section is already documented in genome (application.md / evolution.md), it's a **duplicate → delete**
+- If early project transition context (e.g., v0.X → v0.Y differences) is no longer a behavioral guide → **delete**
+- Decision rule: "Without this lesson, would the next agent make the same mistake?" — No → delete
+- Result: longterm.md stays within "lessons that still drive behavior today".
+
+### Do NOT write to memory
+
+- Code change details (`environment/summary.md` handles this)
+- Test numbers, run logs (artifact handles this)
+- Principles already stated in genome (no duplication)
+- Generation-specific debug logs (lineage preserves them; don't crowd memory)
+
+### Memory Usage — freedom with responsibility
+
+- **Free access**: Read and write at any time — no permission needed
+- **Cross-tier promotion/demotion is encouraged**: a shortterm note that evolves into a track moves to midterm; a midterm track that completes leaves only its lesson in longterm
+- **Architecture changes must propagate**: when adding new features/structure, update evolution.md / application.md / memory together
+- **Bloat is a failure signal**: if longterm exceeds ~30~50 lines or midterm exceeds ~50~70 lines, pruning was skipped. Clean up in the next reflect.
+- **Empty is normal**: any memory file may be empty — that is a valid state
 
 ## .reap/ Structure
 

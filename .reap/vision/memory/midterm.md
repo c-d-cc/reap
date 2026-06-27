@@ -1,134 +1,35 @@
 # Midterm Memory
 
-## 현재 진행 중인 큰 작업
+> Ongoing multi-generation tracks. A track that has no next step belongs in lineage, not here.
 
-### Agent 실행 구조 (확정)
-- reap-evolve.md = 정적 템플릿 (role, mindset, behavior rules)
-- buildBasePrompt() = 동적 context만 (state, vision, memory, clarity, cruise)
-- generation마다 새 agent 생성, cruise 포함
-- cruise loop: parent가 관리하도록 변경 예정 (미구현)
+## Embryo → Normal transition
 
-### v0.15 기능 패리티
-v0.15에 있었지만 v0.16에 아직 없는 것들:
-- Agent adapter 시스템 (AgentRegistry) — vision §6, 당장 불필요
-- ~~SessionStart knowledge injection~~ — gen-053에서 구현 완료 (`reap load-context`)
+31+ generations, genome 안정, abort 거의 없음 — 전환 조건은 충족. 사용자 판단(2026-03-26)으로 embryo 유지: REAP 자체가 self-evolving 중이고 예기치 못한 genome 변경이 더 있을 수 있어 보수적. 배포 후 사용자 프로젝트면 전환 시점이지만 REAP 자신은 더 관찰.
 
-### Self-evolving 강화
-gen-028~031에서 gap-driven evolution + vision eval + memory 도입 완료.
-다음: vision evaluation을 실제로 활용하여 adapt phase 품질 향상 관찰.
+다음 판단 시점: 사용자가 embryo→normal 전환을 명시 검토할 때.
 
-## Embryo → Normal 전환
+## Evaluator Agent 트랙 — Vision/Goal 위임만 남음
 
-31+ generation 경과, genome 안정, abort 거의 없음. 전환 조건 충족.
-유저 판단 (2026-03-26): REAP 자체가 아직 완성 단계가 아니고 예상치 못한 genome 변경이 더 있을 수 있으므로 embryo 유지. 배포 후 사용자 프로젝트였다면 전환 시점이지만, self-evolving 중인 REAP 자체는 조금 더 관찰.
+설계 문서: `vision/design/evaluator-agent.md`. 템플릿: `src/templates/agents/reap-evaluate.md`.
 
-## Evaluator Agent — 점진 통합 트랙 (gen-051 ~ 진행 중)
+완료 (gen-050~067):
+- nonce transition graph + multi-nonce 발행
+- evaluator agent 템플릿 정의
+- 설계 결정 확정 (opt-in flag / advisor / 코드 통합 plan)
+- Validation 단계 통합 (`ReapConfig.evaluator?: boolean` + `buildEvaluatorPrompt({ stage })`)
+- Fitness 단계 통합 + `priorConcernsSection`
+- Cruise mode high-severity escalation 자동 중단 (`EvaluatorConcern` state 채널 + `report-evaluator` CLI)
 
-설계 문서: `vision/design/evaluator-agent.md` (gen-066 에서 구현 상태 갱신)
-템플릿: `src/templates/agents/reap-evaluate.md` (gen-051 정의)
+남은 1 항목:
+- **Vision/Goal management 위임** — adapt phase에서 evaluator가 gap 분석 + 다음 goal 추천. 트랙 마지막 큰 항목. design 문서의 잔여 절.
 
-진행 상태:
-- ✅ nonce transition graph 리팩토링 (gen-050)
-- ✅ evaluator agent 템플릿 정의 (gen-051)
-- ✅ 설계 결정 확정 (gen-052: opt-in flag / advisor / 코드 통합 plan)
-- ✅ **Validation 단계 코드 통합 (gen-066, Issue #20)** — `ReapConfig.evaluator?: boolean` + `buildEvaluatorPrompt({ stage })` + `validation.ts` 조건부 분기 + 양 adapter `installAgents` 양 caller. dog-fooding `.reap/config.yml: evaluator: true`.
-- ✅ **Fitness 단계 통합 (gen-067)** — `completion.ts` fitness phase 가 `buildEvaluatorPrompt({ stage: "fitness" })` 조건부 활성화. `priorConcernsSection` 으로 state.evaluatorConcerns prompt 동봉.
-- ✅ **Cruise mode escalation 자동 중단 (gen-067)** — `EvaluatorConcern` interface + `GenerationState.evaluatorConcerns?` state 채널. `reap run validation --phase report-evaluator --severity high|low|none --summary "<text>"` CLI (nonce-graph 외부, append-only). fitness 진입 시 `severity: high` 발견하면 `clearCruise()` + fallback prompt + `previousCruiseCount` emit.
-- ⏳ Vision/Goal 위임 — adapt phase evaluator 가 gap 분석 + goal 추천. **트랙 마지막 큰 항목**. design 문서 잔여 항목.
+## Daemon Indexer 트랙 — 남은 작업
 
-gen-066 의 메타 관찰: 본 트랙은 gen-051~052 의 abort 후 design 만 보존된 채로 14 generation 이 흐른 뒤 자연스럽게 이어졌음. **design 문서가 lineage 의 anchor 역할** — abort 가 진짜 abort 가 아니었음.
+코어: `daemon/` 별도 앱, localhost:17224 HTTP API, Tree-sitter WASM 15개 언어, SQLite write-through.
+완료 (gen-060/068/069): incremental, worktree, idle-timeout 검증 + config opt-in + 4 lifecycle 진입점 + lastIndexedCommit 노출 + 21 e2e + 격리 인프라.
 
-gen-067 의 메타 관찰: gen-066 이 `buildEvaluatorPrompt({ stage: "fitness" })` 분기를 미리 만들어두었기 때문에 본 generation 은 그 분기를 그대로 활성화만 함. **선행 generation 의 "미리 만든 hook" 가 후행 generation 의 비용을 줄이는 패턴** — 점진 통합 트랙에서 반복됨.
-
-## Daemon Indexer (2026-03-29 구현 완료, 2026-06-27 gen-068 통합 강화)
-- `daemon/` 별도 앱, localhost:17224 HTTP API
-- Tree-sitter WASM 15개 언어, 인메모리 그래프 + SQLite write-through
-- 조회: 심볼 검색, caller/callee, blast radius, 커뮤니티, 실행 플로우
-- CLI/lifecycle 통합, worktree별 인덱스 fork
-- E2E 테스트 보강 완료 (gen-060): incremental, error-cases, worktree-diverge, idle-timeout
-
-### gen-068 통합 강화 — config opt-in + agent 인지
-
-- `ReapConfig.daemon?: boolean` opt-in flag. 4 lifecycle 진입점 (start/learning/implementation/completion) 게이트.
-- 함수 자체에 config inject 하지 않고 호출 측 게이트 — 미사용 사용자는 dynamic import 도 안 함.
-- daemon `lastIndexedCommit` 노출 → agent prompt 가 git HEAD 와 비교하여 staleness 판단.
-- static knowledge (load-context / dump-state-sync 양 builder) + agent prompt (buildBasePrompt) + reap-guide + agent 템플릿 (evolve / evaluate) 모두 daemon 절 추가.
-
-### gen-069 검증 인프라 — fixture + helper + 21 e2e + 격리 + TS call references fix
-
-- **격리**: `REAP_DAEMON_PORT` env var 양방향 (daemon binary + REAP CLI client). 미설정 시 17224 fallback. 사용자 daemon 무영향.
-- **`daemonReady` 의미 보존**: `lifecycle.ts` 의 두 함수 `Promise<boolean>` return. learning emit context 가 `daemonEnabled` + `daemonReady` 노출.
-- **fixture**: `tests/fixtures/daemon-sample/` (TS 3 파일, 명확한 callee/caller graph). helper 가 매번 git init (nested `.git` 회피).
-- **helper**: `tests/helpers/daemon.ts` 8 export. `bun src/index.ts` 로 daemon spawn (dist queries path bug 회피).
-- **21 e2e cases**: 4 파일 (config 5 / lifecycle 4 / indexing 6 / query 6). 모두 pass. 회귀 0.
-- **Discovered fix**: typescript-tags.scm + tsx-tags.scm 의 `call_expression` 캡처 추가 (daemon 의 TS call references 미감지 버그). 1-line, 검증 인프라 가 의존하는 동작이라 본 generation 에서 처리 (workaround 금지 + 인과 묶음 원칙 적용).
-
-### 남은 작업
-- **MCP server wrapper (백로그 항목 5 잔여)**: AI agent 가 daemon 의 코드 지식을 표준화된 protocol (Model Context Protocol) 로 쿼리. claude-code / opencode 양 client 가 같은 형식으로 사용. 다음 generation 1순위 후보. design 문서 필요 (`vision/design/daemon-mcp.md`).
-- **daemon dist queries path resolution fix** (gen-069 deferred) — gen-064 패턴 (`__dirname.includes("dist")`) 적용. 본 generation 의 helper 는 dev 모드로 회피했으나 dist 사용자 (npm postinstall auto-spawn) 영향 잔존.
-- **import-resolver `.js` extension 자동 strip** (gen-069 deferred) — TS ESM 규약이 IMPORTS edge 에 잡히도록.
-- API 레벨 incremental indexing 지원 (향후 확장).
-- 자동 staleness 판단 + 자동 reindex (현재는 `lastIndexedCommit` 노출까지만, CLI 자동 비교 + reindex trigger 는 향후).
-
-## Knowledge Loading 정/동 분리 (gen-062, 2026-05-25 완료)
-
-Issue #17 해결. Claude Code의 native `@` import 메커니즘 활용.
-- Static knowledge(genome×3 + env summary + vision goals + memory×3 + reap-guide 9개)는 CLAUDE.md `@` ref로 Claude Code가 직접 import.
-- Dynamic context(Current State + Strict Mode + Language 3개)만 SessionStart hook이 inject.
-- migration은 gen-054 marker-hash sync infra가 자동 처리(추가 코드 0).
-- 다음 단계 (Gen-N+1): `opencode-adapter.md` backlog를 source로 OpenCode 지원. 본 generation의 dynamic-only `buildKnowledgeContext()` 가 `reap dump-state` 의 기반이 됨.
-- gen-054 marker sync infra의 가치 재확인: "template = single source of truth" 패턴이 dog-fooding 자동화 영역으로 확대 가능.
-
-## OpenCode adapter — 멀티-client 트랙 (gen-063 + gen-064, 2026-05-25 완료)
-
-Issue #19 해결. claude-code 단독에서 멀티-client 구조로 전환. **4-항목 verification (static load / dynamic refresh / entry-point / slash trigger) 전부 충족.**
-
-### gen-063 — adapter 인프라
-- `src/adapters/{index,types}.ts` dispatcher + AdapterModule interface 신설. agentClient 기준 분기. codex는 helpful Error throw, unknown은 claude-code fallback.
-- OpenCode adapter: opencode.json instructions/plugin sync(상수 리스트 + dedupe, 사용자 필드 보존), AGENTS.md marker-hash sync(CLAUDE.md와 동일 패턴), .opencode/plugins/reap-plugin.ts 배치.
-- Plugin signature: `async ({ $, directory }) => { session.created, tool.execute.before }`. inline 타입으로 `@opencode-ai/plugin` 의존성 강제 X.
-- `reap dump-state` CLI 신규: `--stdout`/`--silent`. emitOutput이 lifecycle 명령 종료 시 sync 버전(`dump-state-sync.ts`)으로 자동 dump (DUMP_COMMANDS 화이트리스트). sync와 async builder는 byte-identical 출력(unit test 보장).
-- AGENTS.md 위치 = 프로젝트 루트 (OpenCode docs 재확인, `.opencode/AGENTS.md`는 비공식). 사용자 영역 marker로 보존.
-
-### gen-064 — slash commands 등록 (4-항목 verification 의 (4))
-- `installSlashCommands(home?)` 함수 — cleanup-then-copy 파이프라인. target: `~/.config/opencode/commands/`. source: `src/adapters/claude-code/skills/` (재사용 — OpenCode 가 Claude Code skill 형식과 거의 100% 호환).
-- prefix pattern `^reap\..+\.md$` — Claude Code adapter 의 검증된 `SKILL_PATTERN` 차용. `reap.` 접두사 reserved 정책 (README/AGENTS.md/reap-guide 명시). gen-061 reapdev 사고 와 동형 위험을 prefix anchor 로 정밀 회피.
-- `integrity.ts` 의 `~/.config/opencode/commands/reap.*` legacy warning 절 제거. 그 위치가 이제 정상 install location.
-- 단일 source 결정: Claude Code skills 19 파일을 OpenCode 도 그대로 사용. 향후 OpenCode 전용 frontmatter 필요 시 그 시점에 분리. dogfooding 부담 최소화.
-- helper `claudeCodeSkillsDir()` — dist (`__dirname.includes("dist")`) 분기 필수: single-bundle 효과로 `dist/cli/__dirname/../adapters/claude-code/skills` 로 풀려야 함. 초기 작성 시 이 분기를 빠뜨려 e2e 가 0-install 로 잡아냄 → 같은 파일의 기존 `assetPath()` 패턴 참조하여 즉시 수정.
-
-### 사용자 검증
-
-gen-064 완료 후 사용자가 `agentClient: opencode` 전환 → `reap update` → `opencode` 실행 → `/reap.status` 호출. 그 결과가 fitness signal. agent 한계로 OpenCode 자체 실행 불가, 정적 산출물 검증만.
-
-### `installSkills` vs `registerSessionIntegration` 책임 (gen-064 adapt 명문화)
-
-application.md "Adapter Layer" 에 명문화된 새 원칙:
-- `reap install-skills` (CLI + npm postinstall) → `installSkills` 호출 — 전체 install + emitOutput
-- `reap update` (모든 project update) → `registerSessionIntegration` 호출 — silent 갱신
-- **user-level assets (slash commands, agent definitions 등) 가 bundled REAP version 과 sync 되어야 한다면 양쪽 함수 모두 같은 silent helper 를 호출해야 함**
-- 표준 패턴: helper 분리 (`installSlashCommands(home?)` for opencode, `installSlashCommandsOnly()` for claude-code) → `installSkills` 와 `registerSessionIntegration` 양쪽이 그 helper 호출
-
-이 갭은 gen-061 reapdev 사고가 `reap update` 한 번에 자동 해소되지 못한 근본 원인이기도 했음. gen-064 fix 이후 양 adapter 모두 update 한 번에 stale `reap.*.md` 자동 cleanup.
-
-향후 Codex adapter 추가 시 이 패턴 그대로 적용 — application.md 가 guide.
-
-### 메타 교훈 — self-evolving 작동 사례
-
-gen-063 fitness 직후 UX gap 발견 → backlog 화 → application.md 4-항목 verification 으로 추상화 (adapt phase) → gen-064 가 그 추상화로 1대1 매핑된 작업 수행. **backlog 가 사후-처치이지만, 그 처치의 결과가 다시 추상화 (4-항목 checklist) 가 되어 미래 재발을 방지**. 같은 패턴이 codex adapter 추가 시도 적용될 것.
-
-gen-064 자체도 같은 패턴 — fitness 직전 사용자가 caller 갭 잡아냄 → back regression → fix + application.md 에 `installSkills` vs `registerSessionIntegration` 책임 표 추가. 두 단계 추상화 누적.
-
-## Lifecycle Termination Paths (gen-061, 2026-05-24 완료)
-
-Issue #16 해결. 종료 경로가 abort/completion에서 abort/early-close/completion 셋으로 확장됨.
-- early-close: lightweight 종료 (implementation/validation 한정). lineage에 `status: partial` + closeMeta 기록. fitness/adapt skip. 미완 task 자동 backlog 승계.
-- abort confirm prompt + start scan phase에 사용자 인지 흐름 통합.
-- agent behavior 가이드: 사용자가 "그만/중단/포기/스코프 축소" 의도 표명 시 세 선택지 자동 제시 (reap-guide.md 반영).
-- 다음 단계 관찰: 실사용 시 reflect interactive prompt 품질, 자동 task 추출 적중률, deferred backlog → next gen 의 자연스러운 흐름.
-
-## submodule 관련 반복 문제
-
-tests/ submodule에서 commit phase마다 dirty check 이슈 반복.
-gen-024에서 순서 교정(submodule check → archive)했으나, subagent가 submodule ref를 원복시키는 문제도 간헐적 발생.
-근본 원인: subagent가 git 작업 시 submodule 상태를 의식하지 못함.
+남은 작업:
+- **MCP server wrapper** — AI agent가 daemon 지식을 표준 protocol로 쿼리 (claude-code / opencode 공용). 다음 generation 1순위 후보. design 문서 필요 (`vision/design/daemon-mcp.md`).
+- **daemon dist queries path resolution fix** — gen-064 패턴 (`__dirname.includes("dist")` 분기) 적용. npm postinstall auto-spawn 영향.
+- **import-resolver `.js` extension 자동 strip** — TS ESM 규약 (`import { x } from "./foo.js"`)이 IMPORTS edge에 잡히도록.
+- **자동 staleness 판단 + 자동 reindex** — 현재는 `lastIndexedCommit` 노출까지만. CLI 비교 + reindex trigger는 향후.

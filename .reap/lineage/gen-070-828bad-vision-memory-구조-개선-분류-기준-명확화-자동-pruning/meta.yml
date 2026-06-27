@@ -1,0 +1,20 @@
+id: gen-070-828bad
+type: embryo
+goal: vision memory 구조 개선 — 분류 기준 명확화 + 자동 pruning + migration plan
+parents:
+  - gen-069-8d6f0e
+timeline:
+  - stage: learning
+    at: 2026-06-27T14:47:40.585Z
+  - stage: planning
+    at: 2026-06-27T14:51:01.808Z
+  - stage: implementation
+    at: 2026-06-27T14:52:47.808Z
+  - stage: validation
+    at: 2026-06-27T14:57:57.776Z
+  - stage: completion
+    at: 2026-06-27T14:59:57.235Z
+status: completed
+fitnessFeedback:
+  text: ok
+  evaluatedAt: 2026-06-27T15:17:05.631Z
