@@ -1,6 +1,7 @@
 ## What's New
 
-- **Memory structure improvement** — Vision memory now uses content-type-based classification (session handoff / ongoing tracks / design lessons) instead of time-based tiers. A mandatory pruning policy was added to the reflect phase: shortterm is replaced every generation, midterm is cleaned on track completion, longterm is pruned periodically. This prevents memory bloat and misclassification across generations.
+- **Migration instruction layer** — `reap update` now detects version gaps and injects per-version migration instructions into the agent's SessionStart context. Agents receive actionable prompts to reorganize existing artifacts/memory when upgrading REAP. Mark migrations complete with `reap update --mark-migrated`.
+- **Memory structure improvement** — Vision memory now uses content-type-based classification (session handoff / ongoing tracks / design lessons) instead of time-based tiers. A mandatory pruning policy was added to the reflect phase: shortterm is replaced every generation, midterm is cleaned on track completion, longterm is pruned periodically.
 
 ---
 

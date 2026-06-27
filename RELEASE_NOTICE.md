@@ -2,9 +2,9 @@
 
 ## v0.17.1
 ### en
-Vision memory classification improved: content-type-based tiers (session handoff / ongoing tracks / design lessons) replace time-based tiers. Mandatory pruning policy added to reflect phase — prevents memory bloat across generations.
+Migration instruction layer: `reap update` now detects version gaps and injects per-version migration notes into SessionStart context. Run `reap update --mark-migrated` after applying. Vision memory reclassified to content-type-based tiers with mandatory pruning policy in reflect phase.
 ### ko
-Vision memory 분류 기준 개선: 시간 기반 계층 → content-type 기반 계층 (세션 핸드오프 / 진행 중 트랙 / 설계 교훈). reflect phase에 필수 pruning 정책 추가 — 세대 간 memory 비대화 방지.
+Migration instruction layer 추가: `reap update` 가 버전 gap 감지 후 migration 지시를 SessionStart context에 주입. 적용 완료 후 `reap update --mark-migrated` 실행. Vision memory를 content-type 기반 계층으로 재분류 + reflect phase 필수 pruning 정책 추가.
 
 ## v0.17.0
 ### en
