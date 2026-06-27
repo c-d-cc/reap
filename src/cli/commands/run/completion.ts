@@ -13,8 +13,9 @@ import {
   buildVisionDevelopmentSuggestions,
 } from "../../../core/vision.js";
 import { executeHooks } from "../../../core/hooks.js";
-import { parseCruiseCount, advanceCruise } from "../../../core/cruise.js";
+import { parseCruiseCount, advanceCruise, clearCruise } from "../../../core/cruise.js";
 import { gitCommitAll, checkSubmoduleDirty, pushSubmodules } from "../../../core/git.js";
+import { buildEvaluatorPrompt, loadReapKnowledge } from "../../../core/prompt.js";
 import {
   detectMaturity,
   getTransitionUrgency,
@@ -127,54 +128,171 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
       const configContent = await readTextFile(paths.config);
       const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
       const cruise = config ? parseCruiseCount(config) : null;
+      const evaluatorEnabled = config?.evaluator === true;
 
       // Re-set fitness nonce (self-loop: completion:fitness -> completion:fitness)
       setTransitionNonces(s, "completion:fitness");
       await gm.save(s);
 
+      // gen-067: detect unresolved high-impact concerns from earlier stages
+      // (recorded by `validation --phase report-evaluator --severity high`).
+      // In cruise mode this auto-aborts the cruise so the evaluator's
+      // recommendation is not silently overridden by self-assessment.
+      const highConcerns = (s.evaluatorConcerns ?? []).filter((c) => c.severity === "high");
+
+      // gen-067: in fitness phase, prepare an evaluator prompt for the
+      // builder to invoke. Reuses the shared builder; only the framing message
+      // and verification tasks differ between stages.
+      let fitnessEvaluatorPrompt: string | undefined;
+      if (evaluatorEnabled) {
+        const knowledge = await loadReapKnowledge(paths);
+        fitnessEvaluatorPrompt = buildEvaluatorPrompt(knowledge, paths, s, { stage: "fitness" });
+      }
+
+      const evaluatorSection: string[] = [];
+      if (evaluatorEnabled) {
+        evaluatorSection.push("");
+        evaluatorSection.push("### Evaluator Subagent Invocation (opt-in via `evaluator: true`)");
+        evaluatorSection.push("");
+        evaluatorSection.push("Before composing the final fitness feedback, launch the independent reviewer using the Agent tool:");
+        evaluatorSection.push("");
+        evaluatorSection.push("- subagent_type: `reap-evaluate`");
+        evaluatorSection.push("- description: independent fitness assessment");
+        evaluatorSection.push("- prompt: the `evaluator.prompt` value from the context above");
+        evaluatorSection.push("");
+        evaluatorSection.push("The evaluator scores the generation along the 6 fitness dimensions (qualitative — no numeric scores).");
+        evaluatorSection.push("Surface every concern to the user in your fitness summary; the human owns the final feedback.");
+        evaluatorSection.push("");
+        evaluatorSection.push("**Fallback** — if the evaluator subagent fails, document the failure and continue. Fitness phase is not gated on the evaluator.");
+      }
+
+      const priorConcernsSection: string[] = [];
+      if ((s.evaluatorConcerns ?? []).length > 0) {
+        priorConcernsSection.push("");
+        priorConcernsSection.push("### Prior Evaluator Concerns (carried from earlier stages)");
+        priorConcernsSection.push("");
+        for (const c of s.evaluatorConcerns!) {
+          priorConcernsSection.push(`- [${c.severity}] (${c.stage}) ${c.summary}`);
+        }
+        priorConcernsSection.push("");
+        priorConcernsSection.push("Surface each of the above to the user with your fitness summary.");
+      }
+
+      if (cruise && highConcerns.length > 0) {
+        // Cruise mode + unresolved high-impact concern → auto-abort cruise.
+        // Clear cruiseCount in config so the next-generation auto-start path is
+        // disengaged, then route the builder back to supervised fitness.
+        await clearCruise(paths.config);
+
+        const fallbackPrompt: string[] = [
+          "## Cruise Aborted by Evaluator Concern",
+          "",
+          "Cruise mode has been **disengaged** because the evaluator raised a high-impact concern:",
+          "",
+        ];
+        for (const c of highConcerns) {
+          fallbackPrompt.push(`- [${c.severity}] (${c.stage}) ${c.summary}`);
+        }
+        fallbackPrompt.push("");
+        fallbackPrompt.push("The remaining cruise generations will NOT auto-start. This fitness phase now follows the supervised flow:");
+        fallbackPrompt.push("");
+        fallbackPrompt.push("1. Present the concern(s) above to the human together with a summary of this generation.");
+        fallbackPrompt.push("2. Wait for the human's decision (continue, override, abort generation, etc.).");
+        fallbackPrompt.push("3. Submit: `reap run completion --phase fitness --feedback \"<human feedback>\"`");
+        fallbackPrompt.push("");
+        fallbackPrompt.push("Cruise can be resumed manually with `reap cruise <N>` once the concern is resolved.");
+        fallbackPrompt.push(...evaluatorSection);
+
+        emitOutput({
+          status: "prompt",
+          command: "completion",
+          phase: "fitness",
+          completed: ["gate", "reflect", "cruise-aborted"],
+          context: {
+            id: s.id,
+            goal: s.goal,
+            cruiseMode: false,
+            cruiseAborted: true,
+            previousCruiseCount: config!.cruiseCount,
+            evaluatorConcerns: s.evaluatorConcerns,
+            evaluator: evaluatorEnabled
+              ? { enabled: true, prompt: fitnessEvaluatorPrompt }
+              : { enabled: false },
+          },
+          prompt: fallbackPrompt.join("\n"),
+          nextCommand: "reap run completion --phase fitness",
+        });
+        return;
+      }
+
       if (cruise) {
         // Cruise mode — self-assessment prompt
+        const cruisePrompt: string[] = [
+          "## Completion — Fitness Phase (Cruise Mode)",
+          "",
+          `Cruise: ${config!.cruiseCount}`,
+          "",
+          "### Self-Assessment (not self-fitness, but metacognition):",
+          "1. Did this generation proceed as expected?",
+          "2. Are there uncertain areas or risks?",
+          "3. Are there items that need human confirmation?",
+          "",
+          "High confidence → auto-proceed: reap run completion --phase fitness --feedback \"self-assessment: OK\"",
+          "Uncertain/risky → stop cruise and request human feedback",
+        ];
+        cruisePrompt.push(...priorConcernsSection);
+        cruisePrompt.push(...evaluatorSection);
+
         emitOutput({
           status: "prompt",
           command: "completion",
           phase: "fitness",
           completed: ["gate", "reflect"],
-          context: { id: s.id, goal: s.goal, cruiseMode: true, cruiseCount: config!.cruiseCount },
-          prompt: [
-            "## Completion — Fitness Phase (Cruise Mode)",
-            "",
-            `Cruise: ${config!.cruiseCount}`,
-            "",
-            "### Self-Assessment (not self-fitness, but metacognition):",
-            "1. Did this generation proceed as expected?",
-            "2. Are there uncertain areas or risks?",
-            "3. Are there items that need human confirmation?",
-            "",
-            "High confidence → auto-proceed: reap run completion --phase fitness --feedback \"self-assessment: OK\"",
-            "Uncertain/risky → stop cruise and request human feedback",
-          ].join("\n"),
+          context: {
+            id: s.id,
+            goal: s.goal,
+            cruiseMode: true,
+            cruiseCount: config!.cruiseCount,
+            evaluatorConcerns: s.evaluatorConcerns ?? [],
+            evaluator: evaluatorEnabled
+              ? { enabled: true, prompt: fitnessEvaluatorPrompt }
+              : { enabled: false },
+          },
+          prompt: cruisePrompt.join("\n"),
           nextCommand: "reap run completion --phase fitness",
         });
       } else {
         // Supervised mode — human feedback
+        const supervisedPrompt: string[] = [
+          "## Completion — Fitness Phase",
+          "",
+          "Collect feedback from the human.",
+          "",
+          "Present to the human:",
+          "1. Summary of what was done in this generation",
+          "2. What went well / areas for improvement",
+          "3. Suggested next direction",
+          "",
+          'Submit: reap run completion --phase fitness --feedback "human feedback here"',
+        ];
+        supervisedPrompt.push(...priorConcernsSection);
+        supervisedPrompt.push(...evaluatorSection);
+
         emitOutput({
           status: "prompt",
           command: "completion",
           phase: "fitness",
           completed: ["gate", "reflect"],
-          context: { id: s.id, goal: s.goal, cruiseMode: false },
-          prompt: [
-            "## Completion — Fitness Phase",
-            "",
-            "Collect feedback from the human.",
-            "",
-            "Present to the human:",
-            "1. Summary of what was done in this generation",
-            "2. What went well / areas for improvement",
-            "3. Suggested next direction",
-            "",
-            'Submit: reap run completion --phase fitness --feedback "human feedback here"',
-          ].join("\n"),
+          context: {
+            id: s.id,
+            goal: s.goal,
+            cruiseMode: false,
+            evaluatorConcerns: s.evaluatorConcerns ?? [],
+            evaluator: evaluatorEnabled
+              ? { enabled: true, prompt: fitnessEvaluatorPrompt }
+              : { enabled: false },
+          },
+          prompt: supervisedPrompt.join("\n"),
           nextCommand: "reap run completion --phase fitness",
         });
       }

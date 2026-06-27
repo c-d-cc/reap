@@ -32,11 +32,13 @@ gen-028~031에서 gap-driven evolution + vision eval + memory 도입 완료.
 - ✅ evaluator agent 템플릿 정의 (gen-051)
 - ✅ 설계 결정 확정 (gen-052: opt-in flag / advisor / 코드 통합 plan)
 - ✅ **Validation 단계 코드 통합 (gen-066, Issue #20)** — `ReapConfig.evaluator?: boolean` + `buildEvaluatorPrompt({ stage })` + `validation.ts` 조건부 분기 + 양 adapter `installAgents` 양 caller. dog-fooding `.reap/config.yml: evaluator: true`.
-- ⏳ Fitness 단계 통합 — backlog `cruise-mode-evaluator-escalation-통합-validationfitness.md` 신설 (gen-066). `buildEvaluatorPrompt({ stage: "fitness" })` 분기 이미 준비됨.
-- ⏳ Cruise mode escalation 자동 중단 — 같은 backlog 에 묶임. state 채널 (`GenerationState.evaluatorConcerns?`) 설계 필요.
-- ⏳ Vision/Goal 위임 — adapt phase evaluator 가 gap 분석 + goal 추천. 같은 backlog.
+- ✅ **Fitness 단계 통합 (gen-067)** — `completion.ts` fitness phase 가 `buildEvaluatorPrompt({ stage: "fitness" })` 조건부 활성화. `priorConcernsSection` 으로 state.evaluatorConcerns prompt 동봉.
+- ✅ **Cruise mode escalation 자동 중단 (gen-067)** — `EvaluatorConcern` interface + `GenerationState.evaluatorConcerns?` state 채널. `reap run validation --phase report-evaluator --severity high|low|none --summary "<text>"` CLI (nonce-graph 외부, append-only). fitness 진입 시 `severity: high` 발견하면 `clearCruise()` + fallback prompt + `previousCruiseCount` emit.
+- ⏳ Vision/Goal 위임 — adapt phase evaluator 가 gap 분석 + goal 추천. **트랙 마지막 큰 항목**. design 문서 잔여 항목.
 
 gen-066 의 메타 관찰: 본 트랙은 gen-051~052 의 abort 후 design 만 보존된 채로 14 generation 이 흐른 뒤 자연스럽게 이어졌음. **design 문서가 lineage 의 anchor 역할** — abort 가 진짜 abort 가 아니었음.
+
+gen-067 의 메타 관찰: gen-066 이 `buildEvaluatorPrompt({ stage: "fitness" })` 분기를 미리 만들어두었기 때문에 본 generation 은 그 분기를 그대로 활성화만 함. **선행 generation 의 "미리 만든 hook" 가 후행 generation 의 비용을 줄이는 패턴** — 점진 통합 트랙에서 반복됨.
 
 ## Daemon Indexer (2026-03-29 구현 완료)
 - `daemon/` 별도 앱, localhost:17224 HTTP API

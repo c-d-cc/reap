@@ -161,3 +161,36 @@ gen-066 의 T009 (`.reap/config.yml` 에 `evaluator: true` 추가) 는 implement
 
 - **판단 기준**: dog-fooding config / opt-in flag 활성화는 본 generation 의 다음 단계 (validation/completion) 에 영향을 주려면 implementation 안에서 처리. 이전 단계에 영향 주려면 planning 직후. **본 generation 안에서 영향 검증을 의도하면 활성화 시점을 의도적으로 선택**.
 - **응용**: 향후 새 feature 의 dog-fooding 활성화 시점을 plan 단계에서 미리 결정 (어느 lifecycle 단계가 처음 사용자가 될지). gen-066 은 validation 이 첫 사용자가 되도록 implementation 마지막에 활성화 → T014 self-test 성공.
+
+### Nonce-graph 외부 phase 패턴 — state 채널 / 부수효과 CLI (gen-067)
+
+evaluator escalation 의 `reap run validation --phase report-evaluator` 는 nonce transition graph 의 일부가 아니라 **side-channel write CLI**. validation 단계의 work phase 와 complete phase 사이 어디서든 호출 가능, nonce 도 소비하지 않음. state 만 append (`GenerationState.evaluatorConcerns`).
+
+- **판단 기준**: 다음 stage 진입 권한이 필요하지 않고 state 만 갱신하는 CLI 는 nonce graph 에 추가하지 않고 외부에 둔다. 그렇지 않으면 graph 가 복잡해지고 multiple-write 시나리오 (한 stage 에서 여러 번 호출) 가 망가짐.
+- **응용**: 미래의 "메모 / 노트 / 부가 메타데이터 기록" 류 CLI 도 같은 패턴 적용. graph 외부 + append-only + nonce 검증 skip + state 검증만.
+- **반례 (graph 내부)**: 다음 phase 진입을 게이트하는 작업 (예: validation work → complete) 는 graph 내부. 두 종류를 섞으면 graph 의미가 흐려짐.
+
+### Append-only state 의 trade-off (gen-067)
+
+`EvaluatorConcern[]` 는 append-only 설계. 중복 detection / resolve / dismiss 없음. 의도된 단순함이지만 trade-off 존재:
+- **장점**: 한 phase 에서 두 번 호출돼도 silent fail 안 함. CLI 로직 단순. cross-generation 으로 carry over 시 그대로 history.
+- **단점**: 중복 호출 시 noise. "이 concern 은 해결됐다" 표현 수단 없음.
+- **현재 generation 별 reset 모델에서는 단점 무시 가능**. cross-generation 이월 도입 시 resolve/dismiss CLI 가 필요.
+
+**교훈**: state 채널 설계 시 (a) 같은 channel 에 idempotent 가 필요한가, (b) entry 의 life cycle (한 번 쓰고 끝 vs. 갱신 필요) 을 먼저 결정. (a)=No, (b)=write-once 이면 append-only 가 가장 단순.
+
+### 점진 통합 트랙에서 "미리 만든 hook" 패턴 (gen-067)
+
+gen-066 이 `buildEvaluatorPrompt({ stage: "fitness" })` 분기를 미리 만들어두고 `validation` 만 활용. gen-067 은 그 분기를 그대로 활성화 — **planning 비용 거의 zero**. design 문서 + 미리 만든 hook 의 조합이 후행 generation 의 시간을 단축.
+
+- **판단 기준**: 본 generation 의 일부만 활용하는 분기 / 옵션 / interface 를 만들 때, "다음 generation 이 활용할 수 있나?" 를 의식. Yes 면 분기 이름과 시그니처를 future-friendly 하게 (예: `stage: "validation" | "fitness"` union 으로 미리 정의).
+- **반례 (over-engineering 회피)**: future 활용 의도가 없는데 미리 만들면 dead code. 의도가 있을 때만 hook 화.
+- **응용 영역**: design 문서가 멀티-generation 트랙을 정의할 때, 각 generation 의 출구에 다음 generation 입구가 되는 분기 / interface 를 의도적으로 만들기. 트랙 전체 비용 분산.
+
+### 함수가 paths 주입으로 디스크 다중 파일을 읽으면 테스트 레벨 = e2e (gen-067)
+
+gen-067 의 T009 (fitness prompt 구조 unit test) 는 implementation 단계에서 e2e 로 재분류. `completion.ts:phase==="fitness"` 가 config + state + 양 prompt builder 를 disk 에서 읽어야 해서 unit-with-mocks 가 과도하게 복잡.
+
+- **휴리스틱**: "함수가 1개 초과 disk 파일을 paths injection 으로 읽으면 e2e 우선." unit 으로 가려면 모든 read 를 mock 해야 하는데, 그 mock 자체가 e2e 보다 maintenance cost 가 크다.
+- **반례 (pure unit)**: 외부 의존 없는 logic (e.g., backlog.ts 의 `consumeBacklog` 같이 파일 1개 read/write) 은 unit 적합.
+- **다음 적용**: planning 단계에서 task 의 "input source 가 몇 개인지" 를 확인. >=2 면 testing strategy 에 e2e 명시. evolution.md Testing Principles 의 표에 추가 가능 (gen-067 shortterm deferred 후보 16번).

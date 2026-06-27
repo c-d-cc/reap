@@ -34,6 +34,33 @@ export type MergeStage = (typeof MERGE_STAGES)[number];
 
 export type GenerationType = "embryo" | "normal" | "merge";
 
+/**
+ * A single concern raised by the reap-evaluate subagent during a stage.
+ *
+ * The builder records these via `reap run validation --phase report-evaluator
+ * --severity <high|low> --summary "..."` after receiving the evaluator's reply.
+ * Each entry persists across stages by living on the GenerationState, so the
+ * subsequent fitness phase can detect unresolved high-impact concerns and
+ * automatically abort cruise mode (gen-067, Issue follow-up of #20).
+ *
+ * Severity is intentionally binary (high vs. low) to align with the
+ * escalation matrix in `~/.config/.../agent/reap-evaluate.md` and to avoid
+ * inviting quantitative metrics (Goodhart's Law).
+ */
+export interface EvaluatorConcern {
+  /** The lifecycle stage during which the concern was raised. */
+  stage: "validation" | "fitness";
+  /**
+   * `"high"` mirrors the matrix's "Escalate" verdict (high impact OR low
+   * confidence) and triggers cruise mode auto-abort. `"low"` is informational.
+   */
+  severity: "low" | "high";
+  /** One-line description suitable for inclusion in a prompt or report. */
+  summary: string;
+  /** ISO 8601 timestamp captured at the moment the CLI ran. */
+  recordedAt: string;
+}
+
 export interface GenerationState {
   id: string;
   type: GenerationType;
@@ -47,6 +74,13 @@ export interface GenerationState {
   pendingTransitions?: Record<string, { nonce: string; hash: string }>;
   sourceBacklog?: string;
   fitnessFeedback?: string;
+  /**
+   * Side-channel for evaluator-surfaced concerns. Appended by
+   * `validation --phase report-evaluator`; read by the fitness phase. Absent
+   * (or empty) means "no concerns raised" — fitness behaves identically to
+   * pre-gen-067.
+   */
+  evaluatorConcerns?: EvaluatorConcern[];
 }
 
 // ── Config ──────────────────────────────────────────────────

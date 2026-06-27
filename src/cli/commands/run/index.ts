@@ -46,7 +46,7 @@ const STAGE_HANDLERS: Record<string, (paths: ReturnType<typeof createPaths>, pha
   report: reportExecute,
 };
 
-export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string | boolean; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string }): Promise<void> {
+export async function execute(stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string | boolean; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string; severity?: string; summary?: string }): Promise<void> {
   if (stage === "start") {
     await startExecute(options.phase, options.goal, options.type, options.parents, options.backlog);
     return;
@@ -72,6 +72,12 @@ export async function execute(stage: string, options: { phase?: string; goal?: s
   }
   if (stage === "early-close") {
     extra = JSON.stringify({ reason: options.reason, sourceAction: options.sourceAction, deferTasks: options.deferTasks });
+  }
+  // gen-067: validation --phase report-evaluator carries two structured fields
+  // (severity, summary). JSON-encode for the validation handler, matching the
+  // abort / early-close precedent. Other validation phases ignore `extra`.
+  if (stage === "validation" && options.phase === "report-evaluator") {
+    extra = JSON.stringify({ severity: options.severity, summary: options.summary });
   }
 
   try {

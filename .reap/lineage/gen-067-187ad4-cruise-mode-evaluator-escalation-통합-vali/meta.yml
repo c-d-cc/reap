@@ -1,0 +1,27 @@
+id: gen-067-187ad4
+type: embryo
+goal: cruise mode + evaluator escalation 통합 — validation/fitness 연결, cruise 자동
+  중단, state 채널
+parents:
+  - gen-066-567761
+timeline:
+  - stage: learning
+    at: 2026-06-26T20:34:26.628Z
+  - stage: planning
+    at: 2026-06-26T20:39:17.484Z
+  - stage: implementation
+    at: 2026-06-26T20:40:45.184Z
+  - stage: validation
+    at: 2026-06-27T01:22:47.478Z
+  - stage: completion
+    at: 2026-06-27T01:23:52.778Z
+status: completed
+fitnessFeedback:
+  text: "self-assessment: cruise escalation mechanism and fitness evaluator wiring
+    complete. All tests pass (typecheck/build/unit 427/0/e2e 218/1
+    pre-existing). Implementation follows evaluator-agent.md design exactly —
+    buildEvaluatorPrompt({stage:'fitness'}) branch reuse, EvaluatorConcern state
+    channel, report-evaluator nonce-graph external CLI, cruise auto-abort on
+    high severity. Self-referential dogfooding via gen-067's own validation
+    prompt confirmed. No regressions in evaluator:false (default) path."
+  evaluatedAt: 2026-06-27T01:34:17.183Z

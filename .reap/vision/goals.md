@@ -20,7 +20,7 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 ### Evaluator Agent
 - [x] Nonce 시스템 리팩토링: transition graph 기반 multi-nonce 발행
 - [x] Evaluator agent 템플릿 정의 (long-running, cross-generation)
-- [ ] Fitness 위임: evaluator 1차 평가 → 인간 에스컬레이션
+- [x] Fitness 위임: evaluator 1차 평가 → 인간 에스컬레이션 (gen-066 validation + gen-067 fitness/cruise. opt-in `evaluator: true`, advisor 모델, `EvaluatorConcern` state 채널, cruise high-severity 자동 중단)
 - [ ] Vision/Goal/Memory 관리 위임
 - [ ] 세대별 작업 기록 및 다음 작업 할당
 

@@ -74,7 +74,9 @@ program
   .option("--source-action <sourceAction>", "Source action for abort/early-close (rollback, stash, hold, none — rollback only for abort)")
   .option("--save-backlog", "Save progress to backlog on abort")
   .option("--defer-tasks <value>", "For early-close: auto-defer unchecked tasks to new backlog (true|false, default true)")
-  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string | false; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string }) => {
+  .option("--severity <severity>", "For validation --phase report-evaluator: evaluator concern severity (high|low|none — none is a no-op)")
+  .option("--summary <summary>", "For validation --phase report-evaluator: one-line evaluator concern summary")
+  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string | false; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string; severity?: string; summary?: string }) => {
     await runExecute(stage, options);
   });
 

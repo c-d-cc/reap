@@ -1,6 +1,6 @@
 import YAML from "yaml";
 import type { ReapPaths } from "../../../core/paths.js";
-import type { ReapConfig } from "../../../types/index.js";
+import type { ReapConfig, EvaluatorConcern } from "../../../types/index.js";
 import { GenerationManager } from "../../../core/generation.js";
 import { readTextFile } from "../../../core/fs.js";
 import { emitOutput, emitError } from "../../../core/output.js";
@@ -9,7 +9,7 @@ import { copyArtifactTemplate } from "../../../core/template.js";
 import { checkArtifactsFilled } from "../../../core/artifact-check.js";
 import { buildEvaluatorPrompt, loadReapKnowledge } from "../../../core/prompt.js";
 
-export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
+export async function execute(paths: ReapPaths, phase?: string, extra?: string): Promise<void> {
   const gm = new GenerationManager(paths);
   const state = await gm.current();
 
@@ -19,6 +19,80 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
   const isMerge = state!.type === "merge";
 
   const s = state!;
+
+  // ── Sub-phase: report-evaluator (gen-067) ──
+  // Side-channel for the builder to persist the reap-evaluate subagent's
+  // verdict on the GenerationState. Does NOT advance the lifecycle and does
+  // NOT participate in the nonce-protected transition graph — this is an
+  // informational write to support cross-stage signalling (validation →
+  // fitness cruise abort).
+  if (phase === "report-evaluator") {
+    let severity: string | undefined;
+    let summary: string | undefined;
+    if (extra) {
+      try {
+        const parsed = JSON.parse(extra) as { severity?: string; summary?: string };
+        severity = parsed.severity;
+        summary = parsed.summary;
+      } catch {
+        emitError("validation", "report-evaluator: failed to parse options. Expected --severity and --summary.");
+      }
+    }
+
+    if (!severity) {
+      emitError("validation", "report-evaluator requires --severity <high|low|none>.");
+    }
+
+    const sev = severity!.toLowerCase();
+    if (sev === "none") {
+      // Explicit no-op: builder reports the evaluator raised no concerns.
+      // State is untouched; this lets the builder log "all clear" without
+      // polluting evaluatorConcerns with empty entries.
+      emitOutput({
+        status: "ok",
+        command: "validation",
+        phase: "report-evaluator",
+        completed: ["gate", "noop"],
+        context: { id: s.id, severity: "none" },
+        message: "Evaluator reported no concern — state unchanged.",
+      });
+      return;
+    }
+
+    if (sev !== "high" && sev !== "low") {
+      emitError("validation", `report-evaluator: invalid severity '${severity}'. Use high, low, or none.`);
+    }
+
+    if (!summary || summary.trim().length === 0) {
+      emitError("validation", "report-evaluator requires --summary \"<one-line description>\".");
+    }
+
+    const concern: EvaluatorConcern = {
+      stage: "validation",
+      severity: sev as "high" | "low",
+      summary: summary!.trim(),
+      recordedAt: new Date().toISOString(),
+    };
+
+    if (!s.evaluatorConcerns) s.evaluatorConcerns = [];
+    s.evaluatorConcerns.push(concern);
+    await gm.save(s);
+
+    emitOutput({
+      status: "ok",
+      command: "validation",
+      phase: "report-evaluator",
+      completed: ["gate", "concern-recorded"],
+      context: {
+        id: s.id,
+        severity: concern.severity,
+        summary: concern.summary,
+        total: s.evaluatorConcerns.length,
+      },
+      message: `Evaluator concern recorded (severity=${concern.severity}). Total: ${s.evaluatorConcerns.length}.`,
+    });
+    return;
+  }
 
   if (!phase || phase === "work") {
     verifyTransition("validation", s, "validation:entry");
@@ -136,9 +210,24 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
       promptLines.push("- Surface every evaluator concern to the user in your validation report, even if you disagree.");
       promptLines.push("- If the evaluator escalates a high-impact concern, lean toward `partial` and document the concern in 04-validation.md.");
       promptLines.push("");
+      promptLines.push("**Persist the verdict for the fitness phase (gen-067)**:");
+      promptLines.push("");
+      promptLines.push("After receiving the evaluator's reply, record the outcome on the generation state so the");
+      promptLines.push("subsequent fitness phase can act on it (cruise mode auto-abort, evaluator concern surfacing):");
+      promptLines.push("");
+      promptLines.push("- High-impact escalation:");
+      promptLines.push("  `reap run validation --phase report-evaluator --severity high --summary \"<one-line description>\"`");
+      promptLines.push("- Low-impact concern (informational):");
+      promptLines.push("  `reap run validation --phase report-evaluator --severity low --summary \"<one-line description>\"`");
+      promptLines.push("- Clean review (no concern):");
+      promptLines.push("  `reap run validation --phase report-evaluator --severity none --summary \"\"`");
+      promptLines.push("");
+      promptLines.push("This call does NOT advance the lifecycle — it only appends to `state.evaluatorConcerns`.");
+      promptLines.push("");
       promptLines.push("**Fallback** — if the evaluator subagent fails (tool unavailable, model error, malformed reply):");
       promptLines.push("- Tell the user the evaluator could not run and why.");
       promptLines.push("- Continue normal validation. The evaluator is opt-in advice, not a gate.");
+      promptLines.push("- Skip the `report-evaluator` CLI call (no concern was generated).");
     }
 
     emitOutput({

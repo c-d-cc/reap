@@ -62,8 +62,8 @@ src/
 │       │   ├── learning.ts     — 탐구 (work → complete)
 │       │   ├── planning.ts     — 계획 (work → complete)
 │       │   ├── implementation.ts — 구현 (work → complete)
-│       │   ├── validation.ts   — 검증 (work → complete). **gen-066부터 `config.evaluator === true` 시 work prompt 에 "Evaluator Subagent Invocation" 절 + `context.evaluator.{enabled, prompt}` append. `evaluator: false` 시 prompt byte-identical (회귀 보장). advisor 모델 — builder 가 verdict 결정, evaluator concern surface, 호출 실패 시 통상 진행.**
-│       │   ├── completion.ts   — 완료 (reflect → fitness → adapt → commit)
+│       │   ├── validation.ts   — 검증 (work → complete). **gen-066부터 `config.evaluator === true` 시 work prompt 에 "Evaluator Subagent Invocation" 절 + `context.evaluator.{enabled, prompt}` append. `evaluator: false` 시 prompt byte-identical (회귀 보장). advisor 모델 — builder 가 verdict 결정, evaluator concern surface, 호출 실패 시 통상 진행. gen-067부터 새 `report-evaluator` sub-phase 신설 — `reap run validation --phase report-evaluator --severity <high|low|none> --summary "..."` 가 transition graph 외부에서 `state.evaluatorConcerns` 배열에 append (nonce 검증/발급 없음). severity=none 은 no-op + ok. work prompt 에 builder 가 evaluator 응답 후 본 CLI 를 호출하라는 지시 (3 사용법) 자동 포함.**
+│       │   ├── completion.ts   — 완료 (reflect → fitness → adapt → commit). **gen-067부터 fitness work 분기: (1) `evaluator: true` 시 `buildEvaluatorPrompt({ stage: "fitness" })` 호출 + `context.evaluator.{enabled, prompt}` emit (양 cruise/supervised 분기 공통), (2) `state.evaluatorConcerns` 비어있지 않으면 prompt 에 "Prior Evaluator Concerns" 절 추가 + `context.evaluatorConcerns` emit, (3) cruise + high-severity concern 시 `clearCruise()` 호출 + 별도 fallback prompt (`completed: [..., "cruise-aborted"]`, `context.cruiseAborted: true`, `previousCruiseCount`) emit + 즉시 return. self-loop nonce 보존 (builder 가 supervised feedback 재호출 가능).**
 │       │   ├── evolve.ts       — 전체 lifecycle 자동 실행
 │       │   ├── detect.ts       — merge: 분기점 감지
 │       │   ├── mate.ts         — merge: genome 교차
@@ -146,10 +146,11 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 ## Tests
 
 ### tests/ submodule (reap-test repo, main branch)
-- `tests/unit/` — bun:test 기반 unit tests (`bun test tests/unit/`). 422 pass / 0 fail (gen-066 시점).
-- `tests/e2e/` — bun:test 기반 e2e tests (`bun test tests/e2e/`). 207 pass / 1 fail (pre-existing init-repair).
+- `tests/unit/` — bun:test 기반 unit tests (`bun test tests/unit/`). 427 pass / 0 fail (gen-067 시점, +5 evaluator-concerns-state).
+- `tests/e2e/` — bun:test 기반 e2e tests (`bun test tests/e2e/`). 218 pass / 1 fail (gen-067 시점, +11 신규, pre-existing init-repair).
 - `tests/scenario/` — bun:test 기반 scenario tests (`bun test tests/scenario/`)
 - 신규 (gen-066): `tests/unit/evaluator-prompt.test.ts` (10 case), `tests/e2e/validation-evaluator.test.ts` (3 case), `tests/e2e/install-agents.test.ts` (6 case).
+- 신규 (gen-067): `tests/unit/evaluator-concerns-state.test.ts` (5 case — yaml round-trip), `tests/e2e/validation-report-evaluator.test.ts` (7 case — CLI input matrix), `tests/e2e/completion-cruise-abort.test.ts` (4 case — cruise + concern combinations).
 
 ### scripts/ (프로젝트 루트)
 - `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates)
@@ -167,6 +168,7 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 - `HookResult` — hook 실행 결과 (name, event, type, status, exitCode, stdout, stderr, content, skipReason)
 - `ReapHookEvent` — 라이프사이클 hook 이벤트 union type (14개 이벤트)
 - `ReapOutput.status` — `"ok" | "prompt" | "error" | "artifact-incomplete"`
+- `EvaluatorConcern` (gen-067) — `{ stage: "validation" | "fitness", severity: "low" | "high", summary: string, recordedAt: string }`. Validation→fitness signalling channel. severity는 binary (Goodhart 회피). high = cruise auto-abort 트리거. `GenerationState.evaluatorConcerns?: EvaluatorConcern[]` 로 노출.
 
 ## Key Design Decisions
 

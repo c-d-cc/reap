@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: medium
 createdAt: 2026-06-26T19:46:28.637Z
+consumedBy: gen-067-187ad4
+consumedAt: 2026-06-26T20:34:26.636Z
 ---
 
 # Cruise mode + evaluator escalation 통합 (validation/fitness)
