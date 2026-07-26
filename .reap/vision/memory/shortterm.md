@@ -1,25 +1,31 @@
 # Shortterm Memory
 
-## 세션 요약 (gen-073, 2026-07-26)
+## 세션 요약 (gen-074, 2026-07-26)
 
-### gen-073: 릴리즈 문서 정합성 + reap.cc 갱신
+### gen-074: scenario 테스트 복구
 
-`scripts/check-docs-version.sh` 신설(검사 5종, 특히 **로케일 집합 동일성**) + release.yml publish 전 게이트 + versionBump skill Step 5-1. 5 로케일 changelog 에 0.17.2/0.17.1 추가 + 0.16.5 누락 보정(20 항목 정렬). reap.cc 가 가르치던 폐기 lifespan 분류를 content-type + pruning 으로 교체(10개 위치).
+`tests/scenario/multi-generation.test.ts` 를 gen-065 backlog gate 동작에 맞게 갱신. **scenario 35-5 → 44-0.**
 
-검증: 스크립트가 수정 전 **8건 fail** → 수정 후 전건 pass. docs vite build 성공. unit 454-0 / e2e 263-1 / scenario 35-5 (뒤 둘 pre-existing, baseline 동일).
+우회(`--no-backlog` 한 줄 추가) 대신 gate 흐름을 시나리오에 편입 — "막힘 → 판단 → 재호출" 실제 사용자 경로를 따라가고, `--no-backlog` 출구도 별도 describe 로 커버. gen-065 gate 가 처음으로 scenario 커버리지를 얻었다. 소스 변경 없음.
 
-### 다음 세션 — 3건 orchestrate 중 2건 완료
+### 다음 세션 — 유저 지시 순서
 
-1. **다음(마지막)**: `backlog 작성 시 interview 기능` — 0.18.0 예정. **gen-073 교훈이 직접 적용됨**: interview 는 "지시를 자세히 쓰는" 접근이 아니라 "빈칸이 남았는지 검사하는" 접근이어야 한다
-2. daemon 2건은 유저 판단으로 보류
+1. **다음**: `genome-line-threshold100-...` backlog — threshold(100) < 배포 템플릿(evolution.md 193줄) 이라 `reap init` 직후 warning. **0.17.2 에 포함**
+2. **그 다음 0.17.2 릴리즈** — 유저 결정: 2건 마치고 함께 배포. 태그 push 는 최종 배포 시 (**유저 확인 필수**)
+3. interview 는 0.18.0, daemon 2건은 유저 보류
+
+### 반드시 기억할 것 — 릴리즈 노트 보강
+
+`RELEASE_NOTICE.md` / `RELEASE_NOTES.md` / 5 로케일 changelog 의 0.17.2 내용은 **gen-072 시점 기준으로만 작성돼 있다.** gen-073(문서 게이트) / gen-074(scenario) / 다음 세대(genome threshold) 내용이 빠져 있으므로 릴리즈 전에 추가해야 한다.
+
+`check-docs-version.sh` 는 **버전 일치만 검사하고 내용 완전성은 못 잡는다.** 수동 확인 필요.
 
 ### 미결 사항
 
-- **0.17.2 릴리즈 준비 완료** — 문서 정합성 확보됨. `git tag v0.17.2 && git push origin main v0.17.2` 만 하면 됨 (**유저 확인 필수**)
+- e2e `init-repair` 1 fail — 3세대째 pre-existing. backlog 화 검토 필요
 - issue #21 코멘트 + close 는 릴리즈 후
-- adapt 에서 genome carrier 목록에 docs 사이트(4번째) 추가 예정
 
 ### Backlog 상태
 
-pending 4건 — interview / daemon 배포결함 / daemon SCIP / genome threshold / scenario 복구.
-consumed: `release-직전-문서-...` (gen-073).
+pending 3건 — genome threshold / interview / daemon 2건(보류).
+consumed: `scenario-multi-generation-...` (gen-074).

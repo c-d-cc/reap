@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: medium
 createdAt: 2026-07-26T03:55:38.415Z
+consumedBy: gen-074-72bf54
+consumedAt: 2026-07-26T05:17:48.943Z
 ---
 
 # scenario multi-generation 5건 실패 — gen-065 backlog gate 도입 후 테스트 미갱신

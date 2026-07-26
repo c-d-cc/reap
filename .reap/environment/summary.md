@@ -165,9 +165,11 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 |---|---|---|
 | unit | `bun test tests/unit/` | 454 pass / 0 fail |
 | e2e | `bun test tests/e2e/` | 263 pass / **1 fail** — `init-repair` "skips when REAP section already present" (pre-existing) |
-| scenario | `bun test tests/scenario/` | 35 pass / **5 fail** — `multi-generation` 전건. gen-065 backlog gate 미반영이 원인 (pre-existing, backlog 등록됨) |
+| scenario | `bun test tests/scenario/` | 44 pass / 0 fail |
 
-**두 pre-existing 실패는 알려진 상태다.** 이 수치와 다르면 회귀를 의심할 것.
+**e2e 의 1 fail 은 알려진 pre-existing 이다.** 이 수치와 다르면 회귀를 의심할 것.
+
+`tests/scenario/multi-generation.test.ts` 는 gen-065 backlog gate 를 시나리오로 커버한다 — pending 이 있으면 `run start` 가 `status: "prompt"` 로 막히고, `--backlog`(소비) 또는 `--no-backlog`(유지) 로 재호출해야 진행된다. 새 scenario 가 backlog 파일을 만든다면 같은 gate 를 거치므로 이 패턴을 참고할 것.
 
 지원 자산:
 - `tests/helpers/setup.ts` — `cli` / `cliRaw` / `setupProject` / `setupGitProject` / `advanceStage` / `cleanup`. 대부분의 e2e·scenario 가 여기만 import 한다
