@@ -8,3 +8,4 @@ strictEdit: true
 strictMerge: true
 evaluator: true
 daemon: true
+lastMigratedVersion: 0.17.1

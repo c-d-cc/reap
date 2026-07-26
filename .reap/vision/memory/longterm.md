@@ -2,12 +2,6 @@
 
 > Design lessons that prevent future generations from repeating mistakes. If a lesson is already in genome (application.md / evolution.md), it does not belong here. Bloat = pruning was skipped.
 
-## Absolute Principles
-
-- **Quantitative fitness is forbidden (Goodhart's Law)**: human natural-language feedback is the only fitness signal. No scoring rubric.
-- **Workarounds are forbidden**: trace root cause + fix immediately, or log a backlog item with reproducer + cause. Never silent-pass.
-- **Lifecycle applies to the AI itself**: every dev task goes through the REAP lifecycle. No "I'll just do this small thing outside".
-
 ## Architecture Patterns
 
 - **CLI-driven flow, minimal slash commands**: a single slash command + CLI emits "what to do next" on stdout (ping-pong). Avoid per-stage slash commands.
@@ -18,6 +12,8 @@
 - **Termination paths live outside the transition graph**: abort / early-close are explicit `state.stage` guards, not graph edges. New escape paths copy abort.ts/early-close.ts pattern.
 - **Nonce-graph external CLI = state side-channel**: append-only state writes (e.g. `report-evaluator`) bypass nonce graph and use plain state appends. Don't pollute the graph.
 - **Opt-in integration pattern**: config flag (e.g. `daemon?: boolean`) → caller-side gate + dynamic import → silent-fail inside the function. Three layers guarantee zero regression for users who don't opt in.
+- **Destructive-action safety belongs in structure, not flags**: to guarantee a check never deletes user data, put it only in the read-only path (`checkIntegrity`) and add nothing to the mutating one (`fixProject`). A conditional saying "don't delete" can be flipped later; an absent code path cannot.
+- **A rule the agent must follow lives in the phase prompt, not only in the guide**: guides load early and compete with everything else in context; the phase prompt is read at the moment of action. Every behavioral rule needs a carrier at the point of use.
 
 ## Design Heuristics
 
@@ -47,3 +43,6 @@
 - **User UX entry-point checklist for new clients/integrations**: (1) static knowledge auto-load, (2) dynamic state refresh trigger, (3) entry-point file, (4) **native UI trigger (slash commands / shortcuts)**. (4) is the most-forgotten — explicitly verify.
 - **Disk-multi-file functions → e2e, not unit**: if a function takes a `paths` injection and reads >1 file, mock cost exceeds e2e cost. Plan testing level by file count.
 - **Debug stash needs causal matching first**: before `git stash`, list changed files + match against failure cause via `git log`. Stash only when matching is ambiguous.
+- **A test suite without a recorded baseline cannot be judged**: when a suite fails, "pre-existing or new regression?" is undecidable unless the last-known counts are written down. Record every suite's pass/fail in environment, including the known failures.
+- **Never hardcode the release version in tests**: a version bump then breaks assertions that were never about the bump. Read it from `package.json`. The exception is an assertion about a *specific version's artifact* (e.g. the v0.17.1 migration note), where the literal is the point.
+- **Changing a template only reaches new projects**: user-owned files (genome, config) are never overwritten by `update`/`repair` — by design. Shipping a rule change therefore needs a migration note, or existing projects end up holding the contradiction. Always ask "what reaches the projects that already exist?"

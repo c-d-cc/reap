@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.17.2
+### en
+Behavior change: the reflect-phase prompt now carries the content-type memory classification and the mandatory pruning policy (replace shortterm / delete completed midterm tracks / dedup longterm), plus an instruction to remove superseded content from environment/summary.md. `reap init` now seeds the same rules into genome/evolution.md. Existing projects get a v0.17.2 migration note to update their genome. `reap fix --check` warns when memory tiers or environment/summary.md exceed their guideline size — warnings only, never auto-deleted. Fixes issue #21.
+### ko
+행동 변경: reflect phase prompt 에 content-type memory 분류와 의무 pruning 정책(shortterm 교체 / 완료된 midterm 트랙 삭제 / longterm 중복 제거)이 추가되고, environment/summary.md 의 낡은 서술 제거 지시가 포함됩니다. `reap init` 이 동일 규칙을 genome/evolution.md 에 씁니다. 기존 프로젝트에는 genome 갱신용 v0.17.2 migration note 가 제공됩니다. `reap fix --check` 가 memory tier 와 environment/summary.md 의 크기 초과를 경고합니다 — 경고만 하며 자동 삭제하지 않습니다. issue #21 해결.
+
 ## v0.17.1
 ### en
 Migration instruction layer: `reap update` now detects version gaps and injects per-version migration notes into SessionStart context. Run `reap update --mark-migrated` after applying. Vision memory reclassified to content-type-based tiers with mandatory pruning policy in reflect phase.

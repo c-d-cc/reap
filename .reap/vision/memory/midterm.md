@@ -23,15 +23,19 @@
 남은 1 항목:
 - **Vision/Goal management 위임** — adapt phase에서 evaluator가 gap 분석 + 다음 goal 추천. 트랙 마지막 큰 항목. design 문서의 잔여 절.
 
-## Daemon Indexer 트랙 — 남은 작업
+## Daemon 트랙 — 유저 판단으로 일시 보류 (2026-07-26)
 
 코어: `daemon/` 별도 앱, localhost:17224 HTTP API, Tree-sitter WASM 15개 언어, SQLite write-through.
-완료 (gen-060/068/069): incremental, worktree, idle-timeout 검증 + config opt-in + 4 lifecycle 진입점 + lastIndexedCommit 노출 + 21 e2e + 격리 인프라.
+완료 (gen-060/068/069): incremental, worktree, idle-timeout + config opt-in + 4 lifecycle 진입점 + lastIndexedCommit + 21 e2e + 격리 인프라.
 
-남은 작업:
-- **daemon 가이드 문서 강화** — MCP wrapper 대신 HTTP API 직접 활용 가이드를 docs/reap-guide.md에 충실히 기술. curl 패턴, 주요 쿼리 시나리오 포함.
-- **daemon dist queries path resolution fix** — gen-064 패턴 (`__dirname.includes("dist")` 분기) 적용. npm postinstall auto-spawn 영향.
-- **import-resolver `.js` extension 자동 strip** — TS ESM 규약 (`import { x } from "./foo.js"`)이 IMPORTS edge에 잡히도록.
-- **자동 staleness 판단 + 자동 reindex** — 현재는 `lastIndexedCommit` 노출까지만. CLI 비교 + reindex trigger는 향후.
+**2026-07-26 세션에서 결정/발견된 것** (backlog 2건에 상술):
 
-MCP server wrapper는 보류 (2026-06-28 사용자 결정): 가이드 문서 강화로 충분, 별도 프로세스 복잡도 불필요.
+- **배포가 깨져 있다** — `dependencies` 는 `file:./daemon` 인데 `files` 에 `daemon/` 이 없고 npm 미발행. npm 설치 시 끊긴 심링크가 되어 **`daemon: true` 사용자가 daemon 을 아예 쓸 수 없다**. 소스 트리 dog-fooding 이라 여태 드러나지 않음. 실측 확인
+- **분리 방향 = npm 독립 발행** — 번들(zero-dependency 파괴) / optionalDependencies(대상 부재라 무효) 모두 기각
+- **SCIP 채택 확정** (유저 결정). Tree-sitter 를 대체가 아니라 baseline 으로 두고 SCIP 이 있으면 승격하는 하이브리드. 핵심 난제는 **노드 ID 통합**(`file::name` vs SCIP symbol ID)
+- **실측 평가는 취소** (유저 판단) — 대형 코드베이스 확보가 비현실적. 코드 독해 기반 분석으로 대체
+- MCP wrapper 는 계속 보류 (2026-06-28 결정)
+
+**순서**: 배포 결함 → SCIP 설계. 착수는 0.17.2 릴리즈 이후, 유저가 재개를 지시할 때.
+
+기존 잔여 항목(가이드 문서 강화 / dist queries path / `.js` strip / 자동 staleness)은 위 두 backlog 에 흡수 여부를 판단할 것.

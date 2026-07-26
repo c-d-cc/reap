@@ -1,37 +1,30 @@
 # Shortterm Memory
 
-## 세션 요약 (gen-071, 2026-06-28 commit)
+## 세션 요약 (gen-072, 2026-07-26)
 
-### gen-071: REAP migration instruction layer
+### gen-072: issue #21 — pruning policy carrier 동기화 (v0.17.2)
 
-backlog `reap-migration-instruction-layer-...md` 구현. 서브에이전트(abd2a7ce)가 세션 한도로 implementation 중 중단, 부모 에이전트가 이어받아 수정 + 완료.
+reflect prompt / evolution 템플릿이 v0.17.1 의 content-type + pruning 규칙을 반영하지 않아 발생한 이슈. 조사 중 **템플릿이 `initCommon` 단 1곳에서만 소비되어 기존 프로젝트에 도달하지 않는다**는 것이 확인되어, migration note `v0.17.2.md` 를 추가해 도달 채널을 만들었다.
 
-**핵심 변경**:
-- `src/core/migration.ts` (신규) — `detectPendingMigrations` / `buildPendingMigrationsSection` / semver 비교 / dist-dev 경로 분기
-- `src/templates/migration/v0.17.1.md` (신규) — 첫 migration note (vision memory content-type 재분류)
-- `src/types/index.ts` — `ReapConfig.lastMigratedVersion?: string`
-- `src/cli/commands/update.ts` — `--mark-migrated` 플래그 + `markMigratedNow` + pending list emit
-- `src/cli/commands/load-context.ts` — SessionStart pending migrations 절 주입 + `getPackageVersion()` 경로 fix (`../../../` 추가)
-- `src/core/dump-state-sync.ts` — session-state.md 동기화
-- `.reap/reap-guide.md` + `src/templates/reap-guide.md` — Migration Instruction Layer 사용법
+주요 변경: `completion.ts`(reflect prompt) / `templates/evolution.md` / `templates/migration/v0.17.2.md`(신규) / `integrity.ts`(크기 warning) / 0.17.2 bump.
 
-**수정된 버그**:
-- TypeScript 3개 (unreachable code / unused import ×2)
-- `getPackageVersion()`이 `load-context.ts`에서 "0.0.0" 반환 (`../../` → `../../../` 경로 fix)
-- `lastMigratedVersion: "0.0.0"` in CONFIG_DEFAULTS → spurious config diff → 제거
+결과: typecheck pass / unit 454-0 / e2e 263-1 / scenario 35-5 (뒤 둘은 pre-existing).
 
-**결과**: typecheck pass / unit 445-0 / e2e 249-1 (pre-existing)
+### 다음 세션 — 3건 orchestrate 중 1건 완료
 
-### 다음 세션 / 다음 generation
+유저가 3건 순차 진행을 지시했고 gen-072 가 그 첫 번째다. 남은 순서:
 
-1순위: **v0.17.1 릴리즈** — gen-070 + gen-071 묶음. push + tag 대기 중.
-2순위: **Evaluator Vision/Goal 위임** (evaluator 트랙 마지막)
-3순위: **daemon 가이드 문서 강화** (MCP wrapper 대신)
+1. **다음**: `release-직전-문서-버전-일치-검증-reapcc-문서-갱신` — 0.17.2 를 깨끗이 릴리즈 가능한 상태로 만드는 것이 목적. **gen-072 가 `RELEASE_NOTES.md` / `docs/` 를 의도적으로 건드리지 않았으므로 그 몫이 여기 있다**
+2. 그 다음: `backlog 작성 시 interview 기능` — 0.18.0 예정
+3. daemon 2건은 유저 판단으로 보류
 
-### 새 migration 파일 추가 관례
+### 미결 사항
 
-새 REAP 버전 릴리즈 시 `src/templates/migration/v{X.Y.Z}.md` 추가. build 스크립트가 `dist/templates/migration/`으로 복사.
+- **0.17.2 는 아직 커밋/푸시/릴리즈 전.** gen-072 completion commit 이 커밋까지 수행하며, npm publish 는 태그 push 트리거
+- Scope C(dog-fooding 대응표에 prompt 코드 추가)를 adapt phase 에서 처리해야 함 — 본 이슈의 근본 원인 대책이라 누락 금지
+- issue #21 은 릴리즈 후 코멘트 + close 필요
 
 ### Backlog 상태
 
-pending: 0 (gen-071 consume 완료)
+pending 6건 — 문서검증 / interview / daemon 배포결함 / daemon SCIP / genome threshold(신규) / scenario 복구(신규).
+consumed: `resolve-21-...` (gen-072).

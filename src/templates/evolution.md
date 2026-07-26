@@ -99,38 +99,62 @@ Space for project design documents. Distinction from Memory:
 Decision rule: "Is this content worth documenting as an independent topic?" → Yes = Design, No = Memory.
 
 ### Memory (`vision/memory/`)
-Free-form space for the AI to record project-related knowledge. 3-tier structure:
-- **longterm.md** — Project lifetime. Recurring lessons, decision backgrounds, architecture rationale
-- **midterm.md** — Multi-generation span. Current work context, multi-gen plans
-- **shortterm.md** — 1-2 sessions. Next-session handoff, immediate context
+Free-form space for the AI to record project-related knowledge. The 3-tier structure is classified by **what the content is for** (content-type), NOT by how long it will live (lifespan). Lifespan requires predicting the future, which the AI can't do reliably — that judgment burden leads to misclassification and bloat.
+
+| File | Role | 1-line decision rule |
+|------|------|----------------------|
+| `shortterm.md` | **Session handoff** — immediate context for the next session | "Is this needed right now?" |
+| `midterm.md` | **Ongoing tracks** — multi-generation work in progress | "Is this an incomplete large track?" |
+| `longterm.md` | **Design lessons** — recurring lessons worth re-reading | "Does this lesson prevent the next generation from making the same mistake?" |
 
 Memory rules:
 - Freely readable/writable at any time — no constraints like genome
-- AI decides when to read, write, promote between tiers, or clean up
-- Keep each tier concise
+- Cross-tier promotion/demotion is encouraged: a shortterm note that grows into a track moves to midterm; a completed track leaves only its lesson in longterm
+- **Bloat is a failure signal**: if longterm exceeds ~30~50 lines or midterm exceeds ~50~70 lines, pruning was skipped. Clean up in the next reflect.
+- **Empty is normal**: any memory file may be empty — that is a valid state
+
+### Memory Classification Decision Tree (mandatory for AI)
+
+When you have something to write to memory, apply top-to-bottom:
+
+```
+1. Is this needed in the next session immediately?
+   → Yes: shortterm.md
+
+2. Is this an ongoing, incomplete track or plan?
+   → Yes: midterm.md
+
+3. Is this a finished design lesson worth preserving?
+   → Yes: longterm.md
+
+4. Is this finished with no special lesson?
+   → Do NOT record (lineage and git history preserve it)
+```
+
+**Important**: Do not stash "might-be-useful" notes in longterm. If it disappears, it's still in lineage and git history.
 
 ### Memory Update Criteria
 
-**Shortterm** (update every generation — mandatory):
-- Summary of what was done in this generation
-- Context to hand off to the next session
-- Undecided matters, ongoing discussions
-- Current backlog state snapshot
+**Shortterm** — session handoff (update every generation — mandatory):
+- Write: summary of this generation, context to hand off, undecided matters, current backlog state
+- **Prune: delete previous handoff items that are already acted on, and REPLACE (overwrite) with this generation's handoff. No accumulation.**
+- Result: shortterm.md stays within the last 1~2 generations of content
 
-**Midterm** (update when context changes):
-- Flow of large ongoing tasks
-- Multi-generation plans
-- Directions agreed with the user
+**Midterm** — ongoing tracks (update when a track's state changes):
+- Write: flow of large ongoing tasks, multi-generation plans, directions agreed with the user
+- **Prune: when a track completes, promote its key decisions to longterm and DELETE the section from midterm. Decision rule: "Does this track have a next step?" — No → delete.**
+- Result: midterm.md stays within tracks that are alive right now
 
-**Longterm** (update only when lessons emerge):
-- Design lessons worth repeating
-- Background behind architecture decisions
-- Lessons from project transitions
+**Longterm** — design lessons (update only when a lesson emerges):
+- Write: design lessons worth repeating, background behind architecture decisions
+- **Prune (periodic — every ~10 generations, or whenever bloat is detected in reflect): if a section is already documented in genome, it is a duplicate → delete. If early transition context is no longer a behavioral guide → delete. Decision rule: "Without this lesson, would the next agent make the same mistake?" — No → delete.**
+- Result: longterm.md stays within lessons that still drive behavior today
 
 **Do NOT write**:
 - Code change details (environment handles this)
-- Test numbers (artifact handles this)
+- Test numbers, run logs (artifact handles this)
 - Principles already in genome (no duplication)
+- Generation-specific debug logs (lineage preserves them)
 
 ## Environment Refresh at Completion
 
@@ -138,6 +162,11 @@ Incrementally update environment/summary.md during reflect phase:
 - Based on files changed in implementation, update only affected environment sections
 - Not a full rewrite — reflect only what changed (file additions/deletions, dependency changes, build changes)
 - Primary update targets: Tech Stack, Source Structure, Tests sections
+
+**Remove superseded content — updating is not append-only**:
+- Delete statements that are no longer true (removed files/modules, abandoned decisions, stale dependency notes)
+- **Do NOT accumulate per-generation changelog entries.** summary.md describes the CURRENT state, not the history of how it got there — lineage and git history own the history
+- If a section has become a list of "what changed in gen-NNN" entries, collapse it into a single present-tense description
 
 ## Genome vs Environment Boundary
 

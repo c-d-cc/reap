@@ -3,7 +3,7 @@
 ## Project
 
 - Source: `~/cdws/reap/` (branch: main)
-- Package: `@c-d-cc/reap` v0.17.1
+- Package: `@c-d-cc/reap` v0.17.2
 - Config language: korean
 
 ## Tech Stack
@@ -45,7 +45,7 @@ src/
 │   ├── migration.ts            — Migration instruction layer (gen-071). `detectPendingMigrations(config, pkgVersion, templatesDir?)` — `lastMigratedVersion < v <= pkgVersion` 범위의 `src/templates/migration/vX.Y.Z.md` 파일 로드, semver 정렬. `buildPendingMigrationsSection` — pending 있을 때만 markdown 절 반환. `migrationTemplatesDir()` — dist/dev 분기 (gen-064 패턴). 3 caller (update.ts / load-context.ts / dump-state-sync.ts) 공유.
 │   ├── dump-state-sync.ts      — `buildKnowledgeContextSync` + `dumpStateSync` (gen-063). emitOutput용 sync 버전. async load-context와 byte-identical 출력 (unit test로 검증). **gen-068: `buildDaemonStaticSection()` export — async builder(`load-context.ts`)와 같은 helper 공유. `config?.daemon === true` 시 daemon static knowledge 절 emit. readiness probe는 의도적으로 제외 (sync 환경 제약 + caller 위임).** **gen-071: pending migrations 절 추가 (migration.ts 공유).**
 │   ├── dump-state-helper.ts    — `dumpStateBestEffort` (async, silent on error). 향후 async caller용 (gen-063)
-│   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts, detectV15, cleanupLegacyProjectSkills)
+│   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts, detectV15, cleanupLegacyProjectSkills). 크기 warning: genome 100줄, memory tier 50/70/60, environment summary 250줄 — **warnings only**, `fixProject` 에 대응 코드 없음이 auto-delete 방지 장치
 │   ├── notice.ts               — release notice (fetchReleaseNotice: RELEASE_NOTICE.md에서 버전+언어별 노트 추출)
 │   ├── report.ts               — auto issue report (autoReport: gh issue create wrapper, best-effort)
 │   ├── template.ts             — artifact 템플릿 복사
@@ -147,14 +147,23 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 ## Tests
 
 ### tests/ submodule (reap-test repo, main branch)
-- `tests/unit/` — bun:test 기반 unit tests (`bun test tests/unit/`). 427 pass / 0 fail (gen-067~069 동일).
-- `tests/e2e/` — bun:test 기반 e2e tests (`bun test tests/e2e/`). 239 pass / 1 fail (gen-069 시점, +21 신규 daemon e2e, pre-existing init-repair 1 fail 유지).
-- `tests/scenario/` — bun:test 기반 scenario tests (`bun test tests/scenario/`)
-- `tests/fixtures/daemon-sample/` (gen-069) — daemon e2e 용 소형 TypeScript 프로젝트 fixture (5 파일: package.json, .gitignore, src/{types,utils,index}.ts). 심볼 관계 `main → validateId + formatUser` 명확. helper 가 매번 tmpdir 복사 + git init.
-- `tests/helpers/daemon.ts` (gen-069) — daemon 격리 helper. `spawnTestDaemon(port, fakeHome)` 가 `bun src/index.ts` spawn (daemon dist 의 queries path bug 회피). port `TEST_DAEMON_PORT=17225` + HOME override 로 사용자 daemon (17224) 영향 0.
-- 신규 (gen-066): `tests/unit/evaluator-prompt.test.ts` (10 case), `tests/e2e/validation-evaluator.test.ts` (3 case), `tests/e2e/install-agents.test.ts` (6 case).
-- 신규 (gen-067): `tests/unit/evaluator-concerns-state.test.ts` (5 case — yaml round-trip), `tests/e2e/validation-report-evaluator.test.ts` (7 case — CLI input matrix), `tests/e2e/completion-cruise-abort.test.ts` (4 case — cruise + concern combinations).
-- 신규 (gen-069): `tests/e2e/daemon-config.test.ts` (5 case — config opt-in 분기), `tests/e2e/daemon-lifecycle.test.ts` (4 case — spawn/stop/stale/silent fail), `tests/e2e/daemon-indexing.test.ts` (6 case — full/stable/auto-trigger), `tests/e2e/daemon-query.test.ts` (6 case — symbols/callers/callees/impact/status/error).
+
+현재 baseline (다음 세대가 회귀 여부를 판단하는 기준):
+
+| 스위트 | 명령 | 결과 |
+|---|---|---|
+| unit | `bun test tests/unit/` | 454 pass / 0 fail |
+| e2e | `bun test tests/e2e/` | 263 pass / **1 fail** — `init-repair` "skips when REAP section already present" (pre-existing) |
+| scenario | `bun test tests/scenario/` | 35 pass / **5 fail** — `multi-generation` 전건. gen-065 backlog gate 미반영이 원인 (pre-existing, backlog 등록됨) |
+
+**두 pre-existing 실패는 알려진 상태다.** 이 수치와 다르면 회귀를 의심할 것.
+
+지원 자산:
+- `tests/helpers/setup.ts` — `cli` / `cliRaw` / `setupProject` / `setupGitProject` / `advanceStage` / `cleanup`. 대부분의 e2e·scenario 가 여기만 import 한다
+- `tests/helpers/daemon.ts` — daemon 격리 helper. `spawnTestDaemon(port, fakeHome)` 가 `bun src/index.ts` 를 spawn (daemon dist 의 queries path 문제 회피). `TEST_DAEMON_PORT=17225` + HOME override 로 사용자 daemon(17224) 영향 0
+- `tests/fixtures/daemon-sample/` — daemon e2e 용 소형 TypeScript 프로젝트(5 파일). 심볼 관계 `main → validateId + formatUser`. helper 가 매번 tmpdir 복사 + git init
+
+버전 의존 assertion 주의: `tests/e2e/update-migration.test.ts` 는 패키지 버전을 `package.json` 에서 읽는다(`PKG_VERSION`). 릴리즈 버전을 하드코딩하면 bump 마다 깨진다 — 단, "특정 버전의 migration note"를 검증하는 케이스는 하드코딩이 맞다.
 
 ### scripts/ (프로젝트 루트)
 - `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates)

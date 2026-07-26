@@ -122,7 +122,36 @@ Embryo → Normal 전환: adapt phase에서 AI 제안, 인간 승인.
 주요 대응 관계:
 - `CLAUDE.md` ↔ `src/templates/claude-md-section.md`
 - `.reap/reap-guide.md` ↔ `src/templates/reap-guide.md`
+- `.reap/genome/evolution.md` ↔ `src/templates/evolution.md`
 - `.reap/` 디렉토리 구조 ↔ `src/core/integrity.ts` (구조 검증), `src/cli/commands/init/` (초기화)
+- **agent 행동 규칙 텍스트 ↔ `src/cli/commands/run/*.ts` 의 prompt 문자열**
+
+### 규칙 변경 시 carrier 3중 확인 (gen-072 교훈, issue #21)
+
+**규칙의 carrier 는 문서만이 아니다.** 같은 규칙이 guide / genome 템플릿 / phase prompt 세 곳에 각각 존재할 수 있고, 하나만 고치면 나머지가 구버전으로 남아 서로 모순되는 지시를 낸다.
+
+판단 기준: **"이 규칙이 agent 행동을 좌우하는가?"** → Yes 면 다음 3곳을 **모두** 확인:
+
+1. `src/templates/reap-guide.md` (+ `.reap/reap-guide.md`) — 세션 시작 시 로드되는 참조 문서
+2. `src/templates/evolution.md` (+ `.reap/genome/evolution.md`) — 프로젝트 genome
+3. `src/cli/commands/run/*.ts` 의 prompt 문자열 — **agent 가 행동하는 바로 그 순간 읽는 지시**
+
+3번이 가장 놓치기 쉽다. grep 으로 코드 안의 규칙 텍스트까지 확인할 것 (예: `grep -rn "<규칙 키워드>" src/cli/`).
+
+**텍스트는 창작하지 말고 한 곳을 기준으로 복제한다.** 세 carrier 가 같은 규칙을 각자 다르게 표현하면 다음 변경 때 또 drift 가 생긴다.
+
+### 규칙 변경이 기존 프로젝트에 도달하는가 (gen-072 교훈)
+
+템플릿 수정은 **`reap init` 하는 신규 프로젝트에만 반영**된다. `src/templates/evolution.md` 의 소비 지점은 `initCommon` (`src/cli/commands/init/common.ts`) 단 1곳이며, `reap update` 와 `reap init --repair` 는 genome 을 건드리지 않는다 — user-owned 자산이므로 덮어쓰지 않는 것이 올바른 설계다.
+
+따라서 **이미 존재하는 프로젝트에 규칙 변경을 전달하는 유일한 채널은 `src/templates/migration/vX.Y.Z.md`** 다. 이것 없이 템플릿만 고치면 기존 사용자는 "genome=구버전 규칙 vs prompt=신버전 규칙" 모순 상태에 놓이며, 어느 쪽이 이길지 예측할 수 없다.
+
+규칙을 바꿀 때 반드시 자문할 것: **"이미 존재하는 프로젝트에는 무엇이 도달하는가?"**
+
+migration note 로 사용자 genome 수정을 지시할 때는 **3분기 판정**을 명시한다 (2분기로 하면 이미 올바른 프로젝트가 불필요한 확인을 받는다):
+- 배포 원본과 정확 일치 → silent edit (note 안에 **대조용 원본 전문**을 실어야 판정 가능)
+- 이미 신규 형식 → no-op, 확인 없음
+- 그 외 (사용자가 수정/번역) → diff 제시 후 확인, 거절 시 skip + `--mark-migrated` 미실행
 
 ## Knowledge Loading — Static / Dynamic 분리
 

@@ -21,6 +21,39 @@ const VALID_GENERATION_TYPES = ["embryo", "normal", "merge"];
 const GENOME_LINE_WARNING_THRESHOLD = 100;
 
 /**
+ * Line thresholds for vision memory tiers (gen-072).
+ *
+ * Mirrors the bloat guidance in reap-guide.md § Memory ("longterm ~30~50 lines,
+ * midterm ~50~70 lines"): the upper bound of each documented range is used so a
+ * project sitting inside the guideline never warns. `shortterm` has no
+ * documented range — it is bounded by "the last 1~2 generations of handoff", so
+ * 60 lines is set as a generous ceiling for that.
+ *
+ * These are WARNINGS ONLY. Memory content is user-authored and must never be
+ * auto-deleted: `fixProject` (fix.ts) deliberately does not act on them. The
+ * resolution path is the mandatory pruning step in `completion --phase reflect`.
+ */
+const MEMORY_LINE_WARNING_THRESHOLDS = {
+  longterm: 50,
+  midterm: 70,
+  shortterm: 60,
+} as const;
+
+/**
+ * Line threshold for environment/summary.md (gen-072).
+ *
+ * summary.md describes the CURRENT state, not a per-generation changelog. When
+ * generations append without removing superseded content it grows without
+ * bound — the reported case reached 66 KB with 8 of 21 sections being changelog
+ * entries. Warning only, same policy as the memory tiers above.
+ */
+const ENV_SUMMARY_LINE_WARNING_THRESHOLD = 250;
+
+/** Shared hint appended to every size warning so the user has a resolution path. */
+const SIZE_WARNING_HINT =
+  "run 'reap run completion --phase reflect' and follow the pruning policy (do not hand-delete)";
+
+/**
  * Detect v0.15 project structure.
  * Returns true if .reap/genome/principles.md exists (v0.15 indicator).
  */
@@ -41,6 +74,7 @@ export async function checkIntegrity(
   await checkCurrentYml(paths, errors, warnings);
   await checkLineage(paths, errors, warnings);
   await checkGenome(paths, errors, warnings);
+  await checkMemorySize(paths, warnings);
   await checkBacklog(paths, errors, warnings);
 
   return { errors, warnings };
@@ -500,6 +534,62 @@ async function checkGenome(
     if (stripped.length === 0) {
       warnings.push(
         `genome/${gf.name}: appears to be placeholder-only (no substantive content)`,
+      );
+    }
+  }
+}
+
+// ── memory / environment size (gen-072) ──────────────────────
+
+/**
+ * Warn when vision memory tiers or environment/summary.md grow past their
+ * guideline size — a signal that the reflect-phase pruning policy was skipped.
+ *
+ * WARNINGS ONLY BY DESIGN. These files are user-authored records; auto-deleting
+ * them would destroy generations of context. `fixProject` (fix.ts) intentionally
+ * has no counterpart to this check — keep it that way. Every warning carries the
+ * resolution path so the user does not hand-prune and lose content.
+ *
+ * A missing file is not a problem (an empty/absent memory tier is a valid state),
+ * so unreadable paths are skipped silently.
+ */
+async function checkMemorySize(
+  paths: ReapPaths,
+  warnings: string[],
+): Promise<void> {
+  const targets: Array<{ path: string; label: string; threshold: number }> = [
+    {
+      path: paths.memoryLongterm,
+      label: "vision/memory/longterm.md",
+      threshold: MEMORY_LINE_WARNING_THRESHOLDS.longterm,
+    },
+    {
+      path: paths.memoryMidterm,
+      label: "vision/memory/midterm.md",
+      threshold: MEMORY_LINE_WARNING_THRESHOLDS.midterm,
+    },
+    {
+      path: paths.memoryShortterm,
+      label: "vision/memory/shortterm.md",
+      threshold: MEMORY_LINE_WARNING_THRESHOLDS.shortterm,
+    },
+    {
+      path: paths.environmentSummary,
+      label: "environment/summary.md",
+      threshold: ENV_SUMMARY_LINE_WARNING_THRESHOLD,
+    },
+  ];
+
+  for (const t of targets) {
+    if (!(await fileExists(t.path))) continue;
+
+    const content = await readTextFile(t.path);
+    if (content === null) continue;
+
+    const lines = content.split("\n").length;
+    if (lines > t.threshold) {
+      warnings.push(
+        `${t.label}: ${lines} lines (exceeds ~${t.threshold} line guideline) — ${SIZE_WARNING_HINT}`,
       );
     }
   }
