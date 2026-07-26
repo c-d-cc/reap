@@ -711,7 +711,7 @@ return nonce to AI                         ←── AI passes nonce
     intro: "Environmentはプロジェクトの記述的知識です — 現在何が存在するかを示します。技術スタック、ソース構造、ビルド設定、ドメイン知識、コード依存関係をキャプチャします。Genome（規範的 — どう構築するか）とは異なり、Environmentは現在の状態を記述します。",
     structureTitle: "2層構造",
     structure: `.reap/environment/
-├── summary.md      # 常にロード（~100行） — 技術スタック、ソース構造、ビルド、テスト
+├── summary.md      # 常にロード（~250行） — 技術スタック、ソース構造、ビルド、テスト
 ├── domain/         # ドメイン知識（オンデマンド）
 ├── resources/      # 外部参照ドキュメント — APIドキュメント、SDK仕様（オンデマンド）
 ├── docs/           # プロジェクト参照ドキュメント — 設計書、仕様（オンデマンド）
@@ -719,7 +719,7 @@ return nonce to AI                         ←── AI passes nonce
     layersTitle: "層",
     layerHeaders: ["層", "読み込み", "内容", "制限"],
     layerItems: [
-      ["summary.md", "セッション開始時に常にロード", "技術スタック、ソース構造、ビルド設定、テストセットアップ。AIの基本的な理解。", "~100行"],
+      ["summary.md", "セッション開始時に常にロード", "技術スタック、ソース構造、ビルド設定、テストセットアップ。AIの基本的な理解。", "~250行"],
       ["domain/", "オンデマンド（必要時にロード）", "ドメイン知識 — ビジネスルール、API仕様、インフラの詳細。", "制限なし"],
       ["resources/", "オンデマンド（必要時にロード）", "外部参照ドキュメント — APIドキュメント、SDK仕様、サードパーティドキュメント。", "制限なし"],
       ["docs/", "オンデマンド（必要時にロード）", "プロジェクト参照ドキュメント — 設計書、仕様、アーキテクチャ決定。", "制限なし"],
@@ -1048,7 +1048,7 @@ reap daemon query    # シンボルクエリを実行`,
     versions: [
       {
         version: "0.17.2",
-        notes: "**Reflectフェーズのpruningポリシー** — reflect promptが「何を書くか」だけでなく「何を削除するか」を指示するようになりました。Memory tierはlifespanではなくcontent-type（セッション引き継ぎ / 進行中トラック / 設計上の教訓）で分類され、4ステップの判断ツリーとtier別のpruningが追加されました — shorttermは毎generation置き換え、完了したmidtermトラックは教訓を昇格させた上で削除、longtermはgenomeと重複する項目を除去します。`environment/summary.md`にも対応する指示が加わり、generationごとの変更履歴を蓄積せず古い記述を削除します。`reap init`は同じルールを`genome/evolution.md`に反映し、既存プロジェクトにはv0.17.2のmigration noteが提供されます。`reap fix --check`はmemory tierや`environment/summary.md`がガイドラインのサイズを超えた場合に警告します — 警告のみで自動削除は行いません。issue #21を解決。",
+        notes: "**Reflectフェーズのpruningポリシー** — reflect promptが「何を書くか」だけでなく「何を削除するか」を指示するようになりました。Memory tierはlifespanではなくcontent-type（セッション引き継ぎ / 進行中トラック / 設計上の教訓）で分類され、4ステップの判断ツリーとtier別のpruningが追加されました — shorttermは毎generation置き換え、完了したmidtermトラックは教訓を昇格させた上で削除、longtermはgenomeと重複する項目を除去します。`environment/summary.md`にも対応する指示が加わり、generationごとの変更履歴を蓄積せず古い記述を削除します。`reap init`は同じルールを`genome/evolution.md`に反映し、既存プロジェクトにはv0.17.2のmigration noteが提供されます。`reap fix --check`はmemory tierや`environment/summary.md`がガイドラインのサイズを超えた場合に警告します — 警告のみで自動削除は行いません。issue #21を解決。 Genome のサイズ警告が根拠を明記したファイル別の値（`invariants` 50 / `application` 250 / `evolution` 300）になりました — 従来の共通 100 行という基準は配布される `evolution.md` 自体が満たせず、`reap init` 直後から警告が出ていました。リリースゲート（`scripts/check-docs-version.sh`）がリリースノートと reap.cc の5ロケールを `package.json` と照合し（ロケール間の整合性を含む）、reap.cc も廃止された lifespan ベースの memory モデルを教えなくなりました。",
       },
       {
         version: "0.17.1",

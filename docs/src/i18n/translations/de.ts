@@ -711,7 +711,7 @@ return nonce to AI                         ←── AI passes nonce
     intro: "Environment ist das deskriptive Wissen des Projekts — was aktuell existiert. Es erfasst Tech-Stack, Quellstruktur, Build-Konfiguration, Domänenwissen und Code-Abhängigkeiten. Anders als das Genome (präskriptiv — wie man baut), beschreibt Environment den aktuellen Zustand.",
     structureTitle: "2-Stufen-Struktur",
     structure: `.reap/environment/
-├── summary.md      # Immer geladen (~100 Zeilen) — Tech-Stack, Quellstruktur, Build, Tests
+├── summary.md      # Immer geladen (~250 Zeilen) — Tech-Stack, Quellstruktur, Build, Tests
 ├── domain/         # Domänenwissen (bei Bedarf)
 ├── resources/      # Externe Referenzdokumente — API-Docs, SDK-Spezifikationen (bei Bedarf)
 ├── docs/           # Projekt-Referenzdokumente — Designdokumente, Spezifikationen (bei Bedarf)
@@ -719,7 +719,7 @@ return nonce to AI                         ←── AI passes nonce
     layersTitle: "Stufen",
     layerHeaders: ["Stufe", "Laden", "Inhalt", "Limit"],
     layerItems: [
-      ["summary.md", "Immer beim Sitzungsstart geladen", "Tech-Stack, Quellstruktur, Build-Konfiguration, Test-Setup. Das Grundverständnis der KI.", "~100 Zeilen"],
+      ["summary.md", "Immer beim Sitzungsstart geladen", "Tech-Stack, Quellstruktur, Build-Konfiguration, Test-Setup. Das Grundverständnis der KI.", "~250 Zeilen"],
       ["domain/", "Bei Bedarf (geladen wenn nötig)", "Domänenwissen — Geschäftsregeln, API-Spezifikationen, Infrastrukturdetails.", "Kein Limit"],
       ["resources/", "Bei Bedarf (geladen wenn nötig)", "Externe Referenzdokumente — API-Docs, SDK-Spezifikationen, Drittanbieter-Dokumentation.", "Kein Limit"],
       ["docs/", "Bei Bedarf (geladen wenn nötig)", "Projekt-Referenzdokumente — Designdokumente, Spezifikationen, Architekturentscheidungen.", "Kein Limit"],
@@ -1048,7 +1048,7 @@ reap daemon query    # Symbol-Abfrage ausführen`,
     versions: [
       {
         version: "0.17.2",
-        notes: "**Pruning-Richtlinie in der Reflect-Phase** — der Reflect-Prompt gibt jetzt auch vor, was *entfernt* werden soll, nicht nur was zu schreiben ist. Memory-Tiers werden nach Inhaltstyp klassifiziert (Session-Übergabe / laufende Tracks / Design-Lektionen) statt nach Lebensdauer, mit einem vierstufigen Entscheidungsbaum und Pruning pro Tier: shortterm wird jede Generation ersetzt, abgeschlossene midterm-Tracks werden nach Übernahme ihrer Lektionen gelöscht, longterm verliert Einträge, die bereits im Genome stehen. `environment/summary.md` erhält eine entsprechende Anweisung, überholte Inhalte zu entfernen statt Changelogs pro Generation anzuhäufen. `reap init` schreibt dieselben Regeln in `genome/evolution.md`, bestehende Projekte erhalten eine v0.17.2-Migrationsnotiz. `reap fix --check` warnt, wenn ein Memory-Tier oder `environment/summary.md` die Richtgröße überschreitet — nur Warnungen, niemals automatisches Löschen. Behebt Issue #21.",
+        notes: "**Pruning-Richtlinie in der Reflect-Phase** — der Reflect-Prompt gibt jetzt auch vor, was *entfernt* werden soll, nicht nur was zu schreiben ist. Memory-Tiers werden nach Inhaltstyp klassifiziert (Session-Übergabe / laufende Tracks / Design-Lektionen) statt nach Lebensdauer, mit einem vierstufigen Entscheidungsbaum und Pruning pro Tier: shortterm wird jede Generation ersetzt, abgeschlossene midterm-Tracks werden nach Übernahme ihrer Lektionen gelöscht, longterm verliert Einträge, die bereits im Genome stehen. `environment/summary.md` erhält eine entsprechende Anweisung, überholte Inhalte zu entfernen statt Changelogs pro Generation anzuhäufen. `reap init` schreibt dieselben Regeln in `genome/evolution.md`, bestehende Projekte erhalten eine v0.17.2-Migrationsnotiz. `reap fix --check` warnt, wenn ein Memory-Tier oder `environment/summary.md` die Richtgröße überschreitet — nur Warnungen, niemals automatisches Löschen. Behebt Issue #21. Genome-Größenwarnungen sind jetzt dateispezifisch (`invariants` 50 / `application` 250 / `evolution` 300) mit dokumentierter Begründung und ersetzen ein gemeinsames 100-Zeilen-Limit, das die ausgelieferte `evolution.md` selbst nicht einhalten konnte — ein frisches `reap init` warnt nicht mehr. Ein Release-Gate (`scripts/check-docs-version.sh`) prüft die Release Notes und alle fünf reap.cc-Locales gegen `package.json`, einschließlich Locale-Parität; reap.cc lehrt zudem nicht länger das abgelöste lebensdauerbasierte Memory-Modell.",
       },
       {
         version: "0.17.1",

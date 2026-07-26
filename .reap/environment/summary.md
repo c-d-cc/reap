@@ -45,7 +45,7 @@ src/
 │   ├── migration.ts            — Migration instruction layer (gen-071). `detectPendingMigrations(config, pkgVersion, templatesDir?)` — `lastMigratedVersion < v <= pkgVersion` 범위의 `src/templates/migration/vX.Y.Z.md` 파일 로드, semver 정렬. `buildPendingMigrationsSection` — pending 있을 때만 markdown 절 반환. `migrationTemplatesDir()` — dist/dev 분기 (gen-064 패턴). 3 caller (update.ts / load-context.ts / dump-state-sync.ts) 공유.
 │   ├── dump-state-sync.ts      — `buildKnowledgeContextSync` + `dumpStateSync` (gen-063). emitOutput용 sync 버전. async load-context와 byte-identical 출력 (unit test로 검증). **gen-068: `buildDaemonStaticSection()` export — async builder(`load-context.ts`)와 같은 helper 공유. `config?.daemon === true` 시 daemon static knowledge 절 emit. readiness probe는 의도적으로 제외 (sync 환경 제약 + caller 위임).** **gen-071: pending migrations 절 추가 (migration.ts 공유).**
 │   ├── dump-state-helper.ts    — `dumpStateBestEffort` (async, silent on error). 향후 async caller용 (gen-063)
-│   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts, detectV15, cleanupLegacyProjectSkills). 크기 warning: genome 100줄, memory tier 50/70/60, environment summary 250줄 — **warnings only**, `fixProject` 에 대응 코드 없음이 auto-delete 방지 장치
+│   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts, detectV15, cleanupLegacyProjectSkills). 크기 warning: genome 파일별(application 250 / evolution 300 / invariants 50), memory tier 50/70/60, environment summary 250줄 — 수치 근거는 코드 주석 + `reap-guide.md` § File Size Guidelines. **warnings only**, `fixProject` 에 대응 코드 없음이 auto-delete 방지 장치
 │   ├── notice.ts               — release notice (fetchReleaseNotice: RELEASE_NOTICE.md에서 버전+언어별 노트 추출)
 │   ├── report.ts               — auto issue report (autoReport: gh issue create wrapper, best-effort)
 │   ├── template.ts             — artifact 템플릿 복사
@@ -163,7 +163,7 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 
 | 스위트 | 명령 | 결과 |
 |---|---|---|
-| unit | `bun test tests/unit/` | 454 pass / 0 fail |
+| unit | `bun test tests/unit/` | 461 pass / 0 fail |
 | e2e | `bun test tests/e2e/` | 263 pass / **1 fail** — `init-repair` "skips when REAP section already present" (pre-existing) |
 | scenario | `bun test tests/scenario/` | 44 pass / 0 fail |
 

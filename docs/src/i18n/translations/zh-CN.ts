@@ -711,7 +711,7 @@ return nonce to AI                         ←── AI passes nonce
     intro: "Environment 是项目的描述性知识——当前存在的内容。它捕获技术栈、源码结构、构建配置、领域知识和代码依赖。与 Genome（规范性——如何构建）不同，Environment 描述的是当前状态。",
     structureTitle: "两层结构",
     structure: `.reap/environment/
-├── summary.md      # 始终加载（约 100 行）——技术栈、源码结构、构建、测试
+├── summary.md      # 始终加载（约 250 行）——技术栈、源码结构、构建、测试
 ├── domain/         # 领域知识（按需）
 ├── resources/      # 外部参考文档——API 文档、SDK 规格（按需）
 ├── docs/           # 项目参考文档——设计文档、规格说明（按需）
@@ -719,7 +719,7 @@ return nonce to AI                         ←── AI passes nonce
     layersTitle: "层级",
     layerHeaders: ["层级", "加载方式", "内容", "限制"],
     layerItems: [
-      ["summary.md", "会话开始时始终加载", "技术栈、源码结构、构建配置、测试设置。AI 的基线理解。", "约 100 行"],
+      ["summary.md", "会话开始时始终加载", "技术栈、源码结构、构建配置、测试设置。AI 的基线理解。", "约 250 行"],
       ["domain/", "按需（需要时加载）", "领域知识——业务规则、API 规格、基础设施详情。", "无限制"],
       ["resources/", "按需（需要时加载）", "外部参考文档——API 文档、SDK 规格、第三方文档。", "无限制"],
       ["docs/", "按需（需要时加载）", "项目参考文档——设计文档、规格说明、架构决策。", "无限制"],
@@ -1048,7 +1048,7 @@ reap daemon query    # 运行符号查询`,
     versions: [
       {
         version: "0.17.2",
-        notes: "**Reflect 阶段的 pruning 策略** — reflect prompt 现在不仅说明写什么，还会指示删除什么。Memory 层级改为按内容类型分类（会话交接 / 进行中的工作轨道 / 设计经验），而非按存续时长，并新增四步判断树与分层 pruning：shortterm 每代替换，已完成的 midterm 轨道在提升其经验后删除，longterm 移除与 genome 重复的条目。`environment/summary.md` 也获得对应指示：删除已过时的描述，而不是逐代累积变更记录。`reap init` 会将相同规则写入 `genome/evolution.md`，现有项目则通过 v0.17.2 迁移说明获得更新。`reap fix --check` 在 memory 层级或 `environment/summary.md` 超出建议大小时发出警告 — 仅警告，绝不自动删除。修复 issue #21。",
+        notes: "**Reflect 阶段的 pruning 策略** — reflect prompt 现在不仅说明写什么，还会指示删除什么。Memory 层级改为按内容类型分类（会话交接 / 进行中的工作轨道 / 设计经验），而非按存续时长，并新增四步判断树与分层 pruning：shortterm 每代替换，已完成的 midterm 轨道在提升其经验后删除，longterm 移除与 genome 重复的条目。`environment/summary.md` 也获得对应指示：删除已过时的描述，而不是逐代累积变更记录。`reap init` 会将相同规则写入 `genome/evolution.md`，现有项目则通过 v0.17.2 迁移说明获得更新。`reap fix --check` 在 memory 层级或 `environment/summary.md` 超出建议大小时发出警告 — 仅警告，绝不自动删除。修复 issue #21。 Genome 大小警告改为按文件设定并附明确依据（`invariants` 50 / `application` 250 / `evolution` 300），取代原先统一的 100 行标准——该标准连随发布的 `evolution.md` 自身都无法满足，导致 `reap init` 之后立即报警。发布关卡（`scripts/check-docs-version.sh`）会将发布说明与 reap.cc 的五个语言版本同 `package.json` 核对（含语言间一致性），reap.cc 也不再讲授已废弃的按存续时长划分的 memory 模型。",
       },
       {
         version: "0.17.1",

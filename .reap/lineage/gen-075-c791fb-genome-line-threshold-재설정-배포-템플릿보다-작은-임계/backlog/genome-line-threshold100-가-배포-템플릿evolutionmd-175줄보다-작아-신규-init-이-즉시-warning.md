@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: medium
 createdAt: 2026-07-26T03:48:58.222Z
+consumedBy: gen-075-c791fb
+consumedAt: 2026-07-26T07:11:02.859Z
 ---
 
 # genome line threshold(100) 가 배포 템플릿(evolution.md 175줄)보다 작아 신규 init 이 즉시 warning

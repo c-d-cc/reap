@@ -712,7 +712,7 @@ return nonce to AI                         ←── AI passes nonce
     intro: "Environment는 프로젝트의 서술적 지식입니다 — 현재 무엇이 존재하는가. 기술 스택, 소스 구조, 빌드 설정, 도메인 지식, 코드 의존성을 캡처합니다. Genome(규범적 — 어떻게 만들 것인가)과 달리, Environment는 현재 상태를 서술합니다.",
     structureTitle: "2계층 구조",
     structure: `.reap/environment/
-├── summary.md      # 항상 로딩 (~100줄) — 기술 스택, 소스 구조, 빌드, 테스트
+├── summary.md      # 항상 로딩 (~250줄) — 기술 스택, 소스 구조, 빌드, 테스트
 ├── domain/         # 도메인 지식 (온디맨드)
 ├── resources/      # 외부 참조 문서 — API 문서, SDK 스펙 (온디맨드)
 ├── docs/           # 프로젝트 참조 문서 — 설계 문서, 스펙 (온디맨드)
@@ -720,7 +720,7 @@ return nonce to AI                         ←── AI passes nonce
     layersTitle: "계층",
     layerHeaders: ["계층", "로딩", "내용", "제한"],
     layerItems: [
-      ["summary.md", "세션 시작 시 항상 로딩", "기술 스택, 소스 구조, 빌드 설정, 테스트 설정. AI의 기본 이해.", "~100줄"],
+      ["summary.md", "세션 시작 시 항상 로딩", "기술 스택, 소스 구조, 빌드 설정, 테스트 설정. AI의 기본 이해.", "~250줄"],
       ["domain/", "온디맨드 (필요 시 로딩)", "도메인 지식 — 비즈니스 규칙, API 스펙, 인프라 세부사항.", "제한 없음"],
       ["resources/", "온디맨드 (필요 시 로딩)", "외부 참조 문서 — API 문서, SDK 스펙, 서드파티 문서.", "제한 없음"],
       ["docs/", "온디맨드 (필요 시 로딩)", "프로젝트 참조 문서 — 설계 문서, 스펙, 아키텍처 결정.", "제한 없음"],
@@ -1049,7 +1049,7 @@ reap daemon query    # 심볼 쿼리 실행`,
     versions: [
       {
         version: "0.17.2",
-        notes: "**Reflect phase pruning 정책** — reflect prompt가 이제 \"무엇을 쓸지\"뿐 아니라 **\"무엇을 지울지\"**를 지시합니다. Memory tier가 lifespan이 아닌 content-type(세션 핸드오프 / 진행 중 트랙 / 설계 교훈) 기준으로 분류되며, 4단계 decision tree와 tier별 pruning이 추가됐습니다 — shortterm은 매 generation 교체, 완료된 midterm 트랙은 교훈을 승격한 뒤 삭제, longterm은 genome과 중복되는 항목을 제거. `environment/summary.md`에도 대응하는 지시가 추가되어 per-generation changelog를 누적하는 대신 낡은 서술을 제거합니다. `reap init`이 동일 규칙을 `genome/evolution.md`에 반영하며, 기존 프로젝트에는 v0.17.2 migration note가 제공됩니다. `reap fix --check`는 memory tier나 `environment/summary.md`가 가이드라인 크기를 초과하면 경고합니다 — 경고만 하며 자동 삭제하지 않습니다. issue #21 해결.",
+        notes: "**Reflect phase pruning 정책** — reflect prompt가 이제 \"무엇을 쓸지\"뿐 아니라 **\"무엇을 지울지\"**를 지시합니다. Memory tier가 lifespan이 아닌 content-type(세션 핸드오프 / 진행 중 트랙 / 설계 교훈) 기준으로 분류되며, 4단계 decision tree와 tier별 pruning이 추가됐습니다 — shortterm은 매 generation 교체, 완료된 midterm 트랙은 교훈을 승격한 뒤 삭제, longterm은 genome과 중복되는 항목을 제거. `environment/summary.md`에도 대응하는 지시가 추가되어 per-generation changelog를 누적하는 대신 낡은 서술을 제거합니다. `reap init`이 동일 규칙을 `genome/evolution.md`에 반영하며, 기존 프로젝트에는 v0.17.2 migration note가 제공됩니다. `reap fix --check`는 memory tier나 `environment/summary.md`가 가이드라인 크기를 초과하면 경고합니다 — 경고만 하며 자동 삭제하지 않습니다. issue #21 해결. Genome 크기 경고가 근거를 명시한 파일별 값(`invariants` 50 / `application` 250 / `evolution` 300)으로 바뀌었습니다 — 기존의 공통 100줄 기준은 배포되는 `evolution.md` 자체가 만족할 수 없어 `reap init` 직후부터 경고가 떴습니다. 릴리즈 게이트(`scripts/check-docs-version.sh`)가 릴리즈 노트와 reap.cc 5개 로케일을 `package.json` 과 대조하며(로케일 간 일관성 포함), reap.cc 도 더 이상 폐기된 lifespan 기반 memory 모델을 가르치지 않습니다.",
       },
       {
         version: "0.17.1",

@@ -709,7 +709,7 @@ return nonce to AI                         ←── AI passes nonce
     intro: "Environment is the project's descriptive knowledge — what exists now. It captures tech stack, source structure, build configuration, domain knowledge, and code dependencies. Unlike Genome (prescriptive — how to build), Environment describes the current state.",
     structureTitle: "2-Tier Structure",
     structure: `.reap/environment/
-├── summary.md      # Always loaded (~100 lines) — tech stack, source structure, build, tests
+├── summary.md      # Always loaded (~250 lines) — tech stack, source structure, build, tests
 ├── domain/         # Domain knowledge (on-demand)
 ├── resources/      # External reference docs — API docs, SDK specs (on-demand)
 ├── docs/           # Project reference docs — design docs, specs (on-demand)
@@ -717,7 +717,7 @@ return nonce to AI                         ←── AI passes nonce
     layersTitle: "Tiers",
     layerHeaders: ["Tier", "Loading", "Content", "Limit"],
     layerItems: [
-      ["summary.md", "Always loaded at session start", "Tech stack, source structure, build config, test setup. The AI's baseline understanding.", "~100 lines"],
+      ["summary.md", "Always loaded at session start", "Tech stack, source structure, build config, test setup. The AI's baseline understanding.", "~250 lines"],
       ["domain/", "On-demand (loaded when needed)", "Domain knowledge — business rules, API specs, infrastructure details.", "No limit"],
       ["resources/", "On-demand (loaded when needed)", "External reference documents — API docs, SDK specs, third-party documentation.", "No limit"],
       ["docs/", "On-demand (loaded when needed)", "Project reference documents — design docs, specs, architecture decisions.", "No limit"],
@@ -1046,7 +1046,7 @@ reap daemon query    # Run a symbol query`,
     versions: [
       {
         version: "0.17.2",
-        notes: "**Reflect-phase pruning policy** — the reflect prompt now tells the agent what to *remove*, not only what to write. Memory tiers are classified by content-type (session handoff / ongoing tracks / design lessons) instead of lifespan, with a 4-step decision tree and per-tier pruning: shortterm is replaced every generation, completed midterm tracks are deleted after promoting their lessons, longterm drops entries already covered by the genome. `environment/summary.md` gains a matching instruction to remove superseded content instead of accumulating per-generation changelogs. `reap init` seeds the same rules into `genome/evolution.md`, and existing projects receive a v0.17.2 migration note. `reap fix --check` warns when a memory tier or `environment/summary.md` exceeds its guideline size — warnings only, never auto-deleted. Fixes issue #21.",
+        notes: "**Reflect-phase pruning policy** — the reflect prompt now tells the agent what to *remove*, not only what to write. Memory tiers are classified by content-type (session handoff / ongoing tracks / design lessons) instead of lifespan, with a 4-step decision tree and per-tier pruning: shortterm is replaced every generation, completed midterm tracks are deleted after promoting their lessons, longterm drops entries already covered by the genome. `environment/summary.md` gains a matching instruction to remove superseded content instead of accumulating per-generation changelogs. `reap init` seeds the same rules into `genome/evolution.md`, and existing projects receive a v0.17.2 migration note. `reap fix --check` warns when a memory tier or `environment/summary.md` exceeds its guideline size — warnings only, never auto-deleted. Fixes issue #21. Genome size warnings are now per-file (`invariants` 50 / `application` 250 / `evolution` 300) with recorded rationale, replacing a shared 100-line limit the shipped `evolution.md` could not meet — a fresh `reap init` no longer warns. A release gate (`scripts/check-docs-version.sh`) verifies the release notes and all five reap.cc locales against `package.json`, including locale parity, and reap.cc itself no longer teaches the retired lifespan-based memory model.",
       },
       {
         version: "0.17.1",

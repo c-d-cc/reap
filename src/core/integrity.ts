@@ -18,7 +18,37 @@ export interface IntegrityResult {
 const VALID_BACKLOG_TYPES = ["genome-change", "environment-change", "task"];
 const VALID_BACKLOG_STATUSES = ["pending", "consumed"];
 const VALID_GENERATION_TYPES = ["embryo", "normal", "merge"];
-const GENOME_LINE_WARNING_THRESHOLD = 100;
+/**
+ * Line thresholds for the three genome files (gen-075).
+ *
+ * These were a single shared constant of 100 until v0.17.2 — a number with no
+ * recorded rationale that REAP itself could not satisfy: the shipped
+ * `src/templates/evolution.md` is ~193 lines, so every project warned on its
+ * genome the moment `reap init` finished.
+ *
+ * They are per-file now because the three files hold different things, and each
+ * value is derived from what its file is for:
+ *
+ * - `invariants.md` (ships at ~7 lines) — absolute constraints, human-edit only.
+ *   Growth here is itself the signal: past ~50 lines it has stopped being a set
+ *   of constraints and become a rulebook, which belongs in evolution.md.
+ *
+ * - `evolution.md` (ships at ~193 lines) — AI behaviour rules. A maturing
+ *   project legitimately adds its own, so the shipped size plus roughly 100
+ *   lines of headroom. Past 300 the rules are usually duplicated, or carry
+ *   descriptive content that belongs in environment/.
+ *
+ * - `application.md` (ships as a ~16-line skeleton, filled in by genome-suggest)
+ *   — project identity and architecture, so it scales with the project. 250
+ *   sits above what a large project needs in practice (this repo: ~205).
+ *
+ * Warnings only — the genome is user-owned and `fixProject` never rewrites it.
+ */
+const GENOME_LINE_WARNING_THRESHOLDS = {
+  application: 250,
+  evolution: 300,
+  invariants: 50,
+} as const;
 
 /**
  * Line thresholds for vision memory tiers (gen-072).
@@ -498,9 +528,9 @@ async function checkGenome(
   warnings: string[],
 ): Promise<void> {
   const genomeFiles = [
-    { path: paths.application, name: "application.md" },
-    { path: paths.evolution, name: "evolution.md" },
-    { path: paths.invariants, name: "invariants.md" },
+    { path: paths.application, name: "application.md", threshold: GENOME_LINE_WARNING_THRESHOLDS.application },
+    { path: paths.evolution, name: "evolution.md", threshold: GENOME_LINE_WARNING_THRESHOLDS.evolution },
+    { path: paths.invariants, name: "invariants.md", threshold: GENOME_LINE_WARNING_THRESHOLDS.invariants },
   ];
 
   for (const gf of genomeFiles) {
@@ -513,9 +543,9 @@ async function checkGenome(
     if (content === null) continue;
 
     const lines = content.split("\n").length;
-    if (lines > GENOME_LINE_WARNING_THRESHOLD) {
+    if (lines > gf.threshold) {
       warnings.push(
-        `genome/${gf.name}: ${lines} lines (exceeds ~${GENOME_LINE_WARNING_THRESHOLD} line guideline)`,
+        `genome/${gf.name}: ${lines} lines (exceeds ~${gf.threshold} line guideline)`,
       );
     }
 

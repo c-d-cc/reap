@@ -1,0 +1,23 @@
+id: gen-075-c791fb
+type: embryo
+goal: genome line threshold 재설정 — 배포 템플릿보다 작은 임계로 인한 신규 init 즉시 warning 해소
+parents:
+  - gen-074-72bf54
+timeline:
+  - stage: learning
+    at: 2026-07-26T07:11:02.850Z
+  - stage: planning
+    at: 2026-07-26T07:12:54.326Z
+  - stage: implementation
+    at: 2026-07-26T07:13:36.713Z
+  - stage: validation
+    at: 2026-07-26T07:17:39.160Z
+  - stage: completion
+    at: 2026-07-26T07:19:32.880Z
+status: completed
+fitnessFeedback:
+  text: 승인. genome threshold 를 파일별 + 근거 명시로 재설계. 문제를 '수치가 작다'가 아니라 '근거가 없다'로 정의한
+    것이 핵심이며, 임계를 올린 뒤 검사가 무력해지지 않았음을 3 case 로 확인한 것도 적절. gen-072 의 해결 지표(예외 제거)와
+    gen-073 의 carrier 4중 확인(docs 불일치 발견)이 모두 실효를 본 세대. 0.17.2 릴리즈 노트 보강 완료로 배포
+    준비 끝.
+  evaluatedAt: 2026-07-26T09:31:30.342Z

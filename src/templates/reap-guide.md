@@ -89,6 +89,22 @@ During `reap run completion --phase reflect`, the AI **must** perform cleanup:
 - **Bloat is a failure signal**: if longterm exceeds ~30~50 lines or midterm exceeds ~50~70 lines, pruning was skipped. Clean up in the next reflect.
 - **Empty is normal**: any memory file may be empty — that is a valid state
 
+## File Size Guidelines
+
+`reap fix --check` warns when a knowledge file grows past the size below. Each value comes from what the file is for, not from a uniform rule:
+
+| File | Guideline | Why |
+|---|---|---|
+| `genome/invariants.md` | ~50 lines | Absolute constraints, human-edit only. Past this it has become a rulebook — that belongs in evolution.md |
+| `genome/evolution.md` | ~300 lines | AI behaviour rules. Ships at ~193 lines and a maturing project adds its own; past 300 the rules are usually duplicated or carry descriptive content that belongs in environment/ |
+| `genome/application.md` | ~250 lines | Project identity and architecture — scales with the project |
+| `vision/memory/longterm.md` | ~50 lines | Design lessons only. Past this, pruning was skipped |
+| `vision/memory/midterm.md` | ~70 lines | Live tracks only. Past this, completed tracks were not removed |
+| `vision/memory/shortterm.md` | ~60 lines | The last 1~2 generations of handoff |
+| `environment/summary.md` | ~250 lines | Current state, not a per-generation changelog |
+
+**These are warnings, never automatic edits.** All of these files are user-authored; `reap fix` will not rewrite or truncate them. Resolve memory and environment bloat through the mandatory pruning step in `completion --phase reflect`, and genome bloat by moving misplaced content to where it belongs — do not hand-delete to silence a warning.
+
 ## .reap/ Structure
 
 ```
