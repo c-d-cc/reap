@@ -1,5 +1,14 @@
 ## What's New
 
+- **Reflect-phase pruning policy** — the reflect prompt now tells the agent what to *remove*, not only what to write. Memory tiers are classified by content-type (session handoff / ongoing tracks / design lessons) rather than lifespan, with a 4-step decision tree and per-tier pruning: shortterm is replaced every generation, completed midterm tracks are deleted after their lessons are promoted, and longterm drops anything already covered by the genome. `environment/summary.md` gets a matching instruction to remove superseded content instead of accumulating per-generation changelogs.
+- **Rules now reach existing projects** — `reap init` seeds the same classification into `genome/evolution.md`, and projects created earlier receive a `v0.17.2` migration note so their genome stops teaching the retired lifespan model. Fixes [#21](https://github.com/c-d-cc/reap/issues/21).
+- **Size warnings** — `reap fix --check` reports when a memory tier or `environment/summary.md` grows past its guideline size. Warnings only; `reap fix` never deletes memory content.
+- **Docs release gate** — `scripts/check-docs-version.sh` verifies that `RELEASE_NOTICE.md`, `RELEASE_NOTES.md`, and all five reap.cc locales agree with `package.json` before publish, including locale-parity so one language can no longer be left behind.
+
+---
+
+## v0.17.1
+
 - **Migration instruction layer** — `reap update` now detects version gaps and injects per-version migration instructions into the agent's SessionStart context. Agents receive actionable prompts to reorganize existing artifacts/memory when upgrading REAP. Mark migrations complete with `reap update --mark-migrated`.
 - **Memory structure improvement** — Vision memory now uses content-type-based classification (session handoff / ongoing tracks / design lessons) instead of time-based tiers. A mandatory pruning policy was added to the reflect phase: shortterm is replaced every generation, midterm is cleaned on track completion, longterm is pruned periodically.
 

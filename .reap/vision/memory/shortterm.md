@@ -1,30 +1,25 @@
 # Shortterm Memory
 
-## 세션 요약 (gen-072, 2026-07-26)
+## 세션 요약 (gen-073, 2026-07-26)
 
-### gen-072: issue #21 — pruning policy carrier 동기화 (v0.17.2)
+### gen-073: 릴리즈 문서 정합성 + reap.cc 갱신
 
-reflect prompt / evolution 템플릿이 v0.17.1 의 content-type + pruning 규칙을 반영하지 않아 발생한 이슈. 조사 중 **템플릿이 `initCommon` 단 1곳에서만 소비되어 기존 프로젝트에 도달하지 않는다**는 것이 확인되어, migration note `v0.17.2.md` 를 추가해 도달 채널을 만들었다.
+`scripts/check-docs-version.sh` 신설(검사 5종, 특히 **로케일 집합 동일성**) + release.yml publish 전 게이트 + versionBump skill Step 5-1. 5 로케일 changelog 에 0.17.2/0.17.1 추가 + 0.16.5 누락 보정(20 항목 정렬). reap.cc 가 가르치던 폐기 lifespan 분류를 content-type + pruning 으로 교체(10개 위치).
 
-주요 변경: `completion.ts`(reflect prompt) / `templates/evolution.md` / `templates/migration/v0.17.2.md`(신규) / `integrity.ts`(크기 warning) / 0.17.2 bump.
+검증: 스크립트가 수정 전 **8건 fail** → 수정 후 전건 pass. docs vite build 성공. unit 454-0 / e2e 263-1 / scenario 35-5 (뒤 둘 pre-existing, baseline 동일).
 
-결과: typecheck pass / unit 454-0 / e2e 263-1 / scenario 35-5 (뒤 둘은 pre-existing).
+### 다음 세션 — 3건 orchestrate 중 2건 완료
 
-### 다음 세션 — 3건 orchestrate 중 1건 완료
-
-유저가 3건 순차 진행을 지시했고 gen-072 가 그 첫 번째다. 남은 순서:
-
-1. **다음**: `release-직전-문서-버전-일치-검증-reapcc-문서-갱신` — 0.17.2 를 깨끗이 릴리즈 가능한 상태로 만드는 것이 목적. **gen-072 가 `RELEASE_NOTES.md` / `docs/` 를 의도적으로 건드리지 않았으므로 그 몫이 여기 있다**
-2. 그 다음: `backlog 작성 시 interview 기능` — 0.18.0 예정
-3. daemon 2건은 유저 판단으로 보류
+1. **다음(마지막)**: `backlog 작성 시 interview 기능` — 0.18.0 예정. **gen-073 교훈이 직접 적용됨**: interview 는 "지시를 자세히 쓰는" 접근이 아니라 "빈칸이 남았는지 검사하는" 접근이어야 한다
+2. daemon 2건은 유저 판단으로 보류
 
 ### 미결 사항
 
-- **0.17.2 는 아직 커밋/푸시/릴리즈 전.** gen-072 completion commit 이 커밋까지 수행하며, npm publish 는 태그 push 트리거
-- Scope C(dog-fooding 대응표에 prompt 코드 추가)를 adapt phase 에서 처리해야 함 — 본 이슈의 근본 원인 대책이라 누락 금지
-- issue #21 은 릴리즈 후 코멘트 + close 필요
+- **0.17.2 릴리즈 준비 완료** — 문서 정합성 확보됨. `git tag v0.17.2 && git push origin main v0.17.2` 만 하면 됨 (**유저 확인 필수**)
+- issue #21 코멘트 + close 는 릴리즈 후
+- adapt 에서 genome carrier 목록에 docs 사이트(4번째) 추가 예정
 
 ### Backlog 상태
 
-pending 6건 — 문서검증 / interview / daemon 배포결함 / daemon SCIP / genome threshold(신규) / scenario 복구(신규).
-consumed: `resolve-21-...` (gen-072).
+pending 4건 — interview / daemon 배포결함 / daemon SCIP / genome threshold / scenario 복구.
+consumed: `release-직전-문서-...` (gen-073).

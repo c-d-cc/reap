@@ -45,22 +45,28 @@ version bump 전에 `/reapdev.docsUpdate` 스킬을 실행하여 문서 일관�
 
 5. 유저가 선택하면:
    - `npm version {type} --no-git-tag-version` 실행
-   - RELEASE_NOTES.md 생성:
-     a. 마지막 태그 이후의 `.reap/lineage/` 폴더들을 시간순으로 스캔
-     b. 각 generation의 01-objective.md (Goal)과 05-completion.md (Summary)를 읽어 변경 내용 파악
-     c. 형식:
+   - RELEASE_NOTES.md 갱신 (**추가가 아니라 승격 구조**):
+
+     이 파일은 `.github/workflows/release.yml` 의 `body_path` 로 지정되어 **GitHub release body 로 그대로 발행**된다. 최상단 `## What's New` 가 곧 이번 릴리즈의 본문이며, 버전 번호가 적혀 있지 않다.
+
+     a. 기존 `## What's New` 본문을 그 아래 `## v{직전버전}` 섹션으로 **승격**(이동)한다
+     b. `## What's New` 를 이번 버전 내용으로 새로 채운다
+     c. 마지막 태그 이후의 `.reap/lineage/` 를 시간순 스캔해 각 generation 의 01-learning.md(Goal)과 05-completion.md(Summary)에서 변경 내용을 파악
+     d. 형식:
         ```
         ## What's New
-        - [주요 변경 1]
-        - [주요 변경 2]
 
-        ## Generations
-        - **gen-XXX-{hash}**: [goal summary]
-        - **gen-YYY-{hash}**: [goal summary]
+        - **[주요 변경 1]** — [사용자 관점 설명]
+        - **[주요 변경 2]** — [사용자 관점 설명]
 
-        ## Breaking Changes
-        [있으면 기술, 없으면 섹션 제거]
+        ---
+
+        ## v{직전버전}
+        [승격된 이전 내용]
         ```
+     e. Breaking change 가 있으면 What's New 안에 명시
+
+     승격을 빠뜨리면 GitHub release 가 **직전 버전 내용으로 발행**된다. Step 5-1 의 검사가 이를 잡는다.
    - RELEASE_NOTICE.md 업데이트:
      a. 파일 상단 (`# Release Notices` 아래, 기존 첫 번째 `## vX.Y.Z` 위)에 새 버전 섹션 추가
      b. 형식:
@@ -78,6 +84,18 @@ version bump 전에 `/reapdev.docsUpdate` 스킬을 실행하여 문서 일관�
         { version: "{new}", notes: "[해당 언어로 변경 요약]" },
         ```
    - `git add package.json RELEASE_NOTES.md RELEASE_NOTICE.md docs/src/i18n/translations/ && git commit -m "chore: v{new} {type} bump"`
+
+5-1. **문서 일관성 검증** (커밋 후, 태그 전 — 필수):
+
+   ```bash
+   bash scripts/check-docs-version.sh
+   ```
+
+   이 스크립트가 `RELEASE_NOTICE.md` / `RELEASE_NOTES.md` / 5개 로케일이 `package.json` 과 일치하는지, **로케일 간 항목 집합이 동일한지**까지 검사한다. non-zero exit 면 태그를 만들지 말고 지적된 항목을 먼저 고쳐라.
+
+   같은 스크립트가 `.github/workflows/release.yml` 의 `npm publish` 앞에서도 실행되므로, 여기서 건너뛰면 태그를 이미 push 한 뒤에 배포가 막힌다 — 되돌리기가 번거로우니 이 시점에 통과시켜라.
+
+   > **왜 이 단계가 있는가**: v0.17.1 릴리즈 때 Step 5 에 5개 로케일 갱신 지시가 이미 있었는데도 누락됐다. 그리고 그 이전에는 en/ko 만 갱신하고 ja/de/zh-CN 을 빠뜨려 changelog 가 로케일마다 달라진 적도 있다. 지시문만으로는 막지 못하므로 실행 가능한 검사로 대체한다.
 
 6. **태그 생성 및 배포** (유저 컨펌 필수):
    - 유저에게 질문: "`v{new}` 태그를 생성하고 push할까요? (yes / no)"

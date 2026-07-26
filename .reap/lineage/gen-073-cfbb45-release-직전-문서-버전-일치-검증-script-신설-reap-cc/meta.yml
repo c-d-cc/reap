@@ -1,0 +1,23 @@
+id: gen-073-cfbb45
+type: embryo
+goal: release 직전 문서-버전 일치 검증 script 신설 + reap.cc 문서에 0.17.1/0.17.2 반영 + 로케일 drift 보정
+parents:
+  - gen-072-66bfbb
+timeline:
+  - stage: learning
+    at: 2026-07-26T04:53:27.914Z
+  - stage: planning
+    at: 2026-07-26T04:55:34.112Z
+  - stage: implementation
+    at: 2026-07-26T04:57:20.820Z
+  - stage: validation
+    at: 2026-07-26T05:04:57.310Z
+  - stage: completion
+    at: 2026-07-26T05:07:01.826Z
+status: completed
+fitnessFeedback:
+  text: 이번 generation 승인. 릴리즈 문서 정합성 확보 + reap.cc 폐기 규칙 제거 완료. backlog 의 사실
+    오류(RELEASE_NOTES 는 정상이었고 승격이 필요했음)와 대책 방향 오류(지시는 이미 있었고 지켜지지 않았음)를 스스로 정정하고
+    검사로 대체한 판단이 좋았음. 검사 2 의 한계를 스스로 명시한 것도 적절. 다음 순서는 interview 보다 gen-072 에서 새로
+    추가된 backlog(scenario 복구, genome threshold)를 먼저 처리하는 것으로 유저가 지시.
+  evaluatedAt: 2026-07-26T05:13:55.209Z

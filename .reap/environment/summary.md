@@ -137,6 +137,17 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 └── tests/                         — daemon 테스트 (25 파일, 130 tests)
 ```
 
+## docs/ — reap.cc 문서 사이트
+
+별도 repo 가 아니라 **본 repo 안의 Vite + React 앱**이다 (`docs/`, 자체 `package.json`).
+
+- 배포: `.github/workflows/docs.yml` — `docs/**`, `media/**`, `README*.md` 변경이 main 에 push 되면 GitHub Pages 로 자동 배포. `docs/public/CNAME` = `reap.cc`
+- 빌드: `cd docs && npx vite build` → `docs/dist/public/`. workflow 가 `index.html` 을 `404.html` 로 복사(SPA fallback)
+- 콘텐츠: **`docs/src/i18n/translations/{en,ko,ja,de,zh-CN}.ts`** — 5개 로케일 각각이 전체 문서 텍스트를 담은 TS 객체. 마크다운 파일이 아니다
+- changelog: 각 로케일의 `releaseNotes.versions[]` 배열, 최신이 첫 원소
+
+**주의**: 문서 텍스트가 TS 객체 배열이므로 구문 오류 시 빌드가 깨진다. 수정 후 반드시 `npx vite build` 확인. 그리고 5개 로케일을 **모두** 갱신해야 한다 — 일부만 고치면 로케일 drift 가 생기며, `scripts/check-docs-version.sh` 가 이를 검사한다.
+
 ## Build & Scripts
 
 - `npm run build` — bun build → `dist/cli/index.js` (~400KB single bundle) + skill 복사
@@ -169,7 +180,7 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 - `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates)
 - `scripts/alpha-publish.sh` — alpha 배포 헬퍼
 - `scripts/postinstall.sh` — npm postinstall hook
-- (참고) 이전의 `e2e-*.sh` shell scripts 는 bun:test 로 일원화되어 제거됨
+- `scripts/check-docs-version.sh` — 릴리즈 문서 정합성 게이트. `RELEASE_NOTICE.md` / `RELEASE_NOTES.md` / 5개 로케일 changelog 가 `package.json` 과 일치하는지 + **로케일 간 항목 집합 동일성** + migration note 가 패키지 버전을 넘지 않는지 검사. `release.yml` 의 `npm publish` 앞과 `reapdev.versionBump` Step 5-1 에서 실행
 
 ### npm scripts
 - `npm run test:unit` — bun test tests/unit/

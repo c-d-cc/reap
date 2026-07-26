@@ -230,6 +230,26 @@ gen-064는 (4) slash trigger 등록을 구현했고, e2e (`installSkills` 직접
 - **agent의 추상적 추론보다 사용자가 코드를 직접 읽기가 강력**. plan 단계의 잘못된 가정(`registerSessionIntegration`이 SessionStart 매번 호출이라는 추정)이 implementation까지 그대로 흘러갔지만 fitness 직전 사용자 검토에서 catch → back regression path가 graceful 하게 처리. lifecycle이 정상 작동한 사례.
 - **사용자 인 더 루프(human-in-the-loop)는 자동화 신뢰의 마지막 safety net**. AI는 자기 작업의 모든 entry point를 자기 검증할 수 없다 — 사용자 직접 테스트와 코드 직접 검토가 그 갭을 메운다. 본 사례가 fitness phase 의 가치를 입증.
 
+## 반복 누락은 지시가 아니라 검사로 막는다 (gen-073 교훈)
+
+같은 절차가 두 번 이상 누락되면, **지시문을 더 자세히 쓰는 것은 이미 실패한 방법**이다.
+
+gen-073 사례: `reapdev.versionBump` skill 은 `docs/src/i18n/translations/` 아래 5개 로케일 파일을 **이름까지 명시**하고 있었다. 그럼에도 v0.17.1 릴리즈에서 문서 갱신이 통째로 누락됐고, 그 이전에는 en/ko 만 갱신하고 ja/de/zh-CN 을 빠뜨려 changelog 가 로케일마다 달라진 적도 있다.
+
+판단 기준: **"이 절차를 사람이 매번 기억해야 하는가?"** → Yes 면 검사를 만들어라.
+
+- 검사는 **실행 가능**해야 한다 (script / test / CI step). 체크리스트 문서는 검사가 아니다
+- **우회 불가능한 경로에 연결**한다 (release workflow, phase 전환, commit hook 등)
+- 지시문에는 검사 실행을 추가하고, **왜 지시문만으로는 부족한지 근거도 함께 적는다.** 그래야 다음 사람이 "지시를 더 자세히 쓰자"로 되돌아가지 않는다
+
+### 검사를 만들 때 — 먼저 실패시켜라
+
+검사를 만든 뒤 곧바로 통과하는 것을 확인하면, **그 검사가 실제로 결함을 잡는지 알 수 없다.** "검사가 동작한다"와 "검사가 무력하다"가 구분되지 않는다.
+
+- 수정 **전** 상태에서 먼저 돌려 fail 을 확인한다. 그 fail 이 곧 검사의 유효성 근거다
+- 개별 항목도 마찬가지 — 정상 값을 일부러 깨뜨려 fail 을 확인하고 복원한다 (negative test)
+- **검사가 못 잡는 것을 결과와 함께 기록한다.** 통과는 "검사 범위 안에서 문제없음"일 뿐이다. 한계를 적어두지 않으면 다음 사람이 그 검사를 실제보다 신뢰한다
+
 ## 아키텍처 변경 시 genome 동기화
 
 새 기능/구조를 추가하거나 아키텍처를 변경했을 때, 해당 변경이 AI의 행동 방식에 영향을 준다면 반드시 genome(evolution.md 또는 application.md)에 반영해야 한다.

@@ -130,13 +130,18 @@ Embryo → Normal 전환: adapt phase에서 AI 제안, 인간 승인.
 
 **규칙의 carrier 는 문서만이 아니다.** 같은 규칙이 guide / genome 템플릿 / phase prompt 세 곳에 각각 존재할 수 있고, 하나만 고치면 나머지가 구버전으로 남아 서로 모순되는 지시를 낸다.
 
-판단 기준: **"이 규칙이 agent 행동을 좌우하는가?"** → Yes 면 다음 3곳을 **모두** 확인:
+판단 기준: **"이 규칙이 agent 행동을 좌우하는가?"** → Yes 면 다음 4곳을 **모두** 확인:
 
 1. `src/templates/reap-guide.md` (+ `.reap/reap-guide.md`) — 세션 시작 시 로드되는 참조 문서
 2. `src/templates/evolution.md` (+ `.reap/genome/evolution.md`) — 프로젝트 genome
 3. `src/cli/commands/run/*.ts` 의 prompt 문자열 — **agent 가 행동하는 바로 그 순간 읽는 지시**
+4. `docs/src/i18n/translations/*.ts` — **reap.cc 문서 사이트, 5개 로케일 전부** (en, ko, ja, de, zh-CN)
 
-3번이 가장 놓치기 쉽다. grep 으로 코드 안의 규칙 텍스트까지 확인할 것 (예: `grep -rn "<규칙 키워드>" src/cli/`).
+3번과 4번이 놓치기 쉽다. 3번은 grep 으로 코드 안의 규칙 텍스트까지 확인할 것 (예: `grep -rn "<규칙 키워드>" src/cli/`).
+
+**4번이 중요한 이유 (gen-073 실증)**: 신규 사용자는 reap.cc 로 REAP 을 배운다. v0.17.1 이 memory tier 를 content-type 기준으로 바꿨는데 문서 사이트는 폐기된 lifespan 분류를 **10개 위치(2곳 × 5 로케일)** 에서 계속 가르치고 있었고, `memoryRules` 에는 새 정책과 정면 배치되는 문구까지 있었다. 코드와 genome 을 다 고쳐도 문서가 구버전이면 **사용자는 여전히 잘못 배운다.**
+
+로케일이 5개이므로 **일부만 고치면 로케일 drift 가 생긴다.** `scripts/check-docs-version.sh` 가 changelog 의 집합 동일성은 검사하지만 본문 텍스트는 검사하지 않으므로, 본문 변경 시에는 5개 파일을 모두 손댔는지 직접 확인할 것.
 
 **텍스트는 창작하지 말고 한 곳을 기준으로 복제한다.** 세 carrier 가 같은 규칙을 각자 다르게 표현하면 다음 변경 때 또 drift 가 생긴다.
 

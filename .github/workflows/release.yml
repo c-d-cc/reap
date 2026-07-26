@@ -22,6 +22,13 @@ jobs:
           registry-url: https://registry.npmjs.org
 
       - run: npm ci
+
+      # Gate the publish on documents matching package.json. v0.17.1 shipped
+      # with no docs update because nothing checked; this runs before publish so
+      # a mismatch stops the release instead of being noticed afterwards.
+      - name: Verify docs match package version
+        run: bash scripts/check-docs-version.sh
+
       - run: npm run build
       - run: npm publish --access public
         env:

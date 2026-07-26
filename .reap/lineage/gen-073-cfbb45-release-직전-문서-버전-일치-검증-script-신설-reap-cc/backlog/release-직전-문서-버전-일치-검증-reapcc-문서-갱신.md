@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
 createdAt: 2026-07-26T02:05:01.760Z
+consumedBy: gen-073-cfbb45
+consumedAt: 2026-07-26T04:53:27.923Z
 ---
 
 # release 직전 문서-버전 일치 검증 + reap.cc 문서 갱신

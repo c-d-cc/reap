@@ -76,6 +76,24 @@ When encountering a problem, never work around it and move on. Always track the 
 
 Decision rule: "If this problem occurs again, would I have to repeat the same workaround?" → If yes, a root cause fix is required.
 
+## Repeated Omissions Need a Check, Not a Longer Instruction
+
+When the same step is missed twice or more, **writing a more detailed instruction is a method that has already failed.**
+
+Decision rule: **"Does a person have to remember this step every time?"** → If yes, build a check.
+
+- The check must be **executable** (script / test / CI step). A checklist document is not a check.
+- Wire it into a path that **cannot be bypassed** (release workflow, phase transition, commit hook).
+- Add the check to the instruction, and **record why the instruction alone was insufficient** — otherwise the next person reverts to "let's write it out in more detail".
+
+### When building a check — make it fail first
+
+If you write a check and immediately see it pass, you do not know whether it catches anything. "The check works" and "the check is inert" look identical.
+
+- Run it against the **broken** state first and confirm the failure. That failure is the evidence the check is real.
+- Do the same per assertion — break a known-good value, confirm the failure, restore it (negative test).
+- **Record what the check cannot see, alongside its results.** Passing means "no problem within the check's scope". Without a stated limit, the next person trusts it further than it goes.
+
 ## Architecture Change = Genome Sync
 
 When adding new features/structures or changing architecture, if the change affects how the AI should behave, it MUST be reflected in the genome (evolution.md or application.md).
