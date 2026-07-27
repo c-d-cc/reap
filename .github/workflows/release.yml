@@ -29,6 +29,12 @@ jobs:
       - name: Verify docs match package version
         run: bash scripts/check-docs-version.sh
 
+      # Install the tarball we are about to publish and ask REAP whether the
+      # result is healthy. Catches what #22 and the gen-074 daemon packaging
+      # defect had in common: both were only visible after installing.
+      - name: Self-diagnosis
+        run: bash scripts/check-self-diagnosis.sh
+
       - run: npm run build
       - run: npm publish --access public
         env:

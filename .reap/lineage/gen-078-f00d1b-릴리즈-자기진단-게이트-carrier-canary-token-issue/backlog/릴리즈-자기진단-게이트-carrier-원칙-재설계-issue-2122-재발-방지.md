@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
 createdAt: 2026-07-27T11:56:46.032Z
+consumedBy: gen-078-f00d1b
+consumedAt: 2026-07-27T13:04:00.544Z
 ---
 
 # 릴리즈 자기진단 게이트 + carrier 원칙 재설계 — issue 21/22 재발 방지

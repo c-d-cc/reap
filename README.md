@@ -235,6 +235,7 @@ Pre-approve N generations for autonomous execution:
 
 REAP integrates with AI agents through an adapter layer keyed by the `agentClient` config field. Currently supported clients:
 
+<!-- reap:carrier(claude-code-commands-path) -->
 - **Claude Code** (`agentClient: claude-code`, default) — static knowledge via `@` imports in `CLAUDE.md`; dynamic state via `SessionStart` hook (`reap load-context`); slash commands installed to `~/.claude/commands/reap.*.md`.
 - **OpenCode** (`agentClient: opencode`) — static knowledge via `opencode.json`'s `instructions` field; dynamic state via `.reap/.session-state.md`, auto-refreshed by the bundled OpenCode plugin (`.opencode/plugins/reap-plugin.ts`) on `session.created` / `tool.execute.before`; slash commands installed to `~/.config/opencode/commands/reap.*.md`.
 

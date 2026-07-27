@@ -174,6 +174,7 @@ export const zhCN: Translations = {
     commandLoadingDesc: "REAP 斜杠命令仅在 REAP 项目中加载——不会出现在非 REAP 项目中。",
     commandLoadingDetails: [
       { label: "来源", desc: "命令原文件存储在 ~/.reap/commands/（由 reap init 和 reap update 安装）" },
+      // reap:carrier(claude-code-commands-path)
       { label: "加载", desc: "打开 REAP 项目时，会话钩子自动将命令符号链接到 .claude/commands/" },
       { label: "非 REAP 项目", desc: "不创建符号链接，因此 AI 代理的技能列表中不会出现 REAP 技能" },
       { label: "向后兼容", desc: "~/.claude/commands/ 中的重定向存根确保旧版设置在迁移期间继续工作" },
@@ -918,6 +919,7 @@ reap daemon query    # 运行符号查询`,
     cruisePauseDesc: "当以下情况发生时，巡航会自动暂停并请求人类输入：(1) 不确定性超过 AI 的置信阈值，(2) 需要人类判断的决策（如破坏性 API 更改），(3) 积压中包含冲突的优先级。所有 N 个 Generation 完成后，人类进行批量审查。",
     memoryTitle: "记忆系统",
     memoryDesc: "记忆是一个自由形式的记录系统，AI 在其中跨会话和 Generation 持久化上下文。与 Genome（修改受限）或 Lineage（随时间压缩）不同，记忆始终可访问且可自由写入。",
+    // reap:carrier(memory-tier-classification)
     memoryHeaders: ["层级", "作用", "判断标准", "Pruning"],
     memoryRows: [
       ["shortterm", "会话交接", "「现在就需要吗？」", "每代替换——不累积"],

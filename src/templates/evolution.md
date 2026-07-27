@@ -116,6 +116,7 @@ Space for project design documents. Distinction from Memory:
 
 Decision rule: "Is this content worth documenting as an independent topic?" → Yes = Design, No = Memory.
 
+<!-- reap:carrier(memory-tier-classification) -->
 ### Memory (`vision/memory/`)
 Free-form space for the AI to record project-related knowledge. The 3-tier structure is classified by **what the content is for** (content-type), NOT by how long it will live (lifespan). Lifespan requires predicting the future, which the AI can't do reliably — that judgment burden leads to misclassification and bloat.
 

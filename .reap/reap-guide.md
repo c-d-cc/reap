@@ -24,6 +24,7 @@ REAP consists of four interconnected layers:
 
 Memory is a free-form recording system under `.reap/vision/memory/` where AI can persist project context across sessions and generations. Unlike Genome (which has modification constraints) or Lineage (which gets compressed), Memory is always accessible and freely writable.
 
+<!-- reap:carrier(memory-tier-classification) -->
 ### 3-Tier Structure — content-type based
 
 Tiers are classified by **what the content is for** (content-type), NOT by how long it will live (lifespan). Lifespan requires predicting the future, which the AI can't reliably do — that judgment burden has historically led to misclassification and bloat.
@@ -88,6 +89,35 @@ During `reap run completion --phase reflect`, the AI **must** perform cleanup:
 - **Architecture changes must propagate**: when adding new features/structure, update evolution.md / application.md / memory together
 - **Bloat is a failure signal**: if longterm exceeds ~30~50 lines or midterm exceeds ~50~70 lines, pruning was skipped. Clean up in the next reflect.
 - **Empty is normal**: any memory file may be empty — that is a valid state
+
+## Carrier Markers
+
+Some facts are known in more than one place — an install path known by both the installer and the checker, a rule stated in the guide, the genome template, a phase prompt and five locale files. When one of them changes and the others do not, the tool starts contradicting itself. That is what issues #21 and #22 were.
+
+Files that know such a fact say so:
+
+```ts
+// reap:carrier(claude-code-commands-path)
+export function claudeCodeCommandsDir(home = homedir()): string { ... }
+```
+
+```markdown
+<!-- reap:carrier(memory-tier-classification) -->
+```
+
+Before changing a shared fact, find everywhere that knows it:
+
+```bash
+grep -rn "reap:carrier(claude-code-commands-path)" .
+bash scripts/list-carriers.sh            # every ID and where it lives
+bash scripts/list-carriers.sh --orphans  # IDs recorded in one file only
+```
+
+The marker sits next to the value, so whoever edits the value sees it. A list kept elsewhere only helps the person who remembers to go read it — REAP kept such a list and #22 still slipped through it, because every entry was a document and #22 was code disagreeing with code.
+
+**Prefer sharing over marking.** If two pieces of code need the same *value*, give it one owner and inject or import it — then there is nothing to keep in sync. Markers are for what cannot be shared: prose, translations, prompt strings, the set of values a function can return.
+
+An orphan (an ID in exactly one file) means either the marker is unnecessary, or the other places that know the fact were never marked. The second is the state #21 and #22 were in.
 
 ## File Size Guidelines
 

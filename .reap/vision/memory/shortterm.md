@@ -1,38 +1,33 @@
 # Shortterm Memory
 
-## 세션 요약 (gen-077, 2026-07-27)
+## 세션 요약 (gen-078, 2026-07-28)
 
-### gen-077: e2e init-repair 해소 — 0.17.3 묶음 1/3
+### gen-078: 자기진단 게이트 + carrier 표식 — 0.17.3 묶음 2/3
 
-6세대 방치된 e2e 1 fail 해소. **e2e 268-1 → 272-0. gen-072 이래 처음으로 세 스위트 모두 green.**
+issue #21/#22 재발 방지. 두 축 완료:
 
-learning 은 "(a) 테스트가 낡았다"로 판정했고 맞았으나, **테스트를 코드 경로별 4 case 로 쪼개면서 계획에 없던 구현 결함이 드러났다** — `repair.ts` 가 `ensureClaudeMd` 의 `"updated"` 를 `skipped` 로 분류해, 파일을 갈아엎고도 "이미 있어서 건너뜀"으로 보고하고 있었다. 부정형 분기(`=== "skipped"` 만 skipped)로 수정.
+- **자기진단 게이트** (`scripts/check-self-diagnosis.sh`) — `npm pack` → 격리 HOME/prefix 설치 → `init` → `fix --check` **경고 0** 요구. release + **CI 양쪽**에 연결
+- **carrier 표식** (`scripts/list-carriers.sh`) — 열거 대신 파일에 `reap:carrier(<id>)` 를 심고 grep. 2 carrier / 19 files, 고아 0
 
-`integrity` 와 `ensureClaudeMd` 의 판정 비대칭은 **통합하지 않았다** — 전자는 경고 여부(느슨해야), 후자는 덮어쓸 위치(엄격해야). 목적이 다르므로 통합하면 한쪽이 부적절해진다. 상호 참조 주석으로 근거를 남겼다.
+**게이트가 만들어지자마자 실제 결함을 잡았다** — `invariants.md` 가 placeholder 로 오판되고 있었다(불릿 목록이라 산문이 없는데 검사가 `-` 줄을 제외). REAP 배포 파일이 REAP 검사를 통과 못 하는 상태로, gen-075 의 genome threshold 와 같은 유형. 인과로 묶여 본 세대에서 수정.
 
-### 다음 세션 — 0.17.3 묶음 계속
+**negative test 가 내 오해도 드러냈다** — #22 를 재현하려 `isCanonical` 을 false 로 했는데 exit 0. gen-076 이 그 검사 자체를 제거한 걸 잊고 있었다. 정확히 재현하니 19건 검출 + exit 1.
 
-1. **`릴리즈-자기진단-게이트-...`** (2/3) — **두 선행 조건 모두 충족됨**: `fix --check` 경고 0(gen-076) + 테스트 0 fail(gen-077). 이제 자기진단과 **테스트를 CI 게이트에 넣을 수 있다**
-2. `agent-관점-검증-층2-...` (3/3) — 설계 세대라 코드 변경이 없을 수 있음
-3. **0.17.3 릴리즈** — 3건 완료 후 릴리즈 노트 일괄 보강 → 태그 (**유저 확인 필수**)
-4. interview 재설계 / daemon 2건은 이번 묶음 제외
+검증: typecheck 0 / 자기진단 pass / docs gate pass / unit 470-0 / e2e 272-0 / scenario 44-0.
 
-### canary token 설계에 반영할 것
+### 다음 세션
 
-"한쪽만 갱신됨"이 **세 번째**다:
+1. **`agent-관점-검증-층2-...`** (3/3) — 묶음 마지막. 설계 세대라 코드 변경이 없을 수 있음
+2. **0.17.3 릴리즈** — 3건 완료 후 릴리즈 노트 일괄 보강 → 태그 (**유저 확인 필수**)
+3. `ci-에서-테스트-실행-...` (신규) — **`reap-test` 를 private 으로 분리한 이유 확인이 선행.** 이유가 약하면 public 전환이 압도적으로 단순 (PAT 발급은 사용자 수동 작업)
+4. interview 재설계 / daemon 2건은 묶음 제외
 
-| 이슈 | 늘린 것 | 안 고친 것 |
-|---|---|---|
-| #21 | memory 분류 규칙 | reflect prompt / evolution 템플릿 |
-| #22 | 설치 경로 | integrity checker |
-| gen-077 | `ensureClaudeMd` 반환값 `"updated"` | `repair.ts` 분기 |
+### 알아둘 것
 
-**반환값 union 확장도 "여러 곳이 아는 사실"의 한 종류**다. 다음 세대 설계에 포함할 것.
-
-### 6세대 방치의 구조적 원인
-
-`.github/workflows/ci.yml` 은 `npm ci` + `npm run build` 만 돌린다 — **테스트를 안 돌린다.** e2e 1 fail 이 아무것도 막지 않았다. 다음 세대에서 CI 에 테스트 추가.
+- **CI 가 테스트를 안 돌리는 이유** = `tests/` 가 private submodule. 기본 `GITHUB_TOKEN` 으로 접근 불가. `ci.yml` 주석에 사유 기록됨
+- **자기진단이 못 잡는 것**: #21 유형(규칙 텍스트) → carrier 표식 영역 / gen-063 유형(slash command 미노출) → 층 2 영역. 게이트 통과 = "검사 범위 안에서 문제없음"일 뿐
+- **carrier 표식의 효과는 미검증** — "값 옆의 주석을 본다"는 가정에 기대고 있다. 노이즈로 인식되기 시작하면 재검토 필요
 
 ### Backlog 상태
 
-pending 5건. consumed: `e2e-init-repair-...` (gen-077).
+pending 5건. consumed: `릴리즈-자기진단-게이트-...` (gen-078).

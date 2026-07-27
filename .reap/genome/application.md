@@ -126,24 +126,54 @@ Embryo → Normal 전환: adapt phase에서 AI 제안, 인간 승인.
 - `.reap/` 디렉토리 구조 ↔ `src/core/integrity.ts` (구조 검증), `src/cli/commands/init/` (초기화)
 - **agent 행동 규칙 텍스트 ↔ `src/cli/commands/run/*.ts` 의 prompt 문자열**
 
-### 규칙 변경 시 carrier 3중 확인 (gen-072 교훈, issue #21)
+### 여러 곳이 아는 사실 — 표식으로 찾는다 (gen-078, issue #21/#22)
 
-**규칙의 carrier 는 문서만이 아니다.** 같은 규칙이 guide / genome 템플릿 / phase prompt 세 곳에 각각 존재할 수 있고, 하나만 고치면 나머지가 구버전으로 남아 서로 모순되는 지시를 낸다.
+같은 사실을 여러 파일이 알고 있는데 일부만 갱신되면 도구가 자기모순에 빠진다. issue #21(규칙 텍스트)과 #22(설치 경로)가 그 결과였다.
 
-판단 기준: **"이 규칙이 agent 행동을 좌우하는가?"** → Yes 면 다음 4곳을 **모두** 확인:
+**목록을 관리하지 마라.** gen-072 가 carrier 목록을 3항목으로 만들었고 gen-073 이 4항목으로 늘렸는데, #22 는 여전히 빠져나갔다 — 목록의 모든 항목이 문서였고 #22 는 **코드 대 코드**였기 때문이다. 열거는 다음에 나올 종류를 미리 담을 수 없다.
 
-1. `src/templates/reap-guide.md` (+ `.reap/reap-guide.md`) — 세션 시작 시 로드되는 참조 문서
-2. `src/templates/evolution.md` (+ `.reap/genome/evolution.md`) — 프로젝트 genome
-3. `src/cli/commands/run/*.ts` 의 prompt 문자열 — **agent 가 행동하는 바로 그 순간 읽는 지시**
-4. `docs/src/i18n/translations/*.ts` — **reap.cc 문서 사이트, 5개 로케일 전부** (en, ko, ja, de, zh-CN)
+**대신 파일이 스스로 선언한다.**
 
-3번과 4번이 놓치기 쉽다. 3번은 grep 으로 코드 안의 규칙 텍스트까지 확인할 것 (예: `grep -rn "<규칙 키워드>" src/cli/`).
+```ts
+// reap:carrier(claude-code-commands-path)
+const targetDir = claudeCodeCommandsDir();
+```
 
-**4번이 중요한 이유 (gen-073 실증)**: 신규 사용자는 reap.cc 로 REAP 을 배운다. v0.17.1 이 memory tier 를 content-type 기준으로 바꿨는데 문서 사이트는 폐기된 lifespan 분류를 **10개 위치(2곳 × 5 로케일)** 에서 계속 가르치고 있었고, `memoryRules` 에는 새 정책과 정면 배치되는 문구까지 있었다. 코드와 genome 을 다 고쳐도 문서가 구버전이면 **사용자는 여전히 잘못 배운다.**
+```markdown
+<!-- reap:carrier(memory-tier-classification) -->
+```
 
-로케일이 5개이므로 **일부만 고치면 로케일 drift 가 생긴다.** `scripts/check-docs-version.sh` 가 changelog 의 집합 동일성은 검사하지만 본문 텍스트는 검사하지 않으므로, 본문 변경 시에는 5개 파일을 모두 손댔는지 직접 확인할 것.
+사실을 바꾸기 전에 찾는다:
 
-**텍스트는 창작하지 말고 한 곳을 기준으로 복제한다.** 세 carrier 가 같은 규칙을 각자 다르게 표현하면 다음 변경 때 또 drift 가 생긴다.
+```bash
+grep -rn "reap:carrier(<사실-id>)" .
+bash scripts/list-carriers.sh             # ID 별 파일 목록
+bash scripts/list-carriers.sh --orphans   # 1개 파일에만 있는 ID
+```
+
+표식은 **값 바로 옆에 있으므로** 그 값을 다루는 사람이 자연히 본다. 다른 파일의 목록은 찾아가야 보이고, 실제로 아무도 안 봤다.
+
+**새로 "여러 곳이 알아야 하는 사실"을 만들면 표식을 함께 심어라.** 표식 없는 carrier 는 다음 사람이 찾지 못한다.
+
+#### 표식보다 공유가 낫다
+
+같은 **값**을 두 코드가 알아야 한다면, 표식을 다는 것보다 **하나가 소유하고 나머지가 주입·import 받는 것**이 낫다. 전자는 사람이 기억해서 함께 고쳐야 하고 후자는 애초에 어긋날 수 없다.
+
+| 상황 | 처방 | 사례 |
+|---|---|---|
+| 같은 값을 두 코드가 앎 | **DI·상수 공유** | #22 — adapter 가 경로를 소유하고 checker 가 주입받음 (gen-076) |
+| 공유 불가 (산문·번역·prompt 문자열) | 표식 + 검사 | #21 — 5개 로케일 + guide + 템플릿 + prompt |
+| 반환값 union 확장 | **부정형 분기** 또는 표식 | gen-077 — `ensureClaudeMd` 에 `"updated"` 를 추가했으나 `repair.ts` 분기가 2종만 다뤄 오분류 |
+
+세 번째는 gen-072/073 의 목록에 없던 종류다. **"열거는 새 종류를 못 잡는다"가 이 원칙 자체에도 적용된다** — 그래서 표식으로 바꿨다.
+
+#### 고아 표식은 신호다
+
+`--orphans` 가 잡는 "1개 파일에만 있는 ID" 는 둘 중 하나다:
+- 표식이 불필요하거나
+- **그 사실을 아는 다른 곳을 아직 표시하지 않았거나**
+
+후자가 #21/#22 의 상태였다.
 
 ### 규칙 변경이 기존 프로젝트에 도달하는가 (gen-072 교훈)
 

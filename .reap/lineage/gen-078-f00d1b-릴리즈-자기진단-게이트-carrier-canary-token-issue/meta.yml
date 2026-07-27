@@ -1,0 +1,23 @@
+id: gen-078-f00d1b
+type: embryo
+goal: 릴리즈 자기진단 게이트 + carrier canary token — issue 21/22 재발 방지
+parents:
+  - gen-077-39d3c7
+timeline:
+  - stage: learning
+    at: 2026-07-27T13:04:00.537Z
+  - stage: planning
+    at: 2026-07-27T13:05:28.666Z
+  - stage: implementation
+    at: 2026-07-27T16:16:06.283Z
+  - stage: validation
+    at: 2026-07-27T16:24:29.285Z
+  - stage: completion
+    at: 2026-07-27T16:26:23.093Z
+status: completed
+fitnessFeedback:
+  text: "승인 + carrier 절 완전 대체 확정. 자기진단 게이트와 carrier 표식 모두 완료. 게이트가 만들어지자마자
+    invariants.md placeholder 오판을 잡았고, negative test 로 #22 재현 시 19건 검출을 실증한 것이
+    좋았음 (그 과정에서 작성자 오해까지 드러남). allowlist 대신 시나리오를 고쳐 게이트를 무디게 하지 않은 판단도 적절.
+    reap-test private 유지 이유는 복제 guard 이므로 CI 는 PAT 로 가되 단계적 도입."
+  evaluatedAt: 2026-07-27T16:37:29.824Z

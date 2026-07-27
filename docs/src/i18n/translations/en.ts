@@ -171,6 +171,7 @@ export const en = {
     commandLoading: "How commands are loaded",
     commandLoadingDesc: "REAP slash commands are installed globally and available in all projects.",
     commandLoadingDetails: [
+      // reap:carrier(claude-code-commands-path)
       { label: "Install", desc: "npm install -g @c-d-cc/reap copies skill files (.md) directly to ~/.claude/commands/" },
       { label: "Update", desc: "Each install replaces existing skills with the latest version. Stale skills are cleaned up automatically." },
       { label: "Scope", desc: "Skills are installed at user level — available in all projects, not just REAP projects." },
@@ -916,6 +917,7 @@ reap daemon query    # Run a symbol query`,
     cruisePauseDesc: "Cruise automatically pauses and requests human input when: (1) uncertainty exceeds the AI's confidence threshold, (2) a decision requires human judgment (e.g., breaking API changes), or (3) the backlog contains conflicting priorities. After all N generations complete, the human reviews the batch.",
     memoryTitle: "Memory System",
     memoryDesc: "Memory is a free-form recording system where the AI persists context across sessions and generations. Unlike Genome (modification-constrained) or Lineage (compressed over time), Memory is always accessible and freely writable.",
+    // reap:carrier(memory-tier-classification)
     memoryHeaders: ["Tier", "Role", "Decision rule", "Pruning"],
     memoryRows: [
       ["shortterm", "Session handoff", "\"Is this needed right now?\"", "Replaced every generation — never accumulates"],

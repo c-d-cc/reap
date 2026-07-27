@@ -174,6 +174,7 @@ export const de: Translations = {
     commandLoadingDesc: "REAP Slash-Befehle werden nur in REAP-Projekten geladen — sie erscheinen nicht in Nicht-REAP-Projekten.",
     commandLoadingDetails: [
       { label: "Quelle", desc: "Befehlsoriginale werden in ~/.reap/commands/ gespeichert (installiert durch reap init und reap update)" },
+      // reap:carrier(claude-code-commands-path)
       { label: "Laden", desc: "Wenn Sie ein REAP-Projekt öffnen, verknüpft der Session-Hook automatisch Befehle mit .claude/commands/" },
       { label: "Nicht-REAP-Projekte", desc: "Es werden keine Symlinks erstellt, daher erscheinen keine REAP-Skills in der Skill-Liste des KI-Agenten" },
       { label: "Abwärtskompatibilität", desc: "Weiterleitungs-Stubs in ~/.claude/commands/ stellen sicher, dass ältere Setups während der Migration weiterhin funktionieren" },
@@ -918,6 +919,7 @@ reap daemon query    # Symbol-Abfrage ausführen`,
     cruisePauseDesc: "Cruise pausiert automatisch und fordert menschliche Eingabe an, wenn: (1) die Unsicherheit die Konfidenzschwelle der KI überschreitet, (2) eine Entscheidung menschliches Urteil erfordert (z.B. API-Änderungen mit Inkompatibilitäten), oder (3) der Backlog widersprüchliche Prioritäten enthält. Nachdem alle N Generationen abgeschlossen sind, überprüft der Mensch die Charge.",
     memoryTitle: "Gedächtnissystem",
     memoryDesc: "Gedächtnis ist ein freiformiges Aufzeichnungssystem, in dem die KI Kontext über Sitzungen und Generationen hinweg persistiert. Im Gegensatz zum Genome (modifikationsbeschränkt) oder Lineage (wird im Laufe der Zeit komprimiert) ist das Gedächtnis immer zugänglich und frei beschreibbar.",
+    // reap:carrier(memory-tier-classification)
     memoryHeaders: ["Ebene", "Rolle", "Entscheidungsregel", "Pruning"],
     memoryRows: [
       ["shortterm", "Session-Übergabe", "\"Wird das gerade jetzt gebraucht?\"", "Wird jede Generation ersetzt — sammelt sich nie an"],

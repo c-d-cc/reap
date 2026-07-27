@@ -41,6 +41,7 @@ export const claudeCodeAdapter: AdapterModule = {
     await registerSessionHooks();
   },
 
+  // reap:carrier(claude-code-commands-path)
   userLevelDirs(home?: string): string[] {
     // `~/.claude/agents/` is deliberately absent: installAgents writes
     // `reap-*.md` there, which the checker matches with a `reap.` prefix — the

@@ -182,6 +182,8 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 - `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates)
 - `scripts/alpha-publish.sh` — alpha 배포 헬퍼
 - `scripts/postinstall.sh` — npm postinstall hook
+- `scripts/check-self-diagnosis.sh` — **자기진단 게이트 (gen-078)**. `npm pack` → 격리 HOME/prefix 에 설치 → `reap init` → `fix --check` 가 **경고·에러 0** 을 요구. release publish 앞 + CI 매 push 양쪽에서 실행. #22(installer↔checker 불일치)와 gen-074 daemon 배포 결함을 잡는다. 대화로 채워지는 genome/goals 는 스크립트가 채운 뒤 진단 — 그것까지 요구하면 REAP 정상 동작에 fail 한다
+- `scripts/list-carriers.sh` — **carrier 표식 조회 (gen-078)**. `reap:carrier(<id>)` 마커를 grep 해 ID 별 파일 목록 출력. `--orphans` 는 1개 파일에만 있는 ID 탐지 — 표식 불필요이거나 **다른 carrier 를 빠뜨린 것**(#21/#22 의 상태)
 - `scripts/check-docs-version.sh` — 릴리즈 문서 정합성 게이트. `RELEASE_NOTICE.md` / `RELEASE_NOTES.md` / 5개 로케일 changelog 가 `package.json` 과 일치하는지 + **로케일 간 항목 집합 동일성** + migration note 가 패키지 버전을 넘지 않는지 검사. `release.yml` 의 `npm publish` 앞과 `reapdev.versionBump` Step 5-1 에서 실행
 
 ### npm scripts
@@ -202,6 +204,30 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 - learning emit context `daemonEnabled` (boolean, 항상) + `daemonReady` (boolean, daemon=true 시에만 spread) — gen-069. agent / test 가 config 분기 검증.
 - `ReapConfig.lastMigratedVersion?: string` (gen-071) — 이 프로젝트가 어디까지 migration 됐는지 추적. 미설정 시 "0.0.0" fallback. `reap update --mark-migrated` 가 현재 패키지 버전으로 갱신. **CONFIG_DEFAULTS에 포함 금지** — optional tracking 필드이며 spurious config diff 유발.
 - `PendingMigration` (gen-071) — `{ version: string, instructions: string }`. `detectPendingMigrations` 반환 타입. `reap update` context + load-context SessionStart + dump-state.md sync 3곳에서 동일 데이터 emit.
+
+## Carrier Markers (gen-078)
+
+여러 곳이 아는 사실에는 그 사실을 아는 파일마다 `reap:carrier(<id>)` 주석을 심는다. 값을 바꾸기 전에 `grep -rn "reap:carrier(<id>)" .` 또는 `bash scripts/list-carriers.sh` 로 전부 찾는다.
+
+현재 등록된 것:
+
+| ID | files | 비고 |
+|---|---|---|
+| `claude-code-commands-path` | 9 | gen-076 이 DI 로 코드 쪽 carrier 를 줄인 뒤 남은 문서들 |
+| `memory-tier-classification` | 10 | 산문·번역·prompt 문자열이라 공유 불가 |
+
+**공유 가능하면 표식보다 공유가 낫다** — 같은 값을 두 코드가 알면 DI·import 로 하나로 만들어 carrier 수를 줄인다. 표식은 공유가 불가능한 경우(문서, 다국어, prompt 문자열, 반환값 union)를 위한 것이다.
+
+## CI / Release 게이트 (gen-073, gen-078)
+
+| workflow | 검사 |
+|---|---|
+| `ci.yml` (매 push) | build + **자기진단** |
+| `release.yml` (태그) | 문서 정합성 + **자기진단** + build + publish |
+
+**CI 는 테스트를 돌리지 않는다** — `tests/` 가 private submodule(`c-d-cc/reap-test`)이고 기본 `GITHUB_TOKEN` 으로 접근할 수 없다. backlog `ci-에서-테스트-실행-...` 로 분리됨. 이것이 e2e 1건 실패가 6세대 방치된 구조적 원인이었다.
+
+문서 게이트는 CI 에 없다 — 개발 중 `package.json` 이 문서보다 앞서는 것이 정상이라 상시 red 가 된다(gen-073 판단). 자기진단은 그런 성질이 없어 양쪽에 있다.
 
 ## Key Design Decisions
 

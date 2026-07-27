@@ -83,6 +83,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
         "   - Add new knowledge from this generation (changed files/modules, dependencies, build, tests)",
         "   - **Delete statements that are no longer true** (removed files/modules, abandoned decisions)",
         "   - **Do NOT accumulate per-generation changelog entries.** summary.md describes the CURRENT state; lineage and git history own the history",
+        // reap:carrier(memory-tier-classification)
         "3. Update memory (`.reap/vision/memory/`). Tiers are classified by **content-type** (what the content is for), NOT by lifespan:",
         "   - Decision tree — apply top-to-bottom:",
         "     1. Needed in the next session immediately? → `shortterm.md`",

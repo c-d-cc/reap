@@ -20,3 +20,13 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+
+      # A fresh install must never report anything about itself. Unlike the docs
+      # check (which is only meaningful at release time, since package.json
+      # legitimately runs ahead of the docs mid-development), this holds at every
+      # commit — so it runs here rather than only before publish.
+      #
+      # Tests are not run here: tests/ is a private submodule and the default
+      # GITHUB_TOKEN cannot fetch it. Tracked separately.
+      - name: Self-diagnosis
+        run: bash scripts/check-self-diagnosis.sh

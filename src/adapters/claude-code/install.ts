@@ -47,6 +47,8 @@ async function cleanupStaleSkills(targetDir: string): Promise<string[]> {
  * change the path here and the checker follows.
  *
  * Mirrors `opencodeCommandsDir` in the OpenCode adapter.
+ *
+ * reap:carrier(claude-code-commands-path)
  */
 export function claudeCodeCommandsDir(home: string = homedir()): string {
   return join(home, ".claude", "commands");

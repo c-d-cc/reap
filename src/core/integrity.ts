@@ -555,19 +555,22 @@ async function checkGenome(
       );
     }
 
-    // Placeholder detection
-    const stripped = content
-      .split("\n")
-      .filter(
-        (l) =>
-          !l.startsWith("#") &&
-          !l.startsWith(">") &&
-          !l.startsWith("-") &&
-          l.trim() !== "",
-      )
-      .join("")
-      .trim();
-    if (stripped.length === 0) {
+    // Placeholder detection.
+    //
+    // Headings, blockquote hints and HTML comments are scaffolding a template
+    // ships with; anything else counts as content. Bullets in particular do —
+    // `invariants.md` is a bullet list by design and carries no prose at all, so
+    // excluding them (as this did until gen-078) made every freshly initialised
+    // project report its own shipped invariants as a placeholder.
+    const substantive = content.split("\n").filter((line) => {
+      const t = line.trim();
+      if (t === "") return false;
+      if (t.startsWith("#")) return false;
+      if (t.startsWith(">")) return false;
+      if (t.startsWith("<!--")) return false;
+      return true;
+    });
+    if (substantive.length === 0) {
       warnings.push(
         `genome/${gf.name}: appears to be placeholder-only (no substantive content)`,
       );
@@ -734,6 +737,7 @@ export async function checkUserLevelArtifacts(
     );
   }
 
+  // reap:carrier(claude-code-commands-path)
   // (Note) `~/.claude/commands/` (claude-code) and
   // `~/.config/opencode/commands/` (opencode) are the canonical slash-command
   // locations. Adapters declare them via `userLevelDirs()`; the caller injects
