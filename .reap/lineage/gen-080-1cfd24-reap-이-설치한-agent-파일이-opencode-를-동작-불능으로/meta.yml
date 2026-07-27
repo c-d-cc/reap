@@ -1,0 +1,23 @@
+id: gen-080-1cfd24
+type: embryo
+goal: REAP 이 설치한 agent 파일이 OpenCode 를 동작 불능으로 만드는 문제 수정 — 클라이언트별 frontmatter 스키마 변환
+parents:
+  - gen-079-600b6c
+timeline:
+  - stage: learning
+    at: 2026-07-27T18:50:01.743Z
+  - stage: planning
+    at: 2026-07-27T18:53:38.315Z
+  - stage: implementation
+    at: 2026-07-27T18:54:47.663Z
+  - stage: validation
+    at: 2026-07-27T19:00:59.429Z
+  - stage: completion
+    at: 2026-07-27T19:02:53.701Z
+status: completed
+fitnessFeedback:
+  text: 승인. OpenCode 를 동작 불능으로 만들던 agent frontmatter 버그 수정 완료, 유저 환경 복구됨. 문서 대조에
+    멈추지 않고 실측으로 원인을 tools 필드 하나로 확정한 것과, auth list 로는 재현되지 않아 agent list 로 바로잡은
+    판단이 좋았음. deprecated tools 대신 permission 을 택하고 model 을 생략한 근거도 적절. gen-079 의
+    deferred 가 하루 만에 사고가 된 것을 longterm 에 기록.
+  evaluatedAt: 2026-07-27T23:17:42.729Z

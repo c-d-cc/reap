@@ -98,7 +98,7 @@ src/
 │   │   └── skills/             — 19 slash command files (.md). OpenCode adapter 도 본 디렉토리를 source 로 재사용 (single source, gen-064)
 │   └── opencode/               — OpenCode 어댑터 (gen-063, gen-064 slash commands)
 │       ├── index.ts            — AdapterModule wrapper
-│       ├── install.ts          — opencode.json instructions/plugin sync (REAP_INSTRUCTIONS 9 + REAP_PLUGIN_ENTRY), AGENTS.md marker-hash sync, .opencode/plugins/reap-plugin.ts 배치, **installSlashCommands(home?) ~/.config/opencode/commands/reap.*.md cleanup-then-copy (gen-064)**, opencodeCommandsDir/claudeCodeSkillsDir helpers. **registerSessionIntegration 도 installSlashCommands 호출 — `reap update` 흐름에서 user-level sync 보장 (gen-064 T013)**. **gen-066: installAgents(home?) + opencodeAgentsDir(home?) 신설 — target `~/.config/opencode/agent/` (singular, OpenCode TUI tip 공식), AGENT_PATTERN `^reap-.+\.md$` (slash-command 의 dot 와 비대칭, frontmatter name 필드 따름). installSkills emitOutput + registerSessionIntegration 양 caller.**
+│       ├── install.ts          — opencode.json instructions/plugin sync (REAP_INSTRUCTIONS 9 + REAP_PLUGIN_ENTRY), AGENTS.md marker-hash sync, .opencode/plugins/reap-plugin.ts 배치, **installSlashCommands(home?) ~/.config/opencode/commands/reap.*.md cleanup-then-copy (gen-064)**, opencodeCommandsDir/claudeCodeSkillsDir helpers. **registerSessionIntegration 도 installSlashCommands 호출 — `reap update` 흐름에서 user-level sync 보장 (gen-064 T013)**. **gen-066: installAgents(home?) + opencodeAgentsDir(home?) 신설 — target `~/.config/opencode/agent/` (singular, OpenCode TUI tip 공식), AGENT_PATTERN `^reap-.+\.md$` (slash-command 의 dot 와 비대칭, frontmatter name 필드 따름). installSkills emitOutput + registerSessionIntegration 양 caller.** **gen-080: `toOpenCodeAgent(source)` 로 frontmatter 를 OpenCode 스키마로 변환 후 write — 기존 `cp` 는 claude-code 스키마를 그대로 복사해 **OpenCode 전체를 설정 오류로 멈추게 했다**(`tools` 문자열 vs record). `tools`→`permission` record, `name`/`memory`/`model` 제거, `mode: subagent` 추가. 본문은 단일 소스. claude-code adapter 는 무변경.**
 │       ├── plugin/
 │       │   └── reap-plugin.ts  — OpenCode plugin source (session.created + tool.execute.before, inline 타입)
 │       └── templates/
@@ -164,7 +164,7 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 | 스위트 | 명령 | 결과 |
 |---|---|---|
 | unit | `bun test tests/unit/` | 470 pass / 0 fail |
-| e2e | `bun test tests/e2e/` | 272 pass / 0 fail |
+| e2e | `bun test tests/e2e/` | 278 pass / 0 fail |
 | scenario | `bun test tests/scenario/` | 44 pass / 0 fail |
 
 **세 스위트 모두 0 fail 이다** (gen-077 에서 마지막 pre-existing 해소). 이 수치와 다르면 회귀를 의심할 것.
@@ -216,6 +216,7 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 |---|---|---|
 | `claude-code-commands-path` | 9 | gen-076 이 DI 로 코드 쪽 carrier 를 줄인 뒤 남은 문서들 |
 | `memory-tier-classification` | 10 | 산문·번역·prompt 문자열이라 공유 불가 |
+| `agent-frontmatter-schema` | 3 | 같은 agent 정의를 두 클라이언트가 다른 스키마로 읽는다 (gen-080) |
 
 **공유 가능하면 표식보다 공유가 낫다** — 같은 값을 두 코드가 알면 DI·import 로 하나로 만들어 carrier 수를 줄인다. 표식은 공유가 불가능한 경우(문서, 다국어, prompt 문자열, 반환값 union)를 위한 것이다.
 

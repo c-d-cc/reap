@@ -323,7 +323,9 @@ export async function installSlashCommands(
     const sources = await readdir(srcDir);
     for (const file of sources) {
       if (!file.endsWith(".md")) continue;
-      await cp(join(srcDir, file), join(targetDir, file));
+      const source = await readTextFile(join(srcDir, file));
+      if (source === null) continue;
+      await writeTextFile(join(targetDir, file), toOpenCodeAgent(source));
       installed++;
     }
   } catch {
@@ -376,6 +378,90 @@ export function opencodeAgentsDir(home: string = homedir()): string {
 }
 
 /**
+ * Map the tool names REAP writes in its agent templates onto OpenCode
+ * permission keys.
+ *
+ * reap:carrier(agent-frontmatter-schema)
+ */
+const OPENCODE_TOOL_PERMISSIONS: Record<string, string> = {
+  Read: "read",
+  Edit: "edit",
+  Write: "write",
+  Glob: "glob",
+  Grep: "grep",
+  Bash: "bash",
+  Agent: "task",
+};
+
+/**
+ * Rewrite a Claude Code agent definition as an OpenCode one.
+ *
+ * The two clients read the same body but disagree on frontmatter, and until
+ * gen-080 the OpenCode adapter copied the file unchanged. OpenCode rejected the
+ * result — `tools` is a string there, where a record is expected — and, because
+ * one bad agent file invalidates the whole configuration, *every* opencode
+ * command stopped working. Installing REAP took the user's other tool down with
+ * it.
+ *
+ * Only the frontmatter is rebuilt; the body is REAP's description of what the
+ * agent does and has nothing to do with the client. Fields are emitted
+ * explicitly rather than filtered, so a field added to the template later
+ * cannot leak into OpenCode's config and break it again.
+ *
+ * Dropped on purpose:
+ *   `name`    — OpenCode takes the identifier from the filename
+ *   `memory`  — not part of OpenCode's schema
+ *   `model`   — OpenCode wants `provider/model`, and which providers a user has
+ *               configured is unknown to us. Pinning one would trade this bug
+ *               for "model not found" on every user without that provider.
+ *               Omitted, so the user's default applies.
+ *
+ * The templates carry a `reap:carrier(agent-frontmatter-schema)` marker so that
+ * anyone editing their frontmatter finds this translation.
+ *
+ * reap:carrier(agent-frontmatter-schema)
+ */
+export function toOpenCodeAgent(source: string): string {
+  const fm = source.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
+  if (!fm) return source; // No frontmatter — nothing to translate.
+
+  const body = source.slice(fm[0].length);
+  const fields = new Map<string, string>();
+  for (const line of fm[1].split(/\r?\n/)) {
+    const m = line.match(/^([A-Za-z_][\w-]*)\s*:\s*(.*)$/);
+    if (m) fields.set(m[1], m[2].trim());
+  }
+
+  const lines = ["---"];
+
+  const description = fields.get("description");
+  if (description) lines.push(`description: ${description}`);
+
+  // REAP invokes both agents as subagents. Left unset, OpenCode defaults to
+  // `all`, which would also offer them as primary agents.
+  lines.push("mode: subagent");
+
+  const tools = (fields.get("tools") ?? "")
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const permissions = tools
+    .map((t) => OPENCODE_TOOL_PERMISSIONS[t])
+    .filter((p): p is string => Boolean(p));
+
+  if (permissions.length > 0) {
+    // `permission`, not `tools`: OpenCode documents the latter as deprecated,
+    // and following a deprecated field is how the schema drifted out from under
+    // us in the first place.
+    lines.push("permission:");
+    for (const key of permissions) lines.push(`  ${key}: allow`);
+  }
+
+  lines.push("---");
+  return lines.join("\n") + "\n" + body.replace(/^\r?\n/, "");
+}
+
+/**
  * Install REAP-managed agent definition files into the user's OpenCode agents
  * directory. Idempotent cleanup-then-copy, prefix-anchored on `reap-*.md`.
  *
@@ -414,7 +500,9 @@ export async function installAgents(
     const sources = await readdir(srcDir);
     for (const file of sources) {
       if (!file.endsWith(".md")) continue;
-      await cp(join(srcDir, file), join(targetDir, file));
+      const source = await readTextFile(join(srcDir, file));
+      if (source === null) continue;
+      await writeTextFile(join(targetDir, file), toOpenCodeAgent(source));
       installed++;
     }
   } catch {
