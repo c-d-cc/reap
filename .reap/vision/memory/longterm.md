@@ -32,8 +32,7 @@
 
 ## Process Heuristics
 
-- **Read actual callers before deciding behavior**: `grep -rn "fnName"` first. Abstract reasoning about "when is this called" is unreliable.
-- **Verify framework semantics with a minimal repro**: CLI option parsing, library edge cases — don't trust convention guesses. `/tmp/test-cli.ts` repro takes a minute and prevents a regression.
+- **Check, don't reason about it**: `grep -rn "fnName"` before deciding when something is called; a one-minute repro before trusting a framework's semantics (CLI parsing, library edge cases). This holds even when your conclusion is right — gen-077 correctly judged "the test is stale", then found a separate bug only by splitting that test into a case per code path. A correct diagnosis still has blind spots.
 - **Test isolation: match the mechanism to the process boundary**: external tools need both a port axis and a path axis — either alone leaks into the user's environment. For paths, an env override only reaches a *spawned child*; bun's `os.homedir()` ignores `$HOME` in-process (node's follows it), so inject the directory rather than overriding the environment.
 - **macOS path comparison needs `realpath()`**: `/var/folders` vs `/private/var/folders` symlink causes silent fixture-mismatch failures.
 - **Disk-multi-file functions → e2e, not unit**: if a function takes a `paths` injection and reads >1 file, mock cost exceeds e2e cost. Plan testing level by file count.
@@ -46,4 +45,5 @@
 - **Making a test pass is not the same as making it meaningful**: when a test breaks because the product gained a deliberate step, adding a flag to skip that step is the cheap fix — and it leaves the new behaviour permanently unverified. Walk the real path instead, and cover every exit it has.
 - **A threshold without a recorded rationale cannot be evaluated**: REAP's genome limit sat at 100 while the template it ships was 193 lines — an impossible bar that survived because nobody could say where 100 came from. Derive each limit from what the thing is for, write that derivation next to the number, and when raising one, prove the check still catches what it should.
 - **Pair a temporary workaround with its removal condition**: gen-072 narrowed a test filter and noted "delete this exception once fixed". That note became gen-075's completion criterion. An undated workaround is debt; one carrying its own exit test is a scheduled repair.
+- **Don't reuse the previous generation's remedy on a look-alike**: two functions answering "is a REAP section here?" differently looked like the value-duplication that DI had just solved — but one decides whether to warn and the other decides what to overwrite. The asymmetry was correct; unifying them would have broken one side.
 - **State a check's limits where the results are recorded**: a check that passes tells you nothing about what it cannot see. gen-073's promotion check would not have caught the very miss that prompted it — writing that down stops the next person from trusting it further than it goes.

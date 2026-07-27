@@ -25,10 +25,14 @@ export async function execute(paths: ReapPaths): Promise<void> {
   const repaired: string[] = [];
   const skipped: string[] = [];
 
-  if (claudeMdAction === "created" || claudeMdAction === "appended") {
-    repaired.push(`CLAUDE.md (${claudeMdAction})`);
-  } else {
+  // Only "skipped" means nothing happened. gen-054 added "updated" (the marker
+  // section was replaced with a newer template) and it fell into the else branch
+  // here, so a repair that rewrote the file reported itself as "already present"
+  // — the one outcome the user could not verify by looking at the output.
+  if (claudeMdAction === "skipped") {
     skipped.push("CLAUDE.md (REAP section already present)");
+  } else {
+    repaired.push(`CLAUDE.md (${claudeMdAction})`);
   }
 
   emitOutput({

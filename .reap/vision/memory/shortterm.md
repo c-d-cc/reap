@@ -1,36 +1,38 @@
 # Shortterm Memory
 
-## 세션 요약 (gen-076, 2026-07-27)
+## 세션 요약 (gen-077, 2026-07-27)
 
-### gen-076: issue #22 — install-skills/fix --check 불일치 (0.17.3)
+### gen-077: e2e init-repair 해소 — 0.17.3 묶음 1/3
 
-`fix --check` 가 `install-skills` 의 정식 설치 위치를 "legacy" 로 오탐하던 문제. **본 repo 경고 19 → 0.**
+6세대 방치된 e2e 1 fail 해소. **e2e 268-1 → 272-0. gen-072 이래 처음으로 세 스위트 모두 green.**
 
-경고 한 줄 삭제로 끝내지 않고 **경로를 DI 로** 넘겼다 — adapter 가 `userLevelDirs()` 로 소유하고 호출부(`fix.ts`)가 checker 에 주입. `core → adapters` 의존 없음. 앞으로 경로를 옮기면 양쪽이 함께 따라온다.
+learning 은 "(a) 테스트가 낡았다"로 판정했고 맞았으나, **테스트를 코드 경로별 4 case 로 쪼개면서 계획에 없던 구현 결함이 드러났다** — `repair.ts` 가 `ensureClaudeMd` 의 `"updated"` 를 `skipped` 로 분류해, 파일을 갈아엎고도 "이미 있어서 건너뜀"으로 보고하고 있었다. 부정형 분기(`=== "skipped"` 만 skipped)로 수정.
 
-이슈는 "어느 쪽이 옳은지는 저자 판단"이라 했으나 **답이 코드 안에 있었다** — `integrity.ts` 가 자기 파일 안에서 모순(L772-774 "정식 위치" vs L715-722 "legacy"). "Phase 2" 는 `git log -S` 로 추적해 v0.15 의 `~/.reap/commands/` 이전 작업명임을 확인하고 문구를 제거했다.
+`integrity` 와 `ensureClaudeMd` 의 판정 비대칭은 **통합하지 않았다** — 전자는 경고 여부(느슨해야), 후자는 덮어쓸 위치(엄격해야). 목적이 다르므로 통합하면 한쪽이 부적절해진다. 상호 참조 주석으로 근거를 남겼다.
 
-검증: unit **470-0**(+9) / e2e **268-1**(+5) / scenario 44-0 / 문서 게이트 pass.
+### 다음 세션 — 0.17.3 묶음 계속
 
-### 다음 세션
+1. **`릴리즈-자기진단-게이트-...`** (2/3) — **두 선행 조건 모두 충족됨**: `fix --check` 경고 0(gen-076) + 테스트 0 fail(gen-077). 이제 자기진단과 **테스트를 CI 게이트에 넣을 수 있다**
+2. `agent-관점-검증-층2-...` (3/3) — 설계 세대라 코드 변경이 없을 수 있음
+3. **0.17.3 릴리즈** — 3건 완료 후 릴리즈 노트 일괄 보강 → 태그 (**유저 확인 필수**)
+4. interview 재설계 / daemon 2건은 이번 묶음 제외
 
-1. **0.17.3 릴리즈** — 문서 정합 완료. `git tag v0.17.3 && git push origin main v0.17.3` (**유저 확인 필수**) + issue #22 코멘트
-2. **`릴리즈-자기진단-게이트-...` backlog** — **본 세대가 선행 조건이었고 충족됐다**(경고 0). 이제 "경고 0" 게이트를 걸 수 있고 canary token 설계도 여기 포함
-3. 나머지: `e2e-init-repair-...`(신규) / `agent-관점-검증-층2` / interview 재설계 / daemon 2건
+### canary token 설계에 반영할 것
 
-### 알아둘 것 — bun 의 homedir() 는 $HOME 을 무시한다
+"한쪽만 갱신됨"이 **세 번째**다:
 
-```
-node: HOME 변경 → homedir() 반영
-bun : HOME 변경 → homedir() 불변
-```
+| 이슈 | 늘린 것 | 안 고친 것 |
+|---|---|---|
+| #21 | memory 분류 규칙 | reflect prompt / evolution 템플릿 |
+| #22 | 설치 경로 | integrity checker |
+| gen-077 | `ensureClaudeMd` 반환값 `"updated"` | `repair.ts` 분기 |
 
-gen-069 daemon e2e 가 HOME override 로 된 건 **child process spawn** 이라서다. in-process 단위 테스트는 `home` 을 인자로 주입해야 한다. 본 세대에서 그렇게 처리했다.
+**반환값 union 확장도 "여러 곳이 아는 사실"의 한 종류**다. 다음 세대 설계에 포함할 것.
 
-### interview 재설계 (gen-076 abort 분)
+### 6세대 방치의 구조적 원인
 
-abort 된 세대의 v2 설계는 lineage 에 없다(abort 이므로). 재착수 시 backlog 문서에 **v1 가정이 그대로 남아 있음**에 주의. 확정된 방향: 고정 6각도(Motivation/Grounding/Boundary/Blast radius/Failure modes/Alternatives) + seed 고유 각도, 상태표(resolved/assumed/open)로 종료 판정, `assumed` 남용 방지 2장치.
+`.github/workflows/ci.yml` 은 `npm ci` + `npm run build` 만 돌린다 — **테스트를 안 돌린다.** e2e 1 fail 이 아무것도 막지 않았다. 다음 세대에서 CI 에 테스트 추가.
 
 ### Backlog 상태
 
-pending 7건. consumed: `resolve-22-...` (gen-076).
+pending 5건. consumed: `e2e-init-repair-...` (gen-077).

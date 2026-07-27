@@ -143,8 +143,20 @@ export function extractReapSection(fileContent: string): { hash: string; startId
  * Looks for a markdown heading containing "REAP" (e.g., "## REAP", "# REAP Project")
  * and extends to the end of the file (since REAP section was always appended last).
  */
+/**
+ * Find a pre-marker REAP section by its heading.
+ *
+ * A heading is required on purpose. Whatever this returns gets **replaced**, so
+ * a looser test — say, any mention of `.reap/genome/` — would let a paragraph
+ * that merely talks about REAP be mistaken for a section and overwritten along
+ * with everything after it.
+ *
+ * `checkRequiredFiles` in core/integrity.ts asks a similar-looking question and
+ * answers it more loosely. That asymmetry is deliberate: there, a wrong answer
+ * costs a spurious warning; here, it costs the user's own text. See the note on
+ * that function.
+ */
 function detectLegacyReapSection(fileContent: string): { startIdx: number; endIdx: number } | null {
-  // Match a markdown heading line that contains "REAP"
   const legacyRe = /^(#{1,3}\s+.*REAP.*)/m;
   const match = legacyRe.exec(fileContent);
   if (!match) return null;

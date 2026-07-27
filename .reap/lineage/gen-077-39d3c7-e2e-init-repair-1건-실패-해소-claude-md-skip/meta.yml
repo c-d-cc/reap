@@ -1,0 +1,23 @@
+id: gen-077-39d3c7
+type: embryo
+goal: e2e init-repair 1건 실패 해소 — CLAUDE.md skip 판정 불일치 원인 규명 후 수정
+parents:
+  - gen-076-a3679b
+timeline:
+  - stage: learning
+    at: 2026-07-27T12:42:25.918Z
+  - stage: planning
+    at: 2026-07-27T12:44:16.898Z
+  - stage: implementation
+    at: 2026-07-27T12:45:17.405Z
+  - stage: validation
+    at: 2026-07-27T12:48:33.284Z
+  - stage: completion
+    at: 2026-07-27T12:50:21.308Z
+status: completed
+fitnessFeedback:
+  text: 승인. e2e 268-1 → 272-0, 세 스위트 모두 green. 테스트를 코드 경로별로 쪼개면서 계획에 없던 repair.ts
+    오분류(updated → skipped)를 발견하고 함께 고친 것이 핵심 — fixture 만 고쳤다면 결함을 덮은 채 green 이
+    됐을 것. integrity/ensureClaudeMd 판정 비대칭을 직전 세대의 DI 처방으로 통합하지 않고 의도적 차이로 판단해
+    주석으로 남긴 것도 적절. '한쪽만 갱신됨' 세 번째 사례를 canary token 설계 입력으로 정리.
+  evaluatedAt: 2026-07-27T13:03:47.367Z

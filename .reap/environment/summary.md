@@ -164,10 +164,10 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 | 스위트 | 명령 | 결과 |
 |---|---|---|
 | unit | `bun test tests/unit/` | 470 pass / 0 fail |
-| e2e | `bun test tests/e2e/` | 268 pass / **1 fail** — `init-repair` "skips when REAP section already present". **backlog `e2e-init-repair-1건-실패-...` 로 등록됨 (gen-076)** — 더 이상 "그냥 pre-existing" 이 아니라 처리 대기 항목이다 |
+| e2e | `bun test tests/e2e/` | 272 pass / 0 fail |
 | scenario | `bun test tests/scenario/` | 44 pass / 0 fail |
 
-**e2e 의 1 fail 은 알려진 pre-existing 이다.** 이 수치와 다르면 회귀를 의심할 것.
+**세 스위트 모두 0 fail 이다** (gen-077 에서 마지막 pre-existing 해소). 이 수치와 다르면 회귀를 의심할 것.
 
 `tests/scenario/multi-generation.test.ts` 는 gen-065 backlog gate 를 시나리오로 커버한다 — pending 이 있으면 `run start` 가 `status: "prompt"` 로 막히고, `--backlog`(소비) 또는 `--no-backlog`(유지) 로 재호출해야 진행된다. 새 scenario 가 backlog 파일을 만든다면 같은 gate 를 거치므로 이 패턴을 참고할 것.
 

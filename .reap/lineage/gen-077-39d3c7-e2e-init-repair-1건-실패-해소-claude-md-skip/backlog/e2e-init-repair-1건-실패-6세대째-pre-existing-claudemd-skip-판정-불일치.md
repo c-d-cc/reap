@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: medium
 createdAt: 2026-07-27T12:31:52.895Z
+consumedBy: gen-077-39d3c7
+consumedAt: 2026-07-27T12:42:25.929Z
 ---
 
 # e2e init-repair 1건 실패 — 6세대째 pre-existing, CLAUDE.md skip 판정 불일치

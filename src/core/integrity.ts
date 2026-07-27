@@ -195,6 +195,12 @@ async function checkRequiredFiles(
   if (!claudeMd) {
     warnings.push("CLAUDE.md missing — run 'reap init --repair'");
   } else if (!claudeMd.includes(".reap/genome/")) {
+    // A bare mention is enough here. `detectLegacyReapSection`
+    // (cli/commands/init/common.ts) requires an actual heading, because it
+    // replaces what it finds. This check only decides whether to warn, so
+    // accepting a hand-written reference avoids nagging users who wired REAP
+    // into their CLAUDE.md their own way. The two thresholds differ by intent,
+    // not by oversight.
     warnings.push("CLAUDE.md exists but missing REAP section — run 'reap init --repair'");
   }
 }
