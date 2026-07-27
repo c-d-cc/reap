@@ -1048,7 +1048,7 @@ reap daemon query    # Run a symbol query`,
     versions: [
       {
         version: "0.17.3",
-        notes: "**`fix --check` no longer flags the install location** — in v0.17.2 `install-skills` wrote 19 slash commands to `~/.claude/commands/` while `fix --check` reported that same path as a v0.15 leftover, producing warnings no supported command could clear. The path is now owned by the adapter and injected into the checker via `AdapterModule.userLevelDirs()`, so the two can no longer drift apart. Genuine leftovers are still reported. Fixes issue #22.",
+        notes: "**`fix --check` no longer flags the install location** — the installer wrote to `~/.claude/commands/` while the checker called it a v0.15 leftover, producing warnings nothing could clear (issue #22). The path now has one owner and reaches the checker by injection. **Two release gates**: `check-self-diagnosis.sh` installs the real publish tarball into a throwaway HOME and requires a clean `fix --check` (CI + pre-publish); `check-agent-integration.sh` drives a headless agent to confirm slash commands actually reach the user (pre-release). **Carrier markers** — a fact known in several places now carries `reap:carrier(id)`, so finding all of them is a grep.",
       },
       {
         version: "0.17.2",

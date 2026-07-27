@@ -97,6 +97,19 @@ version bump 전에 `/reapdev.docsUpdate` 스킬을 실행하여 문서 일관�
 
    > **왜 이 단계가 있는가**: v0.17.1 릴리즈 때 Step 5 에 5개 로케일 갱신 지시가 이미 있었는데도 누락됐다. 그리고 그 이전에는 en/ko 만 갱신하고 ja/de/zh-CN 을 빠뜨려 changelog 가 로케일마다 달라진 적도 있다. 지시문만으로는 막지 못하므로 실행 가능한 검사로 대체한다.
 
+5-2. **agent 통합 검증** (태그 전 — 권장):
+
+   ```bash
+   reap install-skills                        # 현재 소스로 갱신
+   bash scripts/check-agent-integration.sh
+   ```
+
+   헤드리스 agent 를 실제로 띄워 **slash command 가 인식되는지** 확인한다. 파일이 올바른 위치에 있어도 클라이언트가 그것을 명령으로 노출하지 않으면 사용자는 REAP 을 부를 수 없다 — gen-063 이 그 상태로 릴리즈됐고 사용자가 fitness 에서 발견했다.
+
+   **약 $0.25 가 들고 수십 초 걸린다.** CI 에는 없다(비용 + agent 응답 시간의 비결정성). `claude` 가 없으면 SKIP 을 출력하고 통과시키므로 환경에 따라 건너뛸 수 있다 — 그 경우 **검증되지 않았음**을 인지할 것.
+
+   현재 설치된 REAP 을 검사하므로 **`reap install-skills` 를 먼저 돌려야** 소스 변경분이 반영된다.
+
 6. **태그 생성 및 배포** (유저 컨펌 필수):
    - 유저에게 질문: "`v{new}` 태그를 생성하고 push할까요? (yes / no)"
    - yes: `git tag v{new} && git push origin main v{new}` 실행

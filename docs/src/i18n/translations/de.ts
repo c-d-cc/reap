@@ -1050,7 +1050,7 @@ reap daemon query    # Symbol-Abfrage ausführen`,
     versions: [
       {
         version: "0.17.3",
-        notes: "**`fix --check` markiert den Installationsort nicht mehr** — in v0.17.2 schrieb `install-skills` 19 Slash-Befehle nach `~/.claude/commands/`, während `fix --check` genau diesen Pfad als v0.15-Überbleibsel meldete; die Warnungen ließen sich mit keinem unterstützten Befehl beseitigen. Der Pfad gehört jetzt dem Adapter und wird über `AdapterModule.userLevelDirs()` in den Checker injiziert, sodass beide Seiten nicht mehr auseinanderlaufen können. Echte Überbleibsel werden weiterhin gemeldet. Behebt Issue #22.",
+        notes: "**`fix --check` markiert den Installationsort nicht mehr** — der Installer schrieb nach `~/.claude/commands/`, während der Checker genau diesen Pfad als v0.15-Überbleibsel meldete; die Warnungen ließen sich mit keinem Befehl beseitigen (Issue #22). Der Pfad hat jetzt einen Eigentümer und wird per Injection an den Checker gereicht. **Zwei Release-Gates**: `check-self-diagnosis.sh` installiert das echte Publish-Tarball in ein Wegwerf-HOME und verlangt ein sauberes `fix --check` (CI + vor dem Publish); `check-agent-integration.sh` startet einen Headless-Agent und prüft, ob Slash-Befehle beim Nutzer wirklich ankommen (vor dem Release). **Carrier-Marker** — ein an mehreren Stellen bekannter Fakt trägt nun `reap:carrier(id)`, sodass ein grep alle findet.",
       },
       {
         version: "0.17.2",

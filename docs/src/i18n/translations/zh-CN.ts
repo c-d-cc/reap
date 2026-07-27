@@ -1050,7 +1050,7 @@ reap daemon query    # 运行符号查询`,
     versions: [
       {
         version: "0.17.3",
-        notes: "**`fix --check` 不再将安装位置标记为遗留** — 在 v0.17.2 中，`install-skills` 会向 `~/.claude/commands/` 写入 19 个斜杠命令，而 `fix --check` 却把同一路径报告为 v0.15 遗留物，产生了任何受支持命令都无法消除的警告。该路径现由 adapter 拥有，并通过 `AdapterModule.userLevelDirs()` 注入检查器，两者不会再出现分歧。真正的遗留物仍会被报告。修复 issue #22。",
+        notes: "**`fix --check` 不再标记安装位置** — 安装程序写入 `~/.claude/commands/`，而检查器却将同一路径报告为 v0.15 遗留物，产生无法消除的警告（issue #22）。该路径现由单一所有者持有，并通过注入传递给检查器。**两道发布关卡**：`check-self-diagnosis.sh` 将真实的发布 tarball 安装到临时 HOME 并要求 `fix --check` 干净（CI + 发布前）；`check-agent-integration.sh` 启动无头代理，确认斜杠命令确实能被用户使用（发布前）。**carrier 标记** — 多处知晓的事实带上 `reap:carrier(id)`，一次 grep 即可找齐。",
       },
       {
         version: "0.17.2",

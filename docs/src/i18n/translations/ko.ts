@@ -1051,7 +1051,7 @@ reap daemon query    # 심볼 쿼리 실행`,
     versions: [
       {
         version: "0.17.3",
-        notes: "**`fix --check` 가 설치 위치를 더 이상 경고하지 않습니다** — v0.17.2 에서는 `install-skills` 가 `~/.claude/commands/` 에 19개의 슬래시 명령을 설치하는 동안 `fix --check` 가 같은 경로를 v0.15 잔재로 표시해, 어떤 지원 명령으로도 해소할 수 없는 경고가 발생했습니다. 이제 경로는 adapter 가 소유하고 `AdapterModule.userLevelDirs()` 로 checker 에 주입되므로 양쪽이 어긋날 수 없습니다. 실제 잔재는 계속 보고됩니다. issue #22 해결.",
+        notes: "**`fix --check` 가 설치 위치를 더 이상 경고하지 않습니다** — installer 는 `~/.claude/commands/` 에 설치하는데 checker 가 v0.15 잔재로 표시해 해소 불가능한 경고가 발생했습니다(issue #22). 이제 경로는 단일 소유자를 가지며 주입으로 전달됩니다. **릴리즈 게이트 2종**: `check-self-diagnosis.sh` 는 실제 배포 tarball 을 격리 HOME 에 설치해 `fix --check` 가 깨끗한지 요구하고(CI + publish 전), `check-agent-integration.sh` 는 헤드리스 agent 로 slash command 가 실제 노출되는지 확인합니다(릴리즈 전). **carrier 표식** — 여러 곳이 아는 사실에 `reap:carrier(id)` 를 심어 grep 으로 전부 찾습니다.",
       },
       {
         version: "0.17.2",

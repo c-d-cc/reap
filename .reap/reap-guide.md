@@ -90,6 +90,21 @@ During `reap run completion --phase reflect`, the AI **must** perform cleanup:
 - **Bloat is a failure signal**: if longterm exceeds ~30~50 lines or midterm exceeds ~50~70 lines, pruning was skipped. Clean up in the next reflect.
 - **Empty is normal**: any memory file may be empty — that is a valid state
 
+## Verifying a Release
+
+Two checks answer different questions, and the second cannot be inferred from the first.
+
+| | Question | Cost | When |
+|---|---|---|---|
+| `scripts/check-self-diagnosis.sh` | Do the files land in the right places with the right contents? | free, seconds | CI on every push + before publish |
+| `scripts/check-agent-integration.sh` | Does the client actually surface them to the agent? | ~$0.25, tens of seconds | before tagging a release |
+
+The first installs the real tarball into a throwaway HOME and asks REAP to diagnose itself — a fresh install reporting anything about itself means the installer and the checker disagree.
+
+The second drives a headless agent against your current installation and judges by what appears on disk, never by what the agent said. Files can be perfectly placed and still never reach the user: an adapter once passed every file-level test while its slash commands stayed invisible, and only a person trying it noticed.
+
+It reads your installation rather than a throwaway one, because a client keeps its login beside its commands — isolating one discards the other. Run `reap install-skills` first so it sees your current sources.
+
 ## Carrier Markers
 
 Some facts are known in more than one place — an install path known by both the installer and the checker, a rule stated in the guide, the genome template, a phase prompt and five locale files. When one of them changes and the others do not, the tool starts contradicting itself. That is what issues #21 and #22 were.

@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: medium
 createdAt: 2026-07-27T12:17:41.052Z
+consumedBy: gen-079-600b6c
+consumedAt: 2026-07-27T16:37:45.295Z
 ---
 
 # agent 관점 검증 (층2) — slash command·hook·import 가 실제로 동작하는지 확인하는 절차

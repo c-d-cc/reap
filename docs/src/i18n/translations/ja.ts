@@ -1050,7 +1050,7 @@ reap daemon query    # シンボルクエリを実行`,
     versions: [
       {
         version: "0.17.3",
-        notes: "**`fix --check` がインストール先を警告しなくなりました** — v0.17.2 では `install-skills` が `~/.claude/commands/` に19個のスラッシュコマンドを配置する一方、`fix --check` が同じパスを v0.15 の残骸として報告し、サポートされているどのコマンドでも解消できない警告が出ていました。パスは adapter が所有し `AdapterModule.userLevelDirs()` を通じて checker に注入されるようになったため、両者が食い違うことはなくなりました。本物の残骸は引き続き報告されます。issue #22 を解決。",
+        notes: "**`fix --check` がインストール先を警告しなくなりました** — installer は `~/.claude/commands/` に配置する一方、checker が同じパスを v0.15 の残骸と報告し、解消不能な警告が出ていました（issue #22）。パスは単一の所有者を持ち、注入によって checker に渡されます。**リリースゲート2種**: `check-self-diagnosis.sh` は実際の配布 tarball を隔離 HOME にインストールして `fix --check` がクリーンであることを要求し（CI + publish 前）、`check-agent-integration.sh` はヘッドレスエージェントでスラッシュコマンドが実際に届くかを確認します（リリース前）。**carrier マーカー** — 複数箇所が知る事実に `reap:carrier(id)` を付け、grep で全て見つけられます。",
       },
       {
         version: "0.17.2",
