@@ -13,7 +13,8 @@ import {
 } from "../../core/integrity.js";
 import { emitOutput, emitError } from "../../core/output.js";
 import { LIFECYCLE_STAGES, MERGE_STAGES } from "../../types/index.js";
-import type { GenerationState } from "../../types/index.js";
+import { getAdapter } from "../../adapters/index.js";
+import type { GenerationState, ReapConfig } from "../../types/index.js";
 
 export interface FixResult {
   issues: string[];
@@ -29,14 +30,35 @@ async function dirExists(path: string): Promise<boolean> {
   }
 }
 
+/**
+ * Where the configured adapter legitimately installs user-level files.
+ *
+ * Injected into `checkUserLevelArtifacts` so `core` never imports `adapters`
+ * (gen-076). Returns an empty list when the adapter cannot be resolved — an
+ * unimplemented client (`codex` throws from the dispatcher) must not take down
+ * `fix --check`, and skipping a check is safer than flagging a location that may
+ * well be correct.
+ */
+async function resolveCanonicalUserDirs(paths: ReturnType<typeof createPaths>): Promise<string[]> {
+  try {
+    const content = await readTextFile(paths.config);
+    if (!content) return [];
+    const config = YAML.parse(content) as ReapConfig;
+    return getAdapter(config?.agentClient ?? "claude-code").userLevelDirs();
+  } catch {
+    return [];
+  }
+}
+
 /** Check-only mode: run structural integrity check without modifying anything */
 export async function checkProject(
   projectRoot: string,
 ): Promise<IntegrityResult> {
   const paths = createPaths(projectRoot);
+  const canonicalDirs = await resolveCanonicalUserDirs(paths);
   const [structureResult, userLevelResult] = await Promise.all([
     checkIntegrity(paths),
-    checkUserLevelArtifacts(projectRoot),
+    checkUserLevelArtifacts(projectRoot, canonicalDirs),
   ]);
   return {
     errors: [...structureResult.errors, ...userLevelResult.errors],

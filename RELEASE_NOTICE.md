@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.17.3
+### en
+`reap fix --check` no longer reports the location `reap install-skills` writes to. In v0.17.2 the installer targeted `~/.claude/commands/` while the checker flagged the same path as a v0.15 leftover, producing 19 warnings that no supported command could clear — re-running the installer simply put the files back. The path is now owned by the adapter and injected into the checker via `AdapterModule.userLevelDirs()`, so moving it in future updates both sides at once. Genuine leftovers (`~/.claude/skills/reap.*`, project-level `.claude/commands/reap.*`) are still reported. Fixes issue #22.
+### ko
+`reap fix --check` 가 `reap install-skills` 의 설치 위치를 더 이상 경고하지 않습니다. v0.17.2 에서는 installer 가 `~/.claude/commands/` 에 설치하는 동안 checker 가 같은 경로를 v0.15 잔재로 표시해, 어떤 지원 명령으로도 해소할 수 없는 경고 19건이 발생했습니다 — installer 를 다시 돌려도 같은 파일이 재배치될 뿐이었습니다. 이제 경로는 adapter 가 소유하고 `AdapterModule.userLevelDirs()` 를 통해 checker 에 주입되므로, 앞으로 경로를 옮기면 양쪽이 함께 갱신됩니다. 실제 잔재(`~/.claude/skills/reap.*`, 프로젝트 레벨 `.claude/commands/reap.*`)는 계속 보고됩니다. issue #22 해결.
+
 ## v0.17.2
 ### en
 Behavior change: the reflect-phase prompt now carries the content-type memory classification and the mandatory pruning policy (replace shortterm / delete completed midterm tracks / dedup longterm), plus an instruction to remove superseded content from environment/summary.md. `reap init` seeds the same rules into genome/evolution.md, and existing projects get a v0.17.2 migration note to update theirs. `reap fix --check` warns when a genome file, memory tier, or environment/summary.md exceeds its guideline size — the genome thresholds are now per-file with recorded rationale, replacing a shared 100-line limit that the shipped evolution.md itself could not meet. All size checks are warnings only, never auto-deleted. Release plumbing: `scripts/check-docs-version.sh` gates `npm publish` on the release notes and all five reap.cc locales matching package.json, including locale parity; reap.cc no longer teaches the retired lifespan-based memory model. Fixes issue #21.

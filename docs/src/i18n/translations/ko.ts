@@ -1048,6 +1048,10 @@ reap daemon query    # 심볼 쿼리 실행`,
     breadcrumb: "기타",
     versions: [
       {
+        version: "0.17.3",
+        notes: "**`fix --check` 가 설치 위치를 더 이상 경고하지 않습니다** — v0.17.2 에서는 `install-skills` 가 `~/.claude/commands/` 에 19개의 슬래시 명령을 설치하는 동안 `fix --check` 가 같은 경로를 v0.15 잔재로 표시해, 어떤 지원 명령으로도 해소할 수 없는 경고가 발생했습니다. 이제 경로는 adapter 가 소유하고 `AdapterModule.userLevelDirs()` 로 checker 에 주입되므로 양쪽이 어긋날 수 없습니다. 실제 잔재는 계속 보고됩니다. issue #22 해결.",
+      },
+      {
         version: "0.17.2",
         notes: "**Reflect phase pruning 정책** — reflect prompt가 이제 \"무엇을 쓸지\"뿐 아니라 **\"무엇을 지울지\"**를 지시합니다. Memory tier가 lifespan이 아닌 content-type(세션 핸드오프 / 진행 중 트랙 / 설계 교훈) 기준으로 분류되며, 4단계 decision tree와 tier별 pruning이 추가됐습니다 — shortterm은 매 generation 교체, 완료된 midterm 트랙은 교훈을 승격한 뒤 삭제, longterm은 genome과 중복되는 항목을 제거. `environment/summary.md`에도 대응하는 지시가 추가되어 per-generation changelog를 누적하는 대신 낡은 서술을 제거합니다. `reap init`이 동일 규칙을 `genome/evolution.md`에 반영하며, 기존 프로젝트에는 v0.17.2 migration note가 제공됩니다. `reap fix --check`는 memory tier나 `environment/summary.md`가 가이드라인 크기를 초과하면 경고합니다 — 경고만 하며 자동 삭제하지 않습니다. issue #21 해결. Genome 크기 경고가 근거를 명시한 파일별 값(`invariants` 50 / `application` 250 / `evolution` 300)으로 바뀌었습니다 — 기존의 공통 100줄 기준은 배포되는 `evolution.md` 자체가 만족할 수 없어 `reap init` 직후부터 경고가 떴습니다. 릴리즈 게이트(`scripts/check-docs-version.sh`)가 릴리즈 노트와 reap.cc 5개 로케일을 `package.json` 과 대조하며(로케일 간 일관성 포함), reap.cc 도 더 이상 폐기된 lifespan 기반 memory 모델을 가르치지 않습니다.",
       },

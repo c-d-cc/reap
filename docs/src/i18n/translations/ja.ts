@@ -1047,6 +1047,10 @@ reap daemon query    # シンボルクエリを実行`,
     breadcrumb: "その他",
     versions: [
       {
+        version: "0.17.3",
+        notes: "**`fix --check` がインストール先を警告しなくなりました** — v0.17.2 では `install-skills` が `~/.claude/commands/` に19個のスラッシュコマンドを配置する一方、`fix --check` が同じパスを v0.15 の残骸として報告し、サポートされているどのコマンドでも解消できない警告が出ていました。パスは adapter が所有し `AdapterModule.userLevelDirs()` を通じて checker に注入されるようになったため、両者が食い違うことはなくなりました。本物の残骸は引き続き報告されます。issue #22 を解決。",
+      },
+      {
         version: "0.17.2",
         notes: "**Reflectフェーズのpruningポリシー** — reflect promptが「何を書くか」だけでなく「何を削除するか」を指示するようになりました。Memory tierはlifespanではなくcontent-type（セッション引き継ぎ / 進行中トラック / 設計上の教訓）で分類され、4ステップの判断ツリーとtier別のpruningが追加されました — shorttermは毎generation置き換え、完了したmidtermトラックは教訓を昇格させた上で削除、longtermはgenomeと重複する項目を除去します。`environment/summary.md`にも対応する指示が加わり、generationごとの変更履歴を蓄積せず古い記述を削除します。`reap init`は同じルールを`genome/evolution.md`に反映し、既存プロジェクトにはv0.17.2のmigration noteが提供されます。`reap fix --check`はmemory tierや`environment/summary.md`がガイドラインのサイズを超えた場合に警告します — 警告のみで自動削除は行いません。issue #21を解決。 Genome のサイズ警告が根拠を明記したファイル別の値（`invariants` 50 / `application` 250 / `evolution` 300）になりました — 従来の共通 100 行という基準は配布される `evolution.md` 自体が満たせず、`reap init` 直後から警告が出ていました。リリースゲート（`scripts/check-docs-version.sh`）がリリースノートと reap.cc の5ロケールを `package.json` と照合し（ロケール間の整合性を含む）、reap.cc も廃止された lifespan ベースの memory モデルを教えなくなりました。",
       },

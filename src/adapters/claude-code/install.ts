@@ -37,13 +37,28 @@ async function cleanupStaleSkills(targetDir: string): Promise<string[]> {
  *
  * @returns `{ cleaned, installed, files, targetDir }` for the caller's report.
  */
+/**
+ * Canonical install location for Claude Code slash commands.
+ *
+ * Single owner of this path (gen-076, issue #22). The integrity checker used to
+ * hardcode the same string and flag it as a v0.15 leftover, so `install-skills`
+ * and `fix --check` contradicted each other in the same release. The checker now
+ * receives this via `AdapterModule.userLevelDirs()` instead of knowing it —
+ * change the path here and the checker follows.
+ *
+ * Mirrors `opencodeCommandsDir` in the OpenCode adapter.
+ */
+export function claudeCodeCommandsDir(home: string = homedir()): string {
+  return join(home, ".claude", "commands");
+}
+
 export async function installSlashCommandsOnly(): Promise<{
   cleaned: string[];
   installed: number;
   files: string[];
   targetDir: string;
 }> {
-  const targetDir = join(homedir(), ".claude", "commands");
+  const targetDir = claudeCodeCommandsDir();
   await ensureDir(targetDir);
 
   const cleaned = await cleanupStaleSkills(targetDir);

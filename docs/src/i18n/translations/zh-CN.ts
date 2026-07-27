@@ -1047,6 +1047,10 @@ reap daemon query    # 运行符号查询`,
     breadcrumb: "其他",
     versions: [
       {
+        version: "0.17.3",
+        notes: "**`fix --check` 不再将安装位置标记为遗留** — 在 v0.17.2 中，`install-skills` 会向 `~/.claude/commands/` 写入 19 个斜杠命令，而 `fix --check` 却把同一路径报告为 v0.15 遗留物，产生了任何受支持命令都无法消除的警告。该路径现由 adapter 拥有，并通过 `AdapterModule.userLevelDirs()` 注入检查器，两者不会再出现分歧。真正的遗留物仍会被报告。修复 issue #22。",
+      },
+      {
         version: "0.17.2",
         notes: "**Reflect 阶段的 pruning 策略** — reflect prompt 现在不仅说明写什么，还会指示删除什么。Memory 层级改为按内容类型分类（会话交接 / 进行中的工作轨道 / 设计经验），而非按存续时长，并新增四步判断树与分层 pruning：shortterm 每代替换，已完成的 midterm 轨道在提升其经验后删除，longterm 移除与 genome 重复的条目。`environment/summary.md` 也获得对应指示：删除已过时的描述，而不是逐代累积变更记录。`reap init` 会将相同规则写入 `genome/evolution.md`，现有项目则通过 v0.17.2 迁移说明获得更新。`reap fix --check` 在 memory 层级或 `environment/summary.md` 超出建议大小时发出警告 — 仅警告，绝不自动删除。修复 issue #21。 Genome 大小警告改为按文件设定并附明确依据（`invariants` 50 / `application` 250 / `evolution` 300），取代原先统一的 100 行标准——该标准连随发布的 `evolution.md` 自身都无法满足，导致 `reap init` 之后立即报警。发布关卡（`scripts/check-docs-version.sh`）会将发布说明与 reap.cc 的五个语言版本同 `package.json` 核对（含语言间一致性），reap.cc 也不再讲授已废弃的按存续时长划分的 memory 模型。",
       },

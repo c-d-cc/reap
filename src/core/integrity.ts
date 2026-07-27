@@ -698,42 +698,55 @@ async function checkBacklog(
  */
 export async function checkUserLevelArtifacts(
   projectRoot: string,
+  canonicalDirs: string[] = [],
+  home: string = homedir(),
 ): Promise<IntegrityResult> {
   const errors: string[] = [];
   const warnings: string[] = [];
-  const home = homedir();
 
-  // ~/.claude/skills/reap.* — user-level reap skills (should only be project-level)
-  await checkGlobPattern(
-    join(home, ".claude", "skills"),
-    /^reap\./,
-    "~/.claude/skills/",
-    "user-level reap skill found (should only be project-level)",
-    errors,
-  );
+  /**
+   * A directory the running adapter installs into is not a leftover, however
+   * much it looks like one. Before gen-076 this comparison did not exist and
+   * `fix --check` reported the location `install-skills` had just written to as
+   * a v0.15 remnant — the two commands contradicted each other with no way for
+   * the user to satisfy both (issue #22).
+   */
+  const isCanonical = (dir: string) => canonicalDirs.includes(dir);
 
-  // ~/.claude/commands/reap.* — legacy reap commands at user level
-  await checkGlobPattern(
-    join(home, ".claude", "commands"),
-    /^reap\./,
-    "~/.claude/commands/",
-    "legacy reap command at user level (Phase 2 remnant)",
-    warnings,
-  );
+  // ~/.claude/skills/reap.* — v0.15 installed skills as `reap.<cmd>/SKILL.md`
+  // here. No current adapter writes to it, so anything matching is a leftover.
+  // Guarded by isCanonical so that an adapter moving here later needs no change
+  // on this side.
+  const userSkillsDir = join(home, ".claude", "skills");
+  if (!isCanonical(userSkillsDir)) {
+    await checkGlobPattern(
+      userSkillsDir,
+      /^reap\./,
+      "~/.claude/skills/",
+      "user-level reap skill found (should only be project-level)",
+      errors,
+    );
+  }
 
-  // (Note) `~/.config/opencode/commands/reap.*` is now the canonical install
-  // location for OpenCode slash commands (gen-064). The legacy warning that
-  // used to live here has been removed — REAP-managed reap.*.md files in that
-  // directory are expected when agentClient is opencode.
+  // (Note) `~/.claude/commands/` (claude-code) and
+  // `~/.config/opencode/commands/` (opencode) are the canonical slash-command
+  // locations. Adapters declare them via `userLevelDirs()`; the caller injects
+  // the list. `core` deliberately does not import adapters, so this file has no
+  // opinion about which path is current — it only knows what it was told.
 
-  // .claude/commands/reap.* — legacy project-level commands (should be in skills/)
-  await checkGlobPattern(
-    join(projectRoot, ".claude", "commands"),
-    /^reap\./,
-    ".claude/commands/",
-    "legacy project-level reap command (should be migrated to skills/)",
-    warnings,
-  );
+  // .claude/commands/reap.* — v0.15 project-level commands. Still worth
+  // flagging: `cleanupLegacyProjectSkills` removes them, so the warning has a
+  // resolution path.
+  const projectCommandsDir = join(projectRoot, ".claude", "commands");
+  if (!isCanonical(projectCommandsDir)) {
+    await checkGlobPattern(
+      projectCommandsDir,
+      /^reap\./,
+      ".claude/commands/",
+      "legacy project-level reap command (should be migrated to skills/)",
+      warnings,
+    );
+  }
 
   return { errors, warnings };
 }

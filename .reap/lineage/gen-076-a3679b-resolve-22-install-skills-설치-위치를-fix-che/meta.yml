@@ -1,0 +1,25 @@
+id: gen-076-a3679b
+type: embryo
+goal: "resolve #22: install-skills 설치 위치를 fix --check 가 legacy 로 오탐하는 문제 — 경로를
+  DI 로 공유해 installer/checker 불일치 제거"
+parents:
+  - gen-075-c791fb
+timeline:
+  - stage: learning
+    at: 2026-07-27T12:19:32.261Z
+  - stage: planning
+    at: 2026-07-27T12:21:24.935Z
+  - stage: implementation
+    at: 2026-07-27T12:22:15.674Z
+  - stage: validation
+    at: 2026-07-27T12:29:28.469Z
+  - stage: completion
+    at: 2026-07-27T12:31:38.636Z
+status: completed
+fitnessFeedback:
+  text: "승인. issue #22 해결 — fix --check 경고 19건 → 0건. 이슈가 '저자 판단'이라 한 것을
+    integrity.ts 의 자기모순(L772-774 vs L715-722)과 git log -S 추적으로 확정한 것이 좋았음. 경고
+    삭제로 끝내지 않고 adapter userLevelDirs() DI 로 경로 소유권을 정리해 재발을 구조적으로 차단. opencode
+    에만 있던 기존 패턴을 완성한 형태. bun homedir 이 $HOME 을 무시한다는 발견으로 설계가 오히려 개선됨. 6세대 미룬
+    init-repair 를 backlog 화한 것도 적절."
+  evaluatedAt: 2026-07-27T12:39:41.328Z

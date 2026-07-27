@@ -1045,6 +1045,10 @@ reap daemon query    # Run a symbol query`,
     breadcrumb: "Other",
     versions: [
       {
+        version: "0.17.3",
+        notes: "**`fix --check` no longer flags the install location** — in v0.17.2 `install-skills` wrote 19 slash commands to `~/.claude/commands/` while `fix --check` reported that same path as a v0.15 leftover, producing warnings no supported command could clear. The path is now owned by the adapter and injected into the checker via `AdapterModule.userLevelDirs()`, so the two can no longer drift apart. Genuine leftovers are still reported. Fixes issue #22.",
+      },
+      {
         version: "0.17.2",
         notes: "**Reflect-phase pruning policy** — the reflect prompt now tells the agent what to *remove*, not only what to write. Memory tiers are classified by content-type (session handoff / ongoing tracks / design lessons) instead of lifespan, with a 4-step decision tree and per-tier pruning: shortterm is replaced every generation, completed midterm tracks are deleted after promoting their lessons, longterm drops entries already covered by the genome. `environment/summary.md` gains a matching instruction to remove superseded content instead of accumulating per-generation changelogs. `reap init` seeds the same rules into `genome/evolution.md`, and existing projects receive a v0.17.2 migration note. `reap fix --check` warns when a memory tier or `environment/summary.md` exceeds its guideline size — warnings only, never auto-deleted. Fixes issue #21. Genome size warnings are now per-file (`invariants` 50 / `application` 250 / `evolution` 300) with recorded rationale, replacing a shared 100-line limit the shipped `evolution.md` could not meet — a fresh `reap init` no longer warns. A release gate (`scripts/check-docs-version.sh`) verifies the release notes and all five reap.cc locales against `package.json`, including locale parity, and reap.cc itself no longer teaches the retired lifespan-based memory model.",
       },

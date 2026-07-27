@@ -34,7 +34,7 @@
 
 - **Read actual callers before deciding behavior**: `grep -rn "fnName"` first. Abstract reasoning about "when is this called" is unreliable.
 - **Verify framework semantics with a minimal repro**: CLI option parsing, library edge cases — don't trust convention guesses. `/tmp/test-cli.ts` repro takes a minute and prevents a regression.
-- **Test isolation needs port + path axes**: external tools that bind ports AND write files require env-overridable port + HOME override. Either axis alone leaks into user environment.
+- **Test isolation: match the mechanism to the process boundary**: external tools need both a port axis and a path axis — either alone leaks into the user's environment. For paths, an env override only reaches a *spawned child*; bun's `os.homedir()` ignores `$HOME` in-process (node's follows it), so inject the directory rather than overriding the environment.
 - **macOS path comparison needs `realpath()`**: `/var/folders` vs `/private/var/folders` symlink causes silent fixture-mismatch failures.
 - **Disk-multi-file functions → e2e, not unit**: if a function takes a `paths` injection and reads >1 file, mock cost exceeds e2e cost. Plan testing level by file count.
 - **Debug stash needs causal matching first**: before `git stash`, list changed files + match against failure cause via `git log`. Stash only when matching is ambiguous.

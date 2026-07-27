@@ -1,5 +1,13 @@
 ## What's New
 
+- **`fix --check` and `install-skills` no longer contradict each other** — in v0.17.2 the installer wrote 19 slash commands to `~/.claude/commands/` while the checker reported that exact path as a v0.15 leftover. No supported command could clear the warnings: re-running `install-skills` put the files straight back, and `reap fix` never touches the user-level directory. Fixes [#22](https://github.com/c-d-cc/reap/issues/22).
+- **The install path now has one owner** — the adapter declares its user-level directories via `AdapterModule.userLevelDirs()` and the checker receives them at the call site, so `core` still never imports `adapters`. The two sides can no longer drift apart: moving the path updates both. The stale "Phase 2 remnant" wording, which referred to a v0.15 migration that v0.16 reversed, is gone.
+- Genuine leftovers are still reported — `~/.claude/skills/reap.*` as an error, project-level `.claude/commands/reap.*` as a warning, and `reapdev.*` commands remain untouched.
+
+---
+
+## v0.17.2
+
 - **Reflect-phase pruning policy** — the reflect prompt now tells the agent what to *remove*, not only what to write. Memory tiers are classified by content-type (session handoff / ongoing tracks / design lessons) rather than lifespan, with a 4-step decision tree and per-tier pruning: shortterm is replaced every generation, completed midterm tracks are deleted after their lessons are promoted, and longterm drops anything already covered by the genome. `environment/summary.md` gets a matching instruction to remove superseded content instead of accumulating per-generation changelogs.
 - **Rules now reach existing projects** — `reap init` seeds the same classification into `genome/evolution.md`, and projects created earlier receive a `v0.17.2` migration note so their genome stops teaching the retired lifespan model. Fixes [#21](https://github.com/c-d-cc/reap/issues/21).
 - **Size warnings, with rationale** — `reap fix --check` reports when a genome file, memory tier, or `environment/summary.md` grows past its guideline size. The genome thresholds are now per-file (`invariants` 50 / `application` 250 / `evolution` 300) instead of a shared 100-line limit that the shipped `evolution.md` could not itself meet — every project used to warn the moment `reap init` finished. Each value is derived from what its file holds, and the guidelines are documented in `reap-guide.md`. All size checks are warnings only; `reap fix` never rewrites these files.

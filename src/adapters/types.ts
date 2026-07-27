@@ -39,4 +39,21 @@ export interface AdapterModule {
    * absent target config.
    */
   registerSessionIntegration(projectRoot: string): Promise<void>;
+
+  /**
+   * Absolute paths of the user-level directories this adapter legitimately
+   * installs into.
+   *
+   * The integrity checker (`checkUserLevelArtifacts`) uses this to avoid
+   * flagging an adapter's own install location as a legacy leftover. Before
+   * gen-076 the checker hardcoded `~/.claude/commands` and warned about it while
+   * `install-skills` was actively installing there — the two disagreed within
+   * one release (issue #22).
+   *
+   * `core` must not import adapters, so the paths are injected at the call site
+   * rather than looked up by the checker.
+   *
+   * @param home - override for testing; defaults to the real home directory
+   */
+  userLevelDirs(home?: string): string[];
 }

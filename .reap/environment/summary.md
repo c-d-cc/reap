@@ -3,7 +3,7 @@
 ## Project
 
 - Source: `~/cdws/reap/` (branch: main)
-- Package: `@c-d-cc/reap` v0.17.2
+- Package: `@c-d-cc/reap` v0.17.3
 - Config language: korean
 
 ## Tech Stack
@@ -45,7 +45,7 @@ src/
 │   ├── migration.ts            — Migration instruction layer (gen-071). `detectPendingMigrations(config, pkgVersion, templatesDir?)` — `lastMigratedVersion < v <= pkgVersion` 범위의 `src/templates/migration/vX.Y.Z.md` 파일 로드, semver 정렬. `buildPendingMigrationsSection` — pending 있을 때만 markdown 절 반환. `migrationTemplatesDir()` — dist/dev 분기 (gen-064 패턴). 3 caller (update.ts / load-context.ts / dump-state-sync.ts) 공유.
 │   ├── dump-state-sync.ts      — `buildKnowledgeContextSync` + `dumpStateSync` (gen-063). emitOutput용 sync 버전. async load-context와 byte-identical 출력 (unit test로 검증). **gen-068: `buildDaemonStaticSection()` export — async builder(`load-context.ts`)와 같은 helper 공유. `config?.daemon === true` 시 daemon static knowledge 절 emit. readiness probe는 의도적으로 제외 (sync 환경 제약 + caller 위임).** **gen-071: pending migrations 절 추가 (migration.ts 공유).**
 │   ├── dump-state-helper.ts    — `dumpStateBestEffort` (async, silent on error). 향후 async caller용 (gen-063)
-│   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, checkUserLevelArtifacts, detectV15, cleanupLegacyProjectSkills). 크기 warning: genome 파일별(application 250 / evolution 300 / invariants 50), memory tier 50/70/60, environment summary 250줄 — 수치 근거는 코드 주석 + `reap-guide.md` § File Size Guidelines. **warnings only**, `fixProject` 에 대응 코드 없음이 auto-delete 방지 장치
+│   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, detectV15, cleanupLegacyProjectSkills). **`checkUserLevelArtifacts(projectRoot, canonicalDirs = [], home = homedir())` — gen-076: adapter 의 정식 설치 위치를 주입받아 검사 대상에서 제외. `core` 는 adapters 를 import 하지 않으며 호출부(`fix.ts`)가 `getAdapter().userLevelDirs()` 를 넘긴다. 미주입 시 해당 검사 skip (오탐보다 안전).**  크기 warning: genome 파일별(application 250 / evolution 300 / invariants 50), memory tier 50/70/60, environment summary 250줄 — 수치 근거는 코드 주석 + `reap-guide.md` § File Size Guidelines. **warnings only**, `fixProject` 에 대응 코드 없음이 auto-delete 방지 장치
 │   ├── notice.ts               — release notice (fetchReleaseNotice: RELEASE_NOTICE.md에서 버전+언어별 노트 추출)
 │   ├── report.ts               — auto issue report (autoReport: gh issue create wrapper, best-effort)
 │   ├── template.ts             — artifact 템플릿 복사
@@ -91,7 +91,7 @@ src/
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/                   — AI client 어댑터 (dispatcher + module 패턴)
 │   ├── index.ts                — dispatcher: `getAdapter(agentClient)` → AdapterModule. codex는 helpful Error throw, unknown은 claude-code fallback
-│   ├── types.ts                — AdapterModule interface (installSkills / ensureProjectIntegration / registerSessionIntegration)
+│   ├── types.ts                — AdapterModule interface (installSkills / ensureProjectIntegration / registerSessionIntegration / **userLevelDirs(home?) — gen-076: adapter 가 정식 설치 위치의 단일 소유자. integrity checker 가 이것을 주입받아 자기 설치 위치를 legacy 로 오탐하지 않는다 (issue #22)**)
 │   ├── claude-code/
 │   │   ├── index.ts            — AdapterModule wrapper. **registerSessionIntegration 이 installSlashCommandsOnly + registerSessionHooks 양쪽 호출 — `reap update` 흐름에서 ~/.claude/commands/ user-level sync 보장 (gen-064 T012)**
 │   │   ├── install.ts          — skill 파일 설치 (~/.claude/commands/) + SessionStart hook 등록 (check-version + load-context). **installSlashCommandsOnly() export — installSkills 내부와 adapter registerSessionIntegration 양쪽이 silent 재사용 (gen-064 T011)**. **gen-066: installAgents(home?) prefix-anchored (`^reap-.+\.md$`) silent helper export — Claude Code agent definitions (`~/.claude/agents/reap-*.md`) sync 도 installSkills + registerSessionIntegration 양 caller (gen-064 패턴 적용).**
@@ -163,8 +163,8 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 
 | 스위트 | 명령 | 결과 |
 |---|---|---|
-| unit | `bun test tests/unit/` | 461 pass / 0 fail |
-| e2e | `bun test tests/e2e/` | 263 pass / **1 fail** — `init-repair` "skips when REAP section already present" (pre-existing) |
+| unit | `bun test tests/unit/` | 470 pass / 0 fail |
+| e2e | `bun test tests/e2e/` | 268 pass / **1 fail** — `init-repair` "skips when REAP section already present". **backlog `e2e-init-repair-1건-실패-...` 로 등록됨 (gen-076)** — 더 이상 "그냥 pre-existing" 이 아니라 처리 대기 항목이다 |
 | scenario | `bun test tests/scenario/` | 44 pass / 0 fail |
 
 **e2e 의 1 fail 은 알려진 pre-existing 이다.** 이 수치와 다르면 회귀를 의심할 것.

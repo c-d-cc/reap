@@ -2,6 +2,8 @@ import {
   installSkills,
   ensureAgentsMd,
   registerSessionIntegration,
+  opencodeCommandsDir,
+  opencodeAgentsDir,
 } from "./install.js";
 import type { AdapterModule, IntegrationAction } from "../types.js";
 
@@ -25,6 +27,10 @@ export const opencodeAdapter: AdapterModule = {
 
   async registerSessionIntegration(projectRoot: string): Promise<void> {
     await registerSessionIntegration(projectRoot);
+  },
+
+  userLevelDirs(home?: string): string[] {
+    return [opencodeCommandsDir(home), opencodeAgentsDir(home)];
   },
 };
 

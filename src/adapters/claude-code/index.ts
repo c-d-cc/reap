@@ -3,6 +3,7 @@ import {
   installSlashCommandsOnly,
   installAgents,
   registerSessionHooks,
+  claudeCodeCommandsDir,
 } from "./install.js";
 import { ensureClaudeMd } from "../../cli/commands/init/common.js";
 import type { AdapterModule, IntegrationAction } from "../types.js";
@@ -38,6 +39,13 @@ export const claudeCodeAdapter: AdapterModule = {
     await installSlashCommandsOnly();
     await installAgents();
     await registerSessionHooks();
+  },
+
+  userLevelDirs(home?: string): string[] {
+    // `~/.claude/agents/` is deliberately absent: installAgents writes
+    // `reap-*.md` there, which the checker matches with a `reap.` prefix — the
+    // dot makes them distinct, so they were never flagged.
+    return [claudeCodeCommandsDir(home)];
   },
 };
 
