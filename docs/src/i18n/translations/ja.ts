@@ -1050,7 +1050,7 @@ reap daemon query    # シンボルクエリを実行`,
     versions: [
       {
         version: "0.17.3",
-        notes: "**`fix --check` がインストール先を警告しなくなりました** — installer は `~/.claude/commands/` に配置する一方、checker が同じパスを v0.15 の残骸と報告し、解消不能な警告が出ていました（issue #22）。パスは単一の所有者を持ち、注入によって checker に渡されます。**リリースゲート2種**: `check-self-diagnosis.sh` は実際の配布 tarball を隔離 HOME にインストールして `fix --check` がクリーンであることを要求し（CI + publish 前）、`check-agent-integration.sh` はヘッドレスエージェントでスラッシュコマンドが実際に届くかを確認します（リリース前）。**carrier マーカー** — 複数箇所が知る事実に `reap:carrier(id)` を付け、grep で全て見つけられます。",
+        notes: "**REAP のインストールが OpenCode を壊さなくなりました** — agent 定義を Claude Code のスキーマのままコピーしており、OpenCode が読めないファイルが1つあるだけで設定全体が無効になり、すべての `opencode` コマンドが失敗していました。クライアントごとに変換して配置します。**`fix --check` がインストール先を警告しなくなりました** — installer は `~/.claude/commands/` に配置する一方、checker が同じパスを v0.15 の残骸と報告し、解消不能な警告が出ていました（issue #22）。パスは単一の所有者を持ち、注入によって checker に渡されます。**リリースゲート2種**: `check-self-diagnosis.sh` は実際の配布 tarball を隔離 HOME にインストールして `fix --check` がクリーンであることを要求し（CI + publish 前）、`check-agent-integration.sh` はヘッドレスエージェントでスラッシュコマンドが実際に届くかを確認します（リリース前）。その他: 新規 init が自身の `invariants.md` を placeholder と誤判定する問題、`init --repair` が更新した CLAUDE.md を「既存」と報告する問題を修正。",
       },
       {
         version: "0.17.2",

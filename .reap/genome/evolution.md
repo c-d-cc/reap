@@ -263,6 +263,11 @@ reflect phase에서 environment/summary.md를 점진적으로 업데이트:
 - 전체 재작성 아님 — 변경된 부분만 반영 (파일 추가/삭제, 의존성 변경, 빌드 변경 등)
 - Tech Stack, Source Structure, Tests 섹션이 주요 갱신 대상
 
+**낡은 서술은 제거한다 — 갱신은 append-only가 아니다**:
+- 더 이상 사실이 아닌 문장을 삭제한다 (제거된 파일/모듈, 폐기된 결정, 낡은 의존성 메모)
+- **generation별 changelog 항목을 쌓지 않는다.** summary.md는 현재 상태를 서술하지, 그렇게 된 경위를 서술하지 않는다 — 경위는 lineage와 git history가 소유한다
+- 어떤 절이 "gen-NNN에서 무엇이 바뀌었다"의 나열이 되었다면 현재형 서술 하나로 접는다
+
 ## genome vs environment 경계
 
 - **genome (application.md)**: prescriptive — "이렇게 해야 한다" (원칙, 설계 결정, 컨벤션, 규칙). genome은 normal mode에서 immutable이므로, 자주 변하는 사실 정보를 넣으면 안 된다.

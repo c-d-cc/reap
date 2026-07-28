@@ -1051,7 +1051,7 @@ reap daemon query    # 심볼 쿼리 실행`,
     versions: [
       {
         version: "0.17.3",
-        notes: "**`fix --check` 가 설치 위치를 더 이상 경고하지 않습니다** — installer 는 `~/.claude/commands/` 에 설치하는데 checker 가 v0.15 잔재로 표시해 해소 불가능한 경고가 발생했습니다(issue #22). 이제 경로는 단일 소유자를 가지며 주입으로 전달됩니다. **릴리즈 게이트 2종**: `check-self-diagnosis.sh` 는 실제 배포 tarball 을 격리 HOME 에 설치해 `fix --check` 가 깨끗한지 요구하고(CI + publish 전), `check-agent-integration.sh` 는 헤드리스 agent 로 slash command 가 실제 노출되는지 확인합니다(릴리즈 전). **carrier 표식** — 여러 곳이 아는 사실에 `reap:carrier(id)` 를 심어 grep 으로 전부 찾습니다.",
+        notes: "**REAP 설치가 더 이상 OpenCode 를 깨뜨리지 않습니다** — agent 정의를 Claude Code 스키마 그대로 복사했고, OpenCode 가 읽지 못하는 파일 하나가 설정 전체를 무효화해 모든 `opencode` 명령이 실패했습니다. 이제 클라이언트별로 변환합니다. **`fix --check` 가 설치 위치를 더 이상 경고하지 않습니다** — installer 는 `~/.claude/commands/` 에 설치하는데 checker 가 v0.15 잔재로 표시해 해소 불가능한 경고가 발생했습니다(issue #22). 이제 경로는 단일 소유자를 가지며 주입으로 전달됩니다. **릴리즈 게이트 2종**: `check-self-diagnosis.sh` 는 실제 배포 tarball 을 격리 HOME 에 설치해 `fix --check` 가 깨끗한지 요구하고(CI + publish 전), `check-agent-integration.sh` 는 헤드리스 agent 로 slash command 가 실제 노출되는지 확인합니다(릴리즈 전). 그 외: 신규 init 이 자신의 `invariants.md` 를 placeholder 로 오판하던 문제, `init --repair` 가 갱신한 CLAUDE.md 를 '이미 있음'으로 보고하던 문제 수정.",
       },
       {
         version: "0.17.2",
