@@ -209,8 +209,10 @@ if ! sed -i.bak 's/^agentClient:.*/agentClient: opencode/' "$OC_PROJECT/.reap/co
 fi
 rm -f "$OC_PROJECT/.reap/config.yml.bak"
 
-if ! (cd "$OC_PROJECT" && HOME="$OC_HOME" "$REAP_BIN" install-skills >/dev/null 2>&1); then
+OC_INSTALL=$(cd "$OC_PROJECT" && HOME="$OC_HOME" "$REAP_BIN" install-skills 2>&1)
+if [ $? -ne 0 ]; then
   red "  FAIL  install-skills failed for agentClient: opencode"
+  echo "$OC_INSTALL" | head -5 | while IFS= read -r line; do dim "        $line"; done
   exit 1
 fi
 green "  ok    installed as an OpenCode project"
@@ -237,10 +239,24 @@ for agent in reap-evolve reap-evaluate; do
   if ! grep -q "$agent" <<< "$OC_OUT"; then
     red "  FAIL  OpenCode accepted the config but does not list $agent"
     echo
-    echo "$OC_OUT" | head -12 | while IFS= read -r line; do dim "        $line"; done
+    dim "        REAP reported: $(echo "$OC_INSTALL" | node -e '
+      let raw=""; process.stdin.on("data",d=>raw+=d).on("end",()=>{
+        try { console.log(JSON.parse(raw).message || "(no message)"); }
+        catch { console.log("(unparseable install-skills output)"); }
+      });')"
+    dim "        $OC_HOME/.config/opencode/agent/ contains:"
+    if [ -d "$OC_HOME/.config/opencode/agent" ]; then
+      ls -1 "$OC_HOME/.config/opencode/agent" 2>/dev/null | while IFS= read -r f; do dim "          $f"; done
+      [ -z "$(ls -A "$OC_HOME/.config/opencode/agent" 2>/dev/null)" ] && dim "          (empty)"
+    else
+      dim "          (directory does not exist)"
+    fi
     echo
-    dim "        The configuration parses, so REAP either wrote nothing or wrote"
-    dim "        somewhere OpenCode does not look."
+    dim "        opencode listed:"
+    echo "$OC_OUT" | grep -E "^[a-zA-Z].*\((primary|subagent)\)" | while IFS= read -r line; do dim "          $line"; done
+    echo
+    dim "        So either REAP wrote nothing, or it wrote somewhere this"
+    dim "        version of OpenCode does not read."
     exit 1
   fi
 done
