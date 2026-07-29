@@ -29,6 +29,17 @@ jobs:
       - name: Verify docs match package version
         run: bash scripts/check-docs-version.sh
 
+      # The gate's OpenCode half skips itself when the client is absent, and a
+      # runner has no reason to have it. Installing it is what makes that half
+      # actually run here rather than report SKIP.
+      #
+      # Deliberately unpinned: the question is whether the *current* OpenCode
+      # accepts what REAP writes. If upstream changes its schema this goes red,
+      # and that is the signal — gen-080 was exactly that failure, found by a
+      # user after it shipped.
+      - name: Install OpenCode (for the self-diagnosis gate)
+        run: npm i -g opencode-ai
+
       # Install the tarball we are about to publish and ask REAP whether the
       # result is healthy. Catches what #22 and the gen-074 daemon packaging
       # defect had in common: both were only visible after installing.

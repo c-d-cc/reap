@@ -203,12 +203,25 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon). 상세�
 
 | 시점 | 검사 | 어디서 | 비용 |
 |---|---|---|---|
-| `ci.yml` (매 push) | build + **자기진단**(층1) | reap | 무료 |
+| `ci.yml` (매 push) | build + **자기진단**(층1, claude-code + **OpenCode**) | reap | 무료 |
 | main push | **테스트 전체** (unit/e2e/scenario) | **reap-test** | 무료 |
 | `release.yml` (태그) | 문서 정합성 + 자기진단 + build + publish | reap | 무료 |
 | 릴리즈 전 수동 (`reapdev.versionBump` 5-2) | **agent 통합**(층2) | 로컬 | ~$0.25 |
 
 **층1 vs 층2**: 층1 은 "파일이 올바른 위치에 올바른 내용으로 놓였는가", 층2 는 "클라이언트가 그것을 실제로 읽는가". 후자는 전자로부터 추론할 수 없다 — gen-063 은 파일 검증을 전부 통과하고도 slash command 가 노출되지 않았다.
+
+### 자기진단은 두 클라이언트를 본다 (gen-082)
+
+`check-self-diagnosis.sh` 는 tarball 설치 후 (1) claude-code 프로젝트로 `fix --check` 가 아무것도 보고하지 않을 것, (2) **`agentClient: opencode` 로 바꿔 `install-skills` 한 뒤 `opencode agent list` 가 exit 0 이고 `reap-evolve`/`reap-evaluate` 를 나열할 것** 을 요구한다.
+
+(2)가 필요한 이유는 실패 양상이 클라이언트마다 다르기 때문이다 — **OpenCode 는 설정 검증이 all-or-nothing 이라 REAP 이 쓴 파일 하나가 `opencode` 명령 전체를 죽인다** (gen-080). Claude Code 에는 이 양상이 없다. 그리고 `reap init` 은 claude-code 만 만들므로 opencode 경로는 그 전까지 어느 게이트도 지나지 않았다.
+
+- **exit 0 만 보면 안 된다** — `agent list` 는 agent 가 하나도 없어도 exit 0 이다. 목록 확인이 함께 있어야 "아무것도 설치하지 않음"이 통과하지 않는다
+- **격리는 `HOME` 하나로 충분** — `reap`(node)의 `homedir()` 와 opencode 프로세스가 둘 다 `$HOME` 을 따른다. 사용자 `~/.config/opencode/` 는 읽지도 쓰지도 않는다
+- **모델 호출 없음** — 설정 파싱뿐이라 무료. 그래서 층2(유료)와 달리 CI 에 있다
+- CI/release 워크플로가 `npm i -g opencode-ai` 로 클라이언트를 설치한다. **버전 미고정** — 묻는 것이 "현재의 OpenCode 가 받아들이는가"이므로 upstream 스키마 변경으로 red 가 되는 것이 의도된 신호다
+- `opencode` 부재 시 **amber SKIP 을 출력**하고 통과한다. 조용한 exit 0 은 "검사했고 깨끗하다"로 읽힌다
+- **잡지 못하는 것**: slash command 는 `opencode command list` 같은 CLI 표면이 없어 검증할 수 없다. 검사한 opencode 버전은 스크립트가 출력하므로 로컬/CI 판정이 갈리면 근거가 남는다
 
 ### 테스트는 reap-test 에서 돈다 (gen-081)
 

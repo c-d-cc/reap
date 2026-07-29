@@ -8,9 +8,15 @@
 # whoever looked filtered for the lines they cared about.
 #
 # This turns that into a gate: install from the actual publish artifact and
-# require a clean bill of health. Two past incidents fail against it —
+# require a clean bill of health. Three past incidents fail against it —
 #   - #22            : install-skills wrote where fix --check called legacy
 #   - gen-074 daemon : `files` omitted daemon/, leaving a broken symlink
+#   - gen-080        : agent files OpenCode could not parse (see part 2)
+#
+# Part 2 exists because the first three checks all ask the same question of one
+# client. REAP claims to support two, and `reap init` only ever exercises the
+# default — so the OpenCode path reached users unverified, and gen-080 took
+# their whole OpenCode install offline.
 #
 # Isolation is not optional. `install-skills` writes 19 files to
 # ~/.claude/commands/ and postinstall touches ~/.reap/ and
@@ -25,13 +31,17 @@ cd "$ROOT"
 
 red()   { printf '\033[31m%s\033[0m\n' "$1"; }
 green() { printf '\033[32m%s\033[0m\n' "$1"; }
+amber() { printf '\033[33m%s\033[0m\n' "$1"; }
 dim()   { printf '\033[2m%s\033[0m\n' "$1"; }
 
 FAKE_HOME=""; PREFIX=""; PROJECT=""; TARBALL=""
+OC_HOME=""; OC_PROJECT=""
 cleanup() {
-  [ -n "$FAKE_HOME" ] && rm -rf "$FAKE_HOME"
-  [ -n "$PREFIX" ]    && rm -rf "$PREFIX"
-  [ -n "$PROJECT" ]   && rm -rf "$PROJECT"
+  [ -n "$FAKE_HOME" ]  && rm -rf "$FAKE_HOME"
+  [ -n "$PREFIX" ]     && rm -rf "$PREFIX"
+  [ -n "$PROJECT" ]    && rm -rf "$PROJECT"
+  [ -n "$OC_HOME" ]    && rm -rf "$OC_HOME"
+  [ -n "$OC_PROJECT" ] && rm -rf "$OC_PROJECT"
   [ -n "$TARBALL" ] && [ -f "$ROOT/$TARBALL" ] && rm -f "$ROOT/$TARBALL"
   return 0
 }
@@ -146,6 +156,95 @@ if [ -n "$FINDINGS" ]; then
   exit 1
 fi
 green "  ok    no findings"
+
+# ── 5. The other client: can OpenCode read what REAP wrote for it? ──────────
+#
+# Everything above runs as a claude-code project, because that is what
+# `reap init` produces. The OpenCode path is written by the same installer and
+# was never exercised — which is how gen-080 shipped agent definitions carrying
+# Claude Code's frontmatter. OpenCode validates its configuration all or
+# nothing, so that single unreadable file took every `opencode` command down
+# until it was deleted, and reinstalling REAP put it back.
+#
+# Asking OpenCode itself is the point. Validating the frontmatter against a
+# copy of OpenCode's schema kept here would be one more place holding a fact
+# that lives somewhere else, and it would drift exactly like #21 and #22 did.
+#
+# No model is involved: `agent list` parses configuration and exits. It needs
+# no credentials and no network, so unlike the agent-integration check this one
+# is free and belongs in CI.
+echo
+echo "Checking the OpenCode client..."
+
+if ! command -v opencode >/dev/null 2>&1; then
+  amber "  SKIP  opencode not found — the OpenCode client was NOT verified"
+  dim "        npm i -g opencode-ai (or https://opencode.ai/install) to run it."
+  echo
+  green "Self-diagnosis passed for v$PKG_VERSION (OpenCode skipped)."
+  exit 0
+fi
+
+dim "  against opencode $(opencode --version 2>/dev/null | head -1)"
+
+# A separate HOME so the claude-code diagnosis above is left as it was, and so
+# the developer's own ~/.config/opencode is neither read nor written. One
+# variable isolates both directions: reap resolves its install path from $HOME,
+# and opencode resolves its config from $HOME too (measured, not assumed —
+# bun's in-process os.homedir() ignores $HOME, but opencode runs as its own
+# process, so it follows).
+OC_HOME=$(mktemp -d)
+OC_PROJECT=$(mktemp -d)
+(cd "$OC_PROJECT" && git init -q && git config user.email "self@check" && git config user.name "Self Check")
+
+if ! (cd "$OC_PROJECT" && HOME="$OC_HOME" "$REAP_BIN" init octest >/dev/null 2>&1); then
+  red "  FAIL  reap init failed for the OpenCode project"
+  exit 1
+fi
+
+# `reap init` writes claude-code; switching the config is the supported way to
+# choose a client, and it is that path this check covers.
+if ! sed -i.bak 's/^agentClient:.*/agentClient: opencode/' "$OC_PROJECT/.reap/config.yml"; then
+  red "  FAIL  could not switch agentClient to opencode"
+  exit 1
+fi
+rm -f "$OC_PROJECT/.reap/config.yml.bak"
+
+if ! (cd "$OC_PROJECT" && HOME="$OC_HOME" "$REAP_BIN" install-skills >/dev/null 2>&1); then
+  red "  FAIL  install-skills failed for agentClient: opencode"
+  exit 1
+fi
+green "  ok    installed as an OpenCode project"
+
+OC_OUT=$(cd "$OC_PROJECT" && HOME="$OC_HOME" opencode agent list 2>&1)
+OC_STATUS=$?
+
+if [ $OC_STATUS -ne 0 ]; then
+  red "  FAIL  OpenCode rejects the configuration REAP just wrote"
+  echo
+  echo "$OC_OUT" | head -6 | while IFS= read -r line; do dim "        $line"; done
+  echo
+  dim "        One file OpenCode cannot parse invalidates the whole config, so"
+  dim "        installing REAP would leave the user with no working opencode"
+  dim "        command at all. That is gen-080."
+  dim "        If REAP's agent files did not change, OpenCode's schema may have."
+  exit 1
+fi
+
+# Exiting 0 is not enough on its own: `agent list` succeeds with no REAP agents
+# at all, reporting only the built-ins. A check that stops at the exit code
+# would pass an install that wrote nothing.
+for agent in reap-evolve reap-evaluate; do
+  if ! grep -q "$agent" <<< "$OC_OUT"; then
+    red "  FAIL  OpenCode accepted the config but does not list $agent"
+    echo
+    echo "$OC_OUT" | head -12 | while IFS= read -r line; do dim "        $line"; done
+    echo
+    dim "        The configuration parses, so REAP either wrote nothing or wrote"
+    dim "        somewhere OpenCode does not look."
+    exit 1
+  fi
+done
+green "  ok    OpenCode loads reap-evolve and reap-evaluate"
 
 echo
 green "Self-diagnosis passed for v$PKG_VERSION."

@@ -21,6 +21,17 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+      # The gate's OpenCode half skips itself when the client is absent, and a
+      # runner has no reason to have it. Installing it is what makes that half
+      # actually run here rather than report SKIP.
+      #
+      # Deliberately unpinned: the question is whether the *current* OpenCode
+      # accepts what REAP writes. If upstream changes its schema this goes red,
+      # and that is the signal — gen-080 was exactly that failure, found by a
+      # user after it shipped.
+      - name: Install OpenCode (for the self-diagnosis gate)
+        run: npm i -g opencode-ai
+
       # A fresh install must never report anything about itself. Unlike the docs
       # check (which is only meaningful at release time, since package.json
       # legitimately runs ahead of the docs mid-development), this holds at every

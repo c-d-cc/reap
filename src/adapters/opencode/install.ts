@@ -325,7 +325,12 @@ export async function installSlashCommands(
       if (!file.endsWith(".md")) continue;
       const source = await readTextFile(join(srcDir, file));
       if (source === null) continue;
-      await writeTextFile(join(targetDir, file), toOpenCodeAgent(source));
+      // Verbatim. These are commands, not agents — running them through
+      // toOpenCodeAgent stamps `mode: subagent` onto every one of them, which
+      // describes something a command is not. OpenCode tolerates the stray
+      // field today and there is no `opencode command list` that would report
+      // it, so nothing catches this but reading the file.
+      await writeTextFile(join(targetDir, file), source);
       installed++;
     }
   } catch {
