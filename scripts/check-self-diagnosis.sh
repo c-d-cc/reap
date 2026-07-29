@@ -255,8 +255,13 @@ for agent in reap-evolve reap-evaluate; do
     dim "        opencode listed:"
     echo "$OC_OUT" | grep -E "^[a-zA-Z].*\((primary|subagent)\)" | while IFS= read -r line; do dim "          $line"; done
     echo
-    dim "        So either REAP wrote nothing, or it wrote somewhere this"
-    dim "        version of OpenCode does not read."
+    echo
+    dim "        XDG_CONFIG_HOME=${XDG_CONFIG_HOME:-<unset>}"
+    dim "        HOME (for opencode)=$OC_HOME"
+    echo
+    dim "        REAP resolves its install path from HOME, while OpenCode reads"
+    dim "        XDG_CONFIG_HOME when that is set. If the two disagree above,"
+    dim "        REAP is writing where this client does not look."
     exit 1
   fi
 done
