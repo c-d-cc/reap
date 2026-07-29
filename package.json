@@ -41,7 +41,7 @@
     "build": "bash scripts/build.sh",
     "typecheck": "tsc --noEmit",
     "test": "npm run test:unit && npm run test:e2e && npm run test:scenario",
-    "test:unit": "bun test tests/unit/",
+    "test:unit": "bun test --isolate tests/unit/",
     "test:e2e": "bun test tests/e2e/",
     "test:scenario": "bun test tests/scenario/",
     "postinstall": "bash scripts/postinstall.sh || true"

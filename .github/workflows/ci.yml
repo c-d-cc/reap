@@ -7,7 +7,7 @@ on:
     branches: [main]
 
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -26,7 +26,54 @@ jobs:
       # legitimately runs ahead of the docs mid-development), this holds at every
       # commit — so it runs here rather than only before publish.
       #
-      # Tests are not run here: tests/ is a private submodule and the default
-      # GITHUB_TOKEN cannot fetch it. Tracked separately.
+      # The test suite does not run in this repository — see the dispatch job.
       - name: Self-diagnosis
         run: bash scripts/check-self-diagnosis.sh
+
+  # The suite lives in c-d-cc/reap-test, which is private, and runs there rather
+  # than here. This repository is public, so its workflow logs are readable by
+  # anyone; `bun test` prints every test name, and published logs cannot be taken
+  # back. Running the suite there keeps the logs private, and as a side effect
+  # needs no token to read the tests — only one to ask for the run.
+  #
+  # Pull requests are excluded deliberately. A fork's workflow gets no secrets,
+  # so a job like this would fail on every outside contribution; leaving it to
+  # pushes means a fork PR still gets build and self-diagnosis, both of which
+  # work without secrets. Pre-merge test signal is the maintainer's to run.
+  dispatch-tests:
+    needs: build
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Ask reap-test to run the suite
+        env:
+          TOKEN: ${{ secrets.TEST_DISPATCH_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          # Say so rather than skipping. A missing token means the suite did not
+          # run, and a green tick claiming otherwise is worse than a red one.
+          if [ -z "${TOKEN:-}" ]; then
+            echo "::error::TEST_DISPATCH_TOKEN is not set — the test suite did NOT run."
+            exit 1
+          fi
+
+          # The tests SHA this commit pins, not reap-test's HEAD: that is the
+          # pair actually validated locally, so a failure points at this commit.
+          TESTS_SHA=$(git ls-tree HEAD tests | awk '{print $3}')
+          if [ -z "$TESTS_SHA" ]; then
+            echo "::error::no submodule pointer for tests/ in $GITHUB_SHA"
+            exit 1
+          fi
+          echo "reap $GITHUB_SHA / tests $TESTS_SHA"
+
+          # -f turns an HTTP error into a non-zero exit, so an expired or
+          # under-scoped token shows up here instead of passing quietly.
+          curl -fsS -X POST \
+            -H "Authorization: Bearer $TOKEN" \
+            -H "Accept: application/vnd.github+json" \
+            https://api.github.com/repos/c-d-cc/reap-test/dispatches \
+            -d "$(jq -n --arg r "$GITHUB_SHA" --arg t "$TESTS_SHA" \
+                  '{event_type:"reap-push",client_payload:{reap_sha:$r,tests_sha:$t}}')"
