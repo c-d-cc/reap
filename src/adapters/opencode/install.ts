@@ -270,14 +270,39 @@ function claudeCodeSkillsDir(): string {
 }
 
 /**
+ * Where OpenCode keeps its user-level configuration.
+ *
+ * `~/.config` is only the default. OpenCode follows the XDG base directory
+ * spec, so when XDG_CONFIG_HOME is set it reads there instead — and REAP has
+ * to write to the same place or its files land where the client never looks.
+ * That failure is silent: opencode starts fine and simply has no REAP
+ * commands or agents. GitHub runners set the variable, which is how this was
+ * found; so do plenty of dotfile setups.
+ *
+ * The value is a parameter rather than a direct process.env read so tests can
+ * pin it — a test that fakes `home` while the developer's real
+ * XDG_CONFIG_HOME leaks through would write outside its temp directory.
+ */
+export function opencodeConfigDir(
+  home: string = homedir(),
+  xdgConfigHome: string | undefined = process.env.XDG_CONFIG_HOME,
+): string {
+  const xdg = xdgConfigHome?.trim();
+  return xdg ? join(xdg, "opencode") : join(home, ".config", "opencode");
+}
+
+/**
  * User-level OpenCode commands directory.
  * Per https://opencode.ai/docs/commands/, OpenCode reads markdown commands
- * from `~/.config/opencode/commands/` (global) or `.opencode/commands/`
- * (per-project). REAP installs globally to match the Claude Code adapter's
+ * from the global config directory or `.opencode/commands/` (per-project).
+ * REAP installs globally to match the Claude Code adapter's
  * `~/.claude/commands/` parity model.
  */
-export function opencodeCommandsDir(home: string = homedir()): string {
-  return join(home, ".config", "opencode", "commands");
+export function opencodeCommandsDir(
+  home: string = homedir(),
+  xdgConfigHome: string | undefined = process.env.XDG_CONFIG_HOME,
+): string {
+  return join(opencodeConfigDir(home, xdgConfigHome), "commands");
 }
 
 /**
@@ -378,8 +403,11 @@ function agentsTemplateDir(): string {
  * separate OpenCode convention — naming is asymmetric (commands plural,
  * agents singular) but that is OpenCode's choice, not ours.
  */
-export function opencodeAgentsDir(home: string = homedir()): string {
-  return join(home, ".config", "opencode", "agent");
+export function opencodeAgentsDir(
+  home: string = homedir(),
+  xdgConfigHome: string | undefined = process.env.XDG_CONFIG_HOME,
+): string {
+  return join(opencodeConfigDir(home, xdgConfigHome), "agent");
 }
 
 /**
