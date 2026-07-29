@@ -112,48 +112,21 @@ src/
         ├── normal/             — 01~05 (learning~completion)
         └── merge/              — 01~06 (detect~completion)
 
-daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
-├── src/                           — daemon 소스 (9 모듈 + api/ + indexer/)
-│   ├── index.ts                   — daemon 진입점
-│   ├── server.ts                  — HTTP 서버 (localhost:17224)
-│   ├── router.ts                  — HTTP 라우터
-│   ├── registry.ts                — 프로젝트 레지스트리 (CRUD)
-│   ├── process.ts                 — PID 파일, idle timer
-│   ├── paths.ts                   — daemon 경로 상수
-│   ├── types.ts                   — daemon 타입
-│   ├── api/                       — API 핸들러 (health, projects, query)
-│   └── indexer/                   — 인덱싱 파이프라인
-│       ├── parser.ts              — Tree-sitter WASM 파서 (15개 언어)
-│       ├── scanner.ts             — Git 기반 파일 스캔
-│       ├── graph.ts               — 코드 그래프 (인메모리)
-│       ├── storage.ts             — SQLite 영속화
-│       ├── pipeline.ts            — 인덱싱 파이프라인 오케스트레이터
-│       ├── import-resolver.ts     — import 해석
-│       ├── call-resolver.ts       — call 해석
-│       ├── impact.ts              — blast radius 분석
-│       ├── community.ts           — 커뮤니티 탐지
-│       └── process-tracer.ts      — 실행 플로우 추적
+daemon/                            — 별도 앱 (@c-d-cc/reap-daemon). 상세는 daemon/ 자체 참조
+├── src/                           — 진입점 + HTTP(server/router) + registry/process/paths/types + api/
+│   └── indexer/                   — parser(Tree-sitter WASM 15개 언어) · scanner(git) · graph · storage(SQLite)
+│                                    · pipeline · import/call-resolver · impact · community · process-tracer
 ├── queries/                       — Tree-sitter SCM 쿼리 (15개 언어)
 └── tests/                         — daemon 테스트 (25 파일, 130 tests)
 ```
 
 ## docs/ — reap.cc 문서 사이트
 
-별도 repo 가 아니라 **본 repo 안의 Vite + React 앱**이다 (`docs/`, 자체 `package.json`).
+별도 repo 가 아니라 **본 repo 안의 Vite + React 앱**이다 (`docs/`, 자체 `package.json`). `.github/workflows/docs.yml` 이 `docs/**`, `media/**`, `README*.md` 변경을 main push 시 GitHub Pages 로 배포하고(`docs/public/CNAME` = `reap.cc`), `index.html` 을 `404.html` 로 복사해 SPA fallback 을 만든다. 빌드는 `cd docs && npx vite build` → `docs/dist/public/`.
 
-- 배포: `.github/workflows/docs.yml` — `docs/**`, `media/**`, `README*.md` 변경이 main 에 push 되면 GitHub Pages 로 자동 배포. `docs/public/CNAME` = `reap.cc`
-- 빌드: `cd docs && npx vite build` → `docs/dist/public/`. workflow 가 `index.html` 을 `404.html` 로 복사(SPA fallback)
-- 콘텐츠: **`docs/src/i18n/translations/{en,ko,ja,de,zh-CN}.ts`** — 5개 로케일 각각이 전체 문서 텍스트를 담은 TS 객체. 마크다운 파일이 아니다
-- changelog: 각 로케일의 `releaseNotes.versions[]` 배열, 최신이 첫 원소
+콘텐츠는 마크다운이 아니라 **`docs/src/i18n/translations/{en,ko,ja,de,zh-CN}.ts`** — 5개 로케일 각각이 전체 문서 텍스트를 담은 TS 객체다. changelog 는 각 로케일의 `releaseNotes.versions[]` 배열(최신이 첫 원소).
 
-**주의**: 문서 텍스트가 TS 객체 배열이므로 구문 오류 시 빌드가 깨진다. 수정 후 반드시 `npx vite build` 확인. 그리고 5개 로케일을 **모두** 갱신해야 한다 — 일부만 고치면 로케일 drift 가 생기며, `scripts/check-docs-version.sh` 가 이를 검사한다.
-
-## Build & Scripts
-
-- `npm run build` — bun build → `dist/cli/index.js` (~400KB single bundle) + skill 복사
-- `npm run dev` — bun으로 직접 실행 (빌드 불필요)
-- `npm run typecheck` — tsc --noEmit
-- `postinstall` — skill 자동 설치 + v0.15 감지 안내
+**주의**: TS 객체이므로 구문 오류 시 빌드가 깨진다 — 수정 후 반드시 `npx vite build` 확인. 그리고 5개 로케일을 **모두** 갱신해야 한다. 일부만 고치면 로케일 drift 가 생기며 `scripts/check-docs-version.sh` 가 이를 검사한다.
 
 ## Tests
 
@@ -178,6 +151,14 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 
 버전 의존 assertion 주의: `tests/e2e/update-migration.test.ts` 는 패키지 버전을 `package.json` 에서 읽는다(`PKG_VERSION`). 릴리즈 버전을 하드코딩하면 bump 마다 깨진다 — 단, "특정 버전의 migration note"를 검증하는 케이스는 하드코딩이 맞다.
 
+**테스트는 머신 상태를 읽지 않는다 (gen-081).** CI 를 붙이면서 세 곳이 개발자 머신에 의존하고 있었음이 드러났다. 새 테스트를 쓸 때 같은 함정을 피할 것:
+
+- **git identity 는 저장소마다 설정한다.** 러너에는 global config 가 없어 `git commit` 이 거부된다. `git clone` 과 `submodule add` 로 생긴 저장소는 상속받지 못하므로 각각 필요하다
+- **`git init` 은 항상 `-b main` 으로 브랜치를 명시한다.** 미명시 시 머신의 `init.defaultBranch` 를 따르고, 미설정이면 `master` 다. 직후 `checkout -b` 로 갈아타 무해한 곳까지 전부 명시해 두었다 — 무해 여부를 매번 판단하게 두면 다시 걸린다
+- **`mock.module` 은 프로세스 전역이며 되돌릴 수 없다.** `afterAll` 로 복구해도 소용없다 (bun 은 모든 파일을 로드한 뒤 실행). 그래서 `test:unit` 이 `--isolate` 를 쓴다. `pull.test.ts` 상단 주석에 근거가 있다. **bun 을 직접 호출해 unit 을 돌리면 이 보호가 없다**
+
+리눅스 재현이 필요하면 `oven/bun:<ver>-debian` + `apt-get install git` 이미지에 `-e GIT_CONFIG_GLOBAL=/dev/null` 로 러너 조건을 만들 수 있다. **기본 `oven/bun` 이미지에는 git 이 없어** 전혀 다른 실패를 보게 된다.
+
 ### scripts/ (프로젝트 루트)
 - `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates)
 - `scripts/alpha-publish.sh` — alpha 배포 헬퍼
@@ -188,10 +169,10 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 - `scripts/check-docs-version.sh` — 릴리즈 문서 정합성 게이트. `RELEASE_NOTICE.md` / `RELEASE_NOTES.md` / 5개 로케일 changelog 가 `package.json` 과 일치하는지 + **로케일 간 항목 집합 동일성** + migration note 가 패키지 버전을 넘지 않는지 검사. `release.yml` 의 `npm publish` 앞과 `reapdev.versionBump` Step 5-1 에서 실행
 
 ### npm scripts
-- `npm run test:unit` — bun test tests/unit/
-- `npm run test:e2e` — bash tests/e2e/run.sh
-- `npm run test:scenario` — bash tests/scenario/run.sh
-- `npm run test` — 전체 (unit + e2e + scenario)
+- `npm run build` — bun build → 단일 번들 + 정적 자산 복사 / `npm run dev` — bun 직접 실행(빌드 불필요) / `npm run typecheck` — tsc --noEmit
+- `npm run test:unit` — bun test **--isolate** tests/unit/ (격리 이유는 위 Tests 절)
+- `npm run test:e2e` / `npm run test:scenario` / `npm run test` (전체)
+- `postinstall` — skill 자동 설치 + v0.15 감지 안내
 
 ## Types (주요 타입)
 - `HookResult` — hook 실행 결과 (name, event, type, status, exitCode, stdout, stderr, content, skipReason)
@@ -199,10 +180,8 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 - `ReapOutput.status` — `"ok" | "prompt" | "error" | "artifact-incomplete"`
 - `EvaluatorConcern` (gen-067) — `{ stage: "validation" | "fitness", severity: "low" | "high", summary: string, recordedAt: string }`. Validation→fitness signalling channel. severity는 binary (Goodhart 회피). high = cruise auto-abort 트리거. `GenerationState.evaluatorConcerns?: EvaluatorConcern[]` 로 노출.
 - `ReapConfig.daemon?: boolean` (gen-068) — opt-in flag. 미설정/false 시 4 lifecycle 진입점 (start/learning/implementation/completion) 의 daemon trigger 게이트 비활성. true 시 dynamic import 후 `ensureRegistered` + `triggerIndexing` 호출. 기존 사용자 회귀 0 보장.
-- `ProjectEntry.lastIndexedCommit?: string \| null` (daemon, gen-068) — registry entry 의 마지막 인덱스 git HEAD commit. `register` 시 null 초기화. `PipelineResult.lastCommit?` 4 path (full/incremental/no-change/concurrent-guard) 모두 반환 → index handler 가 registry 에 전달. agent prompt 가 git HEAD 와 비교하여 staleness 판단.
-- `REAP_DAEMON_PORT` env var (gen-069) — daemon binary + REAP CLI client 양방향 인식. 미설정 시 17224 fallback (회귀 0). 테스트 격리 (e2e 가 17225 사용) + 다중 daemon 인스턴스 가능. daemon `daemon/src/index.ts:resolvePort()` + client `src/cli/commands/daemon/client.ts:resolvePort()` + `getBaseUrl()` (module-load 시 아닌 call-time resolve).
-- `ensureRegistered`, `triggerIndexing` (gen-069) — return type `Promise<boolean>`. 성공/실패 시그널을 caller 가 활용. silent fail 정책 유지. learning emit 의 `daemonReady = ensureOK && triggerOK` 패턴.
-- learning emit context `daemonEnabled` (boolean, 항상) + `daemonReady` (boolean, daemon=true 시에만 spread) — gen-069. agent / test 가 config 분기 검증.
+- daemon 연동 타입/신호 — `ProjectEntry.lastIndexedCommit?: string \| null` (마지막 인덱스의 git HEAD; agent 가 현재 HEAD 와 비교해 staleness 판단). `ensureRegistered`/`triggerIndexing` 은 `Promise<boolean>` 을 반환하되 실패는 silent — caller 가 시그널만 활용한다. learning emit 이 `daemonEnabled` (항상) + `daemonReady` (daemon=true 시에만) 를 노출해 test/agent 가 config 분기를 검증한다.
+- `REAP_DAEMON_PORT` env var — daemon binary(`daemon/src/index.ts:resolvePort()`) 와 CLI client(`daemon/client.ts:resolvePort()` + call-time `getBaseUrl()`) 양쪽이 인식. 미설정 시 17224. e2e 는 17225 로 격리한다.
 - `ReapConfig.lastMigratedVersion?: string` (gen-071) — 이 프로젝트가 어디까지 migration 됐는지 추적. 미설정 시 "0.0.0" fallback. `reap update --mark-migrated` 가 현재 패키지 버전으로 갱신. **CONFIG_DEFAULTS에 포함 금지** — optional tracking 필드이며 spurious config diff 유발.
 - `PendingMigration` (gen-071) — `{ version: string, instructions: string }`. `detectPendingMigrations` 반환 타입. `reap update` context + load-context SessionStart + dump-state.md sync 3곳에서 동일 데이터 emit.
 
@@ -220,17 +199,39 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon)
 
 **공유 가능하면 표식보다 공유가 낫다** — 같은 값을 두 코드가 알면 DI·import 로 하나로 만들어 carrier 수를 줄인다. 표식은 공유가 불가능한 경우(문서, 다국어, prompt 문자열, 반환값 union)를 위한 것이다.
 
-## CI / Release 게이트 (gen-073, gen-078, gen-079)
+## CI / Release 게이트 (gen-073, gen-078, gen-079, gen-081)
 
-| 시점 | 검사 | 비용 |
-|---|---|---|
-| `ci.yml` (매 push) | build + **자기진단**(층1) | 무료 |
-| `release.yml` (태그) | 문서 정합성 + **자기진단** + build + publish | 무료 |
-| **릴리즈 전 수동** (`reapdev.versionBump` 5-2) | **agent 통합**(층2) | ~$0.25 |
+| 시점 | 검사 | 어디서 | 비용 |
+|---|---|---|---|
+| `ci.yml` (매 push) | build + **자기진단**(층1) | reap | 무료 |
+| main push | **테스트 전체** (unit/e2e/scenario) | **reap-test** | 무료 |
+| `release.yml` (태그) | 문서 정합성 + 자기진단 + build + publish | reap | 무료 |
+| 릴리즈 전 수동 (`reapdev.versionBump` 5-2) | **agent 통합**(층2) | 로컬 | ~$0.25 |
 
 **층1 vs 층2**: 층1 은 "파일이 올바른 위치에 올바른 내용으로 놓였는가", 층2 는 "클라이언트가 그것을 실제로 읽는가". 후자는 전자로부터 추론할 수 없다 — gen-063 은 파일 검증을 전부 통과하고도 slash command 가 노출되지 않았다.
 
-**CI 는 테스트를 돌리지 않는다** — `tests/` 가 private submodule(`c-d-cc/reap-test`)이고 기본 `GITHUB_TOKEN` 으로 접근할 수 없다. backlog `ci-에서-테스트-실행-...` 로 분리됨. 이것이 e2e 1건 실패가 6세대 방치된 구조적 원인이었다.
+### 테스트는 reap-test 에서 돈다 (gen-081)
+
+`tests/` 는 private submodule(`c-d-cc/reap-test`)이고 기본 `GITHUB_TOKEN` 으로 가져올 수 없다. PAT 으로 가져오는 것은 가능하나 **reap 이 public 이라 워크플로 로그가 공개**된다 — `bun test` 는 테스트 이름을 전부 출력하므로 private 으로 지킨 것이 로그로 새고, **한 번 나간 로그는 되돌릴 수 없다.**
+
+그래서 실행 주체를 뒤집었다:
+
+```
+reap main push
+  └─ ci.yml: build + 자기진단
+  └─ dispatch-tests ──▶ reap-test/.github/workflows/test.yml
+                          checkout reap@<커밋 SHA>        → ./reap
+                          checkout self@<submodule ptr>  → ./reap/tests
+                          npm ci + build
+                          unit / e2e / scenario
+```
+
+- **tests SHA 는 그 커밋의 submodule pointer** — main HEAD 가 아니다. 개발자가 실제로 검증한 조합을 재현하므로 red 의 원인이 코드인지 테스트인지 분리된다. pointer 를 갱신하지 않으면 낡은 조합이 테스트되어 실패한다 (설계된 동작)
+- **PR 에서는 dispatch 하지 않는다** — fork 는 secret 을 받지 못하므로 돌리면 모든 외부 PR 이 red 가 된다. fork PR 은 build + 자기진단만 받고 둘 다 secret 불필요
+- secret `TEST_DISPATCH_TOKEN` — `c-d-cc/reap-test` Contents:RW fine-grained PAT. **부재/만료 시 job 이 red** (`curl -f` + 명시적 exit 1). 조용히 건너뛰지 않는다
+- 결과 알림은 GitHub 기본 알림. reap 의 커밋 화면에는 표시되지 않는다
+
+현재 baseline 은 리눅스 러너에서 그대로 재현된다 (470 / 278 / 44, daemon e2e 포함 제외 없음).
 
 문서 게이트는 CI 에 없다 — 개발 중 `package.json` 이 문서보다 앞서는 것이 정상이라 상시 red 가 된다(gen-073 판단). 자기진단은 그런 성질이 없어 양쪽에 있다.
 
