@@ -132,15 +132,7 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon). 상세�
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline (다음 세대가 회귀 여부를 판단하는 기준):
-
-| 스위트 | 명령 | 결과 |
-|---|---|---|
-| unit | `bun test tests/unit/` | 470 pass / 0 fail |
-| e2e | `bun test tests/e2e/` | 278 pass / 0 fail |
-| scenario | `bun test tests/scenario/` | 44 pass / 0 fail |
-
-**세 스위트 모두 0 fail 이다** (gen-077 에서 마지막 pre-existing 해소). 이 수치와 다르면 회귀를 의심할 것.
+현재 baseline — **unit 473 / e2e 278 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
 
 `tests/scenario/multi-generation.test.ts` 는 gen-065 backlog gate 를 시나리오로 커버한다 — pending 이 있으면 `run start` 가 `status: "prompt"` 로 막히고, `--backlog`(소비) 또는 `--no-backlog`(유지) 로 재호출해야 진행된다. 새 scenario 가 backlog 파일을 만든다면 같은 gate 를 거치므로 이 패턴을 참고할 것.
 
@@ -189,13 +181,7 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon). 상세�
 
 여러 곳이 아는 사실에는 그 사실을 아는 파일마다 `reap:carrier(<id>)` 주석을 심는다. 값을 바꾸기 전에 `grep -rn "reap:carrier(<id>)" .` 또는 `bash scripts/list-carriers.sh` 로 전부 찾는다.
 
-현재 등록된 것:
-
-| ID | files | 비고 |
-|---|---|---|
-| `claude-code-commands-path` | 9 | gen-076 이 DI 로 코드 쪽 carrier 를 줄인 뒤 남은 문서들 |
-| `memory-tier-classification` | 10 | 산문·번역·prompt 문자열이라 공유 불가 |
-| `agent-frontmatter-schema` | 3 | 같은 agent 정의를 두 클라이언트가 다른 스키마로 읽는다 (gen-080) |
+등록된 ID 와 파일 목록은 **`bash scripts/list-carriers.sh` 가 출력한다** — 여기에 옮겨 적으면 그것이 곧 어긋날 목록이 된다(이 원칙이 생긴 이유 그대로). 현재 셋: 설치 경로, memory tier 분류, agent frontmatter 스키마.
 
 **공유 가능하면 표식보다 공유가 낫다** — 같은 값을 두 코드가 알면 DI·import 로 하나로 만들어 carrier 수를 줄인다. 표식은 공유가 불가능한 경우(문서, 다국어, prompt 문자열, 반환값 union)를 위한 것이다.
 
@@ -217,34 +203,38 @@ daemon/                            — 별도 앱 (@c-d-cc/reap-daemon). 상세�
 (2)가 필요한 이유는 실패 양상이 클라이언트마다 다르기 때문이다 — **OpenCode 는 설정 검증이 all-or-nothing 이라 REAP 이 쓴 파일 하나가 `opencode` 명령 전체를 죽인다** (gen-080). Claude Code 에는 이 양상이 없다. 그리고 `reap init` 은 claude-code 만 만들므로 opencode 경로는 그 전까지 어느 게이트도 지나지 않았다.
 
 - **exit 0 만 보면 안 된다** — `agent list` 는 agent 가 하나도 없어도 exit 0 이다. 목록 확인이 함께 있어야 "아무것도 설치하지 않음"이 통과하지 않는다
-- **격리는 `HOME` 하나로 충분** — `reap`(node)의 `homedir()` 와 opencode 프로세스가 둘 다 `$HOME` 을 따른다. 사용자 `~/.config/opencode/` 는 읽지도 쓰지도 않는다
+- **격리는 `HOME` + `XDG_CONFIG_HOME` 두 축** — 하나만으로는 새어나간다. 아래 XDG 절 참조
 - **모델 호출 없음** — 설정 파싱뿐이라 무료. 그래서 층2(유료)와 달리 CI 에 있다
 - CI/release 워크플로가 `npm i -g opencode-ai` 로 클라이언트를 설치한다. **버전 미고정** — 묻는 것이 "현재의 OpenCode 가 받아들이는가"이므로 upstream 스키마 변경으로 red 가 되는 것이 의도된 신호다
 - `opencode` 부재 시 **amber SKIP 을 출력**하고 통과한다. 조용한 exit 0 은 "검사했고 깨끗하다"로 읽힌다
 - **잡지 못하는 것**: slash command 는 `opencode command list` 같은 CLI 표면이 없어 검증할 수 없다. 검사한 opencode 버전은 스크립트가 출력하므로 로컬/CI 판정이 갈리면 근거가 남는다
 
+### OpenCode 경로는 `XDG_CONFIG_HOME` 을 따른다 (gen-082)
+
+`~/.config/opencode/` 는 **기본값일 뿐**이다. OpenCode 는 XDG base directory 규격을 따르므로 `XDG_CONFIG_HOME` 이 설정되면 `$XDG_CONFIG_HOME/opencode/` 를 읽는다.
+
+`opencodeConfigDir(home, xdgConfigHome)` 이 이 판정을 소유하고 `opencodeCommandsDir` / `opencodeAgentsDir` 가 경유한다. **`process.env` 를 직접 읽지 않고 매개변수로 받는다** — 테스트가 fake home 을 쓰면서 실제 값이 새어들면 임시 디렉토리 밖에 쓰게 된다. 빈 문자열/공백은 미설정으로 취급(XDG 규격).
+
+**테스트에서 `HOME` 을 가짜로 줄 때는 `XDG_CONFIG_HOME` 도 함께 처리해야 한다** — 하나만 바꾸면 격리가 성립하지 않는다:
+- unit: `beforeAll` 에서 삭제 + `afterAll` 복원
+- e2e: 자식 프로세스 env 에서 제거 (`cliWithHome` 헬퍼 2곳)
+
+이 결함은 **개발자 로컬에서 재현되지 않는다** (변수가 없으므로). CI 조건은 `XDG_CONFIG_HOME=/tmp/probe npm run test:...` 로 만들 수 있다. GitHub 러너는 `XDG_CONFIG_HOME=/home/runner/.config` 를 설정한다.
+
+claude-code adapter 는 `~/.claude/` 를 쓰며 XDG 와 무관하다.
+
 ### 테스트는 reap-test 에서 돈다 (gen-081)
 
 `tests/` 는 private submodule(`c-d-cc/reap-test`)이고 기본 `GITHUB_TOKEN` 으로 가져올 수 없다. PAT 으로 가져오는 것은 가능하나 **reap 이 public 이라 워크플로 로그가 공개**된다 — `bun test` 는 테스트 이름을 전부 출력하므로 private 으로 지킨 것이 로그로 새고, **한 번 나간 로그는 되돌릴 수 없다.**
 
-그래서 실행 주체를 뒤집었다:
-
-```
-reap main push
-  └─ ci.yml: build + 자기진단
-  └─ dispatch-tests ──▶ reap-test/.github/workflows/test.yml
-                          checkout reap@<커밋 SHA>        → ./reap
-                          checkout self@<submodule ptr>  → ./reap/tests
-                          npm ci + build
-                          unit / e2e / scenario
-```
+그래서 실행 주체를 뒤집었다. reap 의 main push 가 `dispatch-tests` job 으로 `repository_dispatch` 를 보내고, `reap-test/.github/workflows/test.yml` 이 reap 을 `./reap` 로, 자기 자신을 `./reap/tests` 로 checkout 해 배치를 재현한 뒤 build + 세 스위트를 돌린다. 테스트가 `<reap>/tests/` 위치를 하드코딩하므로 checkout 두 번이면 테스트 코드 수정이 필요 없다.
 
 - **tests SHA 는 그 커밋의 submodule pointer** — main HEAD 가 아니다. 개발자가 실제로 검증한 조합을 재현하므로 red 의 원인이 코드인지 테스트인지 분리된다. pointer 를 갱신하지 않으면 낡은 조합이 테스트되어 실패한다 (설계된 동작)
 - **PR 에서는 dispatch 하지 않는다** — fork 는 secret 을 받지 못하므로 돌리면 모든 외부 PR 이 red 가 된다. fork PR 은 build + 자기진단만 받고 둘 다 secret 불필요
 - secret `TEST_DISPATCH_TOKEN` — `c-d-cc/reap-test` Contents:RW fine-grained PAT. **부재/만료 시 job 이 red** (`curl -f` + 명시적 exit 1). 조용히 건너뛰지 않는다
 - 결과 알림은 GitHub 기본 알림. reap 의 커밋 화면에는 표시되지 않는다
 
-현재 baseline 은 리눅스 러너에서 그대로 재현된다 (470 / 278 / 44, daemon e2e 포함 제외 없음).
+현재 baseline 은 리눅스 러너에서 그대로 재현된다 (daemon e2e 포함, 제외 없음).
 
 문서 게이트는 CI 에 없다 — 개발 중 `package.json` 이 문서보다 앞서는 것이 정상이라 상시 red 가 된다(gen-073 판단). 자기진단은 그런 성질이 없어 양쪽에 있다.
 
