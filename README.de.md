@@ -231,7 +231,8 @@ N Generationen für autonome Ausführung vorab genehmigen:
 REAP integriert sich über eine Adapterschicht, die auf dem `agentClient`-Konfigurationsfeld basiert, mit KI-Agenten. Aktuell unterstützte Clients:
 
 - **Claude Code** (`agentClient: claude-code`, Standard) — statisches Wissen über `@`-Imports in `CLAUDE.md`; dynamischer Zustand über den `SessionStart`-Hook (`reap load-context`); Slash-Befehle installiert unter `~/.claude/commands/reap.*.md`.
-- **OpenCode** (`agentClient: opencode`) — statisches Wissen über das `instructions`-Feld von `opencode.json`; dynamischer Zustand über `.reap/.session-state.md`, automatisch aktualisiert vom gebündelten OpenCode-Plugin (`.opencode/plugins/reap-plugin.ts`) bei `session.created` / `tool.execute.before`; Slash-Befehle installiert unter `~/.config/opencode/commands/reap.*.md`.
+<!-- reap:carrier(opencode-config-path) -->
+- **OpenCode** (`agentClient: opencode`) — statisches Wissen über das `instructions`-Feld von `opencode.json`; dynamischer Zustand über `.reap/.session-state.md`, automatisch aktualisiert vom gebündelten OpenCode-Plugin (`.opencode/plugins/reap-plugin.ts`) bei `session.created` / `tool.execute.before`; Slash-Befehle installiert unter `~/.config/opencode/commands/reap.*.md` (`$XDG_CONFIG_HOME` is honoured when set).
 
 Wechseln Sie Clients, indem Sie `.reap/config.yml` bearbeiten, dann `reap install-skills` gefolgt von `reap update` ausführen. REAP regeneriert die Entry-Point-Datei (CLAUDE.md vs AGENTS.md), die Session-Integration und alle client-spezifischen Assets. Das Präfix `reap.` in Slash-Befehlsverzeichnissen ist reserviert — Installationen sind cleanup-then-copy und überschreiben alle `reap.*.md`-Dateien an diesen Orten. Verwenden Sie für benutzerdefinierte Befehle ein anderes Präfix (`mytool.md`, `team.md` usw.).
 

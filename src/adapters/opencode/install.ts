@@ -272,6 +272,8 @@ function claudeCodeSkillsDir(): string {
 /**
  * Where OpenCode keeps its user-level configuration.
  *
+ * reap:carrier(opencode-config-path)
+ *
  * `~/.config` is only the default. OpenCode follows the XDG base directory
  * spec, so when XDG_CONFIG_HOME is set it reads there instead — and REAP has
  * to write to the same place or its files land where the client never looks.

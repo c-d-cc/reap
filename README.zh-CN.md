@@ -231,7 +231,8 @@ AI 根据当前上下文的明确程度调整其沟通风格：
 REAP 通过基于 `agentClient` 配置字段的适配器层与 AI 智能体集成。当前支持的客户端：
 
 - **Claude Code** (`agentClient: claude-code`，默认) — 通过 `CLAUDE.md` 中的 `@` 导入加载静态知识；通过 SessionStart 钩子 (`reap load-context`) 注入动态状态；斜杠命令安装到 `~/.claude/commands/reap.*.md`。
-- **OpenCode** (`agentClient: opencode`) — 通过 `opencode.json` 的 `instructions` 字段加载静态知识；通过 `.reap/.session-state.md` 传递动态状态，捆绑的 OpenCode 插件 (`.opencode/plugins/reap-plugin.ts`) 在 `session.created` / `tool.execute.before` 时自动刷新；斜杠命令安装到 `~/.config/opencode/commands/reap.*.md`。
+<!-- reap:carrier(opencode-config-path) -->
+- **OpenCode** (`agentClient: opencode`) — 通过 `opencode.json` 的 `instructions` 字段加载静态知识；通过 `.reap/.session-state.md` 传递动态状态，捆绑的 OpenCode 插件 (`.opencode/plugins/reap-plugin.ts`) 在 `session.created` / `tool.execute.before` 时自动刷新；斜杠命令安装到 `~/.config/opencode/commands/reap.*.md` (`$XDG_CONFIG_HOME` is honoured when set)。
 
 通过编辑 `.reap/config.yml`，然后运行 `reap install-skills` 和 `reap update` 即可切换客户端。REAP 会重新生成入口点文件 (CLAUDE.md vs AGENTS.md)、会话集成以及任何客户端特定的资产。斜杠命令目录中的 `reap.` 前缀已保留 — 安装为先清理后复制方式，将覆盖这些位置中的任何 `reap.*.md` 文件。自定义命令请使用其他前缀 (`mytool.md`、`team.md` 等)。
 

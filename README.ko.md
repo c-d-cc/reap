@@ -231,7 +231,8 @@ N개 세대를 사전 승인하여 자율 실행:
 REAP는 `agentClient` config 필드를 기준으로 adapter layer를 통해 AI 에이전트와 통합됩니다. 현재 지원되는 클라이언트:
 
 - **Claude Code** (`agentClient: claude-code`, 기본값) — `CLAUDE.md`의 `@` import로 정적 knowledge 로드; SessionStart hook(`reap load-context`)으로 동적 상태 주입; 슬래시 명령은 `~/.claude/commands/reap.*.md`에 설치.
-- **OpenCode** (`agentClient: opencode`) — `opencode.json`의 `instructions` 필드로 정적 knowledge 로드; `.reap/.session-state.md`로 동적 상태 전달, 번들된 OpenCode plugin(`.opencode/plugins/reap-plugin.ts`)이 `session.created` / `tool.execute.before` 시점에 자동 갱신; 슬래시 명령은 `~/.config/opencode/commands/reap.*.md`에 설치.
+<!-- reap:carrier(opencode-config-path) -->
+- **OpenCode** (`agentClient: opencode`) — `opencode.json`의 `instructions` 필드로 정적 knowledge 로드; `.reap/.session-state.md`로 동적 상태 전달, 번들된 OpenCode plugin(`.opencode/plugins/reap-plugin.ts`)이 `session.created` / `tool.execute.before` 시점에 자동 갱신; 슬래시 명령은 `~/.config/opencode/commands/reap.*.md` (`$XDG_CONFIG_HOME` is honoured when set)에 설치.
 
 `.reap/config.yml`을 편집한 뒤 `reap install-skills`와 `reap update`를 실행하면 클라이언트 전환이 완료됩니다. REAP가 entry-point 파일(CLAUDE.md vs AGENTS.md), 세션 통합, 클라이언트별 자산을 재생성합니다. 슬래시 명령 디렉토리의 `reap.` 접두사는 예약되어 있으며 — 설치는 cleanup-then-copy 방식이라 해당 디렉토리의 `reap.*.md` 파일을 덮어씁니다. 사용자 정의 명령은 다른 접두사(`mytool.md`, `team.md` 등)를 사용하세요.
 

@@ -21,7 +21,8 @@ When running REAP commands, follow the structured lifecycle (`reap run <stage>`)
 
 ## Slash Commands
 
-REAP installs `/reap.*` slash commands into `~/.config/opencode/commands/` when `reap install-skills` (or `reap update`) runs with `agentClient: opencode`. Available commands include:
+<!-- reap:carrier(opencode-config-path) -->
+REAP installs `/reap.*` slash commands into `~/.config/opencode/commands/` — or `$XDG_CONFIG_HOME/opencode/commands/` when that is set — when `reap install-skills` (or `reap update`) runs with `agentClient: opencode`. Available commands include:
 
 - `/reap.evolve` — Run a full generation lifecycle
 - `/reap.start`, `/reap.next`, `/reap.back` — Lifecycle control

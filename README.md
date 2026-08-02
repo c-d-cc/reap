@@ -77,6 +77,7 @@ Open your AI agent (Claude Code or OpenCode) and use slash commands:
 
 `/reap.evolve` drives the entire generation lifecycle — from learning through completion. The AI explores the project, plans the work, implements it, validates, and reflects. This is the primary command for day-to-day development.
 
+<!-- reap:carrier(opencode-config-path) -->
 > **OpenCode users**: After `/reap.init`, edit `.reap/config.yml` to set `agentClient: opencode`, then run `reap update` to regenerate client-specific assets (`opencode.json`, `.opencode/plugins/reap-plugin.ts`, `AGENTS.md`, and slash commands at `~/.config/opencode/commands/`).
 
 > **Note:** Users interact with REAP through `/reap.*` slash commands in their AI agent. The CLI is the internal engine that powers those commands.
@@ -237,7 +238,7 @@ REAP integrates with AI agents through an adapter layer keyed by the `agentClien
 
 <!-- reap:carrier(claude-code-commands-path) -->
 - **Claude Code** (`agentClient: claude-code`, default) — static knowledge via `@` imports in `CLAUDE.md`; dynamic state via `SessionStart` hook (`reap load-context`); slash commands installed to `~/.claude/commands/reap.*.md`.
-- **OpenCode** (`agentClient: opencode`) — static knowledge via `opencode.json`'s `instructions` field; dynamic state via `.reap/.session-state.md`, auto-refreshed by the bundled OpenCode plugin (`.opencode/plugins/reap-plugin.ts`) on `session.created` / `tool.execute.before`; slash commands installed to `~/.config/opencode/commands/reap.*.md`.
+- **OpenCode** (`agentClient: opencode`) — static knowledge via `opencode.json`'s `instructions` field; dynamic state via `.reap/.session-state.md`, auto-refreshed by the bundled OpenCode plugin (`.opencode/plugins/reap-plugin.ts`) on `session.created` / `tool.execute.before`; slash commands installed to `~/.config/opencode/commands/reap.*.md` (`$XDG_CONFIG_HOME` is honoured when set).
 
 Switch clients by editing `.reap/config.yml`, then run `reap install-skills` followed by `reap update`. REAP regenerates the entry-point file (CLAUDE.md vs AGENTS.md), the session integration, and any client-specific assets. The `reap.` prefix in slash command directories is reserved — installs are cleanup-then-copy and will overwrite any `reap.*.md` file in those locations. Use a different prefix (`mytool.md`, `team.md`, etc.) for custom commands.
 
@@ -273,7 +274,7 @@ If the subagent invocation fails for any reason, the builder continues normal va
 
 Agent definitions are installed automatically by `reap install-skills` **and** `reap update`:
 - Claude Code → `~/.claude/agents/reap-*.md`
-- OpenCode → `~/.config/opencode/agent/reap-*.md`
+- OpenCode → `~/.config/opencode/agent/reap-*.md` (`$XDG_CONFIG_HOME` is honoured when set)
 
 **Fitness phase + cruise mode** (gen-067): the evaluator also runs during the fitness phase. After receiving its reply, the builder persists the verdict on the generation state via `reap run validation --phase report-evaluator --severity <high|low|none> --summary "..."`. High-severity concerns recorded during validation **automatically abort cruise mode** when the next fitness phase runs — `cruiseCount` is cleared from `config.yml`, the cruise prompt is replaced with a supervised fallback, and the human reviews the concern before composing fitness feedback. Cruise can be resumed manually with `reap cruise <N>` once the concern is resolved. Low-severity concerns surface in the prompt's "Prior Evaluator Concerns" section without aborting cruise.
 
