@@ -1049,6 +1049,10 @@ reap daemon query    # Symbol-Abfrage ausführen`,
     breadcrumb: "Sonstiges",
     versions: [
       {
+        version: "0.17.4",
+        notes: "**REAP installiert jetzt dort, wo OpenCode wirklich liest** — `~/.config` ist nur die Vorgabe; OpenCode folgt der XDG-Base-Directory-Spezifikation. Wer `XDG_CONFIG_HOME` gesetzt hat, bekam keinen der 19 Slash-Befehle und keine der beiden Agent-Definitionen — ohne jede Fehlermeldung. Upgraden und `reap install-skills` erneut ausführen. **Slash-Befehle geben sich nicht mehr als Agents aus** — installierte `reap.*.md` trugen `mode: subagent`; eine Neuinstallation räumt das auf. **Das Selbstdiagnose-Gate prüft beide Clients** — es stellt ein Projekt auf `agentClient: opencode` um und verlangt, dass `opencode agent list` beide REAP-Agents lädt; so wurde der XDG-Fehler beim ersten CI-Lauf gefunden. **Die Testsuite läuft wieder bei jedem Push**, im privaten Repository, das sie enthält.",
+      },
+      {
         version: "0.17.3",
         notes: "**Die Installation von REAP macht OpenCode nicht mehr unbrauchbar** — Agent-Definitionen wurden im Frontmatter-Schema von Claude Code kopiert; eine einzige für OpenCode unlesbare Datei entwertet die gesamte Konfiguration, sodass jeder `opencode`-Befehl fehlschlug. Sie werden jetzt pro Client konvertiert. **`fix --check` markiert den Installationsort nicht mehr** — der Installer schrieb nach `~/.claude/commands/`, während der Checker genau diesen Pfad als v0.15-Überbleibsel meldete; die Warnungen ließen sich mit keinem Befehl beseitigen (Issue #22). Der Pfad hat jetzt einen Eigentümer und wird per Injection an den Checker gereicht. **Zwei Release-Gates**: `check-self-diagnosis.sh` installiert das echte Publish-Tarball in ein Wegwerf-HOME und verlangt ein sauberes `fix --check` (CI + vor dem Publish); `check-agent-integration.sh` startet einen Headless-Agent und prüft, ob Slash-Befehle beim Nutzer wirklich ankommen (vor dem Release). Außerdem behoben: Ein frisch initialisiertes Projekt meldete seine eigene `invariants.md` als Platzhalter, und `init --repair` meldete eine gerade aktualisierte CLAUDE.md als bereits vorhanden.",
       },

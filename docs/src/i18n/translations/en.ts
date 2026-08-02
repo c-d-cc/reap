@@ -1047,6 +1047,10 @@ reap daemon query    # Run a symbol query`,
     breadcrumb: "Other",
     versions: [
       {
+        version: "0.17.4",
+        notes: "**REAP now installs where OpenCode actually reads** — `~/.config` is only the default; OpenCode follows the XDG base directory spec, so anyone with `XDG_CONFIG_HOME` set received none of REAP's 19 slash commands and neither agent definition, with no error at all. Upgrade and re-run `reap install-skills`. **Slash commands no longer claim to be agents** — installed `reap.*.md` files carried `mode: subagent`; reinstalling clears it. **The self-diagnosis gate asks both clients** — it now switches a project to `agentClient: opencode` and requires `opencode agent list` to load both REAP agents, which is how the XDG defect was found on its first CI run. **The test suite runs on every push again**, in the private repository that holds it.",
+      },
+      {
         version: "0.17.3",
         notes: "**Installing REAP no longer breaks OpenCode** — agent definitions were copied in Claude Code's frontmatter schema, and one file OpenCode cannot read invalidates its whole configuration, so every `opencode` command failed. They are now converted per client. **`fix --check` no longer flags the install location** — the installer wrote to `~/.claude/commands/` while the checker called it a v0.15 leftover, producing warnings nothing could clear (issue #22). The path now has one owner and reaches the checker by injection. **Two release gates**: `check-self-diagnosis.sh` installs the real publish tarball into a throwaway HOME and requires a clean `fix --check` (CI + pre-publish); `check-agent-integration.sh` drives a headless agent to confirm slash commands actually reach the user (pre-release). Also fixed: a fresh init reported its own `invariants.md` as a placeholder, and `init --repair` reported an updated CLAUDE.md as already present.",
       },

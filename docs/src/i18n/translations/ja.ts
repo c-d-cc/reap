@@ -1049,6 +1049,10 @@ reap daemon query    # シンボルクエリを実行`,
     breadcrumb: "その他",
     versions: [
       {
+        version: "0.17.4",
+        notes: "**REAP が OpenCode の実際に読み込む場所へインストールします** — `~/.config` はデフォルトにすぎず、OpenCode は XDG base directory 仕様に従います。`XDG_CONFIG_HOME` を設定しているユーザーには 19 個のスラッシュコマンドも 2 つの agent 定義も届いておらず、エラーすら出ませんでした。アップグレード後に `reap install-skills` を再実行してください。**スラッシュコマンドが agent を名乗らなくなりました** — インストールされる `reap.*.md` に `mode: subagent` が付いていました。再インストールで解消します。**自己診断ゲートが両クライアントを検査します** — プロジェクトを `agentClient: opencode` に切り替え、`opencode agent list` が REAP の 2 つの agent を読み込むことを要求します。XDG の不具合はこの検査が初回 CI 実行で発見しました。**テストスイートも毎 push で再び実行されます**（スイートを保持する非公開リポジトリ側で）。",
+      },
+      {
         version: "0.17.3",
         notes: "**REAP のインストールが OpenCode を壊さなくなりました** — agent 定義を Claude Code のスキーマのままコピーしており、OpenCode が読めないファイルが1つあるだけで設定全体が無効になり、すべての `opencode` コマンドが失敗していました。クライアントごとに変換して配置します。**`fix --check` がインストール先を警告しなくなりました** — installer は `~/.claude/commands/` に配置する一方、checker が同じパスを v0.15 の残骸と報告し、解消不能な警告が出ていました（issue #22）。パスは単一の所有者を持ち、注入によって checker に渡されます。**リリースゲート2種**: `check-self-diagnosis.sh` は実際の配布 tarball を隔離 HOME にインストールして `fix --check` がクリーンであることを要求し（CI + publish 前）、`check-agent-integration.sh` はヘッドレスエージェントでスラッシュコマンドが実際に届くかを確認します（リリース前）。その他: 新規 init が自身の `invariants.md` を placeholder と誤判定する問題、`init --repair` が更新した CLAUDE.md を「既存」と報告する問題を修正。",
       },

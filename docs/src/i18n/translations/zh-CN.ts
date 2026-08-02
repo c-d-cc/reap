@@ -1049,6 +1049,10 @@ reap daemon query    # 运行符号查询`,
     breadcrumb: "其他",
     versions: [
       {
+        version: "0.17.4",
+        notes: "**REAP 现在安装到 OpenCode 真正读取的位置** — `~/.config` 只是默认值，OpenCode 遵循 XDG base directory 规范。设置了 `XDG_CONFIG_HOME` 的用户一个斜杠命令（共 19 个）和两个 agent 定义都收不到，而且没有任何报错。升级后请重新运行 `reap install-skills`。**斜杠命令不再自称 agent** — 安装的 `reap.*.md` 带有 `mode: subagent`；重新安装即可清除。**自检关卡现在检查两个客户端** — 它会把项目切换为 `agentClient: opencode`，并要求 `opencode agent list` 加载两个 REAP agent；XDG 缺陷正是该检查在首次 CI 运行时发现的。**测试套件也恢复了每次 push 运行**，在存放它的私有仓库中。",
+      },
+      {
         version: "0.17.3",
         notes: "**安装 REAP 不再导致 OpenCode 无法使用** — agent 定义此前按 Claude Code 的 frontmatter 模式直接复制，而 OpenCode 只要有一个无法解析的文件就会使整个配置失效，导致所有 `opencode` 命令失败。现在按客户端分别转换。**`fix --check` 不再标记安装位置** — 安装程序写入 `~/.claude/commands/`，而检查器却将同一路径报告为 v0.15 遗留物，产生无法消除的警告（issue #22）。该路径现由单一所有者持有，并通过注入传递给检查器。**两道发布关卡**：`check-self-diagnosis.sh` 将真实的发布 tarball 安装到临时 HOME 并要求 `fix --check` 干净（CI + 发布前）；`check-agent-integration.sh` 启动无头代理，确认斜杠命令确实能被用户使用（发布前）。另修复：全新 init 将自带的 `invariants.md` 误判为占位符；`init --repair` 将刚更新的 CLAUDE.md 报告为已存在。",
       },
