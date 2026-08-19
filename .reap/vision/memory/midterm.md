@@ -45,19 +45,12 @@ plugin 전환 · interview skill · milestone · idea · plan(자리) · `/reap.
 남은 1 항목:
 - **Vision/Goal management 위임** — adapt phase에서 evaluator가 gap 분석 + 다음 goal 추천. 트랙 마지막 큰 항목. design 문서의 잔여 절.
 
-## Daemon 트랙 — 배포·위치조회 완료, SCIP 설계만 남음
+## Daemon 트랙 — 종료 (2026-08-19)
 
-코어: `daemon/` 별도 앱, localhost:17224 HTTP API, Tree-sitter WASM 15개 언어, SQLite write-through.
-완료 (gen-060/068/069): incremental, worktree, idle-timeout + config opt-in + 4 lifecycle 진입점 + lastIndexedCommit + 21 e2e + 격리 인프라.
+gen-083 배포 분리 → gen-084 위치 명시 지정 → gen-085 버전 판정 → gen-086 파생 결함 3건. `@c-d-cc/reap-daemon@0.2.0` 발행됐고 격리 환경에서 node 로 기동·응답까지 확인했다.
 
-**배포 결함은 gen-083 에서 해소** — npm 독립 발행 형태 확정, dist queries path 수정, 네이티브 의존 external 화, 미설치 UX, 배포 산출물 게이트. 가이드 문서 강화도 함께 처리. 남은 잔여는 `.js` strip / 자동 staleness 뿐이며 SCIP 설계에 흡수 여부를 판단한다.
+**SCIP 은 착수하지 않기로 했다.** 조사 결론은 `vision/design/daemon/scip-and-scale.md` 로 옮기고 backlog 를 닫았다. 요지: SCIP 은 구조적 한계 4가지 중 **1번(이름 기반 call resolution)만** 풀고 2·3·4(인메모리 그래프 / 단일 repo 가정 / incremental 정합성)는 그대로 남으며, 그 대가로 사용자 저장소에 빌드 가능한 툴체인을 요구한다 — 패키징으로 없앨 수 없는 비용이다. 착수 근거였던 "외부 확산 시 대형 코드베이스"가 아직 성립하지 않는다.
 
-**위치 조회 (gen-084 완료)**: `daemonBin` / `REAP_DAEMON_BIN` 으로 명시 지정. 그 과정에서 **backlog 의 전제가 반증됐다** — pnpm 과 Yarn PnP 는 정상 동작하고, 깨지는 조건은 **reap 과 daemon 이 서로 다른 resolution root 에 설치되는 것**이다. gen-083 lineage 항목은 반증된 주장을 담고 있으니 그것을 직접 읽는 사람은 주의할 것.
+**재검토 조건**은 그 문서에 적었다 — 실사용자가 call resolution 정확도에 불만을 제기하거나, 메모리·스캔 상한에 실제로 부딪힐 때. **추측으로 재개하지 말 것.**
 
-**남은 것 — SCIP 설계**:
-- **SCIP 채택은 확정** (유저 결정). Tree-sitter 를 대체가 아니라 baseline 으로 두고 SCIP 이 있으면 승격하는 하이브리드. 핵심 난제는 **노드 ID 통합**(`file::name` vs SCIP symbol ID)
-- **실측 평가는 취소** (유저 판단) — 대형 코드베이스 확보가 비현실적. 코드 독해 기반 분석으로 대체
-- **새 설계 항목 (gen-083 발견)**: daemon 이 `queries/` 를 **런타임 자산**으로 들고 다닌다. SCIP 인덱서를 붙이면 그 자산 구조와 패키지 크기가 어떻게 되는지 설계에 포함할 것
-- MCP wrapper 는 계속 보류 (2026-06-28 결정)
-
-**버전 판정 축은 gen-085 에서 닫혔다** — 비교기 통합(`src/core/semver.ts`), 하한 발행 게이트(`scripts/check-version-floors.sh`), 출처별 낡은-daemon 안내. `MIN_DAEMON_VERSION` 은 0.2.0 그대로다.
+MCP wrapper 는 계속 보류 (2026-06-28 결정).
