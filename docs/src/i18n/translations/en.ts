@@ -1057,6 +1057,10 @@ reap daemon query    # Run a symbol query`,
     breadcrumb: "Other",
     versions: [
       {
+        version: "0.17.5",
+        notes: "**The code-intelligence daemon actually exists now** — `daemon: true` was documented since v0.16 but `@c-d-cc/reap-daemon` was never published, so npm installs got a dangling symlink and every daemon call failed silently. It is on npm now and is no longer a dependency of REAP: if you use `daemon: true`, run `npm i -g @c-d-cc/reap-daemon` once. **Three defects sat behind that** — the bundle inlined its native bindings so it only started under bun, it looked for its Tree-sitter queries one directory too high so indexing extracted zero symbols, and `__dirname` was baked in at build time, pointing the published v0.17.4 bundle at the maintainer's checkout on every machine. **A missing daemon is now visible** in `reap daemon status`, `reap fix --check`, the agent prompt and lifecycle output; too-old says so in different words. **`daemonBin` for when the two cannot find each other** — set it in `.reap/config.yml`, or `REAP_DAEMON_BIN` for one command; an empty named location is reported rather than ignored, and `daemon status` shows `bin` and `binSource`. **`reap help` lists `/reap.run` and `/reap.report`**, which it never did.",
+      },
+      {
         version: "0.17.4",
         notes: "**REAP now installs where OpenCode actually reads** — `~/.config` is only the default; OpenCode follows the XDG base directory spec, so anyone with `XDG_CONFIG_HOME` set received none of REAP's 19 slash commands and neither agent definition, with no error at all. Upgrade and re-run `reap install-skills`. **Slash commands no longer claim to be agents** — installed `reap.*.md` files carried `mode: subagent`; reinstalling clears it. **The self-diagnosis gate asks both clients** — it now switches a project to `agentClient: opencode` and requires `opencode agent list` to load both REAP agents, which is how the XDG defect was found on its first CI run. **The test suite runs on every push again**, in the private repository that holds it.",
       },

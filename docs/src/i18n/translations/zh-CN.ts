@@ -1059,6 +1059,10 @@ reap daemon query    # 运行符号查询`,
     breadcrumb: "其他",
     versions: [
       {
+        version: "0.17.5",
+        notes: "**代码智能守护进程现在真正存在了** — `daemon: true` 自 v0.16 起就写在文档里，但 `@c-d-cc/reap-daemon` 从未发布：npm 安装得到的是一个断链的符号链接，所有守护进程调用都静默失败。该包现已发布到 npm，且不再是 REAP 的依赖 — 使用 `daemon: true` 的用户请执行一次 `npm i -g @c-d-cc/reap-daemon`。**其背后还有三个缺陷** — 打包内联了原生绑定，因此只能在 bun 下启动；查找 Tree-sitter 查询文件时向上多找了一层，导致索引提取到零个符号；`__dirname` 在构建时被写死，使已发布的 v0.17.4 包在每台机器上都指向维护者的本地检出。**守护进程缺失现在可见** — `reap daemon status`、`reap fix --check`、代理提示词和生命周期输出都会报告；版本过旧则用不同措辞区分。**当两者找不到彼此时使用 `daemonBin`** — 在 `.reap/config.yml` 中设置，或用 `REAP_DAEMON_BIN` 只作用于一次调用；指定位置为空时会报告而非忽略，`daemon status` 会显示 `bin` 与 `binSource`。**`reap help` 现在列出 `/reap.run` 和 `/reap.report`** — 此前一直缺失。",
+      },
+      {
         version: "0.17.4",
         notes: "**REAP 现在安装到 OpenCode 真正读取的位置** — `~/.config` 只是默认值，OpenCode 遵循 XDG base directory 规范。设置了 `XDG_CONFIG_HOME` 的用户一个斜杠命令（共 19 个）和两个 agent 定义都收不到，而且没有任何报错。升级后请重新运行 `reap install-skills`。**斜杠命令不再自称 agent** — 安装的 `reap.*.md` 带有 `mode: subagent`；重新安装即可清除。**自检关卡现在检查两个客户端** — 它会把项目切换为 `agentClient: opencode`，并要求 `opencode agent list` 加载两个 REAP agent；XDG 缺陷正是该检查在首次 CI 运行时发现的。**测试套件也恢复了每次 push 运行**，在存放它的私有仓库中。",
       },

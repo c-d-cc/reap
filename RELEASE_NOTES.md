@@ -1,5 +1,17 @@
 ## What's New
 
+- **The code-intelligence daemon actually exists now** — `daemon: true` has been documented since v0.16, but `@c-d-cc/reap-daemon` was never published. npm installs got a dangling symlink, every daemon call failed silently, and the lifecycle carried on as if nothing were wrong. The package is now on npm and REAP no longer depends on it: **if you use `daemon: true`, install it once with `npm i -g @c-d-cc/reap-daemon`.** Without that, REAP now tells you so rather than doing nothing.
+- **Three defects sat behind that one** — the shipped bundle inlined its native bindings, so it only ever started under bun; it looked for its Tree-sitter queries one directory too far up, so indexing "succeeded" and extracted zero symbols; and `__dirname` was replaced at build time with a literal path, meaning **the published v0.17.4 bundle pointed every user's machine at the maintainer's checkout**. Each of these passed every test, because the tests ran the daemon from source under bun and never touched a tarball.
+- **A missing daemon is now visible in four places** — `reap daemon status`, `reap fix --check`, the agent prompt (which drops the query protocol so agents stop polling a dead port), and the `daemonInstalled` field in lifecycle output. An installed-but-too-old daemon says so in different words than an absent one. The lifecycle is still never blocked.
+- **`daemonBin` for when the two cannot find each other** — REAP resolves the daemon from its own location, and the two are deliberately separate packages, so they meet only when they share a resolution root. A global REAP with a project-local daemon, two package managers, or a Node version switch does not qualify. Set `daemonBin` in `.reap/config.yml`, or `REAP_DAEMON_BIN` for one command. A named location that is empty is reported rather than silently ignored, and `reap daemon status` shows `bin` and `binSource` so you can confirm which setting REAP read.
+- **`reap help` lists `/reap.run` and `/reap.report`** — both have existed for releases and neither appeared in the table.
+
+Also: releases publish through npm trusted publishing (OIDC) instead of a long-lived token, and the release gate's tarball assertions no longer depend on a race that made them pass on macOS and fail on Linux.
+
+---
+
+## v0.17.4
+
 - **REAP now installs where OpenCode actually reads** — `~/.config` is only the default. OpenCode follows the XDG base directory spec, so anyone with `XDG_CONFIG_HOME` set was getting none of REAP's 19 slash commands and neither agent definition: the files went to `$HOME/.config/opencode/`, the client looked somewhere else, and nothing reported a problem. `opencode` started normally and simply had no REAP in it. Upgrade and re-run `reap install-skills` to place them correctly.
 - **Slash command files no longer claim to be agents** — every installed `reap.*.md` carried `mode: subagent`, a field that describes something a command is not. OpenCode tolerates it; it was still wrong. Reinstalling clears them.
 - **The self-diagnosis gate now asks both clients** — it already installed the publish tarball and required a clean `fix --check`, but only ever as a claude-code project, which is what `reap init` produces. It now also switches a project to `agentClient: opencode` and requires `opencode agent list` to load both REAP agents. A single unreadable file invalidates OpenCode's entire configuration, so that path shipping unverified is what took users' OpenCode offline in 0.17.3 — and the XDG defect above was caught by this check on its first run.

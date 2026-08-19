@@ -1059,6 +1059,10 @@ reap daemon query    # シンボルクエリを実行`,
     breadcrumb: "その他",
     versions: [
       {
+        version: "0.17.5",
+        notes: "**コードインテリジェンス・デーモンが実際に存在するようになりました** — `daemon: true` は v0.16 から文書化されていましたが `@c-d-cc/reap-daemon` は公開されておらず、npm インストールでは壊れたシンボリックリンクになり、すべてのデーモン呼び出しが静かに失敗していました。現在は npm 上にあり、REAP の依存ではありません。`daemon: true` を使う場合は `npm i -g @c-d-cc/reap-daemon` を一度実行してください。**その背後に3つの欠陥がありました** — バンドルがネイティブバインディングをインライン化していたため bun でしか起動せず、Tree-sitter クエリを1階層上で探していたためインデックスがシンボルを1つも抽出できず、`__dirname` がビルド時に埋め込まれ、公開された v0.17.4 バンドルがどのマシンでもメンテナのチェックアウトを指していました。**デーモンの不在が見えるようになりました** — `reap daemon status`、`reap fix --check`、エージェントプロンプト、ライフサイクル出力が報告し、古すぎる場合は別の文言で区別します。**互いに見つけられない場合の `daemonBin`** — `.reap/config.yml` に指定するか、一度だけなら `REAP_DAEMON_BIN` を使います。指定先が空の場合は無視せず報告し、`daemon status` が `bin` と `binSource` を表示します。**`reap help` に `/reap.run` と `/reap.report` が載りました** — これまで欠けていました。",
+      },
+      {
         version: "0.17.4",
         notes: "**REAP が OpenCode の実際に読み込む場所へインストールします** — `~/.config` はデフォルトにすぎず、OpenCode は XDG base directory 仕様に従います。`XDG_CONFIG_HOME` を設定しているユーザーには 19 個のスラッシュコマンドも 2 つの agent 定義も届いておらず、エラーすら出ませんでした。アップグレード後に `reap install-skills` を再実行してください。**スラッシュコマンドが agent を名乗らなくなりました** — インストールされる `reap.*.md` に `mode: subagent` が付いていました。再インストールで解消します。**自己診断ゲートが両クライアントを検査します** — プロジェクトを `agentClient: opencode` に切り替え、`opencode agent list` が REAP の 2 つの agent を読み込むことを要求します。XDG の不具合はこの検査が初回 CI 実行で発見しました。**テストスイートも毎 push で再び実行されます**（スイートを保持する非公開リポジトリ側で）。",
       },
