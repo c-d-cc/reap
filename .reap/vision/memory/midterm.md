@@ -8,11 +8,13 @@
 
 **남은 것**: RELEASE_NOTES / NOTICE / 5 로케일을 gen-084·085 내용으로 **보강**(지금 쓰인 것은 daemon 배포·위치조회 범위뿐) → 태그 push. **태그를 밀면 OIDC 로 발행하는 첫 시도**가 된다 — 실패해도 태그를 옮기거나 재실행하면 복구된다.
 
-**남은 세대 (backlog 이 명시한 결합을 따름. 번호는 실행 순서가 아니라 묶음이다)**:
+**backlog 정리 (유저 지시)**: gen-083~085 가 파생시킨 backlog 11건을 **1건으로 합치고 나머지는 버렸다** — `daemon-작업에서-파생된-reap-자체-결함-남은-3건.md`. 전체 18건 → 8건.
 
-- **typecheck·빌드 책임 3건**: daemon typecheck 상시 red(`bun:sqlite` 타입 부재) → `noUnusedLocals` 도입 → e2e 가 daemon 빌드를 전제하는 문제. **순서가 강제된다** — 상시 red 인 곳에 규칙을 더하는 것은 무의미하다
-- **lifecycle 도구 2건**: `reap run push` 가 실패 원인을 삼킴 / validation work phase 재실행 불가(evaluator prompt 회수 불가). 둘 다 **여러 세션에서 실제로 겪었다**
-- **gen-085 신설 3건**: `checkout` 분기가 dog-fooding 에서 죽어 있음(가장 값어치 있음) / `sort -V` prerelease 역전 / `DaemonNotInstalledError` 가 명시 경로 무시. 배분 미정
+남긴 기준은 하나 — **지금 존재하는 사용자에게 실제로 일어나는가.** 남은 셋은 전부 REAP 이 자기 사용자에게 잘못 말하거나(`reap run push` 오류 삼킴 / `DaemonNotInstalledError` 가 명시 경로 무시) 자기 문서를 못 지키는 경우(validation work phase 재실행 불가)다. 버린 항목과 이유는 그 backlog 의 표에 있다.
+
+**왜 정리가 필요했나**: 검증을 강화하면 인접 갭이 드러나고 그때마다 backlog 가 생기는 순환에 들어갔다. 메커니즘은 정상이지만 **실제 결함과 "이론적 취약함"이 같은 무게로 쌓였다** — prerelease·대체 패키지 매니저·기여자처럼 아직 존재하지 않는 상황을 방어하는 항목들이다. 다시 쌓이면 같은 기준으로 다시 자를 것.
+
+**daemon 파생 작업은 여기서 끊는다.** 0.17.5 릴리즈 후 남은 3건은 별도 시점에 판단한다.
 
 ### 0.18 — 별도 브랜치, 6건
 
