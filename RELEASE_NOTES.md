@@ -1,12 +1,14 @@
 ## What's New
 
-- **The code-intelligence daemon actually exists now** — `daemon: true` has been documented since v0.16, but `@c-d-cc/reap-daemon` was never published. npm installs got a dangling symlink, every daemon call failed silently, and the lifecycle carried on as if nothing were wrong. The package is now on npm and REAP no longer depends on it: **if you use `daemon: true`, install it once with `npm i -g @c-d-cc/reap-daemon`.** Without that, REAP now tells you so rather than doing nothing.
-- **Three defects sat behind that one** — the shipped bundle inlined its native bindings, so it only ever started under bun; it looked for its Tree-sitter queries one directory too far up, so indexing "succeeded" and extracted zero symbols; and `__dirname` was replaced at build time with a literal path, meaning **the published v0.17.4 bundle pointed every user's machine at the maintainer's checkout**. Each of these passed every test, because the tests ran the daemon from source under bun and never touched a tarball.
-- **A missing daemon is now visible in four places** — `reap daemon status`, `reap fix --check`, the agent prompt (which drops the query protocol so agents stop polling a dead port), and the `daemonInstalled` field in lifecycle output. An installed-but-too-old daemon says so in different words than an absent one. The lifecycle is still never blocked.
-- **`daemonBin` for when the two cannot find each other** — REAP resolves the daemon from its own location, and the two are deliberately separate packages, so they meet only when they share a resolution root. A global REAP with a project-local daemon, two package managers, or a Node version switch does not qualify. Set `daemonBin` in `.reap/config.yml`, or `REAP_DAEMON_BIN` for one command. A named location that is empty is reported rather than silently ignored, and `reap daemon status` shows `bin` and `binSource` so you can confirm which setting REAP read.
-- **`reap help` lists `/reap.run` and `/reap.report`** — both have existed for releases and neither appeared in the table.
+This release is mostly about the code-intelligence daemon, which was documented from v0.16 but never actually usable on an npm install.
 
-Also: releases publish through npm trusted publishing (OIDC) instead of a long-lived token, and the release gate's tarball assertions no longer depend on a race that made them pass on macOS and fail on Linux.
+- **The daemon is now a separately published package.** If you use `daemon: true`, install it once: `npm i -g @c-d-cc/reap-daemon`. Several packaging problems that kept it from running are fixed along with it.
+- **REAP tells you when the daemon is missing or too old** instead of silently doing nothing — `reap daemon status`, `reap fix --check` and the agent prompt all report it. The lifecycle is never blocked either way.
+- **`daemonBin` when REAP cannot find an installed daemon.** The two are separate packages and meet only when they share a resolution root — a global REAP with a project-local daemon, two package managers, or a Node version switch does not qualify. Set `daemonBin` in `.reap/config.yml`, or `REAP_DAEMON_BIN` for a single command.
+- **`reap run push` reports git's actual error** instead of a generic message about the remote and the network.
+- **`reap help` lists `/reap.run` and `/reap.report`**, which it never did.
+
+Releases now publish through npm trusted publishing (OIDC) rather than a long-lived token.
 
 ---
 

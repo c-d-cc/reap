@@ -1060,7 +1060,7 @@ reap daemon query    # 运行符号查询`,
     versions: [
       {
         version: "0.17.5",
-        notes: "**代码智能守护进程现在真正存在了** — `daemon: true` 自 v0.16 起就写在文档里，但 `@c-d-cc/reap-daemon` 从未发布：npm 安装得到的是一个断链的符号链接，所有守护进程调用都静默失败。该包现已发布到 npm，且不再是 REAP 的依赖 — 使用 `daemon: true` 的用户请执行一次 `npm i -g @c-d-cc/reap-daemon`。**其背后还有三个缺陷** — 打包内联了原生绑定，因此只能在 bun 下启动；查找 Tree-sitter 查询文件时向上多找了一层，导致索引提取到零个符号；`__dirname` 在构建时被写死，使已发布的 v0.17.4 包在每台机器上都指向维护者的本地检出。**守护进程缺失现在可见** — `reap daemon status`、`reap fix --check`、代理提示词和生命周期输出都会报告；版本过旧则用不同措辞区分。**当两者找不到彼此时使用 `daemonBin`** — 在 `.reap/config.yml` 中设置，或用 `REAP_DAEMON_BIN` 只作用于一次调用；指定位置为空时会报告而非忽略，`daemon status` 会显示 `bin` 与 `binSource`。**`reap help` 现在列出 `/reap.run` 和 `/reap.report`** — 此前一直缺失。",
+        notes: "**代码智能守护进程现已作为独立包发布。** 它自 v0.16 起就写在文档里，但从未发布，因此在 npm 安装下无法工作；随之而来的若干打包问题也一并修复。使用 `daemon: true` 的用户请执行一次 `npm i -g @c-d-cc/reap-daemon`。**守护进程缺失或版本过旧现在会被报告** — `reap daemon status`、`reap fix --check` 和代理提示词都会告知，两种情况下生命周期都不会被阻塞。**当 REAP 找不到它时使用 `daemonBin`** — 两者是独立的包，只有共享同一解析根时才能找到彼此；在 `.reap/config.yml` 中设置 `daemonBin`，或用 `REAP_DAEMON_BIN` 只作用于一次调用。**`reap run push` 会报告 git 的真实错误**，**`reap help` 现在列出 `/reap.run` 和 `/reap.report`**。",
       },
       {
         version: "0.17.4",

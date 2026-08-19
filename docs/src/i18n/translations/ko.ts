@@ -1061,7 +1061,7 @@ reap daemon query    # 심볼 쿼리 실행`,
     versions: [
       {
         version: "0.17.5",
-        notes: "**코드 인텔리전스 데몬이 이제 실제로 존재합니다** — `daemon: true` 는 v0.16 부터 문서에 있었지만 `@c-d-cc/reap-daemon` 은 발행된 적이 없어, npm 설치본은 끊긴 심링크를 받았고 모든 데몬 호출이 조용히 실패했습니다. 이제 npm 에 있으며 REAP 의 의존이 아닙니다 — `daemon: true` 를 쓰신다면 `npm i -g @c-d-cc/reap-daemon` 을 한 번 실행하세요. **그 뒤에 결함이 셋 더 있었습니다** — 번들이 네이티브 바인딩을 인라인해 bun 에서만 기동했고, Tree-sitter 쿼리를 한 단계 위에서 찾아 인덱싱이 심볼을 하나도 뽑지 못했으며, `__dirname` 이 빌드 시점에 박혀 배포된 v0.17.4 번들이 모든 머신에서 메인테이너의 체크아웃을 가리켰습니다. **데몬 부재가 이제 드러납니다** — `reap daemon status`, `reap fix --check`, agent prompt, lifecycle 출력이 알려주며, 너무 낡은 경우는 다른 문구로 구분합니다. **서로 못 찾을 때를 위한 `daemonBin`** — `.reap/config.yml` 에 지정하거나 한 번만 쓸 `REAP_DAEMON_BIN` 을 쓰세요. 지정한 자리가 비어 있으면 무시하지 않고 보고하며, `daemon status` 가 `bin` 과 `binSource` 를 보여줍니다. **`reap help` 에 `/reap.run` 과 `/reap.report` 가 나옵니다** — 여태 빠져 있었습니다.",
+        notes: "**코드 인텔리전스 데몬이 별도 발행 패키지가 됐습니다.** v0.16 부터 문서에는 있었지만 발행된 적이 없어 npm 설치본에서는 동작할 수 없었고, 함께 있던 패키징 문제들도 수정했습니다. `daemon: true` 를 쓰신다면 `npm i -g @c-d-cc/reap-daemon` 을 한 번 실행하세요. **데몬이 없거나 너무 낡으면 이제 보고합니다** — `reap daemon status`, `reap fix --check`, agent prompt 가 알려주며 어느 경우든 lifecycle 은 막히지 않습니다. **REAP 가 못 찾을 때를 위한 `daemonBin`** — 둘은 별개 패키지라 같은 resolution root 를 공유할 때만 서로를 찾습니다. `.reap/config.yml` 에 `daemonBin` 을 지정하거나 한 번만 쓸 `REAP_DAEMON_BIN` 을 쓰세요. **`reap run push` 가 git 의 실제 오류를 보고**하고, **`reap help` 에 `/reap.run` 과 `/reap.report`** 가 나옵니다.",
       },
       {
         version: "0.17.4",
