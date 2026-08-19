@@ -95,8 +95,8 @@ REAP 의 slash command 는 전부 `reap run …` 을 실행한다. plugin 만 �
 | `.reap/` 프로젝트 구조 | 프로젝트 | REAP | **불가** | `reap init` 산출물 |
 | `reap` CLI 바이너리 | npm 전역 | 사용자·hook·plugin | **불가** | 모든 command 가 이것을 실행 |
 | ~~`@c-d-cc/reap-daemon`~~ | npm 전역 | REAP | — | **폐기 결정 (2026-08-20).** indexer 가 reap 에 내장된다 |
-| 인덱스 (구 `~/.reap/daemon/indexes/`) | **프로젝트 레벨** — `.reap/` 하위 (2026-08-20 결정) | REAP | **불가** | 프로젝트 파생물. **사용자 레벨을 떠나므로 `reap uninstall` 의 대상이 아니다** |
-| `~/.reap/daemon/` (구 사용자) | `~/.reap/` | — | — | 폐기 후 **잔여물**. allowlist 항목을 유지해 정리한다 — 아래 § |
+| **구 산출물** `~/.reap/daemon/` (registry·indexes·pid) | `~/.reap/` | — | — | daemon 이 만든 것. **폐기 시 전부 삭제한다** — 아래 § |
+| **새 인덱스** (내장 indexer) | **프로젝트 `.reap/` 하위** (2026-08-20 결정) | REAP | **불가** | 프로젝트 파생물. `destroy` 가 `.reap/` 를 지우며 따라간다 |
 
 ### SessionStart hook 이 정적 파일로 대체 불가능한 이유
 
@@ -146,15 +146,23 @@ gen-088 이 만든 4단계 구조를 그대로 놓고 본다. **바뀌는 것은
 - **npm 제거 대상이 둘에서 하나로 준다.** `@c-d-cc/reap-daemon` 이 없어지므로 `reap` 만 지우면 된다
 - **`source === "checkout"` 예외가 사라진다.** 사용자 작업 트리를 npm 에 넘기지 않으려던 가드는 daemon 위치 조회(`locateDaemon`)에 딸린 것이었다
 
-**인덱스는 프로젝트 레벨에 둔다 (2026-08-20 결정).** `~/.reap/` 이 아니라 `.reap/` 하위다. 결과:
+**구 산출물과 새 인덱스는 별개다.** 섞으면 "지운다"의 대상이 흐려진다.
 
-- **`reap uninstall` 의 allowlist 에 추가할 것이 없다.** 인덱스는 사용자 레벨을 떠났으므로 그 명령의 관심사가 아니다
+##### 구 산출물 `~/.reap/daemon/` — 폐기와 함께 전부 지운다
+
+daemon 이 만든 것은 daemon 과 함께 사라져야 한다. registry.json · indexes/ · daemon.pid 전부다. 남길 이유가 없다 — 그것을 읽을 코드가 없어지기 때문이다.
+
+**지우는 자리는 폐기 generation 의 migration note 다.** `reap update` 시점에 정리된다. `reap uninstall` 을 기다리는 것은 답이 아니다 — 그것은 "REAP 자체를 지울 때까지 남아 있다"는 뜻이고, 계속 쓸 사용자의 홈에 죽은 디렉토리가 영구히 남는다.
+
+**그리고 `reap uninstall` 의 allowlist 에서도 항목을 빼지 마라 — 안전망으로.** migration 을 돌리지 않은 사용자, 여러 머신 중 한 곳만 갱신한 사용자가 남는다. allowlist 에 죽은 항목 하나를 두는 비용은 0 이고, 빼면 그 사용자들의 잔여물을 지울 경로가 사라진다. **본선은 migration, 보조는 uninstall.**
+
+##### 새 인덱스 — 프로젝트 레벨이므로 애초에 사용자 레벨 문제가 아니다
+
+`~/.reap/` 이 아니라 `.reap/` 하위다. 결과:
+
+- **`reap uninstall` 의 allowlist 에 새로 추가할 것이 없다** — 사용자 레벨을 떠났으므로 그 명령의 관심사가 아니다
 - **정리는 `reap destroy` 가 이미 한다** — `.reap/` 를 통째로 지우므로 자동으로 따라간다. 새 코드가 필요 없다
 - **`.gitignore` 에 넣어야 한다.** 프로젝트 파생물이고 커밋되면 안 된다. `reap init` 의 gitignore 처리와 `destroy` 의 gitignore 정리 양쪽이 아는 사실이 되므로 **carrier 표식 후보**다
-
-**단, `~/.reap/daemon/` 을 allowlist 에서 빼지 마라.** 인덱스가 프로젝트로 옮겨가도 **이미 daemon 을 쓴 사용자의 머신에는 그 디렉토리가 남아 있다.** 폐기 후 그것을 지우는 경로는 `reap uninstall` 의 allowlist 항목 하나뿐이다. 지우는 코드가 사라지면 잔여물이 영구화된다 — 이 문서가 다루는 결함의 형태 그대로다.
-
-(더 나은 자리가 있다면 폐기 generation 의 migration note 다. uninstall 을 기다리지 않고 `reap update` 시점에 정리할 수 있다. 어느 쪽이든 **누군가는 지워야 한다**는 것이 요점이다.)
 
 3단계의 변화:
 
