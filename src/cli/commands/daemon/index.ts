@@ -1,5 +1,5 @@
 import { emitOutput, emitError } from "../../../core/output.js";
-import { daemonRequest, findProjectId, resolveDaemonAvailability } from "./client.js";
+import { daemonRequest, findProjectId, resolveDaemonAvailability, missingDaemonRemedy } from "./client.js";
 import { createPaths } from "../../../core/paths.js";
 import type { DaemonAvailability } from "../../../types/index.js";
 import { fileExists } from "../../../core/fs.js";
@@ -33,12 +33,10 @@ export async function execute(
 function requireUsableDaemon(): void {
   const avail = resolveDaemonAvailability();
   if (!avail.installed) {
-    // A location that was named and turned out to be empty is the whole story;
-    // repeating the generic advice to name one would talk past the user.
-    const detail = avail.explicitMiss
-      ? `${avail.explicitMiss.label} points at ${avail.explicitMiss.path}, but there is no file there. Install it with: ${avail.installCommand}`
-      : `${avail.locateHint} Otherwise install it with: ${avail.installCommand}`;
-    emitError("daemon", `The daemon is not installed. ${detail}`);
+    // Wording lives in `missingDaemonRemedy` so that this and the exception
+    // thrown from the spawn path cannot drift apart — they answer the same
+    // question and used to answer it differently.
+    emitError("daemon", `The daemon is not installed. ${missingDaemonRemedy(avail.explicitMiss)}`);
   }
   if (avail.outdated) {
     // A named location or a checkout is not fixed by a global install — reap

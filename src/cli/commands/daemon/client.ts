@@ -72,12 +72,44 @@ export const DAEMON_LOCATE_HINT =
 // reap:carrier(min-daemon-version)
 export const MIN_DAEMON_VERSION = "0.2.0";
 
-/** Raised when `daemon: true` is set but no daemon package can be resolved. */
+/**
+ * Raised when `daemon: true` is set but no daemon package can be resolved.
+ *
+ * `explicitMiss` is the whole reason this takes an argument at all: someone who
+ * set `daemonBin` and mistyped it was being told to install a package they
+ * already have, with no mention of the setting they wrote. gen-085 split the
+ * *outdated* advice by source; this is the missing half of that pair, and with
+ * it all three places that say "not installed" answer alike.
+ */
 export class DaemonNotInstalledError extends Error {
-  constructor(readonly installCommand: string = DAEMON_INSTALL_COMMAND) {
-    super(`The REAP daemon is not installed. Install it with: ${installCommand}`);
+  constructor(readonly explicitMiss: ExplicitDaemonBin | null = null) {
+    super(`The daemon is not installed. ${missingDaemonRemedy(explicitMiss)}`);
     this.name = "DaemonNotInstalledError";
   }
+
+  /**
+   * The bare command, beside the sentence. Nothing reads it today — the two
+   * diagnostics that show an install command read `DaemonAvailability` — but
+   * it was on this class before and removing a public field is a bigger change
+   * than the one this generation was asked for.
+   */
+  readonly installCommand = DAEMON_INSTALL_COMMAND;
+}
+
+/**
+ * What to say to someone who has no daemon, given what they pointed reap at.
+ *
+ * The counterpart of `staleDaemonRemedy`, and it exists for the same reason:
+ * three callers phrase this, and if each writes its own they drift. A named
+ * location that turned out to be empty is the entire story — repeating the
+ * generic "here is how to name one" advice would talk past the one person who
+ * already did.
+ */
+export function missingDaemonRemedy(explicitMiss: ExplicitDaemonBin | null): string {
+  if (explicitMiss) {
+    return `${explicitMiss.label} points at ${explicitMiss.path}, but there is no file there. Install it with: ${DAEMON_INSTALL_COMMAND}`;
+  }
+  return `${DAEMON_LOCATE_HINT} Otherwise install it with: ${DAEMON_INSTALL_COMMAND}`;
 }
 const PID_PATH = join(DAEMON_ROOT, "daemon.pid");
 const DEFAULT_PORT = 17224;
@@ -117,8 +149,12 @@ export async function daemonRequest<T = unknown>(
 async function ensureDaemon(): Promise<void> {
   if (await isDaemonRunning()) return;
 
-  const daemonBin = resolveDaemonBin();
-  if (daemonBin === null) throw new DaemonNotInstalledError();
+  // `locateDaemon` rather than `resolveDaemonBin`: the latter keeps only the
+  // path and discards `explicitMiss`, which is precisely the fact the error
+  // needs in order not to give advice the user has already followed.
+  const { bin, explicitMiss } = locateDaemon();
+  if (bin === null) throw new DaemonNotInstalledError(explicitMiss);
+  const daemonBin = bin;
 
   const runtime = detectRuntime();
   const child = spawn(runtime, [daemonBin], {

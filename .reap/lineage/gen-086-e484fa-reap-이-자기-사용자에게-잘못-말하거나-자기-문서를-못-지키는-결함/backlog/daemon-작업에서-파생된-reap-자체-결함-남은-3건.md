@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: medium
 createdAt: 2026-08-19T13:15:26.982Z
+consumedBy: gen-086-e484fa
+consumedAt: 2026-08-19T13:19:38.606Z
 ---
 
 # daemon 작업에서 파생된 REAP 자체 결함 — 남은 3건

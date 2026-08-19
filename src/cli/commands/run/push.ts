@@ -31,14 +31,25 @@ export async function execute(paths: ReapPaths): Promise<void> {
   const smResults = pushSubmodules(paths.root);
   const failedSm = smResults.filter((r) => !r.success);
   if (failedSm.length > 0) {
-    const names = failedSm.map((r) => r.name).join(", ");
-    emitError("push", `Failed to push submodule(s): ${names}. Check remote configuration.`);
+    const detail = failedSm
+      .map((r) => (r.error ? `${r.name}: ${r.error}` : r.name))
+      .join("\n");
+    emitError("push", `Failed to push submodule(s):\n${detail}`);
   }
 
-  // Push main repo
-  const success = gitPush(paths.root);
+  // Push main repo.
+  //
+  // The message is git's own, not a guess about what might be wrong. The
+  // guess this replaced ("Check remote configuration and network") named two
+  // things that were both fine in the case that prompted the change, and it
+  // read as a diagnosis, so it sent the user looking in the wrong place. git
+  // usually says exactly which command to run; that sentence is worth more
+  // than anything reap can infer from a boolean. When nothing was captured —
+  // no stderr, no stdout, no message — say that, rather than inventing a
+  // cause to fill the gap.
+  const { success, error } = gitPush(paths.root);
   if (!success) {
-    emitError("push", "git push failed. Check remote configuration and network.");
+    emitError("push", error ? `git push failed:\n${error}` : "git push failed, and git reported no reason.");
   }
 
   emitOutput({

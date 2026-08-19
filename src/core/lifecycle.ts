@@ -3,6 +3,20 @@ import { LIFECYCLE_STAGES, MERGE_STAGES, type LifeCycleStage, type MergeStage, t
 // ── Transition Graphs ─────────────────────────────────────────
 // Key: current stage:phase, Value: allowed target stage:phase[]
 // Back transitions are explicit entries (e.g., planning:entry -> learning:entry)
+//
+// A stage:phase listed among its own targets is a self-loop: the phase may be
+// re-entered without advancing. `setTransitionNonces` re-issues the whole list
+// on every call, so the nonce is still minted, verified and consumed each time
+// — re-entry is permitted, forgery and stage-skipping are not.
+//
+// `validation:entry` carries one because the validation work phase is the one
+// an interrupted session most needs to ask for again: its output is where the
+// evaluator prompt lives, and its artifact-incomplete branch tells the user to
+// run `reap run validation` again — advice reap then refused, contradicting
+// both itself and genome/evolution.md § 중단된 Generation 복구. Re-entry is
+// safe because the work phase writes no state beyond these nonces:
+// `copyArtifactTemplate` returns early when the artifact already exists, so a
+// second call cannot overwrite work in progress.
 
 export const NORMAL_TRANSITIONS: Record<string, string[]> = {
   "learning:entry":           ["learning:complete"],
@@ -11,7 +25,7 @@ export const NORMAL_TRANSITIONS: Record<string, string[]> = {
   "planning:complete":        ["implementation:entry", "learning:entry"],
   "implementation:entry":     ["implementation:complete", "planning:entry"],
   "implementation:complete":  ["validation:entry", "planning:entry"],
-  "validation:entry":         ["validation:complete", "implementation:entry"],
+  "validation:entry":         ["validation:complete", "validation:entry", "implementation:entry"],
   "validation:complete":      ["completion:entry", "implementation:entry"],
   "completion:entry":         ["completion:fitness", "validation:entry"],
   "completion:fitness":       ["completion:adapt", "completion:fitness", "validation:entry"],
@@ -28,7 +42,7 @@ export const MERGE_TRANSITIONS: Record<string, string[]> = {
   "merge:complete":           ["reconcile:entry", "mate:entry"],
   "reconcile:entry":          ["reconcile:complete", "merge:entry"],
   "reconcile:complete":       ["validation:entry", "merge:entry"],
-  "validation:entry":         ["validation:complete", "reconcile:entry"],
+  "validation:entry":         ["validation:complete", "validation:entry", "reconcile:entry"],
   "validation:complete":      ["completion:entry", "reconcile:entry"],
   "completion:entry":         ["completion:fitness", "validation:entry"],
   "completion:fitness":       ["completion:adapt", "completion:fitness", "validation:entry"],

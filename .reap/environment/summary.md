@@ -3,7 +3,7 @@
 ## Project
 
 - Source: `~/cdws/reap/` (branch: main)
-- Package: `@c-d-cc/reap` v0.17.4 (+ `@c-d-cc/reap-daemon` v0.2.0 — 같은 저장소, 별도 발행)
+- Package: `@c-d-cc/reap` v0.17.5 (+ `@c-d-cc/reap-daemon` v0.2.0 — 같은 저장소, 별도 발행)
 - Config language: korean
 
 ## Tech Stack
@@ -23,7 +23,7 @@
 src/
 ├── types/index.ts              — 타입 정의 (GenerationState, ReapConfig, ReapOutput 등)
 ├── core/                       — 핵심 로직 (29 modules)
-│   ├── lifecycle.ts            — stage 순서 정의 (next/prev) + transition graph (NORMAL_TRANSITIONS, MERGE_TRANSITIONS, getTransitions)
+│   ├── lifecycle.ts            — stage 순서 정의 (next/prev) + transition graph (NORMAL_TRANSITIONS, MERGE_TRANSITIONS, getTransitions). **stage:phase 가 자기 목록에 들어 있으면 self-loop = 그 phase 재진입 허용** — nonce 는 매번 재발급·검증·소비되므로 무결성은 유지된다. 현재 `completion:fitness` 와 `validation:entry` 둘
 │   ├── generation.ts           — generation CRUD, ID 생성
 │   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스, memory/resources/docs 경로 포함)
 │   ├── nonce.ts                — 암호학적 token (SHA256) — 순수 함수, generateToken/verifyToken
@@ -37,7 +37,7 @@ src/
 │   ├── backlog.ts              — backlog scan/consume/revert/create + createDeferredBacklog/extractUncheckedTasks/countCheckedTasks (early-close 승계). `consumeBacklog` 는 `Promise<ConsumeBacklogResult>`("ok"/"already"/"warning") — idempotency 는 YAML.parse 로 판단하되 쓰기는 라인 단위여서 사용자 frontmatter 형식이 보존된다. silent fail 0
 │   ├── archive.ts              — generation 아카이빙 (life → lineage). archiveGeneration (status: completed) + archiveEarlyClose (status: partial + closeMeta)
 │   ├── cruise.ts               — cruise mode 관리 ("N/M" 포맷, parse/advance/clear/set)
-│   ├── git.ts                  — git 연동 (commit, diff, push, pull, fetch, branch analysis)
+│   ├── git.ts                  — git 연동 (commit, diff, push, pull, fetch, branch analysis). `gitPush` 는 `GitPushResult { success, error }` 를 돌려준다 — `boolean` 은 실패 이유를 버렸고 `push.ts` 가 그 자리를 추측으로 메웠다. `describeExecError` 가 stderr → stdout → `err.message` 순으로 건진다. 나머지 래퍼(`gitFetchAll`/`gitPullFfOnly`/…)는 여전히 `catch { return false }` 다
 │   ├── hooks.ts                — lifecycle hook engine (조건부 실행, 순서 제어, 상세 결과)
 │   ├── clarity.ts              — clarity level 자동 판단 (규칙 기반, high/medium/low + signals)
 │   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt, buildStrictSection, memory 로딩, cruise 지시, clarity 주입, strict HARD-GATE). `buildEvaluatorPrompt(knowledge, paths, state, { stage })` 는 reap-evaluate 용 dynamic context. `buildBasePrompt` 는 `config?.daemon === true` 시 Code Intelligence 절을 붙이되, **주입된 `DaemonAvailability` 가 미설치/구버전이면 질의 프로토콜 대신 설치 안내로 교체**한다 — 미주입(undefined)은 "모름"이며 기존 동작을 유지
@@ -88,7 +88,7 @@ src/
 │       ├── update.ts           — 프로젝트 업데이트 (v0.15→migrate 위임, v0.16→config backfill/디렉토리 보충/CLAUDE.md 보수, --post-upgrade 지원)
 │       └── daemon/             — daemon 서브커맨드
 │           ├── index.ts        — daemon 커맨드 라우팅 (start, stop, status, query)
-│           ├── client.ts       — daemon HTTP 클라이언트 (auto-spawn) + **위치 결정의 단일 소유자**: `locateDaemon` 이 env > config > package > checkout 순으로 찾고 `resolveDaemonBin` 은 `.bin` 만 돌려주는 래퍼
+│           ├── client.ts       — daemon HTTP 클라이언트 (auto-spawn) + **위치 결정의 단일 소유자**: `locateDaemon` 이 env > config > package > checkout 순으로 찾고 `resolveDaemonBin` 은 `.bin` 만 돌려주는 래퍼(프로덕션 소비자는 없다 — `ensureDaemon` 이 `explicitMiss` 를 잃지 않으려고 `locateDaemon` 을 직접 쓴다). **안내 문구 소유자 2개**: `staleDaemonRemedy`(낡음) / `missingDaemonRemedy`(미설치). 후자는 `DaemonNotInstalledError` 와 `daemon status/index/query` 가 공유한다
 │           └── lifecycle.ts    — generation 시작/완료 시 자동 인덱싱 훅
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/                   — AI client 어댑터 (dispatcher + module 패턴)
@@ -140,7 +140,7 @@ daemon/                            — 별도 npm 패키지 (@c-d-cc/reap-daemon
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline — **unit 545 / e2e 279 / scenario 44, 세 스위트 모두 0 fail.** daemon 자체 스위트는 별도로 `cd daemon && bun test tests/` → **130 pass**. 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
+현재 baseline — **unit 555 / e2e 287 / scenario 44, 세 스위트 모두 0 fail.** daemon 자체 스위트는 별도로 `cd daemon && bun test tests/` → **130 pass**. 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
 
 `tests/scenario/multi-generation.test.ts` 는 gen-065 backlog gate 를 시나리오로 커버한다 — pending 이 있으면 `run start` 가 `status: "prompt"` 로 막히고, `--backlog`(소비) 또는 `--no-backlog`(유지) 로 재호출해야 진행된다. 새 scenario 가 backlog 파일을 만든다면 같은 gate 를 거치므로 이 패턴을 참고할 것.
 

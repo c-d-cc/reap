@@ -249,16 +249,49 @@ export function gitPullFfOnly(cwd: string): boolean {
   }
 }
 
-export function gitPush(cwd: string): boolean {
+/**
+ * What git said when it refused, or null when it did not refuse.
+ *
+ * A boolean was enough for the caller to know *that* the push failed, and it is
+ * exactly what made the failure unactionable: git had already written the
+ * reason, `stdio: "pipe"` had already captured it, and `catch { return false }`
+ * threw it away. What reached the user was a guess about remotes and networks —
+ * and on 2026-08-19 both of those were fine while the real cause (a token
+ * without `workflow` scope) was visible only by running `git push` by hand.
+ */
+export interface GitPushResult {
+  success: boolean;
+  error: string | null;
+}
+
+/**
+ * Recover what a failed `execSync` was told, in the order git says it.
+ *
+ * stderr first because that is where git writes refusals; stdout next because
+ * some transports report there; the thrown message last, which is what remains
+ * when the failure was in spawning rather than in git (`ENOENT`, a bad cwd).
+ * Anything is better than the empty string — a caller that decides between "say
+ * the cause" and "say nothing" must be able to tell the two apart.
+ */
+function describeExecError(err: unknown): string | null {
+  const e = err as { stderr?: unknown; stdout?: unknown; message?: unknown };
+  for (const candidate of [e?.stderr, e?.stdout, e?.message]) {
+    const text = typeof candidate === "string" ? candidate : candidate?.toString?.();
+    if (typeof text === "string" && text.trim().length > 0) return text.trim();
+  }
+  return null;
+}
+
+export function gitPush(cwd: string): GitPushResult {
   try {
     execSync("git push", {
       cwd,
       encoding: "utf-8",
       stdio: ["pipe", "pipe", "pipe"],
     });
-    return true;
-  } catch {
-    return false;
+    return { success: true, error: null };
+  } catch (err) {
+    return { success: false, error: describeExecError(err) };
   }
 }
 
@@ -266,11 +299,11 @@ export function gitPush(cwd: string): boolean {
  * Push all submodules that have unpushed commits.
  * Returns list of { name, success } for submodules that were pushed.
  */
-export function pushSubmodules(cwd: string): { name: string; success: boolean }[] {
+export function pushSubmodules(cwd: string): { name: string; success: boolean; error: string | null }[] {
   const submodules = checkSubmoduleDirty(cwd);
   if (submodules.length === 0) return [];
 
-  const results: { name: string; success: boolean }[] = [];
+  const results: { name: string; success: boolean; error: string | null }[] = [];
 
   for (const sm of submodules) {
     const smPath = `${cwd}/${sm.name}`;
@@ -282,8 +315,8 @@ export function pushSubmodules(cwd: string): { name: string; success: boolean }[
         stdio: ["pipe", "pipe", "pipe"],
       }).trim();
       if (parseInt(ahead, 10) > 0) {
-        const success = gitPush(smPath);
-        results.push({ name: sm.name, success });
+        const { success, error } = gitPush(smPath);
+        results.push({ name: sm.name, success, error });
       }
     } catch {
       // No upstream or not initialized — skip
