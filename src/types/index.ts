@@ -120,6 +120,24 @@ export interface ReapConfig {
    */
   daemon?: boolean;
   /**
+   * Where the daemon entry point lives, when reap cannot work it out.
+   *
+   * reap looks for the daemon from its own location, so the two only find each
+   * other when they share a resolution root. Installing both globally with the
+   * same manager happens to arrange that; installing reap globally and the
+   * daemon into a project, or into two different prefixes, does not — and the
+   * daemon is deliberately not a dependency of reap, so nothing can be declared
+   * to bridge the gap. Naming the path closes it.
+   *
+   * Takes priority over the automatic search, and `REAP_DAEMON_BIN` takes
+   * priority over this. A path that does not exist is reported but does not
+   * stop the search: this file is committed, and a location that is right on
+   * one machine is not necessarily right on the next.
+   *
+   * Default (omitted): the automatic search alone, exactly as before.
+   */
+  daemonBin?: string;
+  /**
    * The last REAP version up to which this project has applied per-version
    * migration instructions. Used by the migration instruction layer
    * (gen-071) to detect version gaps between the installed REAP package
@@ -187,6 +205,32 @@ export interface ReapOutput {
 }
 
 /**
+ * How reap arrived at a daemon entry point.
+ *
+ * `env` and `config` are the locations a user named on purpose; `package` and
+ * `checkout` are the two ways reap looks on its own. The distinction matters
+ * because only the first two can be wrong in a way reap should complain about —
+ * an automatic search that finds nothing is a situation, but a location that
+ * was pointed at and turns out to be empty is a mistake.
+ */
+export type DaemonBinSource = "env" | "config" | "package" | "checkout";
+
+/** A location the user named, and which of the two channels named it. */
+export interface ExplicitDaemonBin {
+  source: "env" | "config";
+  /** Absolute, after `~` expansion and resolution against the project root. */
+  path: string;
+  /**
+   * How to refer to that channel in a sentence, e.g. `REAP_DAEMON_BIN`.
+   *
+   * Travels with the value for the same reason `installCommand` does: `core`
+   * phrases the diagnostic but must not spell the variable and config key, or
+   * they would exist in two places and drift (gen-076 pattern).
+   */
+  label: string;
+}
+
+/**
  * Whether the separately-published daemon package is present and new enough.
  *
  * The daemon used to be a `file:` dependency of reap, which npm linked into
@@ -195,9 +239,9 @@ export interface ReapOutput {
  * treated the difference as "daemon is down". Splitting the package makes the
  * absence real, and this is what reap consults instead of guessing.
  *
- * `required` and `installCommand` travel with the verdict so that `core` can
- * phrase a diagnostic without importing from `cli` or restating the package
- * name — one owner, injected, nothing to keep in sync (gen-076 pattern).
+ * `required`, `installCommand` and `locateHint` travel with the verdict so that
+ * `core` can phrase a diagnostic without importing from `cli` or restating the
+ * package name — one owner, injected, nothing to keep in sync (gen-076 pattern).
  */
 export interface DaemonAvailability {
   /** Resolvable — either installed as a package or found in a source checkout. */
@@ -214,4 +258,18 @@ export interface DaemonAvailability {
   packageName: string;
   /** What to tell the user to run. */
   installCommand: string;
+  /** Where `bin` came from. `null` when nothing resolved. */
+  source: DaemonBinSource | null;
+  /**
+   * A location the user named where nothing exists.
+   *
+   * Filled independently of the verdict: reap goes on to search for itself, so
+   * a stale path in a committed `config.yml` does not break a machine where the
+   * daemon is installed normally — but staying quiet about it would make an
+   * explicit instruction disappear without a word, which is the same class of
+   * defect this field exists to help fix.
+   */
+  explicitMiss: ExplicitDaemonBin | null;
+  /** What to say when it is installed and reap still cannot find it. */
+  locateHint: string;
 }

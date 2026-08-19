@@ -94,6 +94,20 @@ If you write a check and immediately see it pass, you do not know whether it cat
 - Do the same per assertion — break a known-good value, confirm the failure, restore it (negative test).
 - **Record what the check cannot see, alongside its results.** Passing means "no problem within the check's scope". Without a stated limit, the next person trusts it further than it goes.
 
+### Record what kind of evidence you have — and "ran it" must name the command
+
+Writing only "verified" in an artifact makes **running the command and reading the code look the same.** That distinction collapsed in two consecutive generations, and a blocking defect came through each time.
+
+Tag every item with the kind of evidence behind it:
+
+- `[ran]` — this generation executed that command
+- `[negative]` — broke it on purpose and watched the check fail
+- `[read]` — judged by reading the code. Not executed
+
+**To write `[ran]`, you must be able to name the command that exercises that item.** If you cannot, it is `[read]`. gen-083 recorded an unverified item as satisfied and the evaluator caught it; the tagging convention created from that lesson then failed **one row over** in gen-084 — the behaviour was correct, but nothing in the gate or the tests exercised it. "It was correct" is not the answer to this problem.
+
+When unsure, run `grep -rn "<functionName>" tests/`. Zero hits means `[read]`.
+
 ## Architecture Change = Genome Sync
 
 When adding new features/structures or changing architecture, if the change affects how the AI should behave, it MUST be reflected in the genome (evolution.md or application.md).

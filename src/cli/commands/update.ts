@@ -36,6 +36,10 @@ const VALID_CONFIG_FIELDS = new Set<string>([
   // Opt-in fields — present only when user enables, but listed here so
   // `backfillConfig`'s deprecated-field pruning does not strip them.
   "evaluator", "daemon",
+  // gen-084: where the daemon lives, when reap cannot work it out. Omitting it
+  // here would make `reap update` delete the one setting standing between some
+  // users and a working daemon — and say only "removed a deprecated field".
+  "daemonBin",
   // gen-071: per-project marker tracking last applied migration note set.
   "lastMigratedVersion",
 ]);

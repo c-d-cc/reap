@@ -6,7 +6,7 @@
 
 pending backlog 8건을 두 릴리즈로 가른다.
 
-- **0.17.5 — daemon**: 배포 결함 수정 **(gen-083 완료)** → **strict resolver 우회**(신설, 하드 선행조건) → `daemon-v0.2.0` 발행 → 릴리즈. **gen-084 SCIP 설계는 코드를 내지 않으므로 릴리즈와 순서 무관**
+- **0.17.5 — daemon**: 배포 결함 수정 **(gen-083 완료)** → 위치 명시 지정 경로 **(gen-084 완료)** → **`daemon-v0.2.0` 발행(유저가 태그 push)** → 릴리즈. **선행조건은 전부 끝났고 발행만 남았다.** daemon SCIP 설계는 코드를 내지 않으므로 릴리즈와 순서 무관
 - **0.18 — 나머지 6건**: plugin 전환 · interview skill · milestone · idea · plan(자리) · `/reap.plan` skill
 
 **0.18 작업에는 migration 계획을 함께 만든다.** 6건 중 다수가 `.reap/` 구조와 지식 축을 바꾸므로, 템플릿·코드만 고치면 **이미 존재하는 프로젝트에는 아무것도 도달하지 않는다** (gen-072). `src/templates/migration/v0.18.x.md` 를 각 건과 함께 설계할 것. idea·plan 이 둘 다 최상위 자리를 추가하므로 **migration note 를 건별로 쓸지 한 번에 쓸지**를 먼저 정한다.
@@ -45,8 +45,12 @@ pending backlog 8건을 두 릴리즈로 가른다.
 
 **배포 결함은 gen-083 에서 해소** — npm 독립 발행 형태 확정, dist queries path 수정, 네이티브 의존 external 화, 미설치 UX, 배포 산출물 게이트. 가이드 문서 강화도 함께 처리. 남은 잔여는 `.js` strip / 자동 staleness 뿐이며 SCIP 설계에 흡수 여부를 판단한다.
 
-**남은 것 — SCIP 설계 (gen-084)**:
+**위치 조회 (gen-084 완료)**: `daemonBin` / `REAP_DAEMON_BIN` 으로 명시 지정. 그 과정에서 **backlog 의 전제가 반증됐다** — pnpm 과 Yarn PnP 는 정상 동작하고, 깨지는 조건은 **reap 과 daemon 이 서로 다른 resolution root 에 설치되는 것**이다. gen-083 lineage 항목은 반증된 주장을 담고 있으니 그것을 직접 읽는 사람은 주의할 것.
+
+**남은 것 — SCIP 설계**:
 - **SCIP 채택은 확정** (유저 결정). Tree-sitter 를 대체가 아니라 baseline 으로 두고 SCIP 이 있으면 승격하는 하이브리드. 핵심 난제는 **노드 ID 통합**(`file::name` vs SCIP symbol ID)
 - **실측 평가는 취소** (유저 판단) — 대형 코드베이스 확보가 비현실적. 코드 독해 기반 분석으로 대체
 - **새 설계 항목 (gen-083 발견)**: daemon 이 `queries/` 를 **런타임 자산**으로 들고 다닌다. SCIP 인덱서를 붙이면 그 자산 구조와 패키지 크기가 어떻게 되는지 설계에 포함할 것
 - MCP wrapper 는 계속 보류 (2026-06-28 결정)
+
+**floor 인상 때 함께 닫을 3건**: `낡은 daemon 안내가 명시 경로를 무시한다` / `semverGte 가 prerelease 를 구분하지 못한다` / `MIN_DAEMON_VERSION 발행 검사 게이트`. 셋 다 `MIN_DAEMON_VERSION` 을 올리는 순간 발동하며, 그때 비로소 "설치됨 + 낡음"이 도달 가능해져 게이트에 넣을 수 있다. 지금은 0.2.0 이 최초 발행본이라 그 상태가 존재하지 않는다.

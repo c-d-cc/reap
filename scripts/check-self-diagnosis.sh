@@ -299,7 +299,30 @@ if ! grep -q "reap-daemon" <<< "$DM_FINDINGS"; then
   dim "        is how it survived three generations."
   exit 1
 fi
-green "  ok    a missing daemon is reported, not swallowed"
+# `fix --check` is not the only channel. `reap daemon status` phrases this
+# separately, and until gen-084 nothing ran that branch — not the gate, not a
+# test. It said what it should, but only inspection said so, which is the shape
+# of evidence gen-083 was caught recording as if it were a run.
+printf '\ndaemon: true\n' >> "$PROJECT/.reap/config.yml"
+DM_ST_MISSING=$(cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" daemon status 2>&1)
+cp "$PROJECT/.reap/config.yml.orig2" "$PROJECT/.reap/config.yml"
+if ! grep -q "not installed" <<< "$DM_ST_MISSING"; then
+  red "  FAIL  'daemon status' does not say the daemon is missing"
+  echo
+  echo "$DM_ST_MISSING" | head -6 | while IFS= read -r line; do dim "        $line"; done
+  exit 1
+fi
+if ! grep -q "resolution roots" <<< "$DM_ST_MISSING"; then
+  red "  FAIL  'daemon status' does not say what to do if it IS installed"
+  echo
+  echo "$DM_ST_MISSING" | head -6 | while IFS= read -r line; do dim "        $line"; done
+  echo
+  dim "        Someone whose reap and daemon are in different resolution roots"
+  dim "        reads 'not installed' about software they installed. Without the"
+  dim "        way out, that is where they stop."
+  exit 1
+fi
+green "  ok    a missing daemon is reported, not swallowed — by both channels"
 
 # 5c. Pack and install the daemon on its own, as a user would.
 #
@@ -418,6 +441,202 @@ fi
 green "  ok    installed daemon indexes and answers under node ($DM_NODES symbols)"
 
 kill "$DM_PID" 2>/dev/null; DM_PID=""
+
+# 5d-bis. The daemon is on this disk, works, and reap cannot see it.
+#
+#     Right here — after 5c installed the daemon into its own directory and 5d
+#     proved that copy runs — the environment is in the exact state that broke
+#     users: a working daemon present, and no path from reap's location to it.
+#     5b already proved reap calls that state "not installed". So this is where
+#     naming the location has to rescue it, and it costs nothing to arrange
+#     because the two halves were built above for other reasons.
+#
+#     The state is not a stand-in for one package manager. Reaching it needs
+#     only reap and the daemon in different resolution roots: a global reap with
+#     a project-local daemon, two prefixes, a switched Node version. gen-083
+#     recorded pnpm's default store and Yarn PnP as the cause "in principle";
+#     gen-084 installed both and measured otherwise — pnpm isolates by symlink
+#     layout rather than by replacing the resolver, and PnP's default fallback
+#     admits the top-level project's dependencies. Testing against pnpm here
+#     would have spent an install to check something that does not break.
+#
+#     Runs before 5e on purpose: 5e installs the daemon where reap can find it,
+#     and after that this can no longer be asked. The config is restored on the
+#     way out so 5e still starts from a project with no daemon settings — an
+#     assertion of 5e's would otherwise pass because of a leftover from here.
+
+# Parse `fix --check` and refuse to confuse silence with success.
+#
+# Every assertion below is of the form "the complaint is gone", and absence is
+# also what a crash, an unparseable line or a renamed field look like. gen-083
+# shipped exactly that hole in 5e. So the output must prove it is an answer —
+# `status` plus a numeric `warningCount` — before its content means anything.
+dm_fix_verdict() {
+  node -e '
+    let raw=""; process.stdin.on("data",d=>raw+=d).on("end",()=>{
+      let out;
+      try { out = JSON.parse(raw); } catch { console.log("BAD_JSON"); return; }
+      const ctx = out.context || {};
+      if (out.status !== "ok" || typeof ctx.warningCount !== "number") {
+        console.log("BAD_SHAPE"); return;
+      }
+      console.log("OK\n" + (ctx.warnings || []).join("\n"));
+    });'
+}
+
+dm_require_verdict() {
+  # $1 = verdict text, $2 = what was being checked
+  case "$1" in
+    BAD_JSON|BAD_SHAPE)
+      red "  FAIL  fix --check gave no usable answer while $2 ($1)"
+      exit 1
+      ;;
+  esac
+}
+
+cp "$PROJECT/.reap/config.yml" "$PROJECT/.reap/config.yml.orig3"
+
+# (a) A named location is used, and the complaint stops.
+printf '\ndaemon: true\ndaemonBin: %s\n' "$DM_BIN" >> "$PROJECT/.reap/config.yml"
+DM_NAMED=$(cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" fix --check 2>/dev/null | dm_fix_verdict)
+dm_require_verdict "$DM_NAMED" "checking a named daemon location"
+if grep -q "reap-daemon" <<< "$DM_NAMED"; then
+  red "  FAIL  reap still reports the daemon as missing after being told where it is"
+  echo
+  dim "        daemonBin: $DM_BIN"
+  echo "$DM_NAMED" | while IFS= read -r line; do dim "        $line"; done
+  echo
+  dim "        This is the whole point of the setting. Without it, anyone whose"
+  dim "        reap and daemon live in different resolution roots is told"
+  dim "        forever to install what they already have."
+  exit 1
+fi
+
+# (b) And it is actually launched — resolving a path is not running one.
+DM_NAMED_STATUS=$(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17292 \
+  "$REAP_BIN" daemon status 2>&1)
+if ! grep -q '"status": *"ok"' <<< "$DM_NAMED_STATUS"; then
+  red "  FAIL  reap could not start the daemon it was pointed at"
+  echo
+  echo "$DM_NAMED_STATUS" | head -8 | while IFS= read -r line; do dim "        $line"; done
+  exit 1
+fi
+# The user has no other way to confirm the setting took effect, so reap says
+# which daemon it used and how it got there. A workaround you cannot verify is
+# barely a workaround — and this also catches the setting being ignored while
+# something else happened to satisfy the lookup.
+if ! grep -q '"binSource": *"config"' <<< "$DM_NAMED_STATUS"; then
+  red "  FAIL  the daemon started, but reap does not report using the named location"
+  echo
+  echo "$DM_NAMED_STATUS" | head -12 | while IFS= read -r line; do dim "        $line"; done
+  exit 1
+fi
+(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17292 "$REAP_BIN" daemon stop >/dev/null 2>&1)
+
+# (c) Again without bun. detectRuntime() prefers bun, so (b) proved this only
+#     for machines that have it — the same asymmetry that let an inlined native
+#     binding work under bun and fail under node for three generations.
+DM_NOBUN="$DM_HOME/nobun"
+mkdir -p "$DM_NOBUN"
+printf '#!/bin/sh\nexit 127\n' > "$DM_NOBUN/bun"
+chmod +x "$DM_NOBUN/bun"
+
+DM_NAMED_NODE=$(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17291 \
+  PATH="$DM_NOBUN:$PATH" "$REAP_BIN" daemon status 2>&1)
+if ! grep -q '"status": *"ok"' <<< "$DM_NAMED_NODE"; then
+  red "  FAIL  the named location works with bun but not without it"
+  echo
+  echo "$DM_NAMED_NODE" | head -8 | while IFS= read -r line; do dim "        $line"; done
+  exit 1
+fi
+(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17291 PATH="$DM_NOBUN:$PATH" \
+  "$REAP_BIN" daemon stop >/dev/null 2>&1)
+
+# (d) The environment variable, with nothing in the config. This is the channel
+#     for a CI job or a one-off command, and it has to work on its own — not
+#     merely as an override of a config entry that is already correct.
+cp "$PROJECT/.reap/config.yml.orig3" "$PROJECT/.reap/config.yml"
+printf '\ndaemon: true\n' >> "$PROJECT/.reap/config.yml"
+DM_ENV_STATUS=$(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17290 \
+  REAP_DAEMON_BIN="$DM_BIN" "$REAP_BIN" daemon status 2>&1)
+if ! grep -q '"status": *"ok"' <<< "$DM_ENV_STATUS"; then
+  red "  FAIL  REAP_DAEMON_BIN did not get the daemon started"
+  echo
+  echo "$DM_ENV_STATUS" | head -8 | while IFS= read -r line; do dim "        $line"; done
+  exit 1
+fi
+if ! grep -q '"binSource": *"env"' <<< "$DM_ENV_STATUS"; then
+  red "  FAIL  the daemon started, but reap does not report using REAP_DAEMON_BIN"
+  echo
+  echo "$DM_ENV_STATUS" | head -12 | while IFS= read -r line; do dim "        $line"; done
+  exit 1
+fi
+(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17290 REAP_DAEMON_BIN="$DM_BIN" \
+  "$REAP_BIN" daemon stop >/dev/null 2>&1)
+
+# ...and the fourth corner. The two channels differ only in where the string
+# comes from, so this is cheap insurance rather than a suspicion — but the
+# completion criterion says both channels on both runtimes, and three of four
+# is not that. One extra spawn.
+DM_ENV_NODE=$(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17289 \
+  PATH="$DM_NOBUN:$PATH" REAP_DAEMON_BIN="$DM_BIN" "$REAP_BIN" daemon status 2>&1)
+if ! grep -q '"status": *"ok"' <<< "$DM_ENV_NODE"; then
+  red "  FAIL  REAP_DAEMON_BIN works with bun but not without it"
+  echo
+  echo "$DM_ENV_NODE" | head -8 | while IFS= read -r line; do dim "        $line"; done
+  exit 1
+fi
+(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17289 PATH="$DM_NOBUN:$PATH" \
+  REAP_DAEMON_BIN="$DM_BIN" "$REAP_BIN" daemon stop >/dev/null 2>&1)
+
+# (e) A location that holds nothing must be named, not swallowed.
+#
+#     reap goes on searching after a miss, because config.yml is committed and a
+#     path that is right on one machine may be absent on the next. That silence
+#     would be the same defect one level along: an instruction followed to
+#     nowhere, with no word about it.
+cp "$PROJECT/.reap/config.yml.orig3" "$PROJECT/.reap/config.yml"
+DM_GONE="$DM_HOME/not-a-daemon/dist/index.js"
+printf '\ndaemon: true\ndaemonBin: %s\n' "$DM_GONE" >> "$PROJECT/.reap/config.yml"
+DM_MISS=$(cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" fix --check 2>/dev/null | dm_fix_verdict)
+dm_require_verdict "$DM_MISS" "checking a daemon location that does not exist"
+if ! grep -q "$DM_GONE" <<< "$DM_MISS"; then
+  red "  FAIL  a daemonBin pointing at nothing is not reported"
+  echo
+  dim "        daemonBin: $DM_GONE"
+  echo "$DM_MISS" | while IFS= read -r line; do dim "        $line"; done
+  echo
+  dim "        The path has to appear, or the user is left comparing a generic"
+  dim "        'not installed' against a setting they believe is correct."
+  exit 1
+fi
+
+# (f) The likeliest way to write this setting wrong: naming the package instead
+#     of its entry point. The path exists, so an existence check alone accepts
+#     it — and then reap reports a healthy daemon that cannot start, with every
+#     downstream diagnostic quiet. That is this generation's own defect one
+#     level along, and the person most exposed to it is by definition someone
+#     already unsure where the daemon lives.
+cp "$PROJECT/.reap/config.yml.orig3" "$PROJECT/.reap/config.yml"
+DM_PKGDIR="$DM_INSTALL/node_modules/@c-d-cc/reap-daemon"
+printf '\ndaemon: true\ndaemonBin: %s\n' "$DM_PKGDIR" >> "$PROJECT/.reap/config.yml"
+DM_DIR=$(cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" fix --check 2>/dev/null | dm_fix_verdict)
+dm_require_verdict "$DM_DIR" "checking a daemon location that is a directory"
+if ! grep -q "$DM_PKGDIR" <<< "$DM_DIR"; then
+  red "  FAIL  a daemonBin naming a directory is accepted in silence"
+  echo
+  dim "        daemonBin: $DM_PKGDIR"
+  echo "$DM_DIR" | while IFS= read -r line; do dim "        $line"; done
+  echo
+  dim "        A directory cannot be spawned. Treating it as found reports a"
+  dim "        working daemon to a user who has none, and hands the agent a"
+  dim "        query protocol for a port nothing is listening on."
+  exit 1
+fi
+
+cp "$PROJECT/.reap/config.yml.orig3" "$PROJECT/.reap/config.yml"
+rm -f "$PROJECT/.reap/config.yml.orig3"
+green "  ok    a named daemon location is used, launched and verifiable — and a bad one is named"
 
 # 5e. The seam the split created: does an installed reap find an installed
 #     daemon? Everything above tests the two packages apart — 5a that reap does

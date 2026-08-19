@@ -1,6 +1,7 @@
 import { emitOutput, emitError } from "../../../core/output.js";
 import { daemonRequest, findProjectId, resolveDaemonAvailability } from "./client.js";
 import { createPaths } from "../../../core/paths.js";
+import type { DaemonAvailability } from "../../../types/index.js";
 import { fileExists } from "../../../core/fs.js";
 
 export async function execute(
@@ -32,10 +33,12 @@ export async function execute(
 function requireUsableDaemon(): void {
   const avail = resolveDaemonAvailability();
   if (!avail.installed) {
-    emitError(
-      "daemon",
-      `The daemon is not installed. Install it with: ${avail.installCommand}`,
-    );
+    // A location that was named and turned out to be empty is the whole story;
+    // repeating the generic advice to name one would talk past the user.
+    const detail = avail.explicitMiss
+      ? `${avail.explicitMiss.label} points at ${avail.explicitMiss.path}, but there is no file there. Install it with: ${avail.installCommand}`
+      : `${avail.locateHint} Otherwise install it with: ${avail.installCommand}`;
+    emitError("daemon", `The daemon is not installed. ${detail}`);
   }
   if (avail.outdated) {
     emitError(
@@ -76,15 +79,40 @@ async function statusCmd(): Promise<void> {
           projects: d.projectCount,
           runningVersion: running,
           installedVersion: avail.version,
+          // Which daemon, and how reap arrived at it. Someone who has just set
+          // `daemonBin` to work around a failed lookup has no other way to
+          // confirm the setting took effect — and a workaround you cannot
+          // verify is barely a workaround.
+          bin: avail.bin,
+          binSource: avail.source,
+          ...(avail.explicitMiss ? { explicitMiss: avail.explicitMiss } : {}),
         },
         message: `Daemon running (pid: ${d.pid}, uptime: ${uptimeMin}m, idle: ${idleMin}m, ${d.projectCount} projects, running ${running} / installed ${avail.version ?? "unknown"})`,
       });
     } else {
-      emitError("daemon", "Daemon is not running");
+      emitError("daemon", notRunningMessage(avail));
     }
   } catch {
-    emitError("daemon", "Daemon is not running");
+    emitError("daemon", notRunningMessage(avail));
   }
+}
+
+/**
+ * "Not running" — plus which daemon reap was going to run.
+ *
+ * A location REAP was pointed at is taken at its word: it is checked for being
+ * a file and nothing more, because demanding a matching manifest would reject
+ * the legitimate case of naming a source checkout. The cost is that a path to
+ * some *other* file resolves happily and then fails to start, and without this
+ * the only thing said about it is "not running" — the user's own setting, the
+ * thing most likely to be wrong, would go unmentioned.
+ */
+function notRunningMessage(avail: DaemonAvailability): string {
+  if (avail.bin === null) return "Daemon is not running";
+  const miss = avail.explicitMiss
+    ? ` ${avail.explicitMiss.label} points at ${avail.explicitMiss.path}, where there is no file.`
+    : "";
+  return `Daemon is not running. REAP would start ${avail.bin} (from ${avail.source}).${miss}`;
 }
 
 async function stopCmd(): Promise<void> {

@@ -1,10 +1,16 @@
 import { spawn, execSync } from "child_process";
-import { existsSync, readFileSync } from "fs";
-import { join, dirname } from "path";
+import { existsSync, readFileSync, statSync } from "fs";
+import { join, dirname, isAbsolute, resolve } from "path";
 import { fileURLToPath } from "url";
 import { homedir } from "os";
+import YAML from "yaml";
 import { semverGte } from "../check-version.js";
-import type { DaemonAvailability } from "../../../types/index.js";
+import type {
+  DaemonAvailability,
+  DaemonBinSource,
+  ExplicitDaemonBin,
+  ReapConfig,
+} from "../../../types/index.js";
 
 const DAEMON_ROOT = join(homedir(), ".reap", "daemon");
 
@@ -13,6 +19,36 @@ export const DAEMON_PACKAGE = "@c-d-cc/reap-daemon";
 
 /** What a user is told to run when it is missing or too old. */
 export const DAEMON_INSTALL_COMMAND = `npm i -g ${DAEMON_PACKAGE}`;
+
+/** Environment variable naming the daemon entry point. */
+export const DAEMON_BIN_ENV = "REAP_DAEMON_BIN";
+
+/** The config key that does the same thing, persistently. */
+export const DAEMON_BIN_CONFIG_KEY = "daemonBin";
+
+/**
+ * What to say to someone who has installed the daemon and is still being told
+ * they have not.
+ *
+ * Carried on `DaemonAvailability` for the same reason `installCommand` is: the
+ * three places that phrase this — `reap fix --check`, `reap daemon status` and
+ * the agent prompt — live in `core` and `cli`, and only one of them may own the
+ * wording (gen-076 pattern).
+ *
+ * Deliberately phrased as a condition rather than a list of package managers.
+ * gen-083 recorded that pnpm's default store and Yarn PnP make resolution fail
+ * "in principle"; gen-084 installed both and measured otherwise — pnpm isolates
+ * by symlink layout, not by replacing the resolver, and PnP's default fallback
+ * admits the top-level project's dependencies. What actually fails is reap and
+ * the daemon landing in different resolution roots, whichever manager put them
+ * there. Naming the managers would have shipped a false statement.
+ */
+export const DAEMON_LOCATE_HINT =
+  `If it is installed and REAP still cannot find it, the two are in different ` +
+  `resolution roots (a global reap with a project-local daemon, two prefixes, ` +
+  `or a switched Node version). Point REAP at it: set ` +
+  `'${DAEMON_BIN_CONFIG_KEY}: <path>/dist/index.js' in .reap/config.yml, or ` +
+  `export ${DAEMON_BIN_ENV}=<path>/dist/index.js.`;
 
 /**
  * The oldest daemon this reap build will talk to.
@@ -112,25 +148,136 @@ function moduleDir(): string {
   return dirname(fileURLToPath(import.meta.url));
 }
 
-/** Seams so the three outcomes below can be exercised without a real install. */
+/**
+ * Is there a file at this path — not a directory, not nothing.
+ *
+ * Only named locations are held to "file": the entry point is handed straight
+ * to `spawn`, so a directory can never be one, and the likeliest way to write
+ * this setting wrong is to name the package rather than its entry point
+ * (`.../reap-daemon` instead of `.../reap-daemon/dist/index.js`). Accepting
+ * that would set `installed: true` on something that cannot start, and every
+ * diagnostic downstream would go quiet — the exact silence this whole change
+ * exists to end, one level along.
+ */
+function isFile(path: string): boolean {
+  try {
+    return statSync(path).isFile();
+  } catch {
+    return false;
+  }
+}
+
+/** Seams so the outcomes below can be exercised without a real install. */
 export interface DaemonResolveDeps {
   resolve?: (id: string) => string;
   exists?: (path: string) => boolean;
+  /**
+   * Existence check for a named location — a stricter question than `exists`,
+   * see `isFile`.
+   *
+   * Falls back to `exists` when only that is injected: a test that has already
+   * described what its fake world contains should not have to describe it
+   * twice, and the file-versus-directory distinction is opted into by the tests
+   * that are about it.
+   */
+  existsAsFile?: (path: string) => boolean;
   /** Directory this module is running from. See `moduleDir`. */
   here?: string;
   readVersion?: (packageJsonPath: string) => string | null;
   readName?: (packageJsonPath: string) => string | null;
+  /**
+   * Locations the user named, highest priority first.
+   *
+   * Injected rather than read, so a test never depends on the environment or
+   * working directory it happens to run in. Leaving that to chance is how an
+   * unset variable and an honoured one became indistinguishable in gen-082;
+   * pass `[]` to assert the automatic search on its own.
+   */
+  explicit?: ExplicitDaemonBin[];
+}
+
+/** Where the daemon is, how that was decided, and what was pointed at in vain. */
+export interface DaemonLocation {
+  bin: string | null;
+  source: DaemonBinSource | null;
+  explicitMiss: ExplicitDaemonBin | null;
 }
 
 /**
- * Locate the daemon entry point, distinguishing three outcomes.
+ * Read the locations the user named, in priority order.
  *
- *   1. installed  — the package resolves normally
- *   2. checkout   — no package, but this reap is running from its own repo,
+ * The environment variable comes first because it is the temporary one — a CI
+ * job or a single command overriding what the committed config says, the same
+ * relationship `REAP_DAEMON_PORT` already has with its default.
+ *
+ * `~` is expanded and relative paths are resolved against the project root,
+ * because both are what people actually write in a YAML file. Blank values are
+ * treated as unset rather than as a path to nowhere: `REAP_DAEMON_BIN=` in a
+ * shell profile means "I am not using this", not "look in the empty string".
+ *
+ * Both inputs are parameters rather than reads of `process` so callers — tests
+ * above all — decide what this sees.
+ */
+export function readExplicitDaemonBins(
+  env: NodeJS.ProcessEnv = process.env,
+  cwd: string = process.cwd(),
+): ExplicitDaemonBin[] {
+  const found: ExplicitDaemonBin[] = [];
+
+  const fromEnv = normalizeBinPath(env[DAEMON_BIN_ENV], cwd);
+  if (fromEnv) found.push({ source: "env", path: fromEnv, label: DAEMON_BIN_ENV });
+
+  const fromConfig = normalizeBinPath(readConfigDaemonBin(cwd), cwd);
+  if (fromConfig) {
+    found.push({ source: "config", path: fromConfig, label: `.reap/config.yml '${DAEMON_BIN_CONFIG_KEY}'` });
+  }
+
+  return found;
+}
+
+function normalizeBinPath(raw: string | undefined | null, cwd: string): string | null {
+  if (typeof raw !== "string") return null;
+  const trimmed = raw.trim();
+  if (trimmed === "") return null;
+  const expanded =
+    trimmed === "~" || trimmed.startsWith("~/")
+      ? join(homedir(), trimmed.slice(1))
+      : trimmed;
+  return isAbsolute(expanded) ? expanded : resolve(cwd, expanded);
+}
+
+/**
+ * Read `daemonBin` out of the project config.
+ *
+ * Synchronous and cwd-relative on purpose. `reap fix --check` must be able to
+ * answer without starting anything, and every command in this CLI already
+ * treats the working directory as the project root (`createPaths(process.cwd())`)
+ * without walking upwards — doing something different here would make the
+ * daemon the one thing that finds a project by a rule of its own.
+ *
+ * Any failure is silence. A config that will not parse is a problem the rest of
+ * REAP reports far better than a daemon lookup could.
+ */
+function readConfigDaemonBin(cwd: string): string | null {
+  try {
+    const raw = readFileSync(join(cwd, ".reap", "config.yml"), "utf-8");
+    const value = (YAML.parse(raw) as ReapConfig | null)?.daemonBin;
+    return typeof value === "string" ? value : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Locate the daemon entry point, distinguishing four outcomes.
+ *
+ *   1. explicit   — a location the user named, and something is there
+ *   2. installed  — the package resolves normally
+ *   3. checkout   — no package, but this reap is running from its own repo,
  *                   where daemon/ sits beside it
- *   3. missing    — null
+ *   4. missing    — null
  *
- * The third used to be unreachable: the fallback returned a path unconditionally
+ * The last used to be unreachable: the fallback returned a path unconditionally
  * and callers treated a failed spawn as "daemon is down". Worse, that path was
  * wrong in both layouts — three levels up lands on src/ from the sources and
  * above the package from the bundle, so it never pointed at anything. Only the
@@ -140,14 +287,49 @@ export interface DaemonResolveDeps {
  * Both checkout candidates are tried rather than branched on, because bundling
  * collapses every module into dist/cli/index.js and the directory this file
  * appears to live in changes with it.
+ *
+ * The explicit step (gen-084) exists because steps 2 and 3 both look outward
+ * from reap's own location, and the daemon is deliberately not a dependency —
+ * so when the two are installed into different resolution roots there is
+ * nothing left for reap to follow, and the user was being told to install what
+ * they already had.
+ *
+ * A named location is checked for existence but not for identity, unlike the
+ * checkout candidates. That check is there because `daemon` is a real package
+ * name on npm and both candidates end in `daemon/dist`, so reap could otherwise
+ * launch a stranger by accident. Nothing is accidental about a path someone
+ * wrote down, and demanding a matching manifest would reject the legitimate
+ * case of pointing at a source checkout.
+ *
+ * A named location that holds nothing does not stop the search. `config.yml` is
+ * committed, so a path that is right on one machine may be absent on the next,
+ * and refusing to look further would break a machine where the daemon is
+ * installed perfectly well. It is reported instead — see `explicitMiss`.
  */
-export function resolveDaemonBin(deps: DaemonResolveDeps = {}): string | null {
+export function locateDaemon(deps: DaemonResolveDeps = {}): DaemonLocation {
   const resolveId = deps.resolve ?? ((id: string) => require.resolve(id));
   const fileExists = deps.exists ?? existsSync;
   const here = deps.here ?? moduleDir();
+  const explicit = deps.explicit ?? readExplicitDaemonBins();
+  const namedExists = deps.existsAsFile ?? deps.exists ?? isFile;
+
+  let explicitMiss: ExplicitDaemonBin | null = null;
+  for (const candidate of explicit) {
+    if (namedExists(candidate.path)) {
+      // A miss recorded before this one still travels with the answer. It came
+      // from a higher-priority channel, so it is a stale instruction reap chose
+      // not to follow — and dropping it because a lower-priority location saved
+      // the day is precisely how a setting rots unnoticed.
+      return { bin: candidate.path, source: candidate.source, explicitMiss };
+    }
+    // Only the first miss is kept: it is the one whose instruction reap was
+    // meant to follow, and a second line about a lower-priority fallback would
+    // bury it.
+    explicitMiss ??= candidate;
+  }
 
   try {
-    return resolveId(`${DAEMON_PACKAGE}/dist/index.js`);
+    return { bin: resolveId(`${DAEMON_PACKAGE}/dist/index.js`), source: "package", explicitMiss };
   } catch {
     // fall through to the checkout candidates
   }
@@ -161,13 +343,19 @@ export function resolveDaemonBin(deps: DaemonResolveDeps = {}): string | null {
   const readName = deps.readName ?? readPackageName;
   for (const candidate of candidates) {
     if (!fileExists(candidate)) continue;
-    // `daemon` is a real name on npm, and both candidates end in daemon/dist —
-    // so a package installed under that name would otherwise be launched as if
-    // it were ours. Confirm the manifest beside it says who it is.
     if (readName(join(dirname(candidate), "..", "package.json")) !== DAEMON_PACKAGE) continue;
-    return candidate;
+    return { bin: candidate, source: "checkout", explicitMiss };
   }
-  return null;
+  return { bin: null, source: null, explicitMiss };
+}
+
+/**
+ * Just the path. Kept as its own export because the spawn path wants nothing
+ * else, and because narrowing an existing signature would have meant touching
+ * every caller for no gain.
+ */
+export function resolveDaemonBin(deps: DaemonResolveDeps = {}): string | null {
+  return locateDaemon(deps).bin;
 }
 
 function readPackageName(packageJsonPath: string): string | null {
@@ -200,7 +388,7 @@ function readPackageVersion(packageJsonPath: string): string | null {
  * version alongside this one, where a process is being contacted anyway.
  */
 export function resolveDaemonAvailability(deps: DaemonResolveDeps = {}): DaemonAvailability {
-  const bin = resolveDaemonBin(deps);
+  const { bin, source, explicitMiss } = locateDaemon(deps);
   const base: DaemonAvailability = {
     installed: bin !== null,
     bin,
@@ -209,6 +397,9 @@ export function resolveDaemonAvailability(deps: DaemonResolveDeps = {}): DaemonA
     outdated: false,
     packageName: DAEMON_PACKAGE,
     installCommand: DAEMON_INSTALL_COMMAND,
+    source,
+    explicitMiss,
+    locateHint: DAEMON_LOCATE_HINT,
   };
   if (bin === null) return base;
 

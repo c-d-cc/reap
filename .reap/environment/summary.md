@@ -87,7 +87,7 @@ src/
 │       ├── update.ts           — 프로젝트 업데이트 (v0.15→migrate 위임, v0.16→config backfill/디렉토리 보충/CLAUDE.md 보수, --post-upgrade 지원)
 │       └── daemon/             — daemon 서브커맨드
 │           ├── index.ts        — daemon 커맨드 라우팅 (start, stop, status, query)
-│           ├── client.ts       — daemon HTTP 클라이언트 (auto-spawn)
+│           ├── client.ts       — daemon HTTP 클라이언트 (auto-spawn) + **위치 결정의 단일 소유자**: `locateDaemon` 이 env > config > package > checkout 순으로 찾고 `resolveDaemonBin` 은 `.bin` 만 돌려주는 래퍼
 │           └── lifecycle.ts    — generation 시작/완료 시 자동 인덱싱 훅
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/                   — AI client 어댑터 (dispatcher + module 패턴)
@@ -180,8 +180,9 @@ daemon/                            — 별도 npm 패키지 (@c-d-cc/reap-daemon
 - `EvaluatorConcern` — `{ stage: "validation" | "fitness", severity: "low" | "high", summary: string, recordedAt: string }`. Validation→fitness signalling channel. severity는 binary (Goodhart 회피). high = cruise auto-abort 트리거. `GenerationState.evaluatorConcerns?: EvaluatorConcern[]` 로 노출.
 - `ReapConfig.daemon?: boolean` — opt-in flag. 미설정/false 시 4 lifecycle 진입점 (start/learning/implementation/completion) 의 daemon trigger 게이트 비활성. true 시 dynamic import 후 `ensureRegistered` + `triggerIndexing` 호출. 기존 사용자 회귀 0 보장.
 - daemon 연동 타입/신호 — `ProjectEntry.lastIndexedCommit?: string \| null` (마지막 인덱스의 git HEAD; agent 가 현재 HEAD 와 비교해 staleness 판단). `ensureRegistered`/`triggerIndexing` 은 `Promise<boolean>` 을 반환하되 실패는 silent — caller 가 시그널만 활용한다. learning emit 이 `daemonEnabled` (항상) + `daemonReady` (daemon=true 시에만) 를 노출해 test/agent 가 config 분기를 검증한다.
-- `DaemonAvailability` — `{ installed, bin, version, required, outdated, packageName, installCommand }`. `resolveDaemonAvailability()`(`daemon/client.ts`)가 소유하고 `core`(integrity)·`cli`(daemon/fix)·prompt 가 **주입받는다** — `core` 는 `cli` 를 import 하지 않는다. **미설치와 버전 미달은 별개 상태**이며 메시지도 다르다. 버전을 읽을 수 없는 경우는 `outdated` 로 치지 않는다
+- `DaemonAvailability` — `{ installed, bin, version, required, outdated, packageName, installCommand, source, explicitMiss, locateHint }`. `resolveDaemonAvailability()`(`daemon/client.ts`)가 소유하고 `core`(integrity)·`cli`(daemon/fix)·prompt 가 **주입받는다** — `core` 는 `cli` 를 import 하지 않는다. **미설치와 버전 미달은 별개 상태**이며 메시지도 다르다. 버전을 읽을 수 없는 경우는 `outdated` 로 치지 않는다. `locateHint` 와 `ExplicitDaemonBin.label` 도 값에 실려 이동한다 — 그래야 `core` 가 환경변수명·config 키를 철자하지 않는다
 - `MIN_DAEMON_VERSION` (`daemon/client.ts`) — reap 이 요구하는 daemon 최소 버전. **단일 소유자**이며 문서에는 숫자를 적지 않는다 (reap 이 메시지로 알려준다). 판정 근거는 **설치된 패키지의 버전**이다 — `fix --check` 가 프로세스를 띄우면 안 되고, 너무 낡은 daemon 은 `/health` 조차 제대로 답하지 못할 수 있다. `/health` 의 `version` 은 **실행 중인 것**을 알려주는 별개 신호로 `daemon status` 가 나란히 표시한다
+- `ReapConfig.daemonBin?: string` + `REAP_DAEMON_BIN` (gen-084) — daemon 위치 명시 지정. `readExplicitDaemonBins(env, cwd)` 가 둘을 읽고(env 우선), `~` 전개 + 프로젝트 루트 기준 상대경로 해석, 공백은 미설정 취급. **명시 경로에만 `isFile` 을 건다** — 디렉토리를 받아들이면 `installed: true` 가 되고 모든 진단이 조용해진다(가장 흔한 오타가 `/dist/index.js` 누락이다). 신원 검사는 하지 않는다 — 사람이 지목한 경로에 "우연히 남의 패키지"는 없고, 소스 체크아웃 지목을 막게 된다. **빗나가도 탐색을 멈추지 않고 `explicitMiss` 로 보고**한다: `config.yml` 은 커밋되므로 한 머신에서 맞는 경로가 다른 머신에는 없을 수 있다. `daemon status` 가 `bin`/`binSource` 를 보고해 설정 반영 여부를 확인할 수 있다(단 **띄울 대상**이지 실행 중인 것이 아니다 — 이미 떠 있으면 재사용된다). `VALID_CONFIG_FIELDS`(`update.ts`)에 반드시 있어야 한다 — 없으면 `reap update` 가 조용히 지운다
 - `REAP_DAEMON_PORT` env var — daemon binary(`daemon/src/index.ts:resolvePort()`) 와 CLI client(`daemon/client.ts:resolvePort()` + call-time `getBaseUrl()`) 양쪽이 인식. 미설정 시 17224. e2e 는 17225 로 격리한다.
 - `ReapConfig.lastMigratedVersion?: string` — 이 프로젝트가 어디까지 migration 됐는지 추적. 미설정 시 "0.0.0" fallback. `reap update --mark-migrated` 가 현재 패키지 버전으로 갱신. **CONFIG_DEFAULTS에 포함 금지** — optional tracking 필드이며 spurious config diff 유발.
 - `PendingMigration` — `{ version: string, instructions: string }`. `detectPendingMigrations` 반환 타입. `reap update` context + load-context SessionStart + dump-state.md sync 3곳에서 동일 데이터 emit.
@@ -221,7 +222,7 @@ daemon 절(§ 5)은 **소스 트리를 보지 않는다** — 소스 트리에�
 - **§ 5e 가 두 패키지를 잇는다** — 나머지 절은 둘을 따로 본다. "reap 이 안 싣는다" · "없으면 알려준다" · "단독으로 동작한다" 는 **사용자가 둘 다 설치하고도 아무것도 못 얻는 세계에서 전부 참**이다. 5e 만 같은 prefix 에 설치해 reap 이 찾고 spawn 하는지 확인하며, **bun 이 있을 때와 없을 때 양쪽**을 본다 (`detectRuntime()` 이 bun 을 선호하므로 한 번만으로는 bun 없는 사용자의 조합이 통째로 빠진다)
 - **§ 5a-bis 는 번들에 빌드 머신 경로가 없는지 본다** — `bun build` 가 전역 `__dirname` 을 **빌드 시점 리터럴로 치환**하므로, 그것을 쓴 코드는 배포본에서 빌드한 사람의 체크아웃을 가리킨다. 행동 assertion 은 이것을 **우연히만** 잡는다(daemon 이 정식 설치되면 그 경로를 조회하지 않으므로 빌드한 머신 밖에서는 통과한다)
 - **부재를 주장하는 assertion 은 스스로를 먼저 증명한다** — 5b 는 경고의 존재를, 5e 는 부재를 주장한다. 후자는 크래시·비정상 출력·필드명 변경도 "부재"로 읽으므로 `status: "ok"` 와 숫자 `warningCount` 를 먼저 요구한다. `grep -q` 로 없음을 확인하는 자리는 전부 같은 취약성을 갖는다
-- **알려진 파손**: strict resolver(pnpm 기본 store, Yarn PnP)는 **선언되지 않은 패키지 접근을 차단**하므로 daemon resolve 가 원리적으로 실패한다. 그 사용자는 정상 설치하고도 영구히 "설치하라"는 안내를 받고 5e 는 seam 이 건강하다고 보고한다. 우회(`REAP_DAEMON_BIN`/`daemonBin`)는 backlog
+- **§ 5d-bis 는 명시 경로가 실제로 구제하는지 본다** (gen-084). 5d 와 5e **사이**에서만 물을 수 있는 질문이다 — 그 지점에서 daemon 은 디스크에 있고(5c) 동작하며(5d) reap 은 못 본다(5b). 5e 가 daemon 을 찾을 수 있는 곳에 설치하고 나면 성립하지 않는다. 나갈 때 config 를 원복하므로 5e 가 남은 설정 때문에 엉뚱한 이유로 통과하지 않는다. 두 채널(`daemonBin` / `REAP_DAEMON_BIN`) × 두 런타임(bun / bun 은닉) 네 조합 + 빈 경로 + 디렉토리
 - **비용 미측정**: 로컬(macOS, warm cache) 설치 ~2초만 실측이고 **`better-sqlite3` 가 5c·5e 에서 두 번 설치된다**. 리눅스 러너가 prebuilt 를 못 받으면 소스 컴파일이 두 번 일어난다. 그래서 절을 독립적으로 유지한다 — 후퇴가 필요해지면 release 워크플로로 옮기는 것이 호출 한 줄이다. **끄는 환경변수는 두지 않는다**: 아직 발생하지 않은 비용을 위해 게이트를 미리 무디게 하는 것이고, 꺼진 채로도 통과를 보고하게 된다. 게이트는 `daemon/dist` 를 지우고 재빌드하므로 **로컬 실행이 작업 트리를 건드리는 유일한 지점**이다 (gitignore 대상이라 무해)
 
 ### 자기진단은 두 클라이언트를 본다 (gen-082)

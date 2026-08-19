@@ -726,9 +726,25 @@ export function checkDaemonAvailability(
 ): IntegrityResult {
   const warnings: string[] = [];
   if (daemonEnabled && availability) {
-    if (!availability.installed) {
+    // Reported before the verdict and regardless of it. An instruction that was
+    // followed to an empty path is a fact about this setup whether or not the
+    // search went on to succeed, and it is the finding the user can act on.
+    const miss = availability.explicitMiss;
+    if (miss) {
       warnings.push(
-        `config.yml sets 'daemon: true' but ${availability.packageName} is not installed. Install it with: ${availability.installCommand}`,
+        `${miss.label} points at ${miss.path}, but there is no file there. REAP searched for the daemon the usual way instead.`,
+      );
+    }
+    if (!availability.installed) {
+      // The locate hint is withheld when a location was already named: it would
+      // tell someone who has just been told their path is empty to supply a
+      // path. The miss warning above is the actionable one in that case.
+      //
+      // The command goes last either way, so nothing follows it that could be
+      // mistaken for part of it.
+      const hint = miss ? "Install it with" : `${availability.locateHint} Otherwise install it with`;
+      warnings.push(
+        `config.yml sets 'daemon: true' but ${availability.packageName} is not installed. ${hint}: ${availability.installCommand}`,
       );
     } else if (availability.outdated) {
       warnings.push(

@@ -1,13 +1,25 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
 createdAt: 2026-08-19T02:03:21.097Z
+consumedBy: gen-084-326c11
+consumedAt: 2026-08-19T02:29:38.837Z
 ---
 
 # daemon 위치를 명시 지정하는 우회 경로 — strict resolver(pnpm, Yarn PnP)에서 daemon 이 원리적으로 resolve 되지 않는다
 
 > **0.17.5 릴리즈 하드 선행조건 (유저 결정 2026-08-19).** gen-083 이 pnpm / Yarn PnP 사용자에게는 상황을 **더 나쁘게** 만들었으므로, 이것을 해소하기 전에 0.17.5 를 내지 않는다. 순서: gen-083(완료) → **본 backlog** → `daemon-v0.2.0` 발행 → 0.17.5.
+
+> **[gen-084 정정] 아래 Problem 절의 핵심 주장은 실측으로 반증되었다.**
+>
+> pnpm 기본 store(프로젝트 로컬·전역)와 Yarn PnP 는 **daemon 을 정상적으로 조회한다**. pnpm 의 격리는 resolver 교체가 아니라 심링크 배치이고(상향 탐색이 root `node_modules` 에 닿는다), PnP 의 기본 `pnpFallbackMode: dependencies-only` 는 최상위 프로젝트의 의존을 허용한다.
+>
+> **실제로 깨지는 조건은 "reap 과 daemon 이 서로 다른 resolution root 에 설치되는 것"** 이다 — 전역 reap + 프로젝트 로컬 daemon, 서로 다른 prefix, Node 버전 전환. 아래 표의 2·3행이 그것이고 실측으로 재현된다.
+>
+> 이 재규정은 문제를 축소하지 않고 **확대**한다. 특정 매니저 사용자만의 이야기가 아니라 평범한 설치 조합의 문제다. 해법(명시 경로)은 그대로이며 gen-084 에서 구현됐다. 문서는 매니저 이름이 아니라 **조건**으로 서술한다 — 매니저를 파손 사례로 적으면 거짓 서술이 된다.
+>
+> 측정 절차는 `lineage` 의 gen-084 validation artifact § 측정 절차 참조.
 
 ## Problem
 

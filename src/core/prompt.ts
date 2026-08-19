@@ -241,7 +241,20 @@ export function buildBasePrompt(
       `\`daemon: true\` is set, but the daemon package is not installed, so there is nothing listening. Do NOT attempt daemon queries — use Read/Grep/Glob as normal.`,
     );
     lines.push("");
-    lines.push(`Tell the user they can install it with: \`${daemonAvailability.installCommand}\``);
+    // The location hint is only useful to someone who has not already given a
+    // location. When they have and it was empty, say that instead — telling
+    // them to point REAP at the daemon would be answering a question they
+    // already answered.
+    if (daemonAvailability.explicitMiss) {
+      const miss = daemonAvailability.explicitMiss;
+      lines.push(
+        `Note: ${miss.label} points at \`${miss.path}\`, but there is no file there. Tell the user — that path is likely the whole problem.`,
+      );
+    } else {
+      lines.push(`Tell the user: ${daemonAvailability.locateHint}`);
+    }
+    lines.push("");
+    lines.push(`If it is genuinely absent, it installs with: \`${daemonAvailability.installCommand}\``);
     lines.push("");
   } else if (config?.daemon === true && daemonAvailability?.outdated) {
     lines.push("## Code Intelligence (Daemon) — installed version too old");

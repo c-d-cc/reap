@@ -299,6 +299,14 @@ When enabled, REAP automatically:
 - re-indexes at key lifecycle moments (learning, implementation complete, completion commit),
 - includes a "Code Intelligence" section in the builder/evaluator prompt with query examples and a staleness check protocol.
 
+**Installed but not found?** REAP looks for the daemon from its own location, and the daemon is deliberately not a dependency of REAP — so the two find each other only when they share a resolution root. Installing both globally with the same package manager arranges that; a global REAP with a project-local daemon, two different prefixes, or a Node version switch does not. Point REAP at it:
+
+```yaml
+daemonBin: /usr/local/lib/node_modules/@c-d-cc/reap-daemon/dist/index.js
+```
+
+`REAP_DAEMON_BIN` does the same for one command or a CI job and takes priority. Relative paths resolve against the project root and `~` is expanded. `reap daemon status` reports `bin` and `binSource`, so you can confirm REAP is reading the setting — that is what it *would* start, since a daemon already running is reused.
+
 If `daemon: true` is set with no daemon installed — or one older than your REAP requires — REAP says so instead of failing silently: `reap daemon status` and `reap fix --check` report it and print the command to run, and the agent prompt drops the query protocol so the agent does not poll a dead port. **The lifecycle is never blocked** either way.
 
 With the package installed, the daemon starts automatically on first use and shuts itself down after 30 minutes of idle time. It can also be managed explicitly:
@@ -354,6 +362,7 @@ agentClient: claude-code # AI agent client
 # cruiseCount: 1/5             # Present = cruise mode (current/total)
 # evaluator: true              # Opt-in: launch reap-evaluate during validation
 # daemon: true                 # Opt-in: local code-intelligence daemon
+# daemonBin: <path>/dist/index.js  # Only if REAP cannot find an installed daemon
 ```
 
 Key settings:

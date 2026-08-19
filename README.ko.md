@@ -288,6 +288,14 @@ daemon: true   # 기본값: false
 - 주요 lifecycle 시점(learning, implementation 완료, completion commit)에 재인덱싱하며,
 - 빌더/evaluator 프롬프트에 쿼리 예시와 staleness 확인 프로토콜을 포함한 "Code Intelligence" 섹션을 추가합니다.
 
+**설치했는데 못 찾는다면?** REAP는 자기 위치를 기준으로 데몬을 찾고, 데몬은 의도적으로 REAP의 의존 패키지가 아닙니다 — 따라서 둘은 **같은 resolution root 를 공유할 때만** 서로를 찾습니다. 같은 패키지 매니저로 둘 다 전역 설치하면 그 조건이 충족되지만, 전역 REAP + 프로젝트 로컬 데몬, 서로 다른 prefix, Node 버전 전환 후에는 충족되지 않습니다. 이럴 때는 위치를 직접 알려주세요:
+
+```yaml
+daemonBin: /usr/local/lib/node_modules/@c-d-cc/reap-daemon/dist/index.js
+```
+
+한 번의 명령이나 CI 작업에는 `REAP_DAEMON_BIN` 을 쓸 수 있고 이쪽이 우선합니다. 상대 경로는 프로젝트 루트 기준으로 해석되고 `~` 는 홈으로 전개됩니다. `reap daemon status` 가 `bin` 과 `binSource` 를 보고하므로 REAP 이 그 설정을 읽고 있는지 확인할 수 있습니다 — 이것은 REAP 이 **띄울** 대상이며, 이미 떠 있는 데몬은 출처와 무관하게 재사용됩니다.
+
 `daemon: true` 인데 데몬이 설치되어 있지 않거나 REAP가 요구하는 버전보다 낡은 경우, REAP는 조용히 넘어가지 않고 그렇게 말합니다 — `reap daemon status` 와 `reap fix --check` 가 이를 보고하고 실행할 명령을 제시하며, 에이전트 프롬프트에서 질의 프로토콜이 빠져 죽은 포트에 요청을 보내지 않습니다. 어느 경우든 **lifecycle 은 절대 막히지 않습니다**.
 
 패키지를 설치한 뒤에는 데몬이 첫 사용 시 자동으로 시작되고 30분 유휴 후 자동 종료됩니다. 명시적으로 관리할 수도 있습니다:
@@ -343,6 +351,7 @@ agentClient: claude-code       # AI 에이전트 클라이언트
 # cruiseCount: 1/5             # 존재 시 = cruise 모드 (현재/전체)
 # evaluator: true              # Opt-in: validation/fitness에서 reap-evaluate 실행
 # daemon: true                 # Opt-in: 로컬 코드 인텔리전스 데몬
+# daemonBin: <경로>/dist/index.js  # 설치된 데몬을 REAP가 못 찾을 때만
 ```
 
 주요 설정:

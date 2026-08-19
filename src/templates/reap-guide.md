@@ -409,6 +409,24 @@ daemon: true
 
 When opted in, REAP lifecycle commands (`start`, `learning`, `implementation complete`, `completion commit`) automatically register the project and trigger indexing. When omitted or `false`, daemon-related CLI behaviour is a no-op — byte-identical to projects that have never enabled it.
 
+### Installed, but REAP cannot find it
+
+REAP looks for the daemon from its own location, and the daemon is deliberately not one of reap's dependencies — that is what keeps a native SQLite build and fifteen Tree-sitter grammars out of every install. The two therefore find each other only when they share a resolution root. Installing both globally with the same package manager arranges that; a global reap with a project-local daemon, two different prefixes, or a Node version switch that moves the global prefix does not.
+
+Tell REAP where it is:
+
+```yaml
+# .reap/config.yml
+daemon: true
+daemonBin: /usr/local/lib/node_modules/@c-d-cc/reap-daemon/dist/index.js
+```
+
+Or for a single command or a CI job, `REAP_DAEMON_BIN=/path/to/dist/index.js`, which takes priority over the config.
+
+`reap daemon status` reports `bin` and `binSource` (`env`, `config`, `package`, or `checkout`), so you can confirm REAP is reading the setting rather than assuming it. That is what REAP *would* start: a daemon already running is reused whatever it came from, so `runningVersion` and `installedVersion` are shown side by side for the same reason.
+
+A relative path is resolved against the project root and a leading `~` is expanded, so `daemonBin: ./node_modules/@c-d-cc/reap-daemon/dist/index.js` works as written. A path that holds nothing is reported by name — but it does not stop the search, because `config.yml` is committed and a location that is right on one machine may be absent on the next.
+
 ### When it is enabled but unusable
 
 `daemon: true` with no daemon installed — or one older than this REAP requires — is a mismatch between configuration and environment, not a passing outage, so REAP says so rather than failing silently. **The lifecycle is never blocked**: indexing still fails quietly and every command runs as before. What changes is that asking gets an answer:
