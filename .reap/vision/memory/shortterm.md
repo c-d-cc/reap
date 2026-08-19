@@ -18,11 +18,33 @@
 - 자기진단 게이트 daemon 절 **6 → 10 assertion**. negative test 8건 전부 FAIL 확인 후 복원
 - environment 276줄 / longterm 53줄 — 둘 다 가이드라인 초과. 근본 정리는 처방적 서술을 genome 으로 옮기는 작업이며 미완
 
-### 다음 — 0.17.5 릴리즈가 열렸다
+### 다음 — 0.17.5 는 npm 토큰 권한 하나에 막혀 있다
 
-**본 세대가 마지막 선행조건이었다.** 남은 것은 `daemon-v0.2.0` **발행**(유저가 태그 push) → 0.17.5.
+**세대 작업은 끝났다.** gen-083/084 는 커밋·push 됐고 reap CI / reap-test 모두 green (unit 523 / e2e 279 / scenario 44 / daemon 130).
 
-`@c-d-cc/reap-daemon` 은 여전히 **404** 인데 문서 7종이 전부 `npm i -g @c-d-cc/reap-daemon` 을 안내한다. **발행 없이 0.17.5 를 내면 결함을 다른 결함으로 바꾸는 것.**
+`daemon-v0.2.0` 태그는 **이미 remote 에 있고** `38ba4e8` 을 가리킨다. **재발행 시 태그를 다시 밀 필요 없다** — `gh run rerun 32226672534` 로 충분하다.
+
+**막힌 지점**: `npm publish` 가 `E404 PUT https://registry.npmjs.org/@c-d-cc%2freap-daemon`. tarball 검사는 전부 통과했고(17 files, 14.3 kB) 실제 발행 호출에서 거부됐다. npm 은 권한 없는 대상의 존재를 숨기려 403 대신 404 를 낸다 — 즉 **패키지가 없어서가 아니라 토큰이 새 패키지를 만들 권한이 없다**는 뜻으로 읽는다. `@c-d-cc` 는 org 이고(`@c-d-cc/reap` maintainer = `hichoi`, 사용자명과 스코프명이 다르다), 기존 토큰은 `@c-d-cc/reap` 발행에는 계속 성공하고 있다.
+
+**유저 조치 대기 (2026-08-19, 유저 외출 중)**: npmjs.com → Access Tokens → `NPM_TOKEN` 의 Packages and scopes 확인. "Only select packages" 면 그것이 원인이며, 스코프 전체(또는 All packages) 쓰기 권한으로 재발급 후 GitHub secret 교체 → workflow 재실행.
+
+**진단은 [추론]이다** — 로컬 npm 이 미로그인(`E401`)이라 토큰 설정을 직접 확인하지 못했다. 다른 원인(org 의 신규 패키지 생성 정책, 2FA)일 여지가 남아 있다.
+
+### 이 세션에서 세대 밖으로 처리한 것 3건
+
+- **remote 를 SSH 로 전환** — HTTPS OAuth 토큰에 `workflow` scope 가 없어 gen-083 의 `release.yml` 변경이 push 거부됐다. SSH 는 scope 개념이 없어 재발하지 않는다
+- **reap-test CI 에 daemon 빌드 추가** (reap-test `ae57a46`) — `daemon/dist/` 가 gitignore 이고 reap 빌드가 만들지 않아 e2e 1건이 러너에서만 red 였다. `daemon/dist/index.js` 를 지워 로컬에서 재현 후 고침. **근본(갓 클론한 개발자도 같은 실패를 본다)은 backlog** `e2e-가-daemon-빌드를-전제하는데...`
+- **`tar | grep -q` 오판 4곳 수정** (`38ba4e8`) — 아래 참조
+
+### `tar -tzf ... | grep -q` 는 pipefail 아래에서 매치를 실패로 뒤집는다
+
+`grep -q` 가 첫 매치에서 떠나면 tar 가 SIGPIPE 로 죽고, `pipefail` 이 그 실패를 파이프라인 실패로 승격시킨다. **매치했는데 실패로 읽힌다.**
+
+daemon 발행 1차 시도가 이것으로 막혔다 — `dist/index.js` 는 17개 항목 중 **1번**이라 grep 이 즉시 떠났고, `queries/` 는 3번부터라 간발의 차로 통과했다. **경합에 의존하는 검사**였다. macOS tar 는 넘어가고 GNU tar 는 오류를 내므로 **로컬에서는 5/5 통과하고 러너에서만 실패**한다.
+
+`check-self-diagnosis.sh:227` 은 방향이 반대라 더 나빴다 — 오탐 red 가 아니라 **조용한 pass**. reap tarball 에 daemon/ 이 섞여도 `if` 가 false 로 읽혀 통과한다.
+
+**gen-083 이 5a-bis 에서 만난 것과 같은 부류다.** 그때 인스턴스 하나만 고치고 같은 패턴을 쓸지 않았다. 처방: 목록을 변수로 한 번 받고 그 다음 grep — 파이프가 없으면 tar 구현과 무관해진다.
 
 ### 릴리즈 전 유저 확인이 필요한 것 2건
 
