@@ -34,10 +34,6 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
-      # Trusted publishing needs npm 11.5.1 or later, and Node 22 ships npm 10.
-      # Without this the publish falls back to looking for a token and fails
-      # with a message about authentication rather than about the version.
-      - run: npm i -g npm@latest
 
       - run: npm ci
 
@@ -77,6 +73,13 @@ jobs:
         run: bash scripts/check-self-diagnosis.sh
 
       - run: npm run build
+      # Trusted publishing needs npm 11.5.1 or later and Node 22 ships npm 10,
+      # so npm is upgraded here rather than at the top of the job. npm 12 blocks
+      # install scripts for global installs by default, which changes what the
+      # self-diagnosis gate above observes — it must run on the same npm CI uses,
+      # or the release gate and CI stop testing the same thing.
+      - run: npm i -g npm@latest
+
       # No token: the OIDC credential is exchanged at publish time.
       - run: npm publish --access public
 
@@ -107,10 +110,6 @@ jobs:
           node-version: 22
           registry-url: https://registry.npmjs.org
 
-      # Trusted publishing needs npm 11.5.1 or later, and Node 22 ships npm 10.
-      # Without this the publish falls back to looking for a token and fails
-      # with a message about authentication rather than about the version.
-      - run: npm i -g npm@latest
 
       - run: npm ci
 
@@ -152,6 +151,13 @@ jobs:
           grep -q "package/dist/index.js" <<< "$LISTING" \
             || { echo "::error::dist/index.js missing from the daemon tarball"; exit 1; }
           rm -f "$TARBALL"
+
+      # Trusted publishing needs npm 11.5.1 or later and Node 22 ships npm 10,
+      # so npm is upgraded here rather than at the top of the job. npm 12 blocks
+      # install scripts for global installs by default, which changes what the
+      # self-diagnosis gate above observes — it must run on the same npm CI uses,
+      # or the release gate and CI stop testing the same thing.
+      - run: npm i -g npm@latest
 
       # No token: the OIDC credential is exchanged at publish time.
       - run: npm publish --access public
