@@ -280,9 +280,15 @@ Agent definitions are installed automatically by `reap install-skills` **and** `
 
 ### Code Intelligence Daemon (opt-in)
 
-REAP ships a local code-intelligence daemon (`localhost:17224`) that maintains a Tree-sitter symbol graph across generations. It parses 15+ languages, stores the graph in SQLite, and exposes an HTTP API for symbol search, caller/callee analysis, blast-radius impact, community detection, and process flow tracing.
+REAP can use a local code-intelligence daemon (`localhost:17224`) that maintains a Tree-sitter symbol graph across generations. It parses 15+ languages, stores the graph in SQLite, and exposes an HTTP API for symbol search, caller/callee analysis, blast-radius impact, community detection, and process flow tracing.
 
-Enable it by adding one line to `.reap/config.yml`:
+**It is a separate package — install it first.** REAP does not depend on it and installing REAP does not bring it along: it carries a native SQLite build and a set of Tree-sitter grammars, which every user would otherwise pay for to get a feature that is off by default.
+
+```bash
+npm i -g @c-d-cc/reap-daemon
+```
+
+Then enable it by adding one line to `.reap/config.yml`:
 
 ```yaml
 daemon: true   # default: false
@@ -293,7 +299,9 @@ When enabled, REAP automatically:
 - re-indexes at key lifecycle moments (learning, implementation complete, completion commit),
 - includes a "Code Intelligence" section in the builder/evaluator prompt with query examples and a staleness check protocol.
 
-The daemon starts automatically on first use and shuts itself down after 30 minutes of idle time. It can also be managed explicitly:
+If `daemon: true` is set with no daemon installed — or one older than your REAP requires — REAP says so instead of failing silently: `reap daemon status` and `reap fix --check` report it and print the command to run, and the agent prompt drops the query protocol so the agent does not poll a dead port. **The lifecycle is never blocked** either way.
+
+With the package installed, the daemon starts automatically on first use and shuts itself down after 30 minutes of idle time. It can also be managed explicitly:
 
 ```bash
 reap daemon status   # Check if running

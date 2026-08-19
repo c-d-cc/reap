@@ -3,13 +3,19 @@ name: Release
 on:
   push:
     tags:
+      # reap itself. The daemon publishes from the same repository under its own
+      # tag namespace (see the daemon job) so that a reap release does not drag
+      # a daemon release along with it, and vice versa — they are separate
+      # packages on separate cadences and only share a checkout.
       - 'v*'
+      - 'daemon-v*'
 
 permissions:
   contents: write
 
 jobs:
   publish:
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -40,9 +46,11 @@ jobs:
       - name: Install OpenCode (for the self-diagnosis gate)
         run: npm i -g opencode-ai
 
+      # reap:carrier(self-diagnosis-covered-incidents)
       # Install the tarball we are about to publish and ask REAP whether the
-      # result is healthy. Catches what #22 and the gen-074 daemon packaging
-      # defect had in common: both were only visible after installing.
+      # result is healthy. #22 was only ever visible after installing, and so
+      # was the daemon packaging defect — which this gate did NOT catch until
+      # gen-083 added an assertion for it, despite claiming to.
       - name: Self-diagnosis
         run: bash scripts/check-self-diagnosis.sh
 
@@ -51,7 +59,69 @@ jobs:
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
 
+  # The daemon is a separate npm package with its own version, released by
+  # pushing a daemon-v* tag. Keeping it here rather than in its own repository
+  # is deliberate: the two are edited together often enough (this change touched
+  # both) that a second checkout would cost more than the shared tag namespace.
+  #
+  # Publishing is never automatic on a reap release. A daemon that has not
+  # changed should not be republished, and reap does not depend on it — the
+  # version floor reap enforces lives in MIN_DAEMON_VERSION, not in a manifest.
+  publish-daemon:
+    if: startsWith(github.ref, 'refs/tags/daemon-v')
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: daemon
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - run: npm ci
+
+      # The tag must name the version being published. Without this, a mistyped
+      # tag publishes something other than what it says, and npm versions cannot
+      # be republished once taken.
+      - name: Verify the tag matches package.json
+        run: |
+          set -euo pipefail
+          TAG="${GITHUB_REF#refs/tags/daemon-v}"
+          PKG=$(node -p "require('./package.json').version")
+          if [ "$TAG" != "$PKG" ]; then
+            echo "::error::tag daemon-v$TAG does not match daemon/package.json $PKG"
+            exit 1
+          fi
+          echo "publishing @c-d-cc/reap-daemon $PKG"
+
+      - run: bash scripts/build.sh
+      - run: bun test tests/
+
+      # Bundling leaves the native and WASM dependencies external, so the shipped
+      # dist is useless without queries/ beside it. Assert rather than trust the
+      # files field: shipping without them produces a daemon that starts, answers
+      # health checks and extracts nothing.
+      - name: Verify the tarball carries its runtime assets
+        run: |
+          set -euo pipefail
+          TARBALL=$(npm pack --silent | tail -1)
+          tar -tzf "$TARBALL" | grep -q "package/queries/" \
+            || { echo "::error::queries/ missing from the daemon tarball"; exit 1; }
+          tar -tzf "$TARBALL" | grep -q "package/dist/index.js" \
+            || { echo "::error::dist/index.js missing from the daemon tarball"; exit 1; }
+          rm -f "$TARBALL"
+
+      - run: npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
   github-release:
+    if: startsWith(github.ref, 'refs/tags/v')
     needs: publish
     runs-on: ubuntu-latest
     steps:

@@ -1,14 +1,42 @@
 {
   "name": "@c-d-cc/reap-daemon",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "REAP Daemon — Code indexing and graph query service",
+  "license": "MIT",
+  "author": "HyeonIL Choi <hichoi@c-d.cc> (C to D)",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/c-d-cc/reap.git",
+    "directory": "daemon"
+  },
+  "homepage": "https://reap.cc",
+  "bugs": {
+    "url": "https://github.com/c-d-cc/reap/issues"
+  },
+  "keywords": [
+    "reap",
+    "code-intelligence",
+    "tree-sitter",
+    "symbol-graph",
+    "indexer"
+  ],
   "type": "module",
   "bin": {
     "reap-daemon": "dist/index.js"
   },
+  "files": [
+    "dist/",
+    "queries/"
+  ],
+  "engines": {
+    "node": ">=20"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "bun src/index.ts",
-    "build": "bun build src/index.ts --outdir dist --target node",
+    "build": "bash scripts/build.sh",
     "typecheck": "tsc --noEmit",
     "test": "bun test tests/"
   },

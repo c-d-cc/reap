@@ -5,7 +5,11 @@ import { daemonRequest } from "./client.js";
  *
  * Returns `true` when the index request was sent and acknowledged.
  * Silently returns `false` if the daemon is unreachable or the project
- * is not registered. Silent-fail policy preserved (no throw); the
+ * is not registered — and equally when the daemon package is not installed
+ * at all, which `daemonRequest` reports by throwing. That stays silent on
+ * purpose: a missing daemon must never block the lifecycle. Telling the user
+ * about it is the job of `reap daemon status`, `reap fix --check` and the
+ * agent prompt, all of which are asked rather than interrupting. Silent-fail policy preserved (no throw); the
  * boolean lets callers surface readiness in their emit context
  * (`daemonReady` in learning work output — gen-069).
  */

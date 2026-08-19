@@ -185,3 +185,33 @@ export interface ReapOutput {
   prompt?: string;
   nextCommand?: string;
 }
+
+/**
+ * Whether the separately-published daemon package is present and new enough.
+ *
+ * The daemon used to be a `file:` dependency of reap, which npm linked into
+ * place whether or not the target shipped — so an install that had no daemon
+ * at all was indistinguishable from one that did, and every call site quietly
+ * treated the difference as "daemon is down". Splitting the package makes the
+ * absence real, and this is what reap consults instead of guessing.
+ *
+ * `required` and `installCommand` travel with the verdict so that `core` can
+ * phrase a diagnostic without importing from `cli` or restating the package
+ * name — one owner, injected, nothing to keep in sync (gen-076 pattern).
+ */
+export interface DaemonAvailability {
+  /** Resolvable — either installed as a package or found in a source checkout. */
+  installed: boolean;
+  /** Absolute path to the daemon entry point, or null when unresolvable. */
+  bin: string | null;
+  /** Version declared by the resolved package, or null when unreadable. */
+  version: string | null;
+  /** Lowest daemon version this reap build is prepared to talk to. */
+  required: string;
+  /** Installed, but older than `required`. Distinct from not installed at all. */
+  outdated: boolean;
+  /** The npm package name, carried rather than parsed back out of the command. */
+  packageName: string;
+  /** What to tell the user to run. */
+  installCommand: string;
+}

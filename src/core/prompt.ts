@@ -1,5 +1,5 @@
 import type { ReapPaths } from "./paths.js";
-import type { GenerationState, ReapConfig } from "../types/index.js";
+import type { GenerationState, ReapConfig, DaemonAvailability } from "../types/index.js";
 import { readTextFile } from "./fs.js";
 import {
   detectMaturity,
@@ -88,6 +88,7 @@ export function buildBasePrompt(
   cruiseCount?: string,
   clarityResult?: ClarityResult,
   config?: ReapConfig | null,
+  daemonAvailability?: DaemonAvailability | null,
 ): string {
   const lines: string[] = [];
   const isMerge = state?.type === "merge";
@@ -221,7 +222,37 @@ export function buildBasePrompt(
   // Surfaces the daemon usage protocol to the subagent ONLY when the user
   // opted in (`config.daemon: true`). When omitted/false, this section is
   // absent and the prompt is byte-identical to pre-gen-068.
-  if (config?.daemon === true) {
+  //
+  // gen-083: opting in no longer implies the daemon is there — it installs
+  // separately. Handing an agent a query protocol for something that cannot
+  // answer buys nothing but wasted turns: it would dutifully curl a dead port
+  // every stage and conclude the daemon was down, generation after generation.
+  // When the package is absent or too old, the protocol is replaced by the one
+  // fact that helps, and the agent is told to stop trying.
+  //
+  // `daemonAvailability` is injected rather than resolved here so `core` keeps
+  // out of `cli` (gen-076 pattern). Omitted means unknown, and unknown keeps
+  // the previous behaviour — a caller that does not check must not silently
+  // turn the protocol off.
+  if (config?.daemon === true && daemonAvailability && !daemonAvailability.installed) {
+    lines.push("## Code Intelligence (Daemon) — enabled but NOT installed");
+    lines.push("");
+    lines.push(
+      `\`daemon: true\` is set, but the daemon package is not installed, so there is nothing listening. Do NOT attempt daemon queries — use Read/Grep/Glob as normal.`,
+    );
+    lines.push("");
+    lines.push(`Tell the user they can install it with: \`${daemonAvailability.installCommand}\``);
+    lines.push("");
+  } else if (config?.daemon === true && daemonAvailability?.outdated) {
+    lines.push("## Code Intelligence (Daemon) — installed version too old");
+    lines.push("");
+    lines.push(
+      `The installed daemon is ${daemonAvailability.version}, older than the ${daemonAvailability.required} this REAP needs. Do NOT rely on daemon queries — use Read/Grep/Glob as normal.`,
+    );
+    lines.push("");
+    lines.push(`Tell the user they can upgrade it with: \`${daemonAvailability.installCommand}\``);
+    lines.push("");
+  } else if (config?.daemon === true) {
     lines.push("## Code Intelligence (Daemon)");
     lines.push("");
     lines.push("REAP daemon is enabled. Prefer daemon queries over full-text search when possible.");

@@ -11,10 +11,18 @@ export default function DaemonPage() {
       <DocPage title={d.title} breadcrumb={d.breadcrumb}>
         <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{d.intro}</p>
 
+        <h2 className="text-base font-semibold text-foreground mb-3">{d.installTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-3">{d.installDesc}</p>
+        <CodeBlock language="bash">{d.installCmd}</CodeBlock>
+        <p className="text-xs text-muted-foreground mt-2 mb-6">{d.installNote}</p>
+
         <h2 className="text-base font-semibold text-foreground mb-3">{d.optInTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3">{d.optInDesc}</p>
         <CodeBlock language="yaml">{d.optInConfig}</CodeBlock>
         <p className="text-xs text-muted-foreground mt-2 mb-6">{d.optInNote}</p>
+
+        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{d.unusableTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{d.unusableDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{d.autoTriggerTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3">{d.autoTriggerDesc}</p>

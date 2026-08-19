@@ -70,10 +70,19 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
     // whether the live daemon actually accepted the register + index calls.
     const configContent = await readTextFile(paths.config);
     const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
+    //
+    // gen-083: `daemonInstalled` separates "the daemon package is absent" from
+    // "the daemon is not answering". Both used to arrive here as
+    // `daemonReady: false`, which is why an install that could never work read
+    // exactly like one that was merely stopped.
     const daemonEnabled = config?.daemon === true;
     let daemonReady: boolean | undefined;
+    let daemonInstalled: boolean | undefined;
     if (daemonEnabled) {
       const { ensureRegistered, triggerIndexing } = await import("../daemon/lifecycle.js");
+      const { resolveDaemonAvailability } = await import("../daemon/client.js");
+      const avail = resolveDaemonAvailability();
+      daemonInstalled = avail.installed && !avail.outdated;
       const registered = await ensureRegistered(paths.root, basename(paths.root));
       const indexed = await triggerIndexing(paths.root);
       daemonReady = registered && indexed;
@@ -98,7 +107,7 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
         sourceBacklog: s.sourceBacklog ? { filename: s.sourceBacklog, content: sourceBacklogContent?.slice(0, 2000) } : null,
         pendingBacklog: pendingBacklog.map((b) => ({ type: b.type, title: b.title, filename: b.filename })),
         daemonEnabled,
-        ...(daemonEnabled ? { daemonReady } : {}),
+        ...(daemonEnabled ? { daemonReady, daemonInstalled } : {}),
       },
       prompt: [
         "## Learning Stage — Explore and Build Context",

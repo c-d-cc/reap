@@ -8,7 +8,7 @@ import {
   LIFECYCLE_STAGES,
   MERGE_STAGES,
 } from "../types/index.js";
-import type { GenerationState } from "../types/index.js";
+import type { GenerationState, DaemonAvailability } from "../types/index.js";
 
 export interface IntegrityResult {
   errors: string[];
@@ -697,6 +697,46 @@ async function checkBacklog(
       );
     }
   }
+}
+
+// ── daemon availability check ────────────────────────────────
+
+/**
+ * Report a project that asked for the daemon but cannot use it.
+ *
+ * `daemon: true` and no daemon is a mismatch between configuration and
+ * environment, not a transient outage — it will be just as broken tomorrow. The
+ * lifecycle still refuses to block on it, so this is where a user who asks
+ * finds out. Before the daemon became a separate package there was nothing to
+ * find out: npm linked a directory that did not ship, and reap could not tell
+ * an empty link from a stopped process.
+ *
+ * `availability` is injected (gen-076 pattern) because resolving it belongs to
+ * `cli` and `core` does not import from there. Undefined means the caller did
+ * not look, and a check that was not run reports nothing — flagging a setup
+ * that may well be fine is worse than staying quiet.
+ *
+ * Warnings only. Nothing here has a counterpart in `fixProject`: there is no
+ * safe automatic repair for "install this package", and leaving the mutating
+ * path untouched is what guarantees one can never appear by accident.
+ */
+export function checkDaemonAvailability(
+  daemonEnabled: boolean,
+  availability?: DaemonAvailability,
+): IntegrityResult {
+  const warnings: string[] = [];
+  if (daemonEnabled && availability) {
+    if (!availability.installed) {
+      warnings.push(
+        `config.yml sets 'daemon: true' but ${availability.packageName} is not installed. Install it with: ${availability.installCommand}`,
+      );
+    } else if (availability.outdated) {
+      warnings.push(
+        `config.yml sets 'daemon: true' and the daemon is installed, but version ${availability.version} is older than the ${availability.required} this REAP requires. Upgrade with: ${availability.installCommand}`,
+      );
+    }
+  }
+  return { errors: [], warnings };
 }
 
 // ── user-level artifact checks ───────────────────────────────

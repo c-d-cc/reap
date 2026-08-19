@@ -1,5 +1,5 @@
 import { emitOutput, emitError } from "../../../core/output.js";
-import { daemonRequest, findProjectId } from "./client.js";
+import { daemonRequest, findProjectId, resolveDaemonAvailability } from "./client.js";
 import { createPaths } from "../../../core/paths.js";
 import { fileExists } from "../../../core/fs.js";
 
@@ -21,19 +21,51 @@ export async function execute(
   }
 }
 
+/**
+ * Stop with an accurate reason when the daemon package cannot be used at all.
+ *
+ * "Not running" was previously the answer to three different situations: not
+ * installed, installed but unusable, and simply stopped. Only the last one is
+ * fixed by starting it, so collapsing them told users to retry something that
+ * could never work. Each now says what it is and, where relevant, what to run.
+ */
+function requireUsableDaemon(): void {
+  const avail = resolveDaemonAvailability();
+  if (!avail.installed) {
+    emitError(
+      "daemon",
+      `The daemon is not installed. Install it with: ${avail.installCommand}`,
+    );
+  }
+  if (avail.outdated) {
+    emitError(
+      "daemon",
+      `The installed daemon is ${avail.version}, but this version of REAP needs ${avail.required} or newer. Upgrade with: ${avail.installCommand}`,
+    );
+  }
+}
+
 async function statusCmd(): Promise<void> {
+  requireUsableDaemon();
+  const avail = resolveDaemonAvailability();
+
   try {
     const result = await daemonRequest<{
       pid: number;
       uptime: number;
       idleTime: number;
       projectCount: number;
+      version?: string;
     }>("GET", "/health");
 
     if (result.status === "ok" && result.data) {
       const d = result.data;
       const uptimeMin = Math.floor(d.uptime / 60_000);
       const idleMin = Math.floor(d.idleTime / 60_000);
+      // Both versions are shown because they can legitimately differ: the
+      // daemon stays resident for thirty idle minutes, so an upgrade does not
+      // replace the process that is answering.
+      const running = d.version ?? "unknown";
       emitOutput({
         status: "ok",
         command: "daemon",
@@ -42,8 +74,10 @@ async function statusCmd(): Promise<void> {
           uptime: `${uptimeMin}m`,
           idle: `${idleMin}m`,
           projects: d.projectCount,
+          runningVersion: running,
+          installedVersion: avail.version,
         },
-        message: `Daemon running (pid: ${d.pid}, uptime: ${uptimeMin}m, idle: ${idleMin}m, ${d.projectCount} projects)`,
+        message: `Daemon running (pid: ${d.pid}, uptime: ${uptimeMin}m, idle: ${idleMin}m, ${d.projectCount} projects, running ${running} / installed ${avail.version ?? "unknown"})`,
       });
     } else {
       emitError("daemon", "Daemon is not running");
@@ -54,6 +88,9 @@ async function statusCmd(): Promise<void> {
 }
 
 async function stopCmd(): Promise<void> {
+  // Deliberately not gated: stopping is meaningful even when the installed
+  // package is too old, and reporting "not installed" for a stop request would
+  // leave a stray process with no way to reach it.
   try {
     const result = await daemonRequest("GET", "/health");
     if (result.status === "ok") {
@@ -75,6 +112,7 @@ async function stopCmd(): Promise<void> {
 }
 
 async function indexCmd(): Promise<void> {
+  requireUsableDaemon();
   const root = process.cwd();
   const paths = createPaths(root);
 
@@ -106,6 +144,7 @@ async function queryCmd(query?: string): Promise<void> {
     emitError("daemon", "Usage: reap daemon query <search-term>");
   }
 
+  requireUsableDaemon();
   const root = process.cwd();
   const projectId = await findProjectId(root);
   if (!projectId) {

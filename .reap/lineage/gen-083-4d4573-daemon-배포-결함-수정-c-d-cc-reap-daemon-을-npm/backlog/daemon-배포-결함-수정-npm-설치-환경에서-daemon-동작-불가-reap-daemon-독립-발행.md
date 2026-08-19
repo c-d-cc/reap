@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
 createdAt: 2026-07-26T03:26:55.570Z
+consumedBy: gen-083-4d4573
+consumedAt: 2026-08-19T00:44:48.071Z
 ---
 
 # daemon 배포 결함 수정 — npm 설치 환경에서 daemon 동작 불가 + reap-daemon 독립 발행

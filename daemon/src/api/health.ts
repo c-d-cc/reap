@@ -1,6 +1,7 @@
 import type { ApiResponse, HealthData } from "../types.js";
 import type { IdleTimer } from "../process.js";
 import type { RegistryManager } from "../registry.js";
+import { packageVersion } from "../package-assets.js";
 
 const startTime = Date.now();
 
@@ -15,6 +16,7 @@ export function createHealthHandler(
       uptime: Date.now() - startTime,
       idleTime: idleTimer.idleMs(),
       projectCount: registry.list().length,
+      version: packageVersion(),
     },
   });
 }

@@ -30,6 +30,10 @@
   "bin": {
     "reap": "dist/cli/index.js"
   },
+  "//workspaces": "daemon/ is a separate npm package, published on its own tag and NOT a dependency of reap — see release.yml. It stays in this repo because the two are edited together, and declaring it a workspace is what makes `npm ci` install its dependencies for local runs and CI. Removing the file: dependency alone would have left the daemon's own e2e tests with no web-tree-sitter, since npm had been hoisting them into the root as a side effect.",
+  "workspaces": [
+    "daemon"
+  ],
   "files": [
     "dist/",
     "scripts/postinstall.sh",
@@ -47,7 +51,6 @@
     "postinstall": "bash scripts/postinstall.sh || true"
   },
   "dependencies": {
-    "@c-d-cc/reap-daemon": "file:./daemon",
     "yaml": "^2.0.0"
   },
   "reap": {

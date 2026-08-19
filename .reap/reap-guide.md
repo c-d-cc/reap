@@ -387,17 +387,37 @@ All REAP interactions go through `/reap.*` slash commands. These are the primary
 
 ## Code Intelligence (Daemon)
 
-REAP ships with a local code-intelligence daemon (`@c-d-cc/reap-daemon`) that runs on `localhost:17224`. It maintains a Tree-sitter–backed symbol graph (functions, classes, types, calls, imports) persisted to SQLite, supports incremental updates, and exposes a small HTTP API for symbol search, caller/callee lookup, and change-impact analysis.
+REAP can use a local code-intelligence daemon (`@c-d-cc/reap-daemon`) that runs on `localhost:17224`. It maintains a Tree-sitter–backed symbol graph (functions, classes, types, calls, imports) persisted to SQLite, supports incremental updates, and exposes a small HTTP API for symbol search, caller/callee lookup, and change-impact analysis.
+
+### It is a separate package — install it
+
+`reap` does not depend on the daemon and installing reap does not bring it along. It carries a native SQLite build and a set of Tree-sitter grammars, which every user would otherwise pay for to get a feature that is off by default.
+
+```bash
+npm i -g @c-d-cc/reap-daemon
+```
+
+Until v0.17.5 the daemon was declared as a `file:` dependency that never shipped, so `daemon: true` produced a dangling link and did nothing at all — quietly, because every call site treats a missing daemon as one that is merely down. If you enabled the daemon before that and never saw it work, this is why.
 
 ### Opt-in
 
-Daemon integration is opt-in via `.reap/config.yml`:
+With the package installed, enable it in `.reap/config.yml`:
 
 ```yaml
 daemon: true
 ```
 
 When opted in, REAP lifecycle commands (`start`, `learning`, `implementation complete`, `completion commit`) automatically register the project and trigger indexing. When omitted or `false`, daemon-related CLI behaviour is a no-op — byte-identical to projects that have never enabled it.
+
+### When it is enabled but unusable
+
+`daemon: true` with no daemon installed — or one older than this REAP requires — is a mismatch between configuration and environment, not a passing outage, so REAP says so rather than failing silently. **The lifecycle is never blocked**: indexing still fails quietly and every command runs as before. What changes is that asking gets an answer:
+
+- `reap daemon status` distinguishes *not installed*, *too old*, and *not running*, and prints the command to run. It also shows the running version beside the installed one — the daemon stays resident for 30 idle minutes, so an upgrade does not replace the process answering requests.
+- `reap fix --check` reports the mismatch as a warning.
+- The agent prompt drops the query protocol and says to use ordinary file search instead, so the agent does not spend every stage curling a dead port.
+
+REAP names the version it needs in those messages; this guide deliberately does not repeat the number, so there is nothing here to fall out of date.
 
 ### Auto-trigger points
 

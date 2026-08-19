@@ -269,9 +269,15 @@ evaluator: true   # 기본값: false
 
 ### Code Intelligence Daemon (opt-in)
 
-REAP는 로컬 코드 인텔리전스 데몬(`localhost:17224`)을 제공합니다. 세대에 걸쳐 Tree-sitter 심볼 그래프를 유지하며, 15개 이상의 언어를 파싱하고, 그래프를 SQLite에 저장하고, 심볼 검색, caller/callee 분석, blast-radius 영향, 커뮤니티 감지, 프로세스 흐름 추적을 위한 HTTP API를 제공합니다.
+REAP는 로컬 코드 인텔리전스 데몬(`localhost:17224`)을 사용할 수 있습니다. 세대에 걸쳐 Tree-sitter 심볼 그래프를 유지하며, 15개 이상의 언어를 파싱하고, 그래프를 SQLite에 저장하고, 심볼 검색, caller/callee 분석, blast-radius 영향, 커뮤니티 감지, 프로세스 흐름 추적을 위한 HTTP API를 제공합니다.
 
-`.reap/config.yml`에 한 줄을 추가하여 활성화합니다:
+**별도 패키지이므로 먼저 설치해야 합니다.** REAP는 데몬에 의존하지 않으며 REAP를 설치해도 함께 설치되지 않습니다 — 네이티브 SQLite 빌드와 Tree-sitter 문법 묶음을 지고 있어서, 기본적으로 꺼져 있는 기능을 위해 모든 사용자가 그 비용을 낼 이유가 없기 때문입니다.
+
+```bash
+npm i -g @c-d-cc/reap-daemon
+```
+
+그다음 `.reap/config.yml`에 한 줄을 추가하여 활성화합니다:
 
 ```yaml
 daemon: true   # 기본값: false
@@ -282,7 +288,9 @@ daemon: true   # 기본값: false
 - 주요 lifecycle 시점(learning, implementation 완료, completion commit)에 재인덱싱하며,
 - 빌더/evaluator 프롬프트에 쿼리 예시와 staleness 확인 프로토콜을 포함한 "Code Intelligence" 섹션을 추가합니다.
 
-데몬은 첫 사용 시 자동으로 시작되고 30분 유휴 후 자동 종료됩니다. 명시적으로 관리할 수도 있습니다:
+`daemon: true` 인데 데몬이 설치되어 있지 않거나 REAP가 요구하는 버전보다 낡은 경우, REAP는 조용히 넘어가지 않고 그렇게 말합니다 — `reap daemon status` 와 `reap fix --check` 가 이를 보고하고 실행할 명령을 제시하며, 에이전트 프롬프트에서 질의 프로토콜이 빠져 죽은 포트에 요청을 보내지 않습니다. 어느 경우든 **lifecycle 은 절대 막히지 않습니다**.
+
+패키지를 설치한 뒤에는 데몬이 첫 사용 시 자동으로 시작되고 30분 유휴 후 자동 종료됩니다. 명시적으로 관리할 수도 있습니다:
 
 ```bash
 reap daemon status   # 실행 여부 확인

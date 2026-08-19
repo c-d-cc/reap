@@ -41,6 +41,8 @@ export interface HealthData {
   uptime: number;
   idleTime: number;
   projectCount: number;
+  /** The daemon build answering this request — see packageVersion(). */
+  version: string;
 }
 
 // === Graph Types ===

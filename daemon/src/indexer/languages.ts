@@ -1,5 +1,5 @@
 import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { queriesDir } from "../package-assets.js";
 
 export interface LanguageConfig {
   name: string;
@@ -8,7 +8,7 @@ export interface LanguageConfig {
   extensions: string[];
 }
 
-const QUERIES_DIR = join(dirname(fileURLToPath(import.meta.url)), "..", "..", "queries");
+const QUERIES_DIR = queriesDir();
 
 function wasmPath(name: string): string {
   try {
