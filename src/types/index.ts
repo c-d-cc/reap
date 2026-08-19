@@ -261,6 +261,27 @@ export interface DaemonAvailability {
   /** Where `bin` came from. `null` when nothing resolved. */
   source: DaemonBinSource | null;
   /**
+   * How to name the channel that supplied `bin`, or null when reap found it by
+   * itself.
+   *
+   * Non-null is the case where telling someone to `npm i -g` the daemon is
+   * wrong: reap will keep using the path they named, so a global upgrade
+   * changes nothing and they get the same warning again with no way to see why.
+   * Carried rather than derived from `source` because the two diagnostics that
+   * need it are in `core` and must not import the daemon client to learn what
+   * the setting is called (gen-076 pattern, same as `installCommand`).
+   */
+  explicitLabel: string | null;
+  /**
+   * What to do about `bin` being too old, phrased for where it came from.
+   *
+   * Carried rather than assembled by each reader for the same reason
+   * `installCommand` is: `core` gives this advice in two places and must not
+   * import the daemon client to learn what the daemon settings are called
+   * (gen-076 pattern). Meaningless unless `outdated` is true.
+   */
+  staleRemedy: string;
+  /**
    * A location the user named where nothing exists.
    *
    * Filled independently of the verdict: reap goes on to search for itself, so

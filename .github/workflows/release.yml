@@ -47,6 +47,16 @@ jobs:
       - name: Verify docs match package version
         run: bash scripts/check-docs-version.sh
 
+      # Two numbers name a release on npm and are spent telling users to
+      # upgrade: MIN_DAEMON_VERSION and reap.autoUpdateMinVersion. Nothing
+      # checked that either named a release that exists, and the mistake is only
+      # possible in the direction nobody tests: raise a floor, forget to publish,
+      # and the affected users are sent after a version that was never released.
+      # Here rather than in ci.yml because it needs the network, and a check that
+      # intermittently reports SKIP on every push is one people stop reading.
+      - name: Verify the version floors name published releases
+        run: bash scripts/check-version-floors.sh
+
       # The gate's OpenCode half skips itself when the client is absent, and a
       # runner has no reason to have it. Installing it is what makes that half
       # actually run here rather than report SKIP.

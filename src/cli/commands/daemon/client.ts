@@ -4,7 +4,7 @@ import { join, dirname, isAbsolute, resolve } from "path";
 import { fileURLToPath } from "url";
 import { homedir } from "os";
 import YAML from "yaml";
-import { semverGte } from "../check-version.js";
+import { semverGte } from "../../../core/semver.js";
 import type {
   DaemonAvailability,
   DaemonBinSource,
@@ -14,7 +14,12 @@ import type {
 
 const DAEMON_ROOT = join(homedir(), ".reap", "daemon");
 
-/** The npm package the daemon ships as. Single owner — nothing else spells it. */
+/**
+ * The npm package the daemon ships as. Single owner within TypeScript — nothing
+ * else spells it. scripts/check-version-floors.sh cannot import it, so it reads
+ * this declaration; the marker is how that reader is found from here.
+ */
+// reap:carrier(daemon-package-name)
 export const DAEMON_PACKAGE = "@c-d-cc/reap-daemon";
 
 /** What a user is told to run when it is missing or too old. */
@@ -58,7 +63,13 @@ export const DAEMON_LOCATE_HINT =
  * present as the same quiet nothing this whole change exists to remove. This
  * constant is the only place the number lives — the documentation deliberately
  * does not repeat it, and instead says that reap reports what it needs.
+ *
+ * Raising it is the dangerous direction, and the danger is not in this file:
+ * name a version that was never published and every user is told to upgrade to
+ * something that does not exist. scripts/check-daemon-floor.sh reads the value
+ * from right here and asks npm, before the release publishes.
  */
+// reap:carrier(min-daemon-version)
 export const MIN_DAEMON_VERSION = "0.2.0";
 
 /** Raised when `daemon: true` is set but no daemon package can be resolved. */
@@ -225,14 +236,59 @@ export function readExplicitDaemonBins(
   const found: ExplicitDaemonBin[] = [];
 
   const fromEnv = normalizeBinPath(env[DAEMON_BIN_ENV], cwd);
-  if (fromEnv) found.push({ source: "env", path: fromEnv, label: DAEMON_BIN_ENV });
+  if (fromEnv) found.push({ source: "env", path: fromEnv, label: explicitBinLabel("env")! });
 
   const fromConfig = normalizeBinPath(readConfigDaemonBin(cwd), cwd);
   if (fromConfig) {
-    found.push({ source: "config", path: fromConfig, label: `.reap/config.yml '${DAEMON_BIN_CONFIG_KEY}'` });
+    found.push({ source: "config", path: fromConfig, label: explicitBinLabel("config")! });
   }
 
   return found;
+}
+
+/**
+ * How to name the channel a location came from, or null when nobody named one.
+ *
+ * A miss already carried this on `ExplicitDaemonBin.label`; a hit did not, and
+ * the diagnostics that needed it live in `core`, which must not import from
+ * `cli`. So it travels on `DaemonAvailability` the way `installCommand` and
+ * `locateHint` do — and the strings are built here rather than inline above, or
+ * a hit and a miss would refer to the same setting by two different names.
+ */
+export function explicitBinLabel(source: DaemonBinSource | null): string | null {
+  if (source === "env") return DAEMON_BIN_ENV;
+  if (source === "config") return `.reap/config.yml '${DAEMON_BIN_CONFIG_KEY}'`;
+  return null;
+}
+
+/**
+ * How to replace a daemon that is too old, given where reap found it.
+ *
+ * `npm i -g` is the answer for exactly one of the four sources, and it was being
+ * given for all of them. A daemon named by the user stays named however many
+ * times they install a global one; a daemon found in a source checkout beside
+ * reap is not an npm install at all. In both cases the advice is not merely
+ * unhelpful — it looks like it should work, so someone follows it, sees the same
+ * warning, and has nothing to go on.
+ *
+ * `package` keeps the global command because resolution is the one case where it
+ * can be right. It is not always: a project-local daemon outranks a global one,
+ * and reap cannot tell which it resolved without reasoning about prefixes. The
+ * path is given in every case for that reason — it is what lets someone see
+ * which copy reap means, whatever the advice.
+ */
+export function staleDaemonRemedy(
+  source: DaemonBinSource | null,
+  bin: string | null,
+): string {
+  const label = explicitBinLabel(source);
+  if (label) {
+    return `That daemon is at ${bin}, named by ${label}, so installing the package globally would not replace it. Upgrade the copy at that path, or point ${label} at a newer one.`;
+  }
+  if (source === "checkout") {
+    return `That daemon is a source checkout at ${bin}, beside this REAP rather than installed, so '${DAEMON_INSTALL_COMMAND}' would not replace it. Update and rebuild that checkout, or point ${DAEMON_BIN_CONFIG_KEY} at an installed daemon.`;
+  }
+  return `That daemon is at ${bin}. Upgrade it with: ${DAEMON_INSTALL_COMMAND}`;
 }
 
 function normalizeBinPath(raw: string | undefined | null, cwd: string): string | null {
@@ -398,6 +454,8 @@ export function resolveDaemonAvailability(deps: DaemonResolveDeps = {}): DaemonA
     packageName: DAEMON_PACKAGE,
     installCommand: DAEMON_INSTALL_COMMAND,
     source,
+    explicitLabel: explicitBinLabel(source),
+    staleRemedy: staleDaemonRemedy(source, bin),
     explicitMiss,
     locateHint: DAEMON_LOCATE_HINT,
   };

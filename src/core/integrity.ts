@@ -747,8 +747,12 @@ export function checkDaemonAvailability(
         `config.yml sets 'daemon: true' but ${availability.packageName} is not installed. ${hint}: ${availability.installCommand}`,
       );
     } else if (availability.outdated) {
+      // Where it came from decides what to say, and the sentence is composed by
+      // whoever knows that (see `staleDaemonRemedy`). Telling someone to install
+      // globally when reap will go on resolving a named path or a checkout beside
+      // it is advice that cannot take effect while looking like it should.
       warnings.push(
-        `config.yml sets 'daemon: true' and the daemon is installed, but version ${availability.version} is older than the ${availability.required} this REAP requires. Upgrade with: ${availability.installCommand}`,
+        `config.yml sets 'daemon: true' and the daemon is installed, but version ${availability.version} is older than the ${availability.required} this REAP requires. ${availability.staleRemedy}`,
       );
     }
   }

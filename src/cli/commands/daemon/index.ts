@@ -41,9 +41,12 @@ function requireUsableDaemon(): void {
     emitError("daemon", `The daemon is not installed. ${detail}`);
   }
   if (avail.outdated) {
+    // A named location or a checkout is not fixed by a global install — reap
+    // would resolve the same old file on the next command and repeat this
+    // message verbatim.
     emitError(
       "daemon",
-      `The installed daemon is ${avail.version}, but this version of REAP needs ${avail.required} or newer. Upgrade with: ${avail.installCommand}`,
+      `The installed daemon is ${avail.version}, but this version of REAP needs ${avail.required} or newer. ${avail.staleRemedy}`,
     );
   }
 }

@@ -4,20 +4,12 @@ import { join } from "path";
 import YAML from "yaml";
 import { cleanupLegacyHooks, cleanupLegacyProjectSkills } from "../../core/integrity.js";
 import { fetchReleaseNotice } from "../../core/notice.js";
-
-/**
- * Inline semver comparison: returns true if a >= b.
- * Handles simple major.minor.patch format.
- */
-export function semverGte(a: string, b: string): boolean {
-  const pa = a.split(".").map(Number);
-  const pb = b.split(".").map(Number);
-  for (let i = 0; i < 3; i++) {
-    if ((pa[i] ?? 0) > (pb[i] ?? 0)) return true;
-    if ((pa[i] ?? 0) < (pb[i] ?? 0)) return false;
-  }
-  return true; // equal
-}
+// The comparison used to be inlined here, and it read a prerelease as equal to
+// its own release: an alpha of X.Y.Z satisfied a floor of X.Y.Z (gen-085).
+// Of the two guards below only checkAutoUpdateGuard is reached by such a build —
+// performAutoUpdate returns at its "-alpha" check long before comparing — and it
+// only changes anything once autoUpdateMinVersion names a line that has alphas.
+import { semverGte } from "../../core/semver.js";
 
 /**
  * Query autoUpdateMinVersion from the latest npm package metadata.

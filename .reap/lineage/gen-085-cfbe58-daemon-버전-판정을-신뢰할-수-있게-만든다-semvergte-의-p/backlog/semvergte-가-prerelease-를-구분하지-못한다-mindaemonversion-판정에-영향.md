@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: low
 createdAt: 2026-08-19T01:46:10.224Z
+consumedBy: gen-085-cfbe58
+consumedAt: 2026-08-19T12:08:02.721Z
 ---
 
 # semverGte 가 prerelease 를 구분하지 못한다 — MIN_DAEMON_VERSION 판정에 영향

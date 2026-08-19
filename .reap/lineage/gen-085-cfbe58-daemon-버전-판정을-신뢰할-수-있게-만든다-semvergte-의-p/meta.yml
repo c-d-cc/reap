@@ -1,0 +1,60 @@
+id: gen-085-cfbe58
+type: embryo
+goal: daemon 버전 판정을 신뢰할 수 있게 만든다 — semverGte 의 prerelease 오판을 고치고,
+  MIN_DAEMON_VERSION 을 올릴 때 그 버전이 실제로 발행됐는지 검사하는 게이트를 만든다. 도달 불가능한 세 번째 항목(낡은
+  안내가 명시 경로를 무시)은 착수 여부를 planning 에서 판단한다.
+parents:
+  - gen-084-326c11
+timeline:
+  - stage: learning
+    at: 2026-08-19T12:08:02.710Z
+  - stage: planning
+    at: 2026-08-19T12:12:57.560Z
+  - stage: implementation
+    at: 2026-08-19T12:17:01.688Z
+  - stage: validation
+    at: 2026-08-19T12:28:25.945Z
+  - stage: completion
+    at: 2026-08-19T12:48:37.968Z
+  - stage: validation
+    at: 2026-08-19T12:59:37.763Z
+    from: completion
+    reason: 상위 지시 정정 — detectPendingMigrations 의 소비자별 정책 분기(releaseLineGt)를 걷어낸다. 현재
+      존재하는 사용자에게 일어나지 않는 시나리오를 위한 machinery 이므로.
+  - stage: implementation
+    at: 2026-08-19T12:59:43.453Z
+    from: validation
+    reason: 코드 변경이 필요하다 — releaseLineGt 제거
+  - stage: validation
+    at: 2026-08-19T13:02:26.750Z
+  - stage: completion
+    at: 2026-08-19T13:06:15.297Z
+  - stage: validation
+    at: 2026-08-19T13:08:54.263Z
+    from: completion
+    reason: 상위 지시 재번복 — releaseLineGt 를 유지하기로. migration note 은닉은 유저가 실제로 alpha 를
+      내므로 실재하는 시나리오다.
+  - stage: implementation
+    at: 2026-08-19T13:08:54.454Z
+    from: validation
+    reason: 코드 복원 필요
+  - stage: validation
+    at: 2026-08-19T13:11:49.211Z
+  - stage: completion
+    at: 2026-08-19T13:11:55.612Z
+status: completed
+fitnessFeedback:
+  text: >-
+    결함 세 개를 닫은 것은 좋다. 특히 evaluator 가 낸 3건이 전부 이 세대가 만든 것이었고 그것을 회피 없이 고친 점, 그리고
+    performAutoUpdate 의 early-return 을 찾아내 자기가 앞서 보고한 내용이 틀렸다고 정정한 점이 좋다.
+
+
+    다만 작업이 필요 이상으로 깊어지고 있다. daemon 관련 세대들이 매번 인접 갭을 발견하고 그때마다 backlog 를 만들어 17건이
+    쌓였고, 그중 상당수는 prerelease·대체 패키지 매니저·기여자처럼 아직 존재하지 않는 상황을 방어하는 것이다. 검증을 강화하는 일
+    자체가 새 작업을 낳는 순환에 들어갔다. 이번 세대를 마지막으로 daemon 파생 작업을 정리하고 릴리즈로 간다.
+
+
+    마무리 지시: adapt 에서 새 제안을 최소화(Next Generation Hints 는 0.17.5 릴리즈 문서 보강 한 줄),
+    backlog 추가 금지, 완결 항목을 명시, tests submodule 커밋 후 completion commit 까지 (push
+    금지).
+  evaluatedAt: 2026-08-19T13:14:27.557Z

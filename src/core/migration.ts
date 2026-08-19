@@ -25,6 +25,7 @@ import { readdirSync, readFileSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import type { ReapConfig } from "../types/index.js";
+import { semverGt, semverCore } from "./semver.js";
 
 // ── filename pattern ─────────────────────────────────────────────────────────
 
@@ -40,27 +41,18 @@ export function parseVersionFromFilename(name: string): string | null {
   return m ? m[1] : null;
 }
 
-// ── semver comparison ───────────────────────────────────────────────────────
+// ── release-line comparison ─────────────────────────────────────────────────
 
 /**
- * Compare two semver-core (`X.Y.Z`) strings. Returns true when `a > b`.
- * Non-numeric segments are treated as 0 (defensive against malformed input).
+ * True when `a` belongs to a later release line than `b`.
+ *
+ * Cores only. Someone running `0.17.6-alpha.3` is running the 0.17.6 code and
+ * needs the v0.17.6 note, but under strict precedence that note sorts above
+ * their version and `detectPendingMigrations` drops it as unreleased — hiding
+ * it from prerelease testers, who meet the new conventions first.
  */
-export function semverGt(a: string, b: string): boolean {
-  const pa = a.split(".").map((s) => Number.parseInt(s, 10) || 0);
-  const pb = b.split(".").map((s) => Number.parseInt(s, 10) || 0);
-  for (let i = 0; i < 3; i++) {
-    const av = pa[i] ?? 0;
-    const bv = pb[i] ?? 0;
-    if (av > bv) return true;
-    if (av < bv) return false;
-  }
-  return false;
-}
-
-/** True when `a >= b`. */
-export function semverGte(a: string, b: string): boolean {
-  return a === b || semverGt(a, b);
+export function releaseLineGt(a: string, b: string): boolean {
+  return semverGt(semverCore(a), semverCore(b));
 }
 
 // ── templates directory resolution ──────────────────────────────────────────
@@ -134,8 +126,8 @@ export function detectPendingMigrations(
     const version = parseVersionFromFilename(name);
     if (!version) continue;
     // gap window: lastMigrated < version <= currentVersion
-    if (!semverGt(version, lastMigrated)) continue;
-    if (semverGt(version, currentVersion)) continue;
+    if (!releaseLineGt(version, lastMigrated)) continue;
+    if (releaseLineGt(version, currentVersion)) continue;
     try {
       const body = readFileSync(join(dir, name), "utf-8");
       pending.push({ version, instructions: body });
@@ -144,7 +136,7 @@ export function detectPendingMigrations(
     }
   }
 
-  pending.sort((a, b) => (semverGt(a.version, b.version) ? 1 : -1));
+  pending.sort((a, b) => (releaseLineGt(a.version, b.version) ? 1 : -1));
   return pending;
 }
 

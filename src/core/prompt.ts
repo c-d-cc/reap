@@ -263,7 +263,12 @@ export function buildBasePrompt(
       `The installed daemon is ${daemonAvailability.version}, older than the ${daemonAvailability.required} this REAP needs. Do NOT rely on daemon queries — use Read/Grep/Glob as normal.`,
     );
     lines.push("");
-    lines.push(`Tell the user they can upgrade it with: \`${daemonAvailability.installCommand}\``);
+    // Same split as the "not installed" branch above, and phrased by the same
+    // owner: what replaces a stale daemon depends on where reap found it, and
+    // relaying an upgrade command that cannot take effect is worse than saying
+    // nothing — the user runs it, nothing changes, and the agent has no reason
+    // to look further.
+    lines.push(`Tell the user: ${daemonAvailability.staleRemedy}`);
     lines.push("");
   } else if (config?.daemon === true) {
     lines.push("## Code Intelligence (Daemon)");

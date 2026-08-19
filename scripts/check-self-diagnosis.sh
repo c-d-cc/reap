@@ -642,9 +642,101 @@ if ! grep -q "$DM_PKGDIR" <<< "$DM_DIR"; then
   exit 1
 fi
 
+# (g) A named location holding a daemon that is too old. gen-085.
+#
+#     The advice for a stale daemon was `npm i -g @c-d-cc/reap-daemon` in all
+#     three places that give it, unconditionally. That is wrong for exactly the
+#     users the setting above exists for: reap goes on resolving the named path,
+#     so the command changes nothing, the warning returns unchanged, and there is
+#     no way to tell why. Someone follows correct-sounding advice forever.
+#
+#     gen-084 declined to fix it, reasoning that the branch could not be reached
+#     — MIN_DAEMON_VERSION and the only published daemon are both 0.2.0 — and
+#     that shipping a branch no test can execute is worse. The reasoning was
+#     sound; the premise was not. daemon/package.json carried 0.1.0 until
+#     gen-083, so any checkout from before then is a stale daemon, and making
+#     the version comparison prerelease-aware in this same generation turned
+#     every 0.2.0-x into one as well.
+#
+#     The package.json here is fabricated rather than a real old release, because
+#     none was ever published. That is a real difference and it is worth naming:
+#     what is being simulated is only where the version string comes from, and
+#     resolveDaemonAvailability reads nothing else about the package. The
+#     location is accepted without an identity check by design (gen-084: nothing
+#     is accidental about a path someone wrote down) — an accepted limitation
+#     that turns out to be what makes this testable at all.
+cp "$PROJECT/.reap/config.yml.orig3" "$PROJECT/.reap/config.yml"
+DM_STALE="$DM_HOME/stale-daemon"
+mkdir -p "$DM_STALE/dist"
+cat > "$DM_STALE/package.json" <<'STALEPKG'
+{ "name": "@c-d-cc/reap-daemon", "version": "0.1.0", "main": "dist/index.js" }
+STALEPKG
+# Never started, so it need not be a daemon — the verdict is read off the
+# manifest precisely so that `fix --check` can answer without spawning anything.
+echo 'process.exit(0);' > "$DM_STALE/dist/index.js"
+printf '\ndaemon: true\ndaemonBin: %s\n' "$DM_STALE/dist/index.js" >> "$PROJECT/.reap/config.yml"
+
+DM_STALE_OUT=$(cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" fix --check 2>/dev/null | dm_fix_verdict)
+dm_require_verdict "$DM_STALE_OUT" "checking a named daemon location that is out of date"
+
+# It has to be recognised as stale at all — otherwise the two assertions below
+# pass by describing a warning that was never emitted.
+if ! grep -q "0.1.0" <<< "$DM_STALE_OUT"; then
+  red "  FAIL  a daemon older than the floor at a named location is not reported"
+  echo
+  dim "        daemonBin: $DM_STALE/dist/index.js  (version 0.1.0)"
+  echo "$DM_STALE_OUT" | while IFS= read -r line; do dim "        $line"; done
+  exit 1
+fi
+if ! grep -q "$DM_STALE/dist/index.js" <<< "$DM_STALE_OUT"; then
+  red "  FAIL  a stale daemon is reported without saying which copy is stale"
+  echo
+  echo "$DM_STALE_OUT" | while IFS= read -r line; do dim "        $line"; done
+  echo
+  dim "        The user has a global daemon and a named one. Without the path"
+  dim "        they cannot tell which of them reap is talking about."
+  exit 1
+fi
+if grep -q "npm i -g @c-d-cc/reap-daemon" <<< "$DM_STALE_OUT"; then
+  red "  FAIL  a stale daemon at a named location is still met with the global upgrade command"
+  echo
+  echo "$DM_STALE_OUT" | while IFS= read -r line; do dim "        $line"; done
+  echo
+  dim "        reap will keep resolving daemonBin. Running that command changes"
+  dim "        nothing and produces this same warning again — advice that cannot"
+  dim "        work is worse than none, because it looks like it should."
+  exit 1
+fi
+
+# And the CLI, which is a separate code path from `fix --check` and the one a
+# user reaches by trying to make the daemon go.
+DM_STALE_CLI=$(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17288 \
+  "$REAP_BIN" daemon status 2>&1)
+if ! grep -q "0.1.0" <<< "$DM_STALE_CLI"; then
+  red "  FAIL  'reap daemon status' does not report the stale named daemon"
+  echo
+  echo "$DM_STALE_CLI" | head -8 | while IFS= read -r line; do dim "        $line"; done
+  exit 1
+fi
+# The CLI does mention the global command — to say it would not help — so its
+# presence proves nothing. What must be absent is the bare instruction, and what
+# must be present is the path and the setting that chose it.
+if grep -q "Upgrade with:" <<< "$DM_STALE_CLI"; then
+  red "  FAIL  'reap daemon status' sends the user after a global upgrade that cannot help"
+  echo
+  echo "$DM_STALE_CLI" | head -8 | while IFS= read -r line; do dim "        $line"; done
+  exit 1
+fi
+if ! grep -q "daemonBin" <<< "$DM_STALE_CLI"; then
+  red "  FAIL  'reap daemon status' does not say which setting chose the stale daemon"
+  echo
+  echo "$DM_STALE_CLI" | head -8 | while IFS= read -r line; do dim "        $line"; done
+  exit 1
+fi
+
 cp "$PROJECT/.reap/config.yml.orig3" "$PROJECT/.reap/config.yml"
 rm -f "$PROJECT/.reap/config.yml.orig3"
-green "  ok    a named daemon location is used, launched and verifiable — and a bad one is named"
+green "  ok    a named daemon location is used, launched and verifiable — and a bad or stale one is named"
 
 # 5e. The seam the split created: does an installed reap find an installed
 #     daemon? Everything above tests the two packages apart — 5a that reap does
