@@ -9,10 +9,11 @@
 #
 # reap:carrier(self-diagnosis-covered-incidents)
 # This turns that into a gate: install from the actual publish artifact and
-# require a clean bill of health. Three past incidents fail against it —
+# require a clean bill of health. Four past incidents fail against it —
 #   - #22            : install-skills wrote where fix --check called legacy
 #   - gen-074 daemon : shipped a daemon nobody could use (section 5)
-#   - gen-080        : agent files OpenCode could not parse (section 6)
+#   - npm 12 default : install scripts blocked, no integration at all (section 6)
+#   - gen-080        : agent files OpenCode could not parse (section 7)
 #
 # The daemon entry was false when it was written (gen-078) and stayed false for
 # five generations. It claimed the gate caught the packaging defect; the gate
@@ -26,11 +27,13 @@
 # was never run against the broken state is a guess, and this file is read by
 # whoever is deciding what still needs testing.
 #
-# Sections 5 and 6 exist because the first checks all ask the same question of
-# one client and one package. REAP claims to support two clients and ships a
-# second package; `reap init` exercises neither — so the OpenCode path reached
-# users unverified and took their whole OpenCode install offline (gen-080), and
-# the daemon reached users as a dangling symlink.
+# Sections 5 through 7 exist because the first checks all ask the same question
+# of one client, one package and one way of installing. REAP claims to support
+# two clients and ships a second package; `reap init` exercises neither — so the
+# OpenCode path reached users unverified and took their whole OpenCode install
+# offline (gen-080), and the daemon reached users as a dangling symlink. Section
+# 6 adds the third axis: sections 2 through 5 all install with scripts allowed,
+# which npm 12 no longer does by default.
 #
 # Isolation is not optional. `install-skills` writes 19 files to
 # ~/.claude/commands/ and postinstall touches ~/.reap/ and
@@ -56,6 +59,7 @@ dim()   { printf '\033[2m%s\033[0m\n' "$1"; }
 FAKE_HOME=""; PREFIX=""; PROJECT=""; TARBALL=""
 OC_HOME=""; OC_PROJECT=""
 DM_HOME=""; DM_INSTALL=""; DM_PROJECT=""; DM_TARBALL=""; DM_PID=""
+BL_HOME=""; BL_PREFIX=""; BL_PROJECT=""
 cleanup() {
   [ -n "$DM_PID" ] && kill "$DM_PID" 2>/dev/null
   [ -n "$FAKE_HOME" ]  && rm -rf "$FAKE_HOME"
@@ -67,6 +71,9 @@ cleanup() {
   [ -n "$DM_INSTALL" ] && rm -rf "$DM_INSTALL"
   [ -n "$DM_PROJECT" ] && rm -rf "$DM_PROJECT"
   [ -n "$DM_TARBALL" ] && [ -f "$ROOT/daemon/$DM_TARBALL" ] && rm -f "$ROOT/daemon/$DM_TARBALL"
+  [ -n "$BL_HOME" ]    && rm -rf "$BL_HOME"
+  [ -n "$BL_PREFIX" ]  && rm -rf "$BL_PREFIX"
+  [ -n "$BL_PROJECT" ] && rm -rf "$BL_PROJECT"
   return 0
 }
 trap cleanup EXIT
@@ -845,7 +852,104 @@ fi
 mv "$PROJECT/.reap/config.yml.orig2" "$PROJECT/.reap/config.yml" 2>/dev/null || true
 green "  ok    an installed reap starts an installed daemon, with bun and without"
 
-# ── 6. The other client: can OpenCode read what REAP wrote for it? ──────────
+# ── 6. Install scripts blocked: is what we ship still usable? ──────────────
+#
+# npm 12 stopped running install scripts for global installs by default. REAP
+# put every user-level asset behind exactly one of them:
+#
+#   scripts/postinstall.sh → install-skills → slash commands, agent
+#   definitions, ~/.reap/reap-guide.md, the SessionStart hook
+#
+# Blocked, the install still succeeds and the binary still runs. What the user
+# loses is the entire agent integration, with no error anywhere — and the
+# README's first instruction is `/reap.init`, a slash command that is now one
+# of the missing files. Measured against the real 0.17.5 tarball before this
+# section existed: 19 commands and 2 agents on npm 11, zero of each on npm 12.
+#
+# The condition is forced with --ignore-scripts rather than inferred from the
+# runner's npm version. release.yml pins the gate to node's bundled npm, so a
+# version-dependent check here would quietly stop reproducing anything the day
+# that pin changes — and the failure mode would be a passing check.
+#
+# Absence is asserted before the repair is asserted. Without it a future npm
+# that ignores --ignore-scripts would leave this section testing a healthy
+# install and reporting a pass, which is the same shape of defect it exists to
+# catch.
+echo
+echo "Checking an install with scripts blocked..."
+
+BL_HOME=$(mktemp -d)
+BL_PREFIX=$(mktemp -d)
+BL_PROJECT=$(mktemp -d)
+
+if ! HOME="$BL_HOME" npm i -g --ignore-scripts --prefix "$BL_PREFIX" "$ROOT/$TARBALL" >/dev/null 2>&1; then
+  red "  FAIL  global install with --ignore-scripts failed"
+  exit 1
+fi
+
+BL_BIN="$BL_PREFIX/bin/reap"
+if [ ! -x "$BL_BIN" ]; then
+  red "  FAIL  reap binary missing at $BL_BIN"
+  exit 1
+fi
+
+BL_PKG="$BL_PREFIX/lib/node_modules/@c-d-cc/reap"
+BL_CMD_DIR="$BL_HOME/.claude/commands"
+BL_AGENT_DIR="$BL_HOME/.claude/agents"
+BL_GUIDE="$BL_HOME/.reap/reap-guide.md"
+
+count_matching() { ls -1 "$1" 2>/dev/null | grep -c "$2" | tr -d ' '; }
+
+if [ -e "$BL_GUIDE" ] || [ "$(count_matching "$BL_CMD_DIR" '^reap\.')" != "0" ]; then
+  red "  FAIL  --ignore-scripts no longer blocks the postinstall"
+  dim "        This section reproduces npm 12 by blocking install scripts. If"
+  dim "        they ran, nothing below is testing the condition it claims to."
+  exit 1
+fi
+green "  ok    blocked install leaves no user-level assets (condition reproduced)"
+
+# What the user has at this point is the binary and the README. `reap init` is
+# what the README's CLI path leads to, so that is the command asked to repair.
+# Any other reap command must do the same — this one is chosen because it is
+# the first a new user runs, not because it is special.
+(cd "$BL_PROJECT" && git init -q && git config user.email "self@check" && git config user.name "Self Check")
+if ! (cd "$BL_PROJECT" && HOME="$BL_HOME" "$BL_BIN" init blockedtest >/dev/null 2>&1); then
+  red "  FAIL  reap init failed under a blocked install"
+  exit 1
+fi
+
+# Counts come from the package that was just installed, so this asserts "all of
+# them" rather than a number written here that drifts as commands are added.
+BL_WANT_CMDS=$(count_matching "$BL_PKG/dist/adapters/claude-code/skills" '^reap\..*\.md$')
+BL_WANT_AGENTS=$(count_matching "$BL_PKG/dist/templates/agents" '^reap-.*\.md$')
+if [ "$BL_WANT_CMDS" = "0" ] || [ "$BL_WANT_AGENTS" = "0" ]; then
+  red "  FAIL  the installed package carries no skills or no agent definitions"
+  dim "        expected sources under $BL_PKG/dist/"
+  exit 1
+fi
+
+BL_FAILURES=""
+[ -f "$BL_GUIDE" ] || BL_FAILURES="$BL_FAILURES\n        ~/.reap/reap-guide.md missing — CLAUDE.md imports it by path"
+BL_GOT_CMDS=$(count_matching "$BL_CMD_DIR" '^reap\..*\.md$')
+[ "$BL_GOT_CMDS" = "$BL_WANT_CMDS" ] || BL_FAILURES="$BL_FAILURES\n        ~/.claude/commands/: $BL_GOT_CMDS of $BL_WANT_CMDS reap.*.md — /reap.* unavailable"
+BL_GOT_AGENTS=$(count_matching "$BL_AGENT_DIR" '^reap-.*\.md$')
+[ "$BL_GOT_AGENTS" = "$BL_WANT_AGENTS" ] || BL_FAILURES="$BL_FAILURES\n        ~/.claude/agents/: $BL_GOT_AGENTS of $BL_WANT_AGENTS reap-*.md — no evolve/evaluate agent"
+grep -q "reap load-context" "$BL_HOME/.claude/settings.json" 2>/dev/null \
+  || BL_FAILURES="$BL_FAILURES\n        ~/.claude/settings.json has no SessionStart hook — no dynamic context"
+
+if [ -n "$BL_FAILURES" ]; then
+  red "  FAIL  a blocked install stays broken after the user's first command"
+  echo
+  printf '%b\n' "$BL_FAILURES"
+  echo
+  dim "        The binary works and the integration does not. Nothing tells the"
+  dim "        user, and the documented next step (/reap.init) is one of the"
+  dim "        files that did not get installed."
+  exit 1
+fi
+green "  ok    the first reap command restores all user-level assets"
+
+# ── 7. The other client: can OpenCode read what REAP wrote for it? ──────────
 #
 # Everything above runs as a claude-code project, because that is what
 # `reap init` produces. The OpenCode path is written by the same installer and

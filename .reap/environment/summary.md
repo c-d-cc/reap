@@ -10,7 +10,7 @@
 
 - Runtime: Bun (build), Node.js (execution)
 - Build: `bun build` → single bundle (`dist/cli/index.js`, ~770KB)
-- Dependencies: `yaml` v2 — **유일한 production dependency** (gen-083 에서 사실이 됨. 그 전에는 `@c-d-cc/reap-daemon` 이 `file:./daemon` 으로 선언되어 있었고 tarball 에는 없었다)
+- Dependencies: `yaml` v2 — **유일한 production dependency**. daemon 은 의존이 아니다 (아래 Workspaces)
 - Workspaces: `daemon` — 런타임 의존이 **아니다**. `npm ci` 한 번으로 daemon 의 의존까지 설치되게 하는 것이 목적이며, 소비자의 npm 은 의존 패키지의 `workspaces` 필드를 처리하지 않는다
 - CLI Framework: 자체 구현 (`src/libs/cli.ts`) — commander/yargs 대신
 - Crypto: Node.js native `crypto` (nonce, hash)
@@ -53,12 +53,14 @@ src/
 │   ├── template.ts             — artifact 템플릿 복사
 │   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). lineage 편향 분석 제거됨
 ├── cli/
-│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, config, run, make, cruise, install-skills, fix, destroy, clean, check-version, update, load-context, dump-state, daemon)
+│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, config, run, make, cruise, install-skills, fix, destroy, clean, check-version, update, load-context, dump-state, daemon).
+│   │                             **`program.parse()` 앞에서 `ensureUserLevelAssets` 를 await** — 명령을 가리지 않는다.
+│   │                             `postinstall` 이 안 돈 사용자가 가진 것은 바이너리 하나이므로 그것을 부르는 것 자체가 조건이다
 │   └── commands/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair, --migrate 지원)
 │       ├── migrate.ts          — v0.15→v0.16 마이그레이션 (multi-phase: confirm→execute→vision→complete)
 │       ├── check-version.ts    — postinstall/SessionStart용: v0.15 legacy cleanup + autoUpdate 자동 업데이트 + autoUpdateMinVersion guard + release notice 표시 (semverGte, queryAutoUpdateMinVersion, queryLatestVersion, performAutoUpdate, handOffToNewBinary, checkAutoUpdateGuard)
-│       ├── load-context.ts     — SessionStart hook용: dynamic context 주입 (buildKnowledgeContext, hookSpecificOutput JSON 출력). gen-062에서 정/동 분리 — Current State/Strict/Language 3개 dynamic 섹션만 출력 (~1KB). static knowledge(genome/env/vision/memory/reap-guide)는 CLAUDE.md의 `@` import refs로 Claude Code가 직접 로드. 비-REAP 디렉토리에서는 silent exit
+│       ├── load-context.ts     — SessionStart hook용: dynamic context 주입 (buildKnowledgeContext, hookSpecificOutput JSON 출력). Current State/Strict/Language 3개 dynamic 섹션만 출력한다 (~1KB) — static knowledge(genome/env/vision/memory/reap-guide)는 CLAUDE.md 의 `@` import refs 로 Claude Code 가 직접 로드하므로 여기서 다루지 않는다. 비-REAP 디렉토리에서는 silent exit
 │       ├── dump-state.ts       — `.reap/.session-state.md`에 동일 dynamic context 기록 (--stdout/--silent 지원). OpenCode plugin과 외부 도구용. emitOutput이 lifecycle 명령 종료 시 sync 버전(dump-state-sync.ts)으로 자동 dump
 │       ├── run/                — stage 실행 (21 handlers)
 │       │   ├── start.ts        — generation 생성 (scan → create). create phase 에 **backlog gate**: `--backlog`/`--no-backlog` 없이 pending > 0 이면 `status: prompt`/`phase: select-backlog` 로 멈춘다 (idempotent). `consumeBacklog` warning 은 `context.backlogWarning` 으로 surface. create 직후 `config?.daemon === true` 시 `ensureRegistered` + `triggerIndexing`
@@ -92,15 +94,30 @@ src/
 │           └── lifecycle.ts    — generation 시작/완료 시 자동 인덱싱 훅
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/                   — AI client 어댑터 (dispatcher + module 패턴)
-│   ├── index.ts                — dispatcher: `getAdapter(agentClient)` → AdapterModule. codex는 helpful Error throw, unknown은 claude-code fallback
-│   ├── types.ts                — AdapterModule interface (installSkills / ensureProjectIntegration / registerSessionIntegration / **userLevelDirs(home?) — gen-076: adapter 가 정식 설치 위치의 단일 소유자. integrity checker 가 이것을 주입받아 자기 설치 위치를 legacy 로 오탐하지 않는다 (issue #22)**)
+│   ├── index.ts                — `getAdapter(agentClient)` → AdapterModule (codex 는 helpful Error, unknown 은 claude-code fallback).
+│   │                             `resolveAgentClient(cwd)` — config.yml 에서 client 판정 (install-skills 와 공유).
+│   │                             **`ensureUserLevelAssets({cwd, version, home?})`** — `~/.reap/.install-stamp` 의 client 별 버전과
+│   │                             비교해 필요할 때만 설치. `"synced"|"partial"|"current"|"failed"`, silent · never throws.
+│   │                             **`complete` 일 때만 stamp** — 부분 설치를 성공으로 굳히면 그 자체가 무증상 실패가 된다
+│   ├── types.ts                — AdapterModule (installSkills / ensureProjectIntegration / registerSessionIntegration /
+│   │                             **syncUserLevelAssets(home?) → UserLevelSyncResult{complete, missing}** / **userLevelDirs(home?)** —
+│   │                             후자는 정식 설치 위치의 단일 소유자이며 integrity checker 가 주입받는다 (issue #22))
 │   ├── claude-code/
-│   │   ├── index.ts            — AdapterModule wrapper. **registerSessionIntegration 이 installSlashCommandsOnly + registerSessionHooks 양쪽 호출 — `reap update` 흐름에서 ~/.claude/commands/ user-level sync 보장 (gen-064 T012)**
-│   │   ├── install.ts          — skill 파일 설치 (~/.claude/commands/) + SessionStart hook 등록 (check-version + load-context). **installSlashCommandsOnly() export — installSkills 내부와 adapter registerSessionIntegration 양쪽이 silent 재사용 (gen-064 T011)**. **installAgents(home?) prefix-anchored (`^reap-.+\.md$`) silent helper export — Claude Code agent definitions (`~/.claude/agents/reap-*.md`) sync 도 installSkills + registerSessionIntegration 양 caller (같은 패턴).**
+│   │   ├── index.ts            — wrapper. installSkills·registerSessionIntegration·syncUserLevelAssets 셋 다 install.ts 의
+│   │   │                         `syncUserLevelAssets` 를 경유한다 (목록을 아는 곳은 하나)
+│   │   ├── install.ts          — **`syncUserLevelAssets(home)` = 사용자 레벨 자산 일습의 단일 소유자**: slash commands
+│   │   │                         (`~/.claude/commands/reap.*.md`) + agents (`~/.claude/agents/reap-*.md`, prefix-anchored)
+│   │   │                         + `~/.reap/reap-guide.md` + SessionStart hook (settings.json). `home` 전 계층 주입.
+│   │   │                         guide·hook installer 가 성공 여부를 반환하고 `missing` 이 모은다
 │   │   └── skills/             — 19 slash command files (.md). OpenCode adapter 도 본 디렉토리를 source 로 재사용 (single source)
-│   └── opencode/               — OpenCode 어댑터 
-│       ├── index.ts            — AdapterModule wrapper
-│       ├── install.ts          — opencode.json instructions/plugin sync (REAP_INSTRUCTIONS 9 + REAP_PLUGIN_ENTRY), AGENTS.md marker-hash sync, .opencode/plugins/reap-plugin.ts 배치, **installSlashCommands(home?) ~/.config/opencode/commands/reap.*.md cleanup-then-copy**, opencodeCommandsDir/claudeCodeSkillsDir helpers. **registerSessionIntegration 도 installSlashCommands 호출 — `reap update` 흐름에서 user-level sync 보장 (gen-064 T013)**. **installAgents(home?) + opencodeAgentsDir(home?) 신설 — target `~/.config/opencode/agent/` (singular, OpenCode TUI tip 공식), AGENT_PATTERN `^reap-.+\.md$` (slash-command 의 dot 와 비대칭, frontmatter name 필드 따름). installSkills emitOutput + registerSessionIntegration 양 caller.** **`toOpenCodeAgent(source)` 로 frontmatter 를 OpenCode 스키마로 변환 후 write — 기존 `cp` 는 claude-code 스키마를 그대로 복사해 **OpenCode 전체를 설정 오류로 멈추게 했다**(`tools` 문자열 vs record). `tools`→`permission` record, `name`/`memory`/`model` 제거, `mode: subagent` 추가. 본문은 단일 소스. claude-code adapter 는 무변경.**
+│   └── opencode/               — OpenCode 어댑터
+│       ├── index.ts            — wrapper
+│       ├── install.ts          — project-level: opencode.json instructions/plugin sync (REAP_INSTRUCTIONS 9 + REAP_PLUGIN_ENTRY),
+│       │                         AGENTS.md marker-hash sync, `.opencode/plugins/reap-plugin.ts` 배치.
+│       │                         user-level: **`syncUserLevelAssets(home)`** = guide + `installSlashCommands` + `installAgents`.
+│       │                         경로 helper `opencodeConfigDir`/`opencodeCommandsDir`/`opencodeAgentsDir` (agent 는 singular).
+│       │                         **`toOpenCodeAgent(source)`** 가 frontmatter 를 OpenCode 스키마로 변환한 뒤 write —
+│       │                         claude-code 스키마를 그대로 `cp` 하면 (`tools` 문자열 vs record) **OpenCode 전체가 멈춘다**
 │       ├── plugin/
 │       │   └── reap-plugin.ts  — OpenCode plugin source (session.created + tool.execute.before, inline 타입)
 │       └── templates/
@@ -140,12 +157,12 @@ daemon/                            — 별도 npm 패키지 (@c-d-cc/reap-daemon
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline — **unit 555 / e2e 287 / scenario 44, 세 스위트 모두 0 fail.** daemon 자체 스위트는 별도로 `cd daemon && bun test tests/` → **130 pass**. 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
+현재 baseline — **unit 568 / e2e 292 / scenario 44, 세 스위트 모두 0 fail.** daemon 자체 스위트는 별도로 `cd daemon && bun test tests/` → **130 pass**. 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
 
 `tests/scenario/multi-generation.test.ts` 는 gen-065 backlog gate 를 시나리오로 커버한다 — pending 이 있으면 `run start` 가 `status: "prompt"` 로 막히고, `--backlog`(소비) 또는 `--no-backlog`(유지) 로 재호출해야 진행된다. 새 scenario 가 backlog 파일을 만든다면 같은 gate 를 거치므로 이 패턴을 참고할 것.
 
 지원 자산:
-- `tests/helpers/setup.ts` — `cli` / `cliRaw` / `setupProject` / `setupGitProject` / `advanceStage` / `cleanup`. 대부분의 e2e·scenario 가 여기만 import 한다
+- `tests/helpers/setup.ts` — `cli` / `cliRaw` / `setupProject` / `setupGitProject` / `advanceStage` / `cleanup`. 대부분의 e2e·scenario 가 여기만 import 한다. **`cli()` 는 HOME 을 격리하지 않는다** — CLI 진입점이 사용자 레벨 자산을 동기화하므로 스위트 실행이 개발자의 실제 `~/.claude/`·`~/.reap/` 에 버전당 1회 쓴다. 사용자 레벨을 다루는 테스트는 `cliWithHome`(각 파일 로컬, `XDG_CONFIG_HOME` 도 함께 제거) 을 쓴다
 - `tests/helpers/daemon.ts` — daemon 격리 helper. `spawnTestDaemon(port, fakeHome)` 가 `bun src/index.ts` 를 spawn. `TEST_DAEMON_PORT=17225` + HOME override 로 사용자 daemon(17224) 영향 0. **소스만 보므로 배포 산출물 결함은 못 본다** — 그쪽은 자기진단 게이트 § 5 가 담당한다
 - `tests/fixtures/daemon-sample/` — daemon e2e 용 소형 TypeScript 프로젝트(5 파일). 심볼 관계 `main → validateId + formatUser`. helper 가 매번 tmpdir 복사 + git init
 
@@ -163,7 +180,7 @@ daemon/                            — 별도 npm 패키지 (@c-d-cc/reap-daemon
 - `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates)
 - `scripts/alpha-publish.sh` — alpha 배포 헬퍼
 - `scripts/postinstall.sh` — npm postinstall hook
-- `scripts/check-self-diagnosis.sh` — **자기진단 게이트 (gen-078, gen-082 OpenCode, gen-083 daemon)**. `npm pack` → 격리 HOME/prefix 에 설치 → `reap init` → `fix --check` 가 **경고·에러 0** 을 요구. release publish 앞 + CI 매 push 양쪽에서 실행. 대화로 채워지는 genome/goals 는 스크립트가 채운 뒤 진단 — 그것까지 요구하면 REAP 정상 동작에 fail 한다. daemon 절은 항상 실행된다 — 끄는 스위치는 두지 않고, 비용이 문제가 되면 release 전용으로 옮긴다
+- `scripts/check-self-diagnosis.sh` — **자기진단 게이트**. `npm pack` → 격리 HOME/prefix 에 설치 → `reap init` → `fix --check` 가 **경고·에러 0** 을 요구. 7개 절: 빌드·설치·init·진단 / daemon / **install script 차단** / OpenCode. release publish 앞 + CI 매 push 양쪽에서 실행. 대화로 채워지는 genome/goals 는 스크립트가 채운 뒤 진단 — 그것까지 요구하면 REAP 정상 동작에 fail 한다. daemon 절은 항상 실행된다 — 끄는 스위치는 두지 않고, 비용이 문제가 되면 release 전용으로 옮긴다
 - `scripts/list-carriers.sh` — **carrier 표식 조회 (gen-078)**. `reap:carrier(<id>)` 마커를 grep 해 ID 별 파일 목록 출력. `--orphans` 는 1개 파일에만 있는 ID 탐지 — 표식 불필요이거나 **다른 carrier 를 빠뜨린 것**(#21/#22 의 상태)
 - `scripts/check-agent-integration.sh` — **agent 통합 검증 / 층2 (gen-079)**. 헤드리스 `claude -p` 로 `/reap.start` 를 시키고 **`current.yml` 생성 여부**로 판정 — agent 응답(자연어)은 파싱하지 않는다. slash command 인식 / `@` import 로드 / SessionStart hook 발화 / CLI 동작을 한 번에 검증. **격리하지 않는다** — Claude Code 는 로그인을 slash command 와 같은 `~/.claude/` 에 두므로 HOME 격리 시 인증을 잃는다. 현재 설치를 읽기만 하고 임시 프로젝트에만 쓴다. **~$0.25/회** 라 CI 아닌 릴리즈 전 (`reapdev.versionBump` Step 5-2)
 - `scripts/check-version-floors.sh` — **버전 하한 게이트**. reap 이 사용자에게 "이 버전으로 올려라"라고 말하는 두 숫자(`MIN_DAEMON_VERSION`, `package.json` 의 `reap.autoUpdateMinVersion`)가 npm 에 **실제로 발행돼 있는지** 검사한다. 값은 소스에서 읽는다(carrier 표식). 네트워크 실패·비-JSON 은 amber SKIP, **패키지 자체가 없으면(`E404`) FAIL** — 그 둘을 구분하지 않으면 이름 오타가 조용히 통과한다. `release.yml` 의 `npm publish` 앞. **CI 에는 없다** — 매 push 마다 네트워크가 필요하고, 코드와 무관한 이유로 주기적으로 SKIP 을 내는 검사는 사람이 스크롤로 넘긴다
@@ -221,6 +238,13 @@ daemon 절(§ 5)은 **소스 트리를 보지 않는다** — 거기서는 의�
 - **부재를 주장하는 assertion 은 스스로 먼저 증명한다.** 크래시·비정상 출력·필드명 변경도 "부재"로 읽히므로 `status: "ok"` 와 숫자 `warningCount` 를 요구한 뒤에야 내용을 본다. `grep -q` 로 없음을 확인하는 자리는 전부 같은 취약성을 갖는다
 - **비용은 미측정이고 끄는 스위치는 두지 않는다.** `better-sqlite3` 가 두 번 설치되므로 리눅스에서 prebuilt 를 못 받으면 소스 컴파일이 두 번이다. 후퇴가 필요하면 release 전용으로 옮기는 것이 호출 한 줄 — 꺼진 채로 통과를 보고하는 환경변수보다 낫다
 - 게이트는 `daemon/dist` 를 지우고 재빌드한다 — **로컬 실행이 작업 트리를 건드리는 유일한 지점**(gitignore 대상이라 무해)
+
+### 자기진단은 install script 가 차단된 설치도 본다
+
+§ 6 은 같은 tarball 을 `--ignore-scripts` 로 한 번 더 설치한다. npm 12 부터 전역 설치의 lifecycle script 는 기본 차단이고, REAP 의 사용자 레벨 자산은 그때까지 `postinstall` 하나에만 걸려 있었다 — 바이너리는 돌고 통합은 없고 오류도 없었다.
+
+- **npm 버전으로 조건을 추론하지 않고 `--ignore-scripts` 로 강제한다.** `release.yml` 이 게이트를 node 번들 npm 에 고정하므로, 버전 판정은 그 고정이 바뀌는 날 **아무것도 재현하지 않으면서 pass 를 보고**하게 된다. 부재 선단언(위 daemon 절의 같은 규칙)이 그 퇴화를 막는다. 기대 개수는 설치된 패키지에서 센다
+- **잡지 못하는 것**: claude-code 만 본다. "차단 + OpenCode" 는 fake-home unit/e2e 로만 덮인다. 그리고 `reap init` 하나로 판정하므로 "어떤 명령이든 복구한다"는 e2e 쪽이 증명한다
 
 ### 자기진단은 두 클라이언트를 본다 (gen-082)
 

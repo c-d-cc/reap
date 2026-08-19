@@ -3,7 +3,7 @@
  * (Claude Code, OpenCode, future Codex, ...).
  *
  * An adapter encapsulates HOW REAP integrates with a specific AI client:
- *   - user-level skill/command installation (`installSkills`)
+ *   - user-level asset installation (`syncUserLevelAssets`, `installSkills`)
  *   - project-level entry-point file management (`ensureProjectIntegration` —
  *     CLAUDE.md for claude-code, AGENTS.md for opencode)
  *   - session-start / runtime integration registration
@@ -15,6 +15,24 @@
  * go through the dispatcher.
  */
 export type IntegrationAction = "created" | "appended" | "updated" | "skipped";
+
+/**
+ * What a `syncUserLevelAssets` call actually managed to place.
+ *
+ * `complete` exists because the individual installers swallow their own
+ * failures — an unwritable agents directory or a hand-edited
+ * `~/.claude/settings.json` that will not parse leaves the rest of the install
+ * fine and that one piece absent. `ensureUserLevelAssets` records success in a
+ * stamp, and a stamp written over a partial install is permanent: nothing
+ * retries at the same version. That is the exact failure shape this whole
+ * mechanism exists to remove, so the stamp is only written when `complete`.
+ *
+ * `missing` names the pieces that did not land, for diagnostics.
+ */
+export interface UserLevelSyncResult {
+  complete: boolean;
+  missing: string[];
+}
 
 export interface AdapterModule {
   /** Identifier (must match the agentClient field value). */
@@ -39,6 +57,27 @@ export interface AdapterModule {
    * absent target config.
    */
   registerSessionIntegration(projectRoot: string): Promise<void>;
+
+  /**
+   * Install every user-level asset this client needs, and nothing else.
+   *
+   * "User-level" is the contract, not a description: this must not read or
+   * write the project directory, because `ensureUserLevelAssets` calls it from
+   * wherever the user happened to run `reap` — including directories that are
+   * not REAP projects.
+   *
+   * `installSkills` and `registerSessionIntegration` both delegate here rather
+   * than repeating the list. Before gen-087 the list was repeated, and the two
+   * copies had already drifted: `registerSessionIntegration` omitted
+   * `~/.reap/reap-guide.md`, which the entry-point file imports by path.
+   *
+   * Must be silent (no `emitOutput`), idempotent, and prefix-anchored so
+   * user-supplied files in the same directories survive. Must report whether
+   * every piece landed — see `UserLevelSyncResult`.
+   *
+   * @param home - override for testing; defaults to the real home directory
+   */
+  syncUserLevelAssets(home?: string): Promise<UserLevelSyncResult>;
 
   /**
    * Absolute paths of the user-level directories this adapter legitimately

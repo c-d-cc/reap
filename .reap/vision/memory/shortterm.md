@@ -1,42 +1,45 @@
 # Shortterm Memory
 
-## 세션 요약 (gen-086, 2026-08-19)
+## 세션 요약 (gen-087, 2026-08-19)
 
-### REAP 이 자기 사용자에게 잘못 말하던 것 3건 — 전부 닫았다
+### npm 12 가 REAP 을 통째로 설치되지 않게 만들고 있었다
 
-정리된 backlog 1건(11건을 합친 것)을 소비했다. **범위는 유저가 고정**했고 지키는 것 자체가 이번 세대의 절반이었다 — 소스 5파일 / 테스트 5파일, backlog 신설 0, 게이트·스크립트 신설 0.
+npm 12 는 전역 설치의 install script 를 기본 차단한다. REAP 의 사용자 레벨 자산 넷
+(slash command 19 · agent 2 · `~/.reap/reap-guide.md` · SessionStart hook)은 `scripts/postinstall.sh`
+**하나에만** 걸려 있었다. 결과: 바이너리는 돌고 통합은 없고 **오류도 없다.**
+README 의 Quick Start 는 `/reap.init` — 없어진 그 파일이다.
 
-- **`gitPush` 가 stderr 를 버렸다** → `GitPushResult { success, error }`. 옛 문구 `"Check remote configuration and network."` **삭제**. 그 문장이 결함의 본체였다 — 추측인데 진단처럼 읽혔고, 실사례에서 두 가지 모두 정상이었다
-- **validation work 재실행 불가** → 두 graph 의 `validation:entry` 에 self-loop. `stage-transition.ts` 무변경. **새 메커니즘을 만들지 않았다**
-- **`DaemonNotInstalledError` 가 명시 경로 무시** → `ensureDaemon` 이 `locateDaemon()` 을 쓰고 `missingDaemonRemedy` 를 신설·공유
+수정은 셋이다. (1) adapter 마다 `syncUserLevelAssets` 하나가 자산 일습을 소유하고 기존 두 caller 가
+경유한다 (세 번째 caller 를 덧붙이지 않았다). (2) `program.parse()` 앞에서
+`ensureUserLevelAssets` — 명령을 가리지 않는다. (3) `~/.reap/.install-stamp` 로 client·버전당 1회.
 
-### 결함 2 의 진짜 증거는 evaluator 가 아니었다
+**게이트 6절**이 `--ignore-scripts` 로 조건을 강제 재현한다. npm 버전으로 추론하지 않는다 —
+`release.yml` 이 게이트를 node 번들 npm 에 고정하므로 그러면 언젠가 조용히 무력해진다.
 
-backlog 은 "evaluator prompt 회수 불가"만 적었다. 재현하다 더 강한 것이 나왔다 — **artifact 미작성 분기가 스스로 `nextCommand: "reap run validation"` 을 내보내고 REAP 이 그것을 거부**한다. evaluator 를 안 쓰는 사용자도 겪는다.
+### evaluator 가 잡은 것이 이번 세대의 절반이다
 
-그리고 **본 세대가 자기 수정의 첫 사용자**다. validation 에서 `run validation` 을 두 번 불러 evaluator prompt 를 두 번 받았다.
-
-### negative 가 없었으면 못 봤을 것
-
-daemon 항목 첫 negative 에서 fail 이 1건뿐이었다. 내가 쓴 보완 단언 `toContain(DAEMON_BIN_ENV)` 이 **무력**했기 때문 — `DAEMON_LOCATE_HINT` 가 그 변수명을 이미 철자한다. 경로 문자열로 바꾸니 2건. evaluator 가 같은 모양을 하나 더 찾았다(`toContain("daemonBin")`).
+초안은 sync 가 반환하면 stamp 를 찍었다. installer 셋이 자기 실패를 삼키므로,
+`settings.json` 이 파싱 불가인 사용자는 hook 없이 `"synced"` 를 받고 **영구히 재시도되지 않았다.**
+변경 전에도 삼킴은 있었으나 매 `install-skills`/`update` 가 재시도했다 — **종결시킨 것이 stamp** 였고,
+그 결과는 이번 세대가 없애려던 형태와 정확히 같다.
+`UserLevelSyncResult{complete, missing}` 로 계약을 바꾸고 `complete` 일 때만 stamp 한다.
 
 ### 지금 상태
 
-- unit **555** (545→) / e2e **287** (279→) / scenario 44 / daemon 130, 전부 0 fail
-- `package.json` **0.17.5 유지** (의도적 무변경). 태그 미발행
-- **로컬 macOS 에서만 돌았다.** push 하지 않았으므로 reap-test dispatch 미실행 — 리눅스는 표본 밖
-- `fix --check` 0 error / 3 warning — 전부 기존(lineage parent 2 + `environment/summary.md` 272줄)
+- unit **568** (555→) / e2e **292** (287→) / scenario 44 / daemon 130, 전부 0 fail
+- 자기진단 게이트 전 절 통과 (opencode 1.3.16). **수정 전 6절이 fail 하는 것을 먼저 확인했다**
+- `fix --check` 0 error / 4 warning — 기존 (lineage parent 2 + longterm 51줄 + summary)
+- `package.json` **0.17.5 유지**. push·tag·publish 없음. **로컬 macOS 에서만 돌았다**
 
-### 다음
+### 다음 세션이 알아야 할 것
 
-- **0.17.5 릴리즈 문서 보강 → 태그.** 세대 밖, main agent 소관. gen-084·085 **+086** 내용을 RELEASE_NOTES / NOTICE / 5 로케일에
-- daemon 파생 작업은 여기서 끝났다. 남은 pending 7건은 전부 0.18 또는 daemon SCIP
-
-### 열려 있는 갭
-
-- **`ensureDaemon` 배선은 `[독해]` + typecheck 뿐.** 비공개 함수이고 실제 spawn 을 시도해 주입 seam 없이는 검증 불가
-- **결함 3 은 오늘 사용자 화면에 뜨는 경로가 없다** — `daemonRequest` 소비처 전수 확인. 짝이 안 맞던 상태의 교정이며 사용자 대면 `[실행]` 증거는 만들 수 없다
-- **merge lifecycle 의 self-loop 은 graph·unit 단언뿐.** merge validation 을 두 번 부르는 e2e 가 없다 (merge e2e 자체가 없다)
-- `resolveDaemonBin` 이 프로덕션 dead code 가 됐다. 제거는 범위 밖이라 두었다
-- `src/cli/commands/run/pull.ts:22` 에 이번에 지운 문장이 fetch 경로에 그대로 있다. 계획이 명시 배제
-- `environment/summary.md` 272줄. 근본 정리는 **처방적 서술을 genome 으로 옮기는 작업**이며 손으로 지워 경고를 끄는 것은 genome 이 금한다
+- **`environment/summary.md` 가 296줄이 됐다** (273→). 새 구조가 실제로 늘어난 몫이고,
+  근본 정리는 **처방적 서술을 genome 으로 옮기는 것**인데 이번 세대는 genome immutable 조건이었다.
+  손으로 지워 경고를 끄는 것은 genome 이 금한다 — 다음에 genome 을 열 수 있을 때 함께 처리할 것
+- **테스트 실행이 개발자의 실제 HOME 에 버전당 1회 쓴다.** `tests/helpers/setup.ts` 의 `cli()` 가
+  HOME 을 격리하지 않기 때문. 이번 세션에서 실제로 발생했고 `~/.config/opencode/` 도 채워졌다.
+  **작업 트리 중간 상태의 agent 정의가 살아 있는 클라이언트로 들어갈 수 있다**
+- **`.reap/life/backlog/npm-uninstall-…md` 가 이 세대 중에 나타났다.** 내가 만들지 않았다
+  (`reap make backlog` 미실행). pending 6 → 7. 출처 확인 후 유지/삭제를 인간이 정해야 한다
+- 0.17.5 릴리즈 문서에 이 건을 넣을지 — 증상이 "REAP 가 아예 안 붙는다"라 changelog 한 줄보다
+  큰 자리가 맞을 수 있다

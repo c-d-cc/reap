@@ -2,10 +2,11 @@ import {
   installSkills,
   ensureAgentsMd,
   registerSessionIntegration,
+  syncUserLevelAssets,
   opencodeCommandsDir,
   opencodeAgentsDir,
 } from "./install.js";
-import type { AdapterModule, IntegrationAction } from "../types.js";
+import type { AdapterModule, IntegrationAction, UserLevelSyncResult } from "../types.js";
 
 /**
  * OpenCode adapter — fulfills the `AdapterModule` contract using the OpenCode
@@ -27,6 +28,10 @@ export const opencodeAdapter: AdapterModule = {
 
   async registerSessionIntegration(projectRoot: string): Promise<void> {
     await registerSessionIntegration(projectRoot);
+  },
+
+  async syncUserLevelAssets(home?: string): Promise<UserLevelSyncResult> {
+    return await syncUserLevelAssets(home);
   },
 
   userLevelDirs(home?: string): string[] {

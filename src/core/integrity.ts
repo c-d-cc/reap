@@ -169,7 +169,11 @@ async function checkRequiredFiles(
   const guideGlobal = join(homedir(), ".reap", "reap-guide.md");
   const guideLocal = join(paths.reap, "reap-guide.md");
   if (!(await fileExists(guideGlobal)) && !(await fileExists(guideLocal))) {
-    errors.push("reap-guide.md missing — run 'npm install -g @c-d-cc/reap' to reinstall");
+    // Not "reinstall the package": npm 12 blocks install scripts for global
+    // installs by default, so a reinstall runs no postinstall and lands the
+    // user right back here. `reap install-skills` places it in every npm
+    // version, and `reap fix` restores it directly.
+    errors.push("reap-guide.md missing — run 'reap install-skills' to restore it");
   }
 
   // memory tier files

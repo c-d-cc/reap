@@ -34,6 +34,7 @@ import { execute as helpExecute } from "./commands/help.js";
 import { execute as daemonExecute } from "./commands/daemon/index.js";
 import { execute as loadContextExecute } from "./commands/load-context.js";
 import { execute as dumpStateExecute } from "./commands/dump-state.js";
+import { ensureUserLevelAssets } from "../adapters/index.js";
 
 const program = new Command();
 
@@ -195,5 +196,15 @@ program
   .action(async (subcommand: string, options: { query?: string }) => {
     await daemonExecute(subcommand, options);
   });
+
+// Before anything is dispatched, make sure this machine actually has the
+// user-level assets REAP needs — slash commands, agent definitions, the guide,
+// the SessionStart hook. `scripts/postinstall.sh` used to be the only thing
+// that installed them, and npm 12 blocks install scripts for global installs by
+// default, so the binary a user runs may be all they got (gen-087).
+//
+// Silent, and a no-op after the first run at a given version. Awaited rather
+// than fired off: a command that reads those files must not race the write.
+await ensureUserLevelAssets({ cwd: process.cwd(), version: readVersion() });
 
 program.parse();

@@ -4,6 +4,7 @@ import { fileURLToPath } from "url";
 import { homedir } from "os";
 import { ensureDir, fileExists } from "../../core/fs.js";
 import { emitOutput } from "../../core/output.js";
+import type { UserLevelSyncResult } from "../types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // In bundled mode, __dirname is dist/cli/. Skills are at dist/adapters/claude-code/skills/
@@ -54,13 +55,13 @@ export function claudeCodeCommandsDir(home: string = homedir()): string {
   return join(home, ".claude", "commands");
 }
 
-export async function installSlashCommandsOnly(): Promise<{
+export async function installSlashCommandsOnly(home: string = homedir()): Promise<{
   cleaned: string[];
   installed: number;
   files: string[];
   targetDir: string;
 }> {
-  const targetDir = claudeCodeCommandsDir();
+  const targetDir = claudeCodeCommandsDir(home);
   await ensureDir(targetDir);
 
   const cleaned = await cleanupStaleSkills(targetDir);
@@ -78,19 +79,54 @@ export async function installSlashCommandsOnly(): Promise<{
 }
 
 /**
+ * Every user-level asset the Claude Code integration needs, in one call.
+ *
+ * This is the set `scripts/postinstall.sh` used to be the only trigger for.
+ * npm 12 blocks install scripts for global installs by default, so a single
+ * owner was needed that any code path can call — see `ensureUserLevelAssets`
+ * in the adapter dispatcher (gen-087).
+ *
+ * Strictly user-level: nothing here reads or writes the project directory, so
+ * it is safe to call from a directory that is not a REAP project at all.
+ * Silent, idempotent, and prefix-anchored — user-supplied files in the same
+ * directories survive every run.
+ */
+export async function syncUserLevelAssets(home: string = homedir()): Promise<
+  UserLevelSyncResult & {
+    slashCommands: { cleaned: string[]; installed: number; files: string[]; targetDir: string };
+    agents: { cleaned: string[]; installed: number; files: string[]; targetDir: string };
+  }
+> {
+  const slashCommands = await installSlashCommandsOnly(home);
+
+  // Copy reap-guide.md to ~/.reap/ (single source, always up-to-date)
+  const guide = await installReapGuide(home);
+
+  // Copy agent definitions to ~/.claude/agents/
+  const agents = await installAgents(home);
+
+  // Register SessionStart hooks (check-version + load-context)
+  const hooks = await registerSessionHooks(home);
+
+  // Each installer above swallows its own failure, so "it returned" says
+  // nothing. The caller stamps on this, and a stamp is permanent for the
+  // version — see UserLevelSyncResult.
+  const missing: string[] = [];
+  if (slashCommands.installed === 0) missing.push("slash commands");
+  if (!guide) missing.push("~/.reap/reap-guide.md");
+  if (agents.installed === 0) missing.push("agent definitions");
+  if (!hooks) missing.push("SessionStart hooks");
+
+  return { complete: missing.length === 0, missing, slashCommands, agents };
+}
+
+/**
  * Install Claude Code skill files to user-level ~/.claude/commands/
  */
 export async function installSkills(_projectRoot?: string): Promise<void> {
-  const { cleaned, installed, files, targetDir } = await installSlashCommandsOnly();
-
-  // Copy reap-guide.md to ~/.reap/ (single source, always up-to-date)
-  await installReapGuide();
-
-  // Copy agent definitions to ~/.claude/agents/
-  await installAgents();
-
-  // Register SessionStart hooks (check-version + load-context)
-  await registerSessionHooks();
+  const {
+    slashCommands: { cleaned, installed, files, targetDir },
+  } = await syncUserLevelAssets();
 
   emitOutput({
     status: "ok",
@@ -174,8 +210,8 @@ export async function installAgents(home: string = homedir()): Promise<{
 /**
  * Copy reap-guide.md to ~/.reap/ so all projects reference a single, up-to-date copy.
  */
-async function installReapGuide(): Promise<void> {
-  const reapHome = join(homedir(), ".reap");
+export async function installReapGuide(home: string = homedir()): Promise<boolean> {
+  const reapHome = join(home, ".reap");
   await ensureDir(reapHome);
 
   // dist/templates/reap-guide.md
@@ -184,8 +220,12 @@ async function installReapGuide(): Promise<void> {
     : join(__dirname, "..", "..", "templates");
   const src = join(templateDir, "reap-guide.md");
 
-  if (await fileExists(src)) {
+  try {
+    if (!(await fileExists(src))) return false;
     await cp(src, join(reapHome, "reap-guide.md"));
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -194,8 +234,8 @@ async function installReapGuide(): Promise<void> {
  * 1. `reap check-version` — v0.15 legacy cleanup + auto-update
  * 2. `reap load-context` — inject REAP knowledge into session context
  */
-export async function registerSessionHooks(): Promise<void> {
-  const settingsPath = join(homedir(), ".claude", "settings.json");
+export async function registerSessionHooks(home: string = homedir()): Promise<boolean> {
+  const settingsPath = join(home, ".claude", "settings.json");
 
   const requiredHooks = [
     { command: "reap check-version 2>/dev/null || true", marker: "reap check-version" },
@@ -237,7 +277,12 @@ export async function registerSessionHooks(): Promise<void> {
     if (changed) {
       await writeFile(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
     }
+    return true;
   } catch {
-    // settings.json doesn't exist or parse error — skip silently
+    // A hand-edited settings.json that will not parse lands here, and skipping
+    // is still the right move — REAP must not clobber it. Reporting the miss is
+    // what is new: the caller then declines to stamp, so the next command tries
+    // again instead of the hook being lost for good at this version.
+    return false;
   }
 }

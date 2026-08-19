@@ -1,0 +1,40 @@
+id: gen-087-1a0c05
+type: embryo
+goal: npm 12 가 전역 설치의 install script 를 기본 차단하므로 REAP 의 사용자 레벨 통합(slash command /
+  agent 정의 / reap-guide / SessionStart hook)이 통째로 설치되지 않는다. postinstall 하나에만 걸려
+  있는 그 의존을 끊고, 그 상태를 자기진단 게이트가 재현해 검사하게 한다.
+parents:
+  - gen-086-e484fa
+timeline:
+  - stage: learning
+    at: 2026-08-19T14:02:48.832Z
+  - stage: planning
+    at: 2026-08-19T14:08:34.125Z
+  - stage: implementation
+    at: 2026-08-19T14:10:36.617Z
+  - stage: validation
+    at: 2026-08-19T14:22:48.747Z
+  - stage: completion
+    at: 2026-08-19T14:42:51.954Z
+status: completed
+fitnessFeedback:
+  text: >-
+    좋음. evaluator 가 stamp 함정을 잡은 것이 핵심이다. installer 넷 중 셋이 자기 실패를 삼키는 상태에서 stamp
+    를 찍으면, 변경 전에는 매 install-skills/update 가 재시도하던 것을 종결시켜 영구히 재시도되지 않는 상태를 만든다 —
+    이 세대가 없애려던 형태를 이 세대가 새로 만들 뻔했다. 그것을 수용이 아니라 UserLevelSyncResult{complete,
+    missing} 계약으로 수정한 판단이 맞다.
+
+
+    설계 판단도 좋다. init/update/fix 세 명령에 매다는 안을 '열거는 다음에 나올 진입점을 담지 못한다'로 기각하고 바이너리
+    호출 자체를 조건으로 삼은 것, 세 번째 caller 대신 syncUserLevelAssets 단일 소유자를 만들어 gen-064 가
+    고친 모양의 재발을 막은 것, 게이트가 npm 버전에 기대지 않고 --ignore-scripts 로 조건을 강제하며 부재를 먼저 단언한
+    것 — 셋 다 맞다.
+
+
+    fix --check 가 npm 12 에서 차단되는 바로 그 재설치를 시키던 문구를 함께 고친 것도 좋다.
+
+
+    결정: npm-uninstall backlog 은 유지한다 — 그 갭이 유저 본인에게 실제로 일어난 일이기 때문(전역 reap 제거 후
+    남은 skill 을 손으로 지워야 했다). environment 296줄 / 테스트의 개발자 HOME 쓰기(실제 피해 없음을 확인) /
+    diff 파일수는 완료 artifact 텍스트로만 남긴다.
+  evaluatedAt: 2026-08-19T21:32:06.975Z

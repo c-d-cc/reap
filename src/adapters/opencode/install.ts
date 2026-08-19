@@ -5,7 +5,7 @@ import { homedir } from "os";
 import { createHash } from "crypto";
 import { readTextFile, writeTextFile, ensureDir, fileExists } from "../../core/fs.js";
 import { emitOutput } from "../../core/output.js";
-import type { IntegrationAction } from "../types.js";
+import type { IntegrationAction, UserLevelSyncResult } from "../types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -229,15 +229,19 @@ export async function installPluginFile(projectRoot: string): Promise<void> {
  * Install reap-guide.md to `~/.reap/` (shared between adapters — same logic
  * as claude-code installer; duplicated to avoid cross-adapter import).
  */
-async function installReapGuide(): Promise<void> {
-  const reapHome = join(homedir(), ".reap");
+export async function installReapGuide(home: string = homedir()): Promise<boolean> {
+  const reapHome = join(home, ".reap");
   await ensureDir(reapHome);
   const templateDir = __dirname.includes("dist")
     ? join(__dirname, "..", "..", "templates")
     : join(__dirname, "..", "..", "templates");
   const src = join(templateDir, "reap-guide.md");
-  if (await fileExists(src)) {
+  try {
+    if (!(await fileExists(src))) return false;
     await cp(src, join(reapHome, "reap-guide.md"));
+    return true;
+  } catch {
+    return false;
   }
 }
 
@@ -562,9 +566,7 @@ export async function installAgents(
 export async function installSkills(projectRoot: string): Promise<void> {
   await installPluginFile(projectRoot);
   const opencodeJsonAction = await ensureOpencodeJson(projectRoot);
-  await installReapGuide();
-  const slashCommands = await installSlashCommands();
-  const agents = await installAgents();
+  const { slashCommands, agents } = await syncUserLevelAssets();
 
   emitOutput({
     status: "ok",
@@ -608,17 +610,53 @@ export async function installSkills(projectRoot: string): Promise<void> {
  *
  *   - `installPluginFile`    → `.opencode/plugins/reap-plugin.ts` (project)
  *   - `ensureOpencodeJson`   → `opencode.json` instructions + plugin entries
- *   - `installSlashCommands` → `~/.config/opencode/commands/reap.*.md`
- *   - `installAgents`        → `~/.config/opencode/agent/reap-*.md`  ← gen-066
+ *   - `syncUserLevelAssets`  → `~/.reap/reap-guide.md`,
+ *                              `~/.config/opencode/commands/reap.*.md`,
+ *                              `~/.config/opencode/agent/reap-*.md`  ← gen-066
  *
- * Both user-level syncs are idempotent and prefix-anchored. User-supplied
- * files are preserved on every run. The reap-guide.md install is intentionally
- * skipped here — that is bundled with the npm package's `postinstall` and the
- * explicit `install-skills` flow, not with per-project `update`.
+ * All user-level syncs are idempotent and prefix-anchored. User-supplied files
+ * are preserved on every run. They go through `syncUserLevelAssets`, which also
+ * covers `~/.reap/reap-guide.md` — that used to be left to `postinstall` and
+ * the explicit `install-skills` flow, until npm 12 stopped running install
+ * scripts and AGENTS.md was left importing a path with nothing behind it.
  */
 export async function registerSessionIntegration(projectRoot: string): Promise<void> {
   await installPluginFile(projectRoot);
   await ensureOpencodeJson(projectRoot);
-  await installSlashCommands();
-  await installAgents();
+  await syncUserLevelAssets();
+}
+
+/**
+ * Every user-level asset the OpenCode integration needs, in one call.
+ *
+ * Mirrors the claude-code adapter's function of the same name. This is the set
+ * `scripts/postinstall.sh` used to be the only trigger for; npm 12 blocks
+ * install scripts for global installs by default, so a single owner was needed
+ * that any code path can call — see `ensureUserLevelAssets` in the adapter
+ * dispatcher (gen-087).
+ *
+ * Strictly user-level: the plugin file and `opencode.json` are project-level
+ * and deliberately excluded, so this is safe to call from a directory that is
+ * not a REAP project. `reap-guide.md` used to be excluded from the `reap
+ * update` path on the grounds that postinstall owned it — an assumption npm 12
+ * removed, and CLAUDE.md/AGENTS.md import that file by path.
+ */
+export async function syncUserLevelAssets(home: string = homedir()): Promise<
+  UserLevelSyncResult & {
+    slashCommands: { cleaned: number; installed: number; targetDir: string };
+    agents: { cleaned: number; installed: number; targetDir: string };
+  }
+> {
+  const guide = await installReapGuide(home);
+  const slashCommands = await installSlashCommands(home);
+  const agents = await installAgents(home);
+
+  // See UserLevelSyncResult — the caller stamps on this and the stamp is
+  // permanent for the version, so a partial install must not read as success.
+  const missing: string[] = [];
+  if (slashCommands.installed === 0) missing.push("slash commands");
+  if (!guide) missing.push("~/.reap/reap-guide.md");
+  if (agents.installed === 0) missing.push("agent definitions");
+
+  return { complete: missing.length === 0, missing, slashCommands, agents };
 }
