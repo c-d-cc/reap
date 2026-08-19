@@ -1061,7 +1061,7 @@ reap daemon query    # 심볼 쿼리 실행`,
     versions: [
       {
         version: "0.17.5",
-        notes: "**코드 인텔리전스 데몬이 별도 발행 패키지가 됐습니다.** v0.16 부터 문서에는 있었지만 발행된 적이 없어 npm 설치본에서는 동작할 수 없었고, 함께 있던 패키징 문제들도 수정했습니다. `daemon: true` 를 쓰신다면 `npm i -g @c-d-cc/reap-daemon` 을 한 번 실행하세요. **데몬이 없거나 너무 낡으면 이제 보고합니다** — `reap daemon status`, `reap fix --check`, agent prompt 가 알려주며 어느 경우든 lifecycle 은 막히지 않습니다. **REAP 가 못 찾을 때를 위한 `daemonBin`** — 둘은 별개 패키지라 같은 resolution root 를 공유할 때만 서로를 찾습니다. `.reap/config.yml` 에 `daemonBin` 을 지정하거나 한 번만 쓸 `REAP_DAEMON_BIN` 을 쓰세요. **`reap run push` 가 git 의 실제 오류를 보고**하고, **`reap help` 에 `/reap.run` 과 `/reap.report`** 가 나옵니다.",
+        notes: "**코드 인텔리전스 데몬이 별도 발행 패키지가 됐습니다.** v0.16 부터 문서에는 있었지만 발행된 적이 없어 npm 설치본에서는 동작할 수 없었고, 함께 있던 패키징 문제들도 수정했습니다. `daemon: true` 를 쓰신다면 `npm i -g @c-d-cc/reap-daemon` 을 한 번 실행하세요. **데몬이 없거나 너무 낡으면 이제 보고합니다** — `reap daemon status`, `reap fix --check`, agent prompt 가 알려주며 어느 경우든 lifecycle 은 막히지 않습니다. **REAP 가 못 찾을 때를 위한 `daemonBin`** — 둘은 별개 패키지라 같은 resolution root 를 공유할 때만 서로를 찾습니다. `.reap/config.yml` 에 `daemonBin` 을 지정하거나 한 번만 쓸 `REAP_DAEMON_BIN` 을 쓰세요. **`reap run push` 가 git 의 실제 오류를 보고**하고, **`reap help` 에 `/reap.run` 과 `/reap.report`** 가 나옵니다. **REAP 이 첫 실행 때 자기 통합을 직접 설치합니다** — npm 12 가 전역 설치의 install script 를 차단해 slash command·agent 정의·session hook 이 놓이지 않았고 오류조차 나지 않았습니다.",
       },
       {
         version: "0.17.4",

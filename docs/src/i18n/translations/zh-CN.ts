@@ -1060,7 +1060,7 @@ reap daemon query    # 运行符号查询`,
     versions: [
       {
         version: "0.17.5",
-        notes: "**代码智能守护进程现已作为独立包发布。** 它自 v0.16 起就写在文档里，但从未发布，因此在 npm 安装下无法工作；随之而来的若干打包问题也一并修复。使用 `daemon: true` 的用户请执行一次 `npm i -g @c-d-cc/reap-daemon`。**守护进程缺失或版本过旧现在会被报告** — `reap daemon status`、`reap fix --check` 和代理提示词都会告知，两种情况下生命周期都不会被阻塞。**当 REAP 找不到它时使用 `daemonBin`** — 两者是独立的包，只有共享同一解析根时才能找到彼此；在 `.reap/config.yml` 中设置 `daemonBin`，或用 `REAP_DAEMON_BIN` 只作用于一次调用。**`reap run push` 会报告 git 的真实错误**，**`reap help` 现在列出 `/reap.run` 和 `/reap.report`**。",
+        notes: "**代码智能守护进程现已作为独立包发布。** 它自 v0.16 起就写在文档里，但从未发布，因此在 npm 安装下无法工作；随之而来的若干打包问题也一并修复。使用 `daemon: true` 的用户请执行一次 `npm i -g @c-d-cc/reap-daemon`。**守护进程缺失或版本过旧现在会被报告** — `reap daemon status`、`reap fix --check` 和代理提示词都会告知，两种情况下生命周期都不会被阻塞。**当 REAP 找不到它时使用 `daemonBin`** — 两者是独立的包，只有共享同一解析根时才能找到彼此；在 `.reap/config.yml` 中设置 `daemonBin`，或用 `REAP_DAEMON_BIN` 只作用于一次调用。**`reap run push` 会报告 git 的真实错误**，**`reap help` 现在列出 `/reap.run` 和 `/reap.report`**。 **REAP 现在会在首次运行时自行安装集成** — npm 12 会阻止全局安装的 install script，导致斜杠命令、代理定义和会话钩子都未被放置，且没有任何报错。",
       },
       {
         version: "0.17.4",

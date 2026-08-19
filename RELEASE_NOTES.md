@@ -7,6 +7,7 @@ This release is mostly about the code-intelligence daemon, which was documented 
 - **`daemonBin` when REAP cannot find an installed daemon.** The two are separate packages and meet only when they share a resolution root — a global REAP with a project-local daemon, two package managers, or a Node version switch does not qualify. Set `daemonBin` in `.reap/config.yml`, or `REAP_DAEMON_BIN` for a single command.
 - **`reap run push` reports git's actual error** instead of a generic message about the remote and the network.
 - **`reap help` lists `/reap.run` and `/reap.report`**, which it never did.
+- **REAP installs its own integration on first run.** npm 12 blocks install scripts for global installs by default, which left the slash commands, agent definitions, guide and session hook unplaced — REAP looked installed and had no integration at all, with no error. Any `reap` command now places them once per version.
 
 Releases now publish through npm trusted publishing (OIDC) rather than a long-lived token.
 
