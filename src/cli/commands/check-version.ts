@@ -9,7 +9,7 @@ import { fetchReleaseNotice } from "../../core/notice.js";
 // Of the two guards below only checkAutoUpdateGuard is reached by such a build —
 // performAutoUpdate returns at its "-alpha" check long before comparing — and it
 // only changes anything once autoUpdateMinVersion names a line that has alphas.
-import { semverGte } from "../../core/semver.js";
+import { semverGt, semverGte } from "../../core/semver.js";
 
 /**
  * Query autoUpdateMinVersion from the latest npm package metadata.
@@ -92,6 +92,18 @@ export interface AutoUpdateResult {
 }
 
 /**
+ * Is there actually something newer to move to?
+ *
+ * Exported so the decision can be exercised directly rather than retyped in a
+ * test — `performAutoUpdate` reaches the network and the installed binary
+ * through helpers that take no seams, so this is the only part of it a unit
+ * test can reach honestly.
+ */
+export function hasNewerRelease(installed: string, latest: string): boolean {
+  return semverGt(latest, installed);
+}
+
+/**
  * Perform auto-update if conditions are met:
  * 1. Installed version is available and not a dev build
  * 2. A newer version exists on npm
@@ -115,8 +127,19 @@ export function performAutoUpdate(root: string): AutoUpdateResult {
     const latest = queryLatestVersion();
     if (!latest) return { action: "skipped", reason: "network-error" };
 
-    // 5. Already up to date
-    if (installed === latest) {
+    // 5. Nothing newer to move to.
+    //
+    // `!==` was the test here, which made "not the latest published version"
+    // mean "upgrade to it" — including when the installed one is *ahead*. That
+    // is not hypothetical: a release build carries the bumped version before it
+    // is published, so installing the tarball that is about to ship made REAP
+    // replace it with the previous release. gen-088 hit exactly that in
+    // `check-self-diagnosis.sh`, where the artifact under test was silently
+    // swapped for the published one; `release.yml` runs that gate before
+    // `npm publish`, so every future release would have met it.
+    //
+    // Comparison belongs to `core/semver.ts`, which owns it for everyone.
+    if (!hasNewerRelease(installed, latest)) {
       return { action: "skipped", reason: "up-to-date" };
     }
 

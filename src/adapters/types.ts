@@ -34,6 +34,24 @@ export interface UserLevelSyncResult {
   missing: string[];
 }
 
+/**
+ * What a `removeUserLevelAssets` call actually took away, and what it chose to
+ * leave behind.
+ *
+ * Both halves are reported because "nothing was removed" and "the command did
+ * not run" look identical from the outside, and the whole point of an uninstall
+ * is that things are gone. A caller — and a test — needs a number it can check
+ * before reading anything into an empty directory.
+ *
+ * `kept` names what was deliberately spared: a user's own files in the same
+ * directories, a hook entry that also carries a command REAP did not write.
+ * Silence there would be indistinguishable from having deleted it.
+ */
+export interface UserLevelRemovalResult {
+  removed: string[];
+  kept: string[];
+}
+
 export interface AdapterModule {
   /** Identifier (must match the agentClient field value). */
   readonly id: "claude-code" | "opencode" | "codex";
@@ -78,6 +96,29 @@ export interface AdapterModule {
    * @param home - override for testing; defaults to the real home directory
    */
   syncUserLevelAssets(home?: string): Promise<UserLevelSyncResult>;
+
+  /**
+   * Take away every user-level asset this client installs, and nothing else.
+   *
+   * The exact inverse of `syncUserLevelAssets`, and deliberately declared right
+   * next to it: the two share a list that cannot be shared as a value — one
+   * copies directories, one edits JSON, one writes a single file — so the only
+   * thing keeping them in step is that whoever adds a fifth asset is looking at
+   * both. Each adapter implements them in the same file for the same reason,
+   * and both carry `reap:carrier(user-level-asset-set)`.
+   *
+   * npm never runs code at uninstall time — `preuninstall` and `postuninstall`
+   * were measured on npm 10 and 12, global and local, and fire in neither — so
+   * this is reached from `reap uninstall` rather than from a package hook.
+   *
+   * Removal is prefix-anchored (`reap.*`, `reap-*`) and, inside `~/.reap/`,
+   * restricted to a named allowlist. Anything not on the list survives. Must be
+   * silent, idempotent, and safe to call from a directory that is not a REAP
+   * project.
+   *
+   * @param home - override for testing; defaults to the real home directory
+   */
+  removeUserLevelAssets(home?: string): Promise<UserLevelRemovalResult>;
 
   /**
    * Absolute paths of the user-level directories this adapter legitimately

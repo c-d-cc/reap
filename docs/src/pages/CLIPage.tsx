@@ -68,6 +68,13 @@ export default function CLIPage() {
           {t.cli.destroyNote}
         </p>
 
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.uninstallTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-2">{t.cli.uninstallDesc}</p>
+        <CodeBlock language="bash">{`reap uninstall [--confirm]`}</CodeBlock>
+        <p className="text-xs text-muted-foreground mt-2 mb-6">
+          {t.cli.uninstallNote}
+        </p>
+
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{t.cli.makeBacklogTitle}</h2>
         <p className="text-sm text-muted-foreground mb-2">{t.cli.makeBacklogDesc}</p>
         <CodeBlock language="bash">{`reap make backlog --type <type> --title <title> [--body <body>] [--priority <priority>]`}</CodeBlock>

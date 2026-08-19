@@ -19,6 +19,7 @@ REAP ist eine generationsbasierte Entwicklungspipeline, in der KI und Menschen z
 
 - [Was ist REAP?](#was-ist-reap)
 - [Installation](#installation)
+- [Deinstallation](#deinstallation)
 - [Schnellstart](#schnellstart-)
 - [Lebenszyklus](#lebenszyklus-)
 - [Kernkonzepte](#kernkonzepte-)
@@ -60,6 +61,27 @@ npm install -g @c-d-cc/reap
 > **Voraussetzungen**: [Node.js](https://nodejs.org) v18+ und ein unterstützter KI-Agent:
 > - [Claude Code](https://claude.ai/claude-code) CLI (Standard)
 > - [OpenCode](https://opencode.ai) — setzen Sie `agentClient: opencode` in `.reap/config.yml` nach `/reap.init`
+
+### Deinstallation
+
+`npm uninstall -g @c-d-cc/reap` entfernt nur das Paket. Alles, was REAP in Ihrem Home-Verzeichnis abgelegt hat — Slash-Befehle, Agentendefinitionen, den SessionStart-Hook in `~/.claude/settings.json`, `~/.reap/` — wurde von REAPs eigenem Code geschrieben, und npm weiß nichts davon. npm führt beim Deinstallieren zudem keinerlei Code aus, sodass REAP nicht über einen Paket-Hook aufräumen kann.
+
+Entfernen Sie REAP daher mit REAP, **bevor** Sie das Paket deinstallieren:
+
+```bash
+reap uninstall            # zeigt, was entfernt wird
+reap uninstall --confirm  # führt es aus und übergibt die Pakete an npm
+```
+
+Es stoppt den Daemon, entfernt REAPs Dateien aus den Verzeichnissen von Claude Code und OpenCode, nimmt REAPs Einträge wieder aus `settings.json` heraus, löscht `~/.reap/reap-guide.md`, den Installationsstempel und `~/.reap/daemon/` und führt anschließend `npm uninstall -g` für `@c-d-cc/reap-daemon` und `@c-d-cc/reap` aus. Ihre eigenen Dateien in diesen Verzeichnissen bleiben unangetastet — auch alles mit dem Namen `reapdev.*` und alles Weitere in `~/.reap/`.
+
+**Paket schon entfernt?** Dann fehlt der Befehl `reap`, und die Dateien liegen noch da. Führen Sie es aus, ohne etwas zu installieren:
+
+```bash
+npx @c-d-cc/reap uninstall --confirm
+```
+
+`reap destroy` ist etwas anderes — es entfernt REAP aus **einem Projekt** (`.reap/`, den REAP-Abschnitt in CLAUDE.md, die `.gitignore`-Einträge) und lässt die Maschine unberührt.
 
 ## Schnellstart [↗](https://reap.cc/docs/quick-start)
 

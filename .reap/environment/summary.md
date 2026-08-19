@@ -53,13 +53,13 @@ src/
 │   ├── template.ts             — artifact 템플릿 복사
 │   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). lineage 편향 분석 제거됨
 ├── cli/
-│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, config, run, make, cruise, install-skills, fix, destroy, clean, check-version, update, load-context, dump-state, daemon).
+│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, config, run, make, cruise, install-skills, fix, destroy, **uninstall**, clean, check-version, update, load-context, dump-state, daemon).
 │   │                             **`program.parse()` 앞에서 `ensureUserLevelAssets` 를 await** — 명령을 가리지 않는다.
 │   │                             `postinstall` 이 안 돈 사용자가 가진 것은 바이너리 하나이므로 그것을 부르는 것 자체가 조건이다
 │   └── commands/
 │       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair, --migrate 지원)
 │       ├── migrate.ts          — v0.15→v0.16 마이그레이션 (multi-phase: confirm→execute→vision→complete)
-│       ├── check-version.ts    — postinstall/SessionStart용: v0.15 legacy cleanup + autoUpdate 자동 업데이트 + autoUpdateMinVersion guard + release notice 표시 (semverGte, queryAutoUpdateMinVersion, queryLatestVersion, performAutoUpdate, handOffToNewBinary, checkAutoUpdateGuard)
+│       ├── check-version.ts    — postinstall/SessionStart용: v0.15 legacy cleanup + autoUpdate 자동 업데이트 + autoUpdateMinVersion guard + release notice 표시 (semverGte, queryAutoUpdateMinVersion, queryLatestVersion, performAutoUpdate, handOffToNewBinary, checkAutoUpdateGuard). **`hasNewerRelease(installed, latest)` = `semverGt(latest, installed)` 가 업데이트 여부를 결정한다** — `!==` 였고, 그것은 *뒤로 가는 것도* 업데이트로 쳤다. 릴리즈 빌드는 발행 전에 이미 올라간 버전을 달고 있으므로 자기진단 게이트가 방금 pack 한 산출물을 배포본으로 바꿔치기당했다. `getInstalledVersion()` 은 여전히 `execSync("reap --version")` 으로 **PATH 위의 reap** 을 읽는다 — 전역 설치에서는 그것이 곧 자기 자신이지만 로컬 설치에서는 아니다 (backlog pending)
 │       ├── load-context.ts     — SessionStart hook용: dynamic context 주입 (buildKnowledgeContext, hookSpecificOutput JSON 출력). Current State/Strict/Language 3개 dynamic 섹션만 출력한다 (~1KB) — static knowledge(genome/env/vision/memory/reap-guide)는 CLAUDE.md 의 `@` import refs 로 Claude Code 가 직접 로드하므로 여기서 다루지 않는다. 비-REAP 디렉토리에서는 silent exit
 │       ├── dump-state.ts       — `.reap/.session-state.md`에 동일 dynamic context 기록 (--stdout/--silent 지원). OpenCode plugin과 외부 도구용. emitOutput이 lifecycle 명령 종료 시 sync 버전(dump-state-sync.ts)으로 자동 dump
 │       ├── run/                — stage 실행 (21 handlers)
@@ -85,7 +85,8 @@ src/
 │       ├── config.ts            — 프로젝트 설정 조회 (config.yml → JSON 출력)
 │       ├── status.ts           — 현재 상태 조회
 │       ├── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
-│       ├── destroy.ts          — REAP 완전 제거 (--confirm 필수, .reap/ + CLAUDE.md + .gitignore)
+│       ├── destroy.ts          — **프로젝트에서** REAP 제거 (--confirm 필수, .reap/ + CLAUDE.md + .gitignore). 출력이 `context.nextStep: "reap uninstall"` 과 안내 문구로 머신 레벨 제거를 가리킨다 — 제거 있을 때와 no-op 일 때 **양쪽** 다
+│       ├── uninstall.ts        — **머신에서** REAP 제거 (2-phase, `--confirm`). 순서: 진입 훅 우회 → daemon stop(비기동) → 양 adapter 홈 자산 → `~/.reap/` allowlist → npm. `detectInstallKind` 이 global/npx/local/checkout/unknown 을 가르고 **global 일 때만 npm 을 부른다** — `npm root -g` 와 패키지 루트의 `node_modules` 를 **realpath 정규화 후** 비교(안 하면 symlink 를 거치는 모든 전역 설치가 'global 아님'으로 오판된다). `UninstallDeps` 가 npm 호출·daemon stop·경로 판정을 전부 주입 가능하게 한다. npm 실패는 전체 실패가 아니다
 │       ├── clean.ts            — 선택적 상태 초기화 (--lineage, --life, --backlog, --hooks)
 │       ├── update.ts           — 프로젝트 업데이트 (v0.15→migrate 위임, v0.16→config backfill/디렉토리 보충/CLAUDE.md 보수, --post-upgrade 지원)
 │       └── daemon/             — daemon 서브커맨드
@@ -100,6 +101,7 @@ src/
 │   │                             비교해 필요할 때만 설치. `"synced"|"partial"|"current"|"failed"`, silent · never throws.
 │   │                             **`complete` 일 때만 stamp** — 부분 설치를 성공으로 굳히면 그 자체가 무증상 실패가 된다
 │   ├── types.ts                — AdapterModule (installSkills / ensureProjectIntegration / registerSessionIntegration /
+│   │                             **removeUserLevelAssets(home?) → UserLevelRemovalResult{removed, kept}** — `syncUserLevelAssets` 의 역연산이며 **바로 옆에 선언**한다. 목록은 값으로 공유할 수 없어(디렉토리 복사 / JSON 편집 / 단일 파일) 인접성이 유일한 동기화 수단이다. 양쪽에 `reap:carrier(user-level-asset-set)` /
 │   │                             **syncUserLevelAssets(home?) → UserLevelSyncResult{complete, missing}** / **userLevelDirs(home?)** —
 │   │                             후자는 정식 설치 위치의 단일 소유자이며 integrity checker 가 주입받는다 (issue #22))
 │   ├── claude-code/
@@ -157,7 +159,7 @@ daemon/                            — 별도 npm 패키지 (@c-d-cc/reap-daemon
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline — **unit 568 / e2e 292 / scenario 44, 세 스위트 모두 0 fail.** daemon 자체 스위트는 별도로 `cd daemon && bun test tests/` → **130 pass**. 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
+현재 baseline — **unit 600 / e2e 302 / scenario 44, 세 스위트 모두 0 fail.** daemon 자체 스위트는 별도로 `cd daemon && bun test tests/` → **130 pass**. 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
 
 `tests/scenario/multi-generation.test.ts` 는 gen-065 backlog gate 를 시나리오로 커버한다 — pending 이 있으면 `run start` 가 `status: "prompt"` 로 막히고, `--backlog`(소비) 또는 `--no-backlog`(유지) 로 재호출해야 진행된다. 새 scenario 가 backlog 파일을 만든다면 같은 gate 를 거치므로 이 패턴을 참고할 것.
 
@@ -236,7 +238,7 @@ daemon 절(§ 5)은 **소스 트리를 보지 않는다** — 거기서는 의�
 - **bun 이 아니라 node 로 판정하고, 판정 근거는 startup 이 아니라 심볼 수다.** 뜨고 health 에 답하고 인덱싱 성공을 보고하면서 심볼이 0개인 것이 네이티브 바인딩 결함의 모습이었다
 - **절의 순서가 의미를 갖는다.** § 5d-bis(명시 경로가 구제하는가)는 5d 와 5e **사이**에서만 물을 수 있다 — 그 지점에서만 daemon 이 디스크에 있고, 동작하며, reap 이 못 본다. 새 시나리오를 끼울 때 이 성질을 먼저 확인할 것
 - **부재를 주장하는 assertion 은 스스로 먼저 증명한다.** 크래시·비정상 출력·필드명 변경도 "부재"로 읽히므로 `status: "ok"` 와 숫자 `warningCount` 를 요구한 뒤에야 내용을 본다. `grep -q` 로 없음을 확인하는 자리는 전부 같은 취약성을 갖는다
-- **비용은 미측정이고 끄는 스위치는 두지 않는다.** `better-sqlite3` 가 두 번 설치되므로 리눅스에서 prebuilt 를 못 받으면 소스 컴파일이 두 번이다. 후퇴가 필요하면 release 전용으로 옮기는 것이 호출 한 줄 — 꺼진 채로 통과를 보고하는 환경변수보다 낫다
+- **게이트 전체가 macOS 에서 14~18초다** (gen-088 실측, 8절 전부). 끄는 스위치는 두지 않는다 — 후퇴가 필요하면 release 전용으로 옮기는 것이 호출 한 줄이고, 꺼진 채로 통과를 보고하는 환경변수보다 낫다. 리눅스에서 `better-sqlite3` prebuilt 를 못 받으면 소스 컴파일이 두 번이라 그쪽은 더 든다
 - 게이트는 `daemon/dist` 를 지우고 재빌드한다 — **로컬 실행이 작업 트리를 건드리는 유일한 지점**(gitignore 대상이라 무해)
 
 ### 자기진단은 install script 가 차단된 설치도 본다
@@ -258,6 +260,21 @@ daemon 절(§ 5)은 **소스 트리를 보지 않는다** — 거기서는 의�
 - CI/release 워크플로가 `npm i -g opencode-ai` 로 클라이언트를 설치한다. **버전 미고정** — 묻는 것이 "현재의 OpenCode 가 받아들이는가"이므로 upstream 스키마 변경으로 red 가 되는 것이 의도된 신호다
 - `opencode` 부재 시 **amber SKIP 을 출력**하고 통과한다. 조용한 exit 0 은 "검사했고 깨끗하다"로 읽힌다
 - **잡지 못하는 것**: slash command 는 `opencode command list` 같은 CLI 표면이 없어 검증할 수 없다. 검사한 opencode 버전은 스크립트가 출력하므로 로컬/CI 판정이 갈리면 근거가 남는다
+
+### 자기진단은 자기가 pack 한 산출물을 설치하는지 검사한다 (gen-088)
+
+§ 2 는 설치 직후 **번들 sha 가 방금 pack 한 것과 같은지** 단언한다. 그 전까지는 아니었고, 그래서
+게이트가 **배포된 패키지를 진단하고 있었다** — postinstall 의 auto-update 가 `npm install -g @latest`
+를 돌리고 npm 이 lifecycle script 에 `npm_config_prefix` 를 물려주므로 그 재설치가 같은 격리 prefix 로
+들어가 방금 설치한 것을 덮어썼다.
+
+설치는 대상 prefix 의 bin 을 PATH 앞에 두고 한다 — 진짜 전역 설치가 그렇게 생겼기 때문이다(npm 은
+lifecycle script 전에 bin 을 링크한다). 그것은 알려진 한 경로를 막을 뿐이고, **sha 단언이 성질을 지킨다.**
+
+§ 8 은 **진짜 전역 설치를 실제로 제거한다**. unit 은 npm 에 넘길 인자만 단언할 수 있고 e2e 는 소스
+체크아웃에서 도는데 거기서는 명령이 npm 을 부르지 않기로 되어 있으므로, **npm 제거가 실제로 일어나는
+것을 보는 유일한 자리**다. 부재를 읽기 전에 exit code · `status: "ok"` · 숫자 `removedCount` 를 요구하고,
+생존 단언을 같은 절에 둔다 — 제거만 보는 검사는 "전부 지움"도 통과시킨다.
 
 ### OpenCode 경로는 `XDG_CONFIG_HOME` 을 따른다 (gen-082)
 

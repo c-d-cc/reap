@@ -12,6 +12,7 @@ import type {
   ReapConfig,
 } from "../../../types/index.js";
 
+// reap:carrier(reap-home-asset-set)
 const DAEMON_ROOT = join(homedir(), ".reap", "daemon");
 
 /**
@@ -170,6 +171,48 @@ async function ensureDaemon(): Promise<void> {
   }
 
   throw new Error("Failed to start daemon within 3 seconds");
+}
+
+/**
+ * Stop the daemon if one is running, and start nothing if one is not.
+ *
+ * `daemonRequest` cannot be used for this. Its first line is `ensureDaemon`, so
+ * asking a stopped daemon for its health starts one — which is merely wasteful
+ * for `reap daemon stop` and actively wrong for `reap uninstall`, where the
+ * next step deletes `~/.reap/daemon/` and a daemon started a moment earlier
+ * writes it straight back.
+ *
+ * Returns the pid it signalled, or `null` when there was nothing to signal.
+ * Waits for the port to go quiet so that a caller which is about to delete the
+ * daemon's files is not racing it.
+ */
+export async function stopDaemonIfRunning(): Promise<number | null> {
+  let pid: number;
+  try {
+    const res = await fetch(`${getBaseUrl()}/health`, { signal: AbortSignal.timeout(500) });
+    if (!res.ok) return null;
+    pid = ((await res.json()) as { data?: { pid?: number } }).data?.pid ?? 0;
+  } catch {
+    return null;
+  }
+  if (!pid) return null;
+
+  try {
+    process.kill(pid, "SIGTERM");
+  } catch {
+    // Already gone between the health check and the signal.
+    return null;
+  }
+
+  const deadline = Date.now() + 3_000;
+  while (Date.now() < deadline) {
+    if (!(await isDaemonRunning())) return pid;
+    await new Promise((r) => setTimeout(r, 100));
+  }
+  // Still answering after three seconds. Report the pid anyway: the caller
+  // needs to know a stop was attempted, and pretending otherwise would send it
+  // looking for a daemon that is on its way down.
+  return pid;
 }
 
 async function isDaemonRunning(): Promise<boolean> {

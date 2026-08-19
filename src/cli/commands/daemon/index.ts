@@ -1,5 +1,11 @@
 import { emitOutput, emitError } from "../../../core/output.js";
-import { daemonRequest, findProjectId, resolveDaemonAvailability, missingDaemonRemedy } from "./client.js";
+import {
+  daemonRequest,
+  findProjectId,
+  resolveDaemonAvailability,
+  missingDaemonRemedy,
+  stopDaemonIfRunning,
+} from "./client.js";
 import { createPaths } from "../../../core/paths.js";
 import type { DaemonAvailability } from "../../../types/index.js";
 import { fileExists } from "../../../core/fs.js";
@@ -120,24 +126,18 @@ async function stopCmd(): Promise<void> {
   // Deliberately not gated: stopping is meaningful even when the installed
   // package is too old, and reporting "not installed" for a stop request would
   // leave a stray process with no way to reach it.
-  try {
-    const result = await daemonRequest("GET", "/health");
-    if (result.status === "ok") {
-      const pid = (result.data as { pid: number }).pid;
-      process.kill(pid, "SIGTERM");
-      emitOutput({
-        status: "ok",
-        command: "daemon",
-        message: `Daemon stopped (pid: ${pid})`,
-      });
-    }
-  } catch {
-    emitOutput({
-      status: "ok",
-      command: "daemon",
-      message: "Daemon is not running",
-    });
-  }
+  //
+  // `stopDaemonIfRunning` rather than `daemonRequest`, whose first line is
+  // `ensureDaemon` — asking a stopped daemon for its health used to start one
+  // and then kill it. Harmless here and not harmless in `reap uninstall`,
+  // which deletes the daemon's data next (gen-088).
+  const pid = await stopDaemonIfRunning();
+  emitOutput({
+    status: "ok",
+    command: "daemon",
+    context: pid === null ? {} : { pid },
+    message: pid === null ? "Daemon is not running" : `Daemon stopped (pid: ${pid})`,
+  });
 }
 
 async function indexCmd(): Promise<void> {

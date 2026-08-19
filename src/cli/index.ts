@@ -34,6 +34,7 @@ import { execute as helpExecute } from "./commands/help.js";
 import { execute as daemonExecute } from "./commands/daemon/index.js";
 import { execute as loadContextExecute } from "./commands/load-context.js";
 import { execute as dumpStateExecute } from "./commands/dump-state.js";
+import { execute as uninstallExecute } from "./commands/uninstall.js";
 import { ensureUserLevelAssets } from "../adapters/index.js";
 
 const program = new Command();
@@ -127,6 +128,14 @@ program
   });
 
 program
+  .command("uninstall")
+  .description("Remove REAP from this machine — user-level files, the daemon, and the npm packages")
+  .option("--confirm", "Confirm removal without prompt")
+  .action(async (options: { confirm?: boolean }) => {
+    await uninstallExecute(options.confirm);
+  });
+
+program
   .command("clean")
   .description("Selectively reset REAP project state")
   .option("--lineage <mode>", "Lineage action (compress or delete)")
@@ -197,6 +206,27 @@ program
     await daemonExecute(subcommand, options);
   });
 
+/**
+ * The one command that must not be preceded by an install.
+ *
+ * `ensureUserLevelAssets` below deliberately does not choose which commands it
+ * runs for — what a user with a blocked install has is the binary, so running
+ * it at all has to be the trigger (gen-087). `uninstall` is the single case
+ * where that is wrong rather than merely unnecessary: it would place the files
+ * moments before deleting them, and on the `npx @c-d-cc/reap uninstall`
+ * recovery path — where there is no stamp, so the install really happens — it
+ * could finish by leaving a stamp behind in an otherwise empty home.
+ *
+ * A list of exceptions is a thing that grows, and gen-087 rejected exactly that
+ * shape for choosing which commands to sync. It is one entry here because
+ * "removes what the hook installs" describes one command and there is no second
+ * candidate; a second one arriving is the signal to find the property they
+ * share rather than to append.
+ */
+function skipsUserLevelSync(argv: string[]): boolean {
+  return argv[2] === "uninstall";
+}
+
 // Before anything is dispatched, make sure this machine actually has the
 // user-level assets REAP needs — slash commands, agent definitions, the guide,
 // the SessionStart hook. `scripts/postinstall.sh` used to be the only thing
@@ -205,6 +235,8 @@ program
 //
 // Silent, and a no-op after the first run at a given version. Awaited rather
 // than fired off: a command that reads those files must not race the write.
-await ensureUserLevelAssets({ cwd: process.cwd(), version: readVersion() });
+if (!skipsUserLevelSync(process.argv)) {
+  await ensureUserLevelAssets({ cwd: process.cwd(), version: readVersion() });
+}
 
 program.parse();

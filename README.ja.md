@@ -19,6 +19,7 @@ REAPは、AIと人間が協力してソフトウェアを構築・進化させ�
 
 - [REAPとは？](#reapとは)
 - [インストール](#インストール)
+- [アンインストール](#アンインストール)
 - [クイックスタート](#クイックスタート-)
 - [ライフサイクル](#ライフサイクル-)
 - [コアコンセプト](#コアコンセプト-)
@@ -60,6 +61,27 @@ npm install -g @c-d-cc/reap
 > **要件**: [Node.js](https://nodejs.org) v18以上、およびサポートされるAIエージェントの1つ:
 > - [Claude Code](https://claude.ai/claude-code) CLI（デフォルト）
 > - [OpenCode](https://opencode.ai) — `/reap.init` 後に `.reap/config.yml` で `agentClient: opencode` に設定
+
+### アンインストール
+
+`npm uninstall -g @c-d-cc/reap` はパッケージだけを削除します。REAP がホームに置いたもの — スラッシュコマンド、エージェント定義、`~/.claude/settings.json` の SessionStart フック、`~/.reap/` — は REAP 自身のコードが書いたものであり、npm はその存在を知りません。さらに npm はアンインストール時にコードを一切実行しないため、REAP がパッケージフックで片付けることもできません。
+
+パッケージを削除する**前に**、REAP で REAP を削除してください:
+
+```bash
+reap uninstall            # 何が削除されるかを表示
+reap uninstall --confirm  # 実行し、パッケージ削除まで npm に渡す
+```
+
+デーモンを停止し、Claude Code と OpenCode 両方の場所から REAP のファイルを削除し、`settings.json` から REAP の項目だけを取り除き、`~/.reap/reap-guide.md`・インストールスタンプ・`~/.reap/daemon/` を削除してから、`@c-d-cc/reap-daemon` と `@c-d-cc/reap` に対して `npm uninstall -g` を実行します。同じディレクトリにあるあなた自身のファイルはそのまま残ります — `reapdev.*` も、`~/.reap/` 内のその他のものも同様です。
+
+**すでにパッケージを削除した場合は?** `reap` コマンドがなく、ファイルだけが残っている状態です。何もインストールせずに実行できます:
+
+```bash
+npx @c-d-cc/reap uninstall --confirm
+```
+
+`reap destroy` は別物です — **1つのプロジェクト**から REAP を取り除くもので（`.reap/`、CLAUDE.md の REAP セクション、`.gitignore` の項目）、マシンには触れません。
 
 ## クイックスタート [↗](https://reap.cc/docs/quick-start)
 

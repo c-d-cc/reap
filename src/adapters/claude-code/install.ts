@@ -4,7 +4,7 @@ import { fileURLToPath } from "url";
 import { homedir } from "os";
 import { ensureDir, fileExists } from "../../core/fs.js";
 import { emitOutput } from "../../core/output.js";
-import type { UserLevelSyncResult } from "../types.js";
+import type { UserLevelRemovalResult, UserLevelSyncResult } from "../types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 // In bundled mode, __dirname is dist/cli/. Skills are at dist/adapters/claude-code/skills/
@@ -90,6 +90,8 @@ export async function installSlashCommandsOnly(home: string = homedir()): Promis
  * it is safe to call from a directory that is not a REAP project at all.
  * Silent, idempotent, and prefix-anchored — user-supplied files in the same
  * directories survive every run.
+ *
+ * reap:carrier(user-level-asset-set)
  */
 export async function syncUserLevelAssets(home: string = homedir()): Promise<
   UserLevelSyncResult & {
@@ -209,6 +211,8 @@ export async function installAgents(home: string = homedir()): Promise<{
 
 /**
  * Copy reap-guide.md to ~/.reap/ so all projects reference a single, up-to-date copy.
+ *
+ * reap:carrier(reap-home-asset-set)
  */
 export async function installReapGuide(home: string = homedir()): Promise<boolean> {
   const reapHome = join(home, ".reap");
@@ -230,6 +234,22 @@ export async function installReapGuide(home: string = homedir()): Promise<boolea
 }
 
 /**
+ * The SessionStart hooks REAP puts in `~/.claude/settings.json`, and the
+ * substring that identifies each one again later.
+ *
+ * One owner rather than two matching lists: `registerSessionHooks` writes these
+ * and `unregisterSessionHooks` has to find exactly the same ones to take them
+ * back out. A marker that drifted from the command it was meant to match would
+ * leave the entry behind — and an entry left behind calls a command that no
+ * longer exists on every session the user starts, for as long as they never
+ * hand-edit the JSON.
+ */
+const REAP_SESSION_HOOKS = [
+  { command: "reap check-version 2>/dev/null || true", marker: "reap check-version" },
+  { command: "reap load-context 2>/dev/null || true", marker: "reap load-context" },
+] as const;
+
+/**
  * Register SessionStart hooks in ~/.claude/settings.json:
  * 1. `reap check-version` — v0.15 legacy cleanup + auto-update
  * 2. `reap load-context` — inject REAP knowledge into session context
@@ -237,10 +257,7 @@ export async function installReapGuide(home: string = homedir()): Promise<boolea
 export async function registerSessionHooks(home: string = homedir()): Promise<boolean> {
   const settingsPath = join(home, ".claude", "settings.json");
 
-  const requiredHooks = [
-    { command: "reap check-version 2>/dev/null || true", marker: "reap check-version" },
-    { command: "reap load-context 2>/dev/null || true", marker: "reap load-context" },
-  ];
+  const requiredHooks = REAP_SESSION_HOOKS;
 
   try {
     let settings: Record<string, unknown> = {};
@@ -285,4 +302,161 @@ export async function registerSessionHooks(home: string = homedir()): Promise<bo
     // again instead of the hook being lost for good at this version.
     return false;
   }
+}
+
+// ── removal ─────────────────────────────────────────────────────────────────
+
+/**
+ * Take away every Claude Code user-level asset REAP installs.
+ *
+ * The inverse of `syncUserLevelAssets` above, and kept in the same file for
+ * that reason — the list of surfaces cannot be shared as a value (one is a
+ * directory of copies, one is a JSON edit), so the only thing keeping the two
+ * in step is proximity.
+ *
+ * reap:carrier(user-level-asset-set)
+ *
+ * `~/.reap/` is deliberately not handled here: `reap-guide.md`, the install
+ * stamp and the daemon's data are not client-specific, and are removed once by
+ * `removeReapHomeAssets` in the adapter dispatcher rather than once per
+ * adapter. `reap uninstall` sweeps both adapters, so doing it here would mean
+ * doing it twice.
+ *
+ * Every removal is prefix-anchored. Anything a user put in these directories
+ * themselves — including `reapdev.*`, which the dot keeps outside `reap-*` —
+ * survives, and is reported in `kept` so that silence is never the evidence.
+ */
+export async function removeUserLevelAssets(
+  home: string = homedir(),
+): Promise<UserLevelRemovalResult> {
+  const removed: string[] = [];
+  const kept: string[] = [];
+
+  const commands = await removeMatching(claudeCodeCommandsDir(home), SKILL_PATTERN);
+  removed.push(...commands.removed.map((f) => `~/.claude/commands/${f}`));
+  kept.push(...commands.kept.map((f) => `~/.claude/commands/${f}`));
+
+  const agents = await removeMatching(join(home, ".claude", "agents"), AGENT_PATTERN);
+  removed.push(...agents.removed.map((f) => `~/.claude/agents/${f}`));
+  kept.push(...agents.kept.map((f) => `~/.claude/agents/${f}`));
+
+  const hooks = await unregisterSessionHooks(home);
+  for (const marker of hooks.removed) removed.push(`~/.claude/settings.json: ${marker}`);
+  for (const other of hooks.kept) kept.push(`~/.claude/settings.json: ${other}`);
+
+  return { removed, kept };
+}
+
+/**
+ * Delete the files in `dir` whose names match `pattern`; report the rest.
+ *
+ * A missing directory is not an error — uninstall runs on machines where the
+ * install never completed, and on machines where it has already run once.
+ */
+async function removeMatching(
+  dir: string,
+  pattern: RegExp,
+): Promise<{ removed: string[]; kept: string[] }> {
+  const removed: string[] = [];
+  const kept: string[] = [];
+  let entries: string[];
+  try {
+    entries = await readdir(dir);
+  } catch {
+    return { removed, kept };
+  }
+  for (const entry of entries) {
+    if (!pattern.test(entry)) {
+      kept.push(entry);
+      continue;
+    }
+    try {
+      await unlink(join(dir, entry));
+      removed.push(entry);
+    } catch {
+      // Unwritable, already gone, a directory — leave it and say so rather
+      // than reporting a removal that did not happen.
+      kept.push(entry);
+    }
+  }
+  return { removed, kept };
+}
+
+/**
+ * Take REAP's SessionStart hooks back out of `~/.claude/settings.json`.
+ *
+ * This is the residue that actually costs the user something. The files are
+ * litter; a hook entry keeps invoking a command that is no longer installed on
+ * every session they start. It is wrapped in `2>/dev/null || true`, so nothing
+ * visibly breaks and nothing tells them either.
+ *
+ * The filter runs at the level of the individual hook, not the entry. REAP
+ * writes one hook per entry, but a user who merged their own command into the
+ * same entry would otherwise lose it — an entry is only dropped once it holds
+ * nothing else. The file itself is never deleted or rewritten wholesale: other
+ * events, other settings and the user's formatting choices are not ours.
+ *
+ * Unparseable JSON is left exactly as it is. Hand-editing is the likeliest
+ * reason for it, and clobbering it to complete an uninstall would be a worse
+ * outcome than a hook that has to be removed by hand.
+ */
+export async function unregisterSessionHooks(
+  home: string = homedir(),
+): Promise<{ removed: string[]; kept: string[]; rewritten: boolean }> {
+  const settingsPath = join(home, ".claude", "settings.json");
+  const removedMarkers: string[] = [];
+  const keptCommands: string[] = [];
+
+  let settings: Record<string, unknown>;
+  try {
+    if (!(await fileExists(settingsPath))) return { removed: [], kept: [], rewritten: false };
+    settings = JSON.parse(await readFile(settingsPath, "utf-8"));
+  } catch {
+    return { removed: [], kept: [], rewritten: false };
+  }
+
+  const hooks = settings.hooks as Record<string, unknown> | undefined;
+  const sessionStart = hooks?.SessionStart;
+  if (!hooks || !Array.isArray(sessionStart)) return { removed: [], kept: [], rewritten: false };
+
+  const isReapHook = (command: unknown): string | null => {
+    if (typeof command !== "string") return null;
+    for (const { marker } of REAP_SESSION_HOOKS) if (command.includes(marker)) return marker;
+    return null;
+  };
+
+  const survivingEntries: unknown[] = [];
+  for (const entry of sessionStart) {
+    const e = entry as { hooks?: { command?: string }[] };
+    if (!Array.isArray(e?.hooks)) {
+      survivingEntries.push(entry);
+      continue;
+    }
+    const survivingHooks = e.hooks.filter((h) => {
+      const marker = isReapHook(h?.command);
+      if (marker) {
+        removedMarkers.push(marker);
+        return false;
+      }
+      if (typeof h?.command === "string") keptCommands.push(h.command);
+      return true;
+    });
+    if (survivingHooks.length > 0) survivingEntries.push({ ...e, hooks: survivingHooks });
+  }
+
+  if (removedMarkers.length === 0) return { removed: [], kept: keptCommands, rewritten: false };
+
+  if (survivingEntries.length > 0) {
+    (hooks as Record<string, unknown>).SessionStart = survivingEntries;
+  } else {
+    delete (hooks as Record<string, unknown>).SessionStart;
+    if (Object.keys(hooks).length === 0) delete settings.hooks;
+  }
+
+  try {
+    await writeFile(settingsPath, JSON.stringify(settings, null, 2) + "\n", "utf-8");
+  } catch {
+    return { removed: [], kept: keptCommands, rewritten: false };
+  }
+  return { removed: removedMarkers, kept: keptCommands, rewritten: true };
 }

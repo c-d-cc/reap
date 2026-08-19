@@ -150,9 +150,17 @@ export async function execute(confirm?: boolean): Promise<void> {
       skipped: result.skipped,
       removedCount: result.removed.length,
       skippedCount: result.skipped.length,
+      // `destroy` is per-project and stops at the project boundary. Someone who
+      // has just removed REAP from the last project they were using it in has
+      // no way to learn that the slash commands, agent definitions and session
+      // hooks in their home directory are still there — and npm will not remove
+      // those either. This is where they are, so this is where it is said.
+      nextStep: "reap uninstall",
     },
-    message: result.removed.length > 0
-      ? `REAP removed. ${result.removed.length} item(s) cleaned.`
-      : "Nothing to remove.",
+    message: (result.removed.length > 0
+      ? `REAP removed from this project. ${result.removed.length} item(s) cleaned.`
+      : "Nothing to remove.") +
+      " To remove REAP from this machine as well — slash commands, agent definitions," +
+      " the session hook, the daemon and the npm packages — run: reap uninstall",
   });
 }

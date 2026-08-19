@@ -21,6 +21,7 @@ REAP is a generation-based development pipeline where AI and humans collaborate 
 
 - [What is REAP?](#what-is-reap)
 - [Installation](#installation)
+- [Uninstalling](#uninstalling)
 - [Quick Start](#quick-start-)
 - [Life Cycle](#life-cycle-)
 - [Core Concepts](#core-concepts-)
@@ -62,6 +63,27 @@ npm install -g @c-d-cc/reap
 > **Requirements**: [Node.js](https://nodejs.org) v18+ and one supported AI agent:
 > - [Claude Code](https://claude.ai/claude-code) CLI (default)
 > - [OpenCode](https://opencode.ai) — set `agentClient: opencode` in `.reap/config.yml` after `/reap.init`
+
+### Uninstalling
+
+`npm uninstall -g @c-d-cc/reap` removes the package and nothing else. Everything REAP placed in your home directory — slash commands, agent definitions, the SessionStart hook in `~/.claude/settings.json`, `~/.reap/` — was written by REAP's own code and npm has never heard of it. npm also runs no code at uninstall time, so REAP cannot clean up from a package hook.
+
+Remove REAP with REAP instead, **before** uninstalling the package:
+
+```bash
+reap uninstall            # shows what will go
+reap uninstall --confirm  # does it, and hands the packages to npm
+```
+
+It stops the daemon, removes REAP's files from both Claude Code and OpenCode locations, takes REAP's entries back out of `settings.json`, deletes `~/.reap/reap-guide.md`, the install stamp and `~/.reap/daemon/`, and then runs `npm uninstall -g` for `@c-d-cc/reap-daemon` and `@c-d-cc/reap`. Your own files in those directories are left alone, including anything named `reapdev.*` and anything else you keep in `~/.reap/`.
+
+**Already removed the package?** Then you have no `reap` command, and the files are still there. Run it without installing anything:
+
+```bash
+npx @c-d-cc/reap uninstall --confirm
+```
+
+`reap destroy` is a different thing — it removes REAP from *one project* (`.reap/`, the CLAUDE.md section, the `.gitignore` entries) and leaves the machine alone.
 
 ## Quick Start [↗](https://reap.cc/docs/quick-start)
 

@@ -19,6 +19,7 @@ REAP는 AI와 인간이 협력하여 소프트웨어를 구축하고 진화시�
 
 - [REAP란 무엇인가?](#reap란-무엇인가)
 - [설치](#설치)
+- [제거](#제거)
 - [빠른 시작](#빠른-시작-)
 - [생명 주기](#생명-주기-)
 - [핵심 개념](#핵심-개념-)
@@ -60,6 +61,27 @@ npm install -g @c-d-cc/reap
 > **요구 사항**: [Node.js](https://nodejs.org) v18+ 및 지원되는 AI 에이전트 중 하나:
 > - [Claude Code](https://claude.ai/claude-code) CLI (기본값)
 > - [OpenCode](https://opencode.ai) — `/reap.init` 후 `.reap/config.yml`에서 `agentClient: opencode`로 설정
+
+### 제거
+
+`npm uninstall -g @c-d-cc/reap` 는 패키지만 지웁니다. REAP 가 홈에 놓은 것 — 슬래시 명령어, 에이전트 정의, `~/.claude/settings.json` 의 SessionStart 훅, `~/.reap/` — 은 REAP 자신의 코드가 쓴 것이라 npm 은 그 존재를 모릅니다. 게다가 npm 은 제거 시점에 어떤 코드도 실행하지 않으므로, REAP 이 패키지 훅으로 정리할 방법이 없습니다.
+
+패키지를 지우기 **전에** REAP 으로 REAP 을 지우세요:
+
+```bash
+reap uninstall            # 무엇이 지워질지 보여줍니다
+reap uninstall --confirm  # 실제로 지우고, 패키지 제거까지 npm 에 넘깁니다
+```
+
+daemon 을 멈추고, Claude Code 와 OpenCode 양쪽 위치에서 REAP 파일을 지우고, `settings.json` 에서 REAP 항목만 빼고, `~/.reap/reap-guide.md` · 설치 스탬프 · `~/.reap/daemon/` 을 지운 뒤 `@c-d-cc/reap-daemon` 과 `@c-d-cc/reap` 에 대해 `npm uninstall -g` 를 실행합니다. 같은 디렉토리에 있는 사용자 파일은 건드리지 않습니다 — `reapdev.*` 도, `~/.reap/` 안의 다른 것들도 그대로 남습니다.
+
+**이미 패키지를 지웠다면?** `reap` 명령이 없고 파일은 남아 있는 상태입니다. 아무것도 설치하지 않고 실행하세요:
+
+```bash
+npx @c-d-cc/reap uninstall --confirm
+```
+
+`reap destroy` 는 다른 것입니다 — **한 프로젝트**에서 REAP 을 제거하며(`.reap/`, CLAUDE.md 의 REAP 절, `.gitignore` 항목), 머신은 건드리지 않습니다.
 
 ## 빠른 시작 [↗](https://reap.cc/docs/quick-start)
 

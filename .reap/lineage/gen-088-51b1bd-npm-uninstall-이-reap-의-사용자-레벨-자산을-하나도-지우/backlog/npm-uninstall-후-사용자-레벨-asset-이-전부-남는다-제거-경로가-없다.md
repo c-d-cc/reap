@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
 createdAt: 2026-08-19T14:22:34.570Z
+consumedBy: gen-088-51b1bd
+consumedAt: 2026-08-19T21:39:16.772Z
 ---
 
 # npm uninstall 후 사용자 레벨 asset 이 전부 남는다 — 제거 경로가 없다

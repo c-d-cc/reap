@@ -1,10 +1,16 @@
 import {
   installSkills,
   syncUserLevelAssets,
+  removeUserLevelAssets,
   claudeCodeCommandsDir,
 } from "./install.js";
 import { ensureClaudeMd } from "../../cli/commands/init/common.js";
-import type { AdapterModule, IntegrationAction, UserLevelSyncResult } from "../types.js";
+import type {
+  AdapterModule,
+  IntegrationAction,
+  UserLevelRemovalResult,
+  UserLevelSyncResult,
+} from "../types.js";
 
 /**
  * Claude Code adapter — wraps the existing install/sync functions to satisfy
@@ -42,6 +48,10 @@ export const claudeCodeAdapter: AdapterModule = {
 
   async syncUserLevelAssets(home?: string): Promise<UserLevelSyncResult> {
     return await syncUserLevelAssets(home);
+  },
+
+  async removeUserLevelAssets(home?: string): Promise<UserLevelRemovalResult> {
+    return await removeUserLevelAssets(home);
   },
 
   // reap:carrier(claude-code-commands-path)

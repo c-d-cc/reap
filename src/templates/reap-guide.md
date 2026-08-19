@@ -384,6 +384,13 @@ All REAP interactions go through `/reap.*` slash commands. These are the primary
 - `reap update --mark-migrated` — Mark this project as having applied all pending migration notes up to the current package version (gen-071 migration layer).
 - `reap dump-state [--stdout] [--silent]` — Dump dynamic REAP context to `.reap/.session-state.md` (used by OpenCode plugin; useful for any external tool that needs current generation state)
 - `reap daemon status|stop|index|query` — Inspect or control the local code-intelligence daemon (see § Code Intelligence below)
+- `reap uninstall [--confirm]` — Remove REAP from this machine: user-level files for both clients, REAP's SessionStart entries, `~/.reap/` (allowlisted), the daemon's data, and finally the npm packages. Two-phase — without `--confirm` it lists what would go and removes nothing.
+
+  **npm cannot do this and neither can a package hook.** `preuninstall`/`postuninstall` were measured not to fire on npm 10 or 12 (global or local) while the same probe fired on install, so `npm uninstall -g @c-d-cc/reap` leaves every file REAP wrote to the home directory — including the SessionStart hooks, which then call a command that no longer exists on every session.
+
+  Someone who has already removed the package has no `reap`: `npx @c-d-cc/reap uninstall --confirm` works without installing anything. `reap uninstall` is the only command that skips the `ensureUserLevelAssets` entry hook — otherwise it would install the assets moments before deleting them.
+
+  Distinct from `reap destroy`, which is per-project (`.reap/`, the CLAUDE.md section, `.gitignore` entries) and leaves the machine untouched. `destroy`'s output points here.
 
 ## Code Intelligence (Daemon)
 

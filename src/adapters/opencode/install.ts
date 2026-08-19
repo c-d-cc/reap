@@ -5,7 +5,7 @@ import { homedir } from "os";
 import { createHash } from "crypto";
 import { readTextFile, writeTextFile, ensureDir, fileExists } from "../../core/fs.js";
 import { emitOutput } from "../../core/output.js";
-import type { IntegrationAction, UserLevelSyncResult } from "../types.js";
+import type { IntegrationAction, UserLevelRemovalResult, UserLevelSyncResult } from "../types.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -228,6 +228,8 @@ export async function installPluginFile(projectRoot: string): Promise<void> {
 /**
  * Install reap-guide.md to `~/.reap/` (shared between adapters — same logic
  * as claude-code installer; duplicated to avoid cross-adapter import).
+ *
+ * reap:carrier(reap-home-asset-set)
  */
 export async function installReapGuide(home: string = homedir()): Promise<boolean> {
   const reapHome = join(home, ".reap");
@@ -640,6 +642,8 @@ export async function registerSessionIntegration(projectRoot: string): Promise<v
  * not a REAP project. `reap-guide.md` used to be excluded from the `reap
  * update` path on the grounds that postinstall owned it — an assumption npm 12
  * removed, and CLAUDE.md/AGENTS.md import that file by path.
+ *
+ * reap:carrier(user-level-asset-set)
  */
 export async function syncUserLevelAssets(home: string = homedir()): Promise<
   UserLevelSyncResult & {
@@ -659,4 +663,78 @@ export async function syncUserLevelAssets(home: string = homedir()): Promise<
   if (agents.installed === 0) missing.push("agent definitions");
 
   return { complete: missing.length === 0, missing, slashCommands, agents };
+}
+
+// ── removal ─────────────────────────────────────────────────────────────────
+
+/**
+ * Take away every OpenCode user-level asset REAP installs.
+ *
+ * The inverse of `syncUserLevelAssets` above, kept beside it for the same
+ * reason the Claude Code adapter does: the shared list cannot be shared as a
+ * value, so proximity is what keeps the two in step.
+ *
+ * reap:carrier(user-level-asset-set)
+ *
+ * Paths go through `opencodeCommandsDir` / `opencodeAgentsDir` rather than
+ * being spelled out, so removal follows `XDG_CONFIG_HOME` exactly as
+ * installation does. Writing to one location and deleting from the other is
+ * how a user with that variable set would end up with the files still there
+ * and REAP reporting a clean uninstall.
+ *
+ * `~/.reap/` is handled once by `removeReapHomeAssets` in the dispatcher — it
+ * is not client-specific, and `reap uninstall` sweeps both adapters.
+ */
+export async function removeUserLevelAssets(
+  home: string = homedir(),
+): Promise<UserLevelRemovalResult> {
+  const removed: string[] = [];
+  const kept: string[] = [];
+
+  const commandsDir = opencodeCommandsDir(home);
+  const commands = await removeMatching(commandsDir, SLASH_COMMAND_PATTERN);
+  removed.push(...commands.removed.map((f) => join(commandsDir, f)));
+  kept.push(...commands.kept.map((f) => join(commandsDir, f)));
+
+  const agentsDir = opencodeAgentsDir(home);
+  const agents = await removeMatching(agentsDir, AGENT_PATTERN);
+  removed.push(...agents.removed.map((f) => join(agentsDir, f)));
+  kept.push(...agents.kept.map((f) => join(agentsDir, f)));
+
+  return { removed, kept };
+}
+
+/**
+ * Delete the files in `dir` matching `pattern`; report the rest.
+ *
+ * Deliberately a local copy of the Claude Code adapter's helper: the two
+ * adapters do not import from each other (see `installReapGuide`, which is
+ * duplicated for the same reason), and a shared helper would be the only thing
+ * either of them shares.
+ */
+async function removeMatching(
+  dir: string,
+  pattern: RegExp,
+): Promise<{ removed: string[]; kept: string[] }> {
+  const removed: string[] = [];
+  const kept: string[] = [];
+  let entries: string[];
+  try {
+    entries = await readdir(dir);
+  } catch {
+    return { removed, kept };
+  }
+  for (const entry of entries) {
+    if (!pattern.test(entry)) {
+      kept.push(entry);
+      continue;
+    }
+    try {
+      await unlink(join(dir, entry));
+      removed.push(entry);
+    } catch {
+      kept.push(entry);
+    }
+  }
+  return { removed, kept };
 }

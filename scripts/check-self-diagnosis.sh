@@ -60,6 +60,7 @@ FAKE_HOME=""; PREFIX=""; PROJECT=""; TARBALL=""
 OC_HOME=""; OC_PROJECT=""
 DM_HOME=""; DM_INSTALL=""; DM_PROJECT=""; DM_TARBALL=""; DM_PID=""
 BL_HOME=""; BL_PREFIX=""; BL_PROJECT=""
+UN_HOME=""; UN_PREFIX=""
 cleanup() {
   [ -n "$DM_PID" ] && kill "$DM_PID" 2>/dev/null
   [ -n "$FAKE_HOME" ]  && rm -rf "$FAKE_HOME"
@@ -74,6 +75,8 @@ cleanup() {
   [ -n "$BL_HOME" ]    && rm -rf "$BL_HOME"
   [ -n "$BL_PREFIX" ]  && rm -rf "$BL_PREFIX"
   [ -n "$BL_PROJECT" ] && rm -rf "$BL_PROJECT"
+  [ -n "$UN_HOME" ]    && rm -rf "$UN_HOME"
+  [ -n "$UN_PREFIX" ]  && rm -rf "$UN_PREFIX"
   return 0
 }
 trap cleanup EXIT
@@ -102,7 +105,19 @@ FAKE_HOME=$(mktemp -d)
 PREFIX=$(mktemp -d)
 echo
 echo "Installing into an isolated environment..."
-if ! HOME="$FAKE_HOME" npm i -g --prefix "$PREFIX" "$ROOT/$TARBALL" >/dev/null 2>&1; then
+
+# The prefix's own bin goes on PATH, which is what a real global install looks
+# like and is not what an isolated one does by default. REAP's postinstall runs
+# `reap check-version`, which reads `reap --version` off PATH to decide whether
+# to auto-update. With the isolated bin absent it reads whatever reap the
+# developer or runner has installed, finds it differs from `latest`, and runs
+# `npm install -g @c-d-cc/reap@latest` — inheriting npm_config_prefix, so the
+# upgrade lands in *this* prefix and overwrites the tarball that was just
+# installed. Measured: the installed bundle was byte-identical to the published
+# 0.17.5 rather than to the one packed a second earlier, and every section below
+# was diagnosing the published package (gen-088).
+if ! HOME="$FAKE_HOME" PATH="$PREFIX/bin:$PATH" \
+     npm i -g --prefix "$PREFIX" "$ROOT/$TARBALL" >/dev/null 2>&1; then
   red "  FAIL  global install failed"
   dim "        HOME=$FAKE_HOME PREFIX=$PREFIX"
   exit 1
@@ -113,7 +128,24 @@ if [ ! -x "$REAP_BIN" ]; then
   red "  FAIL  reap binary missing at $REAP_BIN"
   exit 1
 fi
-green "  ok    installed"
+
+# And then check rather than trust. The line above is a precaution against one
+# known mechanism; this is the property that actually matters, and it holds
+# whatever replaces the artifact next time. Without it "the gate passed" and
+# "the gate tested something else entirely" are the same observation — which is
+# what they were, silently, from the moment 0.17.5 was published.
+PACKED_SHA=$(tar -xzOf "$ROOT/$TARBALL" package/dist/cli/index.js | shasum -a 256 | cut -d" " -f1)
+INSTALLED_SHA=$(shasum -a 256 "$PREFIX/lib/node_modules/@c-d-cc/reap/dist/cli/index.js" 2>/dev/null | cut -d" " -f1)
+if [ -z "$PACKED_SHA" ] || [ "$PACKED_SHA" != "$INSTALLED_SHA" ]; then
+  red "  FAIL  what got installed is not what was packed"
+  dim "        packed:    ${PACKED_SHA:-<could not read tarball>}"
+  dim "        installed: ${INSTALLED_SHA:-<no bundle at the install path>}"
+  dim "        Everything below would be diagnosing some other build. The known"
+  dim "        cause is REAP's own postinstall auto-updating to the published"
+  dim "        version; check that the prefix bin is on PATH for the install."
+  exit 1
+fi
+green "  ok    installed, and it is the artifact we packed"
 
 # ── 3. Initialise a project the way a new user would ────────────────────────
 PROJECT=$(mktemp -d)
@@ -1058,6 +1090,191 @@ for agent in reap-evolve reap-evaluate; do
   fi
 done
 green "  ok    OpenCode loads reap-evolve and reap-evaluate"
+
+# ── 8. Uninstall: does removing REAP actually remove it? ───────────────────
+#
+# npm runs no code at uninstall time. `preuninstall` and `postuninstall` are in
+# its documentation and fire in neither npm 10 nor npm 12, global or local;
+# the same probe script fired on install, so the absence proved itself. So
+# `npm uninstall -g @c-d-cc/reap` removes the package directory and the bin
+# symlink and leaves everything REAP wrote to the home directory exactly where
+# it was — including the SessionStart hooks, which then invoke a command that
+# is no longer installed on every session the user starts.
+#
+# `reap uninstall` is the answer, and this is the only place its npm step can
+# be run for real. Everything below section 2 has an isolated global prefix;
+# the unit tests can assert which arguments npm WOULD be given but never a
+# global install actually disappearing, and the e2e tests run from a source
+# checkout, where the command deliberately refuses to touch npm at all. Left
+# unexercised, that step would be the shape gen-084 named: working, and named
+# by no gate and no test.
+#
+# `npm_config_prefix` is what makes the isolation hold. `reap uninstall` asks
+# npm where its global root is and only proceeds when the package it is running
+# from is inside it, so without this the answer would be the developer's real
+# root, the install would be judged "not global", and the section would pass
+# while testing nothing.
+#
+# Removal is asserted only after the command has proved it ran: an exit code, a
+# `status` of ok, and a removed count that is a number greater than zero. A
+# crash, a renamed field or a usage error all produce an empty directory too.
+#
+# And survival is asserted beside it. A section that only checks that things are
+# gone is passed just as well by a command that deletes the user's home
+# directory.
+UN_HOME=$(mktemp -d)
+UN_PREFIX=$(mktemp -d)
+echo
+echo "Checking uninstall..."
+
+# PATH as in section 2 — otherwise REAP's postinstall replaces this install
+# with the published version, and the command under test is not the one built.
+if ! HOME="$UN_HOME" PATH="$UN_PREFIX/bin:$PATH" \
+     npm i -g --prefix "$UN_PREFIX" "$ROOT/$TARBALL" >/dev/null 2>&1; then
+  red "  FAIL  global install for the uninstall check failed"
+  exit 1
+fi
+UN_INSTALLED_SHA=$(shasum -a 256 "$UN_PREFIX/lib/node_modules/@c-d-cc/reap/dist/cli/index.js" 2>/dev/null | cut -d" " -f1)
+if [ "$UN_INSTALLED_SHA" != "$PACKED_SHA" ]; then
+  red "  FAIL  the uninstall check installed something other than the packed artifact"
+  dim "        packed: $PACKED_SHA  installed: ${UN_INSTALLED_SHA:-<none>}"
+  exit 1
+fi
+UN_BIN="$UN_PREFIX/bin/reap"
+UN_PKG="$UN_PREFIX/lib/node_modules/@c-d-cc/reap"
+UN_CMDS="$UN_HOME/.claude/commands"
+UN_AGENTS="$UN_HOME/.claude/agents"
+UN_SETTINGS="$UN_HOME/.claude/settings.json"
+
+# Things that belong to the user, planted in the same directories REAP writes
+# to. `reapdev.*` is in there because it is the near miss: REAP's own repo keeps
+# its development commands under that name and the only thing separating it
+# from `reap.*` is the dot.
+mkdir -p "$UN_CMDS" "$UN_AGENTS" "$UN_HOME/.reap"
+printf 'mine\n'    > "$UN_CMDS/my-command.md"
+printf 'devtool\n' > "$UN_CMDS/reapdev.publish.md"
+printf 'agent\n'   > "$UN_AGENTS/my-agent.md"
+printf 'secret\n'  > "$UN_HOME/.reap/my-private-key.pem"
+
+# The daemon's own data. Section 8 never runs a daemon, so without planting
+# this the later "~/.reap/daemon is gone" check could not fail — it would be
+# asserting the absence of something that never existed.
+mkdir -p "$UN_HOME/.reap/daemon/indexes"
+printf '{}\n' > "$UN_HOME/.reap/daemon/registry.json"
+
+# A SessionStart hook of the user's own, in the same array REAP writes into.
+if ! node -e '
+  const fs = require("fs");
+  const p = process.argv[1];
+  const s = JSON.parse(fs.readFileSync(p, "utf-8"));
+  s.hooks.SessionStart.push({ matcher: "", hooks: [{ type: "command", command: "my-own-thing" }] });
+  fs.writeFileSync(p, JSON.stringify(s, null, 2) + "\n");
+' "$UN_SETTINGS" 2>/dev/null; then
+  red "  FAIL  could not plant a user hook — is $UN_SETTINGS what the installer wrote?"
+  exit 1
+fi
+
+# The condition, before anything is removed. Every later absence is only
+# meaningful against these.
+UN_CMDS_BEFORE=$(ls -1 "$UN_CMDS" 2>/dev/null | grep -c '^reap\.' || true)
+UN_AGENTS_BEFORE=$(ls -1 "$UN_AGENTS" 2>/dev/null | grep -c '^reap-' || true)
+if [ "$UN_CMDS_BEFORE" -lt 1 ] || [ "$UN_AGENTS_BEFORE" -lt 1 ]; then
+  red "  FAIL  nothing to uninstall — install placed $UN_CMDS_BEFORE commands, $UN_AGENTS_BEFORE agents"
+  exit 1
+fi
+for before in "$UN_HOME/.reap/reap-guide.md" "$UN_HOME/.reap/.install-stamp"; do
+  if [ ! -f "$before" ]; then
+    red "  FAIL  nothing to uninstall — $before absent before the run"
+    exit 1
+  fi
+done
+if [ ! -d "$UN_PKG" ] || [ ! -d "$UN_HOME/.reap/daemon" ] || [ ! -e "$UN_BIN" ]; then
+  red "  FAIL  nothing to uninstall — package dir, daemon dir or bin link absent before the run"
+  exit 1
+fi
+green "  ok    installed state to remove ($UN_CMDS_BEFORE commands, $UN_AGENTS_BEFORE agents)"
+
+# 17288 is an address nothing in this script uses. The daemon is stopped before
+# the files are deleted, and without a port of its own that stop would reach
+# whatever daemon the developer happens to be running.
+set +e
+UN_OUT=$(cd "$UN_HOME" && HOME="$UN_HOME" npm_config_prefix="$UN_PREFIX" REAP_DAEMON_PORT=17288 \
+  "$UN_BIN" uninstall --confirm 2>&1)
+UN_CODE=$?
+set -e
+
+if [ "$UN_CODE" -ne 0 ]; then
+  red "  FAIL  reap uninstall --confirm exited $UN_CODE"
+  dim "        $UN_OUT"
+  exit 1
+fi
+
+# What the command says it did, before looking at what is on disk.
+UN_VERDICT=$(node -e '
+  let raw = ""; process.stdin.on("data", d => raw += d).on("end", () => {
+    let o; try { o = JSON.parse(raw); } catch { console.log("unparseable"); return; }
+    const n = o.context && o.context.removedCount;
+    const npmRan = o.context && o.context.npm && o.context.npm.executed;
+    if (o.status !== "ok") { console.log("status:" + o.status); return; }
+    if (typeof n !== "number" || n < 1) { console.log("removedCount:" + JSON.stringify(n)); return; }
+    if (npmRan !== true) { console.log("npm-not-executed:" + JSON.stringify(o.context.npm)); return; }
+    console.log("ok:" + n);
+  });' <<< "$UN_OUT")
+
+case "$UN_VERDICT" in
+  ok:*) ;;
+  *)
+    red "  FAIL  uninstall did not report a completed removal ($UN_VERDICT)"
+    dim "        $UN_OUT"
+    exit 1
+    ;;
+esac
+green "  ok    uninstall ran and reported ${UN_VERDICT#ok:} removals"
+
+# Gone.
+UN_CMDS_AFTER=$(ls -1 "$UN_CMDS" 2>/dev/null | grep -c '^reap\.' || true)
+UN_AGENTS_AFTER=$(ls -1 "$UN_AGENTS" 2>/dev/null | grep -c '^reap-' || true)
+if [ "$UN_CMDS_AFTER" -ne 0 ] || [ "$UN_AGENTS_AFTER" -ne 0 ]; then
+  red "  FAIL  slash commands or agents survived ($UN_CMDS_AFTER commands, $UN_AGENTS_AFTER agents)"
+  exit 1
+fi
+if [ -f "$UN_HOME/.reap/reap-guide.md" ] || [ -f "$UN_HOME/.reap/.install-stamp" ] || [ -d "$UN_HOME/.reap/daemon" ]; then
+  red "  FAIL  ~/.reap/ still holds REAP's own files"
+  ls -1a "$UN_HOME/.reap" | while IFS= read -r f; do dim "        $f"; done
+  exit 1
+fi
+if grep -q "reap check-version\|reap load-context" "$UN_SETTINGS" 2>/dev/null; then
+  red "  FAIL  settings.json still calls REAP on every session"
+  dim "        $(cat "$UN_SETTINGS")"
+  exit 1
+fi
+if [ -d "$UN_PKG" ]; then
+  red "  FAIL  the package itself is still installed at $UN_PKG"
+  exit 1
+fi
+# The symlink is what `reap` on PATH resolves to; a package directory removed
+# while the link survives leaves a broken command rather than no command.
+if [ -e "$UN_BIN" ] || [ -L "$UN_BIN" ]; then
+  red "  FAIL  the bin link survived at $UN_BIN"
+  exit 1
+fi
+green "  ok    every REAP surface is gone, including the package"
+
+# Kept.
+for survivor in "$UN_CMDS/my-command.md" "$UN_CMDS/reapdev.publish.md" \
+                "$UN_AGENTS/my-agent.md" "$UN_HOME/.reap/my-private-key.pem"; do
+  if [ ! -f "$survivor" ]; then
+    red "  FAIL  uninstall removed something that was not REAP's: $survivor"
+    exit 1
+  fi
+done
+if ! grep -q "my-own-thing" "$UN_SETTINGS" 2>/dev/null; then
+  red "  FAIL  uninstall removed the user's own SessionStart hook"
+  dim "        $(cat "$UN_SETTINGS" 2>/dev/null || echo '(settings.json is gone)')"
+  exit 1
+fi
+green "  ok    the user's own files and hooks survived"
+
 
 echo
 green "Self-diagnosis passed for v$PKG_VERSION."

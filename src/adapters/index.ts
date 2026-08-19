@@ -8,9 +8,9 @@
  */
 import { join } from "path";
 import { homedir } from "os";
-import { readFile, writeFile } from "fs/promises";
+import { readFile, writeFile, rm, rmdir } from "fs/promises";
 import YAML from "yaml";
-import type { AdapterModule } from "./types.js";
+import type { AdapterModule, UserLevelRemovalResult } from "./types.js";
 import { claudeCodeAdapter } from "./claude-code/index.js";
 import { opencodeAdapter } from "./opencode/index.js";
 import { ensureDir } from "../core/fs.js";
@@ -72,6 +72,7 @@ export async function resolveAgentClient(
  */
 type InstallStamp = Record<string, string>;
 
+// reap:carrier(reap-home-asset-set)
 export function installStampPath(home: string = homedir()): string {
   return join(home, ".reap", ".install-stamp");
 }
@@ -147,6 +148,88 @@ export async function ensureUserLevelAssets(opts: {
     // the user's command, and none of them should stop it.
     return "failed";
   }
+}
+
+/**
+ * Everything REAP itself puts in `~/.reap/`, named one by one.
+ *
+ * An allowlist, not a sweep, and the difference is not theoretical: the
+ * directory on the machine this was written on also held a user's private key
+ * (`reap-portal.*.pem`), which REAP did not create and has no business
+ * deleting. `rm -rf ~/.reap` would have taken it.
+ *
+ * A blocklist would not help either — it can only avoid the user files that
+ * exist today, and this is a directory named after the tool, so people put
+ * things in it. Anything absent from this list survives by default, which is
+ * the safe direction to be wrong in.
+ *
+ * `daemon/` is REAP's: the registry of indexed project paths and the SQLite
+ * symbol graphs, which is the largest thing left behind and the only part that
+ * describes the user's source code.
+ *
+ * reap:carrier(reap-home-asset-set)
+ */
+const REAP_HOME_ENTRIES = ["reap-guide.md", ".install-stamp", "daemon"] as const;
+
+/**
+ * Remove the client-agnostic half of REAP's user-level footprint.
+ *
+ * Kept out of the adapters because none of it is client-specific and `reap
+ * uninstall` sweeps every adapter — doing it per-adapter would mean doing it
+ * once per client for no gain.
+ *
+ * The daemon must already be stopped when this runs. It stays resident for
+ * thirty idle minutes and rewrites `~/.reap/daemon/` as it goes, so deleting
+ * first and stopping afterwards leaves the files back where they started.
+ *
+ * The `~/.reap` directory itself is left alone. It is removed only if this
+ * leaves it empty, so that whatever else a user keeps there stays where they
+ * put it.
+ */
+export async function removeReapHomeAssets(
+  home: string = homedir(),
+): Promise<UserLevelRemovalResult> {
+  const reapHome = join(home, ".reap");
+  const removed: string[] = [];
+  const kept: string[] = [];
+
+  let entries: string[];
+  try {
+    const { readdir } = await import("fs/promises");
+    entries = await readdir(reapHome);
+  } catch {
+    return { removed, kept };
+  }
+
+  for (const entry of entries) {
+    if (!(REAP_HOME_ENTRIES as readonly string[]).includes(entry)) {
+      kept.push(join(reapHome, entry));
+      continue;
+    }
+    try {
+      await rm(join(reapHome, entry), { recursive: true, force: true });
+      removed.push(join(reapHome, entry));
+    } catch {
+      kept.push(join(reapHome, entry));
+    }
+  }
+
+  if (kept.length === 0) {
+    // `rmdir`, not `rm -r`. It refuses on a non-empty directory, which is
+    // exactly the guarantee wanted here: if anything appeared between the
+    // listing above and this line, it survives. A recursive delete would be
+    // the one operation in this file capable of taking a user's files, and it
+    // would be guarded only by a check made a moment earlier.
+    try {
+      await rmdir(reapHome);
+      removed.push(reapHome);
+    } catch {
+      // Not empty, or unwritable. Leaving it costs nothing — at worst an
+      // empty directory stays behind.
+    }
+  }
+
+  return { removed, kept };
 }
 
 export type { AdapterModule } from "./types.js";

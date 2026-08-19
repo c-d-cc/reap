@@ -19,6 +19,7 @@ REAP 是一个基于代际迭代的开发管道，AI 与人类协作构建和进
 
 - [什么是 REAP？](#什么是-reap)
 - [安装](#安装)
+- [卸载](#卸载)
 - [快速开始](#快速开始-)
 - [生命周期](#生命周期-)
 - [核心概念](#核心概念-)
@@ -60,6 +61,27 @@ npm install -g @c-d-cc/reap
 > **前提条件**：[Node.js](https://nodejs.org) v18+ 以及以下任一受支持的 AI 智能体：
 > - [Claude Code](https://claude.ai/claude-code) CLI（默认）
 > - [OpenCode](https://opencode.ai) — `/reap.init` 后在 `.reap/config.yml` 中设置 `agentClient: opencode`
+
+### 卸载
+
+`npm uninstall -g @c-d-cc/reap` 只会删除软件包。REAP 放进主目录的东西 — 斜杠命令、智能体定义、`~/.claude/settings.json` 中的 SessionStart 钩子、`~/.reap/` — 都是 REAP 自己的代码写入的，npm 对此一无所知。而且 npm 在卸载时不会执行任何代码，所以 REAP 无法通过软件包钩子来清理。
+
+请在卸载软件包**之前**，用 REAP 卸载 REAP：
+
+```bash
+reap uninstall            # 显示将被删除的内容
+reap uninstall --confirm  # 执行删除，并把软件包交给 npm 卸载
+```
+
+它会停止守护进程，删除 Claude Code 和 OpenCode 两处位置中 REAP 的文件，只从 `settings.json` 中移除 REAP 添加的条目，删除 `~/.reap/reap-guide.md`、安装标记和 `~/.reap/daemon/`，然后对 `@c-d-cc/reap-daemon` 与 `@c-d-cc/reap` 执行 `npm uninstall -g`。这些目录中属于你自己的文件不会被动 — 包括任何名为 `reapdev.*` 的文件，以及 `~/.reap/` 里的其他内容。
+
+**已经删除了软件包？** 那么你没有 `reap` 命令，而文件仍然留在那里。无需安装任何东西即可运行：
+
+```bash
+npx @c-d-cc/reap uninstall --confirm
+```
+
+`reap destroy` 是另一回事 — 它从**单个项目**中移除 REAP（`.reap/`、CLAUDE.md 中的 REAP 部分、`.gitignore` 条目），不会动这台机器。
 
 ## 快速开始 [↗](https://reap.cc/docs/quick-start)
 
