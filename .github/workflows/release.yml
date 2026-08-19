@@ -110,9 +110,17 @@ jobs:
         run: |
           set -euo pipefail
           TARBALL=$(npm pack --silent | tail -1)
-          tar -tzf "$TARBALL" | grep -q "package/queries/" \
+          # Read the listing once into a variable rather than piping it into
+          # grep. `grep -q` stops at its first match, and dist/index.js is the
+          # first entry of seventeen, so tar was still writing when the reader
+          # went away — SIGPIPE, a nonzero tar, and under `pipefail` a matched
+          # grep reported as a failure. The file was there every time. macOS
+          # tar tolerates this and GNU tar does not, so it passed locally and
+          # failed only on the runner.
+          LISTING=$(tar -tzf "$TARBALL")
+          grep -q "package/queries/" <<< "$LISTING" \
             || { echo "::error::queries/ missing from the daemon tarball"; exit 1; }
-          tar -tzf "$TARBALL" | grep -q "package/dist/index.js" \
+          grep -q "package/dist/index.js" <<< "$LISTING" \
             || { echo "::error::dist/index.js missing from the daemon tarball"; exit 1; }
           rm -f "$TARBALL"
 

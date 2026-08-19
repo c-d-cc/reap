@@ -224,7 +224,14 @@ echo "Checking the daemon..."
 # 5a. reap must not carry the daemon. A `file:` dependency on a directory that
 #     is not in `files` is what produced the broken symlink; either half alone
 #     is harmless, so both are checked.
-if tar -tzf "$ROOT/$TARBALL" | grep -q "package/daemon/"; then
+# The listing is read once into a variable, never piped into grep. `grep -q`
+# leaves at its first match while tar is still writing, and under `pipefail`
+# that SIGPIPE turns a matched grep into a failed pipeline. Here that would be
+# silent: the `if` would read false and the check would report a clean tarball
+# precisely when daemon/ is in it. Same shape as the pipefail defect gen-083
+# found in 5a-bis; this is the rest of that class.
+REAP_LISTING=$(tar -tzf "$ROOT/$TARBALL")
+if grep -q "package/daemon/" <<< "$REAP_LISTING"; then
   red "  FAIL  the reap tarball contains daemon/ — it is meant to be a separate package"
   exit 1
 fi
@@ -342,7 +349,8 @@ if [ -z "$DM_TARBALL" ] || [ ! -f "$ROOT/daemon/$DM_TARBALL" ]; then
   exit 1
 fi
 
-if ! tar -tzf "$ROOT/daemon/$DM_TARBALL" | grep -q "package/queries/"; then
+DM_LISTING=$(tar -tzf "$ROOT/daemon/$DM_TARBALL")
+if ! grep -q "package/queries/" <<< "$DM_LISTING"; then
   red "  FAIL  the daemon tarball has no queries/ — it cannot parse anything without them"
   exit 1
 fi
