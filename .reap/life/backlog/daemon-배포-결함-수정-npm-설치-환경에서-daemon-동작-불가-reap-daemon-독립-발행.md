@@ -8,6 +8,8 @@ createdAt: 2026-07-26T03:26:55.570Z
 # daemon 배포 결함 수정 — npm 설치 환경에서 daemon 동작 불가 + reap-daemon 독립 발행
 
 > **착수 시점: 0.17.2 릴리즈 이후.** 유저 결정(2026-07-26) — 0.17.2 는 issue #21(pruning policy) 범위로 마감하고, daemon 관련 작업은 그 다음 세대부터. 본 backlog 는 daemon 트랙의 **선행 조건**이며, `reap-daemon-개선-검토-...md`(SCIP 검토)보다 먼저 처리해야 한다.
+>
+> **재검증 2026-08-19 (v0.17.4): 결함 그대로.** 착수 조건(0.17.2 릴리즈 이후)은 이미 충족됐다. 아래 § 재검증 참조.
 
 ## Problem
 
@@ -26,6 +28,22 @@ reap-daemon -> reap/daemon        # 심링크
 $ ls node_modules/@c-d-cc/reap-daemon/
 ls: No such file or directory     # 끊긴 심링크
 ```
+
+### 재검증 (2026-08-19, v0.17.4 — 현재 최신 배포본)
+
+결함은 그대로이고, 전역 설치에서는 오히려 더 조용하다.
+
+| 확인 | v0.17.4 결과 |
+|---|---|
+| `npm i @c-d-cc/reap@0.17.4` | 설치 **성공**. `node_modules/@c-d-cc/reap-daemon` 은 **끊긴 심링크** |
+| `npm i -g --prefix <tmp>` (자기진단 게이트와 같은 방식) | 설치 **성공**. `@c-d-cc/reap-daemon` 이 **아예 생성되지 않음** — 의존성이 조용히 누락 |
+| `npm view @c-d-cc/reap-daemon` | **E404** — 여전히 미발행 |
+| `package.json` `dependencies` / `files` | `file:./daemon` 유지 / `files` 에 daemon/ 없음 — 무변경 |
+| `daemon/package.json` | `files` · `publishConfig` **부재** (발행 준비 안 됨) |
+| `src/cli/commands/daemon/client.ts:70-76` | `resolveDaemonBin` **2단계 그대로** — 미설치 판정 분기 없음 |
+| daemon 경로 마지막 커밋 | `9e420de` (gen-069). 이후 gen-080/081/082 는 daemon 미변경 |
+
+**설치가 실패하지 않는다는 점이 핵심이다.** 종료 코드 0, 경고 없음. 그래서 설치 시점 검사로는 아무것도 잡히지 않는다.
 
 ### 원인 — 4개 사실의 조합
 
@@ -63,6 +81,23 @@ function resolveDaemonBin(): string {
 본 repo 가 소스 트리에서 dog-fooding 중이라 `resolveDaemonBin` 의 **폴백 경로가 항상 맞는다**. 즉 개발 환경에서만 동작하는 dev-only 기능이었고, gen-069 의 daemon e2e 21개도 소스 트리에서 `bun src/index.ts` 를 직접 spawn 하는 helper(`tests/helpers/daemon.ts`)를 쓰므로 이 갭을 통과한다.
 
 **교훈 후보(adapt 에서 판단)**: e2e 가 "소스 트리에서의 동작"만 검증하고 **배포 산출물(tarball)에서의 동작**을 검증하지 않으면 이 계열 결함은 계속 빠져나간다. gen-064 의 "e2e 가 일부 entry point 만 cover" 교훈과 같은 구조.
+
+### 자기진단 게이트가 이것을 잡는다는 주장은 사실이 아니다 (2026-08-19 발견)
+
+`scripts/check-self-diagnosis.sh` 헤더(13행)는 본 결함을 게이트가 잡는 세 사례 중 하나로 적고 있다:
+
+> Three past incidents fail against it — … `gen-074 daemon : files omitted daemon/, leaving a broken symlink`
+
+**걸리지 않는다.** 게이트가 보는 것은 (1) `npm i -g` 성공 (2) `reap fix --check` 의 errors/warnings 0 두 가지뿐인데:
+
+- 설치는 **성공한다** (위 재검증)
+- `src/core/integrity.ts` 와 `src/cli/commands/fix.ts` 에 daemon 언급이 **0건** — 결함을 볼 수 있는 코드 경로 자체가 없다
+
+현재 CI 가 green 인 것이 그 증거다. 결함이 살아 있는 채로 통과하고 있다. `.reap/environment/summary.md` § CI / Release 게이트도 같은 주장을 복사해 담고 있어 **두 곳이 함께 틀렸다**.
+
+longterm 의 **"A passing check is not a verified goal"** 사례다. gen-078 이 게이트를 만들면서 **깨진 상태에서 먼저 실패시켜 보지 않고** 커버 범위를 적었다 — 같은 문서의 "검사를 만들 때 먼저 실패시켜라" 규칙이 지켜지지 않았다.
+
+따라서 정정을 본 backlog 범위에 포함한다 (S5).
 
 ## Solution
 
@@ -111,6 +146,14 @@ daemon 의 silent-fail 정책은 "daemon 이 죽어 있어도 lifecycle 을 막�
 - `.github/workflows/release.yml` 의 publish 전 검증에 포함 — **issue #21 backlog 의 `scripts/check-docs-version.sh` 와 같은 게이트 지점**이므로 함께 설계하면 중복이 없다
 - 최소한: `npm pack --dry-run` 결과에 daemon 관련 파일이 기대대로 있는지/없는지 assert
 
+### S5. 허위 커버리지 주장 정정 — 같은 세대에서 함께 처리
+
+수정 자체는 작지만 **방치하면 다음 사람이 이 결함은 이미 검사되고 있다고 믿는다.** 코드 수정과 분리하지 않는다.
+
+- `scripts/check-self-diagnosis.sh` 헤더 — gen-074 daemon 항목을 (a) 실제 assertion 을 넣어 **참으로 만들거나** (b) 목록에서 제거한다. **(a) 가 옳다** — S4 가 요구하는 배포 산출물 검증이 곧 그 assertion 이다
+- `.reap/environment/summary.md` § CI / Release 게이트 — 같은 주장을 담고 있으므로 함께 정정
+- **순서: assertion 을 먼저 넣고 현재 코드에서 fail 하는 것을 확인한 뒤** 결함을 고친다. 그래야 이번에는 주장이 사실이 된다
+
 ## Files to Change
 
 - `package.json` — `dependencies` 에서 `@c-d-cc/reap-daemon` 제거
@@ -120,7 +163,8 @@ daemon 의 silent-fail 정책은 "daemon 이 죽어 있어도 lifecycle 을 막�
 - `src/cli/commands/daemon/lifecycle.ts` — `ensureRegistered` / `triggerIndexing` 의 미설치 시 안내 1회 노출 (silent-fail 정책과의 경계 설계)
 - `src/core/integrity.ts` + `src/cli/commands/fix.ts` — "daemon: true 인데 미설치" 진단 (채택 시)
 - `.github/workflows/release.yml` — daemon publish + tarball 검증
-- `.reap/environment/summary.md` — daemon 배포 구조 갱신 (dependency 관계 변경)
+- `scripts/check-self-diagnosis.sh` — daemon 배포 산출물 assertion 추가 + 헤더의 허위 커버리지 주장 정정 (S4/S5)
+- `.reap/environment/summary.md` — daemon 배포 구조 갱신 (dependency 관계 변경) + § CI / Release 게이트의 허위 주장 정정 (S5)
 - `src/templates/reap-guide.md` + `.reap/reap-guide.md` — § Code Intelligence 에 설치 요구사항 명시 (현재는 "opt-in 하면 동작한다"고만 되어 있어 사실과 다름)
 - `docs/src/i18n/translations/*.ts` — daemon 설치 안내 (5개 로케일)
 - 테스트 — tarball 설치 e2e (신규), 기존 daemon e2e 21개는 소스 트리 기준이므로 유지
@@ -134,6 +178,8 @@ daemon 의 silent-fail 정책은 "daemon 이 죽어 있어도 lifecycle 을 막�
 5. `npm i @c-d-cc/reap` 후 `node_modules` 에 `better-sqlite3` / `tree-sitter-*` 가 **없음** (zero-dependency 유지 확인)
 6. 기존 daemon e2e 21개 회귀 없음 (소스 트리 spawn 방식 유지)
 7. `.reap/environment/summary.md` 의 dependency 서술이 실제와 일치
+8. **정정 전에 실패를 먼저 본다** — `check-self-diagnosis.sh` 에 daemon assertion 을 넣고 **수정 전 코드에서 fail** 하는 것을 확인. 통과부터 확인하면 그 검사가 무력한지 알 수 없다
+9. 헤더의 "세 사례가 걸린다"는 주장이 **세 사례 모두에 대해 실제로 참**인가 (#22 / gen-074 daemon / gen-080 각각 확인). 하나가 거짓이었으므로 나머지도 확인 대상이다
 
 ## Open Decisions
 

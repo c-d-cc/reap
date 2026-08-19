@@ -17,13 +17,14 @@
 - gen-082 는 **completion reflect 진행 중**. 소스 변경은 이미 push 됨
 - `TEST_DISPATCH_TOKEN` 은 유저가 재발급해 교체 완료
 
-### 다음 — pending backlog 3건
+### 다음 — pending backlog 8건 (2026-08-19 갱신)
 
-- **interview 기능 재설계** — gen-076 에서 abort. 방향은 "모호성을 측정해 임계 이하로 낮추는 반복 질문"이지 템플릿 슬롯 채우기가 아니다
-- **daemon 배포 결함** — npm 설치 시 daemon 이 끊긴 심링크. `daemon: true` 사용자가 못 쓴다
-- **daemon SCIP 검토** — 위 결함 수정 후
+릴리즈 배분은 midterm § 릴리즈 배분 참조.
 
-daemon 2건은 유저 판단으로 보류 중.
+- **0.17.5** — daemon 배포 결함 → daemon SCIP 설계
+- **0.18** — plugin 전환 · interview skill · milestone · idea · plan(자리) · `/reap.plan` skill
+
+daemon 2건은 재검증 완료(2026-08-19): 결함 그대로이며 **자기진단 게이트가 이것을 잡는다는 헤더 주장이 거짓**임을 발견 — 정정을 배포 결함 backlog 범위에 포함시켰다.
 
 ### 여전히 열려 있는 갭
 
