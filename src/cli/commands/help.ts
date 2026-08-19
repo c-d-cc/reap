@@ -62,6 +62,12 @@ export const COMMAND_DESCRIPTIONS: Record<string, Record<SupportedLanguage, stri
     ja: "部分完了クローズ（abortと正式completionの間のライトウェイト）",
     "zh-CN": "部分保存关闭（abort 与正式 completion 之间的轻量路径）",
   },
+  "/reap.run": {
+    en: "Run a lifecycle stage or phase directly",
+    ko: "lifecycle stage/phase 직접 실행",
+    ja: "ライフサイクルのstage/phaseを直接実行",
+    "zh-CN": "直接执行生命周期stage/phase",
+  },
   "/reap.knowledge": {
     en: "Manage genome, environment, context",
     ko: "Genome, environment, context 관리",
@@ -109,6 +115,12 @@ export const COMMAND_DESCRIPTIONS: Record<string, Record<SupportedLanguage, stri
     ko: "프로젝트 구조 업그레이드",
     ja: "プロジェクト構造をアップグレード",
     "zh-CN": "升级项目结构",
+  },
+  "/reap.report": {
+    en: "Report a bug or request a feature",
+    ko: "버그 리포트 / 기능 요청",
+    ja: "バグ報告 / 機能リクエスト",
+    "zh-CN": "报告缺陷 / 功能请求",
   },
   "/reap.help": {
     en: "Show help and topics",
