@@ -1,7 +1,10 @@
 node_modules/
 dist/
-daemon/dist/
 *.tsbuildinfo
+
+# Code index — derived, and self-referential if committed (indexing it would
+# change the commit that has to be indexed)
+.reap/.index/
 
 # E2E test artifacts (regenerated on each run)
 examples/e2e-test/.reap/lineage/

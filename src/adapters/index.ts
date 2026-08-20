@@ -163,9 +163,11 @@ export async function ensureUserLevelAssets(opts: {
  * things in it. Anything absent from this list survives by default, which is
  * the safe direction to be wrong in.
  *
- * `daemon/` is REAP's: the registry of indexed project paths and the SQLite
- * symbol graphs, which is the largest thing left behind and the only part that
- * describes the user's source code.
+ * `daemon/` is what the retired daemon left: a registry of indexed project
+ * paths and a SQLite symbol graph per project. Nothing writes it since 0.17.6
+ * — it is listed so a machine that once opted in gets it cleaned up rather
+ * than carrying it forever. `reap update` removes the same directory, for the
+ * users who are staying.
  *
  * reap:carrier(reap-home-asset-set)
  */
@@ -177,10 +179,6 @@ const REAP_HOME_ENTRIES = ["reap-guide.md", ".install-stamp", "daemon"] as const
  * Kept out of the adapters because none of it is client-specific and `reap
  * uninstall` sweeps every adapter — doing it per-adapter would mean doing it
  * once per client for no gain.
- *
- * The daemon must already be stopped when this runs. It stays resident for
- * thirty idle minutes and rewrites `~/.reap/daemon/` as it goes, so deleting
- * first and stopping afterwards leaves the files back where they started.
  *
  * The `~/.reap` directory itself is left alone. It is removed only if this
  * leaves it empty, so that whatever else a user keeps there stays where they

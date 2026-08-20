@@ -87,16 +87,10 @@ export async function execute(paths: ReapPaths, phase?: string): Promise<void> {
 
     const next = await performTransition(s, gm, paths);
 
-    // gen-068: re-index after implementation completes so that validation
-    // (and any subsequent evaluator subagent run) queries an up-to-date
-    // graph reflecting the code just written. Silent-fail if daemon is
-    // unreachable or the user has not opted in.
-    const configContent = await readTextFile(paths.config);
-    const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
-    if (config?.daemon === true) {
-      const { triggerIndexing } = await import("../daemon/lifecycle.js");
-      await triggerIndexing(paths.root);
-    }
+    // No re-index here (gen-089). Completing implementation writes code but
+    // makes no commit, and the index is keyed by commit — a rebuild at this
+    // point would record work that HEAD does not yet contain. Validation and
+    // the evaluator get a current index because every query refreshes itself.
 
     emitOutput({
       status: "ok",

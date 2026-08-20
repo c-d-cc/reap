@@ -215,6 +215,13 @@ Claude Code 어댑터의 knowledge 전달은 두 layer로 명확히 분리된다
 ### Enforced Conventions
 - CLI entry point (`src/cli/index.ts`)는 라우팅만 — command 로직은 `src/cli/commands/` 아래 별도 파일의 `execute()` 함수로 분리.
 
+<!-- reap:carrier(zero-native-dependency) -->
+- **Zero *native* dependency.** 의존 개수를 최소로 유지하되 절대 기준은 개수가 아니라
+  **네이티브 빌드가 없을 것**이다 — node-gyp/prebuild 를 요구하는 의존은 받지 않는다.
+  gen-089 에서 "zero dependency" 를 대체했다: 개수를 지키느라 code intelligence 를 별도
+  패키지로 밀어냈고, 그 결과 다운로드 0회에 대표 기능이 5개월간 0을 반환해도 아무도 몰랐다.
+  **개수를 지키느라 기능을 프로세스 밖으로 밀어내면 그 기능은 검증되지 않는다.**
+
 ### File Naming
 - Core modules: kebab-case (`stage-transition.ts`, `genome-suggest.ts`)
 - Commands: stage 이름 그대로 (`learning.ts`, `completion.ts`)

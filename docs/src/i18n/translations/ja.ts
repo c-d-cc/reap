@@ -21,7 +21,7 @@ export const ja: Translations = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
-      daemon: "Code Intelligence Daemon",
+      daemon: "Code Intelligence",
       advanced: "上級",
       collaborationOverview: "分散ワークフロー",
       mergeGeneration: "Merge Generation",
@@ -299,8 +299,8 @@ export const ja: Translations = {
     destroyDesc: "プロジェクトからすべてのREAPファイルを削除します。",
     destroyNote: ".reap/ディレクトリとプロジェクト内のすべてのREAP関連ファイルを完全に削除します。確認のために「yes destroy」と入力する必要があります。",
     uninstallTitle: "reap uninstall",
-    uninstallDesc: "このマシンからREAPを削除します — ユーザーレベルのファイル、デーモン、npmパッケージ。",
-    uninstallNote: "npmはパッケージだけを削除します。REAPのスラッシュコマンド、エージェント定義、SessionStartフック、~/.reap/ はREAP自身のコードが書いたもので、npmはアンインストール時にコードを実行しません。このコマンドが正しい順序で処理します — デーモンを停止し、両クライアントのユーザーレベルファイルを削除し、settings.jsonからREAPの項目だけを取り除き、その後 @c-d-cc/reap-daemon と @c-d-cc/reap をnpmに渡します。あなた自身のファイルは残ります — reapdev.* も、~/.reap/ 内のその他も。すでにパッケージを削除した場合は npx @c-d-cc/reap uninstall --confirm。1つのプロジェクトからREAPを取り除く reap destroy とは別物です。",
+    uninstallDesc: "このマシンからREAPを削除します — ユーザーレベルのファイルとnpmパッケージ。",
+    uninstallNote: "npmはパッケージだけを削除します。REAPのスラッシュコマンド、エージェント定義、SessionStartフック、~/.reap/ はREAP自身のコードが書いたもので、npmはアンインストール時にコードを実行しません。このコマンドが正しい順序で処理します — 両クライアントのユーザーレベルファイルを削除し、settings.jsonからREAPの項目だけを取り除き、廃止されたデーモンが ~/.reap/daemon/ に残したものを削除し、その後 @c-d-cc/reap-daemon と @c-d-cc/reap をnpmに渡します。あなた自身のファイルは残ります — reapdev.* も、~/.reap/ 内のその他も。すでにパッケージを削除した場合は npx @c-d-cc/reap uninstall --confirm。1つのプロジェクトからREAPを取り除く reap destroy とは別物です。",
     makeBacklogTitle: "reap make backlog",
     makeBacklogDesc: "バックログアイテムを作成します。バックログファイルの作成にサポートされている唯一の方法です。",
     makeBacklogNote: "オプション：--type <genome-change|environment-change|task> --title <title> [--body <body>] [--priority <priority>]。バックログファイルを直接作成しないでください。",
@@ -409,7 +409,6 @@ export const ja: Translations = {
       ["agentClient", "使用するAIエージェントクライアント（デフォルト：claude-code）。スキルデプロイメントとセッションhookに使用するアダプターを決定"],
       ["cruiseCount", "存在する場合、cruiseモードを有効にします。形式：current/total（例：1/5）。cruise完了後に自動削除"],
       ["evaluator", "validationおよびfitnessフェーズで独立したreap-evaluate サブエージェントを有効にします（デフォルト：false）。high-severity懸念時にクルーズモードを自動停止"],
-      ["daemon", "ローカルTree-sitterシンボルグラフを有効にします（デフォルト：false）。agentプロンプトにシンボル検索・caller/callee・blast-radius分析ガイドを追加"],
     ],
     strictMode: "Strictモード",
     strictModeDesc: "StrictモードはAIエージェントが実行できる操作を制御します。2つの独立した設定：",
@@ -827,72 +826,47 @@ priority: medium
 タスクの説明。`,
   },
 
-  // Daemon Page
+  // Code Intelligence Page (route stays /docs/daemon so links keep working)
   daemonPage: {
-    title: "Code Intelligence Daemon",
+    title: "Code Intelligence",
     breadcrumb: "ガイド",
-    intro: "REAPは世代をまたいでTree-sitterシンボルグラフを維持するローカルコードインテリジェンスデーモンを利用できます。別途公開されており、REAPのインストールには含まれません。localhost:17224のローカルHTTP APIを通じて、エージェントにシンボル検索、caller/calleeトラバーサル、blast-radius影響分析を提供します。",
-    optInTitle: "セットアップ（オプトイン）",
-    installTitle: "まずインストールする",
-    installDesc: "デーモンは独立したnpmパッケージです。REAPをインストールしても一緒には入りません。ネイティブのSQLiteビルドとTree-sitter文法一式を伴うため、既定でオフの機能のために全ユーザーがその負担を負う理由がないからです。",
-    installCmd: `npm i -g @c-d-cc/reap-daemon`,
-    installNote: "v0.17.5より前は、デーモンが配布されないfile:依存として宣言されていたため、daemon: trueを設定してもリンク切れになり何も起きませんでした。以前デーモンを有効にしても動かなかったのはこれが原因です。",
-    locateTitle: "インストール済みなのに REAP が見つけられない場合",
-    locateDesc: "REAP は自身の位置を基準にデーモンを探しますが、デーモンは意図的に REAP の依存パッケージにしていません \u2014 ネイティブ SQLite ビルドと 15 個の Tree-sitter 文法を全ユーザーに背負わせないためです。そのため両者は同じ resolution root を共有しているときにだけ互いを見つけられます。同じパッケージマネージャで両方をグローバルに入れればその条件は満たされますが、グローバルな REAP とプロジェクトローカルなデーモン、異なる prefix、グローバル prefix が変わる Node バージョン切り替えでは満たされません。その場合は場所を直接指定してください。",
-    locateConfig: `daemonBin: /usr/local/lib/node_modules/@c-d-cc/reap-daemon/dist/index.js`,
-    locateNote: "REAP_DAEMON_BIN は単発のコマンドや CI ジョブで同じ役割を果たし、config より優先されます。相対パスはプロジェクトルート基準で解決され、先頭の ~ はホームに展開されます。reap daemon status が bin と binSource(env, config, package, checkout)を報告するので、REAP がその設定を読んでいるかを推測せず確認できます \u2014 これは REAP が起動する対象であり、すでに動いているデーモンは出所を問わず再利用されます。何も無いパスはそのパスを名指しして報告されますが、探索は止まりません \u2014 config.yml はコミットされるため、あるマシンで正しい位置が別のマシンには無いことがあるからです。",
-    unusableTitle: "有効だが使えない場合",
-    unusableDesc: "daemon: trueなのに未インストール、またはREAPが要求するより古い場合は、一時的な障害ではなく設定と環境の不一致なので、REAPはそう伝えます。lifecycleが止まることはありません — インデックス作成は静かに失敗し、すべてのコマンドは従来どおり動作します。変わるのは、尋ねれば答えが返るという点です。reap daemon statusは未インストール／バージョン不足／未起動を区別し、実行すべきコマンドを表示します。さらにインストール済みバージョンと実行中バージョンを並べて示します — デーモンはアイドル30分まで常駐するため、アップグレードしても応答するプロセスは置き換わらないからです。reap fix --checkはこの不一致を警告として報告します。そしてエージェントプロンプトから照会プロトコルが外れるため、エージェントが毎ステージ死んだポートに問い合わせることがなくなります。",
-    optInDesc: "パッケージをインストールした上で、.reap/config.ymlに1行追加して有効化します：",
-    optInConfig: `daemon: true   # デフォルト: false`,
-    optInNote: "falseまたは未設定の場合、デーモン関連の動作はすべてスキップされます。エージェントプロンプト、lifecycleフック、CLI出力はデーモンを有効にしたことのないプロジェクトと完全に同一です。",
-    autoTriggerTitle: "自動トリガーポイント",
-    autoTriggerDesc: "有効化すると、REAPが主要なlifecycle時点で自動的にプロジェクトを登録し再インデックスします：",
-    autoTriggerHeaders: ["Lifecycle時点", "実行内容"],
-    autoTriggerItems: [
-      ["reap run start (generation作成)", "ensureRegistered + 全triggerIndexing"],
-      ["reap run learning (work phase)", "ensureRegistered + triggerIndexing (探索前にグラフを最新化)"],
-      ["reap run implementation (complete phase)", "triggerIndexing (validationが書いたばかりのコードを参照できるように)"],
-      ["reap run completion (commit phase、アーカイブ後)", "triggerIndexing (次世代のためにコミット済み状態を反映)"],
+    intro: "REAP はコードインデックスを内蔵しています。インストールするものも、起動するものも、バックグラウンドで動くプロセスもありません。Tree-sitter パーサーが追跡中のすべてのファイルを走査し、定義されたシンボルとその間の呼び出し・import を記録して、結果を .reap/.index/ に gzip された JSON として保存します。15 言語が同梱され、ネイティブビルドはありません — グラマーは WebAssembly です。",
+    commandsTitle: "コマンド",
+    commandsDesc: "どのサブコマンドも REAP の他のコマンドと同様に stdout へ JSON を出力します。エージェントはそれをパースし、人間は message フィールドを読めば済みます。",
+    commandsCode: `reap index                     # update — デフォルト動作
+reap index update [--full]     # インデックスを HEAD に合わせる
+reap index status              # 統計、import 解決率、インデックス済みコミット
+reap index impact <file>...    # このファイルを変更すると何が影響を受けるか
+reap index search <query>      # 定義を探す（file:line を返す）
+reap index callers <symbolId>  # 誰がこれを呼ぶか
+reap index callees <symbolId>  # これが何を呼ぶか`,
+    commandsNote: "symbolId は <file>::<name> の形式です — 例: src/core/lifecycle.ts::nextStage。reap index search がこの値を出力します。",
+    commitTitle: "変更の単位はコミットです",
+    commitDesc: "インデックスは自分が記述する SHA を記録します。何を再解析するかは git diff 一回、そもそも再解析が必要かは文字列比較一回で決まります。HEAD が動けば — コミット・ブランチ切り替え・rebase・pull の後 — クエリ自身がインデックスを更新します。REAP が先んじて更新するのは自分がコミットした直後だけ — completion の末尾と early-close です。",
+    commitCode: `reap index update    # Indexed 412 file(s) — full, 1530 symbols at 1a2b3c4 (612ms)
+reap index update    # Index is current at 1a2b3c4 (1530 symbols, 3688 edges)`,
+    commitNote: "その代償として、コミットされていない作業はインデックスに入りません。今しがた書いてまだコミットしていないシンボルは search で見つからず、新規ファイルは impact に現れません。それらは Grep で探してください。また git リポジトリが必要です — なければインデックスを紐づけるコミットが存在しません。",
+    statusTitle: "impact を信じる前に status を見てください",
+    statusDesc: "impact が知っていることはすべて解決済みの import エッジ由来です。imports の比率が低ければグラフは不完全であり、そのときの空の blast radius は「なし」ではなく「不明」を意味します。status はグラマーの読み込み失敗も警告します — ある言語が静かにインデックスされなくなるもう一つの経路です。",
+    statusCode: `files:   412
+symbols: 1530  (function 902, method 341, class 187, type 100)
+edges:   3688  (CALLS 3145, IMPORTS 543)
+imports: 543/543 resolved (100%)
+commit:  1a2b3c4`,
+    statusNote: "（例示の数値です。）この一行がなかったために 5 か月を失いました。このインデクサーの前身は標準的な TypeScript プロジェクトで import を一つも解決できず — ./x.js という specifier を、それを生成する x.ts に対応づけられませんでした — blast radius がゼロを返し続ける間、すべてのテストは通り CI はずっと緑でした。どの検査も「インデックスは走ったか」を問い、「その答えは意味をなすか」を誰も問わなかったからです。",
+    locationTitle: "インデックスの置き場所",
+    locationDesc: ".reap/.index/ の中に manifest.json と gzip されたグラフ一つとして置かれ、reap init と reap update が .gitignore に追加します。プロジェクトを削除すればインデックスも一緒に消え、ホームディレクトリには何も溜まりません。gitignore する理由はサイズではありません — インデックスをコミットすると、それを含むコミットを再びインデックスする必要が生じ、この過程は終わりません。.reap/.index/ はいつ削除しても安全です。次のコマンドが作り直します。",
+    whenTitle: "使いどころ",
+    whenDesc: "両者は補完関係です — インデックスは file:line で答え、それを読めば済みます。",
+    whenHeaders: ["使うもの", "問いがこういうとき"],
+    whenItems: [
+      ["reap index", "これはどこで定義されているか、誰が呼ぶか、このファイルに何が依存しているか、この変更の blast radius はどこまでか"],
+      ["Grep / Glob", "リテラル文字列、コメント、設定ファイル、グラマーのない言語、そしてまだコミットしていないすべて"],
     ],
-    autoTriggerNote: "4つの呼び出し箇所すべてで、デーモンプロセスに到達できない場合は静かに失敗します。CLIライフサイクルはデーモンの問題でブロックされることはありません。",
-    queryTitle: "デーモンへのクエリ",
-    queryDesc: "クエリ前に必ずデーモンが起動しているか確認してください — そうでなければ静かにスキップします：",
-    queryHealth: `curl -sf http://127.0.0.1:17224/health || echo "daemon down"`,
-    queryProjectId: `PROJECT_ID=$(curl -s http://127.0.0.1:17224/projects \\
-  | jq -r --arg p "$CWD" '.data[] | select(.path==$p) | .id')`,
-    queryExamples: `# 名前でシンボルを検索
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols?q=consumeBacklog"
-
-# 特定シンボルのcallers
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callers"
-
-# 特定シンボルのcallees
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callees"
-
-# ファイル変更の影響範囲（blast radius）
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/impact?file=src/core/lifecycle.ts"
-
-# プロジェクトステータス — lastIndexedAtとlastIndexedCommitを含む
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status"`,
-    stalenessTitle: "Staleness確認",
-    stalenessDesc: "/projects/:id/statusはlastIndexedCommit（最近のインデックス時点のgit rev-parse HEAD）を返します。クエリ前にインデックスが古くなっているか確認するには：",
-    stalenessCode: `INDEXED=$(curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status" | jq -r '.data.lastIndexedCommit // "none"')
-HEAD=$(git rev-parse HEAD)
-[ "$INDEXED" = "$HEAD" ] && echo "最新" || echo "古い — 再インデックスをトリガー"`,
-    cliTitle: "CLI管理",
-    cliDesc: "デーモンは最初の使用時に自動起動し、30分のアイドル後に自動シャットダウンします。明示的に管理することもできます：",
-    cliCode: `reap daemon status   # 実行状況を確認、最終インデックスコミットを表示
-reap daemon stop     # デーモンを停止
-reap daemon index    # 手動再インデックスをトリガー
-reap daemon query    # シンボルクエリを実行`,
-    fallbackTitle: "デーモン使用不可時",
-    fallbackDesc: "デーモンは読み取り専用アクセラレーター — コードを決して変更しません。何らかの理由で利用できない場合、エージェントは標準のRead/Grep/Globツールにフォールバックし、ライフサイクルは中断されません。デーモン優先 vs ファイルシステム優先のガイド：",
-    fallbackHeaders: ["アプローチ", "使用場面"],
-    fallbackItems: [
-      ["デーモン優先", "シンボル定義の検索、caller/calleeトラバーサル、複数ファイルの影響分析"],
-      ["ファイルシステム優先（Grep/Glob）", "リテラル文字列検索、コメント検索、パーサー非対応ファイル、デーモンダウン時"],
-    ],
+    retiredTitle: "かつてはデーモンがありました",
+    retiredDesc: "v0.17.5 までこれは daemon: true の裏でポート 17224 に HTTP サーバーを立てる別パッケージ @c-d-cc/reap-daemon でした。現在は廃止され npm 上で deprecated となっています。reap update が設定と残ったデータを代わりに削除するため、手作業で必要なのはグローバルパッケージの削除だけです — reap uninstall もこれを併せて扱います。",
+    retiredCode: `npm uninstall -g @c-d-cc/reap-daemon`,
+    retiredNote: "その存在理由はグラフを warm に保つことでしたが — 本リポジトリのグラフをディスクから読むコストは一桁ミリ秒で、reap のコールドスタートは 40〜70 ミリ秒です。避けようとしていたコストが、避けるための仕組みより安かったのです。その仕組みとはポート、レジストリ、PID ファイル、アイドルタイマー、ネイティブ SQLite ビルドを抱えた二つ目の npm パッケージ、リリースパイプライン、そして自分の stop コマンドですら見つけられなかった孤児プロセスでした。",
   },
 
   // Self-Evolving Page
@@ -1061,6 +1035,10 @@ reap daemon query    # シンボルクエリを実行`,
     title: "リリースノート",
     breadcrumb: "その他",
     versions: [
+      {
+        version: "0.17.6",
+        notes: "**code-intelligence デーモンを廃止し、インデクサーを REAP に内蔵しました。** インストールするものもポートも常駐プロセスもありません — `reap index status`、`reap index impact <file>`、`reap index search <query>`、`reap index callers/callees <symbolId>`。15 言語対応、ネイティブビルドなし。**blast radius は標準的な TypeScript プロジェクトで常にゼロを返していました** — 5 か月間。resolver が `./x.js` という specifier を、それを生成する `x.ts` に対応づけられなかったためです。テスト 130 件が通り CI もずっと緑でした。どの検査も「インデックスは走ったか」を問い、「その答えは意味をなすか」を誰も問わなかったからです。**そこで `reap index status` が import 解決率を報告するようになり**、リリースゲートは「シンボル数 > 0」ではなく既知の関係を見つけられるかを要求します。**インデックスはコミット単位です** — REAP 全体のインデックスがデーモンの 6.7 秒に対し約 0.3 秒、HEAD が動けばクエリ自身が更新し、コミットされていない作業は意図的にインデックスしません。インデックスは `.reap/.index/` にあり gitignore されます。**デーモンを使っていた場合**、`reap update` が `daemon`/`daemonBin` を削除し `~/.reap/daemon/` も消します。グローバルパッケージは `npm uninstall -g @c-d-cc/reap-daemon` で削除してください。**`reap uninstall`** は npm が消せないものを消します — スラッシュコマンド、エージェント定義、`~/.reap/`、SessionStart フックの項目。npm 10 でも 12 でもアンインストールフックは実行されないため、`npm uninstall -g` はこれらを残します。",
+      },
       {
         version: "0.17.5",
         notes: "**コードインテリジェンス・デーモンが独立したパッケージとして公開されました。** v0.16 から文書化されていましたが公開されておらず、npm インストールでは動作しませんでした。付随するパッケージングの問題も修正しています。`daemon: true` を使う場合は `npm i -g @c-d-cc/reap-daemon` を一度実行してください。**デーモンの不在や古さを報告するようになりました** — `reap daemon status`、`reap fix --check`、エージェントプロンプトが知らせ、いずれの場合もライフサイクルは止まりません。**見つけられない場合の `daemonBin`** — 両者は別パッケージで、同じ解決ルートを共有するときだけ互いを見つけます。`.reap/config.yml` に `daemonBin` を設定するか、一度だけなら `REAP_DAEMON_BIN` を使います。**`reap run push` が git の実際のエラーを報告**し、**`reap help` に `/reap.run` と `/reap.report`** が載りました。 **REAP が初回実行時に自身の統合をインストールします** — npm 12 がグローバルインストールの install script を遮断するため、スラッシュコマンド・エージェント定義・セッションフックが配置されず、エラーも出ませんでした。",

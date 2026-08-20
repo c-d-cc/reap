@@ -163,13 +163,9 @@ export async function execute(paths: ReapPaths, phase?: string, extra?: string):
     // generation finalisation regardless of completed/partial status).
     await executeHooks(paths.hooks, "onLifeCompleted", paths.root).catch(() => {});
 
-    // Trigger daemon indexing.
-    try {
-      const { triggerIndexing } = await import("../daemon/lifecycle.js");
-      await triggerIndexing(paths.root);
-    } catch {
-      // best-effort
-    }
+    // Same reason as completion's commit phase: a commit just landed.
+    const { refreshIndexAfterCommit } = await import("../../../indexer/index.js");
+    await refreshIndexAfterCommit(paths.root);
 
     emitOutput({
       status: "ok",

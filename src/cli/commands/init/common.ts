@@ -40,10 +40,15 @@ const DEFAULT_GOALS = `# Vision Goals
  * Create .reap/ directory structure and write common files.
  * Returns the config object.
  */
+export interface InitCommonResult {
+  config: ReapConfig;
+  ignoreAction: "created" | "appended" | "skipped" | "failed";
+}
+
 export async function initCommon(
   paths: ReapPaths,
   projectName: string,
-): Promise<ReapConfig> {
+): Promise<InitCommonResult> {
   // Clean up legacy project-level skills and hooks (from v0.15)
   await cleanupLegacyProjectSkills(paths.root);
   await cleanupLegacyHooks(paths.root);
@@ -96,7 +101,78 @@ export async function initCommon(
   // Write or append CLAUDE.md for AI agent session loading
   await ensureClaudeMd(paths.root, projectName);
 
-  return config;
+  // The result is returned, not discarded: `reap update` reports a failure and
+  // `reap init` was silently swallowing the same one, so a project created on
+  // an unwritable `.gitignore` would commit its index with nothing said. The
+  // caller decides how to surface it.
+  const ignoreAction = await ensureIndexIgnored(paths.root);
+
+  return { config, ignoreAction };
+}
+
+/** The gitignore entry REAP owns, and the line that explains it. */
+const INDEX_IGNORE_ENTRY = ".reap/.index/";
+const INDEX_IGNORE_BLOCK = `# REAP code index — derived, and self-referential if committed\n${INDEX_IGNORE_ENTRY}\n`;
+
+/**
+ * Does this line already ignore the whole index directory?
+ *
+ * Deliberately an equality test on the directory, not a prefix test. The first
+ * version asked `startsWith(".reap/.index")`, which a line like
+ * `.reap/.index/graph.json.gz` satisfies — so the one user most likely to have
+ * a rule already (someone who saw the blob in `git status` and ignored that one
+ * file) would be told nothing was needed while `manifest.json` went on being
+ * committed. A permissive check failing open in the direction it guards is the
+ * same shape as the defect it was written for.
+ *
+ * A negation (`!.reap/.index/keep`) is not an ignore rule and does not count.
+ * It is also inert: git cannot re-include a file whose parent directory is
+ * excluded, so adding the directory rule takes nothing away.
+ */
+function ignoresIndexDir(line: string): boolean {
+  const trimmed = line.trim();
+  if (trimmed === "" || trimmed.startsWith("#") || trimmed.startsWith("!")) return false;
+  const normalised = trimmed.replace(/^\/+/, "").replace(/\/+$/, "");
+  return normalised === ".reap/.index";
+}
+
+/**
+ * Make sure `.reap/.index/` is ignored.
+ *
+ * Not a nicety. `completion --phase commit` calls `gitCommitAll`, which is
+ * `git add -A`, and then refreshes the index — so without this every
+ * generation commits a changing binary blob, and the commit containing the
+ * index has to be indexed, which is the loop the whole design avoids. Three
+ * documents and five locales already told users REAP does this; gen-089
+ * shipped them saying so and the code that would have made it true.
+ *
+ * Appends rather than rewrites, and leaves the file alone when a rule already
+ * covers the directory — `.gitignore` belongs to the user.
+ *
+ * Never throws. The entry is an optimisation, not a precondition, and both
+ * callers are commands that must keep working: `reap init` would otherwise
+ * abandon a half-created `.reap/`, and `reap update` runs on the auto-update
+ * and postinstall paths, where one unwritable unrelated file would take REAP
+ * down with a raw EACCES instead of the JSON every command promises.
+ */
+export async function ensureIndexIgnored(root: string): Promise<"created" | "appended" | "skipped" | "failed"> {
+  const gitignorePath = join(root, ".gitignore");
+  try {
+    const existing = await readTextFile(gitignorePath);
+
+    if (existing === null) {
+      await writeTextFile(gitignorePath, INDEX_IGNORE_BLOCK);
+      return "created";
+    }
+    if (existing.split("\n").some(ignoresIndexDir)) {
+      return "skipped";
+    }
+    const separator = existing.endsWith("\n") ? "\n" : "\n\n";
+    await writeTextFile(gitignorePath, existing + separator + INDEX_IGNORE_BLOCK);
+    return "appended";
+  } catch {
+    return "failed";
+  }
 }
 
 /**

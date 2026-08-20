@@ -1,4 +1,5 @@
 import { readFileSync } from "fs";
+import { homedir } from "os";
 import { join, dirname } from "path";
 import { fileURLToPath } from "url";
 import YAML from "yaml";
@@ -10,6 +11,7 @@ import { detectV15 } from "../../core/integrity.js";
 import { fetchReleaseNotice } from "../../core/notice.js";
 import { autoReport } from "../../core/report.js";
 import { execute as migrateExecute } from "./migrate.js";
+import { ensureIndexIgnored } from "./init/common.js";
 import { getAdapter } from "../../adapters/index.js";
 import {
   detectPendingMigrations,
@@ -28,6 +30,29 @@ function getPackageVersion(): string {
   return "0.0.0";
 }
 
+/**
+ * Delete `~/.reap/daemon/`, the retired daemon's index storage.
+ *
+ * Returns the path when something was there, null otherwise — so `reap update`
+ * can report a removal it actually made rather than one it might have.
+ *
+ * Scoped to exactly this one entry. `~/.reap/` is a directory named after the
+ * tool and users keep their own things in it (gen-088 found a private key
+ * there), so anything not named here survives.
+ */
+async function removeRetiredDaemonData(): Promise<string | null> {
+  const target = join(homedir(), ".reap", "daemon");
+  try {
+    if (!(await fileExists(target))) return null;
+    const { rm } = await import("fs/promises");
+    await rm(target, { recursive: true, force: true });
+    return target;
+  } catch {
+    // Best-effort: a permission error here must not fail an update.
+    return null;
+  }
+}
+
 /** Default values for ReapConfig fields — used for backfill */
 /** Fields that are valid in config.yml (used to prune deprecated fields) */
 const VALID_CONFIG_FIELDS = new Set<string>([
@@ -35,11 +60,11 @@ const VALID_CONFIG_FIELDS = new Set<string>([
   "agentClient", "autoUpdate", "autoIssueReport", "cruiseCount",
   // Opt-in fields — present only when user enables, but listed here so
   // `backfillConfig`'s deprecated-field pruning does not strip them.
-  "evaluator", "daemon",
-  // gen-084: where the daemon lives, when reap cannot work it out. Omitting it
-  // here would make `reap update` delete the one setting standing between some
-  // users and a working daemon — and say only "removed a deprecated field".
-  "daemonBin",
+  "evaluator",
+  // Note the absence of `daemon` and `daemonBin` (gen-089). They are no longer
+  // valid, so the pruning below removes them and says so — which is the whole
+  // notice a user gets that the setting stopped meaning anything. The migration
+  // note v0.17.6.md says the same thing where someone will read it first.
   // gen-071: per-project marker tracking last applied migration note set.
   "lastMigratedVersion",
 ]);
@@ -265,6 +290,29 @@ export async function execute(
   //    opencode: opencode.json + .opencode/plugins/reap-plugin.ts).
   //    Idempotent — best-effort, silent on success.
   await adapter.registerSessionIntegration(paths.root);
+
+  // 5. The retired daemon's data (gen-089). `~/.reap/daemon/` held a registry
+  //    of indexed project paths and a SQLite graph per project; nothing writes
+  //    or reads it any more, and it is the largest thing REAP ever left in the
+  //    home directory. `reap uninstall` also removes it, but that is the path
+  //    for someone leaving — this is the one every existing user takes.
+  const daemonLeftover = await removeRetiredDaemonData();
+  if (daemonLeftover) {
+    updated.push(`removed retired daemon data: ${daemonLeftover}`);
+  }
+
+  // 6. The code index must not be committed (gen-089). Projects initialised
+  //    before 0.17.6 have no such entry, and `completion --phase commit` runs
+  //    `git add -A` — so without this the next generation commits a changing
+  //    binary blob, and the commit containing the index has to be indexed.
+  const ignoreAction = await ensureIndexIgnored(paths.root);
+  if (ignoreAction === "failed") {
+    // Reported rather than thrown — see `ensureIndexIgnored`. Silence here
+    // would leave someone with an index quietly being committed and no clue.
+    updated.push(".gitignore: could not add .reap/.index/ (check file permissions)");
+  } else if (ignoreAction !== "skipped") {
+    updated.push(`.gitignore: .reap/.index/ (${ignoreAction})`);
+  }
 
   // Report
   // Show release notice for current version (before emitOutput, which calls process.exit)

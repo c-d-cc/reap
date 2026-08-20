@@ -3,15 +3,20 @@
 ## Project
 
 - Source: `~/cdws/reap/` (branch: main)
-- Package: `@c-d-cc/reap` v0.17.5 (+ `@c-d-cc/reap-daemon` v0.2.0 — 같은 저장소, 별도 발행)
+- Package: `@c-d-cc/reap` v0.17.6 — 단일 패키지
 - Config language: korean
 
 ## Tech Stack
 
 - Runtime: Bun (build), Node.js (execution)
-- Build: `bun build` → single bundle (`dist/cli/index.js`, ~770KB)
-- Dependencies: `yaml` v2 — **유일한 production dependency**. daemon 은 의존이 아니다 (아래 Workspaces)
-- Workspaces: `daemon` — 런타임 의존이 **아니다**. `npm ci` 한 번으로 daemon 의 의존까지 설치되게 하는 것이 목적이며, 소비자의 npm 은 의존 패키지의 `workspaces` 필드를 처리하지 않는다
+- Build: `bun build` → single bundle (`dist/cli/index.js`, ~0.63MB) + `dist/grammars/` (15 wasm)
+<!-- reap:carrier(zero-native-dependency) -->
+- Dependencies: `yaml` v2 + `web-tree-sitter` 0.22.6 — **네이티브 빌드 0**. 후자는 번들에서
+  `--external` 이며, 그 근거는 `scripts/build.sh` 주석이 소유한다 (인라인하면 깨진다는 것은
+  **입증되지 않았다** — gen-089 가 시험했고 통과했다)
+- Grammars: `tree-sitter-wasms` 는 **devDependency**. `scripts/build.sh` 가 REAP 이 인덱싱하는
+  15개만 `dist/grammars/` 로 복사하며, **대상 목록을 `src/templates/tree-sitter/*-tags.scm` 에서
+  파생**한다 — 목록을 두 곳이 알지 않는다. 발행 tarball +2.4MB(gzip), 전체 36개(+4.4MB)가 아니다
 - CLI Framework: 자체 구현 (`src/libs/cli.ts`) — commander/yargs 대신
 - Crypto: Node.js native `crypto` (nonce, hash)
 - VCS: Git (child_process 직접 호출)
@@ -28,7 +33,7 @@ src/
 │   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스, memory/resources/docs 경로 포함)
 │   ├── nonce.ts                — 암호학적 token (SHA256) — 순수 함수, generateToken/verifyToken
 │   ├── artifact-check.ts        — artifact 미작성 감지 (core placeholder 기반)
-│   ├── semver.ts               — **버전 비교의 단일 소유자.** SemVer 2.0.0 §9~11 (prerelease 순서, build metadata 무시). `semverCompare`/`semverGt`/`semverGte`/`semverCore`. 소비자 넷: autoUpdate floor 2, `MIN_DAEMON_VERSION` 판정, migration 의 release-line 비교
+│   ├── semver.ts               — **버전 비교의 단일 소유자.** SemVer 2.0.0 §9~11 (prerelease 순서, build metadata 무시). `semverCompare`/`semverGt`/`semverGte`/`semverCore`. 소비자 셋: autoUpdate floor 2, migration 의 release-line 비교
 │   ├── stage-transition.ts     — transition graph 기반 nonce 검증 (verifyTransition, setTransitionNonces, prepareStageEntry), artifact 검증, stage 전환
 │   ├── maturity.ts             — bootstrap/growth/cruise 감지, 완성 기준 16항목
 │   ├── lineage.ts              — 아카이브 DAG, genome diff (3-way), lineage 읽기, getLastLineageEntry (early-close hint 노출용)
@@ -40,12 +45,12 @@ src/
 │   ├── git.ts                  — git 연동 (commit, diff, push, pull, fetch, branch analysis). `gitPush` 는 `GitPushResult { success, error }` 를 돌려준다 — `boolean` 은 실패 이유를 버렸고 `push.ts` 가 그 자리를 추측으로 메웠다. `describeExecError` 가 stderr → stdout → `err.message` 순으로 건진다. 나머지 래퍼(`gitFetchAll`/`gitPullFfOnly`/…)는 여전히 `catch { return false }` 다
 │   ├── hooks.ts                — lifecycle hook engine (조건부 실행, 순서 제어, 상세 결과)
 │   ├── clarity.ts              — clarity level 자동 판단 (규칙 기반, high/medium/low + signals)
-│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt, buildStrictSection, memory 로딩, cruise 지시, clarity 주입, strict HARD-GATE). `buildEvaluatorPrompt(knowledge, paths, state, { stage })` 는 reap-evaluate 용 dynamic context. `buildBasePrompt` 는 `config?.daemon === true` 시 Code Intelligence 절을 붙이되, **주입된 `DaemonAvailability` 가 미설치/구버전이면 질의 프로토콜 대신 설치 안내로 교체**한다 — 미주입(undefined)은 "모름"이며 기존 동작을 유지
+│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt, buildStrictSection, memory 로딩, cruise 지시, clarity 주입, strict HARD-GATE). `buildEvaluatorPrompt(knowledge, paths, state, { stage })` 는 reap-evaluate 용 dynamic context. Code Intelligence 절은 **무조건** 붙는다 (인덱서가 함께 배포되므로 부재할 수 없다) — 절에 적힌 명령은 `tests/e2e/index-command.test.ts` 가 그대로 실행한다
 │   ├── scanner.ts              — 프로젝트 스캔 (init용)
 │   ├── fs.ts                   — 파일 유틸리티
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError). lifecycle 명령(DUMP_COMMANDS 화이트리스트) 종료 시 sync dump를 자동 트리거
 │   ├── migration.ts            — Migration instruction layer. `detectPendingMigrations(config, pkgVersion, templatesDir?)` — `lastMigratedVersion < v <= pkgVersion` 범위의 `src/templates/migration/vX.Y.Z.md` 파일 로드, semver 정렬. `buildPendingMigrationsSection` — pending 있을 때만 markdown 절 반환. `migrationTemplatesDir()` — dist/dev 분기 (패턴). 비교는 `core/semver.ts` 가 소유한다(자체 구현을 갖고 있었고 `check-version.ts` 의 사본과 답이 달랐다). note 선택만 `releaseLineGt` 로 **코어만 비교** — `X.Y.Z-alpha.N` 을 돌리는 사람은 X.Y.Z 코드를 돌리므로 그 note 를 받아야 하고, 정순서를 쓰면 prerelease 테스터에게만 숨는다. 3 caller (update.ts / load-context.ts / dump-state-sync.ts) 공유.
-│   ├── dump-state-sync.ts      — `buildKnowledgeContextSync` + `dumpStateSync`. emitOutput 용 sync 버전이며 async `load-context` 와 **byte-identical** (unit 으로 고정). `buildDaemonStaticSection()` 을 async builder 와 공유하고, readiness probe 는 sync 제약상 의도적으로 제외. pending migrations 절 포함
+│   ├── dump-state-sync.ts      — `buildKnowledgeContextSync` + `dumpStateSync`. emitOutput 용 sync 버전이며 async `load-context` 와 **byte-identical** (unit 으로 고정). Code Intelligence 절은 **양쪽 모두 없다** — 항상 참인 사실은 dynamic 이 아니라 static(guide + stage prompt)이 옮긴다. pending migrations 절 포함
 │   ├── dump-state-helper.ts    — `dumpStateBestEffort` (async, silent on error). 향후 async caller용
 │   ├── integrity.ts            — .reap/ 구조 진단 (checkIntegrity, detectV15, cleanupLegacyProjectSkills). **`checkUserLevelArtifacts(projectRoot, canonicalDirs = [], home = homedir())` — gen-076: adapter 의 정식 설치 위치를 주입받아 검사 대상에서 제외. `core` 는 adapters 를 import 하지 않으며 호출부(`fix.ts`)가 `getAdapter().userLevelDirs()` 를 넘긴다. 미주입 시 해당 검사 skip (오탐보다 안전).**  크기 warning: genome 파일별(application 250 / evolution 300 / invariants 50), memory tier 50/70/60, environment summary 250줄 — 수치 근거는 코드 주석 + `reap-guide.md` § File Size Guidelines. **warnings only**, `fixProject` 에 대응 코드 없음이 auto-delete 방지 장치
 │   ├── notice.ts               — release notice (fetchReleaseNotice: RELEASE_NOTICE.md에서 버전+언어별 노트 추출)
@@ -53,7 +58,7 @@ src/
 │   ├── template.ts             — artifact 템플릿 복사
 │   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). lineage 편향 분석 제거됨
 ├── cli/
-│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, config, run, make, cruise, install-skills, fix, destroy, **uninstall**, clean, check-version, update, load-context, dump-state, daemon).
+│   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, config, run, make, cruise, install-skills, fix, destroy, **uninstall**, clean, check-version, update, load-context, dump-state, **index**).
 │   │                             **`program.parse()` 앞에서 `ensureUserLevelAssets` 를 await** — 명령을 가리지 않는다.
 │   │                             `postinstall` 이 안 돈 사용자가 가진 것은 바이너리 하나이므로 그것을 부르는 것 자체가 조건이다
 │   └── commands/
@@ -63,12 +68,12 @@ src/
 │       ├── load-context.ts     — SessionStart hook용: dynamic context 주입 (buildKnowledgeContext, hookSpecificOutput JSON 출력). Current State/Strict/Language 3개 dynamic 섹션만 출력한다 (~1KB) — static knowledge(genome/env/vision/memory/reap-guide)는 CLAUDE.md 의 `@` import refs 로 Claude Code 가 직접 로드하므로 여기서 다루지 않는다. 비-REAP 디렉토리에서는 silent exit
 │       ├── dump-state.ts       — `.reap/.session-state.md`에 동일 dynamic context 기록 (--stdout/--silent 지원). OpenCode plugin과 외부 도구용. emitOutput이 lifecycle 명령 종료 시 sync 버전(dump-state-sync.ts)으로 자동 dump
 │       ├── run/                — stage 실행 (21 handlers)
-│       │   ├── start.ts        — generation 생성 (scan → create). create phase 에 **backlog gate**: `--backlog`/`--no-backlog` 없이 pending > 0 이면 `status: prompt`/`phase: select-backlog` 로 멈춘다 (idempotent). `consumeBacklog` warning 은 `context.backlogWarning` 으로 surface. create 직후 `config?.daemon === true` 시 `ensureRegistered` + `triggerIndexing`
-│       │   ├── learning.ts     — 탐구 (work → complete). work phase 는 `config?.daemon === true` 시 `ensureRegistered` + `triggerIndexing` (silent on failure) 후 `daemonEnabled` / `daemonReady` / `daemonInstalled` 를 emit
+│       │   ├── start.ts        — generation 생성 (scan → create). create phase 에 **backlog gate**: `--backlog`/`--no-backlog` 없이 pending > 0 이면 `status: prompt`/`phase: select-backlog` 로 멈춘다 (idempotent). `consumeBacklog` warning 은 `context.backlogWarning` 으로 surface. **인덱싱 트리거 없음** — 커밋이 없는 시점이다
+│       │   ├── learning.ts     — 탐구 (work → complete). **인덱싱 트리거 없음** — 질의가 스스로 갱신한다
 │       │   ├── planning.ts     — 계획 (work → complete)
-│       │   ├── implementation.ts — 구현 (work → complete). complete phase 는 `config?.daemon === true` 시 `triggerIndexing`
+│       │   ├── implementation.ts — 구현 (work → complete). **인덱싱 트리거 없음** — 코드는 썼지만 커밋은 없다
 │       │   ├── validation.ts   — 검증 (work → complete). `config.evaluator === true` 시 work prompt 에 "Evaluator Subagent Invocation" 절 + `context.evaluator.{enabled, prompt}`; `false` 면 byte-identical. advisor 모델 — builder 가 verdict 를 갖고 evaluator concern 을 surface 한다. `--phase report-evaluator --severity <high|low|none> --summary "..."` 는 transition graph **밖**에서 `state.evaluatorConcerns` 에 append (nonce 없음), severity=none 은 no-op
-│       │   ├── completion.ts   — 완료 (reflect → fitness → adapt → commit). fitness work 는 `evaluator: true` 시 `buildEvaluatorPrompt({ stage: "fitness" })` 를 emit 하고, `state.evaluatorConcerns` 가 비어있지 않으면 "Prior Evaluator Concerns" 절을 붙인다. **cruise + high-severity → `clearCruise()` + supervised fallback prompt + 즉시 return** (self-loop nonce 는 보존). commit phase 의 `triggerIndexing` 은 `config?.daemon === true` 게이트
+│       │   ├── completion.ts   — 완료 (reflect → fitness → adapt → commit). fitness work 는 `evaluator: true` 시 `buildEvaluatorPrompt({ stage: "fitness" })` 를 emit 하고, `state.evaluatorConcerns` 가 비어있지 않으면 "Prior Evaluator Concerns" 절을 붙인다. **cruise + high-severity → `clearCruise()` + supervised fallback prompt + 즉시 return** (self-loop nonce 는 보존). commit phase 는 `refreshIndexAfterCommit` 을 부른다 (`early-close` 와 함께 **유이한 eager 트리거**)
 │       │   ├── evolve.ts       — 전체 lifecycle 자동 실행
 │       │   ├── detect.ts       — merge: 분기점 감지
 │       │   ├── mate.ts         — merge: genome 교차
@@ -86,13 +91,9 @@ src/
 │       ├── status.ts           — 현재 상태 조회
 │       ├── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
 │       ├── destroy.ts          — **프로젝트에서** REAP 제거 (--confirm 필수, .reap/ + CLAUDE.md + .gitignore). 출력이 `context.nextStep: "reap uninstall"` 과 안내 문구로 머신 레벨 제거를 가리킨다 — 제거 있을 때와 no-op 일 때 **양쪽** 다
-│       ├── uninstall.ts        — **머신에서** REAP 제거 (2-phase, `--confirm`). 순서: 진입 훅 우회 → daemon stop(비기동) → 양 adapter 홈 자산 → `~/.reap/` allowlist → npm. `detectInstallKind` 이 global/npx/local/checkout/unknown 을 가르고 **global 일 때만 npm 을 부른다** — `npm root -g` 와 패키지 루트의 `node_modules` 를 **realpath 정규화 후** 비교(안 하면 symlink 를 거치는 모든 전역 설치가 'global 아님'으로 오판된다). `UninstallDeps` 가 npm 호출·daemon stop·경로 판정을 전부 주입 가능하게 한다. npm 실패는 전체 실패가 아니다
+│       ├── uninstall.ts        — **머신에서** REAP 제거 (2-phase, `--confirm`). 순서: 진입 훅 우회 → 양 adapter 홈 자산 → `~/.reap/` allowlist(폐기된 daemon 이 남긴 `daemon/` 포함) → npm. 전역 제거 목록에는 `@c-d-cc/reap-daemon` 이 **무조건** 들어간다 — 미설치면 no-op 이고, 넣지 않으면 deprecated 전역 패키지가 영구히 남는다. `detectInstallKind` 이 global/npx/local/checkout/unknown 을 가르고 **global 일 때만 npm 을 부른다** — `npm root -g` 와 패키지 루트의 `node_modules` 를 **realpath 정규화 후** 비교(안 하면 symlink 를 거치는 모든 전역 설치가 'global 아님'으로 오판된다). `UninstallDeps` 가 npm 호출·경로 판정을 주입 가능하게 한다. npm 실패는 전체 실패가 아니다
 │       ├── clean.ts            — 선택적 상태 초기화 (--lineage, --life, --backlog, --hooks)
 │       ├── update.ts           — 프로젝트 업데이트 (v0.15→migrate 위임, v0.16→config backfill/디렉토리 보충/CLAUDE.md 보수, --post-upgrade 지원)
-│       └── daemon/             — daemon 서브커맨드
-│           ├── index.ts        — daemon 커맨드 라우팅 (start, stop, status, query)
-│           ├── client.ts       — daemon HTTP 클라이언트 (auto-spawn) + **위치 결정의 단일 소유자**: `locateDaemon` 이 env > config > package > checkout 순으로 찾고 `resolveDaemonBin` 은 `.bin` 만 돌려주는 래퍼(프로덕션 소비자는 없다 — `ensureDaemon` 이 `explicitMiss` 를 잃지 않으려고 `locateDaemon` 을 직접 쓴다). **안내 문구 소유자 2개**: `staleDaemonRemedy`(낡음) / `missingDaemonRemedy`(미설치). 후자는 `DaemonNotInstalledError` 와 `daemon status/index/query` 가 공유한다
-│           └── lifecycle.ts    — generation 시작/완료 시 자동 인덱싱 훅
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
 ├── adapters/                   — AI client 어댑터 (dispatcher + module 패턴)
 │   ├── index.ts                — `getAdapter(agentClient)` → AdapterModule (codex 는 helpful Error, unknown 은 claude-code fallback).
@@ -133,19 +134,38 @@ src/
         ├── normal/             — 01~05 (learning~completion)
         └── merge/              — 01~06 (detect~completion)
 
-daemon/                            — 별도 npm 패키지 (@c-d-cc/reap-daemon). 상세는 daemon/ 자체 참조
-├── src/                           — 진입점 + HTTP(server/router) + registry/process/paths/types + api/
-│   ├── package-assets.ts          — packageRoot/queriesDir/packageVersion. **src/ 바로 아래**라 소스와 번들의
-│   │                                상대 깊이가 일치해 dist/dev 분기가 필요 없다
-│   └── indexer/                   — parser(Tree-sitter WASM 15개 언어) · scanner(git) · graph · storage(SQLite)
-│                                    · pipeline · import/call-resolver · impact · community · process-tracer
-├── queries/                       — Tree-sitter SCM 쿼리 (15개 언어)
-└── tests/                         — daemon 테스트 (25 파일, 130 tests)
-
-**배포**: reap 의 dependency 가 아니다. 사용자가 `npm i -g @c-d-cc/reap-daemon` 으로 직접 설치하고, 발행은 `daemon-v*` 태그가 트리거한다. `files` 는 `dist/` + `queries/` 만 (14.2KB / 17파일). 빌드는 **`daemon/scripts/build.sh` 하나가 소유**하며 `package.json` 의 `"build"` 가 그것을 호출한다 — 두 곳이 알면 어긋난다.
-
-**`better-sqlite3` · `web-tree-sitter` · `tree-sitter-wasms` 는 external.** 번들이 네이티브 모듈을 인라인하면 `bindings` 가 번들 위치 기준으로 `.node` 를 찾아 **node 에서 전부 실패**한다 (bun 만 우연히 동작했다). `queries/` 는 런타임 자산이며 빠지면 daemon 이 뜨고 health 에도 답하면서 **심볼을 0개 추출**한다.
 ```
+
+## src/indexer/ — 내장 코드 인덱서 (gen-089)
+
+폐기한 `@c-d-cc/reap-daemon` 에서 이식했다. **상주 프로세스·포트·registry·SQLite 는 전부 사라졌다.**
+
+| 파일 | 역할 |
+|---|---|
+| `assets.ts` | `queriesDir()`/`grammarsDir()`. **한 칸 위** 규칙(dev `src/indexer` → `src/`, bundle `dist/cli` → `dist/`)이라 번들·소스 깊이가 일치한다. grammar 는 `dist/grammars/`, 없으면 devDependency 로 폴백 |
+| `languages.ts` | 15개 언어의 확장자. 언어 *집합*은 `.scm` 파일들이 소유하고 `tests/unit/indexer-assets.test.ts` 가 셋의 일치를 강제한다 |
+| `parser.ts` | web-tree-sitter. grammar 로드 실패를 **기록**한다(stdout 이 JSON 이라 출력하지 않는다) — `status` 가 경고로 노출 |
+| `scanner.ts` | `git ls-files` / `git diff --no-renames --name-only <since>..HEAD`. **커밋만 본다** — 작업 트리·staged 를 섞으면 인덱스의 신원이 커밋이 아니게 된다. `--no-renames` 는 필수: rename 감지가 켜지면 구 경로가 diff 에 안 나와 심볼이 영구 잔존한다 |
+| `graph.ts` | `CodeGraph`. **`edgeKey()` 가 edge 식별의 단일 소유자** — 네 곳이 조립하며 둘이 구분자를 달리 써 call 그래프가 통째로 사라진 적이 있다. `removeEdgesOfKind` / `removeByFile` / `removeFileEdges` / `edgeCounts` |
+| `import-resolver.ts` | **추출**(한 파일)과 **해석**(전체 파일 목록)을 분리. `.js`→`.ts` 매핑이 P2 의 근본 수정. `isCodeSpecifier` 가 `.css` 같은 비-코드를 해석률 분모에서 제외 |
+| `call-resolver.ts` | 이름 매칭. `pickBestTarget` 은 **결정적·import-aware**: ① 참조 파일이 import 하는 파일 ② 자기 파일 ③ 그 외, 각 tier 안에서 경로 정렬 |
+| `impact.ts` | blast radius. 파일↔파일 IMPORTS 만 걷는다 |
+| `store.ts` | `manifest.json`(비압축) + `graph.json.gz`. **manifest 가 `format`·`shards`·통계·`lastIndexedCommit` 의 단일 소유자** — 코드는 shard 파일명을 하드코딩하지 않는다. 모르는 format 은 **버리고 full 재구축** |
+| `pipeline.ts` | full / incremental. **두 edge 종류 모두 전체 그래프 재해석 전에 전량 삭제한다** (`removeEdgesOfKind`) — 전체 그래프 pass 의 결과는 더하는 것이 아니라 교체하는 것이다 |
+| `index.ts` | `Indexer` — `update`/`ready`(lazy)/`search`/`callers`/`callees`/`impact`. `refreshIndexAfterCommit` 이 커밋 지점 두 곳의 단일 소유자 |
+
+**스냅샷은 `nodes`·`edges`·`files`·`refs`·`specifiers` 를 담는다.** 뒤의 둘이 핵심이다 —
+call·import 해석은 **전체 그래프 의존**이라(현재 심볼 집합 / 현재 파일 목록에 맞춰본다)
+incremental 이 재파싱하지 않은 파일까지 재해석해야 한다. 없으면 낡은 edge 가 살아남고
+`status` 는 100% 를 보고한다. `INDEX_FORMAT` 3.
+
+**인덱스 = `.reap/.index/`, gitignore.** `reap init` 과 `reap update` 가 항목을 쓰며
+(`ensureIndexIgnored`, 디렉토리 **일치** 판정 — prefix 로 하면 하위 파일 규칙을 오인해 fail-open),
+쓰기 실패는 예외가 아니라 **보고**된다. gitignore 하는 이유는 크기가 아니라 자기참조다:
+`completion --phase commit` 이 `git add -A` 를 돌린다.
+
+**성능**: 이 저장소 full 인덱싱 **약 0.35초** (daemon 6.7초). 차이의 대부분은 파일별 `git log -1`
+233회 제거. 스냅샷 로드는 gunzip+parse **약 2.4ms**.
 
 ## docs/ — reap.cc 문서 사이트
 
@@ -159,22 +179,24 @@ daemon/                            — 별도 npm 패키지 (@c-d-cc/reap-daemon
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline — **unit 600 / e2e 302 / scenario 44, 세 스위트 모두 0 fail.** daemon 자체 스위트는 별도로 `cd daemon && bun test tests/` → **130 pass**. 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
+현재 baseline — **unit 575 / e2e 326 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신). **daemon 스위트(130)는 패키지와 함께 소멸했다.**
+
+gen-089 에서 unit 이 600 → 575 로 **줄었다**: 폐기한 daemon 의 availability/prompt/integrity 테스트 8파일을 지우고 indexer 테스트 38개를 더한 결과다. 다만 daemon 스위트 130 중 약 32개는 **삭제가 아니라 이식된** 모듈(call-resolver/impact/scanner/parser/pipeline)의 unit test 였고 **대체되지 않았다** — 그쪽은 지금 e2e 로만 덮인다.
 
 `tests/scenario/multi-generation.test.ts` 는 gen-065 backlog gate 를 시나리오로 커버한다 — pending 이 있으면 `run start` 가 `status: "prompt"` 로 막히고, `--backlog`(소비) 또는 `--no-backlog`(유지) 로 재호출해야 진행된다. 새 scenario 가 backlog 파일을 만든다면 같은 gate 를 거치므로 이 패턴을 참고할 것.
 
 지원 자산:
 - `tests/helpers/setup.ts` — `cli` / `cliRaw` / `setupProject` / `setupGitProject` / `advanceStage` / `cleanup`. 대부분의 e2e·scenario 가 여기만 import 한다. **`cli()` 는 HOME 을 격리하지 않는다** — CLI 진입점이 사용자 레벨 자산을 동기화하므로 스위트 실행이 개발자의 실제 `~/.claude/`·`~/.reap/` 에 버전당 1회 쓴다. 사용자 레벨을 다루는 테스트는 `cliWithHome`(각 파일 로컬, `XDG_CONFIG_HOME` 도 함께 제거) 을 쓴다
-- `tests/helpers/daemon.ts` — daemon 격리 helper. `spawnTestDaemon(port, fakeHome)` 가 `bun src/index.ts` 를 spawn. `TEST_DAEMON_PORT=17225` + HOME override 로 사용자 daemon(17224) 영향 0. **소스만 보므로 배포 산출물 결함은 못 본다** — 그쪽은 자기진단 게이트 § 5 가 담당한다
-- `tests/fixtures/daemon-sample/` — daemon e2e 용 소형 TypeScript 프로젝트(5 파일). 심볼 관계 `main → validateId + formatUser`. helper 가 매번 tmpdir 복사 + git init
+- `tests/fixtures/indexer-sample/` — 소형 TypeScript 프로젝트(5 파일). 심볼 관계 `main → validateId + formatUser`
+- `tests/e2e/index-incremental.test.ts` — **판정 기준이 "incremental 결과 == full rebuild 결과"** 다. "incremental 이 돌았는가"만 묻던 판이 blocker 넷을 통과시켰다. `snapshot()` 은 집계가 아니라 **edge 집합 자체**를 비교하고 shard 는 `manifest.shards` 로 찾는다
 
 버전 의존 assertion 주의: `tests/e2e/update-migration.test.ts` 는 패키지 버전을 `package.json` 에서 읽는다(`PKG_VERSION`). 릴리즈 버전을 하드코딩하면 bump 마다 깨진다 — 단, "특정 버전의 migration note"를 검증하는 케이스는 하드코딩이 맞다.
 
-**테스트는 머신 상태를 읽지 않는다 (gen-081).** CI 를 붙이면서 세 곳이 개발자 머신에 의존하고 있었음이 드러났다. 새 테스트를 쓸 때 같은 함정을 피할 것:
-
-- **git identity 는 저장소마다 설정한다.** 러너에는 global config 가 없어 `git commit` 이 거부된다. `git clone` 과 `submodule add` 로 생긴 저장소는 상속받지 못하므로 각각 필요하다
-- **`git init` 은 항상 `-b main` 으로 브랜치를 명시한다.** 미명시 시 머신의 `init.defaultBranch` 를 따르고, 미설정이면 `master` 다. 직후 `checkout -b` 로 갈아타 무해한 곳까지 전부 명시해 두었다 — 무해 여부를 매번 판단하게 두면 다시 걸린다
-- **`mock.module` 은 프로세스 전역이며 되돌릴 수 없다.** `afterAll` 로 복구해도 소용없다 (bun 은 모든 파일을 로드한 뒤 실행). 그래서 `test:unit` 이 `--isolate` 를 쓴다. `pull.test.ts` 상단 주석에 근거가 있다. **bun 을 직접 호출해 unit 을 돌리면 이 보호가 없다**
+**테스트는 머신 상태를 읽지 않는다 (gen-081)** — CI 를 붙이자 세 곳이 개발자 머신에 의존하고 있었다:
+**git identity 는 저장소마다** 설정한다(clone·submodule 은 상속받지 못한다) / **`git init` 은 항상
+`-b main`** (미명시 시 머신의 `init.defaultBranch`, 미설정이면 `master`) / **`mock.module` 은 프로세스
+전역이며 되돌릴 수 없다** — 그래서 `test:unit` 이 `--isolate` 를 쓴다(`pull.test.ts` 주석이 근거를
+소유한다). **bun 을 직접 불러 unit 을 돌리면 이 보호가 없다.**
 
 리눅스 러너 조건은 `oven/bun:<ver>-debian` + `apt-get install git` + `-e GIT_CONFIG_GLOBAL=/dev/null` 로 만든다 (기본 `oven/bun` 에는 git 이 없다).
 
@@ -182,10 +204,10 @@ daemon/                            — 별도 npm 패키지 (@c-d-cc/reap-daemon
 - `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates)
 - `scripts/alpha-publish.sh` — alpha 배포 헬퍼
 - `scripts/postinstall.sh` — npm postinstall hook
-- `scripts/check-self-diagnosis.sh` — **자기진단 게이트**. `npm pack` → 격리 HOME/prefix 에 설치 → `reap init` → `fix --check` 가 **경고·에러 0** 을 요구. 7개 절: 빌드·설치·init·진단 / daemon / **install script 차단** / OpenCode. release publish 앞 + CI 매 push 양쪽에서 실행. 대화로 채워지는 genome/goals 는 스크립트가 채운 뒤 진단 — 그것까지 요구하면 REAP 정상 동작에 fail 한다. daemon 절은 항상 실행된다 — 끄는 스위치는 두지 않고, 비용이 문제가 되면 release 전용으로 옮긴다
+- `scripts/check-self-diagnosis.sh` — **자기진단 게이트**. `npm pack` → 격리 HOME/prefix 에 설치 → `reap init` → `fix --check` 가 **경고·에러 0** 을 요구. 8개 절: 빌드·설치·init·진단 / **인덱스** / install script 차단 / OpenCode / uninstall. release publish 앞 + CI 매 push 양쪽에서 실행. 대화로 채워지는 genome/goals 는 스크립트가 채운 뒤 진단 — 그것까지 요구하면 REAP 정상 동작에 fail 한다. 끄는 스위치는 두지 않는다 — 비용이 문제가 되면 release 전용으로 옮긴다
 - `scripts/list-carriers.sh` — **carrier 표식 조회 (gen-078)**. `reap:carrier(<id>)` 마커를 grep 해 ID 별 파일 목록 출력. `--orphans` 는 1개 파일에만 있는 ID 탐지 — 표식 불필요이거나 **다른 carrier 를 빠뜨린 것**(#21/#22 의 상태)
 - `scripts/check-agent-integration.sh` — **agent 통합 검증 / 층2 (gen-079)**. 헤드리스 `claude -p` 로 `/reap.start` 를 시키고 **`current.yml` 생성 여부**로 판정 — agent 응답(자연어)은 파싱하지 않는다. slash command 인식 / `@` import 로드 / SessionStart hook 발화 / CLI 동작을 한 번에 검증. **격리하지 않는다** — Claude Code 는 로그인을 slash command 와 같은 `~/.claude/` 에 두므로 HOME 격리 시 인증을 잃는다. 현재 설치를 읽기만 하고 임시 프로젝트에만 쓴다. **~$0.25/회** 라 CI 아닌 릴리즈 전 (`reapdev.versionBump` Step 5-2)
-- `scripts/check-version-floors.sh` — **버전 하한 게이트**. reap 이 사용자에게 "이 버전으로 올려라"라고 말하는 두 숫자(`MIN_DAEMON_VERSION`, `package.json` 의 `reap.autoUpdateMinVersion`)가 npm 에 **실제로 발행돼 있는지** 검사한다. 값은 소스에서 읽는다(carrier 표식). 네트워크 실패·비-JSON 은 amber SKIP, **패키지 자체가 없으면(`E404`) FAIL** — 그 둘을 구분하지 않으면 이름 오타가 조용히 통과한다. `release.yml` 의 `npm publish` 앞. **CI 에는 없다** — 매 push 마다 네트워크가 필요하고, 코드와 무관한 이유로 주기적으로 SKIP 을 내는 검사는 사람이 스크롤로 넘긴다
+- `scripts/check-version-floors.sh` — **버전 하한 게이트**. reap 이 사용자에게 "이 버전으로 올려라"라고 말하는 숫자(`package.json` 의 `reap.autoUpdateMinVersion`)가 npm 에 **실제로 발행돼 있는지** 검사한다. 값은 소스에서 읽는다(carrier 표식). 네트워크 실패·비-JSON 은 amber SKIP, **패키지 자체가 없으면(`E404`) FAIL** — 그 둘을 구분하지 않으면 이름 오타가 조용히 통과한다. `release.yml` 의 `npm publish` 앞. **CI 에는 없다** — 매 push 마다 네트워크가 필요하고, 코드와 무관한 이유로 주기적으로 SKIP 을 내는 검사는 사람이 스크롤로 넘긴다
 - `scripts/check-docs-version.sh` — 릴리즈 문서 정합성 게이트. `RELEASE_NOTICE.md` / `RELEASE_NOTES.md` / 5개 로케일 changelog 가 `package.json` 과 일치하는지 + **로케일 간 항목 집합 동일성** + migration note 가 패키지 버전을 넘지 않는지 검사. `release.yml` 의 `npm publish` 앞과 `reapdev.versionBump` Step 5-1 에서 실행
 
 ### npm scripts
@@ -199,12 +221,15 @@ daemon/                            — 별도 npm 패키지 (@c-d-cc/reap-daemon
 - `ReapHookEvent` — 라이프사이클 hook 이벤트 union type (14개 이벤트)
 - `ReapOutput.status` — `"ok" | "prompt" | "error" | "artifact-incomplete"`
 - `EvaluatorConcern` — `{ stage: "validation" | "fitness", severity: "low" | "high", summary: string, recordedAt: string }`. Validation→fitness signalling channel. severity는 binary (Goodhart 회피). high = cruise auto-abort 트리거. `GenerationState.evaluatorConcerns?: EvaluatorConcern[]` 로 노출.
-- `ReapConfig.daemon?: boolean` — opt-in flag. 미설정/false 시 4 lifecycle 진입점 (start/learning/implementation/completion) 의 daemon trigger 게이트 비활성. true 시 dynamic import 후 `ensureRegistered` + `triggerIndexing` 호출. 기존 사용자 회귀 0 보장.
-- daemon 연동 타입/신호 — `ProjectEntry.lastIndexedCommit?: string \| null` (마지막 인덱스의 git HEAD; agent 가 현재 HEAD 와 비교해 staleness 판단). `ensureRegistered`/`triggerIndexing` 은 `Promise<boolean>` 을 반환하되 실패는 silent — caller 가 시그널만 활용한다. learning emit 이 `daemonEnabled` (항상) + `daemonReady` (daemon=true 시에만) 를 노출해 test/agent 가 config 분기를 검증한다.
-- `DaemonAvailability` — `{ installed, bin, version, required, outdated, packageName, installCommand, source, explicitLabel, staleRemedy, explicitMiss, locateHint }`. `resolveDaemonAvailability()`(`daemon/client.ts`)가 소유하고 `core`(integrity)·`cli`(daemon/fix)·prompt 가 **주입받는다** — `core` 는 `cli` 를 import 하지 않는다. **미설치와 버전 미달은 별개 상태**이며 메시지도 다르다. 버전을 읽을 수 없는 경우는 `outdated` 로 치지 않는다. `locateHint` / `explicitLabel` / `staleRemedy` 도 값에 실려 이동한다 — 그래야 `core` 가 환경변수명·config 키를 철자하지 않는다. **낡은 daemon 을 어떻게 고치는가는 어디서 찾았는가에 달렸다** (`staleDaemonRemedy`): `env`/`config` 는 사용자가 지목한 경로라, `checkout` 은 npm 설치가 아니라 전역 설치로 대체되지 않는다 — `npm i -g` 는 `package` 하나에만 옳고 넷 모두에 주어지고 있었다. 경로는 네 경우 모두 말한다(프로젝트 로컬 daemon 이 전역보다 우선하므로 `package` 에서도 전역 명령이 항상 옳지는 않다)
-- `MIN_DAEMON_VERSION` (`daemon/client.ts`) — reap 이 요구하는 daemon 최소 버전. **단일 소유자**이며 문서에는 숫자를 적지 않는다 (reap 이 메시지로 알려준다). 판정 근거는 **설치된 패키지의 버전**이다 — `fix --check` 가 프로세스를 띄우면 안 되고, 너무 낡은 daemon 은 `/health` 조차 제대로 답하지 못할 수 있다. `/health` 의 `version` 은 **실행 중인 것**을 알려주는 별개 신호로 `daemon status` 가 나란히 표시한다
-- `ReapConfig.daemonBin?: string` + `REAP_DAEMON_BIN` (gen-084) — daemon 위치 명시 지정. `readExplicitDaemonBins(env, cwd)` 가 둘을 읽고(env 우선), `~` 전개 + 프로젝트 루트 기준 상대경로 해석, 공백은 미설정 취급. **명시 경로에만 `isFile` 을 건다** — 디렉토리를 받아들이면 `installed: true` 가 되고 모든 진단이 조용해진다(가장 흔한 오타가 `/dist/index.js` 누락이다). 신원 검사는 하지 않는다 — 사람이 지목한 경로에 "우연히 남의 패키지"는 없고, 소스 체크아웃 지목을 막게 된다. **빗나가도 탐색을 멈추지 않고 `explicitMiss` 로 보고**한다: `config.yml` 은 커밋되므로 한 머신에서 맞는 경로가 다른 머신에는 없을 수 있다. `daemon status` 가 `bin`/`binSource` 를 보고해 설정 반영 여부를 확인할 수 있다(단 **띄울 대상**이지 실행 중인 것이 아니다 — 이미 떠 있으면 재사용된다). `VALID_CONFIG_FIELDS`(`update.ts`)에 반드시 있어야 한다 — 없으면 `reap update` 가 조용히 지운다
-- `REAP_DAEMON_PORT` env var — daemon binary(`daemon/src/index.ts:resolvePort()`) 와 CLI client(`daemon/client.ts:resolvePort()` + call-time `getBaseUrl()`) 양쪽이 인식. 미설정 시 17224. e2e 는 17225 로 격리한다.
+- indexer 타입 — `SymbolNode` / `GraphEdge` / `FileNode`(경로·언어·**파일별 import 통계**) / `ImportStats` /
+  **`SymbolReference`** (참조 하나) / **`ImportSpecifier`** (해석 전 import specifier). 뒤의 둘은
+  스냅샷에 **저장된다** — call·import 해석이 전체 그래프 의존이라 incremental 이 재파싱하지 않은
+  파일까지 재해석해야 하기 때문이다. 없으면 낡은 edge 가 살아남고 `status` 는 100%를 보고한다
+- `IndexManifest` / `IndexStats` / `IndexSnapshot` (`src/indexer/store.ts`). `INDEX_FORMAT` 은
+  **단일 소유자**이며 테스트도 그것을 import 한다 — 스냅샷 모양이 바뀌면 올린다. 모르는 format 은
+  버리고 재구축(파생 데이터라 마이그레이션할 가치가 없다)
+- `UpdateResult.mode` — `"full" | "incremental" | "up-to-date"`. `reap index update` 가 왜 그렇게 했는지
+  스스로 설명하게 하는 값이며 e2e 의 판정 기준이기도 하다
 - `ReapConfig.lastMigratedVersion?: string` — 이 프로젝트가 어디까지 migration 됐는지 추적. 미설정 시 "0.0.0" fallback. `reap update --mark-migrated` 가 현재 패키지 버전으로 갱신. **CONFIG_DEFAULTS에 포함 금지** — optional tracking 필드이며 spurious config diff 유발.
 - `PendingMigration` — `{ version: string, instructions: string }`. `detectPendingMigrations` 반환 타입. `reap update` context + load-context SessionStart + dump-state.md sync 3곳에서 동일 데이터 emit.
 
@@ -224,57 +249,52 @@ daemon/                            — 별도 npm 패키지 (@c-d-cc/reap-daemon
 | `ci.yml` (매 push) | build + **자기진단**(층1, claude-code + **OpenCode**) | reap | 무료 |
 | main push | **테스트 전체** (unit/e2e/scenario) | **reap-test** | 무료 |
 | `release.yml` (`v*` 태그) | 문서 정합성 + **버전 하한** + 자기진단 + build + publish | reap | 무료 |
-| `release.yml` (`daemon-v*` 태그) | 태그↔버전 일치 + build + daemon test + tarball 자산 → **daemon publish** | reap | 무료 |
 | 릴리즈 전 수동 (`reapdev.versionBump` 5-2) | **agent 통합**(층2) | 로컬 | ~$0.25 |
 
-**층1 vs 층2**: 층1 은 "파일이 올바른 위치에 올바른 내용으로 놓였는가", 층2 는 "클라이언트가 그것을 실제로 읽는가". 후자는 전자로부터 추론할 수 없다 — gen-063 은 파일 검증을 전부 통과하고도 slash command 가 노출되지 않았다.
+**층1 vs 층2**: 층1 은 "파일이 올바른 위치에 올바른 내용으로 놓였는가", 층2 는 "클라이언트가 그것을 실제로 읽는가".
 
-**게이트가 잡는다고 적힌 사례는 실제로 재현해 확인한 것만 적는다.** gen-078 이 세 사례를 적었는데 그중 daemon 항목이 **거짓이었고 다섯 세대를 살아남았다** — CI 는 내내 초록이었다. 재현할 때는 관련 코드를 아무렇게나 망가뜨리는 것으로 충분하지 않다: 재현 실패는 "주장이 거짓"이 아니라 **"내 변형이 그 결함이 아니다"** 일 수 있다.
+> 게이트에 대해 무엇을 어떻게 쓸 것인가(재현 확인, 부재 단언, 좁힌 명령, 끄는 스위치)는
+> **처방이므로 `genome/evolution.md` § 게이트에 대해 쓰는 문장의 규율**이 소유한다.
+> 아래는 각 게이트가 현재 무엇을 하고 무엇을 못 하는지의 서술이다.
 
-### 자기진단은 배포 산출물에서 daemon 을 실행한다
+### § 5 — 배포 산출물에서 인덱서를 돌린다 (gen-089)
 
-daemon 절(§ 5)은 **소스 트리를 보지 않는다** — 거기서는 의존이 해석되므로 결함이 존재할 수 없다. tarball → 격리 설치 → **node 로 실행** → 실제 소스 인덱싱 → **심볼 수**. 각 § 가 왜 그 자리에 그 형태로 있는지는 스크립트 자신의 주석이 소유한다. 스크립트를 열지 않고 알아야 할 것만 여기 적는다:
+**소스 트리를 보지 않는다** (거기서는 의존이 해석되므로 결함이 존재할 수 없다):
+tarball → 격리 설치 → **node 로 실행**(가짜 `bun` 을 PATH 에 넣어 강제) → NodeNext fixture 인덱싱.
+판정은 **알려진 관계**(`leaf → middle → top`)와 **절대수 해석률(2/2)** 이다.
 
-- **bun 이 아니라 node 로 판정하고, 판정 근거는 startup 이 아니라 심볼 수다.** 뜨고 health 에 답하고 인덱싱 성공을 보고하면서 심볼이 0개인 것이 네이티브 바인딩 결함의 모습이었다
-- **절의 순서가 의미를 갖는다.** § 5d-bis(명시 경로가 구제하는가)는 5d 와 5e **사이**에서만 물을 수 있다 — 그 지점에서만 daemon 이 디스크에 있고, 동작하며, reap 이 못 본다. 새 시나리오를 끼울 때 이 성질을 먼저 확인할 것
-- **부재를 주장하는 assertion 은 스스로 먼저 증명한다.** 크래시·비정상 출력·필드명 변경도 "부재"로 읽히므로 `status: "ok"` 와 숫자 `warningCount` 를 요구한 뒤에야 내용을 본다. `grep -q` 로 없음을 확인하는 자리는 전부 같은 취약성을 갖는다
-- **게이트 전체가 macOS 에서 14~18초다** (gen-088 실측, 8절 전부). 끄는 스위치는 두지 않는다 — 후퇴가 필요하면 release 전용으로 옮기는 것이 호출 한 줄이고, 꺼진 채로 통과를 보고하는 환경변수보다 낫다. 리눅스에서 `better-sqlite3` prebuilt 를 못 받으면 소스 컴파일이 두 번이라 그쪽은 더 든다
-- 게이트는 `daemon/dist` 를 지우고 재빌드한다 — **로컬 실행이 작업 트리를 건드리는 유일한 지점**(gitignore 대상이라 무해)
+**못 보는 것 둘**: (1) **incremental 을 건드리지 않는다** — fixture 를 한 번만 커밋하므로 두 번째
+`index update` 는 `up-to-date` 다. gen-089 의 blocker 넷 중 셋이 그 경로였고 **게이트는 전부
+통과시켰을 것이다**(그쪽은 `tests/e2e/index-incremental.test.ts` 담당). (2) **`lsof` 단언이
+fail-open** — `command -v lsof` 에 `else` 가 없어 lsof 없는 러너에서는 amber SKIP 도 없이 사라진다.
 
-### 자기진단은 install script 가 차단된 설치도 본다
+게이트 전체가 macOS 에서 **14~18초**(gen-088 실측). 네이티브 의존이 사라져 리눅스 컴파일 비용도 없다.
 
-§ 6 은 같은 tarball 을 `--ignore-scripts` 로 한 번 더 설치한다. npm 12 부터 전역 설치의 lifecycle script 는 기본 차단이고, REAP 의 사용자 레벨 자산은 그때까지 `postinstall` 하나에만 걸려 있었다 — 바이너리는 돌고 통합은 없고 오류도 없었다.
+### § 6~8 이 무엇을 보는가 (그리고 못 보는가)
 
-- **npm 버전으로 조건을 추론하지 않고 `--ignore-scripts` 로 강제한다.** `release.yml` 이 게이트를 node 번들 npm 에 고정하므로, 버전 판정은 그 고정이 바뀌는 날 **아무것도 재현하지 않으면서 pass 를 보고**하게 된다. 부재 선단언(위 daemon 절의 같은 규칙)이 그 퇴화를 막는다. 기대 개수는 설치된 패키지에서 센다
-- **잡지 못하는 것**: claude-code 만 본다. "차단 + OpenCode" 는 fake-home unit/e2e 로만 덮인다. 그리고 `reap init` 하나로 판정하므로 "어떤 명령이든 복구한다"는 e2e 쪽이 증명한다
+각 절이 왜 그 자리에 그 형태로 있는지는 **스크립트 자신의 주석이 소유한다.**
+스크립트를 열지 않고 알아야 할 것만 적는다.
 
-### 자기진단은 두 클라이언트를 본다 (gen-082)
+**§ 6 — install script 차단 (gen-087).** 같은 tarball 을 `--ignore-scripts` 로 한 번 더 설치한다.
+npm 12 부터 전역 설치의 lifecycle script 는 기본 차단이고, REAP 의 사용자 레벨 자산은 그때까지
+`postinstall` 하나에만 걸려 있었다 — 바이너리는 돌고 통합은 없고 오류도 없었다.
+npm 버전으로 조건을 추론하지 않고 `--ignore-scripts` 로 **강제**한다.
+**못 보는 것**: claude-code 만 본다. "차단 + OpenCode" 는 fake-home unit/e2e 로만 덮인다.
 
-`check-self-diagnosis.sh` 는 tarball 설치 후 (1) claude-code 프로젝트로 `fix --check` 가 아무것도 보고하지 않을 것, (2) **`agentClient: opencode` 로 바꿔 `install-skills` 한 뒤 `opencode agent list` 가 exit 0 이고 `reap-evolve`/`reap-evaluate` 를 나열할 것** 을 요구한다.
+**§ 7 — 두 클라이언트 (gen-080, gen-082).** `agentClient: opencode` 로 바꿔 `install-skills` 한 뒤
+`opencode agent list` 가 exit 0 이고 `reap-evolve`/`reap-evaluate` 를 **나열**할 것을 요구한다
+(exit 0 만 보면 agent 가 하나도 없어도 통과한다). 필요한 이유는 실패 양상이 클라이언트마다
+다르기 때문이다 — **OpenCode 는 설정 검증이 all-or-nothing 이라 REAP 이 쓴 파일 하나가
+`opencode` 명령 전체를 죽인다.** 모델 호출이 없어 무료라 CI 에 있다. 클라이언트는
+`npm i -g opencode-ai` 로 설치하며 **버전을 고정하지 않는다** — 묻는 것이 "현재의 OpenCode 가
+받아들이는가"이므로 upstream 스키마 변경으로 red 가 되는 것이 의도된 신호다. 부재 시 amber SKIP.
+**못 보는 것**: slash command 는 `opencode command list` 같은 CLI 표면이 없어 검증할 수 없다.
 
-(2)가 필요한 이유는 실패 양상이 클라이언트마다 다르기 때문이다 — **OpenCode 는 설정 검증이 all-or-nothing 이라 REAP 이 쓴 파일 하나가 `opencode` 명령 전체를 죽인다** (gen-080). Claude Code 에는 이 양상이 없다. 그리고 `reap init` 은 claude-code 만 만들므로 opencode 경로는 그 전까지 어느 게이트도 지나지 않았다.
-
-- **exit 0 만 보면 안 된다** — `agent list` 는 agent 가 하나도 없어도 exit 0 이다. 목록 확인이 함께 있어야 "아무것도 설치하지 않음"이 통과하지 않는다
-- **격리는 `HOME` + `XDG_CONFIG_HOME` 두 축** — 하나만으로는 새어나간다. 아래 XDG 절 참조
-- **모델 호출 없음** — 설정 파싱뿐이라 무료. 그래서 층2(유료)와 달리 CI 에 있다
-- CI/release 워크플로가 `npm i -g opencode-ai` 로 클라이언트를 설치한다. **버전 미고정** — 묻는 것이 "현재의 OpenCode 가 받아들이는가"이므로 upstream 스키마 변경으로 red 가 되는 것이 의도된 신호다
-- `opencode` 부재 시 **amber SKIP 을 출력**하고 통과한다. 조용한 exit 0 은 "검사했고 깨끗하다"로 읽힌다
-- **잡지 못하는 것**: slash command 는 `opencode command list` 같은 CLI 표면이 없어 검증할 수 없다. 검사한 opencode 버전은 스크립트가 출력하므로 로컬/CI 판정이 갈리면 근거가 남는다
-
-### 자기진단은 자기가 pack 한 산출물을 설치하는지 검사한다 (gen-088)
-
-§ 2 는 설치 직후 **번들 sha 가 방금 pack 한 것과 같은지** 단언한다. 그 전까지는 아니었고, 그래서
-게이트가 **배포된 패키지를 진단하고 있었다** — postinstall 의 auto-update 가 `npm install -g @latest`
-를 돌리고 npm 이 lifecycle script 에 `npm_config_prefix` 를 물려주므로 그 재설치가 같은 격리 prefix 로
-들어가 방금 설치한 것을 덮어썼다.
-
-설치는 대상 prefix 의 bin 을 PATH 앞에 두고 한다 — 진짜 전역 설치가 그렇게 생겼기 때문이다(npm 은
-lifecycle script 전에 bin 을 링크한다). 그것은 알려진 한 경로를 막을 뿐이고, **sha 단언이 성질을 지킨다.**
-
-§ 8 은 **진짜 전역 설치를 실제로 제거한다**. unit 은 npm 에 넘길 인자만 단언할 수 있고 e2e 는 소스
-체크아웃에서 도는데 거기서는 명령이 npm 을 부르지 않기로 되어 있으므로, **npm 제거가 실제로 일어나는
-것을 보는 유일한 자리**다. 부재를 읽기 전에 exit code · `status: "ok"` · 숫자 `removedCount` 를 요구하고,
-생존 단언을 같은 절에 둔다 — 제거만 보는 검사는 "전부 지움"도 통과시킨다.
+**§ 2 / § 8 — 자기가 pack 한 것을 설치하는가, 그리고 제거되는가 (gen-088).**
+§ 2 는 설치 직후 **번들 sha 가 방금 pack 한 것과 같은지** 단언한다. 그 전까지는 아니었고
+게이트가 **배포된 패키지를 진단하고 있었다** — postinstall 의 auto-update 가 같은 격리 prefix 로
+재설치해 덮어썼기 때문이다. § 8 은 **진짜 전역 설치를 실제로 제거한다**: unit 은 npm 에 넘길
+인자만 볼 수 있고 e2e 는 소스 체크아웃에서 도므로, npm 제거가 실제로 일어나는 것을 보는 유일한 자리다.
 
 ### OpenCode 경로는 `XDG_CONFIG_HOME` 을 따른다 (gen-082)
 
@@ -301,7 +321,7 @@ claude-code adapter 는 `~/.claude/` 를 쓰며 XDG 와 무관하다.
 - secret `TEST_DISPATCH_TOKEN` — `c-d-cc/reap-test` Contents:RW fine-grained PAT. **부재/만료 시 job 이 red** (`curl -f` + 명시적 exit 1). 조용히 건너뛰지 않는다
 - 결과 알림은 GitHub 기본 알림. reap 의 커밋 화면에는 표시되지 않는다
 
-현재 baseline 은 리눅스 러너에서 그대로 재현된다 (daemon e2e 포함, 제외 없음).
+현재 baseline 은 리눅스 러너에서 그대로 재현된다 (제외 없음).
 
 문서 게이트는 CI 에 없다 — 개발 중 `package.json` 이 문서보다 앞서는 것이 정상이라 상시 red 가 된다(gen-073 판단). 자기진단은 그런 성질이 없어 양쪽에 있다.
 
@@ -309,5 +329,6 @@ claude-code adapter 는 `~/.claude/` 를 쓰며 XDG 와 무관하다.
 
 설계 원칙(파일 기반 상태 / JSON stdout / transition graph + nonce / 2-level compression / adapter pattern)은 **처방적이므로 `genome/application.md` 가 소유한다.** 여기에는 현재 상태로만 확인되는 두 가지만 남긴다.
 
-- **Zero-dependency**: production dependency 는 `yaml` 하나. CLI 프레임워크도 자체 구현(`src/libs/cli.ts`). daemon 이 네이티브 의존을 지고 있어 **별도 패키지로 분리된 이유**가 이것이다
+<!-- reap:carrier(zero-native-dependency) -->
+- **Zero *native* dependency** (원칙은 `genome/application.md` 가 소유한다): production dependency 는 `yaml` 과 `web-tree-sitter` 둘. 후자는 WASM 이라 node-gyp/prebuild 가 없다. CLI 프레임워크도 자체 구현(`src/libs/cli.ts`). 폐기한 daemon 이 별도 패키지였던 이유가 네이티브 SQLite 였고, 그것이 사라져 통합이 가능해졌다
 - **`reap make` pattern**: template 기반 resource 생성 (현재 `backlog`, `hook`)

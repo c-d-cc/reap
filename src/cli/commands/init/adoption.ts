@@ -80,7 +80,7 @@ export async function execute(paths: ReapPaths, projectName?: string): Promise<v
   const name = projectName ?? scan.projectName;
 
   // Common init
-  const config = await initCommon(paths, name);
+  const { config, ignoreAction } = await initCommon(paths, name);
 
   // Phase 2: Generate genome suggest + source-map
   const genomeSuggestion = suggestGenome(scan);
@@ -141,6 +141,9 @@ export async function execute(paths: ReapPaths, projectName?: string): Promise<v
       project: config.project,
       mode: "adoption",
       reapDir: paths.reap,
+      ...(ignoreAction === "failed"
+        ? { warning: "could not add .reap/.index/ to .gitignore (check file permissions) — the code index would otherwise be committed" }
+        : {}),
       scan: {
         dependencies: scan.dependencies.length,
         devDependencies: scan.devDependencies.length,

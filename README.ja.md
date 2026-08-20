@@ -73,7 +73,7 @@ reap uninstall            # 何が削除されるかを表示
 reap uninstall --confirm  # 実行し、パッケージ削除まで npm に渡す
 ```
 
-デーモンを停止し、Claude Code と OpenCode 両方の場所から REAP のファイルを削除し、`settings.json` から REAP の項目だけを取り除き、`~/.reap/reap-guide.md`・インストールスタンプ・`~/.reap/daemon/` を削除してから、`@c-d-cc/reap-daemon` と `@c-d-cc/reap` に対して `npm uninstall -g` を実行します。同じディレクトリにあるあなた自身のファイルはそのまま残ります — `reapdev.*` も、`~/.reap/` 内のその他のものも同様です。
+Claude Code と OpenCode 両方の場所から REAP のファイルを削除し、`settings.json` から REAP の項目だけを取り除き、`~/.reap/reap-guide.md`・インストールスタンプ・`~/.reap/daemon/`（廃止されたデーモンが残したもの）を削除してから、`@c-d-cc/reap-daemon` と `@c-d-cc/reap` に対して `npm uninstall -g` を実行します。同じディレクトリにあるあなた自身のファイルはそのまま残ります — `reapdev.*` も、`~/.reap/` 内のその他のものも同様です。
 
 **すでにパッケージを削除した場合は?** `reap` コマンドがなく、ファイルだけが残っている状態です。何もインストールせずに実行できます:
 
@@ -289,29 +289,39 @@ evaluator: true   # デフォルト: false
 
 **Fitness phase + cruise mode**: evaluatorはfitnessフェーズでも実行されます。validationで記録されたhigh-severity concernは次のfitnessフェーズ実行時に**cruise modeを自動停止**します — `cruiseCount`が `config.yml` から削除され、cruiseプロンプトがsupervised fallbackに置き換えられ、ユーザーが懸念事項を確認した後にfeedbackを作成できます。
 
-### Code Intelligence Daemon（オプトイン）
+### Code Intelligence
 
-REAPはローカルコードインテリジェンスデーモン（`localhost:17224`）を提供します。世代をまたいでTree-sitterシンボルグラフを維持し、15以上の言語を解析し、グラフをSQLiteに保存し、シンボル検索、caller/callee分析、blast-radius影響、コミュニティ検出、プロセスフロートレースのHTTP APIを公開します。
+REAP はコードインデックスを内蔵しています。インストールするものも、起動するものも、バックグラウンドで動くプロセスもありません。
 
-`.reap/config.yml` に1行追加して有効化：
-
-```yaml
-daemon: true   # デフォルト: false
-```
-
-有効化すると、REAPが自動的に：
-- generation開始時にデーモンにプロジェクトを登録し、
-- 主要なライフサイクル時点（learning、implementation完了、completion commit）で再インデックスし、
-- ビルダー/evaluatorプロンプトにクエリ例とstaleness確認プロトコルを含む「Code Intelligence」セクションを追加します。
-
-デーモンは最初の使用時に自動起動し、30分のアイドル後に自動シャットダウンします：
+Tree-sitter パーサーが追跡中のすべてのファイルを走査し、定義されたシンボルとその間の呼び出し・import を記録して、結果を `.reap/.index/` に gzip された JSON として保存します。15 言語が同梱され、**ネイティブビルドはありません** — グラマーは WebAssembly です。
 
 ```bash
-reap daemon status   # 実行状況を確認
-reap daemon stop     # デーモンを停止
+reap index                     # update — デフォルト動作
+reap index status              # 統計、import 解決率、インデックス済みコミット
+reap index impact <file>       # このファイルを変更すると何が影響を受けるか
+reap index search <query>      # 定義を探す（file:line を返す）
+reap index callers <symbolId>  # 誰がこれを呼ぶか（src/core/lifecycle.ts::nextStage）
+reap index callees <symbolId>  # これが何を呼ぶか
 ```
 
-デーモンは読み取り専用アクセラレーター — コードを決して変更しません。何らかの理由で利用できない場合、エージェントは標準のRead/Grep/Globツールにフォールバックし、ライフサイクルは中断されません。
+**変更の単位はコミットです。** インデックスは自分が記述する SHA を記録するため、何を再解析するかは `git diff` 一回、そもそも再解析が必要かは文字列比較一回で決まります。本リポジトリの完全インデックスは約 0.3 秒、変更がなければゼロです。`HEAD` が動けば — コミット・ブランチ切り替え・rebase・pull の後 — クエリ自身がインデックスを更新します。REAP が先んじて更新するのは自分がコミットした直後だけ — `completion` の末尾と `early-close` です。
+
+代償は **コミットされていない作業がインデックスに入らない** ことです。それは Grep で探してください。`reap index status` は常に自分が記述するコミットを示します。
+
+**`impact` を信じる前に `status` を見てください。** `impact` が知っていることはすべて解決済みの import エッジ由来なので、`imports` の比率が低ければグラフは不完全であり、空の blast radius は *なし* ではなく *不明* を意味します:
+
+```
+symbols: 1530  (function 902, method 341, class 187, type 100)
+edges:   3688  (CALLS 3145, IMPORTS 543)
+imports: 543/543 resolved (100%)
+commit:  1a2b3c4
+```
+
+（例示の数値です。）この一行がなかったために 5 か月を失いました。このインデクサーの前身は標準的な TypeScript プロジェクトで import を **一つも** 解決できず — `./x.js` という specifier を、それを生成する `x.ts` に対応づけられませんでした — blast radius がゼロを返し続ける間、すべてのテストは通り CI はずっと緑でした。どの検査も「インデックスは走ったか」を問い、「その答えは意味をなすか」を誰も問わなかったからです。
+
+インデックスは `.reap/.index/` にあり gitignore されます。削除しても常に安全です — 次のコマンドが作り直します。
+
+**daemon を置き換えます（v0.17.6 で削除）。** v0.17.5 までこれは `daemon: true` の裏でポート 17224 に HTTP サーバーを立てる別パッケージ `@c-d-cc/reap-daemon` でした。現在は廃止され npm 上で deprecated となっており、`reap update` が設定と残ったデータを代わりに削除します。その存在理由はグラフを warm に保つことでしたが — 本リポジトリのグラフをディスクから読むコストは一桁ミリ秒で、`reap` のコールドスタートは 40〜70 ミリ秒です。**避けようとしていたコストが、避けるための仕組みより安かった。** その仕組みとはポート、レジストリ、PID ファイル、アイドルタイマー、ネイティブ SQLite ビルドを抱えた二つ目の npm パッケージ、そしてリリースパイプラインでした。
 
 ## プロジェクト構造
 
@@ -354,7 +364,6 @@ strictMerge: false              # 直接の git pull/push/merge を制限
 agentClient: claude-code       # AIエージェントクライアント
 # cruiseCount: 1/5             # 存在する場合 = cruise mode（現在/合計）
 # evaluator: true              # オプトイン: validation/fitnessで reap-evaluate を起動
-# daemon: true                 # オプトイン: ローカルコードインテリジェンスデーモン
 ```
 
 主要な設定項目：
@@ -363,7 +372,6 @@ agentClient: claude-code       # AIエージェントクライアント
 - **`strictMerge`**: 直接の git pull/push/merge を制限します — 代わりに `/reap.pull`、`/reap.push`、`/reap.merge` を使用してください。
 - **`agentClient`**: スキルのデプロイに使用するアダプターを決定します。
 - **`evaluator`**: オプトインの独立レビュアー。`true`のとき、validationステージで `reap-evaluate` サブエージェントをアドバイザーとして起動します。デフォルト `false`。上記の [Evaluator Agent](#evaluator-agentオプトイン) を参照。
-- **`daemon`**: オプトインのローカルコードインテリジェンスデーモン。`true`のとき、REAPがライフサイクルチェックポイントで自動インデックスし、エージェントプロンプトにデーモンクエリ指示を含めます。デフォルト `false`。上記の [Code Intelligence Daemon](#code-intelligence-daemonオプトイン) を参照。
 
 ## v0.15からのアップグレード [↗](https://reap.cc/docs/migration-guide)
 

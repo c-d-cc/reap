@@ -7,5 +7,4 @@ autoIssueReport: false
 strictEdit: true
 strictMerge: true
 evaluator: true
-daemon: true
-lastMigratedVersion: 0.17.3
+lastMigratedVersion: 0.17.6

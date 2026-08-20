@@ -161,6 +161,6 @@ export async function execute(confirm?: boolean): Promise<void> {
       ? `REAP removed from this project. ${result.removed.length} item(s) cleaned.`
       : "Nothing to remove.") +
       " To remove REAP from this machine as well — slash commands, agent definitions," +
-      " the session hook, the daemon and the npm packages — run: reap uninstall",
+      " the session hook and the npm packages — run: reap uninstall",
   });
 }

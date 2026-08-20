@@ -72,11 +72,7 @@ export async function execute(paths: ReapPaths, _phase?: string): Promise<void> 
   const knowledge = await loadReapKnowledge(paths);
   // Resolved here rather than inside the prompt builder so `core` stays clear of
   // `cli`. Only asked when the user opted in — an untouched project pays nothing.
-  const daemonAvailability =
-    config?.daemon === true
-      ? (await import("../daemon/client.js")).resolveDaemonAvailability()
-      : null;
-  const subagentPrompt = buildBasePrompt(knowledge, paths, state, config?.cruiseCount, clarityResult, config, daemonAvailability);
+  const subagentPrompt = buildBasePrompt(knowledge, paths, state, config?.cruiseCount, clarityResult, config);
 
   if (autoSubagent) {
     const promptLines = [

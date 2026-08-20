@@ -185,17 +185,9 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
     // Run onLifeStarted hooks
     await executeHooks(paths.hooks, "onLifeStarted", paths.root).catch(() => {});
 
-    // gen-068: daemon integration is opt-in via `config.daemon: true`. The
-    // call-site gate avoids the spawn-attempt + 3s timeout cost when the
-    // user has not opted in. When enabled, register the project first (in
-    // case the daemon was reset) before triggering a full index.
-    const configContent = await readTextFile(paths.config);
-    const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
-    if (config?.daemon === true) {
-      const { ensureRegistered, triggerIndexing } = await import("../daemon/lifecycle.js");
-      await ensureRegistered(paths.root, basename(paths.root));
-      await triggerIndexing(paths.root);
-    }
+    // No indexing here. The index is keyed by commit (gen-089), and creating a
+    // generation does not make one — the trigger that matters is the commit at
+    // the end of completion, and any query in between refreshes itself.
 
     const messageLines = [`Generation ${state.id} created. Run: reap run learning`];
     if (consumeWarning) {

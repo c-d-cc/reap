@@ -11,40 +11,38 @@
 # This turns that into a gate: install from the actual publish artifact and
 # require a clean bill of health. Four past incidents fail against it —
 #   - #22            : install-skills wrote where fix --check called legacy
-#   - gen-074 daemon : shipped a daemon nobody could use (section 5)
+#   - gen-089 index  : a resolver that resolved nothing, reported as success
+#                      (section 5)
 #   - npm 12 default : install scripts blocked, no integration at all (section 6)
 #   - gen-080        : agent files OpenCode could not parse (section 7)
 #
-# The daemon entry was false when it was written (gen-078) and stayed false for
-# five generations. It claimed the gate caught the packaging defect; the gate
-# only ever checked that installation succeeded and that `fix --check` was
-# quiet, and the defective install did both. CI was green the whole time with
-# the defect live. gen-083 added section 5 and confirmed it fails against the
-# unfixed code before fixing anything — the claim is now earned rather than
-# asserted.
+# A daemon entry used to sit where the index one is. It was false when written
+# (gen-078) and stayed false for five generations: it claimed the gate caught a
+# packaging defect, while the gate only ever checked that installation succeeded
+# and that `fix --check` was quiet — both of which the defective install did. CI
+# was green the whole time with the defect live.
+#
+# Section 5 now asks a harder question than its predecessor did. "Are there
+# symbols?" was the assertion in place while blast radius returned zero for
+# every TypeScript project for five months. It asks instead whether the index
+# finds relationships the fixture is known to have.
 #
 # The lesson is in the ordering. A coverage claim written alongside a check that
 # was never run against the broken state is a guess, and this file is read by
 # whoever is deciding what still needs testing.
 #
 # Sections 5 through 7 exist because the first checks all ask the same question
-# of one client, one package and one way of installing. REAP claims to support
-# two clients and ships a second package; `reap init` exercises neither — so the
-# OpenCode path reached users unverified and took their whole OpenCode install
-# offline (gen-080), and the daemon reached users as a dangling symlink. Section
-# 6 adds the third axis: sections 2 through 5 all install with scripts allowed,
-# which npm 12 no longer does by default.
+# of one client, one code path and one way of installing. REAP claims to support
+# two clients and now carries its own indexer; `reap init` exercises neither —
+# so the OpenCode path reached users unverified and took their whole OpenCode
+# install offline (gen-080). Section 6 adds the third axis: sections 2 through 5
+# all install with scripts allowed, which npm 12 no longer does by default.
 #
 # Isolation is not optional. `install-skills` writes 19 files to
 # ~/.claude/commands/ and postinstall touches ~/.reap/ and
 # ~/.claude/settings.json, so an unisolated run would overwrite the developer's
 # own setup. CI runners are disposable, but the same script has to be safe to
 # run locally or nobody will run it before pushing.
-#
-# One exception, stated rather than hidden: section 5 rebuilds the daemon, which
-# deletes and recreates daemon/dist in the working tree. It is a gitignored build
-# output and `npm run build -w daemon` recreates it, so nothing is lost — but a
-# local run does touch the checkout, unlike everything else here.
 
 set -uo pipefail
 
@@ -58,20 +56,16 @@ dim()   { printf '\033[2m%s\033[0m\n' "$1"; }
 
 FAKE_HOME=""; PREFIX=""; PROJECT=""; TARBALL=""
 OC_HOME=""; OC_PROJECT=""
-DM_HOME=""; DM_INSTALL=""; DM_PROJECT=""; DM_TARBALL=""; DM_PID=""
+IX_PROJECT=""
 BL_HOME=""; BL_PREFIX=""; BL_PROJECT=""
 UN_HOME=""; UN_PREFIX=""
 cleanup() {
-  [ -n "$DM_PID" ] && kill "$DM_PID" 2>/dev/null
   [ -n "$FAKE_HOME" ]  && rm -rf "$FAKE_HOME"
   [ -n "$PREFIX" ]     && rm -rf "$PREFIX"
   [ -n "$PROJECT" ]    && rm -rf "$PROJECT"
   [ -n "$OC_HOME" ]    && rm -rf "$OC_HOME"
   [ -n "$OC_PROJECT" ] && rm -rf "$OC_PROJECT"
-  [ -n "$DM_HOME" ]    && rm -rf "$DM_HOME"
-  [ -n "$DM_INSTALL" ] && rm -rf "$DM_INSTALL"
-  [ -n "$DM_PROJECT" ] && rm -rf "$DM_PROJECT"
-  [ -n "$DM_TARBALL" ] && [ -f "$ROOT/daemon/$DM_TARBALL" ] && rm -f "$ROOT/daemon/$DM_TARBALL"
+  [ -n "$IX_PROJECT" ]  && rm -rf "$IX_PROJECT"
   [ -n "$BL_HOME" ]    && rm -rf "$BL_HOME"
   [ -n "$BL_PREFIX" ]  && rm -rf "$BL_PREFIX"
   [ -n "$BL_PROJECT" ] && rm -rf "$BL_PROJECT"
@@ -220,669 +214,245 @@ if [ -n "$FINDINGS" ]; then
 fi
 green "  ok    no findings"
 
-# ── 5. The daemon: is what we publish something that actually works? ────────
+# ── 5. The index: does the published bundle produce answers that make sense? ─
 #
-# Everything above verifies files landing in the right place. The daemon fails
-# a level lower: it was declared as `file:./daemon`, packed into nothing, and
-# never published — so `daemon: true` installed a broken symlink and every call
-# site swallowed the failure. Nothing in a source tree can see that, because in
-# a source tree the dependency resolves.
+# Everything above verifies files landing in the right place. This section
+# refuses to accept that as evidence, for two reasons that both actually
+# happened.
 #
-# So this section refuses to look at the source tree at all. It packs the daemon
-# the way it would be published, installs it as a stranger would, and runs it
-# under **node** — not bun. Running under bun hid two separate defects for three
-# generations: bun resolved the native sqlite binding that node could not, and
-# nobody ever ran the bundle rather than the sources.
+# The first is packaging. The retired daemon was declared as `file:./daemon`,
+# packed into nothing, and never published — so `daemon: true` installed a
+# broken symlink and every call site swallowed the failure. Nothing in a source
+# tree can see that, because in a source tree everything resolves. So this runs
+# the *installed* reap, under **node**, with bun made unavailable: bun hid two
+# defects for three generations by resolving what node could not.
 #
-# The assertion is symbols, not startup. A daemon that starts, answers /health
-# and reports a successful index while extracting zero symbols is exactly the
-# state this defect left behind, and every weaker check passes it.
+# The second is worse and is why the assertion below is shaped as it is. The
+# daemon's blast radius returned zero for every NodeNext project for five
+# months. 130 tests passed, this gate passed, CI was green the whole time —
+# because every check asked "did indexing run?" and none asked "does the answer
+# mean anything?". A grammar that fails to load, a resolver that resolves
+# nothing, an index written to the wrong place: all of them produce a confident
+# success and an empty graph.
 #
-# 5e is here because the rest of this section tests the two packages apart, and
-# splitting them is precisely what created a seam between them. "reap does not
-# ship it", "a missing one is reported" and "it works standalone" are all true
-# in a world where users install both and still get nothing, so the last step
-# installs them side by side and makes reap do the finding.
-#
-# Kept deliberately self-contained: its own HOME, its own port, its own install
-# directory, no state shared with the sections above. That is what keeps a
-# retreat cheap if the cost turns out to hurt — the section can be moved to the
-# release workflow by deleting one call, with nothing to untangle.
-#
-# There is deliberately no environment variable to skip it. An escape hatch
-# shipped alongside a brand-new gate blunts it before anyone has measured a
-# reason to, and the reason it would exist has not happened: the cost is NOT
-# measured, but "unmeasured" is not "too slow". Locally the install takes ~2s
-# against a warm cache, and better-sqlite3 is installed twice (5c and 5e), so a
-# runner unable to fetch a prebuild compiles it twice. If that proves painful,
-# measure it and move the section — do not leave a switch that turns the check
-# off while still reporting a pass.
+# So the fixture below has known relationships, and the check is that the index
+# finds *those*, at a 100% import resolution rate. `nodes > 0` is exactly the
+# assertion that was in place while the defect shipped.
 echo
-echo "Checking the daemon..."
+echo "Checking the built-in code index (installed bundle, node, no bun)..."
 
-# 5a. reap must not carry the daemon. A `file:` dependency on a directory that
-#     is not in `files` is what produced the broken symlink; either half alone
-#     is harmless, so both are checked.
-# The listing is read once into a variable, never piped into grep. `grep -q`
-# leaves at its first match while tar is still writing, and under `pipefail`
-# that SIGPIPE turns a matched grep into a failed pipeline. Here that would be
-# silent: the `if` would read false and the check would report a clean tarball
-# precisely when daemon/ is in it. Same shape as the pipefail defect gen-083
-# found in 5a-bis; this is the rest of that class.
-REAP_LISTING=$(tar -tzf "$ROOT/$TARBALL")
-if grep -q "package/daemon/" <<< "$REAP_LISTING"; then
-  red "  FAIL  the reap tarball contains daemon/ — it is meant to be a separate package"
-  exit 1
-fi
+IX_PROJECT=$(mktemp -d)
 
-REAP_DEPS=$(node -e '
-  const {execSync} = require("child_process");
-  const t = process.argv[1];
-  const out = execSync(`tar -xzOf ${JSON.stringify(t)} package/package.json`, {encoding:"utf-8"});
-  console.log(Object.keys(JSON.parse(out).dependencies || {}).join(" "));
-' "$ROOT/$TARBALL")
-
-if grep -q "reap-daemon" <<< "$REAP_DEPS"; then
-  red "  FAIL  the reap tarball still depends on @c-d-cc/reap-daemon"
-  dim "        dependencies: $REAP_DEPS"
-  dim "        npm creates a symlink for a file: dependency whether or not the"
-  dim "        target ships. That link is what users got instead of a daemon."
-  exit 1
-fi
-green "  ok    reap ships without the daemon ($REAP_DEPS)"
-
-# 5a-bis. The published bundle must not contain the path it was built from.
-#
-# `bun build` replaces a bare `__dirname` with a string literal fixed at build
-# time, so v0.17.4 shipped this developer's checkout path to every user, and the
-# code that consulted it looked into a directory that existed on exactly one
-# machine. Nothing noticed for three generations, because on that machine the
-# path was correct.
-#
-# Checked here rather than left to the behavioural assertions below, which catch
-# it only by accident: with the daemon properly installed `require.resolve`
-# succeeds and the baked path is never consulted, so a run on any machine other
-# than the one that built it would go green with the defect present.
-# Extracted to a variable rather than piped: `set -o pipefail` is in force, and
-# `grep -q` exits at the first match, which hands tar a SIGPIPE. The pipeline
-# then reports tar's failure, the `if` reads false, and a match becomes a pass.
-# The first negative test of this very assertion caught that — which is the
-# argument for running one.
-BUNDLE=$(tar -xzOf "$ROOT/$TARBALL" package/dist/cli/index.js)
-if grep -qF "$ROOT" <<< "$BUNDLE"; then
-  red "  FAIL  the reap bundle contains the path it was built from"
-  echo
-  grep -oF "$ROOT" <<< "$BUNDLE" | head -1 | while IFS= read -r line; do dim "        $line"; done
-  echo
-  dim "        A user's copy would look for files under a directory that only"
-  dim "        exists here. Resolve from import.meta.url, which survives"
-  dim "        bundling, rather than the bare __dirname, which does not."
-  exit 1
-fi
-unset BUNDLE
-green "  ok    the bundle carries no build-machine paths"
-
-# 5b. An installed reap must say so when the daemon it was told to use is
-#     absent. This runs against the isolated project from section 3 — a real
-#     global install, not the source tree — because in the source tree the
-#     daemon resolves from the checkout beside it and the case cannot occur.
-cp "$PROJECT/.reap/config.yml" "$PROJECT/.reap/config.yml.orig"
-cp "$PROJECT/.reap/config.yml" "$PROJECT/.reap/config.yml.orig2"
-printf '\ndaemon: true\n' >> "$PROJECT/.reap/config.yml"
-DM_FINDINGS=$(cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" fix --check 2>/dev/null | node -e '
-  let raw=""; process.stdin.on("data",d=>raw+=d).on("end",()=>{
-    let ctx={}; try { ctx=(JSON.parse(raw).context)||{}; } catch {}
-    console.log((ctx.warnings||[]).join("\n"));
-  });')
-mv "$PROJECT/.reap/config.yml.orig" "$PROJECT/.reap/config.yml"
-
-if ! grep -q "reap-daemon" <<< "$DM_FINDINGS"; then
-  red "  FAIL  'daemon: true' with no daemon installed produces no warning"
-  echo
-  dim "        warnings were: ${DM_FINDINGS:-(none)}"
-  echo
-  dim "        This is the state every npm user was in. Saying nothing about it"
-  dim "        is how it survived three generations."
-  exit 1
-fi
-# `fix --check` is not the only channel. `reap daemon status` phrases this
-# separately, and until gen-084 nothing ran that branch — not the gate, not a
-# test. It said what it should, but only inspection said so, which is the shape
-# of evidence gen-083 was caught recording as if it were a run.
-printf '\ndaemon: true\n' >> "$PROJECT/.reap/config.yml"
-DM_ST_MISSING=$(cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" daemon status 2>&1)
-cp "$PROJECT/.reap/config.yml.orig2" "$PROJECT/.reap/config.yml"
-if ! grep -q "not installed" <<< "$DM_ST_MISSING"; then
-  red "  FAIL  'daemon status' does not say the daemon is missing"
-  echo
-  echo "$DM_ST_MISSING" | head -6 | while IFS= read -r line; do dim "        $line"; done
-  exit 1
-fi
-if ! grep -q "resolution roots" <<< "$DM_ST_MISSING"; then
-  red "  FAIL  'daemon status' does not say what to do if it IS installed"
-  echo
-  echo "$DM_ST_MISSING" | head -6 | while IFS= read -r line; do dim "        $line"; done
-  echo
-  dim "        Someone whose reap and daemon are in different resolution roots"
-  dim "        reads 'not installed' about software they installed. Without the"
-  dim "        way out, that is where they stop."
-  exit 1
-fi
-green "  ok    a missing daemon is reported, not swallowed — by both channels"
-
-# 5c. Pack and install the daemon on its own, as a user would.
-#
-# Built here rather than assumed: daemon/dist is gitignored and no workflow
-# produces it, so packing without this step ships a tarball with no entry point
-# — and the check would have passed only on a machine where someone had run the
-# build by hand. That is the same "works in my tree" this section exists to end,
-# reproduced inside the section itself.
-if ! (cd "$ROOT/daemon" && npm run build >/dev/null 2>&1); then
-  red "  FAIL  building the daemon failed"
-  exit 1
-fi
-
-DM_TARBALL=$(cd "$ROOT/daemon" && npm pack --silent 2>/dev/null | tail -1)
-if [ -z "$DM_TARBALL" ] || [ ! -f "$ROOT/daemon/$DM_TARBALL" ]; then
-  red "  FAIL  npm pack produced no daemon tarball"
-  exit 1
-fi
-
-DM_LISTING=$(tar -tzf "$ROOT/daemon/$DM_TARBALL")
-if ! grep -q "package/queries/" <<< "$DM_LISTING"; then
-  red "  FAIL  the daemon tarball has no queries/ — it cannot parse anything without them"
-  exit 1
-fi
-
-DM_INSTALL=$(mktemp -d)
-DM_HOME=$(mktemp -d)
-(cd "$DM_INSTALL" && npm init -y >/dev/null 2>&1)
-if ! (cd "$DM_INSTALL" && npm i --silent --no-audit --no-fund "$ROOT/daemon/$DM_TARBALL" >/dev/null 2>&1); then
-  red "  FAIL  installing the daemon tarball failed"
-  exit 1
-fi
-green "  ok    daemon installs standalone"
-
-# 5d. Run the installed bundle under node and ask it to index real source.
-DM_BIN="$DM_INSTALL/node_modules/@c-d-cc/reap-daemon/dist/index.js"
-if [ ! -f "$DM_BIN" ]; then
-  red "  FAIL  the installed daemon has no dist/index.js"
-  exit 1
-fi
-
-DM_PORT=17296
-DM_PROJECT=$(mktemp -d)
-mkdir -p "$DM_PROJECT/src"
-cat > "$DM_PROJECT/src/sample.ts" <<'SAMPLE'
-export function selfDiagnosisMarker(n: number): number {
-  return n + 1;
+# A NodeNext fixture: `.js` specifiers naming `.ts` files, which is the form the
+# retired resolver could never match, plus one call edge across files.
+mkdir -p "$IX_PROJECT/src"
+cat > "$IX_PROJECT/src/leaf.ts" <<'IXEOF'
+export function leafHelper(n: number): number {
+  return n * 2;
 }
-export class SelfDiagnosisFixture {
-  run(): number { return selfDiagnosisMarker(1); }
+IXEOF
+cat > "$IX_PROJECT/src/middle.ts" <<'IXEOF'
+import { leafHelper } from "./leaf.js";
+
+export function middleCaller(n: number): number {
+  return leafHelper(n) + 1;
 }
-SAMPLE
-(cd "$DM_PROJECT" && git init -q -b main && git config user.email "self@check" \
-  && git config user.name "Self Check" && git add -A && git commit -qm fixture)
+IXEOF
+cat > "$IX_PROJECT/src/top.ts" <<'IXEOF'
+import { middleCaller } from "./middle.js";
 
-HOME="$DM_HOME" REAP_DAEMON_PORT="$DM_PORT" node "$DM_BIN" > "$DM_HOME/daemon.log" 2>&1 &
-DM_PID=$!
-
-DM_UP=""
-for _ in $(seq 1 30); do
-  if curl -sf "http://127.0.0.1:$DM_PORT/health" >/dev/null 2>&1; then DM_UP=1; break; fi
-  sleep 0.5
-done
-if [ -z "$DM_UP" ]; then
-  red "  FAIL  the installed daemon did not come up under node"
-  echo
-  head -20 "$DM_HOME/daemon.log" 2>/dev/null | while IFS= read -r line; do dim "        $line"; done
-  echo
-  dim "        node, not bun, on purpose. detectRuntime() prefers bun but falls"
-  dim "        back to node, so a bundle only bun can load is broken for anyone"
-  dim "        without bun installed."
-  exit 1
-fi
-
-DM_REG=$(curl -s -X POST "http://127.0.0.1:$DM_PORT/projects/register" \
-  -H 'Content-Type: application/json' \
-  -d "{\"path\":\"$DM_PROJECT\",\"name\":\"selfcheck\"}")
-DM_ID=$(node -e '
-  let raw=""; process.stdin.on("data",d=>raw+=d).on("end",()=>{
-    try { console.log(JSON.parse(raw).data.id); } catch { console.log(""); }
-  });' <<< "$DM_REG")
-
-if [ -z "$DM_ID" ]; then
-  red "  FAIL  the daemon would not register a project"
-  dim "        $DM_REG"
-  exit 1
-fi
-
-DM_INDEX=$(curl -s -X POST "http://127.0.0.1:$DM_PORT/projects/$DM_ID/index")
-DM_NODES=$(node -e '
-  let raw=""; process.stdin.on("data",d=>raw+=d).on("end",()=>{
-    try { const j=JSON.parse(raw); console.log(j.status === "ok" ? (j.data.nodesCreated ?? -1) : -1); }
-    catch { console.log(-1); }
-  });' <<< "$DM_INDEX")
-
-# Zero is the failure this whole section exists for: indexing "succeeds" and
-# produces nothing, because the bundle looks for its .scm queries one directory
-# too far up. Treating a successful response as proof would pass it.
-case "$DM_NODES" in ''|*[!0-9]*) DM_NODES=0 ;; esac
-if [ "$DM_NODES" -le 0 ]; then
-  red "  FAIL  the installed daemon extracted no symbols"
-  echo
-  dim "        index response: $DM_INDEX"
-  echo
-  dim "        It started, answered /health and reported success. A daemon in"
-  dim "        this state is indistinguishable from a working one at every"
-  dim "        level except the one that matters."
-  exit 1
-fi
-
-DM_SYM=$(curl -s "http://127.0.0.1:$DM_PORT/projects/$DM_ID/symbols?q=selfDiagnosisMarker")
-if ! grep -q "selfDiagnosisMarker" <<< "$DM_SYM"; then
-  red "  FAIL  the daemon indexed $DM_NODES symbol(s) but cannot find a known one"
-  dim "        $DM_SYM"
-  exit 1
-fi
-green "  ok    installed daemon indexes and answers under node ($DM_NODES symbols)"
-
-kill "$DM_PID" 2>/dev/null; DM_PID=""
-
-# 5d-bis. The daemon is on this disk, works, and reap cannot see it.
-#
-#     Right here — after 5c installed the daemon into its own directory and 5d
-#     proved that copy runs — the environment is in the exact state that broke
-#     users: a working daemon present, and no path from reap's location to it.
-#     5b already proved reap calls that state "not installed". So this is where
-#     naming the location has to rescue it, and it costs nothing to arrange
-#     because the two halves were built above for other reasons.
-#
-#     The state is not a stand-in for one package manager. Reaching it needs
-#     only reap and the daemon in different resolution roots: a global reap with
-#     a project-local daemon, two prefixes, a switched Node version. gen-083
-#     recorded pnpm's default store and Yarn PnP as the cause "in principle";
-#     gen-084 installed both and measured otherwise — pnpm isolates by symlink
-#     layout rather than by replacing the resolver, and PnP's default fallback
-#     admits the top-level project's dependencies. Testing against pnpm here
-#     would have spent an install to check something that does not break.
-#
-#     Runs before 5e on purpose: 5e installs the daemon where reap can find it,
-#     and after that this can no longer be asked. The config is restored on the
-#     way out so 5e still starts from a project with no daemon settings — an
-#     assertion of 5e's would otherwise pass because of a leftover from here.
-
-# Parse `fix --check` and refuse to confuse silence with success.
-#
-# Every assertion below is of the form "the complaint is gone", and absence is
-# also what a crash, an unparseable line or a renamed field look like. gen-083
-# shipped exactly that hole in 5e. So the output must prove it is an answer —
-# `status` plus a numeric `warningCount` — before its content means anything.
-dm_fix_verdict() {
-  node -e '
-    let raw=""; process.stdin.on("data",d=>raw+=d).on("end",()=>{
-      let out;
-      try { out = JSON.parse(raw); } catch { console.log("BAD_JSON"); return; }
-      const ctx = out.context || {};
-      if (out.status !== "ok" || typeof ctx.warningCount !== "number") {
-        console.log("BAD_SHAPE"); return;
-      }
-      console.log("OK\n" + (ctx.warnings || []).join("\n"));
-    });'
+export function topEntry(): number {
+  return middleCaller(21);
 }
+IXEOF
 
-dm_require_verdict() {
-  # $1 = verdict text, $2 = what was being checked
-  case "$1" in
-    BAD_JSON|BAD_SHAPE)
-      red "  FAIL  fix --check gave no usable answer while $2 ($1)"
-      exit 1
-      ;;
-  esac
-}
+(
+  cd "$IX_PROJECT"
+  git init -q -b main .
+  git config user.email "gate@example.com"
+  git config user.name "Gate"
+) >/dev/null 2>&1
 
-cp "$PROJECT/.reap/config.yml" "$PROJECT/.reap/config.yml.orig3"
-
-# (a) A named location is used, and the complaint stops.
-printf '\ndaemon: true\ndaemonBin: %s\n' "$DM_BIN" >> "$PROJECT/.reap/config.yml"
-DM_NAMED=$(cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" fix --check 2>/dev/null | dm_fix_verdict)
-dm_require_verdict "$DM_NAMED" "checking a named daemon location"
-if grep -q "reap-daemon" <<< "$DM_NAMED"; then
-  red "  FAIL  reap still reports the daemon as missing after being told where it is"
-  echo
-  dim "        daemonBin: $DM_BIN"
-  echo "$DM_NAMED" | while IFS= read -r line; do dim "        $line"; done
-  echo
-  dim "        This is the whole point of the setting. Without it, anyone whose"
-  dim "        reap and daemon live in different resolution roots is told"
-  dim "        forever to install what they already have."
+(cd "$IX_PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" init index-gate >/dev/null 2>&1) || true
+if [ ! -f "$IX_PROJECT/.reap/config.yml" ]; then
+  red "  FAIL  reap init did not create a project for the index check"
   exit 1
 fi
 
-# (b) And it is actually launched — resolving a path is not running one.
-DM_NAMED_STATUS=$(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17292 \
-  "$REAP_BIN" daemon status 2>&1)
-if ! grep -q '"status": *"ok"' <<< "$DM_NAMED_STATUS"; then
-  red "  FAIL  reap could not start the daemon it was pointed at"
-  echo
-  echo "$DM_NAMED_STATUS" | head -8 | while IFS= read -r line; do dim "        $line"; done
-  exit 1
-fi
-# The user has no other way to confirm the setting took effect, so reap says
-# which daemon it used and how it got there. A workaround you cannot verify is
-# barely a workaround — and this also catches the setting being ignored while
-# something else happened to satisfy the lookup.
-if ! grep -q '"binSource": *"config"' <<< "$DM_NAMED_STATUS"; then
-  red "  FAIL  the daemon started, but reap does not report using the named location"
-  echo
-  echo "$DM_NAMED_STATUS" | head -12 | while IFS= read -r line; do dim "        $line"; done
-  exit 1
-fi
-(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17292 "$REAP_BIN" daemon stop >/dev/null 2>&1)
+(cd "$IX_PROJECT" && git add -A && git commit -qm "fixture") >/dev/null 2>&1
 
-# (c) Again without bun. detectRuntime() prefers bun, so (b) proved this only
-#     for machines that have it — the same asymmetry that let an inlined native
-#     binding work under bun and fail under node for three generations.
-DM_NOBUN="$DM_HOME/nobun"
-mkdir -p "$DM_NOBUN"
-printf '#!/bin/sh\nexit 127\n' > "$DM_NOBUN/bun"
-chmod +x "$DM_NOBUN/bun"
+# node only. `IX_NOBUN/bun` exits 127, so anything that silently depended on bun
+# fails here rather than on a user's machine.
+IX_NOBUN="$IX_PROJECT/.nobun"
+mkdir -p "$IX_NOBUN"
+printf '#!/bin/sh\nexit 127\n' > "$IX_NOBUN/bun"
+chmod +x "$IX_NOBUN/bun"
 
-DM_NAMED_NODE=$(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17291 \
-  PATH="$DM_NOBUN:$PATH" "$REAP_BIN" daemon status 2>&1)
-if ! grep -q '"status": *"ok"' <<< "$DM_NAMED_NODE"; then
-  red "  FAIL  the named location works with bun but not without it"
+IX_UPDATE=$(cd "$IX_PROJECT" && HOME="$FAKE_HOME" PATH="$IX_NOBUN:$PATH" \
+  "$REAP_BIN" index update 2>&1)
+if ! grep -q '"status": *"ok"' <<< "$IX_UPDATE"; then
+  red "  FAIL  'reap index update' did not succeed from an installed bundle under node"
   echo
-  echo "$DM_NAMED_NODE" | head -8 | while IFS= read -r line; do dim "        $line"; done
-  exit 1
-fi
-(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17291 PATH="$DM_NOBUN:$PATH" \
-  "$REAP_BIN" daemon stop >/dev/null 2>&1)
-
-# (d) The environment variable, with nothing in the config. This is the channel
-#     for a CI job or a one-off command, and it has to work on its own — not
-#     merely as an override of a config entry that is already correct.
-cp "$PROJECT/.reap/config.yml.orig3" "$PROJECT/.reap/config.yml"
-printf '\ndaemon: true\n' >> "$PROJECT/.reap/config.yml"
-DM_ENV_STATUS=$(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17290 \
-  REAP_DAEMON_BIN="$DM_BIN" "$REAP_BIN" daemon status 2>&1)
-if ! grep -q '"status": *"ok"' <<< "$DM_ENV_STATUS"; then
-  red "  FAIL  REAP_DAEMON_BIN did not get the daemon started"
+  echo "$IX_UPDATE" | head -12 | while IFS= read -r line; do dim "        $line"; done
   echo
-  echo "$DM_ENV_STATUS" | head -8 | while IFS= read -r line; do dim "        $line"; done
-  exit 1
-fi
-if ! grep -q '"binSource": *"env"' <<< "$DM_ENV_STATUS"; then
-  red "  FAIL  the daemon started, but reap does not report using REAP_DAEMON_BIN"
-  echo
-  echo "$DM_ENV_STATUS" | head -12 | while IFS= read -r line; do dim "        $line"; done
-  exit 1
-fi
-(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17290 REAP_DAEMON_BIN="$DM_BIN" \
-  "$REAP_BIN" daemon stop >/dev/null 2>&1)
-
-# ...and the fourth corner. The two channels differ only in where the string
-# comes from, so this is cheap insurance rather than a suspicion — but the
-# completion criterion says both channels on both runtimes, and three of four
-# is not that. One extra spawn.
-DM_ENV_NODE=$(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17289 \
-  PATH="$DM_NOBUN:$PATH" REAP_DAEMON_BIN="$DM_BIN" "$REAP_BIN" daemon status 2>&1)
-if ! grep -q '"status": *"ok"' <<< "$DM_ENV_NODE"; then
-  red "  FAIL  REAP_DAEMON_BIN works with bun but not without it"
-  echo
-  echo "$DM_ENV_NODE" | head -8 | while IFS= read -r line; do dim "        $line"; done
-  exit 1
-fi
-(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17289 PATH="$DM_NOBUN:$PATH" \
-  REAP_DAEMON_BIN="$DM_BIN" "$REAP_BIN" daemon stop >/dev/null 2>&1)
-
-# (e) A location that holds nothing must be named, not swallowed.
-#
-#     reap goes on searching after a miss, because config.yml is committed and a
-#     path that is right on one machine may be absent on the next. That silence
-#     would be the same defect one level along: an instruction followed to
-#     nowhere, with no word about it.
-cp "$PROJECT/.reap/config.yml.orig3" "$PROJECT/.reap/config.yml"
-DM_GONE="$DM_HOME/not-a-daemon/dist/index.js"
-printf '\ndaemon: true\ndaemonBin: %s\n' "$DM_GONE" >> "$PROJECT/.reap/config.yml"
-DM_MISS=$(cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" fix --check 2>/dev/null | dm_fix_verdict)
-dm_require_verdict "$DM_MISS" "checking a daemon location that does not exist"
-if ! grep -q "$DM_GONE" <<< "$DM_MISS"; then
-  red "  FAIL  a daemonBin pointing at nothing is not reported"
-  echo
-  dim "        daemonBin: $DM_GONE"
-  echo "$DM_MISS" | while IFS= read -r line; do dim "        $line"; done
-  echo
-  dim "        The path has to appear, or the user is left comparing a generic"
-  dim "        'not installed' against a setting they believe is correct."
+  dim "        The likely causes are a grammar missing from dist/grammars/ or"
+  dim "        web-tree-sitter inlined into the bundle instead of left external."
+  rm -rf "$IX_PROJECT"
   exit 1
 fi
 
-# (f) The likeliest way to write this setting wrong: naming the package instead
-#     of its entry point. The path exists, so an existence check alone accepts
-#     it — and then reap reports a healthy daemon that cannot start, with every
-#     downstream diagnostic quiet. That is this generation's own defect one
-#     level along, and the person most exposed to it is by definition someone
-#     already unsure where the daemon lives.
-cp "$PROJECT/.reap/config.yml.orig3" "$PROJECT/.reap/config.yml"
-DM_PKGDIR="$DM_INSTALL/node_modules/@c-d-cc/reap-daemon"
-printf '\ndaemon: true\ndaemonBin: %s\n' "$DM_PKGDIR" >> "$PROJECT/.reap/config.yml"
-DM_DIR=$(cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" fix --check 2>/dev/null | dm_fix_verdict)
-dm_require_verdict "$DM_DIR" "checking a daemon location that is a directory"
-if ! grep -q "$DM_PKGDIR" <<< "$DM_DIR"; then
-  red "  FAIL  a daemonBin naming a directory is accepted in silence"
-  echo
-  dim "        daemonBin: $DM_PKGDIR"
-  echo "$DM_DIR" | while IFS= read -r line; do dim "        $line"; done
-  echo
-  dim "        A directory cannot be spawned. Treating it as found reports a"
-  dim "        working daemon to a user who has none, and hands the agent a"
-  dim "        query protocol for a port nothing is listening on."
+IX_STATUS=$(cd "$IX_PROJECT" && HOME="$FAKE_HOME" PATH="$IX_NOBUN:$PATH" \
+  "$REAP_BIN" index status 2>&1)
+
+# Everything below reads fields out of this JSON, so prove it is JSON and that
+# the command ran before believing any number in it. An absent field and a
+# crashed process look identical to a grep.
+IX_VERDICT=$(node -e '
+  let raw = "";
+  process.stdin.on("data", d => raw += d).on("end", () => {
+    let ctx;
+    try { ctx = JSON.parse(raw).context; } catch { console.log("PARSE_ERROR"); return; }
+    if (!ctx) { console.log("NO_CONTEXT"); return; }
+    const need = ["nodes", "imports", "edgeTotal", "edgeDistinct", "indexPath"];
+    const missing = need.filter(k => ctx[k] === undefined);
+    if (missing.length) { console.log("MISSING " + missing.join(",")); return; }
+    console.log([
+      ctx.nodes,
+      ctx.imports.resolved,
+      ctx.imports.attempted,
+      ctx.edgeTotal,
+      ctx.edgeDistinct,
+      ctx.indexPath,
+      JSON.stringify(ctx.languageFailures ?? null),
+    ].join("|"));
+  });
+' <<< "$IX_STATUS")
+
+case "$IX_VERDICT" in
+  PARSE_ERROR|NO_CONTEXT|MISSING*)
+    red "  FAIL  'reap index status' did not report usable numbers ($IX_VERDICT)"
+    echo "$IX_STATUS" | head -12 | while IFS= read -r line; do dim "        $line"; done
+    rm -rf "$IX_PROJECT"
+    exit 1
+    ;;
+esac
+
+IFS='|' read -r IX_NODES IX_RESOLVED IX_ATTEMPTED IX_ETOTAL IX_EDISTINCT IX_PATH IX_LANGFAIL <<< "$IX_VERDICT"
+
+if [ "$IX_LANGFAIL" != "null" ]; then
+  red "  FAIL  a grammar did not load from the installed package"
+  dim "        $IX_LANGFAIL"
+  dim "        dist/grammars/ is populated by scripts/build.sh from the tag queries."
+  rm -rf "$IX_PROJECT"
   exit 1
 fi
 
-# (g) A named location holding a daemon that is too old. gen-085.
-#
-#     The advice for a stale daemon was `npm i -g @c-d-cc/reap-daemon` in all
-#     three places that give it, unconditionally. That is wrong for exactly the
-#     users the setting above exists for: reap goes on resolving the named path,
-#     so the command changes nothing, the warning returns unchanged, and there is
-#     no way to tell why. Someone follows correct-sounding advice forever.
-#
-#     gen-084 declined to fix it, reasoning that the branch could not be reached
-#     — MIN_DAEMON_VERSION and the only published daemon are both 0.2.0 — and
-#     that shipping a branch no test can execute is worse. The reasoning was
-#     sound; the premise was not. daemon/package.json carried 0.1.0 until
-#     gen-083, so any checkout from before then is a stale daemon, and making
-#     the version comparison prerelease-aware in this same generation turned
-#     every 0.2.0-x into one as well.
-#
-#     The package.json here is fabricated rather than a real old release, because
-#     none was ever published. That is a real difference and it is worth naming:
-#     what is being simulated is only where the version string comes from, and
-#     resolveDaemonAvailability reads nothing else about the package. The
-#     location is accepted without an identity check by design (gen-084: nothing
-#     is accidental about a path someone wrote down) — an accepted limitation
-#     that turns out to be what makes this testable at all.
-cp "$PROJECT/.reap/config.yml.orig3" "$PROJECT/.reap/config.yml"
-DM_STALE="$DM_HOME/stale-daemon"
-mkdir -p "$DM_STALE/dist"
-cat > "$DM_STALE/package.json" <<'STALEPKG'
-{ "name": "@c-d-cc/reap-daemon", "version": "0.1.0", "main": "dist/index.js" }
-STALEPKG
-# Never started, so it need not be a daemon — the verdict is read off the
-# manifest precisely so that `fix --check` can answer without spawning anything.
-echo 'process.exit(0);' > "$DM_STALE/dist/index.js"
-printf '\ndaemon: true\ndaemonBin: %s\n' "$DM_STALE/dist/index.js" >> "$PROJECT/.reap/config.yml"
-
-DM_STALE_OUT=$(cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" fix --check 2>/dev/null | dm_fix_verdict)
-dm_require_verdict "$DM_STALE_OUT" "checking a named daemon location that is out of date"
-
-# It has to be recognised as stale at all — otherwise the two assertions below
-# pass by describing a warning that was never emitted.
-if ! grep -q "0.1.0" <<< "$DM_STALE_OUT"; then
-  red "  FAIL  a daemon older than the floor at a named location is not reported"
+# The fixture has two relative imports. Naming the number rather than only the
+# ratio means a fixture that stopped being parsed cannot pass as 0/0.
+if [ "$IX_ATTEMPTED" != "2" ] || [ "$IX_RESOLVED" != "2" ]; then
+  red "  FAIL  import resolution is $IX_RESOLVED/$IX_ATTEMPTED, expected 2/2"
   echo
-  dim "        daemonBin: $DM_STALE/dist/index.js  (version 0.1.0)"
-  echo "$DM_STALE_OUT" | while IFS= read -r line; do dim "        $line"; done
-  exit 1
-fi
-if ! grep -q "$DM_STALE/dist/index.js" <<< "$DM_STALE_OUT"; then
-  red "  FAIL  a stale daemon is reported without saying which copy is stale"
-  echo
-  echo "$DM_STALE_OUT" | while IFS= read -r line; do dim "        $line"; done
-  echo
-  dim "        The user has a global daemon and a named one. Without the path"
-  dim "        they cannot tell which of them reap is talking about."
-  exit 1
-fi
-if grep -q "npm i -g @c-d-cc/reap-daemon" <<< "$DM_STALE_OUT"; then
-  red "  FAIL  a stale daemon at a named location is still met with the global upgrade command"
-  echo
-  echo "$DM_STALE_OUT" | while IFS= read -r line; do dim "        $line"; done
-  echo
-  dim "        reap will keep resolving daemonBin. Running that command changes"
-  dim "        nothing and produces this same warning again — advice that cannot"
-  dim "        work is worse than none, because it looks like it should."
+  dim "        The fixture imports './leaf.js' and './middle.js', which are .ts"
+  dim "        files — the NodeNext form. A resolver that cannot map .js to .ts"
+  dim "        returns an empty blast radius for every TypeScript project, which"
+  dim "        is what shipped for five months (gen-089)."
+  rm -rf "$IX_PROJECT"
   exit 1
 fi
 
-# And the CLI, which is a separate code path from `fix --check` and the one a
-# user reaches by trying to make the daemon go.
-DM_STALE_CLI=$(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17288 \
-  "$REAP_BIN" daemon status 2>&1)
-if ! grep -q "0.1.0" <<< "$DM_STALE_CLI"; then
-  red "  FAIL  'reap daemon status' does not report the stale named daemon"
-  echo
-  echo "$DM_STALE_CLI" | head -8 | while IFS= read -r line; do dim "        $line"; done
-  exit 1
-fi
-# The CLI does mention the global command — to say it would not help — so its
-# presence proves nothing. What must be absent is the bare instruction, and what
-# must be present is the path and the setting that chose it.
-if grep -q "Upgrade with:" <<< "$DM_STALE_CLI"; then
-  red "  FAIL  'reap daemon status' sends the user after a global upgrade that cannot help"
-  echo
-  echo "$DM_STALE_CLI" | head -8 | while IFS= read -r line; do dim "        $line"; done
-  exit 1
-fi
-if ! grep -q "daemonBin" <<< "$DM_STALE_CLI"; then
-  red "  FAIL  'reap daemon status' does not say which setting chose the stale daemon"
-  echo
-  echo "$DM_STALE_CLI" | head -8 | while IFS= read -r line; do dim "        $line"; done
+if [ "$IX_NODES" -lt 3 ]; then
+  red "  FAIL  the index holds $IX_NODES symbols; the fixture defines 3"
+  rm -rf "$IX_PROJECT"
   exit 1
 fi
 
-cp "$PROJECT/.reap/config.yml.orig3" "$PROJECT/.reap/config.yml"
-rm -f "$PROJECT/.reap/config.yml.orig3"
-green "  ok    a named daemon location is used, launched and verifiable — and a bad or stale one is named"
-
-# 5e. The seam the split created: does an installed reap find an installed
-#     daemon? Everything above tests the two packages apart — 5a that reap does
-#     not carry the daemon, 5b that a missing one is reported, 5c/5d that the
-#     daemon works on its own. All of that stays green in a world where users
-#     install both and still get nothing, because none of it runs reap against a
-#     present daemon. Splitting the packages is what created this gap, so it is
-#     the one thing this section must not leave to inspection.
-if ! HOME="$FAKE_HOME" npm i -g --prefix "$PREFIX" "$ROOT/daemon/$DM_TARBALL" >/dev/null 2>&1; then
-  red "  FAIL  installing the daemon beside reap failed"
+if [ "$IX_ETOTAL" != "$IX_EDISTINCT" ]; then
+  red "  FAIL  $IX_ETOTAL edges of which $IX_EDISTINCT distinct — duplicates are back"
+  dim "        The retired storage appended without a key, so every re-index"
+  dim "        multiplied the edge count and every count-based figure with it."
+  rm -rf "$IX_PROJECT"
   exit 1
 fi
 
-# The warning from 5b must now be gone. Same project, same command, opposite
-# answer — anything less proves only that reap can complain, not that it can
-# stop complaining once the problem is fixed.
-#
-# Note the asymmetry with 5b, which asserts a warning is PRESENT. That one is
-# self-proving: nothing can be found in output that was never produced. This
-# asserts a warning is ABSENT, and absence is exactly what a crashed command,
-# an unparseable line on stdout or a renamed field also look like. So the run
-# has to prove itself first — `fix --check` reports `status` and a numeric
-# `warningCount`, and both are demanded before the absence means anything.
-#
-# The generation that added this section exists because a missing daemon was
-# indistinguishable from a working one. A check with the same shape would let
-# its own defect through.
-printf '\ndaemon: true\n' >> "$PROJECT/.reap/config.yml"
-DM_RAW=$(cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" fix --check 2>/dev/null)
-DM_AFTER=$(node -e '
-  let raw=""; process.stdin.on("data",d=>raw+=d).on("end",()=>{
-    let out;
-    try { out = JSON.parse(raw); } catch { console.log("BAD_JSON"); return; }
-    const ctx = out.context || {};
-    if (out.status !== "ok" || typeof ctx.warningCount !== "number") {
-      console.log("BAD_SHAPE"); return;
+# The index belongs to the project, not to the home directory. The daemon put it
+# in ~/.reap/daemon/ because a single global process served every project; an
+# in-process indexer has no such reason, and derived data in HOME is what
+# gen-088 spent a generation removing.
+# Compared through `pwd -P`: reap reports `process.cwd()`, which is resolved,
+# while `mktemp -d` on macOS hands back the /var symlink to /private/var. The
+# two spell one directory and a literal comparison fails on every macOS run.
+IX_REAL=$(cd "$IX_PROJECT" && pwd -P)
+if [ "$IX_PATH" != "$IX_REAL/.reap/.index" ]; then
+  red "  FAIL  the index was written to $IX_PATH, not to $IX_REAL/.reap/.index"
+  rm -rf "$IX_PROJECT"
+  exit 1
+fi
+if [ -e "$FAKE_HOME/.reap/daemon" ] || [ -e "$FAKE_HOME/.reap/index" ]; then
+  red "  FAIL  indexing wrote into the home directory ($FAKE_HOME/.reap)"
+  ls -la "$FAKE_HOME/.reap" | while IFS= read -r line; do dim "        $line"; done
+  rm -rf "$IX_PROJECT"
+  exit 1
+fi
+
+# The known relationship. This is the assertion the previous gate lacked: not
+# "are there symbols" but "did it find the thing we know is there".
+IX_IMPACT=$(cd "$IX_PROJECT" && HOME="$FAKE_HOME" PATH="$IX_NOBUN:$PATH" \
+  "$REAP_BIN" index impact src/leaf.ts 2>&1)
+IX_DEPS=$(node -e '
+  let raw = "";
+  process.stdin.on("data", d => raw += d).on("end", () => {
+    let ctx;
+    try { ctx = JSON.parse(raw).context; } catch { console.log("PARSE_ERROR"); return; }
+    if (!ctx || !Array.isArray(ctx.directFiles) || !Array.isArray(ctx.indirectFiles)) {
+      console.log("NO_FIELDS"); return;
     }
-    console.log("OK\n" + (ctx.warnings || []).join("\n"));
-  });' <<< "$DM_RAW")
+    console.log([...ctx.directFiles, ...ctx.indirectFiles].sort().join(","));
+  });
+' <<< "$IX_IMPACT")
 
-if [ "$DM_AFTER" = "BAD_JSON" ] || [ "$DM_AFTER" = "BAD_SHAPE" ]; then
-  red "  FAIL  fix --check did not produce a usable answer ($DM_AFTER)"
+if [ "$IX_DEPS" != "src/middle.ts,src/top.ts" ]; then
+  red "  FAIL  blast radius of src/leaf.ts is '$IX_DEPS', expected 'src/middle.ts,src/top.ts'"
   echo
-  echo "${DM_RAW:-(no output)}" | head -5 | while IFS= read -r line; do dim "        $line"; done
-  echo
-  dim "        Silence would otherwise read as 'no warning', which is the same"
-  dim "        mistake this whole section exists to remove."
+  dim "        top.ts imports middle.ts imports leaf.ts. Changing the leaf affects"
+  dim "        both — directly and transitively. An empty answer here is the exact"
+  dim "        result the retired daemon gave for every real project."
+  rm -rf "$IX_PROJECT"
   exit 1
 fi
 
-if grep -q "reap-daemon" <<< "$DM_AFTER"; then
-  red "  FAIL  reap still reports the daemon as missing after installing it"
-  echo
-  dim "        $DM_AFTER"
-  echo
-  dim "        reap resolves the daemon from its own location; if the two"
-  dim "        packages land somewhere this cannot bridge, the user is told to"
-  dim "        install what they already have."
+# Nothing changed since the commit, so nothing should be re-parsed. The retired
+# pipeline had this branch and never reached it: its only caller omitted the
+# argument that selected it, so all four triggers did a full rebuild.
+IX_AGAIN=$(cd "$IX_PROJECT" && HOME="$FAKE_HOME" PATH="$IX_NOBUN:$PATH" \
+  "$REAP_BIN" index update 2>&1)
+IX_MODE=$(node -e '
+  let raw = "";
+  process.stdin.on("data", d => raw += d).on("end", () => {
+    let ctx;
+    try { ctx = JSON.parse(raw).context; } catch { console.log("PARSE_ERROR"); return; }
+    console.log(ctx ? `${ctx.mode}|${ctx.filesProcessed}` : "NO_CONTEXT");
+  });
+' <<< "$IX_AGAIN")
+if [ "$IX_MODE" != "up-to-date|0" ]; then
+  red "  FAIL  re-indexing an unchanged commit reported '$IX_MODE', expected 'up-to-date|0'"
+  rm -rf "$IX_PROJECT"
   exit 1
 fi
 
-# And it must actually launch it. Resolving a path is not the same as spawning
-# it, and a wrong runtime or a bad entry point only shows up here. Isolated port
-# and HOME so a developer's own daemon is neither contacted nor disturbed.
-DM_STATUS=$(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17294 \
-  "$REAP_BIN" daemon status 2>&1)
-if ! grep -q '"status": *"ok"' <<< "$DM_STATUS"; then
-  red "  FAIL  an installed reap could not start the installed daemon"
-  echo
-  echo "$DM_STATUS" | head -8 | while IFS= read -r line; do dim "        $line"; done
-  exit 1
+# No resident process. Stated last, after five commands have demonstrably run,
+# so "nothing is listening" cannot be satisfied by nothing having happened.
+if command -v lsof >/dev/null 2>&1; then
+  if lsof -iTCP:17224 -sTCP:LISTEN >/dev/null 2>&1; then
+    red "  FAIL  something is listening on 17224 — the daemon port"
+    dim "        REAP no longer starts a process. If this is yours, stop it;"
+    dim "        if REAP started it, the removal is incomplete."
+    rm -rf "$IX_PROJECT"
+    exit 1
+  fi
 fi
-(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17294 "$REAP_BIN" daemon stop >/dev/null 2>&1)
 
-# Again with node, because `detectRuntime()` prefers bun and the run above
-# therefore proved the link only for machines that have it. 5d ran the daemon
-# under node but never through reap; this is the remaining combination, and it
-# is the one a user without bun actually gets.
-#
-# That asymmetry is not hypothetical here: an inlined native binding worked
-# under bun and failed under node for three generations precisely because
-# nothing ever exercised the node side. Leaving the same gap one layer up would
-# waste the finding.
-#
-# A stub that fails makes `bun --version` throw, which is all detectRuntime
-# needs to fall back. Cheaper than a second install, so this costs a runner
-# nothing beyond one more spawn.
-DM_NOBUN="$DM_HOME/nobun"
-mkdir -p "$DM_NOBUN"
-printf '#!/bin/sh\nexit 127\n' > "$DM_NOBUN/bun"
-chmod +x "$DM_NOBUN/bun"
-
-DM_STATUS_NODE=$(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17293 \
-  PATH="$DM_NOBUN:$PATH" "$REAP_BIN" daemon status 2>&1)
-if ! grep -q '"status": *"ok"' <<< "$DM_STATUS_NODE"; then
-  red "  FAIL  reap could not start the daemon when bun is unavailable"
-  echo
-  echo "$DM_STATUS_NODE" | head -8 | while IFS= read -r line; do dim "        $line"; done
-  echo
-  dim "        detectRuntime() falls back to node when bun is missing. If only"
-  dim "        bun can load the bundle, every user without bun gets nothing."
-  exit 1
-fi
-(cd "$PROJECT" && HOME="$FAKE_HOME" REAP_DAEMON_PORT=17293 PATH="$DM_NOBUN:$PATH" \
-  "$REAP_BIN" daemon stop >/dev/null 2>&1)
-mv "$PROJECT/.reap/config.yml.orig2" "$PROJECT/.reap/config.yml" 2>/dev/null || true
-green "  ok    an installed reap starts an installed daemon, with bun and without"
+rm -rf "$IX_PROJECT"
+green "  ok    index built under node from the published bundle: 2/2 imports, known blast radius, no duplicates, no process"
 
 # ── 6. Install scripts blocked: is what we ship still usable? ──────────────
 #

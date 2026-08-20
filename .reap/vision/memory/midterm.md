@@ -2,13 +2,19 @@
 
 > Ongoing multi-generation tracks. A track that has no next step belongs in lineage, not here.
 
-## 릴리즈 — 0.17.5 발행 완료, 다음은 0.17.6 (daemon 폐기)
+## 릴리즈 — 0.17.6 준비 완료, 태그·발행만 남음
 
 **0.17.5 는 발행됐다** — `2026-08-19T21:34Z`, 태그 `v0.17.5`(c65284d)에서. npm `latest` 다. gen-083~087 이 전부 들어갔다. **이미 나간 문서는 손대지 않는다** — changelog 는 역사 기록이다 (유저 결정 2026-08-20).
 
-**다음은 0.17.6 이고 내용은 둘이다**:
+**0.17.6 은 gen-089 에서 준비를 마쳤다** — `package.json`·`RELEASE_NOTICE`·`RELEASE_NOTES`·5 로케일·
+migration note `v0.17.6.md` 전부 작성됐고 문서 게이트가 통과한다. 내용은 둘이다:
 - gen-088 `reap uninstall` — 없던 명령이고 증상이 "지워도 안 지워진다"라 기존 사용자 전원 해당. 같은 세대가 auto-update 다운그레이드도 고쳤다
-- **daemon 폐기 + indexer 내장** — 아래 트랙 참조
+- gen-089 **daemon 폐기 + indexer 내장** — 상주 프로세스·포트·별도 패키지 소멸, `reap index` 로 대체
+
+**남은 것은 태그 push 뿐이고, OIDC 로 발행하는 첫 시도**가 된다(0.17.5 는 그 전에 나갔다).
+`daemon-v*` 트리거와 `publish-daemon` job 은 gen-089 가 제거했다.
+**릴리즈 전 수동 절차**: `scripts/check-agent-integration.sh`(층2, ~$0.25) — gen-089 가
+**agent 정의 2개를 재작성**했으므로 이번엔 돌릴 값이 있다.
 
 **backlog 정리 (유저 지시 2026-08-19)**: gen-083~085 파생 11건을 1건으로 합치고 나머지를 버렸다(18 → 8). gen-086 이 그 1건을 닫았다. 기준은 하나였다 — **지금 존재하는 사용자에게 실제로 일어나는가.** 다시 쌓이면 같은 기준으로 자를 것.
 
@@ -44,14 +50,3 @@ plugin 전환 · interview skill · milestone · idea · plan(자리) · `/reap.
 
 남은 1 항목:
 - **Vision/Goal management 위임** — adapt phase에서 evaluator가 gap 분석 + 다음 goal 추천. 트랙 마지막 큰 항목. design 문서의 잔여 절.
-
-## Daemon 트랙 — 폐기 결정 (2026-08-20)
-
-**상주 프로세스를 폐기하고 indexer 를 reap 에 내장한다.** backlog: `daemon-폐기-및-indexer-내장-…md`. 0.17.6 대상.
-
-계기는 Discussion #10 의 외부 제안이었고, 결정 근거는 그 자리에서 잰 수치다 — incremental 이 HTTP 로 **도달 불가**여서 매번 full reindex, 그 6.2초의 **92%가 파일별 `git log` 233회 fork**, 그리고 **blast radius 가 표준 TS ESM 프로젝트에서 항상 0을 반환**(import 341개 중 0개 해석 / `.js` specifier 미처리). 상주가 준다는 이점 넷은 현재 규모에서 전부 0에 수렴한다.
-
-**가장 중요한 교훈**: 검사 전부가 *"인덱싱이 돌았는가"* 를 물었고 *"결과가 말이 되는가"* 는 아무도 묻지 않았다. E2E 130개·자기진단·CI 전부 초록인 채로 5개월. **소비자가 없으면 결함도 발견되지 않는다** — `.reap/plan/`·`.reap/idea/` 처럼 "자리를 먼저 만드는" 0.18 설계 전부에 그대로 적용된다.
-
-`@c-d-cc/reap-daemon` 은 npm **deprecated 처리 완료**(다운로드 0회). SCIP 은 보류 유지 — 조사 결론은 `vision/design/daemon/scip-and-scale.md`. MCP wrapper 도 보류(프로세스 재도입이라 폐기 결정과 상충).
-

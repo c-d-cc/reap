@@ -3,12 +3,7 @@ name: Release
 on:
   push:
     tags:
-      # reap itself. The daemon publishes from the same repository under its own
-      # tag namespace (see the daemon job) so that a reap release does not drag
-      # a daemon release along with it, and vice versa — they are separate
-      # packages on separate cadences and only share a checkout.
       - 'v*'
-      - 'daemon-v*'
 
 permissions:
   contents: write
@@ -43,11 +38,11 @@ jobs:
       - name: Verify docs match package version
         run: bash scripts/check-docs-version.sh
 
-      # Two numbers name a release on npm and are spent telling users to
-      # upgrade: MIN_DAEMON_VERSION and reap.autoUpdateMinVersion. Nothing
-      # checked that either named a release that exists, and the mistake is only
-      # possible in the direction nobody tests: raise a floor, forget to publish,
-      # and the affected users are sent after a version that was never released.
+      # `reap.autoUpdateMinVersion` names a release on npm and is spent telling
+      # users to upgrade. Nothing checked that it named a release that exists,
+      # and the mistake is only possible in the direction nobody tests: raise a
+      # floor, forget to publish, and the affected users are sent after a
+      # version that was never released.
       # Here rather than in ci.yml because it needs the network, and a check that
       # intermittently reports SKIP on every push is one people stop reading.
       - name: Verify the version floors name published releases
@@ -67,91 +62,16 @@ jobs:
       # reap:carrier(self-diagnosis-covered-incidents)
       # Install the tarball we are about to publish and ask REAP whether the
       # result is healthy. #22 was only ever visible after installing, and so
-      # was the daemon packaging defect — which this gate did NOT catch until
-      # gen-083 added an assertion for it, despite claiming to.
+      # was a resolver that resolved nothing: section 5 requires the index to
+      # find a relationship the fixture is known to have, which is the check
+      # the predecessor lacked while its blast radius returned zero for five
+      # months. Both were reproduced against the broken state before being
+      # claimed here — the daemon entry that used to sit in this list was not,
+      # and stayed false for five generations.
       - name: Self-diagnosis
         run: bash scripts/check-self-diagnosis.sh
 
       - run: npm run build
-      # Trusted publishing needs npm 11.5.1 or later and Node 22 ships npm 10,
-      # so npm is upgraded here rather than at the top of the job. npm 12 blocks
-      # install scripts for global installs by default, which changes what the
-      # self-diagnosis gate above observes — it must run on the same npm CI uses,
-      # or the release gate and CI stop testing the same thing.
-      - run: npm i -g npm@latest
-
-      # No token: the OIDC credential is exchanged at publish time.
-      - run: npm publish --access public
-
-  # The daemon is a separate npm package with its own version, released by
-  # pushing a daemon-v* tag. Keeping it here rather than in its own repository
-  # is deliberate: the two are edited together often enough (this change touched
-  # both) that a second checkout would cost more than the shared tag namespace.
-  #
-  # Publishing is never automatic on a reap release. A daemon that has not
-  # changed should not be republished, and reap does not depend on it — the
-  # version floor reap enforces lives in MIN_DAEMON_VERSION, not in a manifest.
-  publish-daemon:
-    if: startsWith(github.ref, 'refs/tags/daemon-v')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      id-token: write
-    defaults:
-      run:
-        working-directory: daemon
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: oven-sh/setup-bun@v2
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          registry-url: https://registry.npmjs.org
-
-
-      - run: npm ci
-
-      # The tag must name the version being published. Without this, a mistyped
-      # tag publishes something other than what it says, and npm versions cannot
-      # be republished once taken.
-      - name: Verify the tag matches package.json
-        run: |
-          set -euo pipefail
-          TAG="${GITHUB_REF#refs/tags/daemon-v}"
-          PKG=$(node -p "require('./package.json').version")
-          if [ "$TAG" != "$PKG" ]; then
-            echo "::error::tag daemon-v$TAG does not match daemon/package.json $PKG"
-            exit 1
-          fi
-          echo "publishing @c-d-cc/reap-daemon $PKG"
-
-      - run: bash scripts/build.sh
-      - run: bun test tests/
-
-      # Bundling leaves the native and WASM dependencies external, so the shipped
-      # dist is useless without queries/ beside it. Assert rather than trust the
-      # files field: shipping without them produces a daemon that starts, answers
-      # health checks and extracts nothing.
-      - name: Verify the tarball carries its runtime assets
-        run: |
-          set -euo pipefail
-          TARBALL=$(npm pack --silent | tail -1)
-          # Read the listing once into a variable rather than piping it into
-          # grep. `grep -q` stops at its first match, and dist/index.js is the
-          # first entry of seventeen, so tar was still writing when the reader
-          # went away — SIGPIPE, a nonzero tar, and under `pipefail` a matched
-          # grep reported as a failure. The file was there every time. macOS
-          # tar tolerates this and GNU tar does not, so it passed locally and
-          # failed only on the runner.
-          LISTING=$(tar -tzf "$TARBALL")
-          grep -q "package/queries/" <<< "$LISTING" \
-            || { echo "::error::queries/ missing from the daemon tarball"; exit 1; }
-          grep -q "package/dist/index.js" <<< "$LISTING" \
-            || { echo "::error::dist/index.js missing from the daemon tarball"; exit 1; }
-          rm -f "$TARBALL"
-
       # Trusted publishing needs npm 11.5.1 or later and Node 22 ships npm 10,
       # so npm is upgraded here rather than at the top of the job. npm 12 blocks
       # install scripts for global installs by default, which changes what the

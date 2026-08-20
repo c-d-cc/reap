@@ -8,11 +8,6 @@ import { emitOutput } from "../../core/output.js";
 import { claudeCodeAdapter } from "../../adapters/claude-code/index.js";
 import { opencodeAdapter } from "../../adapters/opencode/index.js";
 import { removeReapHomeAssets } from "../../adapters/index.js";
-import {
-  DAEMON_PACKAGE,
-  resolveDaemonAvailability,
-  stopDaemonIfRunning,
-} from "./daemon/client.js";
 
 /**
  * `reap uninstall` — the removal path npm does not provide.
@@ -31,15 +26,13 @@ import {
  *
  *   1. skip the entry hook — `ensureUserLevelAssets` runs before every command
  *      and would reinstall what is about to be deleted (see `src/cli/index.ts`)
- *   2. stop the daemon — it stays resident for thirty idle minutes and rewrites
- *      `~/.reap/daemon/` while it runs
- *   3. remove the home assets — both clients, then the client-agnostic ones
- *   4. hand the packages to npm
+ *   2. remove the home assets — both clients, then the client-agnostic ones
+ *   3. hand the packages to npm
  *
- * Step 4 removes the package this process is running from. On unix that works:
+ * Step 3 removes the package this process is running from. On unix that works:
  * node has already read the bundle and npm is not deleting the interpreter.
  * Windows may refuse on a file lock, and that is survivable — everything that
- * matters happened in step 3, and the output hands over the command to run.
+ * matters happened in step 2, and the output hands over the command to run.
  */
 
 /** How this copy of REAP got onto the machine. */
@@ -57,13 +50,6 @@ export interface UninstallDeps {
   readPackageName?: (packageJsonPath: string) => string | null;
   /** Hand the package list to npm. Seam so tests can assert the arguments. */
   runNpmUninstall?: (packages: string[]) => { ok: boolean; error?: string };
-  /**
-   * Stop a running daemon. Seam for the same reason as the npm one: a test
-   * that faked only `HOME` would still reach the developer's daemon on the
-   * default port, because the port is the other isolation axis and `HOME`
-   * does not cover it. Out-of-process callers set `REAP_DAEMON_PORT`.
-   */
-  stopDaemon?: () => Promise<number | null>;
 }
 
 /**
@@ -169,24 +155,25 @@ export function detectInstallKind(deps: UninstallDeps = {}): {
 export const REAP_PACKAGE = "@c-d-cc/reap";
 
 /**
+ * The retired daemon package (gen-089). Kept here, in the one command that
+ * cleans up after REAP, precisely because nothing else refers to it any more —
+ * it is deprecated on npm but still installed globally wherever someone opted
+ * in before 0.17.6.
+ */
+export const DAEMON_PACKAGE = "@c-d-cc/reap-daemon";
+
+/**
  * Which packages npm should be asked to remove.
  *
- * The daemon goes with REAP. It is published separately because it carries a
- * native SQLite build and fifteen Tree-sitter grammars that nobody should pay
- * for by default, but there is no such thing as a daemon user who is not a REAP
- * user — leaving it behind would leave the larger of the two packages installed
- * for a tool that is gone.
- *
- * Unless it was found in a checkout. That is a working tree npm never installed
- * and cannot remove, and handing it over would at best fail; gen-084 already
- * draws this same line when it decides how to advise upgrading a stale daemon.
- * A daemon that is not installed at all is simply absent from the list.
+ * The retired daemon (`@c-d-cc/reap-daemon`) is still named, unconditionally.
+ * gen-089 removed the code that could tell whether it was installed and where
+ * from, and asking npm to remove a package that is absent is a no-op — so the
+ * alternative to naming it is leaving a deprecated global package behind on
+ * every machine that ever enabled it. Someone who ran the daemon from a source
+ * checkout never installed it globally, so nothing is taken from them either.
  */
-export function npmRemovalTargets(daemonSource: string | null, daemonInstalled: boolean): string[] {
-  const packages: string[] = [];
-  if (daemonInstalled && daemonSource !== "checkout") packages.push(DAEMON_PACKAGE);
-  packages.push(REAP_PACKAGE);
-  return packages;
+export function npmRemovalTargets(): string[] {
+  return [DAEMON_PACKAGE, REAP_PACKAGE];
 }
 
 function readPackageName(packageJsonPath: string): string | null {
@@ -220,9 +207,8 @@ function defaultNpmUninstall(packages: string[]): { ok: boolean; error?: string 
 /** CLI entry point for `reap uninstall`. */
 export async function execute(confirm?: boolean, deps: UninstallDeps = {}): Promise<void> {
   const home = deps.home ?? homedir();
-  const daemon = resolveDaemonAvailability();
   const { kind, packageRoot } = detectInstallKind(deps);
-  const packages = npmRemovalTargets(daemon.source, daemon.installed);
+  const packages = npmRemovalTargets();
   const npmCommand = `npm uninstall -g ${packages.join(" ")}`;
 
   if (!confirm) {
@@ -235,18 +221,12 @@ export async function execute(confirm?: boolean, deps: UninstallDeps = {}): Prom
         packageRoot,
         npmCommand,
         npmWillRun: kind === "global",
-        daemon: {
-          installed: daemon.installed,
-          source: daemon.source,
-          bin: daemon.bin,
-          removedFromNpm: packages.includes(DAEMON_PACKAGE),
-        },
         willRemove: [
           "~/.claude/commands/reap.*.md",
           "~/.claude/agents/reap-*.md",
           "~/.claude/settings.json: the SessionStart entries REAP added",
           "OpenCode commands and agents (reap.* / reap-*), wherever XDG_CONFIG_HOME points",
-          "~/.reap/reap-guide.md, ~/.reap/.install-stamp, ~/.reap/daemon/",
+          "~/.reap/reap-guide.md, ~/.reap/.install-stamp, ~/.reap/daemon/ (data the retired daemon left)",
         ],
         willKeep: [
           "your own files in those directories, including reapdev.*",
@@ -264,11 +244,7 @@ export async function execute(confirm?: boolean, deps: UninstallDeps = {}): Prom
     });
   }
 
-  // 1. The daemon first. It rewrites ~/.reap/daemon/ while it runs, so deleting
-  //    before stopping puts the files straight back.
-  const stoppedPid = await (deps.stopDaemon ?? stopDaemonIfRunning)();
-
-  // 2. Both clients, whatever this project's agentClient says. Someone who has
+  // 1. Both clients, whatever this project's agentClient says. Someone who has
   //    switched clients has both sets on disk, and sweeping the one they are
   //    not using costs nothing when it is absent.
   const removed: string[] = [];
@@ -279,12 +255,13 @@ export async function execute(confirm?: boolean, deps: UninstallDeps = {}): Prom
     kept.push(...result.kept);
   }
 
-  // 3. The client-agnostic half: the guide, the install stamp, the daemon data.
+  // 2. The client-agnostic half: the guide, the install stamp, and whatever the
+  //    retired daemon left behind in ~/.reap/daemon/.
   const reapHome = await removeReapHomeAssets(home);
   removed.push(...reapHome.removed);
   kept.push(...reapHome.kept);
 
-  // 4. npm last, and only when this is unambiguously a global install. A
+  // 3. npm last, and only when this is unambiguously a global install. A
   //    failure here is not a failure of the uninstall: everything above has
   //    already happened, and what is left is one command the user can run.
   let npmRan = false;
@@ -314,7 +291,6 @@ export async function execute(confirm?: boolean, deps: UninstallDeps = {}): Prom
       kept,
       removedCount: removed.length,
       keptCount: kept.length,
-      daemonStopped: stoppedPid,
       installKind: kind,
       npm: {
         executed: npmRan,

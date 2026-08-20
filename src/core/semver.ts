@@ -10,8 +10,8 @@
  * example in SemVer 2.0.0 §11, both got all seven adjacent pairs wrong.
  *
  * That mattered because the floors are real: `autoUpdateMinVersion` decides
- * whether reap upgrades itself, `MIN_DAEMON_VERSION` decides whether the daemon
- * is usable, and this repository publishes prereleases from
+ * whether reap upgrades itself, the migration layer decides which notes a
+ * project still has to apply, and this repository publishes prereleases from
  * `scripts/alpha-publish.sh`.
  *
  * Rules implemented here are SemVer 2.0.0 §9-11:

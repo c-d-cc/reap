@@ -4,7 +4,6 @@ import { fileURLToPath } from "url";
 import YAML from "yaml";
 import { createPaths } from "./paths.js";
 import { buildStrictSection } from "./prompt.js";
-import { buildDaemonStaticSection } from "../cli/commands/load-context.js";
 import { buildPendingMigrationsSection } from "./migration.js";
 import type { ReapConfig, GenerationState } from "../types/index.js";
 
@@ -114,13 +113,9 @@ export function buildKnowledgeContextSync(cwd: string): string | null {
     );
   }
 
-  // ── Daemon (gen-068) ─────────────────────────────────────
-  // Sync builder cannot probe daemon readiness (no async fetch). It emits
-  // the static "Enabled" section only — agents see the same content the
-  // async builder produces minus the readiness line.
-  if (config?.daemon === true) {
-    sections.push(buildDaemonStaticSection());
-  }
+  // No Code Intelligence section (gen-089) — see the matching comment in
+  // `buildKnowledgeContext`. Removed from both builders together so the two
+  // stay byte-identical, which a unit test fixes in place.
 
   // ── Pending Migrations (gen-071) ─────────────────────────
   // Mirrors the async builder in load-context.ts. Same omit-when-empty

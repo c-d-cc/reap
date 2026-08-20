@@ -77,51 +77,49 @@ When REAP creates any file (artifacts, backlog, etc.) with template sections (`<
 - Do NOT return to the parent agent before generation completion — handle user interactions within this session.
 - tests/ is a git submodule — commit inside submodule first if modified.
 
-## Code Intelligence (Daemon) — opt-in
+## Code Intelligence
 
-REAP optionally integrates with a local code-intelligence daemon
-(`localhost:17224`) that maintains a Tree-sitter symbol graph for the
-project. When `config.daemon: true` is set, REAP auto-indexes at key
-lifecycle moments (start, learning, implementation complete, completion
-commit) and the daemon protocol section appears in your subagent prompt
-and the SessionStart context. Use it to make exploration and impact
-analysis faster.
+REAP ships a code index — built in, always available, nothing to start.
+A Tree-sitter parser records the symbols each tracked file defines and
+the calls and imports between them. Use it to make exploration and
+impact analysis faster.
 
-### When to use the daemon
+```bash
+reap index status              # counts, import resolution rate, indexed commit
+reap index search <query>      # find a definition — returns file:line
+reap index impact <file>       # what breaks if you change this file
+reap index callers <symbolId>  # who calls this
+reap index callees <symbolId>  # what this calls
+```
 
-- **Learning stage** — find existing implementations by name before
-  reading source. Symbol search (`GET /projects/{id}/symbols?q=`)
-  returns file:line positions you can `Read` directly. Faster than
+A `symbolId` is `<file>::<name>`, e.g. `src/core/lifecycle.ts::nextStage`.
+`reap index search` prints them. Every subcommand emits JSON on stdout.
+
+### When to use it
+
+- **Learning stage** — `reap index search <name>` before reading source.
+  It returns `file:line` you can `Read` directly, and it is faster than
   Grep for symbol-shaped queries (function/class/type names).
-- **Implementation stage** — before editing a function, query its
-  callers (`GET /projects/{id}/symbols/{id}/callers`) to understand
-  the change's blast radius. Helps avoid breaking out-of-sight call
-  sites.
-- **Validation stage** — for each changed file in your diff, query
-  `GET /projects/{id}/impact?file=<path>` to enumerate dependent
-  files. Cross-reference with your validation evidence.
+- **Implementation stage** — before editing a shared module, run
+  `reap index impact <file>` and `reap index callers <symbolId>` so the
+  change's blast radius is known rather than guessed.
+- **Validation stage** — for each changed file in your diff, run
+  `reap index impact` and cross-reference with your validation evidence.
 
-### Protocol
+### Two things it will not tell you
 
-Always probe first — daemon may be down or the user may not have
-opted in:
-
-```bash
-curl -sf http://127.0.0.1:17224/health || true   # silent skip if down
-```
-
-If healthy, look up the current project's ID once, then reuse it:
-
-```bash
-PROJECT_ID=$(curl -s http://127.0.0.1:17224/projects \
-  | jq -r --arg p "$PWD" '.data[] | select(.path==$p) | .id')
-```
-
-See `~/.reap/reap-guide.md` § Code Intelligence (Daemon) for the full
-query reference and staleness check protocol.
+- **The index is keyed by commit.** Symbols you wrote but have not
+  committed are absent — use Grep for those. `reap index status` always
+  names the commit the index describes.
+- **Check the import resolution rate before trusting an empty answer.**
+  Everything `impact` knows comes from resolved import edges, so a low
+  rate means the graph is incomplete and an empty blast radius means
+  *unknown* rather than *none*.
 
 ### Fallback behaviour
 
-- Daemon down or `config.daemon !== true` → continue with normal
-  Read/Grep/Glob tools. The daemon is an accelerator, not a
-  requirement. Never block the lifecycle on a daemon problem.
+Queries refresh the index themselves when HEAD has moved, so there is
+nothing to keep fresh. If a command fails for any reason — no git
+repository, an unsupported language — continue with normal Read/Grep/Glob.
+The index is an accelerator, not a requirement. Never block the lifecycle
+on an index problem.

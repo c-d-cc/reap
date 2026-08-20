@@ -1,5 +1,21 @@
 ## What's New
 
+The code-intelligence daemon is gone. The indexer that mattered ships with REAP, and it now returns answers that are not empty.
+
+- **`reap index` replaces the daemon.** Nothing to install, no port, no background process: `reap index status`, `reap index impact <file>`, `reap index search <query>`, `reap index callers <symbolId>`, `reap index callees <symbolId>`. Fifteen languages, no native build — the Tree-sitter grammars are WebAssembly.
+- **Blast radius used to return zero for every standard TypeScript project, and had for five months.** The resolver never mapped a `./x.js` specifier to the `x.ts` that produces it, so a NodeNext codebase produced an import graph with no edges in it. 130 tests passed, the release gate passed, CI was green throughout — because every check asked whether indexing had run and none asked whether the answer meant anything.
+- **So `reap index status` reports the import resolution rate**, and the release gate now requires a known relationship to be found rather than a nonzero symbol count. The number that would have caught this on day one is on screen.
+- **Indexing is keyed by commit.** The index records the SHA it describes, so deciding what to re-parse is one `git diff`. A full index of REAP itself takes ~0.3s against the daemon's 6.7s — most of the difference was a `git log` subprocess per file, for information the index needs one copy of. Queries refresh themselves when HEAD has moved, so the only eager trigger left is the commit at the end of `completion`. The trade-off: uncommitted work is not in the index.
+- **The index lives in `.reap/.index/`**, gitignored, and goes when the project goes — not in your home directory.
+- **If you used the daemon**, `reap update` removes `daemon` / `daemonBin` from `.reap/config.yml` and deletes `~/.reap/daemon/`. Remove the global package with `npm uninstall -g @c-d-cc/reap-daemon`; it is deprecated on npm. See the v0.17.6 migration note.
+- **`reap uninstall`** removes what npm cannot. `npm uninstall -g @c-d-cc/reap` deletes the package and nothing else — the slash commands, agent definitions, `~/.reap/` and the SessionStart hook entries were written by REAP's own code, and `preuninstall`/`postuninstall` do not fire on npm 10 or 12. The leftover hook kept calling a command that no longer existed, on every session. Already removed the package? `npx @c-d-cc/reap uninstall --confirm`.
+
+Two analyses the daemon also carried — community detection and process tracing — are deliberately not ported. The first was connected components under another name, so its cohesion score was the constant 1.00; the second called every function whose callers could not be resolved an entry point.
+
+---
+
+## v0.17.5
+
 This release is mostly about the code-intelligence daemon, which was documented from v0.16 but never actually usable on an npm install.
 
 - **The daemon is now a separately published package.** If you use `daemon: true`, install it once: `npm i -g @c-d-cc/reap-daemon`. Several packaging problems that kept it from running are fixed along with it.

@@ -19,7 +19,7 @@ export const en = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
-      daemon: "Code Intelligence Daemon",
+      daemon: "Code Intelligence",
       advanced: "Advanced",
       collaborationOverview: "Distributed Workflow",
       mergeGeneration: "Merge Generation",
@@ -296,8 +296,8 @@ export const en = {
     destroyDesc: "Remove all REAP files from project.",
     destroyNote: "Completely removes the .reap/ directory and all REAP-related files from the project. Requires typing \"yes destroy\" to confirm.",
     uninstallTitle: "reap uninstall",
-    uninstallDesc: "Remove REAP from this machine — user-level files, the daemon, and the npm packages.",
-    uninstallNote: "npm removes the package and nothing else: REAP's slash commands, agent definitions, SessionStart hook and ~/.reap/ were written by REAP's own code, and npm runs no code at uninstall time. This does it in the right order — stops the daemon, clears both clients' user-level files, takes only REAP's entries out of settings.json, then hands @c-d-cc/reap-daemon and @c-d-cc/reap to npm. Your own files survive, including reapdev.* and anything else in ~/.reap/. Already removed the package? npx @c-d-cc/reap uninstall --confirm. Not to be confused with reap destroy, which removes REAP from one project.",
+    uninstallDesc: "Remove REAP from this machine — user-level files and the npm packages.",
+    uninstallNote: "npm removes the package and nothing else: REAP's slash commands, agent definitions, SessionStart hook and ~/.reap/ were written by REAP's own code, and npm runs no code at uninstall time. This does it in the right order — clears both clients' user-level files, takes only REAP's entries out of settings.json, removes what the retired daemon left in ~/.reap/daemon/, then hands @c-d-cc/reap-daemon and @c-d-cc/reap to npm. Your own files survive, including reapdev.* and anything else in ~/.reap/. Already removed the package? npx @c-d-cc/reap uninstall --confirm. Not to be confused with reap destroy, which removes REAP from one project.",
     makeBacklogTitle: "reap make backlog",
     makeBacklogDesc: "Create a backlog item. The only supported way to create backlog files.",
     makeBacklogNote: "Options: --type <genome-change|environment-change|task> --title <title> [--body <body>] [--priority <priority>]. Never create backlog files directly.",
@@ -407,7 +407,6 @@ export const en = {
       ["agentClient", "AI agent client (claude-code | opencode | codex). Controls adapter layer — slash command location, manifest file (CLAUDE.md vs AGENTS.md), plugin/hook strategy. Default: claude-code. Codex is currently unsupported."],
       ["cruiseCount", "When present, enables cruise mode. Format: current/total (e.g. 1/5). Removed automatically after cruise completes"],
       ["evaluator", "Opt-in independent reviewer. When true, launches reap-evaluate as an advisor during validation and fitness phases. High-severity concerns abort cruise mode. Default: false."],
-      ["daemon", "Opt-in local code-intelligence daemon. When true, REAP auto-indexes at lifecycle checkpoints (learning, implementation complete, completion commit) and includes daemon query instructions in agent prompts. Default: false."],
     ],
     strictMode: "Strict Mode",
     strictModeDesc: "Strict mode controls what the AI agent is allowed to do. Two independent settings:",
@@ -825,72 +824,47 @@ priority: medium
 Description of the task.`,
   },
 
-  // Daemon Page
+  // Code Intelligence Page (route stays /docs/daemon so links keep working)
   daemonPage: {
-    title: "Code Intelligence Daemon",
+    title: "Code Intelligence",
     breadcrumb: "Guide",
-    intro: "REAP can use a local code-intelligence daemon that maintains a Tree-sitter symbol graph across generations. It is published separately and is not installed with REAP. It provides agents with symbol search, caller/callee traversal, and blast-radius impact analysis — all through a local HTTP API at localhost:17224.",
-    optInTitle: "Setup (opt-in)",
-    installTitle: "Install it first",
-    installDesc: "The daemon is a separate npm package. Installing REAP does not bring it along: it carries a native SQLite build and a set of Tree-sitter grammars, which every user would otherwise pay for to get a feature that is off by default.",
-    installCmd: `npm i -g @c-d-cc/reap-daemon`,
-    installNote: "Before v0.17.5 the daemon was declared as a file: dependency that never shipped, so daemon: true produced a dangling link and did nothing at all. If you enabled the daemon before that and never saw it work, this is why.",
-    locateTitle: "Installed, but REAP cannot find it",
-    locateDesc: "REAP looks for the daemon from its own location, and the daemon is deliberately not one of REAP's dependencies \u2014 that is what keeps a native SQLite build and fifteen Tree-sitter grammars out of every install. The two therefore find each other only when they share a resolution root. Installing both globally with the same package manager arranges that; a global REAP with a project-local daemon, two different prefixes, or a Node version switch that moves the global prefix does not. When that happens, tell REAP where it is.",
-    locateConfig: `daemonBin: /usr/local/lib/node_modules/@c-d-cc/reap-daemon/dist/index.js`,
-    locateNote: "REAP_DAEMON_BIN does the same for a single command or a CI job and takes priority over the config. A relative path is resolved against the project root and a leading ~ is expanded. reap daemon status reports bin and binSource (env, config, package or checkout), so you can confirm REAP is reading the setting rather than assuming it \u2014 that is what REAP would start, since a daemon already running is reused whatever it came from. A path that holds nothing is reported by name, but it does not stop the search \u2014 config.yml is committed, and a location that is right on one machine may be absent on the next.",
-    unusableTitle: "Enabled but unusable",
-    unusableDesc: "daemon: true with nothing installed — or a daemon older than your REAP requires — is a mismatch between configuration and environment rather than a passing outage, so REAP says so. The lifecycle is never blocked: indexing still fails quietly and every command runs as before. What changes is that asking gets an answer. reap daemon status separates not installed, too old and not running, and prints the command to run; it also shows the running version beside the installed one, since the daemon stays resident for 30 idle minutes and an upgrade does not replace the process answering requests. reap fix --check reports the mismatch as a warning. And the agent prompt drops the query protocol, so the agent does not spend every stage curling a dead port.",
-    optInDesc: "With the package installed, enable it by adding one line to .reap/config.yml:",
-    optInConfig: `daemon: true   # default: false`,
-    optInNote: "When set to false (or omitted), all daemon-related behavior is skipped. Agent prompts, lifecycle hooks, and CLI output remain byte-identical to projects that have never enabled the daemon.",
-    autoTriggerTitle: "Auto-trigger Points",
-    autoTriggerDesc: "When enabled, REAP automatically registers and re-indexes the project at key lifecycle moments:",
-    autoTriggerHeaders: ["Lifecycle Moment", "What Runs"],
-    autoTriggerItems: [
-      ["reap run start (generation created)", "ensureRegistered + full triggerIndexing"],
-      ["reap run learning (work phase)", "ensureRegistered + triggerIndexing (keeps graph fresh before exploration)"],
-      ["reap run implementation (complete phase)", "triggerIndexing (so validation sees the just-written code)"],
-      ["reap run completion (commit phase, post-archive)", "triggerIndexing (graph reflects the committed state for the next generation)"],
+    intro: "REAP ships a code index. Nothing to install, nothing to start, no background process. A Tree-sitter parser walks every tracked file, records the symbols it defines and the calls and imports between them, and stores the result in .reap/.index/ as gzipped JSON. Fifteen languages ship with it, and there is no native build — the grammars are WebAssembly.",
+    commandsTitle: "Commands",
+    commandsDesc: "Every subcommand emits JSON on stdout like the rest of REAP, so an agent can parse it and a human can read the message field.",
+    commandsCode: `reap index                     # update — the default
+reap index update [--full]     # bring the index level with HEAD
+reap index status              # counts, import resolution rate, indexed commit
+reap index impact <file>...    # what breaks if you change this file
+reap index search <query>      # find a definition, with file:line
+reap index callers <symbolId>  # who calls this
+reap index callees <symbolId>  # what this calls`,
+    commandsNote: "A symbolId is <file>::<name> — for example src/core/lifecycle.ts::nextStage. reap index search prints them.",
+    commitTitle: "The unit of change is a commit",
+    commitDesc: "The index records the SHA it describes. Deciding what to re-parse is one git diff, and deciding whether to bother is one string comparison. Queries refresh the index themselves when HEAD has moved — after a commit, a branch switch, a rebase or a pull — so REAP refreshes eagerly only where it has just committed: at the end of completion, and in early-close.",
+    commitCode: `reap index update    # Indexed 412 file(s) — full, 1530 symbols at 1a2b3c4 (612ms)
+reap index update    # Index is current at 1a2b3c4 (1530 symbols, 3688 edges)`,
+    commitNote: "The trade-off: uncommitted work is not in the index. A symbol you wrote a minute ago and have not committed will not be found by search, and a new file will not appear in impact — use Grep for those. A git repository is required, since without one there is no commit to key the index to.",
+    statusTitle: "Read status before trusting impact",
+    statusDesc: "Everything impact knows comes from resolved import edges. A low imports rate means the graph is incomplete, and an empty blast radius then means unknown rather than none. status also warns when a grammar fails to load, which is the other way a language goes silently unindexed.",
+    statusCode: `files:   412
+symbols: 1530  (function 902, method 341, class 187, type 100)
+edges:   3688  (CALLS 3145, IMPORTS 543)
+imports: 543/543 resolved (100%)
+commit:  1a2b3c4`,
+    statusNote: "(Illustrative figures.) That line exists because its absence cost five months. The predecessor to this indexer resolved zero imports in every standard TypeScript project — it never mapped a ./x.js specifier to the x.ts that produces it — and blast radius returned nothing while every test passed and CI stayed green, because each check asked whether indexing had run and none asked whether the answer meant anything.",
+    locationTitle: "Where the index lives",
+    locationDesc: "In .reap/.index/ — a manifest.json plus one gzipped graph — and both reap init and reap update add it to .gitignore. Deleting the project deletes the index with it; nothing accumulates in your home directory. The ignore is not about size: committing the index would mean the commit containing it has to be indexed, which does not terminate. Deleting .reap/.index/ is always safe, since the next command rebuilds it.",
+    whenTitle: "When to use it",
+    whenDesc: "The two are complementary — the index answers with file:line, which you then read.",
+    whenHeaders: ["Reach for", "When the question is"],
+    whenItems: [
+      ["reap index", "Where is this defined, who calls it, what depends on this file, what is the blast radius of this change"],
+      ["Grep / Glob", "Literal strings, comments, config files, languages with no grammar, and anything not committed yet"],
     ],
-    autoTriggerNote: "All four call sites silent-fail when the daemon process is unreachable. The CLI lifecycle is never blocked by a daemon problem.",
-    queryTitle: "Querying the Daemon",
-    queryDesc: "Always verify the daemon is alive before querying — otherwise skip silently:",
-    queryHealth: `curl -sf http://127.0.0.1:17224/health || echo "daemon down"`,
-    queryProjectId: `PROJECT_ID=$(curl -s http://127.0.0.1:17224/projects \\
-  | jq -r --arg p "$CWD" '.data[] | select(.path==$p) | .id')`,
-    queryExamples: `# Symbol search by name
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols?q=consumeBacklog"
-
-# Callers of a specific symbol
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callers"
-
-# Callees of a specific symbol
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callees"
-
-# Impact (blast radius) of a file change
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/impact?file=src/core/lifecycle.ts"
-
-# Project status — includes lastIndexedAt and lastIndexedCommit
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status"`,
-    stalenessTitle: "Staleness Check",
-    stalenessDesc: "/projects/:id/status returns lastIndexedCommit — the git rev-parse HEAD at the moment of the most recent successful indexing. To check whether the index is stale before a query:",
-    stalenessCode: `INDEXED=$(curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status" | jq -r '.data.lastIndexedCommit // "none"')
-HEAD=$(git rev-parse HEAD)
-[ "$INDEXED" = "$HEAD" ] && echo "fresh" || echo "stale — trigger reindex"`,
-    cliTitle: "CLI Management",
-    cliDesc: "The daemon starts automatically on first use and shuts itself down after 30 minutes of idle time. You can also manage it explicitly:",
-    cliCode: `reap daemon status   # Check if running, show last indexed commit
-reap daemon stop     # Stop the daemon
-reap daemon index    # Trigger manual re-index
-reap daemon query    # Run a symbol query`,
-    fallbackTitle: "When Daemon is Unavailable",
-    fallbackDesc: "The daemon is a read-only accelerator — it never modifies your code. If unreachable for any reason, agents fall back to standard Read/Grep/Glob tools without interrupting the lifecycle. Daemon-first vs filesystem-first guidance:",
-    fallbackHeaders: ["Approach", "When to Use"],
-    fallbackItems: [
-      ["Daemon-first", "Symbol definition lookup, caller/callee traversal, multi-file impact analysis"],
-      ["Filesystem-first (Grep/Glob)", "Literal string search, comment search, files with no parser support, daemon down"],
-    ],
+    retiredTitle: "There used to be a daemon",
+    retiredDesc: "Through v0.17.5 this was a separate package, @c-d-cc/reap-daemon, running an HTTP server on port 17224 behind daemon: true. It is retired and deprecated on npm. reap update removes the settings and the leftover data for you; the only manual step is the global package, which reap uninstall also names.",
+    retiredCode: `npm uninstall -g @c-d-cc/reap-daemon`,
+    retiredNote: "Its purpose was to keep a graph warm — and loading this repository's graph costs single-digit milliseconds against a reap cold start of 40 to 70. The thing being avoided was cheaper than the machinery avoiding it, and that machinery was a port, a registry, a PID file, an idle timer, a second npm package with a native SQLite build, a release pipeline, and an orphaned process on at least one machine that its own stop command could not find.",
   },
 
   // Self-Evolving Page
@@ -1059,6 +1033,10 @@ reap daemon query    # Run a symbol query`,
     title: "Release Notes",
     breadcrumb: "Other",
     versions: [
+      {
+        version: "0.17.6",
+        notes: "**The code-intelligence daemon is gone; the indexer ships with REAP.** Nothing to install, no port, no background process — `reap index status`, `reap index impact <file>`, `reap index search <query>`, `reap index callers/callees <symbolId>`. Fifteen languages, no native build. **Blast radius used to return zero for every standard TypeScript project**, and had for five months: the resolver never mapped a `./x.js` specifier to the `x.ts` that produces it. 130 tests passed and CI stayed green throughout, because every check asked whether indexing had run and none asked whether the answer meant anything. **So `reap index status` now reports the import resolution rate**, and the release gate requires a known relationship to be found rather than a nonzero symbol count. **Indexing is keyed by commit** — a full index of REAP takes ~0.3s against the daemon's 6.7s, queries refresh themselves when HEAD moves, and uncommitted work is deliberately not indexed. The index lives in `.reap/.index/` and is gitignored. **If you used the daemon**, `reap update` removes `daemon`/`daemonBin` and deletes `~/.reap/daemon/`; remove the global package with `npm uninstall -g @c-d-cc/reap-daemon`. **`reap uninstall`** removes what npm cannot — slash commands, agent definitions, `~/.reap/` and the SessionStart hook entries, which `npm uninstall -g` leaves behind because uninstall hooks do not fire on npm 10 or 12.",
+      },
       {
         version: "0.17.5",
         notes: "**The code-intelligence daemon is now a separately published package.** It was documented from v0.16 but never published, so it could not work on an npm install; several packaging problems are fixed with it. If you use `daemon: true`, run `npm i -g @c-d-cc/reap-daemon` once. **A missing or too-old daemon is now reported** by `reap daemon status`, `reap fix --check` and the agent prompt instead of silently doing nothing — the lifecycle is never blocked either way. **`daemonBin` when REAP cannot find it** — the two are separate packages and meet only when they share a resolution root; set `daemonBin` in `.reap/config.yml` or `REAP_DAEMON_BIN` for a single command. **`reap run push` reports git's actual error**, and **`reap help` lists `/reap.run` and `/reap.report`**. **REAP installs its own integration on first run** — npm 12 blocks install scripts for global installs, which left slash commands, agent definitions and the session hook unplaced with no error at all.",

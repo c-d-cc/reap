@@ -7,7 +7,6 @@ import { createPaths } from "../../core/paths.js";
 import { readTextFile, fileExists, writeTextFile } from "../../core/fs.js";
 import {
   checkIntegrity,
-  checkDaemonAvailability,
   checkUserLevelArtifacts,
   detectV15,
   type IntegrityResult,
@@ -15,7 +14,6 @@ import {
 import { emitOutput, emitError } from "../../core/output.js";
 import { LIFECYCLE_STAGES, MERGE_STAGES } from "../../types/index.js";
 import { getAdapter } from "../../adapters/index.js";
-import { resolveDaemonAvailability } from "./daemon/client.js";
 import type { GenerationState, ReapConfig } from "../../types/index.js";
 
 export interface FixResult {
@@ -52,29 +50,12 @@ async function resolveCanonicalUserDirs(paths: ReturnType<typeof createPaths>): 
   }
 }
 
-/** Did this project opt into the daemon? Absent or unreadable config means no. */
-async function isDaemonEnabled(paths: ReturnType<typeof createPaths>): Promise<boolean> {
-  try {
-    const content = await readTextFile(paths.config);
-    if (!content) return false;
-    return (YAML.parse(content) as ReapConfig)?.daemon === true;
-  } catch {
-    return false;
-  }
-}
-
 /** Check-only mode: run structural integrity check without modifying anything */
 export async function checkProject(
   projectRoot: string,
 ): Promise<IntegrityResult> {
   const paths = createPaths(projectRoot);
   const canonicalDirs = await resolveCanonicalUserDirs(paths);
-  const daemonEnabled = await isDaemonEnabled(paths);
-  // Only resolved when the project asked for it, so a project that never
-  // mentions the daemon does no extra work and can produce no daemon finding.
-  const daemonResult = daemonEnabled
-    ? checkDaemonAvailability(true, resolveDaemonAvailability())
-    : checkDaemonAvailability(false);
   const [structureResult, userLevelResult] = await Promise.all([
     checkIntegrity(paths),
     checkUserLevelArtifacts(projectRoot, canonicalDirs),
@@ -83,12 +64,10 @@ export async function checkProject(
     errors: [
       ...structureResult.errors,
       ...userLevelResult.errors,
-      ...daemonResult.errors,
     ],
     warnings: [
       ...structureResult.warnings,
       ...userLevelResult.warnings,
-      ...daemonResult.warnings,
     ],
   };
 }

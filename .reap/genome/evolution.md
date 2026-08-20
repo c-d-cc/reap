@@ -105,11 +105,6 @@ memory에 무언가를 쓰려고 할 때 위에서 아래로 적용한다.
 - **아키텍처 변경 시 반드시 반영** — 새 기능/구조 추가 시 evolution.md / application.md / memory 모두 동기화
 - **비대화는 실패 신호** — longterm 30~50줄 / midterm 50~70줄을 넘으면 pruning 미수행 의심. reflect에서 정리.
 
-## Self-exploration 우선
-
-첫 generation(또는 genome이 빈약한 상태)에서는 코드 변경보다 자기 탐구를 우선.
-실제 코드베이스를 읽고 genome/environment/vision을 채우는 것이 코드 수정보다 먼저.
-
 ## Code Quality Principles
 
 새 코드를 작성하기 전에 반드시 기존 코드를 읽고 패턴을 파악한다.
@@ -142,22 +137,22 @@ memory에 무언가를 쓰려고 할 때 위에서 아래로 적용한다.
 | prompt 변경 | 기능적 영향 있으면 e2e, 없으면 skip |
 | 외부 도구 / subprocess / daemon 통합 | e2e (subprocess + 포트/HOME 격리 + git init fixture) |
 
-### 외부 도구 / subprocess / daemon e2e 패턴 (gen-069)
+### 외부 도구 / 사용자 영역을 건드리는 e2e 격리 (gen-069, gen-082, gen-089)
 
-REAP daemon 같은 별도 프로세스로 동작하는 컴포넌트를 e2e 검증할 때 다음 패턴 차용:
+프로세스가 **읽는 축을 전부** 격리한다 — 하나만 막으면 새어나간다. `HOME` 을 가짜로 주면
+`XDG_CONFIG_HOME` 도 함께 처리하고(gen-082), 포트를 쓰는 도구면 포트도 env 로 옮긴다.
+helper 는 `tests/helpers/<tool>.ts` 한 곳으로 모으고 e2e 는 helper 만 import 한다.
+fixture 는 그 도구가 실제로 기대하는 입력(예: git-init 된 트리)을 그대로 재현한다.
 
-1. **포트 격리** — env var (예: `REAP_DAEMON_PORT`) 로 user 영역의 default port (17224) 와 충돌 회피. helper 가 비어있는 포트 할당.
-2. **HOME 격리** — `HOME` env var override 로 user 영역 `~/.reap/daemon/` 미접근 보장. 모든 daemon side-effect 가 test 임시 디렉토리에 갇힘.
-3. **Fixture = git project** — 실제 daemon 이 기대하는 입력 (git-init 된 source tree) 그대로 재현. fixture 는 별도 `tests/fixtures/<name>/` 디렉토리.
-4. **macOS realpath 정규화** — `/var` → `/private/var` symlink 가 path comparison fail 유발. fixture path 는 `realpath()` 로 정규화 후 비교 (현재 deferred — gen-069 의 디버깅 cost 사례).
-5. **Helper 단일 import** — spawn/stop/register/copy 를 `tests/helpers/<tool>.ts` 한 곳으로 추출. e2e 파일은 helper 만 import.
-6. **격리 효과 보장 — 외부 사용자 영역 미접근**: 이 패턴은 user 가 자기 환경에서 같은 도구를 동시에 실행 중이어도 e2e 가 user state 를 건드리지 않음을 의미.
-
-향후 외부 도구 통합 (예: MCP server, 다른 sidecar) 도 같은 4-축 (process / port / HOME / fixture) 으로 격리.
+- **env override 는 spawn 된 자식에게만 닿는다** — bun 의 `os.homedir()` 는 `$HOME` 을 무시한다
+  (node 는 따른다). in-process 라면 디렉토리를 **주입**하라
+- **macOS realpath 정규화**: `/var` → `/private/var` symlink 때문에 경로 비교가 어긋난다.
+  `realpath`/`pwd -P` 로 양쪽을 정규화하라. gen-089 에서 코드와 게이트 양쪽에서 재발했고,
+  코드 쪽은 **사용자에게 빈 결과를 주는 실제 결함**이었다
 
 ### 테스트 피드백 루프
-- 테스트 실행 중 환경 문제나 새로운 깨달음이 발생하면, completion artifact에 기록하고 필요 시 genome에 반영.
-- 테스트 실패 원인이 환경 차이(OS, Node 버전 등)인 경우 environment에 기록.
+- 실행 중 얻은 깨달음은 completion artifact 에 기록하고 필요하면 genome 에 반영한다
+  (환경 차이가 원인이면 environment — § genome vs environment 경계 참조).
 
 ## 중단된 Generation 복구
 
@@ -197,16 +192,11 @@ REAP daemon 같은 별도 프로세스로 동작하는 컴포넌트를 e2e 검�
 
 ### 인과로 묶인 검증 동작 fix 는 본 generation 에서 처리 (gen-069)
 
-본 generation 의 목적이 X 의 검증 인프라 구축인데, 검증을 돌리면서 X 가 의존하는 다른 동작 Y 가 실제로 깨져있음을 발견한 경우:
+X 의 검증 인프라를 만들다가 X 가 의존하는 Y 가 깨져 있음을 발견하면, **fix Y 가 scope 밖이라도
+인과로 묶여 있다 — 분리하면 검증이 의미를 잃는다.** 인과 chain 을 한 곳만 끊으면 새 누락 path 가 생긴다.
 
-- **fix Y 가 본 generation scope 가 아니라도 인과로 묶여있다 — 분리하면 검증이 의미를 잃는다**.
-- **gen-065 lesson 의 일반화**: 인과 chain 의 어느 한 곳만 끊으면 새 누락 path 생성. 본 generation 에서 X+Y 를 같은 묶음으로 처리.
-- **gen-069 사례**: daemon e2e 검증 인프라 (X) 구축 중 typescript-tags.scm 의 call_expression 캡처 누락 (Y) 발견. fix 가 1-line 이고 본 generation 의 case 2/3 가 직접 의존 → 즉시 fix. 분리했으면 본 generation e2e 가 fail 한 채 commit 됐을 것.
-
-판단 기준:
-- fix 가 small scope (1~수 라인) 인가 → Yes 면 본 generation.
-- fix 누락 시 본 generation 의 검증이 실패하거나 의미를 잃는가 → Yes 면 본 generation 강제.
-- fix 가 큰 design 변경을 동반하는가 → Yes 면 backlog 화 + 본 generation 의 해당 검증 cases 만 skip + 다음 generation 에서 enable.
+판단 기준: fix 가 small scope 인가 / 빠뜨리면 본 generation 의 검증이 실패하거나 의미를 잃는가
+→ Yes 면 본 generation. 큰 design 변경을 동반하면 backlog 화 + 해당 검증만 skip + 다음 세대에서 enable.
 
 ## 사용자 UX gap은 verification 항목으로 명시 (gen-063 교훈)
 
@@ -217,18 +207,17 @@ REAP daemon 같은 별도 프로세스로 동작하는 컴포넌트를 e2e 검�
 3. **Entry-point 파일** — 사용자가 첫 진입 시 보는 안내 (CLAUDE.md / AGENTS.md / 등)
 4. **Trigger 등록 — slash commands / shortcuts** — 사용자가 native UI로 REAP를 호출할 수 있는 경로
 
-(4)는 가장 잊기 쉬운 항목이다. gen-063에서 OpenCode adapter는 (1)~(3)을 모두 갖췄지만 (4)가 누락되어, 사용자가 fitness 단계에서 "agent는 동작하지만 슬래시 트리거가 안 됨"을 발견함. follow-up backlog `opencode-slash-commands.md`로 처리하기로 했지만, 처음부터 verification에 포함됐으면 본 generation에서 끝났을 작업.
+(4)가 가장 잊기 쉽다 — gen-063 은 (1)~(3)을 갖추고 (4)만 빠뜨렸고, 사용자가 fitness 에서 발견했다.
+판단 기준: **"이 통합을 처음 받은 사용자가 5분 안에 평소처럼 REAP 를 호출할 수 있는가?"**
 
-판단 기준: "이 client/통합을 처음 받은 사용자가 5분 안에 평소처럼 REAP를 호출할 수 있는가?" — Yes면 OK, No면 (1)~(4) 중 누락이 있다.
+### 검증 전 self-audit — 통과한 e2e 는 시나리오의 일부만 덮는다 (gen-064)
 
-### 사용자 직접 테스트가 e2e가 못 잡는 갭을 잡는다 (gen-064 사례)
+fitness 전에 셋을 확인한다: (1) verification 의 각 시나리오가 e2e 로 1:1 재현되는가,
+(2) **변경한 함수의 caller 를 전부 확인했는가**, (3) 사용자가 따라할 명령 시퀀스를 e2e 가
+그대로 실행하는가.
 
-gen-064는 (4) slash trigger 등록을 구현했고, e2e (`installSkills` 직접 호출) 가 모두 통과했다. 그러나 사용자가 fitness 직전 코드 직접 검토 중 결정적 갭 발견: **`reap update` 흐름은 `installSkills` 가 아닌 `registerSessionIntegration` 만 호출**하므로, user-level sync가 그쪽에 없으면 backlog verification ("`reap update` 후 reap.* 19 자동 배치") 과 코드 불일치. e2e는 verification scenario의 **일부 CLI entry point만 cover** 했고, 사용자가 실제 시나리오의 다른 entry point에서 갭을 잡아냄.
-
-교훈:
-- **fitness 전 self-audit 체크리스트**: (1) backlog verification 의 각 시나리오가 e2e 1:1 mirror 되는가, (2) 변경 함수의 caller 가 모두 검증되었는가, (3) 사용자가 따라할 명령 시퀀스를 e2e 가 그대로 재현하는가.
-- **agent의 추상적 추론보다 사용자가 코드를 직접 읽기가 강력**. plan 단계의 잘못된 가정(`registerSessionIntegration`이 SessionStart 매번 호출이라는 추정)이 implementation까지 그대로 흘러갔지만 fitness 직전 사용자 검토에서 catch → back regression path가 graceful 하게 처리. lifecycle이 정상 작동한 사례.
-- **사용자 인 더 루프(human-in-the-loop)는 자동화 신뢰의 마지막 safety net**. AI는 자기 작업의 모든 entry point를 자기 검증할 수 없다 — 사용자 직접 테스트와 코드 직접 검토가 그 갭을 메운다. 본 사례가 fitness phase 의 가치를 입증.
+(2)가 gen-064 의 실제 결함이었다 — e2e 는 `installSkills` 를 직접 불렀고 `reap update` 는
+`registerSessionIntegration` 만 부른다. 전부 초록인 채로 진입점 하나가 비어 있었다.
 
 ## 반복 누락은 지시가 아니라 검사로 막는다 (gen-073 교훈)
 
@@ -250,6 +239,17 @@ gen-073 사례: `reapdev.versionBump` skill 은 `docs/src/i18n/translations/` �
 - 개별 항목도 마찬가지 — 정상 값을 일부러 깨뜨려 fail 을 확인하고 복원한다 (negative test)
 - **검사가 못 잡는 것을 결과와 함께 기록한다.** 통과는 "검사 범위 안에서 문제없음"일 뿐이다. 한계를 적어두지 않으면 다음 사람이 그 검사를 실제보다 신뢰한다
 
+### 게이트에 대해 쓰는 문장의 규율
+
+- **잡는다고 적은 사례는 재현해 확인한 것만 적는다.** gen-078 의 한 항목이 **거짓인 채 다섯 세대를
+  살아남았다**(CI 는 내내 초록). 재현 실패는 "주장이 거짓"이 아니라 **"내 변형이 그 결함이 아니다"** 일 수 있다
+- **"돌았는가"가 아니라 "답이 맞는가"를 묻는다.** "심볼 수 > 0" 이 걸려 있는 동안 대표 기능이
+  5개월간 0을 반환했다. 알려진 관계를 지목하고 비율이 아니라 **절대수**를 본다 — `0/0` 이 통과한다
+- **부재 단언은 스스로 먼저 증명한다.** 크래시·필드명 변경도 "부재"로 읽힌다. 상태와 숫자를 먼저 요구하라
+- **검사 범위를 좁히면 기준이 통과로 바뀐다.** 기준에 적힌 명령을 적힌 그대로 돌려라
+- **끄는 스위치를 두지 않는다.** 비용이 문제면 실행 시점을 옮겨라
+- **두 층은 서로를 추론하지 못한다** — "파일이 놓였는가"와 "클라이언트가 읽는가"는 별개다(gen-063)
+
 ### 검증 근거는 종류를 구분해 적는다 — 그리고 "실행"은 명령을 지목할 수 있어야 한다
 
 artifact 에 "확인함"이라고만 적으면 **직접 돌려본 것과 코드를 읽고 판단한 것이 같아 보인다.** 두 세대 연속으로 그 구분이 무너져 blocking 결함이 나왔다.
@@ -263,6 +263,17 @@ artifact 에 "확인함"이라고만 적으면 **직접 돌려본 것과 코드�
 **`[실행]` 을 붙이려면 그 항목을 실행하는 명령을 지목할 수 있어야 한다.** 지목할 수 없으면 `[독해]` 다. gen-083 은 미검증 항목을 충족으로 적어 evaluator 에게 잡혔고, 그 교훈으로 만든 이 표기법이 gen-084 에서 **한 칸 옆에서 똑같이 어긋났다** — 기능은 정상이었지만 그것을 실행하는 것이 게이트에도 테스트에도 없었다. "정상이었다"는 이 문제의 답이 아니다.
 
 의심스러우면 `grep -rn "<함수명>" tests/` 로 확인한다. 0건이면 `[독해]` 다.
+
+### 독립 검토는 한 번으로 수렴하지 않는다 (gen-089)
+
+evaluator 호출은 **1회 감사가 아니다.** gen-089 는 3라운드가 필요했고 **2·3라운드의 결함은 전부
+직전 라운드의 수정 안에 있었다** — 매 라운드가 전 검사 초록인 상태에서 시작했다.
+
+- 수정 라운드를 **2회 이상 예산에 넣어라**. 지적은 **먼저 재현하고** 고친다
+- **통과하는 negative 는 "수정이 불필요"가 아니라 "내 검사가 그 결함을 덮지 않는다"** 이다.
+  green 을 허가로 읽으면 옳은 수정을 지운다
+- 해소된 concern 도 `--severity none` 으로 낮추지 마라 — 그 채널은 "미해결"이 아니라
+  "fitness 를 보는 사람이 알아야 할 것"을 나른다
 
 ## 아키텍처 변경 시 genome 동기화
 

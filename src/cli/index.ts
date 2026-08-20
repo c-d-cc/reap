@@ -31,7 +31,7 @@ import { execute as checkVersionExecute } from "./commands/check-version.js";
 import { execute as configExecute } from "./commands/config.js";
 import { execute as updateExecute } from "./commands/update.js";
 import { execute as helpExecute } from "./commands/help.js";
-import { execute as daemonExecute } from "./commands/daemon/index.js";
+import { execute as indexExecute } from "./commands/index-cmd.js";
 import { execute as loadContextExecute } from "./commands/load-context.js";
 import { execute as dumpStateExecute } from "./commands/dump-state.js";
 import { execute as uninstallExecute } from "./commands/uninstall.js";
@@ -129,7 +129,7 @@ program
 
 program
   .command("uninstall")
-  .description("Remove REAP from this machine — user-level files, the daemon, and the npm packages")
+  .description("Remove REAP from this machine — user-level files and the npm packages")
   .option("--confirm", "Confirm removal without prompt")
   .action(async (options: { confirm?: boolean }) => {
     await uninstallExecute(options.confirm);
@@ -199,11 +199,12 @@ program
   });
 
 program
-  .command("daemon <subcommand>")
-  .description("Manage the REAP daemon (status, stop, index, query)")
-  .option("--query <query>", "Search query for daemon query subcommand")
-  .action(async (subcommand: string, options: { query?: string }) => {
-    await daemonExecute(subcommand, options);
+  .command("index [subcommand] [target...]")
+  .description("Code index: update, status, impact <file...>, search <query>, callers/callees <symbolId>")
+  .option("--full", "Rebuild from scratch instead of updating since the last indexed commit")
+  .option("--kind <kind>", "Restrict a search to one symbol kind (function, class, type, ...)")
+  .action(async (subcommand: string | undefined, targets: string[] | undefined, options: { full?: boolean; kind?: string }) => {
+    await indexExecute(subcommand, targets ?? [], options);
   });
 
 /**

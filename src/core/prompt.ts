@@ -1,5 +1,5 @@
 import type { ReapPaths } from "./paths.js";
-import type { GenerationState, ReapConfig, DaemonAvailability } from "../types/index.js";
+import type { GenerationState, ReapConfig } from "../types/index.js";
 import { readTextFile } from "./fs.js";
 import {
   detectMaturity,
@@ -88,7 +88,6 @@ export function buildBasePrompt(
   cruiseCount?: string,
   clarityResult?: ClarityResult,
   config?: ReapConfig | null,
-  daemonAvailability?: DaemonAvailability | null,
 ): string {
   const lines: string[] = [];
   const isMerge = state?.type === "merge";
@@ -218,73 +217,30 @@ export function buildBasePrompt(
     }
   }
 
-  // ── Code Intelligence (Daemon) — gen-068 opt-in ─────────
-  // Surfaces the daemon usage protocol to the subagent ONLY when the user
-  // opted in (`config.daemon: true`). When omitted/false, this section is
-  // absent and the prompt is byte-identical to pre-gen-068.
+  // ── Code Intelligence ─────────────────────────────────────
+  // Unconditional (gen-089). It used to be gated on `config.daemon: true` with
+  // three branches for whether the separate package was installed, current, or
+  // absent — an accounting that existed only because the indexer shipped
+  // elsewhere. It ships here now, so there is nothing to be unavailable.
   //
-  // gen-083: opting in no longer implies the daemon is there — it installs
-  // separately. Handing an agent a query protocol for something that cannot
-  // answer buys nothing but wasted turns: it would dutifully curl a dead port
-  // every stage and conclude the daemon was down, generation after generation.
-  // When the package is absent or too old, the protocol is replaced by the one
-  // fact that helps, and the agent is told to stop trying.
-  //
-  // `daemonAvailability` is injected rather than resolved here so `core` keeps
-  // out of `cli` (gen-076 pattern). Omitted means unknown, and unknown keeps
-  // the previous behaviour — a caller that does not check must not silently
-  // turn the protocol off.
-  if (config?.daemon === true && daemonAvailability && !daemonAvailability.installed) {
-    lines.push("## Code Intelligence (Daemon) — enabled but NOT installed");
-    lines.push("");
-    lines.push(
-      `\`daemon: true\` is set, but the daemon package is not installed, so there is nothing listening. Do NOT attempt daemon queries — use Read/Grep/Glob as normal.`,
-    );
-    lines.push("");
-    // The location hint is only useful to someone who has not already given a
-    // location. When they have and it was empty, say that instead — telling
-    // them to point REAP at the daemon would be answering a question they
-    // already answered.
-    if (daemonAvailability.explicitMiss) {
-      const miss = daemonAvailability.explicitMiss;
-      lines.push(
-        `Note: ${miss.label} points at \`${miss.path}\`, but there is no file there. Tell the user — that path is likely the whole problem.`,
-      );
-    } else {
-      lines.push(`Tell the user: ${daemonAvailability.locateHint}`);
-    }
-    lines.push("");
-    lines.push(`If it is genuinely absent, it installs with: \`${daemonAvailability.installCommand}\``);
-    lines.push("");
-  } else if (config?.daemon === true && daemonAvailability?.outdated) {
-    lines.push("## Code Intelligence (Daemon) — installed version too old");
-    lines.push("");
-    lines.push(
-      `The installed daemon is ${daemonAvailability.version}, older than the ${daemonAvailability.required} this REAP needs. Do NOT rely on daemon queries — use Read/Grep/Glob as normal.`,
-    );
-    lines.push("");
-    // Same split as the "not installed" branch above, and phrased by the same
-    // owner: what replaces a stale daemon depends on where reap found it, and
-    // relaying an upgrade command that cannot take effect is worse than saying
-    // nothing — the user runs it, nothing changes, and the agent has no reason
-    // to look further.
-    lines.push(`Tell the user: ${daemonAvailability.staleRemedy}`);
-    lines.push("");
-  } else if (config?.daemon === true) {
-    lines.push("## Code Intelligence (Daemon)");
-    lines.push("");
-    lines.push("REAP daemon is enabled. Prefer daemon queries over full-text search when possible.");
-    lines.push("");
-    lines.push("- Health: `curl -sf http://127.0.0.1:17224/health` — if it fails, daemon is down; skip silently.");
-    lines.push("- Project ID lookup: `curl -s http://127.0.0.1:17224/projects | jq '.data[] | select(.path==\"<cwd>\")'`.");
-    lines.push("- Symbol search: `GET /projects/{id}/symbols?q=<query>` — find function/class/type definitions.");
-    lines.push("- Callers: `GET /projects/{id}/symbols/{symbolId}/callers` — who calls this symbol?");
-    lines.push("- Impact: `GET /projects/{id}/impact?file=<path>` — blast radius of changes to a file.");
-    lines.push("- Staleness: `GET /projects/{id}/status` includes `lastIndexedCommit`. Compare against `git rev-parse HEAD`; if different, the index is stale.");
-    lines.push("");
-    lines.push("See `~/.reap/reap-guide.md` § Code Intelligence (Daemon) for the full protocol.");
-    lines.push("");
-  }
+  // The commands below are the ones the agent will type, so they are also the
+  // ones the e2e suite runs verbatim. The predecessor documented `?file=` in
+  // four places while the server accepted `?files=`, and nothing executed the
+  // documented form to find out.
+  lines.push("## Code Intelligence");
+  lines.push("");
+  lines.push("REAP ships a code index. Prefer it over full-text search for symbol-shaped questions.");
+  lines.push("");
+  lines.push("- `reap index status` — symbol/edge counts, the import resolution rate, and the commit the index describes.");
+  lines.push("- `reap index search <query>` — find a definition. Returns `file:line`; Read it directly.");
+  lines.push("- `reap index impact <file>` — what breaks if you change this file. Ask BEFORE editing a shared module.");
+  lines.push("- `reap index callers <symbolId>` — who calls this. A symbolId looks like `src/core/lifecycle.ts::nextStage`.");
+  lines.push("- `reap index callees <symbolId>` — what this calls.");
+  lines.push("");
+  lines.push("Queries refresh the index themselves when HEAD has moved, so there is nothing to start and nothing to keep fresh.");
+  lines.push("");
+  lines.push("Two things it will not tell you. The index is keyed by **commit**, so symbols you have written but not committed are absent — use Grep for those. And a low `import resolution rate` in `status` means the graph is incomplete, so treat an empty `impact` result as unknown rather than as none.");
+  lines.push("");
 
   // ── Project Path ──────────────────────────────────────────
   lines.push("## Project");

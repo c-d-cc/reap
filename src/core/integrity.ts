@@ -8,7 +8,7 @@ import {
   LIFECYCLE_STAGES,
   MERGE_STAGES,
 } from "../types/index.js";
-import type { GenerationState, DaemonAvailability } from "../types/index.js";
+import type { GenerationState } from "../types/index.js";
 
 export interface IntegrityResult {
   errors: string[];
@@ -701,66 +701,6 @@ async function checkBacklog(
       );
     }
   }
-}
-
-// ── daemon availability check ────────────────────────────────
-
-/**
- * Report a project that asked for the daemon but cannot use it.
- *
- * `daemon: true` and no daemon is a mismatch between configuration and
- * environment, not a transient outage — it will be just as broken tomorrow. The
- * lifecycle still refuses to block on it, so this is where a user who asks
- * finds out. Before the daemon became a separate package there was nothing to
- * find out: npm linked a directory that did not ship, and reap could not tell
- * an empty link from a stopped process.
- *
- * `availability` is injected (gen-076 pattern) because resolving it belongs to
- * `cli` and `core` does not import from there. Undefined means the caller did
- * not look, and a check that was not run reports nothing — flagging a setup
- * that may well be fine is worse than staying quiet.
- *
- * Warnings only. Nothing here has a counterpart in `fixProject`: there is no
- * safe automatic repair for "install this package", and leaving the mutating
- * path untouched is what guarantees one can never appear by accident.
- */
-export function checkDaemonAvailability(
-  daemonEnabled: boolean,
-  availability?: DaemonAvailability,
-): IntegrityResult {
-  const warnings: string[] = [];
-  if (daemonEnabled && availability) {
-    // Reported before the verdict and regardless of it. An instruction that was
-    // followed to an empty path is a fact about this setup whether or not the
-    // search went on to succeed, and it is the finding the user can act on.
-    const miss = availability.explicitMiss;
-    if (miss) {
-      warnings.push(
-        `${miss.label} points at ${miss.path}, but there is no file there. REAP searched for the daemon the usual way instead.`,
-      );
-    }
-    if (!availability.installed) {
-      // The locate hint is withheld when a location was already named: it would
-      // tell someone who has just been told their path is empty to supply a
-      // path. The miss warning above is the actionable one in that case.
-      //
-      // The command goes last either way, so nothing follows it that could be
-      // mistaken for part of it.
-      const hint = miss ? "Install it with" : `${availability.locateHint} Otherwise install it with`;
-      warnings.push(
-        `config.yml sets 'daemon: true' but ${availability.packageName} is not installed. ${hint}: ${availability.installCommand}`,
-      );
-    } else if (availability.outdated) {
-      // Where it came from decides what to say, and the sentence is composed by
-      // whoever knows that (see `staleDaemonRemedy`). Telling someone to install
-      // globally when reap will go on resolving a named path or a checkout beside
-      // it is advice that cannot take effect while looking like it should.
-      warnings.push(
-        `config.yml sets 'daemon: true' and the daemon is installed, but version ${availability.version} is older than the ${availability.required} this REAP requires. ${availability.staleRemedy}`,
-      );
-    }
-  }
-  return { errors: [], warnings };
 }
 
 // ── user-level artifact checks ───────────────────────────────

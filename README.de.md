@@ -73,7 +73,7 @@ reap uninstall            # zeigt, was entfernt wird
 reap uninstall --confirm  # führt es aus und übergibt die Pakete an npm
 ```
 
-Es stoppt den Daemon, entfernt REAPs Dateien aus den Verzeichnissen von Claude Code und OpenCode, nimmt REAPs Einträge wieder aus `settings.json` heraus, löscht `~/.reap/reap-guide.md`, den Installationsstempel und `~/.reap/daemon/` und führt anschließend `npm uninstall -g` für `@c-d-cc/reap-daemon` und `@c-d-cc/reap` aus. Ihre eigenen Dateien in diesen Verzeichnissen bleiben unangetastet — auch alles mit dem Namen `reapdev.*` und alles Weitere in `~/.reap/`.
+Es entfernt REAPs Dateien aus den Verzeichnissen von Claude Code und OpenCode, nimmt REAPs Einträge wieder aus `settings.json` heraus, löscht `~/.reap/reap-guide.md`, den Installationsstempel und `~/.reap/daemon/` (was der stillgelegte Daemon hinterlassen hat) und führt anschließend `npm uninstall -g` für `@c-d-cc/reap-daemon` und `@c-d-cc/reap` aus. Ihre eigenen Dateien in diesen Verzeichnissen bleiben unangetastet — auch alles mit dem Namen `reapdev.*` und alles Weitere in `~/.reap/`.
 
 **Paket schon entfernt?** Dann fehlt der Befehl `reap`, und die Dateien liegen noch da. Führen Sie es aus, ohne etwas zu installieren:
 
@@ -289,29 +289,39 @@ Wenn der Subagenten-Aufruf fehlschlägt, setzt der Builder die normale Validieru
 
 **Fitness-Phase + Cruise-Modus**: Der Evaluator läuft auch in der Fitness-Phase. High-severity-Befunde aus der Validierung **stoppen Cruise-Modus automatisch** beim nächsten Fitness-Phase-Lauf — `cruiseCount` wird aus `config.yml` gelöscht, der Cruise-Prompt durch einen supervised Fallback ersetzt, sodass der Benutzer den Befund prüfen kann.
 
-### Code Intelligence Daemon (opt-in)
+### Code Intelligence
 
-REAP enthält einen lokalen Code-Intelligence-Daemon (`localhost:17224`), der generationsübergreifend einen Tree-sitter-Symbolgraph pflegt. Er parst 15+ Sprachen, speichert den Graph in SQLite und stellt eine HTTP-API für Symbolsuche, Caller/Callee-Analyse, Blast-Radius-Impact, Community-Erkennung und Prozessfluss-Tracing bereit.
+REAP bringt einen Code-Index mit. Nichts zu installieren, nichts zu starten, kein Hintergrundprozess.
 
-Aktivierung durch eine Zeile in `.reap/config.yml`:
-
-```yaml
-daemon: true   # Standard: false
-```
-
-Wenn aktiviert, führt REAP automatisch:
-- Projektregistrierung beim Daemon bei Generation-Start,
-- Re-Indexierung an wichtigen Lifecycle-Momenten (learning, implementation complete, completion commit),
-- fügt einen "Code Intelligence"-Abschnitt mit Query-Beispielen und Staleness-Prüfprotokoll in Builder/Evaluator-Prompts ein.
-
-Der Daemon startet automatisch beim ersten Gebrauch und fährt nach 30 Minuten Inaktivität herunter:
+Ein Tree-sitter-Parser durchläuft jede versionierte Datei, erfasst die dort definierten Symbole sowie die Aufrufe und Importe zwischen ihnen und legt das Ergebnis als gzip-komprimiertes JSON in `.reap/.index/` ab. Fünfzehn Sprachen sind enthalten, und es gibt **keinen nativen Build** — die Grammatiken sind WebAssembly.
 
 ```bash
-reap daemon status   # Status prüfen
-reap daemon stop     # Daemon stoppen
+reap index                     # update — die Voreinstellung
+reap index status              # Zahlen, Import-Auflösungsrate, indizierter Commit
+reap index impact <file>       # was bricht, wenn Sie diese Datei ändern
+reap index search <query>      # eine Definition finden, mit file:line
+reap index callers <symbolId>  # wer ruft das auf (src/core/lifecycle.ts::nextStage)
+reap index callees <symbolId>  # was ruft das auf
 ```
 
-Der Daemon ist ein Read-only-Beschleuniger — er modifiziert niemals Ihren Code. Bei Nichtverfügbarkeit fallen Agenten auf Standard-Read/Grep/Glob-Tools zurück, ohne den Lifecycle zu unterbrechen.
+**Die Einheit der Änderung ist ein Commit.** Der Index hält die SHA fest, die er beschreibt; zu entscheiden, was neu geparst werden muss, ist ein `git diff`, und zu entscheiden, ob überhaupt, ein Stringvergleich. Ein vollständiger Index dieses Repositorys dauert etwa eine Drittelsekunde, ein Re-Index ohne Änderungen gar nichts. Sobald `HEAD` sich bewegt hat — nach einem Commit, einem Branch-Wechsel, einem Rebase oder einem Pull — aktualisieren die Abfragen den Index selbst. REAP aktualisiert nur dort von sich aus, wo es gerade selbst committet hat: am Ende von `completion` und in `early-close`.
+
+Der Preis dafür: **nicht committete Arbeit steht nicht im Index.** Dafür nehmen Sie Grep; `reap index status` nennt immer den Commit, den der Index beschreibt.
+
+**Lesen Sie `status`, bevor Sie `impact` glauben.** Alles, was `impact` weiß, stammt aus aufgelösten Import-Kanten. Eine niedrige `imports`-Rate bedeutet also einen unvollständigen Graphen, und ein leerer Blast Radius heißt *unbekannt*, nicht *keiner*:
+
+```
+symbols: 1530  (function 902, method 341, class 187, type 100)
+edges:   3688  (CALLS 3145, IMPORTS 543)
+imports: 543/543 resolved (100%)
+commit:  1a2b3c4
+```
+
+(Beispielwerte.) Diese Zeile gibt es, weil ihr Fehlen fünf Monate gekostet hat. Der Vorgänger dieses Indexers löste in jedem gewöhnlichen TypeScript-Projekt **null** Importe auf — er ordnete einen `./x.js`-Specifier nie der `x.ts` zu, aus der er entsteht — und der Blast Radius blieb leer, während alle Tests bestanden und CI durchgehend grün war: jede Prüfung fragte, ob indiziert wurde, keine fragte, ob das Ergebnis Sinn ergibt.
+
+Der Index liegt in `.reap/.index/` und ist gitignored. Ihn zu löschen ist immer unbedenklich — der nächste Befehl baut ihn neu.
+
+**Ersetzt den Daemon (entfernt in v0.17.6).** Bis v0.17.5 war dies ein separates Paket, `@c-d-cc/reap-daemon`, das hinter `daemon: true` einen HTTP-Server auf Port 17224 betrieb. Es ist stillgelegt und auf npm als deprecated markiert; `reap update` entfernt die Einstellungen und die zurückgebliebenen Daten für Sie. Sein Zweck war, einen Graphen warmzuhalten — und den Graphen dieses Repositorys von der Platte zu laden kostet einstellige Millisekunden gegenüber einem `reap`-Kaltstart von 40 bis 70. **Das Vermiedene war billiger als die Maschinerie, die es vermied**, und diese Maschinerie bestand aus einem Port, einer Registry, einer PID-Datei, einem Idle-Timer, einem zweiten npm-Paket mit nativem SQLite-Build und einer Release-Pipeline.
 
 ## Projektstruktur
 
@@ -354,7 +364,6 @@ strictMerge: false              # Direktes git pull/push/merge einschränken
 agentClient: claude-code       # KI-Agenten-Client
 # cruiseCount: 1/5             # Vorhanden = Cruise-Modus (aktuell/gesamt)
 # evaluator: true              # Opt-in: reap-evaluate in Validierung/Fitness starten
-# daemon: true                 # Opt-in: Lokaler Code-Intelligence-Daemon
 ```
 
 Wichtige Einstellungen:
@@ -363,7 +372,6 @@ Wichtige Einstellungen:
 - **`strictMerge`**: Beschränkt direktes git pull/push/merge — verwenden Sie stattdessen `/reap.pull`, `/reap.push`, `/reap.merge`.
 - **`agentClient`**: Bestimmt, welcher Adapter für die Skill-Bereitstellung verwendet wird.
 - **`evaluator`**: Opt-in unabhängiger Reviewer. Startet bei `true` den `reap-evaluate` Subagenten als Advisor. Standard `false`. Siehe [Evaluator Agent](#evaluator-agent-opt-in) oben.
-- **`daemon`**: Opt-in lokaler Code-Intelligence-Daemon. Bei `true` indexiert REAP an Lifecycle-Checkpoints automatisch und fügt Daemon-Query-Anweisungen in Agent-Prompts ein. Standard `false`. Siehe [Code Intelligence Daemon](#code-intelligence-daemon-opt-in) oben.
 
 ## Upgrade von v0.15 [↗](https://reap.cc/docs/migration-guide)
 

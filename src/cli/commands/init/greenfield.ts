@@ -92,7 +92,7 @@ ${claudeMdSection}
 }
 
 export async function execute(paths: ReapPaths, projectName: string): Promise<void> {
-  const config = await initCommon(paths, projectName);
+  const { config, ignoreAction } = await initCommon(paths, projectName);
 
   // Write empty genome template
   await writeTextFile(paths.application, DEFAULT_APPLICATION);
@@ -111,6 +111,9 @@ export async function execute(paths: ReapPaths, projectName: string): Promise<vo
       project: config.project,
       mode: "greenfield",
       reapDir: paths.reap,
+      ...(ignoreAction === "failed"
+        ? { warning: "could not add .reap/.index/ to .gitignore (check file permissions) — the code index would otherwise be committed" }
+        : {}),
     },
     message: `Project '${config.project}' initialized (greenfield). .reap/ structure created.`,
     prompt: buildConversationPrompt(claudeMdSection),

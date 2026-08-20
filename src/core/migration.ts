@@ -14,7 +14,7 @@
  *
  * The helpers are sync because they only do filesystem reads — keeping them
  * sync lets the async + sync builders share the same code path and remain
- * byte-identical (gen-068 daemon section pattern).
+ * byte-identical.
  *
  * All failures are silent: detection that throws or hits an unreadable file
  * yields an empty array. Migration is best-effort — it must never block the

@@ -21,7 +21,7 @@ export const ko: Translations = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
-      daemon: "Code Intelligence Daemon",
+      daemon: "Code Intelligence",
       advanced: "고급",
       collaborationOverview: "분산 워크플로우",
       mergeGeneration: "Merge Generation",
@@ -299,8 +299,8 @@ export const ko: Translations = {
     destroyDesc: "프로젝트에서 모든 REAP 파일을 제거합니다.",
     destroyNote: "프로젝트에서 .reap/ 디렉토리와 모든 REAP 관련 파일을 완전히 제거합니다. 확인을 위해 \"yes destroy\"를 입력해야 합니다.",
     uninstallTitle: "reap uninstall",
-    uninstallDesc: "이 머신에서 REAP를 제거합니다 — 사용자 레벨 파일, daemon, npm 패키지.",
-    uninstallNote: "npm은 패키지만 지웁니다. REAP의 슬래시 명령어, 에이전트 정의, SessionStart 훅, ~/.reap/ 는 REAP 자신의 코드가 쓴 것이고, npm은 제거 시점에 어떤 코드도 실행하지 않습니다. 이 명령이 올바른 순서로 처리합니다 — daemon 정지, 두 클라이언트의 사용자 레벨 파일 제거, settings.json에서 REAP 항목만 제거, 그다음 @c-d-cc/reap-daemon 과 @c-d-cc/reap 를 npm에 넘깁니다. 사용자 파일은 남습니다 — reapdev.* 도, ~/.reap/ 안의 다른 것들도. 이미 패키지를 지웠다면 npx @c-d-cc/reap uninstall --confirm. 프로젝트 하나에서 REAP를 제거하는 reap destroy 와는 다릅니다.",
+    uninstallDesc: "이 머신에서 REAP를 제거합니다 — 사용자 레벨 파일과 npm 패키지.",
+    uninstallNote: "npm은 패키지만 지웁니다. REAP의 슬래시 명령어, 에이전트 정의, SessionStart 훅, ~/.reap/ 는 REAP 자신의 코드가 쓴 것이고, npm은 제거 시점에 어떤 코드도 실행하지 않습니다. 이 명령이 올바른 순서로 처리합니다 — 두 클라이언트의 사용자 레벨 파일 제거, settings.json에서 REAP 항목만 제거, 폐기된 daemon 이 ~/.reap/daemon/ 에 남긴 것 제거, 그다음 @c-d-cc/reap-daemon 과 @c-d-cc/reap 를 npm에 넘깁니다. 사용자 파일은 남습니다 — reapdev.* 도, ~/.reap/ 안의 다른 것들도. 이미 패키지를 지웠다면 npx @c-d-cc/reap uninstall --confirm. 프로젝트 하나에서 REAP를 제거하는 reap destroy 와는 다릅니다.",
     makeBacklogTitle: "reap make backlog",
     makeBacklogDesc: "backlog 항목을 생성합니다. backlog 파일을 생성하는 유일한 지원 방법입니다.",
     makeBacklogNote: "옵션: --type <genome-change|environment-change|task> --title <title> [--body <body>] [--priority <priority>]. backlog 파일을 직접 생성하지 마세요.",
@@ -410,7 +410,6 @@ export const ko: Translations = {
       ["agentClient", "AI 에이전트 클라이언트 (claude-code | opencode | codex). 어댑터 layer를 제어 — 슬래시 명령 위치, manifest 파일 (CLAUDE.md vs AGENTS.md), plugin/hook 전략. 기본값: claude-code. Codex는 현재 미지원."],
       ["cruiseCount", "존재 시 크루즈 모드 활성화. 형식: current/total (예: 1/5). 크루즈 완료 후 자동 제거"],
       ["evaluator", "opt-in 독립 검토자. true 설정 시 validation/fitness 단계에서 reap-evaluate를 advisor로 실행. high-severity concern은 cruise mode를 자동 중단. 기본값: false."],
-      ["daemon", "opt-in 로컬 코드 인텔리전스 데몬. true 설정 시 lifecycle 주요 시점(learning, implementation 완료, completion commit)에 자동 인덱싱하고 agent 프롬프트에 데몬 쿼리 지침 포함. 기본값: false."],
     ],
     strictMode: "Strict 모드",
     strictModeDesc: "Strict 모드는 AI 에이전트가 할 수 있는 작업을 제어합니다. 두 개의 독립적인 설정:",
@@ -828,72 +827,47 @@ priority: medium
 작업에 대한 설명.`,
   },
 
-  // Daemon Page
+  // Code Intelligence Page (route stays /docs/daemon so links keep working)
   daemonPage: {
-    title: "Code Intelligence Daemon",
+    title: "Code Intelligence",
     breadcrumb: "가이드",
-    intro: "REAP는 세대에 걸쳐 Tree-sitter 심볼 그래프를 유지하는 로컬 코드 인텔리전스 데몬을 사용할 수 있습니다. 별도로 배포되며 REAP 설치에 포함되지 않습니다. 에이전트에게 심볼 검색, caller/callee 순회, blast-radius 영향 분석을 localhost:17224의 로컬 HTTP API를 통해 제공합니다.",
-    optInTitle: "설정 (opt-in)",
-    installTitle: "먼저 설치하세요",
-    installDesc: "데몬은 별도의 npm 패키지입니다. REAP를 설치해도 함께 설치되지 않습니다 — 네이티브 SQLite 빌드와 Tree-sitter 문법 묶음을 지고 있어서, 기본적으로 꺼져 있는 기능을 위해 모든 사용자가 그 비용을 낼 이유가 없기 때문입니다.",
-    installCmd: `npm i -g @c-d-cc/reap-daemon`,
-    installNote: "v0.17.5 이전에는 데몬이 배포되지 않는 file: 의존성으로 선언되어 있어, daemon: true 를 켜면 끊긴 심링크가 생기고 아무 일도 일어나지 않았습니다. 예전에 데몬을 켰는데 동작하지 않았다면 이것이 원인입니다.",
-    locateTitle: "설치했는데 REAP가 찾지 못할 때",
-    locateDesc: "REAP는 자기 위치를 기준으로 데몬을 찾고, 데몬은 의도적으로 REAP의 의존 패키지가 아닙니다 \u2014 네이티브 SQLite 빌드와 15개 Tree-sitter 문법을 모든 설치에 얹지 않기 위해서입니다. 따라서 둘은 같은 resolution root 를 공유할 때만 서로를 찾습니다. 같은 패키지 매니저로 둘 다 전역 설치하면 그 조건이 충족되지만, 전역 REAP 에 프로젝트 로컬 데몬, 서로 다른 prefix, 전역 prefix 를 옮기는 Node 버전 전환에서는 충족되지 않습니다. 그럴 때는 위치를 직접 알려주면 됩니다.",
-    locateConfig: `daemonBin: /usr/local/lib/node_modules/@c-d-cc/reap-daemon/dist/index.js`,
-    locateNote: "REAP_DAEMON_BIN 은 한 번의 명령이나 CI 작업에 같은 일을 하며 config 보다 우선합니다. 상대 경로는 프로젝트 루트 기준으로 해석되고 앞머리 ~ 는 홈으로 전개됩니다. reap daemon status 가 bin 과 binSource(env, config, package, checkout)를 보고하므로 REAP 이 그 설정을 읽고 있는지 짐작하지 않고 확인할 수 있습니다 \u2014 이것은 REAP 이 띄울 대상이며, 이미 떠 있는 데몬은 출처와 무관하게 재사용됩니다. 아무것도 없는 경로는 그 경로를 지목해 보고되지만 탐색을 멈추지는 않습니다 \u2014 config.yml 은 커밋되므로 한 머신에서 맞는 위치가 다른 머신에는 없을 수 있기 때문입니다.",
-    unusableTitle: "켰지만 쓸 수 없을 때",
-    unusableDesc: "daemon: true 인데 설치가 없거나 REAP가 요구하는 버전보다 낡은 경우는 일시적 장애가 아니라 설정과 환경의 불일치이므로, REAP가 그렇게 말합니다. lifecycle 은 절대 막히지 않습니다 — 인덱싱은 여전히 조용히 실패하고 모든 명령은 그대로 동작합니다. 달라지는 것은 물어보면 답한다는 점입니다. reap daemon status 는 미설치 / 버전 미달 / 미실행을 구분하고 실행할 명령을 알려주며, 설치된 버전과 실행 중인 버전을 나란히 보여줍니다 — 데몬은 idle 30분까지 살아 있으므로 업그레이드해도 응답하는 프로세스가 바뀌지 않기 때문입니다. reap fix --check 는 이 불일치를 경고로 보고합니다. 그리고 에이전트 프롬프트에서 질의 프로토콜이 빠지므로, 에이전트가 매 단계마다 죽은 포트에 요청을 보내지 않습니다.",
-    optInDesc: "패키지를 설치한 뒤 .reap/config.yml에 한 줄을 추가하여 활성화합니다:",
-    optInConfig: `daemon: true   # 기본값: false`,
-    optInNote: "false(또는 미설정) 시 모든 데몬 관련 동작이 건너뜁니다. 에이전트 프롬프트, lifecycle 훅, CLI 출력은 데몬을 한 번도 활성화하지 않은 프로젝트와 완전히 동일합니다.",
-    autoTriggerTitle: "자동 트리거 시점",
-    autoTriggerDesc: "활성화 시 REAP가 주요 lifecycle 시점에 자동으로 프로젝트를 등록하고 재인덱싱합니다:",
-    autoTriggerHeaders: ["Lifecycle 시점", "실행 내용"],
-    autoTriggerItems: [
-      ["reap run start (generation 생성)", "ensureRegistered + 전체 triggerIndexing"],
-      ["reap run learning (work phase)", "ensureRegistered + triggerIndexing (탐구 전 그래프 최신화)"],
-      ["reap run implementation (complete phase)", "triggerIndexing (validation이 방금 작성한 코드를 볼 수 있도록)"],
-      ["reap run completion (commit phase, 아카이브 후)", "triggerIndexing (다음 세대를 위해 커밋된 상태 반영)"],
+    intro: "REAP 는 코드 인덱스를 내장합니다. 설치할 것도, 띄울 것도, 백그라운드에서 도는 프로세스도 없습니다. Tree-sitter 파서가 추적 중인 모든 파일을 훑어 정의된 심볼과 그 사이의 호출·import 를 기록하고, 결과를 .reap/.index/ 에 gzip 된 JSON 으로 저장합니다. 15개 언어가 함께 배포되며 네이티브 빌드가 없습니다 — grammar 가 WebAssembly 입니다.",
+    commandsTitle: "명령",
+    commandsDesc: "모든 서브커맨드는 REAP 의 다른 명령과 마찬가지로 stdout 에 JSON 을 냅니다. 에이전트는 파싱하고, 사람은 message 필드를 읽으면 됩니다.",
+    commandsCode: `reap index                     # update — 기본 동작
+reap index update [--full]     # 인덱스를 HEAD 에 맞춤
+reap index status              # 통계, import 해석률, 인덱싱된 커밋
+reap index impact <file>...    # 이 파일을 바꾸면 무엇이 영향받는가
+reap index search <query>      # 정의 찾기 (file:line 반환)
+reap index callers <symbolId>  # 누가 이것을 부르는가
+reap index callees <symbolId>  # 이것이 무엇을 부르는가`,
+    commandsNote: "symbolId 는 <file>::<name> 형태입니다 — 예: src/core/lifecycle.ts::nextStage. reap index search 가 이 값을 출력합니다.",
+    commitTitle: "변경의 단위는 커밋입니다",
+    commitDesc: "인덱스는 자기가 서술하는 SHA 를 기록합니다. 무엇을 다시 읽을지는 git diff 한 번이고, 다시 읽을 필요가 있는지는 문자열 비교 한 번입니다. HEAD 가 움직이면 — 커밋·브랜치 전환·rebase·pull 후 — 질의가 스스로 인덱스를 갱신합니다. REAP 이 먼저 갱신하는 것은 자기가 방금 커밋한 자리뿐입니다 — completion 끝, 그리고 early-close.",
+    commitCode: `reap index update    # Indexed 412 file(s) — full, 1530 symbols at 1a2b3c4 (612ms)
+reap index update    # Index is current at 1a2b3c4 (1530 symbols, 3688 edges)`,
+    commitNote: "대가는 이것입니다 — 커밋되지 않은 작업은 인덱스에 없습니다. 방금 쓰고 아직 커밋하지 않은 심볼은 search 로 찾을 수 없고, 새로 만든 파일은 impact 에 나타나지 않습니다. 그건 Grep 으로 찾으세요. 그리고 git 저장소가 필요합니다 — 없으면 인덱스를 키잉할 커밋 자체가 없습니다.",
+    statusTitle: "impact 를 믿기 전에 status 를 보세요",
+    statusDesc: "impact 가 아는 것은 전부 해석된 import edge 에서 나옵니다. imports 비율이 낮으면 그래프가 불완전하고, 그때 빈 blast radius 는 '없음'이 아니라 '모름'입니다. status 는 grammar 로드 실패도 경고합니다 — 어떤 언어가 조용히 인덱싱되지 않는 다른 한 경로입니다.",
+    statusCode: `files:   412
+symbols: 1530  (function 902, method 341, class 187, type 100)
+edges:   3688  (CALLS 3145, IMPORTS 543)
+imports: 543/543 resolved (100%)
+commit:  1a2b3c4`,
+    statusNote: "(예시 수치입니다.) 이 한 줄이 없어서 5개월을 잃었습니다. 이 인덱서의 전신은 표준 TypeScript 프로젝트에서 import 를 하나도 해석하지 못했고 — ./x.js specifier 를 그것을 만들어내는 x.ts 에 대응시키지 못했습니다 — blast radius 가 계속 0을 반환하는 동안 모든 테스트가 통과했고 CI 는 내내 초록이었습니다. 모든 검사가 '인덱싱이 돌았는가'를 물었고 '결과가 말이 되는가'는 아무도 묻지 않았기 때문입니다.",
+    locationTitle: "인덱스가 있는 곳",
+    locationDesc: ".reap/.index/ 안에 manifest.json 과 gzip 된 그래프 하나로 있고, reap init 과 reap update 가 .gitignore 에 추가합니다. 프로젝트를 지우면 인덱스도 함께 사라지고 홈 디렉토리에는 아무것도 쌓이지 않습니다. gitignore 하는 이유는 크기가 아닙니다 — 인덱스를 커밋하면 그것을 담은 커밋을 다시 인덱싱해야 하고, 이 과정은 끝나지 않습니다. .reap/.index/ 는 언제 지워도 안전합니다. 다음 명령이 다시 만듭니다.",
+    whenTitle: "언제 쓰는가",
+    whenDesc: "둘은 상호보완적입니다 — 인덱스는 file:line 으로 답하고, 그것을 읽으면 됩니다.",
+    whenHeaders: ["도구", "질문이 이럴 때"],
+    whenItems: [
+      ["reap index", "이건 어디에 정의됐나, 누가 부르나, 이 파일에 무엇이 의존하나, 이 변경의 blast radius 는 어디까지인가"],
+      ["Grep / Glob", "리터럴 문자열, 주석, 설정 파일, grammar 가 없는 언어, 그리고 아직 커밋하지 않은 모든 것"],
     ],
-    autoTriggerNote: "4개의 호출 위치 모두 데몬 프로세스에 접근할 수 없을 때 조용히 실패합니다. CLI lifecycle은 데몬 문제로 절대 차단되지 않습니다.",
-    queryTitle: "데몬 쿼리",
-    queryDesc: "쿼리 전에 항상 데몬이 실행 중인지 확인하세요 — 아니면 조용히 건너뜁니다:",
-    queryHealth: `curl -sf http://127.0.0.1:17224/health || echo "daemon down"`,
-    queryProjectId: `PROJECT_ID=$(curl -s http://127.0.0.1:17224/projects \\
-  | jq -r --arg p "$CWD" '.data[] | select(.path==$p) | .id')`,
-    queryExamples: `# 이름으로 심볼 검색
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols?q=consumeBacklog"
-
-# 특정 심볼의 callers
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callers"
-
-# 특정 심볼의 callees
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callees"
-
-# 파일 변경의 영향 범위 (blast radius)
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/impact?file=src/core/lifecycle.ts"
-
-# 프로젝트 상태 — lastIndexedAt과 lastIndexedCommit 포함
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status"`,
-    stalenessTitle: "Staleness 확인",
-    stalenessDesc: "/projects/:id/status는 lastIndexedCommit(최근 인덱싱 시점의 git rev-parse HEAD)을 반환합니다. 쿼리 전에 인덱스가 오래됐는지 확인하려면:",
-    stalenessCode: `INDEXED=$(curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status" | jq -r '.data.lastIndexedCommit // "none"')
-HEAD=$(git rev-parse HEAD)
-[ "$INDEXED" = "$HEAD" ] && echo "최신" || echo "오래됨 — 재인덱싱 필요"`,
-    cliTitle: "CLI 관리",
-    cliDesc: "데몬은 첫 사용 시 자동으로 시작되고 30분 유휴 후 자동 종료됩니다. 명시적으로 관리할 수도 있습니다:",
-    cliCode: `reap daemon status   # 실행 여부 확인, 마지막 인덱싱 커밋 표시
-reap daemon stop     # 데몬 종료
-reap daemon index    # 수동 재인덱싱 트리거
-reap daemon query    # 심볼 쿼리 실행`,
-    fallbackTitle: "데몬 사용 불가 시",
-    fallbackDesc: "데몬은 읽기 전용 가속기 — 코드를 절대 수정하지 않습니다. 어떤 이유로 사용 불가 시 에이전트는 표준 Read/Grep/Glob 도구로 폴백하며 lifecycle이 중단되지 않습니다. 데몬 우선 vs 파일시스템 우선 가이드:",
-    fallbackHeaders: ["접근 방식", "사용 시기"],
-    fallbackItems: [
-      ["데몬 우선", "심볼 정의 조회, caller/callee 순회, 다중 파일 영향 분석"],
-      ["파일시스템 우선 (Grep/Glob)", "리터럴 문자열 검색, 주석 검색, 파서 미지원 파일, 데몬 다운"],
-    ],
+    retiredTitle: "예전에는 daemon 이 있었습니다",
+    retiredDesc: "v0.17.5 까지 이것은 daemon: true 뒤에서 17224 포트에 HTTP 서버를 띄우는 별도 패키지 @c-d-cc/reap-daemon 이었습니다. 지금은 폐기되어 npm 에서 deprecated 되었습니다. reap update 가 설정과 남은 데이터를 대신 지우므로, 손으로 할 일은 전역 패키지 제거 하나뿐입니다 — reap uninstall 도 이것을 함께 처리합니다.",
+    retiredCode: `npm uninstall -g @c-d-cc/reap-daemon`,
+    retiredNote: "그 존재 이유는 그래프를 warm 하게 유지하는 것이었는데 — 이 저장소의 그래프를 디스크에서 읽는 데 한 자리 수 밀리초가 들고 reap 콜드 스타트는 40~70ms 입니다. 피하려던 비용이 피하는 장치보다 쌌습니다. 그 장치는 포트 하나, registry, PID 파일, idle timer, 네이티브 SQLite 빌드를 진 두 번째 npm 패키지, 릴리즈 파이프라인, 그리고 자기 stop 명령조차 찾지 못한 고아 프로세스였습니다.",
   },
 
   // Self-Evolving Page
@@ -1062,6 +1036,10 @@ reap daemon query    # 심볼 쿼리 실행`,
     title: "릴리즈 노트",
     breadcrumb: "기타",
     versions: [
+      {
+        version: "0.17.6",
+        notes: "**code-intelligence daemon 을 폐기하고 indexer 를 REAP 에 내장했습니다.** 설치할 것도 포트도 상주 프로세스도 없습니다 — `reap index status`, `reap index impact <file>`, `reap index search <query>`, `reap index callers/callees <symbolId>`. 15개 언어를 지원하며 네이티브 빌드가 없습니다. **blast radius 가 표준 TypeScript 프로젝트에서 항상 0을 반환하고 있었습니다** — 5개월간. resolver 가 `./x.js` specifier 를 그것을 만들어내는 `x.ts` 에 대응시키지 못했기 때문입니다. 테스트 130개가 통과했고 CI 도 내내 초록이었습니다. 모든 검사가 '인덱싱이 돌았는가'를 물었고 '결과가 말이 되는가'는 아무도 묻지 않았기 때문입니다. **그래서 이제 `reap index status` 가 import 해석률을 보고하고**, 릴리즈 게이트는 '심볼 수 > 0' 이 아니라 알려진 관계를 찾아내는지를 요구합니다. **인덱싱은 커밋 기준입니다** — REAP 전체 인덱싱이 daemon 의 6.7초 대비 약 0.3초이고, HEAD 가 움직이면 질의가 스스로 갱신하며, 커밋되지 않은 작업은 의도적으로 인덱싱하지 않습니다. 인덱스는 `.reap/.index/` 에 있고 gitignore 됩니다. **daemon 을 쓰셨다면** `reap update` 가 `daemon`/`daemonBin` 을 지우고 `~/.reap/daemon/` 도 삭제합니다. 전역 패키지는 `npm uninstall -g @c-d-cc/reap-daemon` 으로 제거하세요. **`reap uninstall`** 은 npm 이 지우지 못하는 것을 지웁니다 — slash command, agent 정의, `~/.reap/`, SessionStart hook 항목. npm 10 과 12 모두 uninstall hook 을 실행하지 않아 `npm uninstall -g` 는 이것들을 그대로 남깁니다.",
+      },
       {
         version: "0.17.5",
         notes: "**코드 인텔리전스 데몬이 별도 발행 패키지가 됐습니다.** v0.16 부터 문서에는 있었지만 발행된 적이 없어 npm 설치본에서는 동작할 수 없었고, 함께 있던 패키징 문제들도 수정했습니다. `daemon: true` 를 쓰신다면 `npm i -g @c-d-cc/reap-daemon` 을 한 번 실행하세요. **데몬이 없거나 너무 낡으면 이제 보고합니다** — `reap daemon status`, `reap fix --check`, agent prompt 가 알려주며 어느 경우든 lifecycle 은 막히지 않습니다. **REAP 가 못 찾을 때를 위한 `daemonBin`** — 둘은 별개 패키지라 같은 resolution root 를 공유할 때만 서로를 찾습니다. `.reap/config.yml` 에 `daemonBin` 을 지정하거나 한 번만 쓸 `REAP_DAEMON_BIN` 을 쓰세요. **`reap run push` 가 git 의 실제 오류를 보고**하고, **`reap help` 에 `/reap.run` 과 `/reap.report`** 가 나옵니다. **REAP 이 첫 실행 때 자기 통합을 직접 설치합니다** — npm 12 가 전역 설치의 install script 를 차단해 slash command·agent 정의·session hook 이 놓이지 않았고 오류조차 나지 않았습니다.",

@@ -73,7 +73,7 @@ reap uninstall            # 显示将被删除的内容
 reap uninstall --confirm  # 执行删除，并把软件包交给 npm 卸载
 ```
 
-它会停止守护进程，删除 Claude Code 和 OpenCode 两处位置中 REAP 的文件，只从 `settings.json` 中移除 REAP 添加的条目，删除 `~/.reap/reap-guide.md`、安装标记和 `~/.reap/daemon/`，然后对 `@c-d-cc/reap-daemon` 与 `@c-d-cc/reap` 执行 `npm uninstall -g`。这些目录中属于你自己的文件不会被动 — 包括任何名为 `reapdev.*` 的文件，以及 `~/.reap/` 里的其他内容。
+它会删除 Claude Code 和 OpenCode 两处位置中 REAP 的文件，只从 `settings.json` 中移除 REAP 添加的条目，删除 `~/.reap/reap-guide.md`、安装标记和 `~/.reap/daemon/`（已停用的 daemon 留下的数据），然后对 `@c-d-cc/reap-daemon` 与 `@c-d-cc/reap` 执行 `npm uninstall -g`。这些目录中属于你自己的文件不会被动 — 包括任何名为 `reapdev.*` 的文件，以及 `~/.reap/` 里的其他内容。
 
 **已经删除了软件包？** 那么你没有 `reap` 命令，而文件仍然留在那里。无需安装任何东西即可运行：
 
@@ -289,31 +289,39 @@ evaluator: true   # 默认值: false
 
 **Fitness 阶段 + Cruise 模式**: evaluator 也在 fitness 阶段运行。validation 期间记录的 high-severity concern 在下次 fitness 阶段运行时会**自动中止 cruise 模式** — `cruiseCount` 从 `config.yml` 中清除，cruise 提示被替换为 supervised fallback，用户审查问题后再撰写 fitness 反馈。
 
-### Code Intelligence Daemon（可选功能）
+### Code Intelligence
 
-REAP 内置本地代码智能守护进程（`localhost:17224`），跨代际维护 Tree-sitter 符号图。解析 15+ 种语言，将图存储在 SQLite 中，并提供符号搜索、调用关系分析、blast-radius 影响、社区检测和进程流追踪的 HTTP API。
+REAP 内置代码索引。无需安装、无需启动、没有后台进程。
 
-在 `.reap/config.yml` 中添加一行即可启用：
-
-```yaml
-daemon: true   # 默认值: false
-```
-
-启用后，REAP 自动：
-- 在 generation 开始时向 daemon 注册项目，
-- 在关键生命周期时刻（learning、implementation 完成、completion commit）重新索引，
-- 在构建者/evaluator 提示中添加包含查询示例和 staleness 检查协议的"Code Intelligence"部分。
-
-守护进程首次使用时自动启动，30 分钟空闲后自动关闭：
+Tree-sitter 解析器遍历每个受版本控制的文件，记录其中定义的符号以及它们之间的调用与 import，并将结果以 gzip 压缩的 JSON 存放在 `.reap/.index/`。随附 15 种语言，且**没有原生构建** —— 语法是 WebAssembly。
 
 ```bash
-reap daemon status   # 检查运行状态
-reap daemon stop     # 停止守护进程
+reap index                     # update —— 默认行为
+reap index status              # 统计、import 解析率、已索引的 commit
+reap index impact <file>       # 修改这个文件会影响什么
+reap index search <query>      # 查找定义，返回 file:line
+reap index callers <symbolId>  # 谁调用了它（src/core/lifecycle.ts::nextStage）
+reap index callees <symbolId>  # 它调用了什么
 ```
 
-守护进程是只读加速器 — 绝不修改代码。不可用时智能体回退到标准 Read/Grep/Glob 工具，生命周期不会中断。
+**变更的单位是 commit。** 索引记录它所描述的 SHA，因此判断需要重新解析什么只是一次 `git diff`，判断是否值得重新解析只是一次字符串比较。完整索引本仓库约需三分之一秒，无变更时为零。一旦 `HEAD` 移动 —— 提交、切换分支、rebase 或 pull 之后 —— 查询本身会更新索引。REAP 只在自己刚提交的地方主动刷新：`completion` 末尾，以及 `early-close`。
 
-**Staleness 检查**: 每次索引运行记录 `lastIndexedCommit`（索引时的 `HEAD` 哈希）。智能体可通过 `GET /projects/:id/status` 与当前 `HEAD` 比较，决定查询前是否需要重新索引。
+代价是**未提交的工作不在索引中**。那部分请用 Grep 查找；`reap index status` 始终会指明索引所描述的 commit。
+
+**相信 `impact` 之前先看 `status`。** `impact` 所知的一切都来自已解析的 import 边，因此 `imports` 比率偏低意味着图不完整，空的 blast radius 表示*未知*而非*没有*：
+
+```
+symbols: 1530  (function 902, method 341, class 187, type 100)
+edges:   3688  (CALLS 3145, IMPORTS 543)
+imports: 543/543 resolved (100%)
+commit:  1a2b3c4
+```
+
+（示例数值。）这一行的缺失代价是五个月。本索引器的前身在每个标准 TypeScript 项目中解析出的 import 数为**零** —— 它从未把 `./x.js` 这样的 specifier 对应到生成它的 `x.ts` —— 于是 blast radius 一直返回空，而所有测试都通过、CI 始终是绿色：每项检查都在问「索引跑了吗」，没有人问「这个答案说得通吗」。
+
+索引位于 `.reap/.index/` 并被 gitignore。删除它永远是安全的 —— 下一条命令会重建。
+
+**取代 daemon（v0.17.6 中移除）。** 直到 v0.17.5，这曾是一个独立包 `@c-d-cc/reap-daemon`，在 `daemon: true` 背后于 17224 端口运行 HTTP 服务。它已停用并在 npm 上标记为 deprecated；`reap update` 会替你移除相关配置和残留数据。它存在的理由是让图保持热态 —— 而从磁盘加载本仓库的图只需个位数毫秒，`reap` 冷启动则是 40 到 70 毫秒。**被规避的开销比规避它的机制更便宜**，而那套机制包括一个端口、一份注册表、一个 PID 文件、一个空闲计时器、一个带原生 SQLite 构建的第二个 npm 包，以及一条发布流水线。
 
 ## 项目结构
 
@@ -356,7 +364,6 @@ strictMerge: false              # 限制直接 git pull/push/merge
 agentClient: claude-code       # AI 智能体客户端
 # cruiseCount: 1/5             # 存在时 = cruise 模式（当前/总计）
 # evaluator: true              # 可选：在 validation/fitness 中启动 reap-evaluate
-# daemon: true                 # 可选：本地代码智能守护进程
 ```
 
 关键设置：
@@ -365,7 +372,6 @@ agentClient: claude-code       # AI 智能体客户端
 - **`strictMerge`**：限制直接 git pull/push/merge——请改用 `/reap.pull`、`/reap.push`、`/reap.merge`。
 - **`agentClient`**：决定使用哪个适配器进行技能部署。
 - **`evaluator`**：可选独立审查者。`true` 时在 validation 阶段启动 `reap-evaluate` 子智能体作为顾问。默认 `false`。参见上方 [Evaluator Agent](#evaluator-agent可选功能)。
-- **`daemon`**：可选本地代码智能守护进程。`true` 时 REAP 在生命周期检查点自动索引，并在智能体提示中包含 daemon 查询指示。默认 `false`。参见上方 [Code Intelligence Daemon](#code-intelligence-daemon可选功能)。
 
 ## 从 v0.15 升级 [↗](https://reap.cc/docs/migration-guide)
 

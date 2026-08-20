@@ -21,7 +21,7 @@ export const zhCN: Translations = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
-      daemon: "Code Intelligence Daemon",
+      daemon: "Code Intelligence",
       advanced: "高级功能",
       collaborationOverview: "分布式工作流",
       mergeGeneration: "合并代",
@@ -299,8 +299,8 @@ export const zhCN: Translations = {
     destroyDesc: "从项目中移除所有 REAP 文件。",
     destroyNote: "完全移除 .reap/ 目录和项目中所有 REAP 相关文件。需要输入 \"yes destroy\" 确认。",
     uninstallTitle: "reap uninstall",
-    uninstallDesc: "从这台机器上移除 REAP — 用户级文件、守护进程和 npm 软件包。",
-    uninstallNote: "npm 只删除软件包。REAP 的斜杠命令、智能体定义、SessionStart 钩子和 ~/.reap/ 都是 REAP 自己的代码写入的，而 npm 在卸载时不执行任何代码。此命令按正确顺序处理 — 停止守护进程，清理两个客户端的用户级文件，只从 settings.json 中移除 REAP 的条目，然后把 @c-d-cc/reap-daemon 与 @c-d-cc/reap 交给 npm。你自己的文件会保留，包括 reapdev.* 以及 ~/.reap/ 中的其他内容。已经删除了软件包？npx @c-d-cc/reap uninstall --confirm。请勿与 reap destroy 混淆，后者只从单个项目中移除 REAP。",
+    uninstallDesc: "从这台机器上移除 REAP — 用户级文件和 npm 软件包。",
+    uninstallNote: "npm 只删除软件包。REAP 的斜杠命令、智能体定义、SessionStart 钩子和 ~/.reap/ 都是 REAP 自己的代码写入的，而 npm 在卸载时不执行任何代码。此命令按正确顺序处理 — 清理两个客户端的用户级文件，只从 settings.json 中移除 REAP 的条目，删除已停用的 daemon 留在 ~/.reap/daemon/ 的数据，然后把 @c-d-cc/reap-daemon 与 @c-d-cc/reap 交给 npm。你自己的文件会保留，包括 reapdev.* 以及 ~/.reap/ 中的其他内容。已经删除了软件包？npx @c-d-cc/reap uninstall --confirm。请勿与 reap destroy 混淆，后者只从单个项目中移除 REAP。",
     makeBacklogTitle: "reap make backlog",
     makeBacklogDesc: "创建 backlog 项。这是创建 backlog 文件的唯一支持方式。",
     makeBacklogNote: "选项：--type <genome-change|environment-change|task> --title <title> [--body <body>] [--priority <priority>]。切勿直接创建 backlog 文件。",
@@ -409,7 +409,6 @@ export const zhCN: Translations = {
       ["agentClient", "使用的 AI 代理客户端（默认：claude-code）。决定技能部署和会话钩子使用哪个适配器"],
       ["cruiseCount", "存在时启用巡航模式。格式：当前/总计（如 1/5）。巡航完成后自动移除"],
       ["evaluator", "在 validation 和 fitness 阶段启用独立的 reap-evaluate 子代理（默认：false）。检测到高严重性问题时自动中止 cruise 模式"],
-      ["daemon", "启用本地 Tree-sitter 符号图（默认：false）。在代理提示中添加符号搜索、调用关系和影响范围分析指南"],
     ],
     strictMode: "严格模式",
     strictModeDesc: "严格模式控制 AI 代理被允许做什么。两个独立设置：",
@@ -827,72 +826,47 @@ priority: medium
 任务描述。`,
   },
 
-  // Daemon Page
+  // Code Intelligence Page (route stays /docs/daemon so links keep working)
   daemonPage: {
-    title: "Code Intelligence Daemon",
+    title: "Code Intelligence",
     breadcrumb: "指南",
-    intro: "REAP 可以使用一个跨代际维护 Tree-sitter 符号图的本地代码智能守护进程。它单独发布，安装 REAP 时并不会一并安装。通过 localhost:17224 的本地 HTTP API，为智能体提供符号搜索、调用关系遍历和 blast-radius 影响分析。",
-    optInTitle: "设置（可选功能）",
-    installTitle: "先安装它",
-    installDesc: "守护进程是独立的 npm 包。安装 REAP 不会一并安装它：它带有原生 SQLite 构建和一整套 Tree-sitter 语法，否则所有用户都要为一个默认关闭的功能承担这份开销。",
-    installCmd: `npm i -g @c-d-cc/reap-daemon`,
-    installNote: "在 v0.17.5 之前，守护进程被声明为从未随包发布的 file: 依赖，因此设置 daemon: true 只会产生一个断掉的符号链接，什么也不会发生。如果你以前启用过守护进程却从未见它工作，原因就在这里。",
-    locateTitle: "已安装，但 REAP 找不到",
-    locateDesc: "REAP 以自身位置为起点查找守护进程，而守护进程被有意排除在 REAP 的依赖之外 \u2014 这样原生 SQLite 构建和十五套 Tree-sitter 语法就不会进入每一次安装。因此两者只有共享同一个 resolution root 时才能找到彼此。用同一个包管理器把两者都全局安装即可满足该条件；全局 REAP 搭配项目本地的守护进程、两个不同的 prefix，或改变全局 prefix 的 Node 版本切换则不满足。这种情况下直接告诉 REAP 它在哪里。",
-    locateConfig: `daemonBin: /usr/local/lib/node_modules/@c-d-cc/reap-daemon/dist/index.js`,
-    locateNote: "REAP_DAEMON_BIN 对单条命令或 CI 任务起同样作用，且优先于配置。相对路径按项目根目录解析，开头的 ~ 会展开为主目录。reap daemon status 会报告 bin 与 binSource(env、config、package 或 checkout)，因此你可以确认 REAP 是否在读取该设置，而不是假定它生效 \u2014 这是 REAP 将要启动的对象；已经在运行的守护进程无论来自哪里都会被复用。指向空处的路径会被点名报告，但不会中止查找 \u2014 config.yml 是提交进仓库的，在一台机器上正确的位置在另一台上可能并不存在。",
-    unusableTitle: "已启用但不可用",
-    unusableDesc: "设置了 daemon: true 却没有安装，或者版本低于当前 REAP 的要求，这不是一次临时故障，而是配置与环境不一致，所以 REAP 会明确告知。生命周期永远不会被阻塞：索引仍然静默失败，所有命令照常运行。改变的是——你问，它就会回答。reap daemon status 会区分未安装、版本过旧和未运行，并给出应执行的命令；它还会把运行中的版本与已安装的版本并列显示，因为守护进程会驻留至空闲 30 分钟，升级并不会替换正在响应请求的进程。reap fix --check 会把这种不一致报告为警告。并且智能体提示中会去掉查询协议，这样智能体就不会每个阶段都去请求一个已经关闭的端口。",
-    optInDesc: "安装好该包之后，在 .reap/config.yml 中添加一行即可启用：",
-    optInConfig: `daemon: true   # 默认值: false`,
-    optInNote: "设置为 false 或未设置时，所有守护进程相关行为均跳过。智能体提示、生命周期钩子和 CLI 输出与从未启用守护进程的项目完全相同。",
-    autoTriggerTitle: "自动触发点",
-    autoTriggerDesc: "启用后，REAP 在关键生命周期时刻自动注册并重新索引项目：",
-    autoTriggerHeaders: ["生命周期时刻", "执行内容"],
-    autoTriggerItems: [
-      ["reap run start（generation 创建）", "ensureRegistered + 完整 triggerIndexing"],
-      ["reap run learning（work phase）", "ensureRegistered + triggerIndexing（探索前保持图最新）"],
-      ["reap run implementation（complete phase）", "triggerIndexing（让 validation 看到刚写的代码）"],
-      ["reap run completion（commit phase，归档后）", "triggerIndexing（图反映下一代的已提交状态）"],
+    intro: "REAP 内置代码索引。无需安装、无需启动、没有后台进程。Tree-sitter 解析器遍历每个受版本控制的文件，记录其中定义的符号以及它们之间的调用与 import，并将结果以 gzip 压缩的 JSON 存放在 .reap/.index/。随附 15 种语言，且没有原生构建 —— 语法是 WebAssembly。",
+    commandsTitle: "命令",
+    commandsDesc: "每个子命令都与 REAP 的其他命令一样在 stdout 输出 JSON，智能体可以解析，人可以读 message 字段。",
+    commandsCode: `reap index                     # update —— 默认行为
+reap index update [--full]     # 让索引与 HEAD 对齐
+reap index status              # 统计、import 解析率、已索引的 commit
+reap index impact <file>...    # 修改这个文件会影响什么
+reap index search <query>      # 查找定义，返回 file:line
+reap index callers <symbolId>  # 谁调用了它
+reap index callees <symbolId>  # 它调用了什么`,
+    commandsNote: "symbolId 的形式是 <file>::<name> —— 例如 src/core/lifecycle.ts::nextStage。reap index search 会输出它们。",
+    commitTitle: "变更的单位是 commit",
+    commitDesc: "索引记录它所描述的 SHA。判断需要重新解析什么只是一次 git diff，判断是否值得重新解析只是一次字符串比较。一旦 HEAD 移动 —— 提交、切换分支、rebase 或 pull 之后 —— 查询本身会更新索引。REAP 只在自己刚提交的地方主动刷新：completion 末尾，以及 early-close。",
+    commitCode: `reap index update    # Indexed 412 file(s) — full, 1530 symbols at 1a2b3c4 (612ms)
+reap index update    # Index is current at 1a2b3c4 (1530 symbols, 3688 edges)`,
+    commitNote: "代价是：未提交的工作不在索引中。刚写完还没提交的符号 search 找不到，新建的文件也不会出现在 impact 里 —— 那部分请用 Grep。此外需要一个 git 仓库，否则没有可供索引绑定的 commit。",
+    statusTitle: "相信 impact 之前先看 status",
+    statusDesc: "impact 所知的一切都来自已解析的 import 边。imports 比率偏低意味着图不完整，此时空的 blast radius 表示未知而非没有。status 还会在语法加载失败时发出警告 —— 这是某种语言被悄悄漏掉索引的另一条路径。",
+    statusCode: `files:   412
+symbols: 1530  (function 902, method 341, class 187, type 100)
+edges:   3688  (CALLS 3145, IMPORTS 543)
+imports: 543/543 resolved (100%)
+commit:  1a2b3c4`,
+    statusNote: "（示例数值。）这一行的缺失代价是五个月。本索引器的前身在每个标准 TypeScript 项目中解析出的 import 数为零 —— 它从未把 ./x.js 这样的 specifier 对应到生成它的 x.ts —— 于是 blast radius 一直返回空，而所有测试都通过、CI 始终是绿色：每项检查都在问「索引跑了吗」，没有人问「这个答案说得通吗」。",
+    locationTitle: "索引存放在哪里",
+    locationDesc: "位于 .reap/.index/ —— 一个 manifest.json 加一个 gzip 压缩的图 —— 并由 reap init 和 reap update 写入 .gitignore。删除项目时索引随之消失，主目录里不会累积任何东西。忽略它与体积无关：把索引提交进去意味着包含它的那次提交又需要被索引，这个过程不会终止。删除 .reap/.index/ 永远是安全的 —— 下一条命令会重建。",
+    whenTitle: "何时使用",
+    whenDesc: "两者互补 —— 索引以 file:line 作答，你据此去读代码。",
+    whenHeaders: ["使用", "当问题是"],
+    whenItems: [
+      ["reap index", "这在哪里定义、谁调用它、什么依赖这个文件、这次改动的 blast radius 有多大"],
+      ["Grep / Glob", "字面字符串、注释、配置文件、没有语法支持的语言，以及一切尚未提交的内容"],
     ],
-    autoTriggerNote: "所有四个调用位置在守护进程不可达时均静默失败。CLI 生命周期永远不会被守护进程问题阻塞。",
-    queryTitle: "查询守护进程",
-    queryDesc: "查询前务必验证守护进程是否运行——否则静默跳过：",
-    queryHealth: `curl -sf http://127.0.0.1:17224/health || echo "daemon down"`,
-    queryProjectId: `PROJECT_ID=$(curl -s http://127.0.0.1:17224/projects \\
-  | jq -r --arg p "$CWD" '.data[] | select(.path==$p) | .id')`,
-    queryExamples: `# 按名称搜索符号
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols?q=consumeBacklog"
-
-# 特定符号的调用者
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callers"
-
-# 特定符号的被调用者
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/symbols/<symbol-id>/callees"
-
-# 文件变更的影响范围（blast radius）
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/impact?file=src/core/lifecycle.ts"
-
-# 项目状态——包含 lastIndexedAt 和 lastIndexedCommit
-curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status"`,
-    stalenessTitle: "新鲜度检查",
-    stalenessDesc: "/projects/:id/status 返回 lastIndexedCommit（最近成功索引时的 git rev-parse HEAD）。查询前检查索引是否过时：",
-    stalenessCode: `INDEXED=$(curl -s "http://127.0.0.1:17224/projects/$PROJECT_ID/status" | jq -r '.data.lastIndexedCommit // "none"')
-HEAD=$(git rev-parse HEAD)
-[ "$INDEXED" = "$HEAD" ] && echo "最新" || echo "过时——触发重新索引"`,
-    cliTitle: "CLI 管理",
-    cliDesc: "守护进程首次使用时自动启动，30 分钟空闲后自动关闭。也可以显式管理：",
-    cliCode: `reap daemon status   # 检查运行状态，显示最后索引提交
-reap daemon stop     # 停止守护进程
-reap daemon index    # 触发手动重新索引
-reap daemon query    # 运行符号查询`,
-    fallbackTitle: "守护进程不可用时",
-    fallbackDesc: "守护进程是只读加速器——绝不修改代码。不可用时智能体回退到标准 Read/Grep/Glob 工具，生命周期不会中断。守护进程优先 vs 文件系统优先指南：",
-    fallbackHeaders: ["方法", "使用场景"],
-    fallbackItems: [
-      ["守护进程优先", "符号定义查找、调用关系遍历、多文件影响分析"],
-      ["文件系统优先（Grep/Glob）", "字面字符串搜索、注释搜索、无解析器支持的文件、守护进程宕机时"],
-    ],
+    retiredTitle: "曾经有一个 daemon",
+    retiredDesc: "直到 v0.17.5，这曾是一个独立包 @c-d-cc/reap-daemon，在 daemon: true 背后于 17224 端口运行 HTTP 服务。它已停用并在 npm 上标记为 deprecated。reap update 会替你移除相关配置和残留数据；需要手动处理的只有那个全局包，reap uninstall 也会一并列出它。",
+    retiredCode: `npm uninstall -g @c-d-cc/reap-daemon`,
+    retiredNote: "它存在的理由是让图保持热态 —— 而从磁盘加载本仓库的图只需个位数毫秒，reap 冷启动则是 40 到 70 毫秒。被规避的开销比规避它的机制更便宜，而那套机制包括一个端口、一份注册表、一个 PID 文件、一个空闲计时器、一个带原生 SQLite 构建的第二个 npm 包、一条发布流水线，以及至少一台机器上连它自己的 stop 命令都找不到的孤儿进程。",
   },
 
   // Self-Evolving Page
@@ -1061,6 +1035,10 @@ reap daemon query    # 运行符号查询`,
     title: "发布说明",
     breadcrumb: "其他",
     versions: [
+      {
+        version: "0.17.6",
+        notes: "**code-intelligence 守护进程已移除，索引器随 REAP 一同发布。** 无需安装、没有端口、没有后台进程 —— `reap index status`、`reap index impact <file>`、`reap index search <query>`、`reap index callers/callees <symbolId>`。支持 15 种语言，没有原生构建。**blast radius 在每个标准 TypeScript 项目中一直返回零**，持续了五个月：解析器从未把 `./x.js` 这样的 specifier 对应到生成它的 `x.ts`。130 个测试通过，CI 始终是绿色，因为每项检查都在问「索引跑了吗」，没有人问「这个答案说得通吗」。**因此 `reap index status` 现在会报告 import 解析率**，发布门禁要求找到已知的依赖关系，而不是符号数大于零。**索引以 commit 为单位** —— REAP 的完整索引约 0.3 秒，而守护进程需要 6.7 秒；HEAD 移动时查询会自行刷新；未提交的工作被有意排除在索引之外。索引位于 `.reap/.index/` 并被 gitignore。**如果你曾使用守护进程**，`reap update` 会移除 `daemon`/`daemonBin` 并删除 `~/.reap/daemon/`；用 `npm uninstall -g @c-d-cc/reap-daemon` 移除全局包。**`reap uninstall`** 会清除 npm 无法清除的部分 —— 斜杠命令、智能体定义、`~/.reap/` 以及 SessionStart 钩子条目；npm 10 和 12 都不执行卸载钩子，所以 `npm uninstall -g` 会把它们留在原地。",
+      },
       {
         version: "0.17.5",
         notes: "**代码智能守护进程现已作为独立包发布。** 它自 v0.16 起就写在文档里，但从未发布，因此在 npm 安装下无法工作；随之而来的若干打包问题也一并修复。使用 `daemon: true` 的用户请执行一次 `npm i -g @c-d-cc/reap-daemon`。**守护进程缺失或版本过旧现在会被报告** — `reap daemon status`、`reap fix --check` 和代理提示词都会告知，两种情况下生命周期都不会被阻塞。**当 REAP 找不到它时使用 `daemonBin`** — 两者是独立的包，只有共享同一解析根时才能找到彼此；在 `.reap/config.yml` 中设置 `daemonBin`，或用 `REAP_DAEMON_BIN` 只作用于一次调用。**`reap run push` 会报告 git 的真实错误**，**`reap help` 现在列出 `/reap.run` 和 `/reap.report`**。 **REAP 现在会在首次运行时自行安装集成** — npm 12 会阻止全局安装的 install script，导致斜杠命令、代理定义和会话钩子都未被放置，且没有任何报错。",

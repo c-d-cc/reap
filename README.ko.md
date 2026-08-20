@@ -73,7 +73,7 @@ reap uninstall            # 무엇이 지워질지 보여줍니다
 reap uninstall --confirm  # 실제로 지우고, 패키지 제거까지 npm 에 넘깁니다
 ```
 
-daemon 을 멈추고, Claude Code 와 OpenCode 양쪽 위치에서 REAP 파일을 지우고, `settings.json` 에서 REAP 항목만 빼고, `~/.reap/reap-guide.md` · 설치 스탬프 · `~/.reap/daemon/` 을 지운 뒤 `@c-d-cc/reap-daemon` 과 `@c-d-cc/reap` 에 대해 `npm uninstall -g` 를 실행합니다. 같은 디렉토리에 있는 사용자 파일은 건드리지 않습니다 — `reapdev.*` 도, `~/.reap/` 안의 다른 것들도 그대로 남습니다.
+Claude Code 와 OpenCode 양쪽 위치에서 REAP 파일을 지우고, `settings.json` 에서 REAP 항목만 빼고, `~/.reap/reap-guide.md` · 설치 스탬프 · `~/.reap/daemon/`(폐기된 daemon 이 남긴 것)을 지운 뒤 `@c-d-cc/reap-daemon` 과 `@c-d-cc/reap` 에 대해 `npm uninstall -g` 를 실행합니다. 같은 디렉토리에 있는 사용자 파일은 건드리지 않습니다 — `reapdev.*` 도, `~/.reap/` 안의 다른 것들도 그대로 남습니다.
 
 **이미 패키지를 지웠다면?** `reap` 명령이 없고 파일은 남아 있는 상태입니다. 아무것도 설치하지 않고 실행하세요:
 
@@ -290,47 +290,39 @@ evaluator: true   # 기본값: false
 
 **Fitness phase + cruise mode**: evaluator는 fitness 단계에서도 실행됩니다. validation 중 기록된 high-severity concern은 다음 fitness phase 실행 시 **cruise mode를 자동 중단**합니다 — `cruiseCount`가 `config.yml`에서 삭제되고, cruise 프롬프트가 supervised fallback으로 교체되어 사용자가 우려 사항을 검토한 후 fitness 피드백을 작성할 수 있습니다. 우려가 해소되면 `reap cruise <N>`으로 cruise를 재개할 수 있습니다.
 
-### Code Intelligence Daemon (opt-in)
+### Code Intelligence
 
-REAP는 로컬 코드 인텔리전스 데몬(`localhost:17224`)을 사용할 수 있습니다. 세대에 걸쳐 Tree-sitter 심볼 그래프를 유지하며, 15개 이상의 언어를 파싱하고, 그래프를 SQLite에 저장하고, 심볼 검색, caller/callee 분석, blast-radius 영향, 커뮤니티 감지, 프로세스 흐름 추적을 위한 HTTP API를 제공합니다.
+REAP 는 코드 인덱스를 내장합니다. 설치할 것도, 띄울 것도, 백그라운드에서 도는 프로세스도 없습니다.
 
-**별도 패키지이므로 먼저 설치해야 합니다.** REAP는 데몬에 의존하지 않으며 REAP를 설치해도 함께 설치되지 않습니다 — 네이티브 SQLite 빌드와 Tree-sitter 문법 묶음을 지고 있어서, 기본적으로 꺼져 있는 기능을 위해 모든 사용자가 그 비용을 낼 이유가 없기 때문입니다.
-
-```bash
-npm i -g @c-d-cc/reap-daemon
-```
-
-그다음 `.reap/config.yml`에 한 줄을 추가하여 활성화합니다:
-
-```yaml
-daemon: true   # 기본값: false
-```
-
-활성화 시 REAP가 자동으로:
-- generation 시작 시 데몬에 프로젝트를 등록하고,
-- 주요 lifecycle 시점(learning, implementation 완료, completion commit)에 재인덱싱하며,
-- 빌더/evaluator 프롬프트에 쿼리 예시와 staleness 확인 프로토콜을 포함한 "Code Intelligence" 섹션을 추가합니다.
-
-**설치했는데 못 찾는다면?** REAP는 자기 위치를 기준으로 데몬을 찾고, 데몬은 의도적으로 REAP의 의존 패키지가 아닙니다 — 따라서 둘은 **같은 resolution root 를 공유할 때만** 서로를 찾습니다. 같은 패키지 매니저로 둘 다 전역 설치하면 그 조건이 충족되지만, 전역 REAP + 프로젝트 로컬 데몬, 서로 다른 prefix, Node 버전 전환 후에는 충족되지 않습니다. 이럴 때는 위치를 직접 알려주세요:
-
-```yaml
-daemonBin: /usr/local/lib/node_modules/@c-d-cc/reap-daemon/dist/index.js
-```
-
-한 번의 명령이나 CI 작업에는 `REAP_DAEMON_BIN` 을 쓸 수 있고 이쪽이 우선합니다. 상대 경로는 프로젝트 루트 기준으로 해석되고 `~` 는 홈으로 전개됩니다. `reap daemon status` 가 `bin` 과 `binSource` 를 보고하므로 REAP 이 그 설정을 읽고 있는지 확인할 수 있습니다 — 이것은 REAP 이 **띄울** 대상이며, 이미 떠 있는 데몬은 출처와 무관하게 재사용됩니다.
-
-`daemon: true` 인데 데몬이 설치되어 있지 않거나 REAP가 요구하는 버전보다 낡은 경우, REAP는 조용히 넘어가지 않고 그렇게 말합니다 — `reap daemon status` 와 `reap fix --check` 가 이를 보고하고 실행할 명령을 제시하며, 에이전트 프롬프트에서 질의 프로토콜이 빠져 죽은 포트에 요청을 보내지 않습니다. 어느 경우든 **lifecycle 은 절대 막히지 않습니다**.
-
-패키지를 설치한 뒤에는 데몬이 첫 사용 시 자동으로 시작되고 30분 유휴 후 자동 종료됩니다. 명시적으로 관리할 수도 있습니다:
+Tree-sitter 파서가 추적 중인 모든 파일을 훑어 정의된 심볼과 그 사이의 호출·import 를 기록하고, 결과를 `.reap/.index/` 에 gzip 된 JSON 으로 저장합니다. 15개 언어가 함께 배포되며 **네이티브 빌드가 없습니다** — grammar 가 WebAssembly 입니다.
 
 ```bash
-reap daemon status   # 실행 여부 확인
-reap daemon stop     # 데몬 종료
+reap index                     # update — 기본 동작
+reap index status              # 통계, import 해석률, 인덱싱된 커밋
+reap index impact <file>       # 이 파일을 바꾸면 무엇이 영향받는가
+reap index search <query>      # 정의 찾기 (file:line 반환)
+reap index callers <symbolId>  # 누가 이것을 부르는가 (src/core/lifecycle.ts::nextStage)
+reap index callees <symbolId>  # 이것이 무엇을 부르는가
 ```
 
-데몬은 읽기 전용 가속기입니다 — 코드를 절대 수정하지 않습니다. 어떤 이유로 사용 불가 시 에이전트는 표준 Read/Grep/Glob 도구로 폴백하며 lifecycle이 중단되지 않습니다.
+**변경의 단위는 커밋입니다.** 인덱스가 자기가 서술하는 SHA 를 기록하므로, 무엇을 다시 읽을지는 `git diff` 한 번이고 다시 읽을 필요가 있는지는 문자열 비교 한 번입니다. 이 저장소의 전체 인덱싱이 약 0.3초, 변경이 없으면 0초입니다. `HEAD` 가 움직이면 — 커밋·브랜치 전환·rebase·pull 후 — 질의가 스스로 인덱스를 갱신합니다. REAP 이 먼저 갱신하는 것은 자기가 방금 커밋한 자리뿐입니다 — `completion` 끝, 그리고 `early-close`.
 
-**Staleness 확인**: 각 인덱싱 실행 시 `lastIndexedCommit`(인덱싱 시점의 `HEAD` 해시)을 기록합니다. 에이전트는 `GET /projects/:id/status`로 현재 `HEAD`와 비교하여 쿼리 전에 재인덱싱이 필요한지 판단할 수 있습니다.
+대가는 **커밋되지 않은 작업이 인덱스에 없다**는 것입니다. 그건 Grep 으로 찾으세요. `reap index status` 는 항상 자기가 서술하는 커밋을 알려줍니다.
+
+**`impact` 를 믿기 전에 `status` 를 보세요.** `impact` 가 아는 것은 전부 해석된 import edge 에서 나오므로, `imports` 비율이 낮으면 그래프가 불완전하고 빈 blast radius 는 *없음*이 아니라 *모름*입니다:
+
+```
+symbols: 1530  (function 902, method 341, class 187, type 100)
+edges:   3688  (CALLS 3145, IMPORTS 543)
+imports: 543/543 resolved (100%)
+commit:  1a2b3c4
+```
+
+(예시 수치입니다.) 이 한 줄이 없어서 5개월을 잃었습니다. 이 인덱서의 전신은 표준 TypeScript 프로젝트에서 import 를 **하나도** 해석하지 못했고 — `./x.js` specifier 를 그것을 만들어내는 `x.ts` 에 대응시키지 못했습니다 — blast radius 가 계속 0을 반환하는 동안 모든 테스트가 통과했고 CI 는 내내 초록이었습니다. 모든 검사가 "인덱싱이 돌았는가"를 물었고 "결과가 말이 되는가"는 아무도 묻지 않았기 때문입니다.
+
+인덱스는 `.reap/.index/` 에 있고 gitignore 됩니다. 지워도 항상 안전합니다 — 다음 명령이 다시 만듭니다.
+
+**daemon 을 대체합니다 (v0.17.6 에서 제거).** v0.17.5 까지 이것은 `daemon: true` 뒤에서 17224 포트에 HTTP 서버를 띄우는 별도 패키지 `@c-d-cc/reap-daemon` 이었습니다. 지금은 폐기되어 npm 에서 deprecated 되었고, `reap update` 가 설정과 남은 데이터를 대신 지웁니다. 그 존재 이유는 그래프를 warm 하게 유지하는 것이었는데 — 이 저장소의 그래프를 디스크에서 읽는 데 한 자리 수 밀리초가 들고 `reap` 콜드 스타트는 40~70ms 입니다. **피하려던 비용이 피하는 장치보다 쌌습니다.** 그 장치는 포트 하나, registry, PID 파일, idle timer, 네이티브 SQLite 빌드를 진 두 번째 npm 패키지, 그리고 릴리즈 파이프라인이었습니다.
 
 ## 프로젝트 구조
 
@@ -373,8 +365,6 @@ strictMerge: false              # 직접 git pull/push/merge 제한
 agentClient: claude-code       # AI 에이전트 클라이언트
 # cruiseCount: 1/5             # 존재 시 = cruise 모드 (현재/전체)
 # evaluator: true              # Opt-in: validation/fitness에서 reap-evaluate 실행
-# daemon: true                 # Opt-in: 로컬 코드 인텔리전스 데몬
-# daemonBin: <경로>/dist/index.js  # 설치된 데몬을 REAP가 못 찾을 때만
 ```
 
 주요 설정:
@@ -383,7 +373,6 @@ agentClient: claude-code       # AI 에이전트 클라이언트
 - **`strictMerge`**: 직접 git pull/push/merge를 제한합니다 — 대신 `/reap.pull`, `/reap.push`, `/reap.merge`를 사용하세요.
 - **`agentClient`**: 스킬 배포에 사용할 어댑터를 결정합니다.
 - **`evaluator`**: Opt-in 독립 검토자. `true`일 때 validation 단계에서 `reap-evaluate` 서브에이전트를 어드바이저로 실행합니다. 기본값 `false`. 위의 [Evaluator Agent](#evaluator-agent-opt-in) 참조.
-- **`daemon`**: Opt-in 로컬 코드 인텔리전스 데몬. `true`일 때 REAP가 lifecycle 체크포인트에서 자동 인덱싱하고 에이전트 프롬프트에 데몬 쿼리 지시를 포함합니다. 기본값 `false`. 위의 [Code Intelligence Daemon](#code-intelligence-daemon-opt-in) 참조.
 
 ## v0.15에서 업그레이드 [↗](https://reap.cc/docs/migration-guide)
 

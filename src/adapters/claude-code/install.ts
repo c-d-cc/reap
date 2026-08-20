@@ -317,7 +317,7 @@ export async function registerSessionHooks(home: string = homedir()): Promise<bo
  * reap:carrier(user-level-asset-set)
  *
  * `~/.reap/` is deliberately not handled here: `reap-guide.md`, the install
- * stamp and the daemon's data are not client-specific, and are removed once by
+ * stamp and the retired daemon's data are not client-specific, and are removed once by
  * `removeReapHomeAssets` in the adapter dispatcher rather than once per
  * adapter. `reap uninstall` sweeps both adapters, so doing it here would mean
  * doing it twice.
