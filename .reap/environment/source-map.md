@@ -77,21 +77,31 @@ src/
 │       │                          코드가 있는 디렉토리에 강제될 수 있다. `--repair` 는 CLAUDE.md 만 본다
 │       ├── migrate.ts          — v0.15→v0.16 마이그레이션 (multi-phase: confirm→execute→vision→complete)
 │       ├── check-version.ts    — postinstall/SessionStart용: v0.15 legacy cleanup + 자동 업데이트 + release notice.
-│       │                          **`performAutoUpdate` 는 여섯 조건을 순서대로 묻는다**: 버전을
+│       │                          **`performAutoUpdate` 는 일곱 조건을 순서대로 묻는다**: 버전을
 │       │                          알 수 있는가 → dev/alpha 가 아닌가 → 네트워크 → **더 새 것이 있는가**
 │       │                          (`hasNewerRelease` = `semverGt(latest, installed)`; `!==` 였고 그것은
 │       │                          *뒤로 가는 것*도 업데이트로 쳤다) → 하한(`autoUpdateMinVersion`) →
-│       │                          **전역 설치인가**(`detectInstallKind`). 마지막 둘의 **순서가 의미를
-│       │                          갖는다** — 하한 경고가 비-global 설치가 듣는 유일한 말이고, kind 조회는
-│       │                          `npm root -g` spawn 이라 업그레이드가 실제로 대기 중일 때만 해야 한다.
+│       │                          **`autoUpdate` 가 꺼져있지 않은가**(`readAutoUpdateSetting`) →
+│       │                          **전역 설치인가**(`detectInstallKind`). 마지막 셋의 **순서가 의미를
+│       │                          갖는다** — 하한 경고가 비-global 설치와 **auto-update 를 끈 사용자가
+│       │                          듣는 유일한 말**이므로 그 둘보다 앞서야 하고(호출부에서 게이트하면
+│       │                          그 경고가 사라진다), config 읽기는 파일 하나·kind 조회는
+│       │                          `npm root -g` spawn 이라 싼 쪽이 앞이다.
 │       │                          `getInstalledVersion()` 은 **자기 패키지**의 버전을 읽는다
 │       │                          (`runningVersionOrNull`) — PATH 의 `reap` 이 아니다. `null` 은
 │       │                          "알 수 없음"이며 1단계에서 멈춘다. `AutoUpdateDeps`/`GuardDeps` 로
 │       │                          network·npm·설치종류를 전부 주입할 수 있다.
 │       │                          `upgradeCommandFor(kind)` 가 처방 문구를 고른다 — 로컬 설치에게
 │       │                          `npm install -g` 를 권하지 않기 위해.
-│       │                          **`checkAutoUpdateGuard` 는 호출자가 없다**(backlog), 그리고
-│       │                          **`config.autoUpdate` 는 읽히지 않는다**(backlog)
+│       │                          `readAutoUpdateSetting(root)` 은 **`=== false` 만 끈다** — 파일
+│       │                          없음·YAML 깨짐·필드 없음·비-boolean 은 전부 켜짐(fail open).
+│       │                          npm 은 postinstall 을 패키지 디렉토리에서 돌리고 거기엔 프로젝트
+│       │                          config 가 없으므로, fail closed 는 요청한 사람이 아니라 **설치
+│       │                          경로 전체**를 껐을 것이다. cwd 에서 위로 올라가지 않는다.
+│       │                          **`checkAutoUpdateGuard` 는 여전히 호출자가 없다**(backlog).
+│       │                          그것이 유일하게 봉사할 수 있는 인구는 **하한 미달 `-alpha` 빌드**다 —
+│       │                          `performAutoUpdate` 는 `+dev`·`-alpha` 둘 다 거르고 guard 는
+│       │                          `+dev` 만 거른다
 │       ├── load-context.ts     — SessionStart hook용: dynamic context 주입 (buildKnowledgeContext, hookSpecificOutput JSON 출력). Current State/Strict/Language 3개 dynamic 섹션만 출력한다 (~1KB) — static knowledge(genome/env/vision/memory/reap-guide)는 CLAUDE.md 의 `@` import refs 로 Claude Code 가 직접 로드하므로 여기서 다루지 않는다. 비-REAP 디렉토리에서는 silent exit
 │       ├── dump-state.ts       — `.reap/.session-state.md`에 동일 dynamic context 기록 (--stdout/--silent 지원). OpenCode plugin과 외부 도구용. emitOutput이 lifecycle 명령 종료 시 sync 버전(dump-state-sync.ts)으로 자동 dump
 │       ├── run/                — stage 실행 (21 handlers)

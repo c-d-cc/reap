@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
 createdAt: 2026-08-20T13:05:28.493Z
+consumedBy: gen-093-31d766
+consumedAt: 2026-08-20T14:03:09.507Z
 ---
 
 # config.autoUpdate 를 읽는 코드가 없다 — false 로 둔 사용자도 자동 업데이트된다

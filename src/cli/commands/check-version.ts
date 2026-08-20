@@ -156,11 +156,46 @@ export interface AutoUpdateDeps {
   installedVersion?: () => string | null;
   latestVersion?: () => string | null;
   minVersion?: () => string | null;
+  autoUpdateEnabled?: (root: string) => boolean;
   installKind?: () => InstallKind;
   installLatestGlobally?: () => void;
   handOff?: (root: string) => boolean;
   syncWithCurrentBinary?: (root: string) => void;
   log?: (message: string) => void;
+}
+
+/**
+ * Has the user turned this off?
+ *
+ * `autoUpdate` has been in `config.yml` since v0.16 — created as `true`,
+ * preserved by `reap update`, printed by `reap config`, documented in the
+ * `/reap.config` skill as "auto-update enabled", type-checked by
+ * `integrity.ts` — and read by nothing. Someone who set it `false` saw
+ * `false` and was updated anyway (gen-092 found it; gen-093 is this).
+ *
+ * **Only an explicit boolean `false` disables.** Every other outcome — no
+ * config file, unparseable YAML, absent field, a value that is not a boolean —
+ * leaves auto-update on. Failing the other way looks like the cautious choice
+ * and is not: `execute` passes `process.cwd()`, and npm runs postinstall in
+ * the package directory, where there is no `.reap/config.yml` at all. Treating
+ * "cannot read" as "off" would silently disable auto-update for the install
+ * path rather than for the people who asked. The default written into new
+ * projects is `true`, so "absent" and "default" agreeing is also the
+ * consistent reading.
+ *
+ * A non-boolean value stays on for a different reason: `integrity.ts` already
+ * warns about it ("'autoUpdate' should be boolean"). Quietly honouring it
+ * here would put the user back where this defect started — a config value
+ * doing something they cannot see.
+ */
+export function readAutoUpdateSetting(root: string): boolean {
+  try {
+    const configPath = join(root, ".reap", "config.yml");
+    const config = YAML.parse(readFileSync(configPath, "utf-8")) as { autoUpdate?: unknown };
+    return config?.autoUpdate === false ? false : true;
+  } catch {
+    return true;
+  }
 }
 
 function defaultGlobalInstall(): void {
@@ -189,18 +224,22 @@ function defaultSyncWithCurrentBinary(root: string): void {
  * 1. its version can be determined, and is not a dev or alpha build
  * 2. a newer version exists on npm
  * 3. the autoUpdateMinVersion floor passes
- * 4. it is a global installation — the only kind `npm install -g` acts on
+ * 4. the project has not set `autoUpdate: false`
+ * 5. it is a global installation — the only kind `npm install -g` acts on
  *
  * On success, hands off to the new binary to sync project structure.
  * All errors are silently swallowed — never breaks postinstall/hooks.
  *
- * (4) arrived in gen-092 with the rest of this file's fixes; the numbered
- * comments below are the same list, in the order they are tested.
+ * (5) arrived in gen-092 and (4) in gen-093. The body tests them in this
+ * order, but its numbered comments run 1-9 and are not this list renumbered:
+ * they count steps, and the install and the hand-off are steps rather than
+ * conditions. Follow the wording, not the digit.
  */
 export function performAutoUpdate(root: string, deps: AutoUpdateDeps = {}): AutoUpdateResult {
   const readInstalled = deps.installedVersion ?? getInstalledVersion;
   const readLatest = deps.latestVersion ?? queryLatestVersion;
   const readMinVersion = deps.minVersion ?? queryAutoUpdateMinVersion;
+  const isEnabled = deps.autoUpdateEnabled ?? readAutoUpdateSetting;
   const readInstallKind = deps.installKind ?? (() => detectInstallKind().kind);
   const installGlobally = deps.installLatestGlobally ?? defaultGlobalInstall;
   const handOff = deps.handOff ?? handOffToNewBinary;
@@ -252,7 +291,31 @@ export function performAutoUpdate(root: string, deps: AutoUpdateDeps = {}): Auto
       };
     }
 
-    // 6. Only a global install may be upgraded, because `npm install -g` acts
+    // 6. The user said not to.
+    //
+    //    Asked *after* step 5 and that is the whole of the placement. Step 5
+    //    prints rather than installs: it tells someone below the hard floor
+    //    that REAP will not fix it for them and what to run. Turning off
+    //    auto-update is a statement about installing, not about being told —
+    //    and the person who declined to be updated automatically is the one
+    //    who most needs to hear that their copy is below the floor. Gating the
+    //    call site in `execute` instead would return before step 5 ever ran and
+    //    take that warning away; keeping the warning from there would mean
+    //    checking the floor in two places, which is how this file ended up with
+    //    `checkAutoUpdateGuard` sitting in it unreferenced.
+    //
+    //    Asked before step 7 for cost: this reads one file, that spawns
+    //    `npm root -g`, and both decline in silence.
+    //
+    //    What it does not touch: `reap update`, which syncs a project and
+    //    changes no installation, and an `npm install -g` the user typed
+    //    themselves. The only thing this flag turns off is the one install REAP
+    //    performs on its own.
+    if (!isEnabled(root)) {
+      return { action: "skipped", from: installed, to: latest, reason: "auto-update-disabled" };
+    }
+
+    // 7. Only a global install may be upgraded, because `npm install -g` acts
     //    on the machine rather than on this directory — and the only case where
     //    those are the same thing is a global install.
     //
@@ -276,15 +339,15 @@ export function performAutoUpdate(root: string, deps: AutoUpdateDeps = {}): Auto
       return { action: "skipped", from: installed, to: latest, reason: `not-global: ${kind} install` };
     }
 
-    // 7. Perform upgrade
+    // 8. Perform upgrade
     installGlobally();
 
-    // 8. Hand off to new binary for project sync.
+    // 9. Hand off to new binary for project sync.
     // The new binary runs `reap update --post-upgrade` which skips self-upgrade
     // and only performs project sync with the new code. Both this and the
     // fallback below resolve `reap` on PATH, which is correct *here* and only
     // here: the global install was just replaced, so PATH's `reap` is the new
-    // binary. Step 6 is what makes that true — before it, this line could hand
+    // binary. Step 7 is what makes that true — before it, this line could hand
     // off to a binary belonging to an installation we had no business touching.
     if (!handOff(root)) {
       // Fallback: run reap update with current (old) binary
@@ -348,23 +411,41 @@ export function checkAutoUpdateGuard(deps: GuardDeps = {}): void {
  * Post-install + SessionStart hook entry point.
  * - Clean up legacy v0.15 SessionStart hooks
  * - Clean up legacy v0.15 project-level skills
- * - Auto-update (skips dev builds, non-global installs, and network failures)
+ * - Auto-update (skips dev builds, non-global installs, network failures, and
+ *   projects that set `autoUpdate: false`)
  *
  * It does NOT call `checkAutoUpdateGuard`, which this comment claimed until
  * gen-092 looked: that function has no caller anywhere in `src/`. The floor it
  * checks is enforced by `performAutoUpdate` step 5 for anyone who reaches it,
  * and nobody sees the standalone warning. Whether to wire it up or delete it
- * is a decision on its own — see the backlog item.
+ * is a decision on its own — see the backlog item. One input for it changed
+ * here: turning auto-update off no longer means never hearing about the floor,
+ * because step 6 is placed after step 5.
+ *
+ * Who still never hears it is whoever returns before step 5, and those cases
+ * are not worth the same. The one where wiring the standalone guard up would
+ * actually make a difference is step 2's `-alpha` build: `performAutoUpdate`
+ * screens `+dev` and `-alpha` both, `checkAutoUpdateGuard` screens `+dev`
+ * alone, so an alpha below the floor is precisely the installation the guard
+ * could serve and this function cannot. Step 4's population is the opposite
+ * case and not a candidate: a floor names a published version, so a copy at or
+ * above the latest published one is at or above the floor and has nothing to
+ * be told.
  */
 export async function execute(): Promise<void> {
   const root = process.cwd();
   await cleanupLegacyHooks(root);
   await cleanupLegacyProjectSkills(root);
 
-  // Attempted unconditionally — `config.autoUpdate` is never read (gen-043
-  // made it unconditional and the field stayed; backlogged in gen-092).
-  // performAutoUpdate itself declines for a dev build, a non-global install,
-  // a network failure, or nothing newer to move to.
+  // Every reason not to upgrade lives inside `performAutoUpdate`, including
+  // `autoUpdate: false`, which it reads from `root`'s config. That is
+  // deliberate rather than incidental: the flag has to be weighed after the
+  // hard-floor warning, and only the function that owns the floor can do that.
+  // Returning early from here would be the same decision spelled in a place
+  // that cannot see the warning it would suppress.
+  //
+  // gen-043 made this call unconditional and the config field stayed behind,
+  // read by nothing, for fifty generations; gen-093 wired it up.
   const result = performAutoUpdate(root);
 
   // Show release notice after successful upgrade
