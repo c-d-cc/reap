@@ -1,49 +1,49 @@
 # Shortterm Memory
 
-## 세션 요약 (gen-091, 2026-08-20)
+## 세션 요약 (gen-092, 2026-08-20)
 
-### 층2 게이트가 매 릴리즈마다 틀린 답을 주고 있었다
+### auto-update 가 남의 버전을 읽고 남의 설치를 바꾸고 있었다
 
-`check-agent-integration.sh` 가 권한 거부를 `This is the gen-063 failure exactly` 로 단정했다.
-슬래시 커맨드·`@` import·hook·CLI 는 전부 정상이었고 원인은 오직 권한이었다.
-0.17.6 릴리즈에서 **$0.53 중 $0.26 이 없는 결함을 쫓는 데** 들어갔다.
+`getInstalledVersion()` 이 `execSync("reap --version")` 이었다 — **PATH 의 바이너리**이지 그 코드가
+속한 패키지가 아니다. 이 저장소에서 실측으로 갈렸다(PATH 0.17.5 vs package.json 0.17.6).
+그리고 7단계는 무조건 `npm install -g` 였다 — 프로젝트에 로컬 설치한 사용자의 **전역 설치**가
+바뀐다.
 
-수정 둘. (1) 임시 프로젝트에 `Bash(reap:*)` 를 허용해 원인 자체를 없앤다.
-(2) **답을 셋으로** — pass / FAIL / **amber SKIP**. 세 번째는 "검사가 아무것도 측정하지 못했다"다.
-부재 FAIL 은 원인을 열거하고 단정하지 않는다.
+**결함이 둘이고 근거가 따로다.** (1)을 고쳐도 (2)는 닫히지 않는다 — 트리거가 "전역이 낡음"에서
+"자기가 낡음"으로 **뒤집힐 뿐**이다. backlog 이 스스로 그 정정을 담고 있었고, 그것이 이번 goal 의
+절반이었다.
 
-**그리고 게이트의 주장을 좁혔다** — 증명하는 것은 **하나 반**이다. `@` import 와 hook 은
-검증되지 않는다(`/reap.start` 는 둘 없이도 성공한다). 여섯 세대 동안 넷을 주장해왔다.
+수정: `src/core/package-info.ts` 신설(버전을 아는 다섯 곳 → 하나) + `detectInstallKind` 를
+`uninstall.ts` 에서 core 로 이동해 **global 일 때만** 업그레이드.
 
-### evaluator 가 4라운드를 돌았고 네 번 다 직전 수정 안에 결함이 있었다
+### 이 세대의 지배적 실패는 "문장"이었다
 
-high 2 + low 2. 매 라운드가 **전 검사 초록인 상태에서** 시작했다.
-회귀 넷 전부 `reap run back` 으로 정식 회귀해 고쳤다.
+코드를 고치고 **그 코드를 서술한 바로 옆 문장을 안 고친 것이 여섯 번**이다 — 파일 헤더 2, 함수
+doc 2, 테스트 docblock 1, 인라인 주석 1. **셋은 evaluator 가, 셋은 내가** 잡았다. 릴리즈 문서
+7파일에도 같은 일이 났고(하지 않는 안내를 약속), 고치면서 **반대 방향으로 한 번 더** 할 뻔했다
+("silently" — 하한 미달이면 말을 한다).
 
-가장 날카로웠던 것: `reap` 부분문자열이 **역선택한다** — 슬래시 커맨드를 못 찾은 agent 는
-reap 을 **더** 말한다(`ls ~/.claude/commands | grep reap`, `reap.cc`).
-**이 게이트가 존재하는 시나리오에서 가장 나타나기 쉬운 문자열이 그 시나리오를 용서할 뻔했다.**
-→ `reap run` 으로 좁혔다.
-
-그리고 **carrier 표식을 심은 세대 안에서 표식이 어긋났다** — 값을 좁히고 4곳을 다시 grep 하지
-않았다. #22 의 재발이다.
+evaluator 3라운드: **high → low → low.** 1라운드의 blocker 둘은 **내 수정이 만든 것**이었다.
+그중 F1 은 `runningVersion()` 의 `"0.0.0"` 이 truthy 라 `version-unknown` 분기가 죽고
+**매 postinstall·매 세션마다 거짓 breaking-change 경고**가 나가는 상태였다 — 옛 코드는 조용했다.
 
 ### 지금 상태
 
-- unit **585** / e2e **329** / scenario **44** / 전부 0 fail (변동 없음 — `src/**` 코드 미변경)
-- `fix --check` 0 error / **2 warning** (gen-052 lineage parent 승계분, 이번 세대와 무관)
-- 층1 자기진단 전 절 통과 (opencode 1.3.16) · 문서 게이트 통과 · 층2 **통과**
-- 라이브 agent 실행 **11회 / $2.4602**. fixture 18종 × 58회 = **$0**
-- `package.json` **0.17.6 유지**. push·tag 없음. **로컬 macOS 에서만 돌았다**
+- unit **620** (585→) / e2e 329 / scenario 44, 전부 0 fail
+- 자기진단 게이트 전 절 통과, 문서 게이트 통과, docs 빌드 통과
+- `fix --check` 0 error / 2 warning (gen-052 lineage parent 상속분)
+- **`package.json` 0.17.6 유지. push·tag 없음.**
 
 ### 다음 세션이 알아야 할 것
 
-- **라운드5(마지막 수정)는 evaluator 미검토다.** 윈도잉 / `REAP_CMD_MATCH` 공유 /
-  `Array.isArray` 가드 / 재래핑. 전부 라운드4 가 지적한 그대로이고 윈도잉은 negative 로
-  확인했지만, **"지적대로 고쳤다"가 "새 결함이 없다"는 아니다** — 이 세대에서 네 번 틀렸다
-- **fixture 18종은 커밋하지 않았다** (scratchpad). 그중 11종은 evaluator 가 만들었고
-  이 세대의 결정적 결함 둘을 그쪽이 잡았다. backlog `층2-게이트-판정부에-자동-회귀-검사가-없다…`
-  가 그것들을 자산으로 만들 것을 제안한다 — 시작점 목록이 그 backlog 에 있다
-- **0.17.6 릴리즈는 아직이다.** 미푸시 커밋 8개(이 세대 포함).
-  층2 가 검증한 조합은 **"0.17.6 소스 + 0.17.5 설치본"** 이다 — 발행 후 재실행이 더 정확하다
-- pending backlog **12건** (기존 11 + 이번 신규 1)
+- **릴리즈가 바로 다음 순서다.** team lead 계획: 이 세대 → `check-agent-integration.sh` 재실행
+  → 태그·발행. **커밋 9개 미푸시.**
+- **backlog 가 8 → 12 로 늘었다.** 이번 세대가 5건을 만들었고 그중 둘은 **사용자에게 실제로
+  일어나는 것**이다: `config.autoUpdate` 가 **읽히지 않는다**(false 로 둬도 자동 업데이트된다),
+  `--mark-migrated` 가 버전을 못 읽으면 기록을 `0.0.0` 으로 낮춘다.
+  **`autoUpdate` 건은 0.17.6 에 함께 넣을지 인간이 판단할 자리다** — 이번 릴리즈가
+  "당신이 언급한 적 없는 설치"를 고치는데 그 절반이 남아 있다.
+- **round 4 수정분(주석·artifact only)에 대한 evaluator 4차 확인은 응답이 오지 않은 채 닫았다.**
+  round 3 이 이미 blocker 0 이었고 코드 동작 변경이 없어 진행했다. 응답이 늦게 오면 읽어볼 것.
+- `checkAutoUpdateGuard` 는 **호출자가 없다**(backlog). `reap uninstall` 의 `unknown` 문구가
+  판정을 단정한다(backlog, gen-090 문구).

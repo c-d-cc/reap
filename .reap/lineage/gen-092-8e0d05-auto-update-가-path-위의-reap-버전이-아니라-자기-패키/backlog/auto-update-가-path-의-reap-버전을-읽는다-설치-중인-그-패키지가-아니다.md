@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
 createdAt: 2026-08-19T22:18:38.341Z
+consumedBy: gen-092-8e0d05
+consumedAt: 2026-08-20T12:24:09.481Z
 ---
 
 # auto-update 가 PATH 의 reap 버전을 읽는다 — 설치 중인 그 패키지가 아니다

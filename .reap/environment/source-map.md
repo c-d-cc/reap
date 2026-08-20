@@ -18,13 +18,30 @@
 ```
 src/
 ├── types/index.ts              — 타입 정의 (GenerationState, ReapConfig, ReapOutput 등)
-├── core/                       — 핵심 로직 (29 modules)
+├── core/                       — 핵심 로직 (30 modules)
 │   ├── lifecycle.ts            — stage 순서 정의 (next/prev) + transition graph (NORMAL_TRANSITIONS, MERGE_TRANSITIONS, getTransitions). **stage:phase 가 자기 목록에 들어 있으면 self-loop = 그 phase 재진입 허용** — nonce 는 매번 재발급·검증·소비되므로 무결성은 유지된다. 현재 `completion:fitness` 와 `validation:entry` 둘
 │   ├── generation.ts           — generation CRUD, ID 생성
 │   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스, memory/resources/docs 경로 포함)
 │   ├── nonce.ts                — 암호학적 token (SHA256) — 순수 함수, generateToken/verifyToken
 │   ├── artifact-check.ts        — artifact 미작성 감지 (core placeholder 기반)
-│   ├── semver.ts               — **버전 비교의 단일 소유자.** SemVer 2.0.0 §9~11 (prerelease 순서, build metadata 무시). `semverCompare`/`semverGt`/`semverGte`/`semverCore`. 소비자 셋: autoUpdate floor 2, migration 의 release-line 비교
+│   ├── semver.ts               — **버전 비교의 단일 소유자.** SemVer 2.0.0 §9~11 (prerelease 순서, build metadata 무시). `semverCompare`/`semverGt`/`semverGte`/`semverCore`. 소비자 셋: autoUpdate 의 하한·최신 비교, migration 의 release-line 비교
+│   ├── package-info.ts         — **이 코드가 속한 패키지에 관한 사실의 단일 소유자** (gen-092).
+│   │                             `REAP_PACKAGE` / `findPackageRoot` / `ownPackageRoot` /
+│   │                             `packageVersion` / `runningVersion` / `runningVersionOrNull` /
+│   │                             `UNKNOWN_VERSION` / `InstallKind` / `detectInstallKind`.
+│   │                             버전을 아는 곳이 **다섯이었고 그중 하나는 다른 질문에 답했다**
+│   │                             (`execSync("reap --version")` = PATH 의 바이너리). 넷은 각자 다른
+│   │                             **고정 깊이 목록**을 갖고 있었다 — 번들이 모든 모듈을 한 파일로
+│   │                             접으므로 깊이가 소스와 다르기 때문. `findPackageRoot` 는 이름으로
+│   │                             12단계까지 올라가 **깊이에 의존하지 않는다** (실패 시 옛 고정 깊이로 폴백).
+│   │                             **`packageVersion` 과 `runningVersion` 을 나눈 이유**: 전자는
+│   │                             `lastMigratedVersion` 으로 사용자 config 에 기록되므로 `+dev` 가
+│   │                             붙으면 안 되고, 후자는 `performAutoUpdate` 가 로컬 빌드를 건너뛰는
+│   │                             근거라 붙어야 한다. **`UNKNOWN_VERSION`("0.0.0") 은 truthy 다** —
+│   │                             행동을 결정하는 소비자는 `runningVersionOrNull` 을 쓴다.
+│   │                             `detectInstallKind` 은 gen-090 이 `uninstall.ts` 에 쓴 것이며
+│   │                             분기는 그대로다. hook 경로로 오면서 `npm root -g` 에 timeout 과
+│   │                             호출부 catch 가 붙었다 (hang·throw 가 세션으로 새지 않게)
 │   ├── stage-transition.ts     — transition graph 기반 nonce 검증 (verifyTransition, setTransitionNonces, prepareStageEntry), artifact 검증, stage 전환
 │   ├── maturity.ts             — bootstrap/growth/cruise 감지, 완성 기준 16항목
 │   ├── lineage.ts              — 아카이브 DAG, genome diff (3-way), lineage 읽기, getLastLineageEntry (early-close hint 노출용)
@@ -59,7 +76,22 @@ src/
 │       │                          후자는 트리에 대해 아무것도 주장하지 않는다 — `--mode greenfield` 는
 │       │                          코드가 있는 디렉토리에 강제될 수 있다. `--repair` 는 CLAUDE.md 만 본다
 │       ├── migrate.ts          — v0.15→v0.16 마이그레이션 (multi-phase: confirm→execute→vision→complete)
-│       ├── check-version.ts    — postinstall/SessionStart용: v0.15 legacy cleanup + autoUpdate 자동 업데이트 + autoUpdateMinVersion guard + release notice 표시 (semverGte, queryAutoUpdateMinVersion, queryLatestVersion, performAutoUpdate, handOffToNewBinary, checkAutoUpdateGuard). **`hasNewerRelease(installed, latest)` = `semverGt(latest, installed)` 가 업데이트 여부를 결정한다** — `!==` 였고, 그것은 *뒤로 가는 것도* 업데이트로 쳤다. 릴리즈 빌드는 발행 전에 이미 올라간 버전을 달고 있으므로 자기진단 게이트가 방금 pack 한 산출물을 배포본으로 바꿔치기당했다. `getInstalledVersion()` 은 여전히 `execSync("reap --version")` 으로 **PATH 위의 reap** 을 읽는다 — 전역 설치에서는 그것이 곧 자기 자신이지만 로컬 설치에서는 아니다 (backlog pending)
+│       ├── check-version.ts    — postinstall/SessionStart용: v0.15 legacy cleanup + 자동 업데이트 + release notice.
+│       │                          **`performAutoUpdate` 는 여섯 조건을 순서대로 묻는다**: 버전을
+│       │                          알 수 있는가 → dev/alpha 가 아닌가 → 네트워크 → **더 새 것이 있는가**
+│       │                          (`hasNewerRelease` = `semverGt(latest, installed)`; `!==` 였고 그것은
+│       │                          *뒤로 가는 것*도 업데이트로 쳤다) → 하한(`autoUpdateMinVersion`) →
+│       │                          **전역 설치인가**(`detectInstallKind`). 마지막 둘의 **순서가 의미를
+│       │                          갖는다** — 하한 경고가 비-global 설치가 듣는 유일한 말이고, kind 조회는
+│       │                          `npm root -g` spawn 이라 업그레이드가 실제로 대기 중일 때만 해야 한다.
+│       │                          `getInstalledVersion()` 은 **자기 패키지**의 버전을 읽는다
+│       │                          (`runningVersionOrNull`) — PATH 의 `reap` 이 아니다. `null` 은
+│       │                          "알 수 없음"이며 1단계에서 멈춘다. `AutoUpdateDeps`/`GuardDeps` 로
+│       │                          network·npm·설치종류를 전부 주입할 수 있다.
+│       │                          `upgradeCommandFor(kind)` 가 처방 문구를 고른다 — 로컬 설치에게
+│       │                          `npm install -g` 를 권하지 않기 위해.
+│       │                          **`checkAutoUpdateGuard` 는 호출자가 없다**(backlog), 그리고
+│       │                          **`config.autoUpdate` 는 읽히지 않는다**(backlog)
 │       ├── load-context.ts     — SessionStart hook용: dynamic context 주입 (buildKnowledgeContext, hookSpecificOutput JSON 출력). Current State/Strict/Language 3개 dynamic 섹션만 출력한다 (~1KB) — static knowledge(genome/env/vision/memory/reap-guide)는 CLAUDE.md 의 `@` import refs 로 Claude Code 가 직접 로드하므로 여기서 다루지 않는다. 비-REAP 디렉토리에서는 silent exit
 │       ├── dump-state.ts       — `.reap/.session-state.md`에 동일 dynamic context 기록 (--stdout/--silent 지원). OpenCode plugin과 외부 도구용. emitOutput이 lifecycle 명령 종료 시 sync 버전(dump-state-sync.ts)으로 자동 dump
 │       ├── run/                — stage 실행 (21 handlers)
@@ -86,7 +118,7 @@ src/
 │       ├── status.ts           — 현재 상태 조회
 │       ├── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
 │       ├── destroy.ts          — **프로젝트에서** REAP 제거 (--confirm 필수, .reap/ + CLAUDE.md + .gitignore). 출력이 `context.nextStep: "reap uninstall"` 과 안내 문구로 머신 레벨 제거를 가리킨다 — 제거 있을 때와 no-op 일 때 **양쪽** 다
-│       ├── uninstall.ts        — **머신에서** REAP 제거 (2-phase, `--confirm`). 순서: 진입 훅 우회 → 양 adapter 홈 자산 → `~/.reap/` allowlist(폐기된 daemon 이 남긴 `daemon/` 포함) → npm. 전역 제거 목록에는 `@c-d-cc/reap-daemon` 이 **무조건** 들어간다 — 미설치면 no-op 이고, 넣지 않으면 deprecated 전역 패키지가 영구히 남는다. `detectInstallKind` 이 global/npx/local/checkout/unknown 을 가르고 **global 일 때만 npm 을 부른다** — `npm root -g` 와 패키지 루트의 `node_modules` 를 **realpath 정규화 후** 비교(안 하면 symlink 를 거치는 모든 전역 설치가 'global 아님'으로 오판된다). `UninstallDeps` 가 npm 호출·경로 판정을 주입 가능하게 한다. npm 실패는 전체 실패가 아니다
+│       ├── uninstall.ts        — **머신에서** REAP 제거 (2-phase, `--confirm`). 순서: 진입 훅 우회 → 양 adapter 홈 자산 → `~/.reap/` allowlist(폐기된 daemon 이 남긴 `daemon/` 포함) → npm. 전역 제거 목록에는 `@c-d-cc/reap-daemon` 이 **무조건** 들어간다 — 미설치면 no-op 이고, 넣지 않으면 deprecated 전역 패키지가 영구히 남는다. `detectInstallKind`(**`core/package-info.ts` 소유**, gen-092 에 이동)이 global/npx/local/checkout/unknown 을 가르고 **global 일 때만 npm 을 부른다** — `npm root -g` 와 패키지 루트의 `node_modules` 를 **realpath 정규화 후** 비교(안 하면 symlink 를 거치는 모든 전역 설치가 'global 아님'으로 오판된다). `UninstallDeps extends InstallKindDeps` 가 npm 호출·경로 판정을 주입 가능하게 한다. npm 실패는 전체 실패가 아니다
 │       ├── clean.ts            — 선택적 상태 초기화 (--lineage, --life, --backlog, --hooks)
 │       ├── update.ts           — 프로젝트 업데이트 (v0.15→migrate 위임, v0.16→config backfill/디렉토리 보충/CLAUDE.md 보수, --post-upgrade 지원)
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)

@@ -30,13 +30,20 @@
 **코드를 수정하기 전에 `environment/source-map.md` 를 열 것.** 무엇이 존재하고 무엇이 무엇을 부르는지는
 `reap index` 가 답하지만, 각 모듈이 무엇을 위한 것이고 왜 그렇게 생겼는지는 그 문서에만 있다.
 
+여기에 한 줄만 남기는 이유는 **새 사본을 만드는 것을 막기 위해서**다 (gen-092):
+**우리 버전·패키지 루트·설치 종류를 아는 곳은 `src/core/package-info.ts` 하나다.**
+버전만 해도 다섯 곳이 알고 있었고 넷은 서로의 사본이라고 주석에 스스로 적어두고 있었으며,
+다섯째는 `execSync("reap --version")` 으로 **다른 질문에 답하고** 있었다. 필요하면 import 할 것 —
+`packageVersion`(순수 버전, 사용자 config 에 기록됨) / `runningVersion`(+`+dev` 마커) /
+`runningVersionOrNull`(행동을 결정하는 소비자용) 이 나뉜 이유는 그 파일이 설명한다.
+
 ## Tests
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline — **unit 585 / e2e 329 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신). **daemon 스위트(130)는 패키지와 함께 소멸했다.**
+현재 baseline — **unit 620 / e2e 329 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신). **daemon 스위트(130)는 패키지와 함께 소멸했다.**
 
-gen-089 에서 unit 이 600 → 575 로 **줄었다**: 폐기한 daemon 의 availability/prompt/integrity 테스트 8파일을 지우고 indexer 테스트 38개를 더한 결과다. 다만 daemon 스위트 130 중 약 32개는 **삭제가 아니라 이식된** 모듈(call-resolver/impact/scanner/parser/pipeline)의 unit test 였고 **대체되지 않았다** — 그쪽은 지금 e2e 로만 덮인다.
+폐기된 daemon 스위트 130 중 약 32개는 **삭제가 아니라 이식된** 모듈(call-resolver/impact/scanner/parser/pipeline)의 unit test 였고 **대체되지 않았다** — 그쪽은 지금 e2e 로만 덮인다.
 
 `tests/scenario/multi-generation.test.ts` 는 gen-065 backlog gate 를 시나리오로 커버한다 — pending 이 있으면 `run start` 가 `status: "prompt"` 로 막히고, `--backlog`(소비) 또는 `--no-backlog`(유지) 로 재호출해야 진행된다. 새 scenario 가 backlog 파일을 만든다면 같은 gate 를 거치므로 이 패턴을 참고할 것.
 

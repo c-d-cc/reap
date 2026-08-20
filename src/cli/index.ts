@@ -1,23 +1,7 @@
 #!/usr/bin/env node
 
-import { readFileSync } from "fs";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
 import { Command } from "../libs/cli.js";
-
-function readVersion(): string {
-  const __dir = dirname(fileURLToPath(import.meta.url));
-  let version = "0.0.0";
-  for (const rel of [join(__dir, "..", "..", "package.json"), join(__dir, "..", "package.json")]) {
-    try { version = JSON.parse(readFileSync(rel, "utf-8")).version; break; } catch {}
-  }
-  // Check for dev build marker (created by build.sh for local builds)
-  try {
-    const hash = readFileSync(join(__dir, "..", ".dev-build"), "utf-8").trim();
-    if (hash) version += `+dev.${hash}`;
-  } catch {}
-  return version;
-}
+import { runningVersion } from "../core/package-info.js";
 import { execute as initExecute } from "./commands/init/index.js";
 import { execute as statusExecute } from "./commands/status.js";
 import { execute as runExecute } from "./commands/run/index.js";
@@ -42,7 +26,7 @@ const program = new Command();
 program
   .name("reap")
   .description("Recursive Evolutionary Autonomous Pipeline — Self-Evolving")
-  .version(readVersion());
+  .version(runningVersion());
 
 program
   .command("init [project-name]")
@@ -237,7 +221,7 @@ function skipsUserLevelSync(argv: string[]): boolean {
 // Silent, and a no-op after the first run at a given version. Awaited rather
 // than fired off: a command that reads those files must not race the write.
 if (!skipsUserLevelSync(process.argv)) {
-  await ensureUserLevelAssets({ cwd: process.cwd(), version: readVersion() });
+  await ensureUserLevelAssets({ cwd: process.cwd(), version: runningVersion() });
 }
 
 program.parse();

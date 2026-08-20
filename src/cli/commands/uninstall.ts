@@ -1,10 +1,11 @@
 import { execFileSync } from "child_process";
-import { realpathSync } from "fs";
-import { readFileSync } from "fs";
 import { homedir } from "os";
-import { basename, dirname, join } from "path";
-import { fileURLToPath } from "url";
 import { emitOutput } from "../../core/output.js";
+import {
+  detectInstallKind,
+  REAP_PACKAGE,
+  type InstallKindDeps,
+} from "../../core/package-info.js";
 import { claudeCodeAdapter } from "../../adapters/claude-code/index.js";
 import { opencodeAdapter } from "../../adapters/opencode/index.js";
 import { removeReapHomeAssets } from "../../adapters/index.js";
@@ -35,124 +36,11 @@ import { removeReapHomeAssets } from "../../adapters/index.js";
  * matters happened in step 2, and the output hands over the command to run.
  */
 
-/** How this copy of REAP got onto the machine. */
-export type InstallKind = "global" | "npx" | "local" | "checkout" | "unknown";
-
-export interface UninstallDeps {
+export interface UninstallDeps extends InstallKindDeps {
   home?: string;
-  /** Where this module is running from. Injected so tests need no install. */
-  moduleDir?: string;
-  /** `npm root -g`, or null when npm cannot be asked. */
-  npmGlobalRoot?: () => string | null;
-  /** Resolve a path through symlinks. See `sameDirectory`. */
-  realpath?: (path: string) => string;
-  /** Read a `package.json` name field; null when unreadable. */
-  readPackageName?: (packageJsonPath: string) => string | null;
   /** Hand the package list to npm. Seam so tests can assert the arguments. */
   runNpmUninstall?: (packages: string[]) => { ok: boolean; error?: string };
 }
-
-/**
- * Are these two paths the same directory?
- *
- * Compared through `realpath` because they arrive by different routes and can
- * spell the same place differently. `npm root -g` echoes the configured prefix
- * verbatim, while node resolves the bin symlink it was launched through, so on
- * macOS one says `/var/folders/...` and the other `/private/var/folders/...`
- * for one directory. Without this a genuine global install is judged "not
- * global" every time and npm is never called — the failure being silence, which
- * is the shape this whole command exists to remove.
- *
- * Not macOS-specific: it holds anywhere the path to the install runs through a
- * symlink, which is the normal arrangement for a version manager.
- */
-function sameDirectory(a: string, b: string, resolvePath: (p: string) => string): boolean {
-  const norm = (p: string) => {
-    try {
-      return resolvePath(p);
-    } catch {
-      return p;
-    }
-  };
-  return norm(a) === norm(b);
-}
-
-/**
- * Walk up from a directory to the package root that owns it — the nearest
- * ancestor whose `package.json` names this package.
- *
- * Returns null rather than guessing. A guess here would be handed to
- * `npm uninstall -g`.
- */
-export function findPackageRoot(
-  startDir: string,
-  packageName: string,
-  readName: (p: string) => string | null,
-): string | null {
-  let dir = startDir;
-  for (let i = 0; i < 12; i++) {
-    if (readName(join(dir, "package.json")) === packageName) return dir;
-    const parent = dirname(dir);
-    if (parent === dir) break;
-    dir = parent;
-  }
-  return null;
-}
-
-/**
- * Decide whether npm may be told to uninstall, and be conservative about it.
- *
- * `npm uninstall -g` acts on the machine, not on this directory, so being wrong
- * in the permissive direction means deleting an installation the user did not
- * ask about. Only a package root sitting directly in npm's own global root
- * earns a yes. Everything else is named and reported, and the command to run is
- * printed instead:
- *
- *   - `npx` — the copy running is a throwaway in npm's `_npx` cache, and
- *     whether a global install also exists is not visible from here. This is
- *     the recovery path for someone who already removed REAP, so usually there
- *     is nothing to uninstall at all.
- *   - `local` — a project dependency. A global uninstall would hit someone
- *     else's install entirely.
- *   - `checkout` — a source tree. npm does not manage it.
- *   - `unknown` — npm could not be asked, or the package root was not found.
- */
-export function detectInstallKind(deps: UninstallDeps = {}): {
-  kind: InstallKind;
-  packageRoot: string | null;
-} {
-  const here = deps.moduleDir ?? dirname(fileURLToPath(import.meta.url));
-  const readName = deps.readPackageName ?? readPackageName;
-  const resolvePath = deps.realpath ?? realpathSync;
-
-  const packageRoot = findPackageRoot(here, REAP_PACKAGE, readName);
-  if (packageRoot === null) return { kind: "unknown", packageRoot: null };
-
-  // `<something>/node_modules/@c-d-cc/reap` → the containing node_modules is
-  // two levels up because the name is scoped.
-  const containingNodeModules = dirname(dirname(packageRoot));
-  const inNodeModules = basename(containingNodeModules) === "node_modules";
-
-  if (!inNodeModules) return { kind: "checkout", packageRoot };
-  if (packageRoot.includes("_npx")) return { kind: "npx", packageRoot };
-
-  const globalRoot = (deps.npmGlobalRoot ?? npmGlobalRoot)();
-  if (globalRoot === null) return { kind: "unknown", packageRoot };
-  if (sameDirectory(globalRoot, containingNodeModules, resolvePath)) {
-    return { kind: "global", packageRoot };
-  }
-  return { kind: "local", packageRoot };
-}
-
-/**
- * REAP's own package name, as npm knows it.
- *
- * It has to be a literal — it is what identifies the package root while
- * walking up from this module, so it cannot be read out of the file it is
- * looking for. No marker: a unit test reads `package.json` and asserts the two
- * agree, which is a check rather than a note to remember (gen-073).
- */
-export const REAP_PACKAGE = "@c-d-cc/reap";
 
 /**
  * The retired daemon package (gen-089). Kept here, in the one command that
@@ -174,23 +62,6 @@ export const DAEMON_PACKAGE = "@c-d-cc/reap-daemon";
  */
 export function npmRemovalTargets(): string[] {
   return [DAEMON_PACKAGE, REAP_PACKAGE];
-}
-
-function readPackageName(packageJsonPath: string): string | null {
-  try {
-    const name = JSON.parse(readFileSync(packageJsonPath, "utf-8")).name;
-    return typeof name === "string" ? name : null;
-  } catch {
-    return null;
-  }
-}
-
-function npmGlobalRoot(): string | null {
-  try {
-    return execFileSync("npm", ["root", "-g"], { encoding: "utf-8", stdio: ["ignore", "pipe", "ignore"] }).trim();
-  } catch {
-    return null;
-  }
 }
 
 function defaultNpmUninstall(packages: string[]): { ok: boolean; error?: string } {

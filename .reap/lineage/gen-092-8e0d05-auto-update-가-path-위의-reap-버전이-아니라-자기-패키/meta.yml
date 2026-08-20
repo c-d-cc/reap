@@ -1,0 +1,75 @@
+id: gen-092-8e0d05
+type: embryo
+goal: auto-update 가 PATH 위의 reap 버전이 아니라 자기 패키지의 버전을 읽게 하고, 로컬 설치의 postinstall 이
+  전역 설치를 바꾸는 동작을 함께 판단한다.
+parents:
+  - gen-091-744435
+timeline:
+  - stage: learning
+    at: 2026-08-20T12:24:09.476Z
+  - stage: planning
+    at: 2026-08-20T12:30:26.805Z
+  - stage: implementation
+    at: 2026-08-20T12:33:38.289Z
+  - stage: validation
+    at: 2026-08-20T12:47:41.571Z
+  - stage: implementation
+    at: 2026-08-20T13:02:51.353Z
+    from: validation
+    reason: "evaluator high: (F1) runningVersion 의 0.0.0 sentinel 때문에
+      getInstalledVersion 이 null 을 못 돌려주고 실패 시 거짓 경고를 낸다 — 내가 만든 회귀. (F2) 릴리즈 문서
+      7파일의 비-global 안내 문구가 거짓. (F3) 파일 상단 주석의 도달 주장 정정. (F4) 주입 seam 의 기본값이 고정돼
+      있지 않다."
+  - stage: validation
+    at: 2026-08-20T13:08:30.754Z
+  - stage: implementation
+    at: 2026-08-20T13:22:53.512Z
+    from: validation
+    reason: "evaluator round 2 (low): L1 04 artifact 가 round-1 수치를 담고 있다 / L2
+      UNKNOWN_VERSION 주석이 lastMigratedVersion 을 무해한 소비자로 지목했으나 거기서는 기록을 낮춘다 / L3
+      0.0.0 리터럴이 모듈을 건너 중복 / L4 uninstall 이 조용히 timeout 을 얻었다 / L5 marker 분기의
+      단언이 약하다 / L6 REAP_PACKAGE 의 근거 주석이 이동 중 소실"
+  - stage: validation
+    at: 2026-08-20T13:25:34.590Z
+  - stage: implementation
+    at: 2026-08-20T13:38:43.744Z
+    from: validation
+    reason: "evaluator round 3 (low): L1 package-info 헤더의 'unchanged' 가 거짓 / L2 새
+      uninstall 테스트의 docblock 이 실제로 덮지 않는 경로를 덮는다고 적었다 / L3 04 의 게이트 미도달 근거가 로컬
+      전용이며 CI 에서는 다른 이유로 미도달 / L4 try/catch 근거가 wrap 보다 넓다 / L5 uninstall 의
+      unknown 문구가 판정을 단정 (gen-090 기존 문구, backlog)"
+  - stage: validation
+    at: 2026-08-20T13:51:03.888Z
+  - stage: completion
+    at: 2026-08-20T13:51:08.473Z
+status: completed
+fitnessFeedback:
+  text: >-
+    [사용자 위임 — 이 피드백은 사용자의 명시적 승인으로 orchestrating agent 가 작성했다. 인간의 직접 판단이 아니며,
+    그렇게 읽혀서는 안 된다.]
+
+
+    목표는 달성됐다. 결함 둘을 근거를 따로 세워 처리하라는 backlog 의 요구를 지켰고, 그 요구가 있었던 이유(gen-088 이
+    근거를 합쳐 틀린 문장을 남길 뻔했다)를 반복하지 않았다. 세 번째 결함을 자기 수정에서 발견해 함께 고친 것도 옳다.
+
+
+    가장 값진 것은 코드가 아니라 진단이다 — 동작 6개를 바꾸고 그것을 서술하는 문장 6개를 뒤에 남겼다. 그리고 그것이 carrier
+    문제가 아니라는 판별이 정확하다: grep 할 것도 없고 두 번째 파일도 없다. 텍스트가 바로 옆에 있어서 오히려 건너뛴다. 표식으로 못
+    잡는 종류를 이름 붙인 것이 이 세대의 남는 몫이다.
+
+
+    reviewer 제안을 그대로 받지 않은 판단이 좋다. "0.0.0" 리터럴 넷을 상수로 통일하라는 제안에 대해 "판정 불가"와
+    "migration 안 됨"은 철자만 같은 다른 사실이라며 자기가 만든 하나만 치환하고 나머지는 근거와 함께 넘긴 것 — 공유가 옳은
+    경우와 우연히 같은 값인 경우를 구분한 것이다. reviewer 가 재확인 후 동의한 것이 그 판단의 값이다.
+
+
+    아쉬운 것: 1라운드 blocker 둘이 전부 자기 수정이 만든 것이었다. 그중 "0.0.0" 이 truthy 라
+    version-unknown 분기가 죽은 건은, 고쳐지지 않았다면 매 postinstall·매 세션마다 사용자에게 거짓 경고를 출력했을
+    것이다. 이전 코드가 조용했던 자리다. 직전 세대(gen-091)도 같은 모양이었으므로 두 세대 연속이며, longterm 의 "각
+    수정의 이웃이 다음 결함이 사는 곳"이 두 번 연속 확인된 셈이다 — 그 항목을 재확인 사례로 보강할 값이 있다.
+
+
+    4라운드 확인을 받지 못한 것을 "받았다"로 적지 않고 그대로 적은 것이 맞다. 증명하지 못하는 9가지를 따로 적은 것도 마찬가지다.
+    특히 설치된 사본에서 버전을 읽는 상시 검사가 없다는 것 — 이 세대가 고친 바로 그 값에 대해 회귀 검사가 없다는 뜻이므로, 다음
+    세대가 가장 먼저 볼 자리다.
+  evaluatedAt: 2026-08-20T14:00:47.499Z

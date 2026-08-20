@@ -1,7 +1,5 @@
-import { readFileSync } from "fs";
 import { homedir } from "os";
-import { join, dirname } from "path";
-import { fileURLToPath } from "url";
+import { join } from "path";
 import YAML from "yaml";
 import type { ReapPaths } from "../../core/paths.js";
 import { createPaths } from "../../core/paths.js";
@@ -18,17 +16,7 @@ import {
   type PendingMigration,
 } from "../../core/migration.js";
 import type { ReapConfig } from "../../types/index.js";
-
-/** Read package version from package.json */
-function getPackageVersion(): string {
-  try {
-    const __dir = dirname(fileURLToPath(import.meta.url));
-    for (const rel of [join(__dir, "..", "..", "package.json"), join(__dir, "..", "package.json")]) {
-      try { return JSON.parse(readFileSync(rel, "utf-8")).version; } catch {}
-    }
-  } catch {}
-  return "0.0.0";
-}
+import { packageVersion, UNKNOWN_VERSION } from "../../core/package-info.js";
 
 /**
  * Delete `~/.reap/daemon/`, the retired daemon's index storage.
@@ -215,7 +203,7 @@ export async function execute(
   // healed in the same pass.
   if (markMigrated) {
     await backfillConfig(paths);
-    const version = getPackageVersion();
+    const version = packageVersion();
     const previous = await markMigratedNow(paths, version);
     emitOutput({
       status: "ok",
@@ -325,8 +313,8 @@ export async function execute(
         if (cfg?.language) language = cfg.language;
       } catch { /* use default */ }
     }
-    const version = getPackageVersion();
-    if (version !== "0.0.0") {
+    const version = packageVersion();
+    if (version !== UNKNOWN_VERSION) {
       const notice = fetchReleaseNotice(version, language);
       if (notice) console.error(notice);
     }
@@ -342,7 +330,7 @@ export async function execute(
   if (refreshedRaw) {
     try { refreshedConfig = YAML.parse(refreshedRaw) as ReapConfig; } catch { /* keep null */ }
   }
-  const pkgVersion = getPackageVersion();
+  const pkgVersion = packageVersion();
   let pendingMigrations: PendingMigration[] = [];
   try {
     pendingMigrations = detectPendingMigrations(refreshedConfig, pkgVersion);
