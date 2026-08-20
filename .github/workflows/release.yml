@@ -89,8 +89,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Only this version's section. RELEASE_NOTES.md keeps every past release,
+      # and body_path on the whole file published all of them — v0.17.6's release
+      # carried the v0.17.0 notes and a setup section for a retired feature.
+      # The current release is always the first `## ` block; older ones follow
+      # as `## vX.Y.Z`.
+      - name: Extract this version's notes
+        run: awk '/^## /{n++} n==1' RELEASE_NOTES.md > /tmp/release-body.md
+
+      - name: Fail if the extracted notes are empty
+        run: test -s /tmp/release-body.md
+
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          body_path: RELEASE_NOTES.md
+          body_path: /tmp/release-body.md
           generate_release_notes: false
