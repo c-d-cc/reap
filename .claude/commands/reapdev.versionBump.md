@@ -109,7 +109,14 @@ version bump 전에 `/reapdev.docsUpdate` 스킬을 실행하여 문서 일관�
 
    헤드리스 agent 를 실제로 띄워 **slash command 가 인식되는지** 확인한다. 파일이 올바른 위치에 있어도 클라이언트가 그것을 명령으로 노출하지 않으면 사용자는 REAP 을 부를 수 없다 — gen-063 이 그 상태로 릴리즈됐고 사용자가 fitness 에서 발견했다.
 
-   **약 $0.25 가 들고 수십 초 걸린다.** CI 에는 없다(비용 + agent 응답 시간의 비결정성). `claude` 가 없으면 SKIP 을 출력하고 통과시키므로 환경에 따라 건너뛸 수 있다 — 그 경우 **검증되지 않았음**을 인지할 것.
+   **약 $0.25 가 들고 수십 초 걸린다.** CI 에는 없다(비용 + agent 응답 시간의 비결정성).
+
+   <!-- reap:carrier(agent-integration-gate-verdicts) -->
+   **답이 셋이다 — pass / FAIL / SKIP.** SKIP 은 `claude` 나 `reap` 이 없을 때, 그리고 **`/reap.start` 가 시키는 `reap run` 명령이 거부되어 agent 가 막혔을 때** 나온다. 셋 다 exit 0 이며 amber 로 "agent integration was NOT verified" 라고 말한다 — **검증되지 않았음**이지 통과가 아니다. 태그를 밀기 전에 그 문구가 나왔는지 눈으로 확인할 것.
+
+   FAIL 이 났다면 **문구를 먼저 읽어라.** 게이트는 원인을 단정하지 않고 열거한다(슬래시 커맨드 미노출 / CLI 실패 / init 상태 / agent 조기 중단). 0.17.6 릴리즈 직전에 이 게이트가 권한 거부를 gen-063 으로 단정해 **존재하지 않는 결함을 쫓게 만들었다** — 그 릴리즈의 층2 비용 $0.53 중 $0.26 이 거기 들어갔다. 그래서 지금은 단정하지 않는다.
+
+   **통과가 증명하는 것은 하나 반이다.** CLI 동작은 생성된 generation 이 그 자체로 증명한다. **슬래시 커맨드 노출은 아니다** — 슬래시 커맨드는 CLI 의 wrapper 라, 그것을 못 찾고 `reap run start` 를 직접 부른 agent 도 **같은 파일**을 남긴다(gen-079 1차에서 실제로 일어났다). 그 절반은 agent 가 "우회하지 말라"는 지시를 지켰다는 것에 기댄다. `@` import 로드나 SessionStart hook 발화는 **둘 다 증명하지 않는다**(`/reap.start` 는 둘 없이도 성공한다).
 
    현재 설치된 REAP 을 검사하므로 **`reap install-skills` 를 먼저 돌려야** 소스 변경분이 반영된다.
 

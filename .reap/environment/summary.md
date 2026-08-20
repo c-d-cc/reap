@@ -71,7 +71,10 @@ gen-089 에서 unit 이 600 → 575 로 **줄었다**: 폐기한 daemon 의 avai
 - `scripts/postinstall.sh` — npm postinstall hook
 - `scripts/check-self-diagnosis.sh` — **자기진단 게이트**. `npm pack` → 격리 HOME/prefix 에 설치 → `reap init` → `fix --check` 가 **경고·에러 0** 을 요구. 8개 절: 빌드·설치·init·진단 / **인덱스** / install script 차단 / OpenCode / uninstall. init 절은 **greenfield 가 `environment/source-map.md` 를 실질 내용과 함께 쓰는지**도 요구한다 — 배포되는 genome 이 그 파일을 읽으라고 지시하므로, 전제를 installer 가 만들지 않으면 규칙이 허공을 가리킨다. release publish 앞 + CI 매 push 양쪽에서 실행. 대화로 채워지는 genome/goals 는 스크립트가 채운 뒤 진단 — 그것까지 요구하면 REAP 정상 동작에 fail 한다. 끄는 스위치는 두지 않는다 — 비용이 문제가 되면 release 전용으로 옮긴다
 - `scripts/list-carriers.sh` — **carrier 표식 조회 (gen-078)**. `reap:carrier(<id>)` 마커를 grep 해 ID 별 파일 목록 출력. `--orphans` 는 1개 파일에만 있는 ID 탐지 — 표식 불필요이거나 **다른 carrier 를 빠뜨린 것**(#21/#22 의 상태)
-- `scripts/check-agent-integration.sh` — **agent 통합 검증 / 층2 (gen-079)**. 헤드리스 `claude -p` 로 `/reap.start` 를 시키고 **`current.yml` 생성 여부**로 판정 — agent 응답(자연어)은 파싱하지 않는다. slash command 인식 / `@` import 로드 / SessionStart hook 발화 / CLI 동작을 한 번에 검증. **격리하지 않는다** — Claude Code 는 로그인을 slash command 와 같은 `~/.claude/` 에 두므로 HOME 격리 시 인증을 잃는다. 현재 설치를 읽기만 하고 임시 프로젝트에만 쓴다. **~$0.25/회** 라 CI 아닌 릴리즈 전 (`reapdev.versionBump` Step 5-2)
+<!-- reap:carrier(agent-integration-gate-verdicts) -->
+- `scripts/check-agent-integration.sh` — **agent 통합 검증 / 층2 (gen-079, gen-091)**. 헤드리스 `claude -p` 로 `/reap.start` 를 시키고 **`current.yml` 생성 여부**로 판정한다. **격리하지 않는다** — Claude Code 는 로그인을 slash command 와 같은 `~/.claude/` 에 두므로 HOME 격리 시 인증을 잃는다. 현재 설치를 읽기만 하고 임시 프로젝트에만 쓴다(권한 허용 `Bash(reap:*)` 도 그 안에만). **~$0.25/회** 라 CI 아닌 릴리즈 전 (`reapdev.versionBump` Step 5-2).
+  - **답이 셋이다** — pass / FAIL / **amber SKIP(exit 0)**. 세 번째는 `/reap.start` 가 시키는 `reap run` 명령이 거부됐을 때이며 *"검사가 아무것도 측정하지 못했다"* 를 뜻한다. **검사 실패와 측정 실패는 다르다** — gen-091 이전에는 그것을 FAIL 로, 그것도 `This is the gen-063 failure exactly` 로 단정해 릴리즈가 없는 결함을 쫓았다. 부재 FAIL 은 이제 원인을 열거하고 agent 응답과 거부 항목을 함께 싣는다.
+  - **통과가 증명하는 것은 하나 반이다.** `CLI reachable` 은 생성된 generation 이 증명한다. `slash command 노출` 은 **agent 가 우회 금지 지시를 지켰을 때만** 성립한다 — 슬래시 커맨드는 CLI 의 wrapper 라 우회가 바이트 동일한 파일을 남긴다(gen-079 실측). **`@` import 로드와 SessionStart hook 발화는 증명하지 않는다** — `/reap.start` 는 둘 없이도 성공한다. 여섯 세대 동안 넷을 주장했다.
 - `scripts/check-version-floors.sh` — **버전 하한 게이트**. reap 이 사용자에게 "이 버전으로 올려라"라고 말하는 숫자(`package.json` 의 `reap.autoUpdateMinVersion`)가 npm 에 **실제로 발행돼 있는지** 검사한다. 값은 소스에서 읽는다(carrier 표식). 네트워크 실패·비-JSON 은 amber SKIP, **패키지 자체가 없으면(`E404`) FAIL** — 그 둘을 구분하지 않으면 이름 오타가 조용히 통과한다. `release.yml` 의 `npm publish` 앞. **CI 에는 없다** — 매 push 마다 네트워크가 필요하고, 코드와 무관한 이유로 주기적으로 SKIP 을 내는 검사는 사람이 스크롤로 넘긴다
 - `scripts/check-docs-version.sh` — 릴리즈 문서 정합성 게이트. `RELEASE_NOTICE.md` / `RELEASE_NOTES.md` / 5개 로케일 changelog 가 `package.json` 과 일치하는지 + **로케일 간 항목 집합 동일성** + migration note 가 패키지 버전을 넘지 않는지 검사. `release.yml` 의 `npm publish` 앞과 `reapdev.versionBump` Step 5-1 에서 실행
 
@@ -115,6 +118,8 @@ gen-089 에서 unit 이 600 → 575 로 **줄었다**: 폐기한 daemon 의 avai
 | main push | **테스트 전체** (unit/e2e/scenario) | **reap-test** | 무료 |
 | `release.yml` (`v*` 태그) | 문서 정합성 + **버전 하한** + 자기진단 + build + publish | reap | 무료 |
 | 릴리즈 전 수동 (`reapdev.versionBump` 5-2) | **agent 통합**(층2) | 로컬 | ~$0.25 |
+
+**층2 가 못 잡는 것** (gen-091 이 4라운드 독립 검토로 확정): (a) `@` import 로드와 hook 발화 — 검증 수단이 **없다**. (b) **판정의 절반이 agent 준수에 기댄다** — sentinel 없이 CLI 로 우회하면 통과한다. fail-open 둘(지정 토큰 오발화 / `reap run` 거부가 커맨드 부재와 겹침)과 반대 방향 누출(명령문 없는 거부 항목은 발화하지 않음)이 **전부 그 가정으로 환원된다**. `stream-json` 으로 구조적 판정이 가능한지는 미조사. (c) `permission_denials` 의 실제 동작을 **모른다** — 거부를 on-demand 로 재현할 방법이 없어(`--disallowedTools` 는 도구를 안 주고 `--permission-mode manual` 은 헤드리스에서 거부하지 않는다) negative 는 **합성 fixture** 뿐이고, 필드 leg 가 프로덕션에서 한 번도 발화하지 않을 수 있다. (d) **자동 회귀 검사가 없다** — 판정부 8개 분기 중 라이브가 지나는 것은 1~2개. bash 게이트용 테스트 하네스가 저장소에 없고 다른 게이트 3종도 같은 상태다.
 
 **층1 vs 층2**: 층1 은 "파일이 올바른 위치에 올바른 내용으로 놓였는가", 층2 는 "클라이언트가 그것을 실제로 읽는가".
 

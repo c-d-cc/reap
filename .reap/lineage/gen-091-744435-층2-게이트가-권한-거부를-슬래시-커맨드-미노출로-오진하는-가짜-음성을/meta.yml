@@ -1,0 +1,49 @@
+id: gen-091-744435
+type: embryo
+goal: 층2 게이트가 권한 거부를 슬래시 커맨드 미노출로 오진하는 가짜 음성을 없애고, 부재를 하나의 원인으로 단정하지 않도록 판정을 고친다.
+parents:
+  - gen-090-6477ee
+timeline:
+  - stage: learning
+    at: 2026-08-20T08:07:37.590Z
+  - stage: planning
+    at: 2026-08-20T08:13:58.946Z
+  - stage: implementation
+    at: 2026-08-20T08:19:58.792Z
+  - stage: validation
+    at: 2026-08-20T08:27:07.791Z
+  - stage: implementation
+    at: 2026-08-20T08:43:17.125Z
+    from: validation
+    reason: "evaluator high: DENIALS>0 단독 조건이 REAP 무관 거부로도 SKIP 을 내 진짜 gen-063 을 놓친다
+      (HEAD 대비 회귀). 판정 조건 수정 + 게이트 주장 축소 + 문서 정정 필요"
+  - stage: validation
+    at: 2026-08-20T08:46:42.193Z
+  - stage: implementation
+    at: 2026-08-20T08:59:02.306Z
+    from: validation
+    reason: "evaluator round 2 (high): reap 부분문자열이 역선택 — 슬래시 커맨드를 못 찾은 agent 가 reap
+      을 더 말한다. reap run 으로 좁히고, FAIL 분기도 거부 항목을 출력하고, slash-command-recognised
+      주장의 근거를 분리"
+  - stage: validation
+    at: 2026-08-20T08:59:02.878Z
+  - stage: implementation
+    at: 2026-08-20T09:10:02.913Z
+    from: validation
+    reason: "evaluator round 3 (low): carrier drift (4곳이 naming reap 이라 하는데 코드는 reap
+      run) + 인접성 가정 주석 + printDenials 가 필터보다 먼저 자름 + Verdict 환원이 커버리지까지 쓸어담음"
+  - stage: validation
+    at: 2026-08-20T09:10:03.464Z
+  - stage: implementation
+    at: 2026-08-20T09:20:52.797Z
+    from: validation
+    reason: "evaluator round 4 (low): 잘림이 판정 근거를 감춘다 (순서 수정과 같은 모양, 한 단계 아래) + reap
+      run 리터럴이 코드 대 코드로 중복 (#22 모양) — 윈도잉 + REAP_CMD_MATCH 공유"
+  - stage: validation
+    at: 2026-08-20T09:20:53.378Z
+  - stage: completion
+    at: 2026-08-20T09:23:55.605Z
+status: completed
+fitnessFeedback:
+  text: ok good
+  evaluatedAt: 2026-08-20T12:22:08.677Z

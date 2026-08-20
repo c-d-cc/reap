@@ -105,6 +105,11 @@ The second drives a headless agent against your current installation and judges 
 
 It reads your installation rather than a throwaway one, because a client keeps its login beside its commands — isolating one discards the other. Run `reap install-skills` first so it sees your current sources.
 
+<!-- reap:carrier(agent-integration-gate-verdicts) -->
+It answers three ways, not two. Alongside pass and fail there is an amber skip, for when the client refused the `reap run` command /reap.start issues, stopping the agent before it ever reached REAP — the check measured nothing, and saying so is not the same as saying REAP is broken. It reported one such run as a missing slash command once, and $0.26 of the release's $0.53 went on a defect that was not there. A missing generation now names every cause that produces it rather than picking one.
+
+What a pass establishes is narrower than it used to claim, and the two halves do not rest on the same thing. That the CLI works is proved by the generation itself. That the client surfaced the slash command is not — a slash command wraps the CLI, so an agent that could not find it and ran `reap run start` by hand leaves an identical file behind, which is what happened the first time this check was built. That half rests on the agent obeying an instruction not to bypass. And neither half says CLAUDE.md's `@` imports loaded or the SessionStart hook fired: `/reap.start` needs neither to succeed.
+
 ## Carrier Markers
 
 Some facts are known in more than one place — an install path known by both the installer and the checker, a rule stated in the guide, the genome template, a phase prompt and five locale files. When one of them changes and the others do not, the tool starts contradicting itself. That is what issues #21 and #22 were.
