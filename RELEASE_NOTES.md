@@ -1,32 +1,26 @@
 ## What's New
 
-The code-intelligence daemon is gone. The indexer that mattered ships with REAP, and it now returns answers that are not empty.
+REAP ships a code index, and it now returns answers that are not empty.
 
-- **`reap index` replaces the daemon.** Nothing to install, no port, no background process: `reap index status`, `reap index impact <file>`, `reap index search <query>`, `reap index callers <symbolId>`, `reap index callees <symbolId>`. Fifteen languages, no native build — the Tree-sitter grammars are WebAssembly.
+- **`reap index`.** Nothing to install, no port, no background process: `reap index status`, `reap index impact <file>`, `reap index search <query>`, `reap index callers <symbolId>`, `reap index callees <symbolId>`. Fifteen languages, no native build — the Tree-sitter grammars are WebAssembly.
 - **Blast radius used to return zero for every standard TypeScript project, and had for five months.** The resolver never mapped a `./x.js` specifier to the `x.ts` that produces it, so a NodeNext codebase produced an import graph with no edges in it. 130 tests passed, the release gate passed, CI was green throughout — because every check asked whether indexing had run and none asked whether the answer meant anything.
 - **So `reap index status` reports the import resolution rate**, and the release gate now requires a known relationship to be found rather than a nonzero symbol count. The number that would have caught this on day one is on screen.
-- **Indexing is keyed by commit.** The index records the SHA it describes, so deciding what to re-parse is one `git diff`. A full index of REAP itself takes ~0.3s against the daemon's 6.7s — most of the difference was a `git log` subprocess per file, for information the index needs one copy of. Queries refresh themselves when HEAD has moved, so the only eager trigger left is the commit at the end of `completion`. The trade-off: uncommitted work is not in the index.
+- **Indexing is keyed by commit.** The index records the SHA it describes, so deciding what to re-parse is one `git diff`. A full index of REAP itself takes ~0.3s. Queries refresh themselves when HEAD has moved, so the only eager trigger left is the commit at the end of `completion`. The trade-off: uncommitted work is not in the index.
 - **The index lives in `.reap/.index/`**, gitignored, and goes when the project goes — not in your home directory.
-- **If you used the daemon**, `reap update` removes `daemon` / `daemonBin` from `.reap/config.yml` and deletes `~/.reap/daemon/`. Remove the global package with `npm uninstall -g @c-d-cc/reap-daemon`; it is deprecated on npm. See the v0.17.6 migration note.
 - **`reap uninstall`** removes what npm cannot. `npm uninstall -g @c-d-cc/reap` deletes the package and nothing else — the slash commands, agent definitions, `~/.reap/` and the SessionStart hook entries were written by REAP's own code, and `preuninstall`/`postuninstall` do not fire on npm 10 or 12. The leftover hook kept calling a command that no longer existed, on every session. Already removed the package? `npx @c-d-cc/reap uninstall --confirm`.
 - **Agents are told to read `environment/source-map.md` before changing code**, and `reap init` now creates that file for greenfield projects. It never did — `adoption` writes one from a scan of your tree, greenfield had nothing to scan — so shipping the rule on its own would have sent every new project's agent looking for a file that does not exist. The rule matters because `summary.md` is loaded into context every session and source-map is not: a structure document nothing tells the agent to open is a structure document that sits there while the code it describes gets edited. Existing projects own their `genome/evolution.md` and `reap update` does not touch it, so the v0.17.6 migration note carries the rule to them, along with what to do when the file itself is missing. The note fixes the other half of that file in the same pass: it still told the reflect phase to keep the structure description in `summary.md`, so installing the reading rule on its own would have left an agent sent to a file that nothing is told to write — the state the note itself calls worse than an absent file.
 - **Installing REAP into a project no longer changes your global install.** The auto-update asked `reap --version` for the currently installed version, which is whatever binary is first on PATH rather than the package the code belongs to, and then upgraded the global installation unconditionally. Install REAP into a project while an older one sits globally and the postinstall upgraded the global one — an installation the user never mentioned. It also meant the release gate diagnosed the published package instead of the tarball it had just packed, which is how this was found. REAP now reads its own `package.json`, and only a global installation upgrades itself: a project-local copy, an `npx` run and a source checkout are left alone. The version is read in one place now instead of five, four of which said in a comment that they were copies of each other.
 - **And `autoUpdate: false` now turns it off.** The switch has been in `.reap/config.yml` since v0.16 — created by `reap init`, preserved by `reap update`, printed by `reap config`, documented as "auto-update enabled" — and read by nothing. Setting it `false` showed you `false` and updated you anyway. It now stops the install, and only the install: the hard-floor warning that says your copy is too old for REAP to fix automatically still reaches you, because someone who declined automatic fixing is exactly who needs to hear it. `reap update` and an `npm install -g` you typed yourself are unaffected — the flag governs the one install REAP performs on its own. If the config cannot be read at all, auto-update stays on — npm runs postinstall in the package directory, where no project config exists, so reading "cannot tell" as "off" would have disabled it for everyone rather than for the people who asked. The cost of that choice is worth stating: the flag governs the recurring path (every session), not the moment you install REAP itself, which cannot see your project's config.
 
-Two analyses the daemon also carried — community detection and process tracing — are deliberately not ported. The first was connected components under another name, so its cohesion score was the constant 1.00; the second called every function whose callers could not be resolved an entry point.
+Two further analyses are deliberately absent — community detection and process tracing. The first was connected components under another name, so its cohesion score was the constant 1.00; the second called every function whose callers could not be resolved an entry point.
 
 ---
 
 ## v0.17.5
 
-This release is mostly about the code-intelligence daemon, which was documented from v0.16 but never actually usable on an npm install.
-
-- **The daemon is now a separately published package.** If you use `daemon: true`, install it once: `npm i -g @c-d-cc/reap-daemon`. Several packaging problems that kept it from running are fixed along with it.
-- **REAP tells you when the daemon is missing or too old** instead of silently doing nothing — `reap daemon status`, `reap fix --check` and the agent prompt all report it. The lifecycle is never blocked either way.
-- **`daemonBin` when REAP cannot find an installed daemon.** The two are separate packages and meet only when they share a resolution root — a global REAP with a project-local daemon, two package managers, or a Node version switch does not qualify. Set `daemonBin` in `.reap/config.yml`, or `REAP_DAEMON_BIN` for a single command.
+- **REAP installs its own integration on first run.** npm 12 blocks install scripts for global installs by default, which left the slash commands, agent definitions, guide and session hook unplaced — REAP looked installed and had no integration at all, with no error. Any `reap` command now places them once per version.
 - **`reap run push` reports git's actual error** instead of a generic message about the remote and the network.
 - **`reap help` lists `/reap.run` and `/reap.report`**, which it never did.
-- **REAP installs its own integration on first run.** npm 12 blocks install scripts for global installs by default, which left the slash commands, agent definitions, guide and session hook unplaced — REAP looked installed and had no integration at all, with no error. Any `reap` command now places them once per version.
 
 Releases now publish through npm trusted publishing (OIDC) rather than a long-lived token.
 
@@ -69,29 +63,7 @@ Releases now publish through npm trusted publishing (OIDC) rather than a long-li
 
 ## v0.17.0
 
-- **Code Intelligence Daemon** (opt-in) — set `daemon: true` in `.reap/config.yml` to activate a local Tree-sitter symbol graph (localhost:17224). REAP auto-indexes at generation start, implementation complete, and completion commit. Agents receive daemon query instructions (symbol search, caller/callee, blast-radius impact) in their prompts. `lastIndexedCommit` exposed on `/projects/:id/status` for staleness checks.
 - **Evaluator Agent — fitness phase + cruise auto-abort** — with `evaluator: true`, the evaluator now runs during the fitness phase as well as validation. High-severity concerns recorded via `reap run validation --phase report-evaluator` automatically abort cruise mode, replacing the auto-fitness prompt with a supervised fallback so the user can review before continuing.
-
-## Daemon Setup
-
-```bash
-npm install -g @c-d-cc/reap
-```
-
-Add to `.reap/config.yml`:
-
-```yaml
-daemon: true   # default: false
-```
-
-Then start the daemon and register your project:
-
-```bash
-reap daemon start
-reap daemon status
-```
-
-The daemon runs at `localhost:17224`. REAP automatically triggers indexing at key lifecycle points. Agents receive symbol query guidance in their prompts when `daemon: true` is set.
 
 ## Evaluator Setup
 

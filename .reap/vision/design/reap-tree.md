@@ -14,7 +14,7 @@ REAP 은 **프로젝트 하나 = pipeline 하나**를 전제한다. `.reap/life/
 - **generation 비대화** — 여러 저장소에 걸친 작업을 억지로 한 세대에 담는다. artifact 가 커지고 validation 이 무엇을 검증하는지 흐려진다
 - **지식 파편화** — 하위 저장소를 REAP 밖에서 관리한다. 그쪽에서 얻은 교훈이 상위 genome 에 도달하지 않고, 상위 원칙이 하위에 전달되지 않는다
 
-REAP 자신이 이미 이 상태에 가깝다. `daemon/` 은 별도 앱이고 `tests/` 는 별도 저장소(submodule)이며 `docs/` 는 자체 빌드를 갖는다. 지금은 하나의 `.reap/` 이 이 셋을 모두 관장하지만, 각자가 독립 lifecycle 을 가질 규모가 되면 같은 문제를 맞는다.
+REAP 자신이 이미 이 상태에 가깝다. `tests/` 는 별도 저장소(submodule)이고 `docs/` 는 자체 빌드를 갖는다. 지금은 하나의 `.reap/` 이 둘을 모두 관장하지만, 각자가 독립 lifecycle 을 가질 규모가 되면 같은 문제를 맞는다.
 
 ## 2. 정의
 
@@ -182,7 +182,7 @@ child 가 parent 원칙을 어긴 것을 **누가 감지하는가**. 지금 답�
 1. **관측 우선, 강제는 나중.** M1 을 먼저 완성한다. 처음부터 실행 제어를 넣으면 독립 repo 의 자율성이 깨지고, 실패 시 tree 전체가 멈춘다
 2. **child 의 `.reap/` 은 child 소유.** parent 는 **읽되 쓰지 않는다.** 배정조차 직접 쓰기가 아니어야 한다
 3. **단독 실행이 항상 가능해야 한다.** child repo 를 혼자 clone 해서 `/reap.evolve` 를 돌리면 그냥 동작한다. tree 는 그 위에 얹는 layer 이지 전제가 아니다
-4. **opt-in.** tree 를 모르는 기존 프로젝트의 동작은 byte-identical 이어야 한다 (daemon/evaluator 와 같은 패턴: config flag → caller 게이트 → 내부 silent-fail)
+4. **opt-in.** tree 를 모르는 기존 프로젝트의 동작은 byte-identical 이어야 한다 (`evaluator` 와 같은 패턴: config flag → caller 게이트 → 내부 silent-fail)
 5. **전파는 1-hop.** 각 노드는 바로 위·아래만 안다
 
 ---
@@ -250,7 +250,7 @@ reap tree sync-genome          # 상속 genome 갱신 (child 에서 실행)
 2. **fitness 이중 부담** (§6) — child fitness 를 parent 로 승계할 것인가. 승계하면 self-fitness 경계가 어떻게 유지되는가
 3. **상속 genome 갱신 시점** — parent 가 바뀐 것을 child 가 언제 아는가. SessionStart 마다? harvest 시? 수동?
 4. **child 가 여러 parent 를 갖는 경우** — 공유 라이브러리는 자연히 그렇게 된다. 금지할 것인가, DAG 을 허용할 것인가. **"Tree"라는 이름이 이미 답을 전제하고 있다는 점을 의식할 것**
-5. **daemon 과의 관계** — cross-repo 심볼 그래프·impact 분석이 tree 축을 인지해야 하는가. (현재 daemon 은 project 별 등록이므로 노드 내부만 본다)
+5. **code index 와의 관계** — cross-repo 심볼 그래프·impact 분석이 tree 축을 인지해야 하는가. **전제가 바뀌었다**: 인덱스는 `.reap/.index/` 에 프로젝트별로 살고 커밋 기준으로 갱신되므로, 지금은 구조적으로 노드 내부만 본다. 노드 경계를 넘으려면 각 child 의 스냅샷을 parent 가 읽는 형태가 되는데, 그것은 "parent 는 child 의 `.reap/` 을 읽되 쓰지 않는다"(§ 원칙 2)와는 맞지만 **child 의 커밋이 움직일 때 parent 인덱스가 언제 낡는가**라는 질문을 새로 만든다. 미결.
 6. **stale 판정 기준** — child 가 얼마나 조용하면 stale 인가. 시간 기준은 머신 상태에 의존하지 않는가
 7. **Milestone 과의 접점** — parent 의 milestone 이 child 들에게 분배되는가. 분배된다면 child 는 자기 milestone 을 갖는가
 
@@ -271,6 +271,6 @@ reap tree sync-genome          # 상속 genome 갱신 (child 에서 실행)
 tree 는 **두 프로젝트가 있어야 검증된다** — 단위 테스트로 잡히지 않는다.
 
 - **scenario test**: `tests/fixtures/` 에 parent + child 두 프로젝트를 만들고, child 에서 세대를 돌린 뒤 parent harvest 결과를 확인
-- **회귀 보장**: tree 미설정 프로젝트의 모든 출력이 byte-identical 임을 검사 (daemon opt-in 검증 패턴 재사용)
+- **회귀 보장**: tree 미설정 프로젝트의 모든 출력이 byte-identical 임을 검사 (`evaluator` opt-in 검증 패턴 재사용)
 - **검사를 먼저 실패시킨다** — harvest 를 구현하기 전에 검사를 돌려 fail 을 확인한다 (gen-073 교훈)
 - **머신 상태를 읽지 않는다** — fixture 는 `git init -b main` + repo 별 identity 설정. 로컬 경로 비교는 realpath 정규화 (gen-081 교훈)

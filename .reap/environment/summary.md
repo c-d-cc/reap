@@ -41,9 +41,9 @@
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline — **unit 627 / e2e 331 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신). **daemon 스위트(130)는 패키지와 함께 소멸했다.**
+현재 baseline — **unit 629 / e2e 331 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
 
-폐기된 daemon 스위트 130 중 약 32개는 **삭제가 아니라 이식된** 모듈(call-resolver/impact/scanner/parser/pipeline)의 unit test 였고 **대체되지 않았다** — 그쪽은 지금 e2e 로만 덮인다.
+`src/indexer/` 의 이식된 모듈(call-resolver/impact/scanner/parser/pipeline)에는 **unit test 가 없다** — 그쪽은 지금 e2e 로만 덮인다.
 
 `tests/scenario/multi-generation.test.ts` 는 gen-065 backlog gate 를 시나리오로 커버한다 — pending 이 있으면 `run start` 가 `status: "prompt"` 로 막히고, `--backlog`(소비) 또는 `--no-backlog`(유지) 로 재호출해야 진행된다. 새 scenario 가 backlog 파일을 만든다면 같은 gate 를 거치므로 이 패턴을 참고할 것.
 
@@ -207,5 +207,5 @@ claude-code adapter 는 `~/.claude/` 를 쓰며 XDG 와 무관하다.
 설계 원칙(파일 기반 상태 / JSON stdout / transition graph + nonce / 2-level compression / adapter pattern)은 **처방적이므로 `genome/application.md` 가 소유한다.** 여기에는 현재 상태로만 확인되는 두 가지만 남긴다.
 
 <!-- reap:carrier(zero-native-dependency) -->
-- **Zero *native* dependency** (원칙은 `genome/application.md` 가 소유한다): production dependency 는 `yaml` 과 `web-tree-sitter` 둘. 후자는 WASM 이라 node-gyp/prebuild 가 없다. CLI 프레임워크도 자체 구현(`src/libs/cli.ts`). 폐기한 daemon 이 별도 패키지였던 이유가 네이티브 SQLite 였고, 그것이 사라져 통합이 가능해졌다
+- **Zero *native* dependency** (원칙은 `genome/application.md` 가 소유한다): production dependency 는 `yaml` 과 `web-tree-sitter` 둘. 후자는 WASM 이라 node-gyp/prebuild 가 없다 — 그래서 인덱서가 패키지에 내장될 수 있다. CLI 프레임워크도 자체 구현(`src/libs/cli.ts`)
 - **`reap make` pattern**: template 기반 resource 생성 (현재 `backlog`, `hook`)

@@ -300,7 +300,7 @@ export const zhCN: Translations = {
     destroyNote: "完全移除 .reap/ 目录和项目中所有 REAP 相关文件。需要输入 \"yes destroy\" 确认。",
     uninstallTitle: "reap uninstall",
     uninstallDesc: "从这台机器上移除 REAP — 用户级文件和 npm 软件包。",
-    uninstallNote: "npm 只删除软件包。REAP 的斜杠命令、智能体定义、SessionStart 钩子和 ~/.reap/ 都是 REAP 自己的代码写入的，而 npm 在卸载时不执行任何代码。此命令按正确顺序处理 — 清理两个客户端的用户级文件，只从 settings.json 中移除 REAP 的条目，删除已停用的 daemon 留在 ~/.reap/daemon/ 的数据，然后把 @c-d-cc/reap-daemon 与 @c-d-cc/reap 交给 npm。你自己的文件会保留，包括 reapdev.* 以及 ~/.reap/ 中的其他内容。已经删除了软件包？npx @c-d-cc/reap uninstall --confirm。请勿与 reap destroy 混淆，后者只从单个项目中移除 REAP。",
+    uninstallNote: "npm 只删除软件包。REAP 的斜杠命令、智能体定义、SessionStart 钩子和 ~/.reap/ 都是 REAP 自己的代码写入的，而 npm 在卸载时不执行任何代码。此命令按正确顺序处理 — 清理两个客户端的用户级文件，只从 settings.json 中移除 REAP 的条目，删除 REAP 放进 ~/.reap/ 的内容，然后把 REAP 的 npm 包交给 npm。你自己的文件会保留，包括 reapdev.* 以及 ~/.reap/ 中的其他内容。已经删除了软件包？npx @c-d-cc/reap uninstall --confirm。请勿与 reap destroy 混淆，后者只从单个项目中移除 REAP。",
     makeBacklogTitle: "reap make backlog",
     makeBacklogDesc: "创建 backlog 项。这是创建 backlog 文件的唯一支持方式。",
     makeBacklogNote: "选项：--type <genome-change|environment-change|task> --title <title> [--body <body>] [--priority <priority>]。切勿直接创建 backlog 文件。",
@@ -863,10 +863,6 @@ commit:  1a2b3c4`,
       ["reap index", "这在哪里定义、谁调用它、什么依赖这个文件、这次改动的 blast radius 有多大"],
       ["Grep / Glob", "字面字符串、注释、配置文件、没有语法支持的语言，以及一切尚未提交的内容"],
     ],
-    retiredTitle: "曾经有一个 daemon",
-    retiredDesc: "直到 v0.17.5，这曾是一个独立包 @c-d-cc/reap-daemon，在 daemon: true 背后于 17224 端口运行 HTTP 服务。它已停用并在 npm 上标记为 deprecated。reap update 会替你移除相关配置和残留数据；需要手动处理的只有那个全局包，reap uninstall 也会一并列出它。",
-    retiredCode: `npm uninstall -g @c-d-cc/reap-daemon`,
-    retiredNote: "它存在的理由是让图保持热态 —— 而从磁盘加载本仓库的图只需个位数毫秒，reap 冷启动则是 40 到 70 毫秒。被规避的开销比规避它的机制更便宜，而那套机制包括一个端口、一份注册表、一个 PID 文件、一个空闲计时器、一个带原生 SQLite 构建的第二个 npm 包、一条发布流水线，以及至少一台机器上连它自己的 stop 命令都找不到的孤儿进程。",
   },
 
   // Self-Evolving Page
@@ -1037,11 +1033,11 @@ commit:  1a2b3c4`,
     versions: [
       {
         version: "0.17.6",
-        notes: "**code-intelligence 守护进程已移除，索引器随 REAP 一同发布。** 无需安装、没有端口、没有后台进程 —— `reap index status`、`reap index impact <file>`、`reap index search <query>`、`reap index callers/callees <symbolId>`。支持 15 种语言，没有原生构建。**blast radius 在每个标准 TypeScript 项目中一直返回零**，持续了五个月：解析器从未把 `./x.js` 这样的 specifier 对应到生成它的 `x.ts`。130 个测试通过，CI 始终是绿色，因为每项检查都在问「索引跑了吗」，没有人问「这个答案说得通吗」。**因此 `reap index status` 现在会报告 import 解析率**，发布门禁要求找到已知的依赖关系，而不是符号数大于零。**索引以 commit 为单位** —— REAP 的完整索引约 0.3 秒，而守护进程需要 6.7 秒；HEAD 移动时查询会自行刷新；未提交的工作被有意排除在索引之外。索引位于 `.reap/.index/` 并被 gitignore。**如果你曾使用守护进程**，`reap update` 会移除 `daemon`/`daemonBin` 并删除 `~/.reap/daemon/`；用 `npm uninstall -g @c-d-cc/reap-daemon` 移除全局包。**`reap uninstall`** 会清除 npm 无法清除的部分 —— 斜杠命令、智能体定义、`~/.reap/` 以及 SessionStart 钩子条目；npm 10 和 12 都不执行卸载钩子，所以 `npm uninstall -g` 会把它们留在原地。 **随 REAP 分发的 genome 现在要求 agent 在修改代码前先读 `environment/source-map.md`**，并且 greenfield 的 `reap init` 会创建该文件——此前并不会创建，若只搬运规则，每个新项目的 agent 都会去找一个不存在的文件。`summary.md` 每次会话都会加载，而 source-map 不会，这正是结构文档始终未被打开、它所描述的代码却在被修改的原因。已有项目拥有自己的 `genome/evolution.md`，因此规则通过 v0.17.6 的 migration note 送达，其中也说明了文件本身缺失时该怎么做。 同一份 note 还会修正该文件的另一半：它此前要求 reflect 阶段把结构说明维护在 `summary.md` 中，若不改动，新规则就会指向一个**没有任何地方要求去写**的文件。 **把 REAP 装进项目，不会再改动你的全局安装。** auto-update 通过 `reap --version` 询问\"当前安装的版本\"——那是 **PATH 中最先找到的可执行文件**，而不是这段代码所属的包——然后无条件升级全局安装。在全局存在旧版 REAP 的情况下把它装进项目，postinstall 就会升级**你从未提及的那个全局安装**。现在 REAP 读取自己的 `package.json`，并且只有全局安装才会升级自身：项目内的本地副本、`npx` 运行和源码检出都保持原样。 **而且 `autoUpdate: false` 现在真的能关掉自动更新。** 这个开关自 v0.16 起就在 `.reap/config.yml` 里：`reap init` 创建它，`reap update` 保留它，`reap config` 显示它，`/reap.config` skill 把它写作 \"auto-update enabled\"，`reap fix` 还检查它的类型——却**没有任何地方读取它**。把它设为 `false`，你看到的是 `false`，全局安装照样被替换。现在关掉它只会停止**安装**这一件事：最低版本警告——告诉你手上的副本太旧、REAP 无法自动修复——依然会送达，因为拒绝了自动修复的人最需要知道这件事。`reap update` 和你自己敲的 `npm install -g` 不受影响；这个开关管的只是 **REAP 自行执行的那一次安装**。如果完全读不到配置，自动更新保持开启：npm 在包目录里运行 postinstall，那里没有项目配置，把\"读不到\"当成\"关闭\"就会对**所有人**生效，而不是对提出要求的人生效。 这里把适用范围说清楚：这个开关管的是**反复发生的路径——每次会话启动**，而不是你刚敲下的 `npm install` 的 postinstall——后者运行的地方没有你项目的配置。",
+        notes: "**REAP 内置了代码索引。** 无需安装、没有端口、没有后台进程 —— `reap index status`、`reap index impact <file>`、`reap index search <query>`、`reap index callers/callees <symbolId>`。支持 15 种语言，没有原生构建。**blast radius 在每个标准 TypeScript 项目中一直返回零**，持续了五个月：解析器从未把 `./x.js` 这样的 specifier 对应到生成它的 `x.ts`。130 个测试通过，CI 始终是绿色，因为每项检查都在问「索引跑了吗」，没有人问「这个答案说得通吗」。**因此 `reap index status` 现在会报告 import 解析率**，发布门禁要求找到已知的依赖关系，而不是符号数大于零。**索引以 commit 为单位** —— REAP 的完整索引约 0.3 秒；HEAD 移动时查询会自行刷新；未提交的工作被有意排除在索引之外。索引位于 `.reap/.index/` 并被 gitignore。**`reap uninstall`** 会清除 npm 无法清除的部分 —— 斜杠命令、智能体定义、`~/.reap/` 以及 SessionStart 钩子条目；npm 10 和 12 都不执行卸载钩子，所以 `npm uninstall -g` 会把它们留在原地。 **随 REAP 分发的 genome 现在要求 agent 在修改代码前先读 `environment/source-map.md`**，并且 greenfield 的 `reap init` 会创建该文件——此前并不会创建，若只搬运规则，每个新项目的 agent 都会去找一个不存在的文件。`summary.md` 每次会话都会加载，而 source-map 不会，这正是结构文档始终未被打开、它所描述的代码却在被修改的原因。已有项目拥有自己的 `genome/evolution.md`，因此规则通过 v0.17.6 的 migration note 送达，其中也说明了文件本身缺失时该怎么做。 同一份 note 还会修正该文件的另一半：它此前要求 reflect 阶段把结构说明维护在 `summary.md` 中，若不改动，新规则就会指向一个**没有任何地方要求去写**的文件。 **把 REAP 装进项目，不会再改动你的全局安装。** auto-update 通过 `reap --version` 询问\"当前安装的版本\"——那是 **PATH 中最先找到的可执行文件**，而不是这段代码所属的包——然后无条件升级全局安装。在全局存在旧版 REAP 的情况下把它装进项目，postinstall 就会升级**你从未提及的那个全局安装**。现在 REAP 读取自己的 `package.json`，并且只有全局安装才会升级自身：项目内的本地副本、`npx` 运行和源码检出都保持原样。 **而且 `autoUpdate: false` 现在真的能关掉自动更新。** 这个开关自 v0.16 起就在 `.reap/config.yml` 里：`reap init` 创建它，`reap update` 保留它，`reap config` 显示它，`/reap.config` skill 把它写作 \"auto-update enabled\"，`reap fix` 还检查它的类型——却**没有任何地方读取它**。把它设为 `false`，你看到的是 `false`，全局安装照样被替换。现在关掉它只会停止**安装**这一件事：最低版本警告——告诉你手上的副本太旧、REAP 无法自动修复——依然会送达，因为拒绝了自动修复的人最需要知道这件事。`reap update` 和你自己敲的 `npm install -g` 不受影响；这个开关管的只是 **REAP 自行执行的那一次安装**。如果完全读不到配置，自动更新保持开启：npm 在包目录里运行 postinstall，那里没有项目配置，把\"读不到\"当成\"关闭\"就会对**所有人**生效，而不是对提出要求的人生效。 这里把适用范围说清楚：这个开关管的是**反复发生的路径——每次会话启动**，而不是你刚敲下的 `npm install` 的 postinstall——后者运行的地方没有你项目的配置。",
       },
       {
         version: "0.17.5",
-        notes: "**代码智能守护进程现已作为独立包发布。** 它自 v0.16 起就写在文档里，但从未发布，因此在 npm 安装下无法工作；随之而来的若干打包问题也一并修复。使用 `daemon: true` 的用户请执行一次 `npm i -g @c-d-cc/reap-daemon`。**守护进程缺失或版本过旧现在会被报告** — `reap daemon status`、`reap fix --check` 和代理提示词都会告知，两种情况下生命周期都不会被阻塞。**当 REAP 找不到它时使用 `daemonBin`** — 两者是独立的包，只有共享同一解析根时才能找到彼此；在 `.reap/config.yml` 中设置 `daemonBin`，或用 `REAP_DAEMON_BIN` 只作用于一次调用。**`reap run push` 会报告 git 的真实错误**，**`reap help` 现在列出 `/reap.run` 和 `/reap.report`**。 **REAP 现在会在首次运行时自行安装集成** — npm 12 会阻止全局安装的 install script，导致斜杠命令、代理定义和会话钩子都未被放置，且没有任何报错。",
+        notes: "**`reap run push` 会报告 git 的真实错误**，**`reap help` 现在列出 `/reap.run` 和 `/reap.report`**。 **REAP 现在会在首次运行时自行安装集成** — npm 12 会阻止全局安装的 install script，导致斜杠命令、代理定义和会话钩子都未被放置，且没有任何报错。",
       },
       {
         version: "0.17.4",
@@ -1061,7 +1057,7 @@ commit:  1a2b3c4`,
       },
       {
         version: "0.17.0",
-        notes: "**代码智能守护进程**（可选功能）— 在 `.reap/config.yml` 中设置 `daemon: true` 可激活本地 Tree-sitter 符号图（localhost:17224）。在 generation 开始、implementation 完成和 completion 提交时自动更新索引。代理提示包含符号搜索/调用关系/影响范围查询示例。`/projects/:id/status` 公开 `lastIndexedCommit` 以检查索引新鲜度。**Evaluator Agent** — fitness 阶段集成完成：fitness 阶段运行 evaluator，提示中显示历史问题，检测到高严重性问题时自动中止 cruise 模式。",
+        notes: "**Evaluator Agent** — fitness 阶段集成完成：fitness 阶段运行 evaluator，提示中显示历史问题，检测到高严重性问题时自动中止 cruise 模式。",
       },
       {
         version: "0.16.6",

@@ -75,7 +75,7 @@ reap uninstall            # shows what will go
 reap uninstall --confirm  # does it, and hands the packages to npm
 ```
 
-It removes REAP's files from both Claude Code and OpenCode locations, takes REAP's entries back out of `settings.json`, deletes `~/.reap/reap-guide.md`, the install stamp and `~/.reap/daemon/` (what the retired daemon left behind), and then runs `npm uninstall -g` for `@c-d-cc/reap-daemon` and `@c-d-cc/reap`. Your own files in those directories are left alone, including anything named `reapdev.*` and anything else you keep in `~/.reap/`.
+It removes REAP's files from both Claude Code and OpenCode locations, takes REAP's entries back out of `settings.json`, deletes what REAP itself wrote into `~/.reap/` — an allowlist, never the whole directory — and then hands its npm packages to `npm uninstall -g`. Your own files in those directories are left alone, including anything named `reapdev.*` and anything else you keep in `~/.reap/`.
 
 **Already removed the package?** Then you have no `reap` command, and the files are still there. Run it without installing anything:
 
@@ -331,8 +331,6 @@ commit:  1a2b3c4
 (Illustrative figures.) That line exists because its absence cost five months. The predecessor to this indexer resolved zero imports in every standard TypeScript project — it never mapped a `./x.js` specifier to the `x.ts` that produces it — and blast radius returned nothing while every test passed and CI stayed green, because each check asked whether indexing had run and none asked whether the answer meant anything.
 
 The index lives in `.reap/.index/` and is gitignored. Deleting it is always safe; the next command rebuilds it.
-
-**Replacing the daemon (removed in v0.17.6).** Through v0.17.5 this was a separate package, `@c-d-cc/reap-daemon`, running an HTTP server on port 17224 behind `daemon: true`. It is retired and deprecated on npm; `reap update` removes the settings and the leftover data for you. Its purpose was to keep a graph warm — and loading this repository's graph costs single-digit milliseconds against a `reap` cold start of 40 to 70. The thing being avoided was cheaper than the machinery avoiding it, and that machinery was a port, a registry, a PID file, an idle timer, a second npm package with a native SQLite build, and a release pipeline.
 
 ## Project Structure
 

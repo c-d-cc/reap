@@ -73,7 +73,7 @@ reap uninstall            # 显示将被删除的内容
 reap uninstall --confirm  # 执行删除，并把软件包交给 npm 卸载
 ```
 
-它会删除 Claude Code 和 OpenCode 两处位置中 REAP 的文件，只从 `settings.json` 中移除 REAP 添加的条目，删除 `~/.reap/reap-guide.md`、安装标记和 `~/.reap/daemon/`（已停用的 daemon 留下的数据），然后对 `@c-d-cc/reap-daemon` 与 `@c-d-cc/reap` 执行 `npm uninstall -g`。这些目录中属于你自己的文件不会被动 — 包括任何名为 `reapdev.*` 的文件，以及 `~/.reap/` 里的其他内容。
+它会删除 Claude Code 和 OpenCode 两处位置中 REAP 的文件，只从 `settings.json` 中移除 REAP 添加的条目，删除 REAP 自己写入 `~/.reap/` 的内容（一份 allowlist，而非整个目录），然后对 REAP 的 npm 包执行 `npm uninstall -g`。这些目录中属于你自己的文件不会被动 — 包括任何名为 `reapdev.*` 的文件，以及 `~/.reap/` 里的其他内容。
 
 **已经删除了软件包？** 那么你没有 `reap` 命令，而文件仍然留在那里。无需安装任何东西即可运行：
 
@@ -320,8 +320,6 @@ commit:  1a2b3c4
 （示例数值。）这一行的缺失代价是五个月。本索引器的前身在每个标准 TypeScript 项目中解析出的 import 数为**零** —— 它从未把 `./x.js` 这样的 specifier 对应到生成它的 `x.ts` —— 于是 blast radius 一直返回空，而所有测试都通过、CI 始终是绿色：每项检查都在问「索引跑了吗」，没有人问「这个答案说得通吗」。
 
 索引位于 `.reap/.index/` 并被 gitignore。删除它永远是安全的 —— 下一条命令会重建。
-
-**取代 daemon（v0.17.6 中移除）。** 直到 v0.17.5，这曾是一个独立包 `@c-d-cc/reap-daemon`，在 `daemon: true` 背后于 17224 端口运行 HTTP 服务。它已停用并在 npm 上标记为 deprecated；`reap update` 会替你移除相关配置和残留数据。它存在的理由是让图保持热态 —— 而从磁盘加载本仓库的图只需个位数毫秒，`reap` 冷启动则是 40 到 70 毫秒。**被规避的开销比规避它的机制更便宜**，而那套机制包括一个端口、一份注册表、一个 PID 文件、一个空闲计时器、一个带原生 SQLite 构建的第二个 npm 包，以及一条发布流水线。
 
 ## 项目结构
 

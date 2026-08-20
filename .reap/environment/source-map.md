@@ -128,7 +128,7 @@ src/
 │       ├── status.ts           — 현재 상태 조회
 │       ├── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
 │       ├── destroy.ts          — **프로젝트에서** REAP 제거 (--confirm 필수, .reap/ + CLAUDE.md + .gitignore). 출력이 `context.nextStep: "reap uninstall"` 과 안내 문구로 머신 레벨 제거를 가리킨다 — 제거 있을 때와 no-op 일 때 **양쪽** 다
-│       ├── uninstall.ts        — **머신에서** REAP 제거 (2-phase, `--confirm`). 순서: 진입 훅 우회 → 양 adapter 홈 자산 → `~/.reap/` allowlist(폐기된 daemon 이 남긴 `daemon/` 포함) → npm. 전역 제거 목록에는 `@c-d-cc/reap-daemon` 이 **무조건** 들어간다 — 미설치면 no-op 이고, 넣지 않으면 deprecated 전역 패키지가 영구히 남는다. `detectInstallKind`(**`core/package-info.ts` 소유**, gen-092 에 이동)이 global/npx/local/checkout/unknown 을 가르고 **global 일 때만 npm 을 부른다** — `npm root -g` 와 패키지 루트의 `node_modules` 를 **realpath 정규화 후** 비교(안 하면 symlink 를 거치는 모든 전역 설치가 'global 아님'으로 오판된다). `UninstallDeps extends InstallKindDeps` 가 npm 호출·경로 판정을 주입 가능하게 한다. npm 실패는 전체 실패가 아니다
+│       ├── uninstall.ts        — **머신에서** REAP 제거 (2-phase, `--confirm`). 순서: 진입 훅 우회 → 양 adapter 홈 자산 → `~/.reap/` allowlist → npm. **두 목록의 소유자는 코드다** — 홈 자산은 `reap:carrier(reap-home-asset-set)` 이, 전역 제거 대상은 `npmRemovalTargets()` 가 갖는다. 산문이 그 값을 다시 적으면 어긋나므로 여기에 열거하지 않는다(gen-094 에서 README 가 실제로 어긋났다). 두 목록 모두 **지금 코드가 쓰지 않는 항목을 포함**하며, 그것이 의도다 — 미존재 시 no-op 이고, 빼면 예전에 그것을 켰던 머신에 영구히 남는다. `detectInstallKind`(**`core/package-info.ts` 소유**, gen-092 에 이동)이 global/npx/local/checkout/unknown 을 가르고 **global 일 때만 npm 을 부른다** — `npm root -g` 와 패키지 루트의 `node_modules` 를 **realpath 정규화 후** 비교(안 하면 symlink 를 거치는 모든 전역 설치가 'global 아님'으로 오판된다). `UninstallDeps extends InstallKindDeps` 가 npm 호출·경로 판정을 주입 가능하게 한다. npm 실패는 전체 실패가 아니다
 │       ├── clean.ts            — 선택적 상태 초기화 (--lineage, --life, --backlog, --hooks)
 │       ├── update.ts           — 프로젝트 업데이트 (v0.15→migrate 위임, v0.16→config backfill/디렉토리 보충/CLAUDE.md 보수, --post-upgrade 지원)
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
@@ -175,7 +175,7 @@ src/
 
 ## src/indexer/ — 내장 코드 인덱서 (gen-089)
 
-폐기한 `@c-d-cc/reap-daemon` 에서 이식했다. **상주 프로세스·포트·registry·SQLite 는 전부 사라졌다.**
+**상주 프로세스도 포트도 registry 도 SQLite 도 없다.** Tree-sitter WASM 파서 + gzip JSON 스냅샷.
 
 | 파일 | 역할 |
 |---|---|
@@ -201,8 +201,8 @@ incremental 이 재파싱하지 않은 파일까지 재해석해야 한다. 없�
 쓰기 실패는 예외가 아니라 **보고**된다. gitignore 하는 이유는 크기가 아니라 자기참조다:
 `completion --phase commit` 이 `git add -A` 를 돌린다.
 
-**성능**: 이 저장소 full 인덱싱 **약 0.35초** (daemon 6.7초). 차이의 대부분은 파일별 `git log -1`
-233회 제거. 스냅샷 로드는 gunzip+parse **약 2.4ms**.
+**성능**: 이 저장소 full 인덱싱 **약 0.35초**. 파일별 `git log -1` 을 돌리지 않는 것이 크다
+(233회였다). 스냅샷 로드는 gunzip+parse **약 2.4ms**.
 
 ## docs/ — reap.cc 문서 사이트
 

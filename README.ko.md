@@ -73,7 +73,7 @@ reap uninstall            # 무엇이 지워질지 보여줍니다
 reap uninstall --confirm  # 실제로 지우고, 패키지 제거까지 npm 에 넘깁니다
 ```
 
-Claude Code 와 OpenCode 양쪽 위치에서 REAP 파일을 지우고, `settings.json` 에서 REAP 항목만 빼고, `~/.reap/reap-guide.md` · 설치 스탬프 · `~/.reap/daemon/`(폐기된 daemon 이 남긴 것)을 지운 뒤 `@c-d-cc/reap-daemon` 과 `@c-d-cc/reap` 에 대해 `npm uninstall -g` 를 실행합니다. 같은 디렉토리에 있는 사용자 파일은 건드리지 않습니다 — `reapdev.*` 도, `~/.reap/` 안의 다른 것들도 그대로 남습니다.
+Claude Code 와 OpenCode 양쪽 위치에서 REAP 파일을 지우고, `settings.json` 에서 REAP 항목만 빼고, `~/.reap/` 안에서 REAP 이 직접 쓴 것(allowlist 이며 디렉토리 전체가 아닙니다)만 지운 뒤 REAP 의 npm 패키지에 `npm uninstall -g` 를 실행합니다. 같은 디렉토리에 있는 사용자 파일은 건드리지 않습니다 — `reapdev.*` 도, `~/.reap/` 안의 다른 것들도 그대로 남습니다.
 
 **이미 패키지를 지웠다면?** `reap` 명령이 없고 파일은 남아 있는 상태입니다. 아무것도 설치하지 않고 실행하세요:
 
@@ -321,8 +321,6 @@ commit:  1a2b3c4
 (예시 수치입니다.) 이 한 줄이 없어서 5개월을 잃었습니다. 이 인덱서의 전신은 표준 TypeScript 프로젝트에서 import 를 **하나도** 해석하지 못했고 — `./x.js` specifier 를 그것을 만들어내는 `x.ts` 에 대응시키지 못했습니다 — blast radius 가 계속 0을 반환하는 동안 모든 테스트가 통과했고 CI 는 내내 초록이었습니다. 모든 검사가 "인덱싱이 돌았는가"를 물었고 "결과가 말이 되는가"는 아무도 묻지 않았기 때문입니다.
 
 인덱스는 `.reap/.index/` 에 있고 gitignore 됩니다. 지워도 항상 안전합니다 — 다음 명령이 다시 만듭니다.
-
-**daemon 을 대체합니다 (v0.17.6 에서 제거).** v0.17.5 까지 이것은 `daemon: true` 뒤에서 17224 포트에 HTTP 서버를 띄우는 별도 패키지 `@c-d-cc/reap-daemon` 이었습니다. 지금은 폐기되어 npm 에서 deprecated 되었고, `reap update` 가 설정과 남은 데이터를 대신 지웁니다. 그 존재 이유는 그래프를 warm 하게 유지하는 것이었는데 — 이 저장소의 그래프를 디스크에서 읽는 데 한 자리 수 밀리초가 들고 `reap` 콜드 스타트는 40~70ms 입니다. **피하려던 비용이 피하는 장치보다 쌌습니다.** 그 장치는 포트 하나, registry, PID 파일, idle timer, 네이티브 SQLite 빌드를 진 두 번째 npm 패키지, 그리고 릴리즈 파이프라인이었습니다.
 
 ## 프로젝트 구조
 

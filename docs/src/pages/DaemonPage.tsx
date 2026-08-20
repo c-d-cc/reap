@@ -6,8 +6,8 @@ import { useT } from "@/i18n";
 /**
  * The code index page.
  *
- * The route is still /docs/daemon so existing links keep working; the daemon
- * itself was retired in v0.17.6 and the last section says so.
+ * The route is /docs/daemon and stays that way: renaming it would 404 every
+ * link that already points here.
  */
 export default function DaemonPage() {
   const t = useT();
@@ -56,11 +56,6 @@ export default function DaemonPage() {
             </tbody>
           </table>
         </div>
-
-        <h2 className="text-base font-semibold text-foreground mb-3 mt-6">{d.retiredTitle}</h2>
-        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{d.retiredDesc}</p>
-        <CodeBlock language="bash">{d.retiredCode}</CodeBlock>
-        <p className="text-xs text-muted-foreground mt-2 mb-6">{d.retiredNote}</p>
       </DocPage>
     </DocLayout>
   );

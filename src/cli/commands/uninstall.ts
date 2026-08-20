@@ -97,7 +97,7 @@ export async function execute(confirm?: boolean, deps: UninstallDeps = {}): Prom
           "~/.claude/agents/reap-*.md",
           "~/.claude/settings.json: the SessionStart entries REAP added",
           "OpenCode commands and agents (reap.* / reap-*), wherever XDG_CONFIG_HOME points",
-          "~/.reap/reap-guide.md, ~/.reap/.install-stamp, ~/.reap/daemon/ (data the retired daemon left)",
+          "~/.reap/: reap-guide.md, .install-stamp, daemon/ — an allowlist, not the whole directory",
         ],
         willKeep: [
           "your own files in those directories, including reapdev.*",

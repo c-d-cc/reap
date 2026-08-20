@@ -73,7 +73,7 @@ reap uninstall            # zeigt, was entfernt wird
 reap uninstall --confirm  # führt es aus und übergibt die Pakete an npm
 ```
 
-Es entfernt REAPs Dateien aus den Verzeichnissen von Claude Code und OpenCode, nimmt REAPs Einträge wieder aus `settings.json` heraus, löscht `~/.reap/reap-guide.md`, den Installationsstempel und `~/.reap/daemon/` (was der stillgelegte Daemon hinterlassen hat) und führt anschließend `npm uninstall -g` für `@c-d-cc/reap-daemon` und `@c-d-cc/reap` aus. Ihre eigenen Dateien in diesen Verzeichnissen bleiben unangetastet — auch alles mit dem Namen `reapdev.*` und alles Weitere in `~/.reap/`.
+Es entfernt REAPs Dateien aus den Verzeichnissen von Claude Code und OpenCode, nimmt REAPs Einträge wieder aus `settings.json` heraus, löscht, was REAP selbst in `~/.reap/` geschrieben hat (eine Allowlist, nicht das ganze Verzeichnis), und führt anschließend `npm uninstall -g` für REAPs npm-Pakete aus. Ihre eigenen Dateien in diesen Verzeichnissen bleiben unangetastet — auch alles mit dem Namen `reapdev.*` und alles Weitere in `~/.reap/`.
 
 **Paket schon entfernt?** Dann fehlt der Befehl `reap`, und die Dateien liegen noch da. Führen Sie es aus, ohne etwas zu installieren:
 
@@ -320,8 +320,6 @@ commit:  1a2b3c4
 (Beispielwerte.) Diese Zeile gibt es, weil ihr Fehlen fünf Monate gekostet hat. Der Vorgänger dieses Indexers löste in jedem gewöhnlichen TypeScript-Projekt **null** Importe auf — er ordnete einen `./x.js`-Specifier nie der `x.ts` zu, aus der er entsteht — und der Blast Radius blieb leer, während alle Tests bestanden und CI durchgehend grün war: jede Prüfung fragte, ob indiziert wurde, keine fragte, ob das Ergebnis Sinn ergibt.
 
 Der Index liegt in `.reap/.index/` und ist gitignored. Ihn zu löschen ist immer unbedenklich — der nächste Befehl baut ihn neu.
-
-**Ersetzt den Daemon (entfernt in v0.17.6).** Bis v0.17.5 war dies ein separates Paket, `@c-d-cc/reap-daemon`, das hinter `daemon: true` einen HTTP-Server auf Port 17224 betrieb. Es ist stillgelegt und auf npm als deprecated markiert; `reap update` entfernt die Einstellungen und die zurückgebliebenen Daten für Sie. Sein Zweck war, einen Graphen warmzuhalten — und den Graphen dieses Repositorys von der Platte zu laden kostet einstellige Millisekunden gegenüber einem `reap`-Kaltstart von 40 bis 70. **Das Vermiedene war billiger als die Maschinerie, die es vermied**, und diese Maschinerie bestand aus einem Port, einer Registry, einer PID-Datei, einem Idle-Timer, einem zweiten npm-Paket mit nativem SQLite-Build und einer Release-Pipeline.
 
 ## Projektstruktur
 

@@ -286,7 +286,7 @@ export async function execute(
   //    for someone leaving — this is the one every existing user takes.
   const daemonLeftover = await removeRetiredDaemonData();
   if (daemonLeftover) {
-    updated.push(`removed retired daemon data: ${daemonLeftover}`);
+    updated.push(`removed leftover index data: ${daemonLeftover}`);
   }
 
   // 6. The code index must not be committed (gen-089). Projects initialised

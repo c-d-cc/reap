@@ -389,7 +389,7 @@ All REAP interactions go through `/reap.*` slash commands. These are the primary
 - `reap update --mark-migrated` — Mark this project as having applied all pending migration notes up to the current package version (gen-071 migration layer).
 - `reap dump-state [--stdout] [--silent]` — Dump dynamic REAP context to `.reap/.session-state.md` (used by OpenCode plugin; useful for any external tool that needs current generation state)
 - `reap index [update|status|impact|search|callers|callees]` — Query the built-in code index (see § Code Intelligence below)
-- `reap uninstall [--confirm]` — Remove REAP from this machine: user-level files for both clients, REAP's SessionStart entries, `~/.reap/` (allowlisted, including what the retired daemon left), and finally the npm packages. Two-phase — without `--confirm` it lists what would go and removes nothing.
+- `reap uninstall [--confirm]` — Remove REAP from this machine: user-level files for both clients, REAP's SessionStart entries, `~/.reap/` (allowlisted), and finally the npm packages. Two-phase — without `--confirm` it lists what would go and removes nothing.
 
   **npm cannot do this and neither can a package hook.** `preuninstall`/`postuninstall` were measured not to fire on npm 10 or 12 (global or local) while the same probe fired on install, so `npm uninstall -g @c-d-cc/reap` leaves every file REAP wrote to the home directory — including the SessionStart hooks, which then call a command that no longer exists on every session.
 
@@ -467,19 +467,7 @@ They are complementary — the index answers with `file:line`, which you then re
 
 ### What it does not do
 
-`impact` walks file-to-file imports. Two analyses the retired daemon also carried — community detection and process tracing — are not here, deliberately: the first was connected components under another name, so its cohesion score was the constant 1.00, and the second called every function whose callers could not be resolved an entry point. Shipping either would have meant three analyses nobody could act on instead of one that works.
-
-### There used to be a daemon
-
-Through v0.17.5 this was a separate package, `@c-d-cc/reap-daemon`, that ran an HTTP server on port 17224 and was enabled with `daemon: true`. It is retired and deprecated on npm.
-
-If you used it, `reap update` removes the settings and the leftover data for you; see the v0.17.6 migration note. Nothing you have to do by hand except removing the global package, which `reap uninstall` also names:
-
-```bash
-npm uninstall -g @c-d-cc/reap-daemon
-```
-
-The reason it went is worth stating, because it is a design conclusion and not just a cleanup. Its whole purpose was to keep a graph warm — and loading this repository's graph from disk costs single-digit milliseconds against a `reap` cold start of 40 to 70. The thing being avoided was cheaper than the machinery avoiding it. What it cost was real: a port, a registry, a PID file, an idle timer, a second npm package with a native SQLite build, a release pipeline, and an orphaned process on at least one machine that its own `stop` command could not find.
+`impact` walks file-to-file imports. Two further analyses are deliberately absent — community detection and process tracing. The first was connected components under another name, so its cohesion score was the constant 1.00; the second called every function whose callers could not be resolved an entry point. Shipping either would have meant three analyses nobody could act on instead of one that works.
 
 ## Migration Instruction Layer
 
