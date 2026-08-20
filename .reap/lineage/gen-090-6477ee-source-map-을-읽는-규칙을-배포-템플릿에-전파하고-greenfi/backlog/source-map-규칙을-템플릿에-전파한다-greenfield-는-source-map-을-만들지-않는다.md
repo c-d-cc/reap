@@ -1,8 +1,10 @@
 ---
 type: genome-change
-status: pending
+status: consumed
 priority: medium
 createdAt: 2026-08-20T04:47:03.266Z
+consumedBy: gen-090-6477ee
+consumedAt: 2026-08-20T04:54:57.543Z
 ---
 
 # source-map 규칙을 템플릿에 전파한다 — greenfield 는 source-map 을 만들지 않는다

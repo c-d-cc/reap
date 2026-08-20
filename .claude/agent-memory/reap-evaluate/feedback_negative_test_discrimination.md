@@ -25,3 +25,12 @@ is fixed, and should not be counted as such. Matching fail counts is strong
 evidence of an honest negative run; a mismatch is worth asking about.
 
 Related: [[no-scope-expansion-in-evaluation]]
+
+**Extension — after a fail-open is fixed, name the assertion that now closes it.**
+A fix to a parser/helper often does not close the hole by itself; some *other*
+assertion does, and that assertion's own comment usually says it is there for a
+different reason. Re-run the attack matrix with that assertion mentally removed.
+If the hole reopens, it is load-bearing and a future reader can delete it as
+redundant. Measured case: `fencedMarkdown` returning `""` for an unterminated
+fence only fails closed because a `toContain("- **Pattern-first**")` loop rejects
+the empty string — the block count and the equality check both still passed.

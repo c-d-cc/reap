@@ -53,7 +53,11 @@ src/
 │   │                             **`program.parse()` 앞에서 `ensureUserLevelAssets` 를 await** — 명령을 가리지 않는다.
 │   │                             `postinstall` 이 안 돈 사용자가 가진 것은 바이너리 하나이므로 그것을 부르는 것 자체가 조건이다
 │   └── commands/
-│       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair, --migrate 지원)
+│       ├── init/               — 프로젝트 초기화 (greenfield/adoption 자동 감지, --repair, --migrate 지원).
+│       │                          **양쪽 모두 `environment/source-map.md` 를 만든다**: adoption 은
+│       │                          `generateSourceMap(scan)`, greenfield 는 `buildSourceMapStub()`.
+│       │                          후자는 트리에 대해 아무것도 주장하지 않는다 — `--mode greenfield` 는
+│       │                          코드가 있는 디렉토리에 강제될 수 있다. `--repair` 는 CLAUDE.md 만 본다
 │       ├── migrate.ts          — v0.15→v0.16 마이그레이션 (multi-phase: confirm→execute→vision→complete)
 │       ├── check-version.ts    — postinstall/SessionStart용: v0.15 legacy cleanup + autoUpdate 자동 업데이트 + autoUpdateMinVersion guard + release notice 표시 (semverGte, queryAutoUpdateMinVersion, queryLatestVersion, performAutoUpdate, handOffToNewBinary, checkAutoUpdateGuard). **`hasNewerRelease(installed, latest)` = `semverGt(latest, installed)` 가 업데이트 여부를 결정한다** — `!==` 였고, 그것은 *뒤로 가는 것도* 업데이트로 쳤다. 릴리즈 빌드는 발행 전에 이미 올라간 버전을 달고 있으므로 자기진단 게이트가 방금 pack 한 산출물을 배포본으로 바꿔치기당했다. `getInstalledVersion()` 은 여전히 `execSync("reap --version")` 으로 **PATH 위의 reap** 을 읽는다 — 전역 설치에서는 그것이 곧 자기 자신이지만 로컬 설치에서는 아니다 (backlog pending)
 │       ├── load-context.ts     — SessionStart hook용: dynamic context 주입 (buildKnowledgeContext, hookSpecificOutput JSON 출력). Current State/Strict/Language 3개 dynamic 섹션만 출력한다 (~1KB) — static knowledge(genome/env/vision/memory/reap-guide)는 CLAUDE.md 의 `@` import refs 로 Claude Code 가 직접 로드하므로 여기서 다루지 않는다. 비-REAP 디렉토리에서는 silent exit

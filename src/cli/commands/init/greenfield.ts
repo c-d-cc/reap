@@ -21,6 +21,42 @@ const DEFAULT_APPLICATION = `# Application
 <!-- Technical constraints -->
 `;
 
+/**
+ * `environment/source-map.md` for a project that has no code yet.
+ *
+ * `adoption` builds this file from a scan of the existing tree. Greenfield has
+ * nothing to scan, so it wrote no source-map at all — harmless until the shipped
+ * genome started telling every agent to open it before changing code (gen-090).
+ *
+ * So the stub teaches rather than describes: an empty directory tree would be
+ * useless, while this says what the file is for and when to fill it. It also
+ * claims nothing about the tree — `--mode greenfield` can be forced on a
+ * directory that already has code, and a stub asserting "no source files yet"
+ * would be false there. The prose is what keeps it out of placeholder territory
+ * as well: the integrity check counts lines that are not headings, blockquotes
+ * or comments, and a file of headings alone reads as unfilled scaffolding.
+ */
+function buildSourceMapStub(projectName: string): string {
+  return `# ${projectName} Source Map
+
+> Code structure — what each module is for and what owns it.
+> Loaded on demand, unlike \`environment/summary.md\`, which loads every session.
+> Keep the structure description here and a pointer to it there.
+
+Record what each module or directory is for and what it owns, one entry each,
+and keep it current as the code changes. \`reap index\` reports what calls what;
+this file is where the reasons live.
+
+## Directory Structure
+
+(not recorded yet)
+
+## Modules
+
+(none recorded yet — add an entry per module: path, role, and what it owns)
+`;
+}
+
 function buildConversationPrompt(claudeMdSection: string): string {
   return `## Greenfield Init — Interactive Session
 
@@ -80,14 +116,15 @@ ${buildHardGateBlock()}
 
 ### PHASE 6: Environment, CLAUDE.md, Vision
 1. Write environment/summary.md based on everything discussed (tech stack, architecture, conventions, constraints).
-2. Ensure CLAUDE.md has the REAP section:
+2. Fill in environment/source-map.md, which was created as a stub. If the architecture discussion above settled on a module layout, record it now — one entry per module, what it is for, what it owns. If nothing is settled yet, leave the stub as it is; genome/evolution.md tells the agent to read this file before changing code, so it should describe the structure rather than repeat the summary.
+3. Ensure CLAUDE.md has the REAP section:
 
 ${claudeMdSection}
 
-3. Ask: "What is the long-term vision and major milestones for this project?" (skippable)
-4. Write vision/goals.md.
-5. Suggest: "Ready to start the first embryo generation? What should the goal be?"
-6. If confirmed: \`reap run start --type embryo --goal "<goal>"\`
+4. Ask: "What is the long-term vision and major milestones for this project?" (skippable)
+5. Write vision/goals.md.
+6. Suggest: "Ready to start the first embryo generation? What should the goal be?"
+7. If confirmed: \`reap run start --type embryo --goal "<goal>"\`
 `;
 }
 
@@ -99,6 +136,7 @@ export async function execute(paths: ReapPaths, projectName: string): Promise<vo
 
   // Write environment
   await writeTextFile(paths.environmentSummary, `# ${config.project} Environment\n\n<!-- Project environment summary -->\n`);
+  await writeTextFile(paths.sourceMap, buildSourceMapStub(config.project));
 
   const claudeMdSection = await getClaudeMdSection();
 
@@ -106,7 +144,7 @@ export async function execute(paths: ReapPaths, projectName: string): Promise<vo
     status: "ok",
     command: "init",
     phase: "greenfield",
-    completed: ["auto-detect", "create-dirs", "write-config", "write-genome", "write-environment", "write-vision"],
+    completed: ["auto-detect", "create-dirs", "write-config", "write-genome", "write-environment", "write-source-map", "write-vision"],
     context: {
       project: config.project,
       mode: "greenfield",

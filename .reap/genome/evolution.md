@@ -105,11 +105,12 @@ memory에 무언가를 쓰려고 할 때 위에서 아래로 적용한다.
 - **아키텍처 변경 시 반드시 반영** — 새 기능/구조 추가 시 evolution.md / application.md / memory 모두 동기화
 - **비대화는 실패 신호** — longterm 30~50줄 / midterm 50~70줄을 넘으면 pruning 미수행 의심. reflect에서 정리.
 
+<!-- reap:carrier(source-map-read-rule) -->
 ## Code Quality Principles
 
 새 코드를 작성하기 전에 반드시 기존 코드를 읽고 패턴을 파악한다.
 
-- **Read source-map first**: 코드를 고치기 전에 `environment/source-map.md` 를 연다. `summary.md` 는 자동 로드되지만 source-map 은 **on-demand** 라 열지 않으면 모듈별 역할·소유권을 모르는 채로 고치게 된다. `reap index` 는 무엇이 무엇을 부르는지 답하지만 **왜 그렇게 생겼는지는 답하지 못한다**.
+- **Read source-map first**: 코드를 고치기 전에 `environment/source-map.md` 를 연다. `summary.md` 는 자동 로드되지만 source-map 은 **on-demand** 라 열지 않으면 모듈별 역할·소유권을 모르는 채로 고치게 된다. `reap index` 는 무엇이 무엇을 부르는지 답하지만 **왜 그렇게 생겼는지는 답하지 못한다**. 그 파일이 없는 프로젝트라면(REAP 이 만들기 전에 init 된 것) `summary.md` 가 담은 구조 서술을 대신 읽고, 코드의 형태를 서술할 필요가 처음 생길 때 source-map 을 쓴다.
 - **Pattern-first**: 같은 역할의 기존 코드가 어떤 구조를 따르는지 먼저 확인. 새 코드는 그 패턴을 따른다.
 - **Consistency over preference**: 개인 선호보다 기존 코드베이스의 일관성이 우선. 더 나은 패턴이 있더라도, 기존과 다른 방식으로 작성하면 불일치가 생긴다 — 바꾸려면 전체를 바꿔라.
 - **No duplication**: 같은 로직이 두 곳에 존재하면 안 된다. 중복을 발견하면 공통화한다.
@@ -145,11 +146,8 @@ memory에 무언가를 쓰려고 할 때 위에서 아래로 적용한다.
 helper 는 `tests/helpers/<tool>.ts` 한 곳으로 모으고 e2e 는 helper 만 import 한다.
 fixture 는 그 도구가 실제로 기대하는 입력(예: git-init 된 트리)을 그대로 재현한다.
 
-- **env override 는 spawn 된 자식에게만 닿는다** — bun 의 `os.homedir()` 는 `$HOME` 을 무시한다
-  (node 는 따른다). in-process 라면 디렉토리를 **주입**하라
-- **macOS realpath 정규화**: `/var` → `/private/var` symlink 때문에 경로 비교가 어긋난다.
-  `realpath`/`pwd -P` 로 양쪽을 정규화하라. gen-089 에서 코드와 게이트 양쪽에서 재발했고,
-  코드 쪽은 **사용자에게 빈 결과를 주는 실제 결함**이었다
+- **env override 가 닿지 않는 축은 값을 주입한다.** 무엇이 닿지 않는지는 런타임·플랫폼 사실이므로
+  `environment/summary.md` § 테스트 가 갖는다 — 여기서 열거하면 그 목록이 곧 낡는다
 
 ### 테스트 피드백 루프
 - 실행 중 얻은 깨달음은 completion artifact 에 기록하고 필요하면 genome 에 반영한다
@@ -165,15 +163,13 @@ fixture 는 그 도구가 실제로 기대하는 입력(예: git-init 된 트리
 
 ## 조기 종료(early-close) 판단
 
-`reap run early-close` 는 implementation/validation 단계에서만 사용 가능한 lightweight 종료 path 다. 다음 상황에서 고려한다.
-- 작업 일부는 완성되어 가치가 있으나 잔여 task 가 별도 generation 으로 나누는 게 더 합리적인 경우.
-- 외부 의존 차단(API 변경, 환경 이슈)으로 현 generation 에서 마무리 불가하지만 진행분은 살리고 싶을 때.
-- 단순 폐기(abort)와 정식 완료(completion) 둘 다 부적절할 때.
+무엇을 할 수 있는 명령인지는 `~/.reap/reap-guide.md` § Termination Paths 가 소유한다.
+여기는 **언제 그것을 고르는가**만 다룬다 — 진행분은 가치가 있는데 잔여 task 를 별도 generation 으로
+나누는 게 낫거나, 외부 의존 차단으로 마무리는 불가하나 진행분은 살리고 싶을 때.
 
 판단 기준:
-- 진행분이 **lineage 에 보존할 가치가 있는가** → No 면 abort 선택.
-- 잔여 task 가 **별도 generation 가치를 가지는가** → No(자잘한 follow-up)면 그대로 completion 까지 가서 hints 에만 기록.
-- `--defer-tasks` 옵션으로 deferred backlog 본문을 명시 지정 가능. 미지정 시 implementation artifact 에서 unchecked `- [ ]` 라인 자동 추출.
+- 진행분이 **lineage 에 보존할 가치가 있는가** → No 면 abort.
+- 잔여 task 가 **별도 generation 가치를 가지는가** → No(자잘한 follow-up)면 completion 까지 가서 hints 에만 기록.
 
 ## Echo Chamber 방지
 
@@ -282,12 +278,14 @@ evaluator 호출은 **1회 감사가 아니다.** gen-089 는 3라운드가 필�
 
 판단 기준: "다음 세션의 새 agent가 이 변경을 몰라도 올바르게 동작할 수 있는가?" → No이면 genome 업데이트 필수.
 
+<!-- reap:carrier(environment-refresh-targets) -->
 ## Completion 시 환경 갱신
 
-reflect phase에서 environment/summary.md를 점진적으로 업데이트:
+reflect phase에서 environment/ 를 점진적으로 업데이트:
 - implementation에서 변경한 파일/모듈을 기준으로 영향받는 environment 섹션만 수정
 - 전체 재작성 아님 — 변경된 부분만 반영 (파일 추가/삭제, 의존성 변경, 빌드 변경 등)
-- Tech Stack, Source Structure, Tests 섹션이 주요 갱신 대상
+- `summary.md` — Tech Stack, Tests, 그 외 매 세션 로드되는 것
+- `source-map.md` — 코드의 구조: 추가·삭제된 모듈과 각각이 무엇을 위한 것인지. **구조 서술을 갖고 있는 쪽을 갱신한다 — 양쪽에 두지 않는다**
 
 **낡은 서술은 제거한다 — 갱신은 append-only가 아니다**:
 - 더 이상 사실이 아닌 문장을 삭제한다 (제거된 파일/모듈, 폐기된 결정, 낡은 의존성 메모)
@@ -297,5 +295,5 @@ reflect phase에서 environment/summary.md를 점진적으로 업데이트:
 ## genome vs environment 경계
 
 - **genome (application.md)**: prescriptive — "이렇게 해야 한다" (원칙, 설계 결정, 컨벤션, 규칙). genome은 normal mode에서 immutable이므로, 자주 변하는 사실 정보를 넣으면 안 된다.
-- **environment (summary.md)**: descriptive — "현재 이런 상태다" (기술 스택, 소스 구조, 빌드, 테스트, 의존성). 코드가 바뀌면 environment만 업데이트.
+- **environment (`summary.md`, `source-map.md`)**: descriptive — "현재 이런 상태다" (기술 스택, 구조, 빌드, 테스트, 의존성). 코드가 바뀌면 environment만 업데이트. `summary.md` 는 매 세션 로드되므로 파일 수에 비례해 커지는 서술을 담지 않는다. `source-map.md` 는 on-demand 이며, 구조 서술이 그럴 만큼 커지면 그쪽이 집이다.
 - 판단 기준: "이 정보가 바뀌면 genome을 수정해야 하나?" → Yes면 genome, No면 environment.

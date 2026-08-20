@@ -10,6 +10,7 @@
 migration note `v0.17.6.md` 전부 작성됐고 문서 게이트가 통과한다. 내용은 둘이다:
 - gen-088 `reap uninstall` — 없던 명령이고 증상이 "지워도 안 지워진다"라 기존 사용자 전원 해당. 같은 세대가 auto-update 다운그레이드도 고쳤다
 - gen-089 **daemon 폐기 + indexer 내장** — 상주 프로세스·포트·별도 패키지 소멸, `reap index` 로 대체
+- gen-090 source-map 규칙 전파 + greenfield 가 그 파일을 만든다. 문서 3종의 0.17.6 항목에 **확장**으로 실었다 (새 버전 섹션 아님)
 
 **남은 것은 태그 push 뿐이고, OIDC 로 발행하는 첫 시도**가 된다(0.17.5 는 그 전에 나갔다).
 `daemon-v*` 트리거와 `publish-daemon` job 은 gen-089 가 제거했다.

@@ -152,6 +152,36 @@ if ! (cd "$PROJECT" && HOME="$FAKE_HOME" "$REAP_BIN" init selftest >/dev/null 2>
 fi
 green "  ok    initialised"
 
+# The genome this tarball ships tells every agent to open
+# environment/source-map.md before changing code. `adoption` has always written
+# that file from its scan; `greenfield` — which is what an empty directory gets,
+# and what this section just ran — never did, so the shipped rule would have
+# pointed a new project's agent at nothing (gen-090).
+#
+# This lives here rather than only in the e2e suite because the two ask
+# different questions. The e2e runs the source tree; this runs what npm
+# actually unpacks, which is the half that has shipped broken before.
+#
+# Content, not just existence: a file that is nothing but headings satisfies
+# `-f` while teaching the agent nothing. The filter is the one `checkIntegrity`
+# uses to call a genome file placeholder-only.
+SOURCE_MAP="$PROJECT/.reap/environment/source-map.md"
+if [ ! -f "$SOURCE_MAP" ]; then
+  red "  FAIL  greenfield init wrote no environment/source-map.md"
+  dim "        The shipped genome/evolution.md tells agents to read it before"
+  dim "        changing code. A rule whose premise the installer does not create"
+  dim "        sends every new project's agent looking for a missing file."
+  exit 1
+fi
+SUBSTANTIVE=$(grep -cvE '^[[:space:]]*($|#|>|<!--)' "$SOURCE_MAP")
+if [ "${SUBSTANTIVE:-0}" -lt 1 ]; then
+  red "  FAIL  environment/source-map.md is scaffolding only ($SUBSTANTIVE content lines)"
+  dim "        Headings and comments alone tell the agent nothing about what the"
+  dim "        file is for or when to fill it."
+  exit 1
+fi
+green "  ok    source-map.md written ($SUBSTANTIVE content lines)"
+
 # `reap init` deliberately leaves genome/application.md and vision/goals.md as
 # skeletons — they are filled in conversation with the agent, which no script
 # can stand in for. Reporting them is correct behaviour, not an install fault,

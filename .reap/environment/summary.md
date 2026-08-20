@@ -34,7 +34,7 @@
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline — **unit 575 / e2e 326 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신). **daemon 스위트(130)는 패키지와 함께 소멸했다.**
+현재 baseline — **unit 585 / e2e 329 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신). **daemon 스위트(130)는 패키지와 함께 소멸했다.**
 
 gen-089 에서 unit 이 600 → 575 로 **줄었다**: 폐기한 daemon 의 availability/prompt/integrity 테스트 8파일을 지우고 indexer 테스트 38개를 더한 결과다. 다만 daemon 스위트 130 중 약 32개는 **삭제가 아니라 이식된** 모듈(call-resolver/impact/scanner/parser/pipeline)의 unit test 였고 **대체되지 않았다** — 그쪽은 지금 e2e 로만 덮인다.
 
@@ -46,6 +46,16 @@ gen-089 에서 unit 이 600 → 575 로 **줄었다**: 폐기한 daemon 의 avai
 - `tests/e2e/index-incremental.test.ts` — **판정 기준이 "incremental 결과 == full rebuild 결과"** 다. "incremental 이 돌았는가"만 묻던 판이 blocker 넷을 통과시켰다. `snapshot()` 은 집계가 아니라 **edge 집합 자체**를 비교하고 shard 는 `manifest.shards` 로 찾는다
 
 버전 의존 assertion 주의: `tests/e2e/update-migration.test.ts` 는 패키지 버전을 `package.json` 에서 읽는다(`PKG_VERSION`). 릴리즈 버전을 하드코딩하면 bump 마다 깨진다 — 단, "특정 버전의 migration note"를 검증하는 케이스는 하드코딩이 맞다.
+
+**격리가 닿지 않는 축 — 실측된 것 (genome 에서 이관, gen-090).** genome 은 "닿지 않는 축은 값을
+주입하라"는 규칙만 갖는다. 무엇이 닿지 않는지는 런타임·플랫폼 사실이라 여기가 집이다:
+
+- **`$HOME` 은 spawn 된 자식에게만 닿는다.** bun 의 `os.homedir()` 는 `$HOME` 을 무시한다(node 는
+  따른다). in-process 코드에는 디렉토리를 **주입**해야 한다
+- **macOS 의 `/var` 는 `/private/var` symlink 다.** 경로 비교가 어긋나므로 `realpath` / `pwd -P` 로
+  양쪽을 정규화한다. gen-089 에서 코드와 게이트 양쪽에서 재발했고, 코드 쪽은 **사용자에게 빈 결과를
+  주는 실제 결함**이었다
+- **`XDG_CONFIG_HOME`** 은 아래 § OpenCode 경로 절 참조 — `HOME` 하나만 가짜로 주면 격리가 성립하지 않는다
 
 **테스트는 머신 상태를 읽지 않는다 (gen-081)** — CI 를 붙이자 세 곳이 개발자 머신에 의존하고 있었다:
 **git identity 는 저장소마다** 설정한다(clone·submodule 은 상속받지 못한다) / **`git init` 은 항상
@@ -59,7 +69,7 @@ gen-089 에서 unit 이 600 → 575 로 **줄었다**: 폐기한 daemon 의 avai
 - `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates)
 - `scripts/alpha-publish.sh` — alpha 배포 헬퍼
 - `scripts/postinstall.sh` — npm postinstall hook
-- `scripts/check-self-diagnosis.sh` — **자기진단 게이트**. `npm pack` → 격리 HOME/prefix 에 설치 → `reap init` → `fix --check` 가 **경고·에러 0** 을 요구. 8개 절: 빌드·설치·init·진단 / **인덱스** / install script 차단 / OpenCode / uninstall. release publish 앞 + CI 매 push 양쪽에서 실행. 대화로 채워지는 genome/goals 는 스크립트가 채운 뒤 진단 — 그것까지 요구하면 REAP 정상 동작에 fail 한다. 끄는 스위치는 두지 않는다 — 비용이 문제가 되면 release 전용으로 옮긴다
+- `scripts/check-self-diagnosis.sh` — **자기진단 게이트**. `npm pack` → 격리 HOME/prefix 에 설치 → `reap init` → `fix --check` 가 **경고·에러 0** 을 요구. 8개 절: 빌드·설치·init·진단 / **인덱스** / install script 차단 / OpenCode / uninstall. init 절은 **greenfield 가 `environment/source-map.md` 를 실질 내용과 함께 쓰는지**도 요구한다 — 배포되는 genome 이 그 파일을 읽으라고 지시하므로, 전제를 installer 가 만들지 않으면 규칙이 허공을 가리킨다. release publish 앞 + CI 매 push 양쪽에서 실행. 대화로 채워지는 genome/goals 는 스크립트가 채운 뒤 진단 — 그것까지 요구하면 REAP 정상 동작에 fail 한다. 끄는 스위치는 두지 않는다 — 비용이 문제가 되면 release 전용으로 옮긴다
 - `scripts/list-carriers.sh` — **carrier 표식 조회 (gen-078)**. `reap:carrier(<id>)` 마커를 grep 해 ID 별 파일 목록 출력. `--orphans` 는 1개 파일에만 있는 ID 탐지 — 표식 불필요이거나 **다른 carrier 를 빠뜨린 것**(#21/#22 의 상태)
 - `scripts/check-agent-integration.sh` — **agent 통합 검증 / 층2 (gen-079)**. 헤드리스 `claude -p` 로 `/reap.start` 를 시키고 **`current.yml` 생성 여부**로 판정 — agent 응답(자연어)은 파싱하지 않는다. slash command 인식 / `@` import 로드 / SessionStart hook 발화 / CLI 동작을 한 번에 검증. **격리하지 않는다** — Claude Code 는 로그인을 slash command 와 같은 `~/.claude/` 에 두므로 HOME 격리 시 인증을 잃는다. 현재 설치를 읽기만 하고 임시 프로젝트에만 쓴다. **~$0.25/회** 라 CI 아닌 릴리즈 전 (`reapdev.versionBump` Step 5-2)
 - `scripts/check-version-floors.sh` — **버전 하한 게이트**. reap 이 사용자에게 "이 버전으로 올려라"라고 말하는 숫자(`package.json` 의 `reap.autoUpdateMinVersion`)가 npm 에 **실제로 발행돼 있는지** 검사한다. 값은 소스에서 읽는다(carrier 표식). 네트워크 실패·비-JSON 은 amber SKIP, **패키지 자체가 없으면(`E404`) FAIL** — 그 둘을 구분하지 않으면 이름 오타가 조용히 통과한다. `release.yml` 의 `npm publish` 앞. **CI 에는 없다** — 매 push 마다 네트워크가 필요하고, 코드와 무관한 이유로 주기적으로 SKIP 을 내는 검사는 사람이 스크롤로 넘긴다
