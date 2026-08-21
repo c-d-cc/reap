@@ -27,13 +27,30 @@ AI의 소통 깊이는 현재 맥락의 구체화(clarity) 수준에 따라 자�
 
 ## Vision 활용 원칙
 
-Vision은 Goals, Memory, Design 세 가지로 구성된다.
+Vision은 Goals, Milestones, Memory, Design 네 가지로 구성된다.
 
 ### Goals (`vision/goals.md`)
 프로젝트의 장기 목표. adapt phase에서 gap 분석을 통해 다음 generation의 방향을 결정하는 핵심 동력.
 - 미완료 `[ ]` 항목이 다음 goal 후보
 - generation 완료 시 달성한 goal을 `[x]`로 마킹 제안
 - Goals cleanup: goals.md는 **미래** 목표를 위한 공간이지 과거 성과의 아카이브가 아니다. 완료 항목(`[x]`)이 누적되어 문서가 forward-looking 역할을 잃어간다고 판단되면, 구체적으로 어떤 항목을 제거할지 인간에게 제안하고 승인을 받아라. 최근 완료된 항목은 아직 참조 가치가 있을 수 있고, 오래 안정된 항목은 제거해도 된다. 항상 인간 확인 후 제거.
+
+### Milestones (`vision/milestones/`)
+
+goal 과 generation 사이의 계획 단위. 하나의 milestone 안에서 **여러 generation 이 수행된다.**
+
+- **경계 3요소가 없으면 milestone 이 아니다** — 소속 goal(`goal:`) · `## Exit Criteria` · `## Out of Scope`.
+  셋 중 하나라도 비면 goal 후보를 내지 못하고 main 이 될 수도 없다. `reap milestone main` 이 거부한다
+- **완료 조건은 판정 가능한 사실**이어야 한다. 정량 메트릭 금지(Goodhart) — 최종 판정은 인간이 한다
+- **main 은 초점이지 제약이 아니다.** 정확히 하나가 main 이지만, 다음 generation 의 후보는
+  **유효한 모든 open milestone** 에서 나온다(main 먼저). 뒤쪽 계획의 항목을 앞당기는 것은 정상이며,
+  `reap run start --phase create --milestone <slug>` 으로 명시한다
+- **닫는 것은 인간이 한다.** reflect 에서 exit criteria 충족을 판단해 **제안**하되 스스로 닫지 마라
+- **milestone 없이도 REAP 은 동작한다.** goal → generation 직결로 충분한 프로젝트가 있다. opt-in
+
+**milestone 과 midterm memory 의 경계**: 계획에 속하는 것(무엇을 언제 어떤 순서로, 무엇이 범위 밖인지,
+얼마나 남았는지)은 **milestone 파일**이 갖는다. midterm 은 계획에 담기지 않는 진행 맥락 — 보류된 판단,
+합의된 방향, 아직 milestone 이 없는 트랙 — 만 갖는다. 같은 내용을 양쪽에 두지 마라.
 
 ### Design (`vision/design/`)
 프로젝트의 설계 문서를 보관하는 공간. Memory와의 구분:
@@ -42,6 +59,7 @@ Vision은 Goals, Memory, Design 세 가지로 구성된다.
 
 판단 기준: "이 내용이 하나의 독립된 주제로 문서화할 만한가?" → Yes면 Design, No면 Memory.
 
+<!-- reap:carrier(memory-tier-classification) -->
 ### Memory (`vision/memory/`)
 AI가 프로젝트 맥락을 자유롭게 기록하는 공간. 3-tier 구조는 **"무엇을 위한 내용인가"(content-type)** 기준으로 분류한다. lifespan으로 판단하지 마라 — AI는 미래를 모르므로 그 추론이 매번 부담이 되고 오분류를 누적시킨다.
 
@@ -73,37 +91,17 @@ memory에 무언가를 쓰려고 할 때 위에서 아래로 적용한다.
 
 ### Memory Pruning 정책 — reflect phase 의무
 
-`reap run completion --phase reflect` 시 다음 cleanup을 **의무적으로** 수행한다:
+`reap run completion --phase reflect` 시 cleanup 은 **의무**다. tier 별 절차와 판단 기준은
+`~/.reap/reap-guide.md` § Memory Pruning Policy 가 소유한다 — 함께 자동 로드되므로 여기 옮겨 적지 않는다.
 
-**Shortterm — 매 generation 의무 cleanup**:
-- 이전 세션의 핸드오프 중 "이미 처리됨" 항목은 삭제
-- 새 generation의 핸드오프로 **교체** (덮어쓰기). 누적 금지.
-- 결과적으로 shortterm.md는 항상 "최근 1~2 generation 분량".
+요지: shortterm 은 **매 generation 교체**(누적 금지), midterm 은 **트랙 완료 시 삭제**,
+longterm 은 **genome 과 중복되면 삭제**.
 
-**Midterm — 트랙 완료 시 cleanup**:
-- 트랙이 완료되면 핵심 결정만 longterm으로 **승격** 후 midterm에서 해당 섹션 **삭제**
-- 판단 기준: "이 트랙에 다음 step이 있는가?" — No 면 삭제
-- 결과적으로 midterm.md는 항상 "현재 살아있는 트랙만".
+### Memory에 쓰지 않을 것 · 활용 원칙
 
-**Longterm — 주기적 cleanup (10 generation마다 또는 reflect에서 비대화 감지 시)**:
-- 섹션이 genome(application.md / evolution.md)에 이미 명문화됐으면 **중복 → 삭제**
-- 프로젝트 초기 전환 맥락(e.g., v0.X→v0.Y 차이)이 더 이상 행동 지침이 아니면 **삭제**
-- 판단 기준: "이 교훈이 없으면 다음 agent가 같은 실수를 할 것인가?" — No 면 삭제
-- 결과적으로 longterm.md는 항상 "지금도 행동 지침이 되는 교훈만".
-
-### Memory에 쓰지 않을 것
-
-- 코드 변경 상세 (environment/summary.md가 담당)
-- 테스트 수치, 실행 로그 (artifact가 담당)
-- genome (application.md / evolution.md) 에 이미 있는 원칙 (중복 금지)
-- generation-specific debug 일지 (lineage에 자연 보존, memory 자리 차지 금지)
-
-### Memory 활용 — 자유와 책임
-
-- **자유로운 읽기/쓰기** — genome처럼 제약 없음
-- **tier 간 이동도 자율** — shortterm 의 항목이 트랙으로 발전하면 midterm으로, 트랙이 완료되어 교훈만 남으면 longterm으로
-- **아키텍처 변경 시 반드시 반영** — 새 기능/구조 추가 시 evolution.md / application.md / memory 모두 동기화
-- **비대화는 실패 신호** — longterm 30~50줄 / midterm 50~70줄을 넘으면 pruning 미수행 의심. reflect에서 정리.
+목록과 상세는 `~/.reap/reap-guide.md` § Memory 가 소유한다. 요지만 남긴다 —
+**environment·artifact·genome·lineage 가 이미 갖는 것은 memory 에 쓰지 않는다.** 읽기·쓰기와
+tier 간 이동은 자유이며, longterm 30~50줄 / midterm 50~70줄을 넘으면 pruning 미수행 신호다.
 
 <!-- reap:carrier(source-map-read-rule) -->
 ## Code Quality Principles

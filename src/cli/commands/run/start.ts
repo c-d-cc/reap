@@ -7,9 +7,10 @@ import { emitOutput, emitError } from "../../../core/output.js";
 import { executeHooks } from "../../../core/hooks.js";
 import { scanBacklog, consumeBacklog } from "../../../core/backlog.js";
 import { getLastLineageEntry } from "../../../core/lineage.js";
+import { listMilestones, candidateMilestones, mainMilestone, findMilestone, uncheckedGenerations } from "../../../core/milestone.js";
 import type { ReapConfig } from "../../../types/index.js";
 
-export async function execute(phase?: string, goal?: string, type?: string, parents?: string, backlog?: string | boolean): Promise<void> {
+export async function execute(phase?: string, goal?: string, type?: string, parents?: string, backlog?: string | boolean, milestone?: string): Promise<void> {
   const paths = createPaths(process.cwd());
 
   if (!(await fileExists(paths.config))) {
@@ -64,6 +65,35 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
       );
     }
 
+    // Goal candidates from the milestones. Every valid open milestone offers
+    // them, main first — pulling an item forward from a later plan is ordinary.
+    const allMilestones = await listMilestones(paths.visionMilestones);
+    const candidates = candidateMilestones(allMilestones);
+    const milestoneCandidates: Array<{ milestone: string; title: string; main: boolean; text: string }> = [];
+    for (const m of candidates) {
+      for (const g of uncheckedGenerations(m)) {
+        milestoneCandidates.push({ milestone: m.slug, title: m.title, main: m.main, text: g.text });
+      }
+    }
+
+    if (milestoneCandidates.length > 0) {
+      promptParts.push(`## Milestone goal candidates (${milestoneCandidates.length})`, "");
+      for (const m of candidates) {
+        const left = uncheckedGenerations(m);
+        if (left.length === 0) continue;
+        promptParts.push(`**${m.title}** (\`${m.slug}\`)${m.main ? " — main" : ""}`);
+        for (const g of left) promptParts.push(`- ${g.text}`);
+        promptParts.push("");
+      }
+      promptParts.push(
+        "Present these to the human alongside any backlog items below.",
+        'Chosen from a milestone → `reap run start --phase create --goal "<goal>" --milestone <slug>`',
+        "`--milestone` may be omitted only when the main milestone is the right owner; it is then used automatically.",
+        "An item from a non-main milestone is a legitimate choice — say so rather than steering to main.",
+        "",
+      );
+    }
+
     if (pendingBacklog.length > 0) {
       promptParts.push(
         `Pending backlog items (${pendingBacklog.length}):`,
@@ -73,7 +103,7 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
         "If a backlog item is selected, include --backlog <filename> in the start command.",
         'Then run: reap run start --phase create --goal "<goal>" [--backlog <filename>]',
       );
-    } else {
+    } else if (milestoneCandidates.length === 0) {
       promptParts.push('Ask the human for the goal of this generation. Then run: reap run start --phase create --goal "<goal>"');
     }
 
@@ -84,6 +114,8 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
       completed: ["gate", "backlog-scan"],
       context: {
         backlogItems: pendingBacklog.map(b => ({ type: b.type, title: b.title, filename: b.filename })),
+        milestoneCandidates,
+        mainMilestone: mainMilestone(allMilestones)?.slug ?? null,
         previousEarlyClose,
       },
       prompt: promptParts.filter(Boolean).join("\n"),
@@ -163,8 +195,31 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
       });
     }
 
+    // Which plan does this generation serve? `--milestone` names it; otherwise
+    // the main milestone owns it. An unknown slug is refused rather than
+    // silently recorded — a wrong milestoneId misreports progress for good.
+    const allMilestones = await listMilestones(paths.visionMilestones);
+    let milestoneId: string | undefined;
+    if (milestone) {
+      const target = findMilestone(allMilestones, milestone);
+      if (!target) {
+        emitError("start", `No milestone '${milestone}'. Run 'reap milestone list' to see what exists.`);
+      }
+      if (target!.status === "completed") {
+        emitError("start", `Milestone '${milestone}' is completed — a finished plan cannot take new generations.`);
+      }
+      milestoneId = target!.slug;
+    } else {
+      milestoneId = mainMilestone(allMilestones)?.slug;
+    }
+
     const genType = (type === "normal" ? "normal" : "embryo") as import("../../../types/index.js").GenerationType;
     const state = await gm.create(goal!, genType);
+
+    if (milestoneId) {
+      state.milestoneId = milestoneId;
+      await gm.save(state);
+    }
 
     // Mark backlog as consumed (after ID generation)
     let consumeWarning: string | undefined;
@@ -206,6 +261,7 @@ export async function execute(phase?: string, goal?: string, type?: string, pare
         type: state.type,
         parents: state.parents,
         sourceBacklog: state.sourceBacklog,
+        milestoneId: state.milestoneId ?? null,
         ...(consumeWarning ? { backlogWarning: consumeWarning } : {}),
       },
       message: messageLines.join("\n"),

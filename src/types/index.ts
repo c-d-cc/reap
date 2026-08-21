@@ -73,6 +73,12 @@ export interface GenerationState {
   phase?: string;
   pendingTransitions?: Record<string, { nonce: string; hash: string }>;
   sourceBacklog?: string;
+  /**
+   * Slug of the milestone this generation serves. Set at `start --phase create`
+   * from `--milestone`, or from the main milestone when the flag is absent.
+   * Absent is valid — milestones are opt-in.
+   */
+  milestoneId?: string;
   fitnessFeedback?: string;
   /**
    * Side-channel for evaluator-surfaced concerns. Appended by
@@ -81,6 +87,39 @@ export interface GenerationState {
    * pre-gen-067.
    */
   evaluatorConcerns?: EvaluatorConcern[];
+}
+
+// ── Milestone ───────────────────────────────────────────────
+
+/** One entry of a milestone's `## Generations` checklist. */
+export interface MilestoneGeneration {
+  checked: boolean;
+  text: string;
+}
+
+/**
+ * A plan between a vision goal and the generations that realise it.
+ *
+ * `status` and `main` are stored in frontmatter; at most one milestone is
+ * main. Main is the focus, not a restriction — goal candidates come from every
+ * valid open milestone, main first.
+ *
+ * Validity (a filled boundary) is derived from the content, never stored.
+ */
+export interface Milestone {
+  /** Filename without `.md`. */
+  slug: string;
+  path: string;
+  /** The `# ` heading. */
+  title: string;
+  /** Owning vision goal — must match an item or section in goals.md. */
+  goal: string;
+  status: "open" | "completed";
+  main: boolean;
+  exitCriteria: string[];
+  outOfScope: string[];
+  generations: MilestoneGeneration[];
+  createdAt?: string;
 }
 
 // ── Config ──────────────────────────────────────────────────

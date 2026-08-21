@@ -3,6 +3,7 @@ import { join } from "path";
 import { homedir } from "os";
 import YAML from "yaml";
 import type { ReapPaths } from "./paths.js";
+import { listMilestones, isValidMilestone, mainMilestone } from "./milestone.js";
 import { readTextFile, fileExists } from "./fs.js";
 import {
   LIFECYCLE_STAGES,
@@ -79,6 +80,16 @@ const MEMORY_LINE_WARNING_THRESHOLDS = {
  */
 const ENV_SUMMARY_LINE_WARNING_THRESHOLD = 250;
 
+/**
+ * Line threshold for the main milestone (gen-097).
+ *
+ * A milestone is a boundary and a generation list. Past this it has stopped
+ * being a plan and become a design document — `vision/design/` is where that
+ * belongs. Only the main one is measured: a completed milestone is a record,
+ * and asking a record to be short is asking it to lose what it recorded.
+ */
+const MILESTONE_LINE_WARNING_THRESHOLD = 80;
+
 /** Shared hint appended to every size warning so the user has a resolution path. */
 const SIZE_WARNING_HINT =
   "run 'reap run completion --phase reflect' and follow the pruning policy (do not hand-delete)";
@@ -105,6 +116,7 @@ export async function checkIntegrity(
   await checkLineage(paths, errors, warnings);
   await checkGenome(paths, errors, warnings);
   await checkMemorySize(paths, warnings);
+  await checkMilestones(paths, warnings);
   await checkBacklog(paths, errors, warnings);
 
   return { errors, warnings };
@@ -131,6 +143,7 @@ async function checkDirectoryStructure(
     { path: paths.environmentResources, name: "environment/resources/" },
     { path: paths.environmentDocs, name: "environment/docs/" },
     { path: paths.visionDesign, name: "vision/design/" },
+    { path: paths.visionMilestones, name: "vision/milestones/" },
     { path: paths.memory, name: "vision/memory/" },
   ];
 
@@ -578,6 +591,57 @@ async function checkGenome(
       warnings.push(
         `genome/${gf.name}: appears to be placeholder-only (no substantive content)`,
       );
+    }
+  }
+}
+
+// ── milestones (gen-097) ─────────────────────────────────────
+
+/**
+ * Warn about milestones that cannot do their job.
+ *
+ * Two conditions, and both are about a file being present but inert:
+ *
+ *   - an **open milestone with an unfilled boundary** offers no goal
+ *     candidates, so it sits in the folder looking like a plan while
+ *     contributing nothing. That is the state `reap make milestone` leaves
+ *     behind when nobody comes back to fill it in.
+ *   - the **main** milestone past the line guideline has become a design
+ *     document.
+ *
+ * Warnings only, like the memory checks — these are user-authored files and
+ * `fixProject` has no counterpart.
+ */
+async function checkMilestones(
+  paths: ReapPaths,
+  warnings: string[],
+): Promise<void> {
+  const all = await listMilestones(paths.visionMilestones);
+  if (all.length === 0) return;
+
+  for (const m of all) {
+    if (m.status !== "open") continue;
+    if (isValidMilestone(m)) continue;
+
+    const missing: string[] = [];
+    if (!m.goal.trim()) missing.push("goal:");
+    if (m.exitCriteria.length === 0) missing.push("## Exit Criteria");
+    if (m.outOfScope.length === 0) missing.push("## Out of Scope");
+    warnings.push(
+      `vision/milestones/${m.slug}.md: ${missing.join(", ")} empty — it offers no goal candidates and cannot become main. Fill it in, or delete it.`,
+    );
+  }
+
+  const main = mainMilestone(all);
+  if (main) {
+    const content = await readTextFile(main.path);
+    if (content !== null) {
+      const lines = content.split("\n").length;
+      if (lines > MILESTONE_LINE_WARNING_THRESHOLD) {
+        warnings.push(
+          `vision/milestones/${main.slug}.md: ${lines} lines (exceeds ~${MILESTONE_LINE_WARNING_THRESHOLD} line guideline) — a milestone is a boundary and a generation list; move the design discussion to vision/design/.`,
+        );
+      }
     }
   }
 }

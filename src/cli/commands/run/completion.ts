@@ -16,6 +16,7 @@ import { executeHooks } from "../../../core/hooks.js";
 import { parseCruiseCount, advanceCruise, clearCruise } from "../../../core/cruise.js";
 import { gitCommitAll, checkSubmoduleDirty, pushSubmodules } from "../../../core/git.js";
 import { buildEvaluatorPrompt, loadReapKnowledge } from "../../../core/prompt.js";
+import { listMilestones } from "../../../core/milestone.js";
 import {
   detectMaturity,
   getTransitionUrgency,
@@ -62,6 +63,21 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
       context.valSummary = valContent?.slice(0, 2000);
     }
 
+    // Milestone this generation served, so reflect can record what moved.
+    const reflectMilestones = await listMilestones(paths.visionMilestones);
+    const servedMilestone = s.milestoneId
+      ? reflectMilestones.find((m) => m.slug === s.milestoneId) ?? null
+      : null;
+    if (servedMilestone) {
+      context.milestone = {
+        slug: servedMilestone.slug,
+        title: servedMilestone.title,
+        path: servedMilestone.path,
+        exitCriteria: servedMilestone.exitCriteria,
+        unchecked: servedMilestone.generations.filter((g) => !g.checked).map((g) => g.text),
+      };
+    }
+
     setTransitionNonces(s, "completion:entry");
     await gm.save(s);
 
@@ -104,6 +120,17 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
         "   - **Bloat check**: longterm over ~30~50 lines or midterm over ~50~70 lines means pruning was skipped — clean up now",
         "   - **Do NOT write**: code change details (environment handles), test numbers (artifact handles), principles already in genome (no duplication), generation-specific debug logs (lineage handles)",
         "",
+        ...(servedMilestone
+          ? [
+              `4. **Milestone Progress** — this generation served **${servedMilestone.title}** (\`${servedMilestone.slug}\`).`,
+              `   - Open \`${servedMilestone.path}\` and check off in \`## Generations\` whatever this generation finished.`,
+              "   - The list is a plan, not a contract — add, split or drop entries if the work turned out differently.",
+              `   - Exit criteria: ${servedMilestone.exitCriteria.join(" / ") || "(none recorded)"}`,
+              "   - If those are now met, say so in the artifact's `## Milestone Progress` section and propose `reap milestone close`. **Do not close it yourself — the human decides.**",
+              "   - A milestone is NOT a memory tier. Whatever belongs to the plan goes in the milestone file, not in midterm.",
+              "",
+            ]
+          : []),
         "When done: reap run completion --phase fitness",
       ].join("\n"),
       nextCommand: "reap run completion --phase fitness",
@@ -386,7 +413,8 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
       const completionContent = await readTextFile(paths.artifact(completionArtifact));
       const genResult = completionContent?.slice(0, 1500);
 
-      const gapAnalysis = buildVisionGapAnalysis(parsedGoals, pendingItems, s.goal, genResult);
+      const milestones = await listMilestones(paths.visionMilestones);
+      const gapAnalysis = buildVisionGapAnalysis(parsedGoals, pendingItems, s.goal, genResult, milestones);
       promptSections.push("");
       promptSections.push(gapAnalysis);
       promptSections.push("**Vision Auto-Update**: Check off any goals completed in this generation.");

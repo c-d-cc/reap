@@ -1,8 +1,10 @@
 ---
 type: task
-status: pending
+status: consumed
 priority: high
 createdAt: 2026-08-18T23:12:12.967Z
+consumedBy: gen-097-e3ae8e
+consumedAt: 2026-08-21T09:48:39.752Z
 ---
 
 # Milestone — goal 과 generation 사이의 계획 단위

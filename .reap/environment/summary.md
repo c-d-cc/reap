@@ -41,7 +41,7 @@
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline — **unit 663 / e2e 329 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
+현재 baseline — **unit 736 / e2e 355 / scenario 55, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
 
 `src/indexer/` 의 이식된 모듈(call-resolver/impact/scanner/parser/pipeline)에는 **unit test 가 없다** — 그쪽은 지금 e2e 로만 덮인다.
 

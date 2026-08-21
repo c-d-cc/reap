@@ -1,4 +1,6 @@
 import type { BacklogItem } from "./backlog.js";
+import type { Milestone } from "../types/index.js";
+import { candidateMilestones, uncheckedGenerations } from "./milestone.js";
 import { SOFTWARE_COMPLETION_CRITERIA } from "./maturity.js";
 
 // ── Types ────────────────────────────────────────────────────
@@ -15,6 +17,19 @@ export interface NextGoalCandidate {
   section: string;
   reason: string;
   relatedBacklog?: string;
+}
+
+/**
+ * Every name a milestone may cite as its owning goal — item titles and the
+ * sections they sit in. Raw; the caller decides how to compare.
+ */
+export function goalIdentifiers(content: string): string[] {
+  const out: string[] = [];
+  for (const g of parseGoals(content)) {
+    out.push(g.title);
+    if (g.section) out.push(g.section);
+  }
+  return out;
 }
 
 // ── Stop words for keyword matching ──────────────────────────
@@ -167,6 +182,7 @@ export function buildVisionGapAnalysis(
   pendingBacklog: BacklogItem[],
   genGoal: string,
   genResult?: string,
+  milestones?: Milestone[],
 ): string {
   const lines: string[] = [];
 
@@ -213,6 +229,32 @@ export function buildVisionGapAnalysis(
   }
 
   // ── Section 3: Next generation candidates ──
+  // A plan beats a guess. `suggestNextGoals` scores token overlap between goal
+  // and backlog titles; when milestones exist, the next generation is named
+  // rather than inferred, so the milestones replace that section outright.
+  const planned = milestones ? candidateMilestones(milestones) : [];
+  const withWork = planned.filter((m) => uncheckedGenerations(m).length > 0);
+
+  if (withWork.length > 0) {
+    lines.push("### Next Generation Candidates (from milestones)");
+    lines.push("");
+    lines.push("Named by the plan, not inferred from keyword overlap. Main milestone first;");
+    lines.push("an item from a later milestone is a legitimate choice, not an exception.");
+    lines.push("");
+    for (const m of withWork) {
+      lines.push(`**${m.title}** (\`${m.slug}\`)${m.main ? " — main" : ""}`);
+      lines.push(`- Exit criteria: ${m.exitCriteria.join(" / ")}`);
+      for (const g of uncheckedGenerations(m)) {
+        lines.push(`  - [ ] ${g.text}`);
+      }
+      lines.push("");
+    }
+    lines.push("**Milestone Progress**: check off in the milestone file whatever this generation finished,");
+    lines.push("and propose closing the milestone if its exit criteria are now met — the human decides.");
+    lines.push("");
+    return lines.join("\n");
+  }
+
   const candidates = suggestNextGoals(goals, pendingBacklog);
   if (candidates.length > 0) {
     lines.push("### Next Generation Candidates (auto-suggested)");

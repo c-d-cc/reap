@@ -137,7 +137,7 @@ const TOPICS_LABEL: Record<SupportedLanguage, string> = {
   "zh-CN": "Topics",
 };
 
-const TOPICS_LIST = "workflow, lifecycle, genome, backlog, agents, hooks, config, evolve, regression, minor-fix, compression, merge, collaboration, maturity, memory, vision";
+const TOPICS_LIST = "workflow, lifecycle, genome, backlog, milestone, agents, hooks, config, evolve, regression, minor-fix, compression, merge, collaboration, maturity, memory, vision";
 
 const TOPICS_USAGE: Record<SupportedLanguage, string> = {
   en: "Usage: /reap.help <topic>",

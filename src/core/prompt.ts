@@ -1,5 +1,6 @@
 import type { ReapPaths } from "./paths.js";
-import type { GenerationState, ReapConfig } from "../types/index.js";
+import { listMilestones, mainMilestone, findMilestone, uncheckedGenerations } from "./milestone.js";
+import type { GenerationState, ReapConfig, Milestone } from "../types/index.js";
 import { readTextFile } from "./fs.js";
 import {
   detectMaturity,
@@ -15,6 +16,7 @@ export interface ReapKnowledge {
   visionGoals: string;
   memoryShortterm: string;
   memoryMidterm: string;
+  milestones: Milestone[];
 }
 
 // ── Load ─────────────────────────────────────────────────────
@@ -25,17 +27,82 @@ export interface ReapKnowledge {
  * Only vision goals and memory (small, session-critical) are included in the prompt.
  */
 export async function loadReapKnowledge(paths: ReapPaths): Promise<ReapKnowledge> {
-  const [visionGoals, memoryShortterm, memoryMidterm] = await Promise.all([
+  const [visionGoals, memoryShortterm, memoryMidterm, milestones] = await Promise.all([
     readTextFile(paths.visionGoals),
     readTextFile(paths.memoryShortterm),
     readTextFile(paths.memoryMidterm),
+    listMilestones(paths.visionMilestones),
   ]);
 
   return {
     visionGoals: visionGoals ?? "",
     memoryShortterm: memoryShortterm ?? "",
     memoryMidterm: memoryMidterm ?? "",
+    milestones,
   };
+}
+
+// ── Milestone Section ───────────────────────────────────────
+
+/**
+ * The `## Milestone` block, or `""` when there is nothing to show.
+ *
+ * Sole owner of this text. Three builders emit it — the subagent prompt
+ * (`buildBasePrompt`) and the two dynamic-context builders, one async and one
+ * sync — and those two are required to stay byte-identical.
+ *
+ * `level` picks the heading depth: the dynamic context uses `#` for its top
+ * sections, the subagent prompt `##`.
+ *
+ * The block describes the milestone this generation serves
+ * (`state.milestoneId`), falling back to main when the generation names none.
+ * When the two differ, main is named on one line: work pulled forward from a
+ * later plan still has to be judged against the current focus.
+ */
+export function buildMilestoneSection(
+  milestones: Milestone[],
+  state: GenerationState | null,
+  level: "#" | "##" = "##",
+): string {
+  const sub = `${level}#`;
+  const main = mainMilestone(milestones);
+  const current = state?.milestoneId ? findMilestone(milestones, state.milestoneId) : null;
+  const focus = current ?? main;
+  if (!focus) return "";
+
+  const lines: string[] = [`${level} Milestone`, ""];
+  lines.push(`**${focus.title}** (\`${focus.slug}\`)`);
+  lines.push(`- Vision goal: ${focus.goal}`);
+  lines.push(`- Status: ${focus.status}${focus.main ? " (main)" : ""}`);
+  lines.push("");
+
+  if (focus.exitCriteria.length > 0) {
+    lines.push(`${sub} Exit Criteria`);
+    for (const c of focus.exitCriteria) lines.push(`- ${c}`);
+    lines.push("");
+  }
+  if (focus.outOfScope.length > 0) {
+    lines.push(`${sub} Out of Scope`);
+    for (const c of focus.outOfScope) lines.push(`- ${c}`);
+    lines.push("");
+  }
+
+  const remaining = uncheckedGenerations(focus);
+  if (remaining.length > 0) {
+    lines.push(`${sub} Remaining Generations`);
+    for (const g of remaining) lines.push(`- ${g.text}`);
+    lines.push("");
+  }
+
+  if (current && main && current.slug !== main.slug) {
+    lines.push(
+      `> This generation serves \`${current.slug}\`, which is not the current focus. ` +
+      `Main milestone: **${main.title}** (\`${main.slug}\`).`,
+    );
+    lines.push("");
+  }
+
+  return lines.join("\n");
 }
 
 // ── Strict Mode ─────────────────────────────────────────────
@@ -97,6 +164,12 @@ export function buildBasePrompt(
     lines.push("## Vision Goals");
     lines.push(knowledge.visionGoals);
     lines.push("");
+  }
+
+  // ── Milestone ─────────────────────────────────────────────
+  const milestoneSection = buildMilestoneSection(knowledge.milestones, state);
+  if (milestoneSection) {
+    lines.push(milestoneSection);
   }
 
   // ── Memory ────────────────────────────────────────────────
@@ -347,6 +420,14 @@ export function buildEvaluatorPrompt(
     lines.push("## Vision Goals (current)");
     lines.push(knowledge.visionGoals);
     lines.push("");
+  }
+
+  // ── Milestone ─────────────────────────────────────────────
+  // The evaluator needs the boundary most of all: judging whether the builder
+  // stayed in scope is impossible without knowing what "out of scope" says.
+  const milestoneSection = buildMilestoneSection(knowledge.milestones, state);
+  if (milestoneSection) {
+    lines.push(milestoneSection);
   }
 
   // ── Memory ────────────────────────────────────────────────

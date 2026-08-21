@@ -14,6 +14,7 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [ ] Self-hosting invariants 정의
 
 ### Distribution
+- [ ] **배포 형태를 사용자 도구로 인식되게 한다** — 지금 REAP 은 클라이언트의 skill 목록에 19줄로 흩어져 있다. 켜고 끄기·버전·출처가 항목별로 나뉘어 하나의 도구로 보이지 않는다
 - [ ] Update agent Phase 2: 프로젝트 동기화 (유저 지시 후 진행)
 - [ ] Update agent Phase 3: 배포 연동 (유저 지시 후 진행)
 
@@ -33,6 +34,12 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [ ] P3 지식 전파 — governs 상속 + 상향 요약 + 충돌 감지
 - [ ] P4 orchestration — goal 배정 + 수확 대조
 - [ ] Fitness 모델 확정 — cell 단위 인간 판단. self-fitness 금지 원칙과의 정합성
+
+### Planning — goal 과 generation 사이
+- [x] Milestone 도입 (gen-097 — `vision/milestones/`, main 1개 + 나머지 소비 가능, 경계 3요소 강제. 다음 세대 제안이 토큰 겹침 휴리스틱에서 계획으로 바뀌었다)
+- [ ] `.reap/plan/` — "무엇을 만들 것인가"의 정본
+- [ ] `.reap/idea/` — 아직 단단하지 않은 지식의 자리
+- [ ] memory 를 flat + 메타데이터로 재설계
 
 ### Agent Client 확장
 - [x] OpenCode adapter (gen-063~064 완료 — opencode.json + plugin + AGENTS.md + dump-state + slash commands `/reap.*`. 4-항목 verification: static load / dynamic refresh / entry-point / slash trigger 모두 충족)

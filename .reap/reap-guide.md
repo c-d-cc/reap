@@ -146,12 +146,13 @@ An orphan (an ID in exactly one file) means either the marker is unnecessary, or
 | File | Guideline | Why |
 |---|---|---|
 | `genome/invariants.md` | ~50 lines | Absolute constraints, human-edit only. Past this it has become a rulebook — that belongs in evolution.md |
-| `genome/evolution.md` | ~300 lines | AI behaviour rules. Ships at ~193 lines and a maturing project adds its own; past 300 the rules are usually duplicated or carry descriptive content that belongs in environment/ |
+| `genome/evolution.md` | ~300 lines | AI behaviour rules. Ships at ~230 lines and a maturing project adds its own; past 300 the rules are usually duplicated or carry descriptive content that belongs in environment/ |
 | `genome/application.md` | ~250 lines | Project identity and architecture — scales with the project |
 | `vision/memory/longterm.md` | ~50 lines | Design lessons only. Past this, pruning was skipped |
 | `vision/memory/midterm.md` | ~70 lines | Live tracks only. Past this, completed tracks were not removed |
 | `vision/memory/shortterm.md` | ~60 lines | The last 1~2 generations of handoff |
 | `environment/summary.md` | ~250 lines | Current state, not a per-generation changelog |
+| the **main** `vision/milestones/*.md` | ~80 lines | A boundary and a generation list. Past this it is a design document — that belongs in `vision/design/`. Only the main one is measured; a completed milestone is a record |
 
 **These are warnings, never automatic edits.** All of these files are user-authored; `reap fix` will not rewrite or truncate them. Resolve memory and environment bloat through the mandatory pruning step in `completion --phase reflect`, and genome bloat by moving misplaced content to where it belongs — do not hand-delete to silence a warning.
 
@@ -172,6 +173,8 @@ An orphan (an ID in exactly one file) means either the marker is unnecessary, or
 │   └── source-map.md          #   Code structure + dependencies (on-demand)
 ├── vision/                    # Long-term goals and direction
 │   ├── goals.md               #   North star objectives
+│   ├── milestones/            #   Plans between a goal and its generations (opt-in)
+│   │   └── <slug>.md          #     Exit criteria, out of scope, planned generations
 │   ├── design/                #   Design documents for future features
 │   └── memory/                #   AI memory (3-tier free-form recording)
 │       ├── longterm.md        #     Project lifetime — lasting lessons, patterns, decision rationale
@@ -213,6 +216,32 @@ A single generation. Carries one goal through the Life Cycle. State is tracked i
 - `merge` — Distributed merge lifecycle (detect → mate → merge → reconcile → validation → completion).
 
 **Generation ID format**: `gen-{NNN}-{hash}` (e.g. `gen-042-a3f8c2`)
+
+### Milestone
+
+The planning unit between a vision goal and the generations that realise it. **Several generations run inside one milestone**, and it is opt-in — goal → generation directly is enough for many projects.
+
+A milestone lives at `vision/milestones/<slug>.md` and needs three things before it can do anything:
+
+| Part | Where | Why |
+|---|---|---|
+| owning goal | `goal:` frontmatter | must name an item or section in `vision/goals.md` |
+| `## Exit Criteria` | body | what makes it over. **Verifiable facts, not quantitative metrics** — the human makes the final call |
+| `## Out of Scope` | body | a boundary is not defined by its inside alone |
+
+`## Generations` holds the planned generations as a checklist. It is a plan, not a contract: add, split and drop entries as the work turns out.
+
+**Main is the focus, not a restriction.** Exactly one milestone carries `main: true`, and `reap milestone main <slug>` moves it — refusing any milestone whose boundary is unfilled, whose goal matches nothing in `goals.md`, or that is already completed. But goal candidates come from **every valid open milestone**, main first. Pulling an item forward from a later plan is ordinary; name it with `reap run start --phase create --milestone <slug>`.
+
+**Where it shows up.** Once a milestone exists you see it in three places, and each replaces a guess with a plan:
+
+- **Every session** — the dynamic context carries the milestone this generation serves (or main, when it serves none), with its boundary and remaining work.
+- **`reap run start --phase scan`** — remaining generations become the goal candidates, main first.
+- **`completion --phase adapt`** — the "Next Generation Candidates" block comes from the milestone instead of keyword overlap between goal and backlog titles.
+
+**Closing is the human's call.** In reflect, the agent checks off what this generation finished and, if the exit criteria now read as met, says so and proposes `reap milestone close <slug>`. It never closes one itself. A closed milestone stays in `vision/milestones/` as `status: completed` — the record of why the goal could be checked — and stops offering candidates.
+
+**Milestone vs. midterm memory.** Whatever belongs to the plan — what happens in what order, what is out of scope, how much is left — lives in the milestone file. Midterm keeps only the ongoing context a plan does not hold: deferred judgments, agreed directions, tracks with no milestone yet. Never both.
 
 ### Backlog
 
@@ -383,6 +412,8 @@ All REAP interactions go through `/reap.*` slash commands. These are the primary
 
 ## CLI Commands (no slash command equivalent)
 - `reap make backlog --type <type> --title <title> [--body <body>] [--priority <priority>]` — Create backlog item (type: genome-change, environment-change, task)
+- `reap make milestone --title <title> --goal <vision goal>` — Create a milestone (template; fill in Exit Criteria / Out of Scope / Generations before it can be used)
+- `reap milestone [list|main <slug>|close <slug>]` — List milestones, move the focus, or mark one completed. `main` refuses a milestone with an unfilled boundary, a goal that matches nothing in `goals.md`, or one already completed
 - `reap make hook --event <event> --name <name> [--type md|sh] [--condition <condition>] [--order <order>]` — Create hook file with correct naming and frontmatter
 - `reap cruise <count>` — Set cruise mode (pre-approve N generations for autonomous execution)
 - `reap update` — Update project structure to match current REAP version (v0.15 migrate, v0.16 sync). When the project's `lastMigratedVersion` lags behind the installed package, pending per-version migration notes are surfaced in `context.pendingMigrations` (see § Migration Instruction Layer).

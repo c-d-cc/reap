@@ -101,7 +101,7 @@ detect → mate → merge → reconcile → validation → completion
 - `lineage/` — 세대 아카이브 (2-level compression)
 - `genome/` — 처방적 지식 (prescriptive)
 - `environment/` — 기술적 지식 (descriptive, 2-tier loading)
-- `vision/` — 장기 목표
+- `vision/` — 장기 방향. `goals.md`(objective) · `milestones/`(goal 을 쪼갠 계획, generation 여럿을 품는다) · `design/` · `memory/`
 - `hooks/` — lifecycle event handlers (.sh, .md)
 
 ### Maturity System
@@ -201,12 +201,13 @@ Claude Code 어댑터의 knowledge 전달은 두 layer로 명확히 분리된다
 | Layer | 메커니즘 | 대상 | 위치 |
 |---|---|---|---|
 | **Static** | Claude Code `@` import (CLAUDE.md 본문) | genome×3 + environment summary + vision goals + memory×3 + reap-guide (총 9) | `src/templates/claude-md-section.md` 의 "Static Knowledge (auto-imported)" 블록 |
-| **Dynamic** | SessionStart hook (`reap load-context`) | Current State (current.yml 가공) + Strict Mode + Language 지시 | `src/cli/commands/load-context.ts` 의 `buildKnowledgeContext()` |
+| **Dynamic** | SessionStart hook (`reap load-context`) | Current State (current.yml 가공) + **Milestone** + Strict Mode + Language 지시 + Pending Migrations | `buildKnowledgeContext()` (`load-context.ts`) **와 `buildKnowledgeContextSync()` (`core/dump-state-sync.ts`) 둘 다** — 출력은 byte-identical 이어야 한다 |
 
 원칙:
 - static knowledge는 코드가 직접 read/inject 하지 않는다. Claude Code의 native `@` import를 신뢰한다.
 - 새 static 파일을 추가하려면 (a) `claude-md-section.md` 의 `@` ref 블록에 한 줄 추가, (b) integrity.ts 의 검증 대상 추가만으로 충분.
-- 새 dynamic context를 추가하려면 `buildKnowledgeContext()` 에 섹션을 추가하되, 반드시 dynamic 자격이 있어야 한다(파일로 표현 불가능한 generation state 의존성). 그렇지 않은 정보는 static으로 분류.
+- 새 dynamic context를 추가하려면 **두 builder 에 같은 섹션을 추가**하되(async·sync), 반드시 dynamic 자격이 있어야 한다. 자격은 둘 중 하나다 — **(a) generation state 의존성**(파일로 표현 불가능) 또는 **(b) 파일 목록이 가변이라 `@` 로 열거할 수 없음**. milestone 은 둘 다에 해당한다: 어느 것을 보여줄지는 `current.yml` 의 `milestoneId` 가 정하고, `vision/milestones/` 의 파일은 계속 늘어난다.
+- 세 곳(subagent prompt + async/sync dynamic)이 같은 텍스트를 내야 하면 **렌더러를 순수 함수 하나로 뽑고 읽기만 갈라라** — `buildMilestoneSection()` 이 그 형태다. 텍스트를 세 번 쓰면 셋이 어긋난다.
 - migration: template 변경 시 `ensureClaudeMd` (`src/cli/commands/init/common.ts`) 의 marker-hash sync 로직(gen-054)이 모든 사용자(plain-path legacy + marker-stale 둘 다) 자동 처리.
 
 ## Conventions

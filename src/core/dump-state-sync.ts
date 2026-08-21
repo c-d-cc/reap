@@ -2,7 +2,8 @@ import { readFileSync, writeFileSync, mkdirSync, existsSync } from "fs";
 import { join, dirname } from "path";
 import YAML from "yaml";
 import { createPaths } from "./paths.js";
-import { buildStrictSection } from "./prompt.js";
+import { buildStrictSection, buildMilestoneSection } from "./prompt.js";
+import { listMilestonesSync } from "./milestone.js";
 import { buildPendingMigrationsSection } from "./migration.js";
 import type { ReapConfig, GenerationState } from "../types/index.js";
 import { packageVersion } from "./package-info.js";
@@ -79,6 +80,18 @@ export function buildKnowledgeContextSync(cwd: string): string | null {
     sections.push(stateLines.join("\n"));
   } else {
     sections.push("No active generation.");
+  }
+
+  // ── Milestone ────────────────────────────────────────────
+  // Rendered by `buildMilestoneSection` so this text has one owner across the
+  // subagent prompt and both dynamic-context builders.
+  {
+    const milestoneSection = buildMilestoneSection(
+      listMilestonesSync(paths.visionMilestones),
+      state,
+      "#",
+    );
+    if (milestoneSection) sections.push(milestoneSection.trimEnd());
   }
 
   // ── Strict Mode ──────────────────────────────────────────

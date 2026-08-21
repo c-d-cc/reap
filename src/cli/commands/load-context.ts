@@ -2,7 +2,8 @@ import { join } from "path";
 import YAML from "yaml";
 import { createPaths } from "../../core/paths.js";
 import { readTextFile, fileExists } from "../../core/fs.js";
-import { buildStrictSection } from "../../core/prompt.js";
+import { buildStrictSection, buildMilestoneSection } from "../../core/prompt.js";
+import { listMilestonesSync } from "../../core/milestone.js";
 import { buildPendingMigrationsSection } from "../../core/migration.js";
 import type { ReapConfig, GenerationState } from "../../types/index.js";
 import { packageVersion } from "../../core/package-info.js";
@@ -75,6 +76,18 @@ export async function buildKnowledgeContext(cwd: string): Promise<string | null>
     sections.push(stateLines.join("\n"));
   } else {
     sections.push("No active generation.");
+  }
+
+  // ── Milestone ────────────────────────────────────────────
+  // Rendered by `buildMilestoneSection` so this text has one owner across the
+  // subagent prompt and both dynamic-context builders.
+  {
+    const milestoneSection = buildMilestoneSection(
+      listMilestonesSync(paths.visionMilestones),
+      state,
+      "#",
+    );
+    if (milestoneSection) sections.push(milestoneSection.trimEnd());
   }
 
   // ── Strict Mode ──────────────────────────────────────────

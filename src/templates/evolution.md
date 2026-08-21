@@ -125,12 +125,31 @@ Decision rule: "If a new agent in the next session doesn't know about this chang
 
 ## Vision
 
-Vision consists of Goals, Memory, and Design.
+Vision consists of Goals, Milestones, Memory, and Design.
 
 ### Goals (`vision/goals.md`)
 Long-term project objectives. During the adapt phase, gap analysis against goals determines the next generation's direction.
 
 Goals cleanup: goals.md is a space for **future** objectives, not an archive of past achievements. When completed items (`[x]`) accumulate and the document loses focus as a forward-looking plan, propose specific items for removal to the human for approval. This is a contextual judgment — recently completed items may still have reference value, while long-stable items can be cleared. Always get human confirmation before removing.
+
+### Milestones (`vision/milestones/`)
+
+The planning unit between a goal and a generation. **Several generations run inside one milestone.**
+
+- **Without its three boundary parts it is not a milestone** — the owning goal (`goal:`), `## Exit Criteria`
+  and `## Out of Scope`. If any is empty it offers no goal candidates and cannot become main;
+  `reap milestone main` refuses it
+- **Exit criteria must be verifiable facts.** No quantitative metrics (Goodhart) — the human makes the final call
+- **Main is the focus, not a restriction.** Exactly one milestone is main, but candidates for the next
+  generation come from **every valid open milestone** (main first). Pulling an item forward from a later
+  plan is ordinary; name it with `reap run start --phase create --milestone <slug>`
+- **The human closes it.** In reflect, judge whether the exit criteria are met and **propose** closing —
+  never close it yourself
+- **REAP works without milestones.** Some projects are served by goal → generation directly. Opt-in
+
+**Milestone vs. midterm memory**: whatever belongs to the plan — what happens in what order, what is out
+of scope, how much is left — lives in the milestone file. Midterm keeps only the ongoing context a plan
+does not hold: deferred judgments, agreed directions, tracks with no milestone yet. Never both.
 
 ### Design (`vision/design/`)
 Space for project design documents. Distinction from Memory:
@@ -177,20 +196,12 @@ When you have something to write to memory, apply top-to-bottom:
 
 ### Memory Update Criteria
 
-**Shortterm** — session handoff (update every generation — mandatory):
-- Write: summary of this generation, context to hand off, undecided matters, current backlog state
-- **Prune: delete previous handoff items that are already acted on, and REPLACE (overwrite) with this generation's handoff. No accumulation.**
-- Result: shortterm.md stays within the last 1~2 generations of content
+Pruning during `completion --phase reflect` is **mandatory**. The per-tier procedure and decision rules
+are owned by `~/.reap/reap-guide.md` § Memory Pruning Policy — it is auto-loaded alongside this file, so
+it is not repeated here.
 
-**Midterm** — ongoing tracks (update when a track's state changes):
-- Write: flow of large ongoing tasks, multi-generation plans, directions agreed with the user
-- **Prune: when a track completes, promote its key decisions to longterm and DELETE the section from midterm. Decision rule: "Does this track have a next step?" — No → delete.**
-- Result: midterm.md stays within tracks that are alive right now
-
-**Longterm** — design lessons (update only when a lesson emerges):
-- Write: design lessons worth repeating, background behind architecture decisions
-- **Prune (periodic — every ~10 generations, or whenever bloat is detected in reflect): if a section is already documented in genome, it is a duplicate → delete. If early transition context is no longer a behavioral guide → delete. Decision rule: "Without this lesson, would the next agent make the same mistake?" — No → delete.**
-- Result: longterm.md stays within lessons that still drive behavior today
+In short: shortterm is **replaced every generation** (no accumulation), midterm sections are **deleted
+when a track completes**, and longterm entries are **deleted once genome documents them**.
 
 **Do NOT write**:
 - Code change details (environment handles this)

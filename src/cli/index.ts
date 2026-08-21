@@ -6,6 +6,7 @@ import { execute as initExecute } from "./commands/init/index.js";
 import { execute as statusExecute } from "./commands/status.js";
 import { execute as runExecute } from "./commands/run/index.js";
 import { execute as makeExecute } from "./commands/make/index.js";
+import { execute as milestoneExecute } from "./commands/milestone.js";
 import { execute as cruiseExecute } from "./commands/cruise.js";
 import { execute as installSkillsExecute } from "./commands/install-skills.js";
 import { execute as fixExecute } from "./commands/fix.js";
@@ -57,12 +58,13 @@ program
   .option("--reason <reason>", "Reason for back regression or abort")
   .option("--backlog <backlog>", "Backlog filename to consume for this generation (use --no-backlog to explicitly declare no relevant backlog)")
   .option("--no-backlog", "Explicitly declare no backlog item is relevant to this generation (suppresses pending-backlog prompt). Negates --backlog.")
+  .option("--milestone <milestone>", "Milestone slug this generation serves (start --phase create). Defaults to the main milestone.")
   .option("--source-action <sourceAction>", "Source action for abort/early-close (rollback, stash, hold, none — rollback only for abort)")
   .option("--save-backlog", "Save progress to backlog on abort")
   .option("--defer-tasks <value>", "For early-close: auto-defer unchecked tasks to new backlog (true|false, default true)")
   .option("--severity <severity>", "For validation --phase report-evaluator: evaluator concern severity (high|low|none — none is a no-op)")
   .option("--summary <summary>", "For validation --phase report-evaluator: one-line evaluator concern summary")
-  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string | false; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string; severity?: string; summary?: string }) => {
+  .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string | false; milestone?: string; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string; severity?: string; summary?: string }) => {
     await runExecute(stage, options);
   });
 
@@ -73,12 +75,20 @@ program
   .option("--title <title>", "Resource title")
   .option("--body <body>", "Optional description body")
   .option("--priority <priority>", "Priority (high, medium, low)")
+  .option("--goal <goal>", "Owning vision goal (milestone) — must match an item or section in vision/goals.md")
   .option("--event <event>", "Hook event (e.g. onLifeCompleted)")
   .option("--name <name>", "Hook name")
   .option("--condition <condition>", "Hook condition (default: always)")
   .option("--order <order>", "Hook execution order (default: 50)")
-  .action(async (resource: string, options: { type?: string; title?: string; body?: string; priority?: string; event?: string; name?: string; condition?: string; order?: string }) => {
+  .action(async (resource: string, options: { type?: string; title?: string; body?: string; priority?: string; goal?: string; event?: string; name?: string; condition?: string; order?: string }) => {
     await makeExecute(resource, options);
+  });
+
+program
+  .command("milestone [action] [slug]")
+  .description("Manage milestones (list, main <slug>, close <slug>)")
+  .action(async (action: string | undefined, slug: string | undefined) => {
+    await milestoneExecute(action, slug);
   });
 
 program

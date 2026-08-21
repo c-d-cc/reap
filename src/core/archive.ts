@@ -67,6 +67,7 @@ async function writeArchive(
     goal: state.goal,
     parents: state.parents,
     timeline: state.timeline,
+    ...(state.milestoneId ? { milestoneId: state.milestoneId } : {}),
     ...extraMeta,
   };
   await writeTextFile(join(archiveDir, "meta.yml"), YAML.stringify(meta));

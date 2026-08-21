@@ -18,7 +18,7 @@
 ```
 src/
 ├── types/index.ts              — 타입 정의 (GenerationState, ReapConfig, ReapOutput 등)
-├── core/                       — 핵심 로직 (30 modules)
+├── core/                       — 핵심 로직 (31 modules)
 │   ├── lifecycle.ts            — stage 순서 정의 (next/prev) + transition graph (NORMAL_TRANSITIONS, MERGE_TRANSITIONS, getTransitions). **stage:phase 가 자기 목록에 들어 있으면 self-loop = 그 phase 재진입 허용** — nonce 는 매번 재발급·검증·소비되므로 무결성은 유지된다. 현재 `completion:fitness` 와 `validation:entry` 둘
 │   ├── generation.ts           — generation CRUD, ID 생성
 │   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스, memory/resources/docs 경로 포함)
@@ -53,7 +53,7 @@ src/
 │   ├── git.ts                  — git 연동 (commit, diff, push, pull, fetch, branch analysis). `gitPush` 는 `GitPushResult { success, error }` 를 돌려준다 — `boolean` 은 실패 이유를 버렸고 `push.ts` 가 그 자리를 추측으로 메웠다. `describeExecError` 가 stderr → stdout → `err.message` 순으로 건진다. 나머지 래퍼(`gitFetchAll`/`gitPullFfOnly`/…)는 여전히 `catch { return false }` 다
 │   ├── hooks.ts                — lifecycle hook engine (조건부 실행, 순서 제어, 상세 결과)
 │   ├── clarity.ts              — clarity level 자동 판단 (규칙 기반, high/medium/low + signals)
-│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt, buildStrictSection, memory 로딩, cruise 지시, clarity 주입, strict HARD-GATE). `buildEvaluatorPrompt(knowledge, paths, state, { stage })` 는 reap-evaluate 용 dynamic context. Code Intelligence 절은 **무조건** 붙는다 (인덱서가 함께 배포되므로 부재할 수 없다) — 절에 적힌 명령은 `tests/e2e/index-command.test.ts` 가 그대로 실행한다
+│   ├── prompt.ts               — subagent prompt 공통 모듈 (loadReapKnowledge, buildBasePrompt, buildStrictSection, memory 로딩, cruise 지시, clarity 주입, strict HARD-GATE). **`buildMilestoneSection(milestones, state, level)` 은 milestone 절 텍스트의 단일 소유자** — subagent prompt·evaluator prompt·동적 컨텍스트 async/sync **네 곳**이 부른다. heading 깊이가 인자인 이유는 동적 컨텍스트가 `#` 를 쓰기 때문. 텍스트를 네 번 쓰면 넷이 어긋난다. `buildEvaluatorPrompt(knowledge, paths, state, { stage })` 는 reap-evaluate 용 dynamic context. Code Intelligence 절은 **무조건** 붙는다 (인덱서가 함께 배포되므로 부재할 수 없다) — 절에 적힌 명령은 `tests/e2e/index-command.test.ts` 가 그대로 실행한다
 │   ├── scanner.ts              — 프로젝트 스캔 (init용)
 │   ├── fs.ts                   — 파일 유틸리티
 │   ├── output.ts               — JSON 출력 (emitOutput, emitError). lifecycle 명령(DUMP_COMMANDS 화이트리스트) 종료 시 sync dump를 자동 트리거
@@ -64,7 +64,17 @@ src/
 │   ├── notice.ts               — release notice (fetchReleaseNotice: RELEASE_NOTICE.md에서 버전+언어별 노트 추출)
 │   ├── report.ts               — auto issue report (autoReport: gh issue create wrapper, best-effort)
 │   ├── template.ts             — artifact 템플릿 복사
-│   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). lineage 편향 분석 제거됨
+│   ├── milestone.ts            — **milestone 의 단일 소유자** (gen-097). 파싱·조회·검증·전이·생성.
+│   │                             `status`(open/completed)와 `main` 은 frontmatter 에 저장되고
+│   │                             **유효성(경계 3요소)은 저장되지 않는다** — 내용에서 파생한다
+│   │                             (`isValidMilestone`). `candidateMilestones` 가 "유효한 open 전부,
+│   │                             main 먼저"를 소유하며, 후보를 내는 세 지점이 전부 이것을 부른다.
+│   │                             `listMilestonesSync` 는 `buildKnowledgeContextSync` 전용이며
+│   │                             **읽기만** 다르다(렌더링은 `prompt.ts` 가 소유).
+│   │                             `validateForMain` 은 `knownGoals: string[]` 을 받는다 —
+│   │                             `vision.ts` 와의 순환 import 를 끊고, goals 파일 형식을 모른다.
+│   │                             frontmatter 쓰기는 라인 단위(YAML 왕복 금지)
+│   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). `goalIdentifiers()` 가 milestone 의 `goal:` 매칭 대상을 낸다. **milestone 이 있으면 `buildVisionGapAnalysis` 의 "Next Generation Candidates" 절이 토큰 겹침 휴리스틱 대신 계획에서 나온다** — 소진·완료·경계 미충족이면 휴리스틱으로 되돌아간다
 ├── cli/
 │   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, config, run, make, cruise, install-skills, fix, destroy, **uninstall**, clean, check-version, update, load-context, dump-state, **index**).
 │   │                             **`program.parse()` 앞에서 `ensureUserLevelAssets` 를 await** — 명령을 가리지 않는다.
