@@ -21,7 +21,7 @@ export const zhCN: Translations = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
-      daemon: "Code Intelligence",
+      codeIntelligence: "Code Intelligence",
       advanced: "高级功能",
       collaborationOverview: "分布式工作流",
       mergeGeneration: "合并代",
@@ -826,8 +826,8 @@ priority: medium
 任务描述。`,
   },
 
-  // Code Intelligence Page (route stays /docs/daemon so links keep working)
-  daemonPage: {
+  // Code Intelligence Page
+  codeIntelligencePage: {
     title: "Code Intelligence",
     breadcrumb: "指南",
     intro: "REAP 内置代码索引。无需安装、无需启动、没有后台进程。Tree-sitter 解析器遍历每个受版本控制的文件，记录其中定义的符号以及它们之间的调用与 import，并将结果以 gzip 压缩的 JSON 存放在 .reap/.index/。随附 15 种语言，且没有原生构建 —— 语法是 WebAssembly。",
@@ -853,7 +853,7 @@ symbols: 1530  (function 902, method 341, class 187, type 100)
 edges:   3688  (CALLS 3145, IMPORTS 543)
 imports: 543/543 resolved (100%)
 commit:  1a2b3c4`,
-    statusNote: "（示例数值。）这一行的缺失代价是五个月。本索引器的前身在每个标准 TypeScript 项目中解析出的 import 数为零 —— 它从未把 ./x.js 这样的 specifier 对应到生成它的 x.ts —— 于是 blast radius 一直返回空，而所有测试都通过、CI 始终是绿色：每项检查都在问「索引跑了吗」，没有人问「这个答案说得通吗」。",
+    statusNote: "（示例数值。）关键是 imports 这一行。impact 所知的一切都来自已解析的 import 边，因此解析率偏低意味着图不完整 —— 此时空的 blast radius 表示「未知」，而不是「没有」。无法把 ./x.js 这样的 specifier 对应到生成它的 x.ts 的解析器，在这里会报告零 —— 所以我们把解析率显示出来，而不是从「索引跑了吗」去推断。",
     locationTitle: "索引存放在哪里",
     locationDesc: "位于 .reap/.index/ —— 一个 manifest.json 加一个 gzip 压缩的图 —— 并由 reap init 和 reap update 写入 .gitignore。删除项目时索引随之消失，主目录里不会累积任何东西。忽略它与体积无关：把索引提交进去意味着包含它的那次提交又需要被索引，这个过程不会终止。删除 .reap/.index/ 永远是安全的 —— 下一条命令会重建。",
     whenTitle: "何时使用",

@@ -16,8 +16,8 @@ import { fileURLToPath } from "url";
  * The bundle collapses every module into `dist/cli/index.js`, so `import.meta.url`
  * stops reflecting where the code was written — a helper that reaches a different
  * number of levels in the two cases silently resolves to the directory *above*
- * the package once published. That is exactly how the daemon's query lookup
- * broke. Keeping the arithmetic identical in both cases means it cannot.
+ * the package once published. Keeping the arithmetic identical in both cases
+ * means it cannot.
  */
 function assetRoot(): string {
   return join(dirname(fileURLToPath(import.meta.url)), "..");

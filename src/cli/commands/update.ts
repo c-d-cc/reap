@@ -19,7 +19,7 @@ import type { ReapConfig } from "../../types/index.js";
 import { packageVersion, UNKNOWN_VERSION } from "../../core/package-info.js";
 
 /**
- * Delete `~/.reap/daemon/`, the retired daemon's index storage.
+ * Delete `~/.reap/daemon/` — stale data no version of REAP writes.
  *
  * Returns the path when something was there, null otherwise — so `reap update`
  * can report a removal it actually made rather than one it might have.
@@ -279,11 +279,10 @@ export async function execute(
   //    Idempotent — best-effort, silent on success.
   await adapter.registerSessionIntegration(paths.root);
 
-  // 5. The retired daemon's data (gen-089). `~/.reap/daemon/` held a registry
-  //    of indexed project paths and a SQLite graph per project; nothing writes
-  //    or reads it any more, and it is the largest thing REAP ever left in the
-  //    home directory. `reap uninstall` also removes it, but that is the path
-  //    for someone leaving — this is the one every existing user takes.
+  // 5. `~/.reap/daemon/` — a registry and a per-project symbol database that
+  //    nothing writes or reads, sitting in the home directory of every machine
+  //    that ever opted in. `reap uninstall` removes the same directory, but
+  //    that is the path for someone leaving; this is the one everyone else takes.
   const daemonLeftover = await removeRetiredDaemonData();
   if (daemonLeftover) {
     updated.push(`removed leftover index data: ${daemonLeftover}`);

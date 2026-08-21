@@ -19,7 +19,7 @@ export const en = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
-      daemon: "Code Intelligence",
+      codeIntelligence: "Code Intelligence",
       advanced: "Advanced",
       collaborationOverview: "Distributed Workflow",
       mergeGeneration: "Merge Generation",
@@ -824,8 +824,8 @@ priority: medium
 Description of the task.`,
   },
 
-  // Code Intelligence Page (route stays /docs/daemon so links keep working)
-  daemonPage: {
+  // Code Intelligence Page
+  codeIntelligencePage: {
     title: "Code Intelligence",
     breadcrumb: "Guide",
     intro: "REAP ships a code index. Nothing to install, nothing to start, no background process. A Tree-sitter parser walks every tracked file, records the symbols it defines and the calls and imports between them, and stores the result in .reap/.index/ as gzipped JSON. Fifteen languages ship with it, and there is no native build — the grammars are WebAssembly.",
@@ -851,7 +851,7 @@ symbols: 1530  (function 902, method 341, class 187, type 100)
 edges:   3688  (CALLS 3145, IMPORTS 543)
 imports: 543/543 resolved (100%)
 commit:  1a2b3c4`,
-    statusNote: "(Illustrative figures.) That line exists because its absence cost five months. The predecessor to this indexer resolved zero imports in every standard TypeScript project — it never mapped a ./x.js specifier to the x.ts that produces it — and blast radius returned nothing while every test passed and CI stayed green, because each check asked whether indexing had run and none asked whether the answer meant anything.",
+    statusNote: "(Illustrative figures.) The line that matters is imports. Everything impact knows comes from resolved import edges, so a low rate means the graph is incomplete — and an empty blast radius then means unknown rather than none. A resolver that cannot map a ./x.js specifier to the x.ts producing it reports zero here, which is why the rate is on screen rather than inferred from whether indexing ran.",
     locationTitle: "Where the index lives",
     locationDesc: "In .reap/.index/ — a manifest.json plus one gzipped graph — and both reap init and reap update add it to .gitignore. Deleting the project deletes the index with it; nothing accumulates in your home directory. The ignore is not about size: committing the index would mean the commit containing it has to be indexed, which does not terminate. Deleting .reap/.index/ is always safe, since the next command rebuilds it.",
     whenTitle: "When to use it",

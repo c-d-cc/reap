@@ -41,14 +41,9 @@ export class CodeGraph {
   /**
    * Add an edge, ignoring one that is already present.
    *
-   * The daemon's graph appended unconditionally and its SQLite table had
-   * neither a primary key nor a unique constraint, so every re-index multiplied
-   * the edge count — five runs produced five copies of all 1,482 edges. In a
-   * long-lived process the in-memory graph was rebuilt each time and hid it;
-   * the inflation only surfaced on restart, and by then every count-based
-   * figure was wrong by the number of runs. Making the graph itself reject
-   * duplicates means neither the snapshot nor an incremental update can
-   * reintroduce it.
+   * The graph itself rejects duplicates, so neither the snapshot nor an
+   * incremental update can multiply the edge count by re-indexing — which would
+   * leave every count-based figure wrong by the number of runs.
    */
   addEdge(edge: GraphEdge): void {
     const key = edgeKey(edge);

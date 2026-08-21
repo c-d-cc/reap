@@ -37,12 +37,9 @@ export class NotAGitRepoError extends Error {
 /**
  * The project's code index: build it, keep it current, ask it questions.
  *
- * There is no process here. The daemon this replaces existed to keep a graph
- * warm, and at this repository's size loading the whole graph costs single-digit
- * milliseconds against a CLI start of 40-70 ms — the thing being avoided was
- * cheaper than the machinery avoiding it. What the daemon actually cost was a
- * port, a registry, a PID file, an idle timer, a separate npm package, and an
- * orphaned process nothing could find.
+ * There is no process here: nothing to start, nothing resident. At this
+ * repository's size loading the whole graph from disk costs single-digit
+ * milliseconds against a CLI start of 40-70 ms.
  */
 export class Indexer {
   private readonly store: IndexStore;
@@ -67,9 +64,7 @@ export class Indexer {
    *
    * The unit of change is a commit, not a file timestamp: the index records the
    * SHA it describes, so deciding what to redo is one `git diff` and deciding
-   * whether to bother is one string comparison. The daemon had this pipeline
-   * too — it was simply never reached, because the only caller never passed the
-   * flag that selected it, and so every trigger did a full rebuild.
+   * whether to bother is one string comparison.
    */
   async update(options: { full?: boolean } = {}): Promise<UpdateResult> {
     if (!isGitRepo(this.projectRoot)) throw new NotAGitRepoError(this.projectRoot);
@@ -238,9 +233,8 @@ function buildStats(
  * complete its generation. Failures surface where they are asked for —
  * `reap index status` — not by interrupting the lifecycle.
  *
- * There is exactly one eager trigger left, and it is here, because a commit is
- * the only event that changes what a commit-keyed index describes. The daemon
- * had four, all of them full rebuilds.
+ * There is exactly one eager trigger, and it is here, because a commit is the
+ * only event that changes what a commit-keyed index describes.
  */
 export async function refreshIndexAfterCommit(projectRoot: string): Promise<boolean> {
   try {

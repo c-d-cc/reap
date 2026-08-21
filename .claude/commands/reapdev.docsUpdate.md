@@ -6,8 +6,8 @@ description: "REAP Dev — Update docs, README based on code changes"
 ## 버전 수준별 동작
 
 1. `package.json` version과 `git describe --tags --abbrev=0 --match 'v*'` 를 비교하여 bump 수준 판단.
-   `--match` 를 빠뜨리면 `daemon-v*` 태그를 릴리즈 태그로 오인한다 (gen-083 이 daemon 을
-   별도 태그 네임스페이스로 발행하기 시작했다).
+   `--match` 를 빠뜨리면 릴리즈가 아닌 태그를 릴리즈 태그로 오인한다 — 이 저장소에는
+   `v*` 가 아닌 태그가 실재한다 (`git tag --list | grep -v '^v'` 로 확인).
 2. 수준별 동작:
    - **patch (또는 bump 없음)**: 변경된 기능의 해당 섹션만 확인. 변경 없으면 skip.
    - **minor 이상**: README + 스킬 전체 **full scan**. 모든 변경사항을 문서와 대조.

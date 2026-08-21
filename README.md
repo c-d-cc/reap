@@ -328,7 +328,7 @@ imports: 543/543 resolved (100%)
 commit:  1a2b3c4
 ```
 
-(Illustrative figures.) That line exists because its absence cost five months. The predecessor to this indexer resolved zero imports in every standard TypeScript project — it never mapped a `./x.js` specifier to the `x.ts` that produces it — and blast radius returned nothing while every test passed and CI stayed green, because each check asked whether indexing had run and none asked whether the answer meant anything.
+(Illustrative figures.) The line that matters is `imports`. Everything `impact` knows comes from resolved import edges, so a low rate means the graph is incomplete — and an empty blast radius then means *unknown* rather than *none*. A resolver that cannot map a `./x.js` specifier to the `x.ts` that produces it reports zero here, which is why the rate is on screen rather than inferred from whether indexing ran.
 
 The index lives in `.reap/.index/` and is gitignored. Deleting it is always safe; the next command rebuilds it.
 

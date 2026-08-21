@@ -317,7 +317,7 @@ imports: 543/543 resolved (100%)
 commit:  1a2b3c4
 ```
 
-(Beispielwerte.) Diese Zeile gibt es, weil ihr Fehlen fünf Monate gekostet hat. Der Vorgänger dieses Indexers löste in jedem gewöhnlichen TypeScript-Projekt **null** Importe auf — er ordnete einen `./x.js`-Specifier nie der `x.ts` zu, aus der er entsteht — und der Blast Radius blieb leer, während alle Tests bestanden und CI durchgehend grün war: jede Prüfung fragte, ob indiziert wurde, keine fragte, ob das Ergebnis Sinn ergibt.
+(Beispielwerte.) Entscheidend ist die Zeile `imports`. Alles, was `impact` weiß, stammt aus aufgelösten Import-Kanten: Ist die Rate niedrig, ist der Graph unvollständig, und ein leerer Blast Radius bedeutet dann **unbekannt** statt *keine*. Ein Resolver, der einen `./x.js`-Specifier nicht der `x.ts` zuordnen kann, aus der er entsteht, meldet hier **null** — deshalb steht die Rate auf dem Bildschirm, statt aus einem gelaufenen Indexlauf erschlossen zu werden.
 
 Der Index liegt in `.reap/.index/` und ist gitignored. Ihn zu löschen ist immer unbedenklich — der nächste Befehl baut ihn neu.
 

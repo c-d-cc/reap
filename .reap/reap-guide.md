@@ -446,7 +446,7 @@ commit:  1a2b3c4
 
 (Illustrative figures — the numbers are whatever your repository has.) The line that matters is **`imports`**. Everything `impact` knows comes from resolved import edges, so a low rate means the graph is incomplete and an empty blast radius means *unknown*, not *none*.
 
-This is not hypothetical caution. The predecessor to this indexer resolved **zero** imports in every standard TypeScript project for five months, because it never mapped a `./x.js` specifier to the `x.ts` file that produces it. Blast radius returned nothing, every test passed, and CI was green throughout — because each check asked whether indexing had run and none asked whether the answer meant anything. The rate is on screen now so that cannot repeat quietly.
+Concretely: an indexer that never maps a `./x.js` specifier to the `x.ts` file producing it resolves **zero** imports in every standard TypeScript project — and every check that asks "did indexing run?" stays green while blast radius returns nothing. The rate is on screen so that cannot happen quietly.
 
 `status` also warns when a grammar fails to load, which is the other way a language can go silently unindexed.
 

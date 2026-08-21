@@ -120,13 +120,9 @@ export function hasNewerRelease(installed: string, latest: string): boolean {
  * How to upgrade *this* installation, told to the user when REAP will not do
  * it for them.
  *
- * One sentence used to serve every case — "Run: npm install -g" — and that was
- * right while the version being reported was PATH's, because PATH's `reap` is
- * usually the global one. Reading our own version instead makes the pairing
- * wrong: we now measure a project's local install and hand its user a command
- * that changes a different installation entirely. gen-086 met the same shape in
- * the daemon's messages and drew the rule — how to fix a stale copy depends on
- * which copy you found.
+ * How to fix a stale copy depends on which copy you found. We report this
+ * installation's own version, so the command has to change that same
+ * installation.
  *
  * `unknown` keeps the global command. It is what was printed before, it is the
  * likeliest case, and there is nothing more specific to say.

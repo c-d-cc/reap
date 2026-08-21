@@ -30,10 +30,8 @@ export interface PipelineOutcome {
  * Parse `targets`, add their symbols and import edges to `graph`, and return
  * what the callers still need.
  *
- * Note what is absent: the daemon ran `git log -1 -- <file>` once per file to
- * record each file's last commit. At 24.5 ms a call that was 5.7 of the 6.2
- * seconds a full index took — 92% of the cost — for information the index needs
- * exactly one copy of. That copy is `manifest.lastIndexedCommit`.
+ * Note what is absent: there is no per-file `git log`. The index needs exactly
+ * one commit, and that copy is `manifest.lastIndexedCommit`.
  */
 async function parseInto(
   graph: CodeGraph,

@@ -7,10 +7,9 @@
 #   reap.autoUpdateMinVersion — below this, reap refuses to auto-update itself
 #                             and says to install @latest by hand
 #
-# gen-089 removed the second one (MIN_DAEMON_VERSION) along with the daemon. One
-# floor is still worth a gate: the failure mode does not depend on how many
-# there are, and the next floor added inherits the check rather than needing it
-# written again.
+# One floor is worth a gate on its own: the failure mode does not depend on how
+# many there are, and the next floor added inherits the check rather than needing
+# it written again.
 #
 # Nothing checked that either named a real release. The mistake is only possible
 # in the direction nobody tests: raise a floor, forget to publish, and every

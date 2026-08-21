@@ -175,7 +175,7 @@ src/
 
 ## src/indexer/ — 내장 코드 인덱서 (gen-089)
 
-**상주 프로세스도 포트도 registry 도 SQLite 도 없다.** Tree-sitter WASM 파서 + gzip JSON 스냅샷.
+**상주 프로세스가 없다 — 시작할 것도, 떠 있는 것도 없다.** Tree-sitter WASM 파서 + gzip JSON 스냅샷.
 
 | 파일 | 역할 |
 |---|---|

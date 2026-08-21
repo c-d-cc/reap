@@ -218,15 +218,8 @@ export function buildBasePrompt(
   }
 
   // ── Code Intelligence ─────────────────────────────────────
-  // Unconditional (gen-089). It used to be gated on `config.daemon: true` with
-  // three branches for whether the separate package was installed, current, or
-  // absent — an accounting that existed only because the indexer shipped
-  // elsewhere. It ships here now, so there is nothing to be unavailable.
-  //
   // The commands below are the ones the agent will type, so they are also the
-  // ones the e2e suite runs verbatim. The predecessor documented `?file=` in
-  // four places while the server accepted `?files=`, and nothing executed the
-  // documented form to find out.
+  // ones the e2e suite runs verbatim.
   lines.push("## Code Intelligence");
   lines.push("");
   lines.push("REAP ships a code index. Prefer it over full-text search for symbol-shaped questions.");

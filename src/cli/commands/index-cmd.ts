@@ -10,11 +10,6 @@ type Subcommand = (typeof SUBCOMMANDS)[number];
 
 /**
  * `reap index` — the code index, and the questions it can answer.
- *
- * This replaces the HTTP surface of the retired daemon. A CLI subcommand needs
- * no port, no registry and no resident process; it works from every client,
- * and the measurement that settled it is that a `reap` cold start is 40-70 ms
- * against a ~5 ms curl to a daemon that had to be running in the first place.
  */
 export async function execute(
   subcommand: string | undefined,
@@ -69,10 +64,9 @@ async function updateCmd(indexer: Indexer, full: boolean): Promise<void> {
 /**
  * What the index contains, and whether it can be believed.
  *
- * The import resolution rate is the point of this command. The daemon's blast
- * radius returned zero for every NodeNext project for five months and every
- * check stayed green, because each one asked whether indexing had run. One line
- * saying "0/283" on any of those runs would have ended it the same day.
+ * The import resolution rate is the point of this command: everything `impact`
+ * knows comes from resolved import edges, so a low rate means an empty blast
+ * radius is *unknown* rather than *none*.
  */
 async function statusCmd(indexer: Indexer): Promise<void> {
   await indexer.ready();
@@ -105,9 +99,9 @@ async function statusCmd(indexer: Indexer): Promise<void> {
       lastIndexedCommit: manifest!.lastIndexedCommit,
       lastIndexedAt: manifest!.lastIndexedAt,
       format: manifest!.format,
-      // Distinct vs total is the P2-b guard made queryable: the retired storage
-      // appended edges without a key, so the two diverged by one factor per
-      // re-index and nothing reported it.
+      // Distinct vs total, made queryable: a store that appends without a key
+      // makes the two diverge by one factor per re-index, and the divergence is
+      // the only symptom.
       edgeTotal: edges.total,
       edgeDistinct: edges.distinct,
       indexPath: indexer.storePath,

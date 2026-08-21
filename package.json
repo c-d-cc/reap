@@ -40,6 +40,7 @@
     "dev": "bun src/cli/index.ts",
     "build": "bash scripts/build.sh",
     "typecheck": "tsc --noEmit",
+    "typecheck:docs": "cd docs && npx tsc --noEmit -p tsconfig.json",
     "test": "npm run test:unit && npm run test:e2e && npm run test:scenario",
     "test:unit": "bun test --isolate tests/unit/",
     "test:e2e": "bun test tests/e2e/",

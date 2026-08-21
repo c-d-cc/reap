@@ -28,7 +28,7 @@ import AdvancedPage from "@/pages/AdvancedPage";
 import CommandReferencePage from "@/pages/CommandReferencePage";
 import HookReferencePage from "@/pages/HookReferencePage";
 import HooksPage from "@/pages/HooksPage";
-import DaemonPage from "@/pages/DaemonPage";
+import CodeIntelligencePage from "@/pages/CodeIntelligencePage";
 import ConfigurationPage from "@/pages/ConfigurationPage";
 import ComparisonPage from "@/pages/ComparisonPage";
 import DistributedOverviewPage from "@/pages/DistributedOverviewPage";
@@ -54,7 +54,7 @@ function Router() {
       <Route path="/docs/lineage" component={LineagePage} />
       <Route path="/docs/backlog" component={BacklogPage} />
       <Route path="/docs/hooks" component={HooksPage} />
-      <Route path="/docs/daemon" component={DaemonPage} />
+      <Route path="/docs/code-intelligence" component={CodeIntelligencePage} />
       <Route path="/docs/hook-reference" component={HookReferencePage} />
       <Route path="/docs/command-reference" component={CommandReferencePage} />
       <Route path="/docs/configuration" component={ConfigurationPage} />

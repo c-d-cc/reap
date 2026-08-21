@@ -33,6 +33,19 @@ jobs:
         working-directory: docs
         run: npm ci
 
+      # `vite build` runs esbuild, which strips types without checking them, and
+      # the root tsconfig includes `src/**` only — so until this step existed
+      # nothing in the repository typechecked `docs/`. It is placed before the
+      # build so a failure stops the deploy rather than shipping past it.
+      #
+      # What it buys, concretely: the five locale files are held in a
+      # `Record<string, Translations>` where `Translations` is `typeof en`, so
+      # renaming a key in en.ts and missing one of the other four is an error
+      # here. Nothing in the repository checked that before this step existed.
+      - name: Typecheck docs
+        working-directory: docs
+        run: npx tsc --noEmit -p tsconfig.json
+
       - name: Build docs
         working-directory: docs
         run: npx vite build

@@ -21,7 +21,7 @@ export const de: Translations = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
-      daemon: "Code Intelligence",
+      codeIntelligence: "Code Intelligence",
       advanced: "Erweitert",
       collaborationOverview: "Verteilter Workflow",
       mergeGeneration: "Merge-Generation",
@@ -826,8 +826,8 @@ priority: medium
 Beschreibung der Aufgabe.`,
   },
 
-  // Code Intelligence Page (route stays /docs/daemon so links keep working)
-  daemonPage: {
+  // Code Intelligence Page
+  codeIntelligencePage: {
     title: "Code Intelligence",
     breadcrumb: "Leitfaden",
     intro: "REAP bringt einen Code-Index mit. Nichts zu installieren, nichts zu starten, kein Hintergrundprozess. Ein Tree-sitter-Parser durchläuft jede versionierte Datei, erfasst die dort definierten Symbole sowie die Aufrufe und Importe zwischen ihnen und legt das Ergebnis als gzip-komprimiertes JSON in .reap/.index/ ab. Fünfzehn Sprachen sind enthalten, und es gibt keinen nativen Build — die Grammatiken sind WebAssembly.",
@@ -853,7 +853,7 @@ symbols: 1530  (function 902, method 341, class 187, type 100)
 edges:   3688  (CALLS 3145, IMPORTS 543)
 imports: 543/543 resolved (100%)
 commit:  1a2b3c4`,
-    statusNote: "(Beispielwerte.) Diese Zeile gibt es, weil ihr Fehlen fünf Monate gekostet hat. Der Vorgänger dieses Indexers löste in jedem gewöhnlichen TypeScript-Projekt null Importe auf — er ordnete einen ./x.js-Specifier nie der x.ts zu, aus der er entsteht — und der Blast Radius blieb leer, während alle Tests bestanden und CI durchgehend grün war: jede Prüfung fragte, ob indiziert wurde, keine fragte, ob das Ergebnis Sinn ergibt.",
+    statusNote: "(Beispielwerte.) Entscheidend ist die Zeile imports. Alles, was impact weiß, stammt aus aufgelösten Import-Kanten: Ist die Rate niedrig, ist der Graph unvollständig, und ein leerer Blast Radius bedeutet dann unbekannt statt keine. Ein Resolver, der einen ./x.js-Specifier nicht der x.ts zuordnen kann, aus der er entsteht, meldet hier null — deshalb steht die Rate auf dem Bildschirm, statt aus einem gelaufenen Indexlauf erschlossen zu werden.",
     locationTitle: "Wo der Index liegt",
     locationDesc: "In .reap/.index/ — eine manifest.json plus ein gzip-komprimierter Graph — und sowohl reap init als auch reap update tragen ihn in .gitignore ein. Wer das Projekt löscht, löscht den Index mit; im Home-Verzeichnis sammelt sich nichts an. Der Ignore-Eintrag hat nichts mit Größe zu tun: den Index zu committen hieße, den Commit zu indizieren, der ihn enthält, und das terminiert nicht. .reap/.index/ zu löschen ist immer unbedenklich — der nächste Befehl baut ihn neu.",
     whenTitle: "Wann Sie ihn verwenden",

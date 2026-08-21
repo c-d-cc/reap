@@ -35,8 +35,15 @@ MAX_PROCESSES=75 상한에 도달
 
 **선결 조건: call resolution 을 이름 기반에서 벗어나게 하는 것.**
 그것 없이 진입점 휴리스틱만 손보면 같은 결함이 다른 형태로 남는다.
-관련 조사는 `vision/design/daemon/scip-and-scale.md` — SCIP 은 이 문제(4가지 한계 중 1번)를 풀지만
-사용자 저장소에 빌드 가능한 툴체인을 요구하고, 보류 결정이 유지되고 있다.
+관련 조사는 SCIP 채택 검토다 — SCIP 은 이 문제(4가지 한계 중 1번)를 풀지만 사용자 저장소에
+빌드 가능한 툴체인을 요구하고, 보류 결정이 유지되고 있다.
+
+> **조사 문서 위치 (gen-095 에 이동).** `.reap/vision/design/code-index-scip.md`.
+> 이 backlog 를 소비하는 세대는 **먼저 그것을 읽을 것.**
+>
+> 그 문서가 지목한 4가지 한계 중 **1번(이름 기반 call resolution)이 이 backlog 의 선결 조건이며,
+> 지금 배포되는 `src/indexer/call-resolver.ts` 를 그대로 서술한다** (`nameIndex` 기반 매칭).
+> **4번은 gen-089 가 해소했다** — 문서에 취소선과 근거를 함께 달아 두었다.
 
 값싼 중간 단계 후보:
 

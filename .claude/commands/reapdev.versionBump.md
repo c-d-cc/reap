@@ -22,9 +22,9 @@ version bump 전에 `/reapdev.docsUpdate` 스킬을 실행하여 문서 일관�
 
 1. 마지막 릴리스 태그 이후 변경사항 분석:
    - `git describe --tags --abbrev=0 --match 'v*'` 로 마지막 **릴리즈** 태그 확인.
-     `--match` 없이 쓰면 `daemon-v*` 를 잡는다 — daemon 은 같은 저장소에서 자기 태그
-     네임스페이스로 발행되므로(gen-083), 최신 태그가 reap 의 릴리즈가 아닐 수 있다.
-     기준점을 잘못 잡으면 변경 분석이 통째로 어긋난다.
+     `--match` 없이 쓰면 릴리즈가 아닌 태그를 잡을 수 있다 — 이 저장소에는 `v*` 가
+     아닌 태그가 실재한다 (`git tag --list | grep -v '^v'`). 기준점을 잘못 잡으면
+     변경 분석이 통째로 어긋난다.
    - `git log {tag}..HEAD --oneline`으로 커밋 목록 확인
    - `.reap/lineage/`에서 해당 기간 generation들의 01-objective.md 스캔
 

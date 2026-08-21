@@ -98,12 +98,11 @@ export async function buildKnowledgeContext(cwd: string): Promise<string | null>
     );
   }
 
-  // No Code Intelligence section here (gen-089). It was dynamic only because
-  // the daemon might be absent, stopped or too old; the indexer ships with REAP
-  // now, so the fact is constant and belongs in static knowledge — the guide,
-  // which Claude Code loads by `@` import, and the stage prompt, which the
-  // agent reads at the moment it would act on it. This channel carries what
-  // cannot be expressed as a file, and a fact that never varies is not that.
+  // No Code Intelligence section here. The index ships with REAP, so its
+  // availability is constant and belongs in static knowledge — the guide, which
+  // Claude Code loads by `@` import, and the stage prompt, which the agent reads
+  // at the moment it would act on it. This channel carries what cannot be
+  // expressed as a file, and a fact that never varies is not that.
 
   // ── Pending Migrations (gen-071) ─────────────────────────
   // Only present when the project's `lastMigratedVersion` lags behind the

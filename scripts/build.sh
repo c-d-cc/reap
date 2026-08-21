@@ -11,17 +11,14 @@ rm -rf dist
 # reap:carrier(zero-native-dependency)
 # web-tree-sitter stays external, and the reason is narrower than it looks.
 #
-# The daemon inlined a *native* module (better-sqlite3); the `bindings` lookup
-# then searched relative to the bundle, found no .node, and every query returned
-# zero while /health said fine. web-tree-sitter is not that: it is JS plus a
-# .wasm, and inlining it was tried here (gen-089) and the self-diagnosis gate
-# still passed under node — so the analogous failure is NOT demonstrated for
-# this package, and claiming it would be a guess wearing the shape of a reason.
+# Inlining it was tried (gen-089) and the self-diagnosis gate still passed under
+# node, so there is NO demonstrated breakage to point at. It is JS plus a .wasm,
+# not a native module: nothing resolves a .node relative to the bundle.
 #
-# External is kept anyway, for what is actually known: it is node's ordinary
-# resolution, which npm guarantees for a declared dependency, and it keeps the
-# bundle 0.11 MB smaller. If it ever moves inline, the gate's section 5 is what
-# would have to stay green — it runs the published bundle under node.
+# External is kept for what is actually known: it is node's ordinary resolution,
+# which npm guarantees for a declared dependency, and it keeps the bundle 0.11 MB
+# smaller. If it ever moves inline, the gate's section 5 is what would have to
+# stay green — it runs the published bundle under node.
 bun build src/cli/index.ts --outdir dist/cli --target node \
   --external web-tree-sitter
 

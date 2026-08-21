@@ -63,11 +63,9 @@ jobs:
       # Install the tarball we are about to publish and ask REAP whether the
       # result is healthy. #22 was only ever visible after installing, and so
       # was a resolver that resolved nothing: section 5 requires the index to
-      # find a relationship the fixture is known to have, which is the check
-      # the predecessor lacked while its blast radius returned zero for five
-      # months. Both were reproduced against the broken state before being
-      # claimed here — the daemon entry that used to sit in this list was not,
-      # and stayed false for five generations.
+      # find a relationship the fixture is known to have, rather than asking
+      # whether indexing ran. Both were reproduced against the broken state
+      # before being claimed here.
       - name: Self-diagnosis
         run: bash scripts/check-self-diagnosis.sh
 
@@ -91,7 +89,8 @@ jobs:
 
       # Only this version's section. RELEASE_NOTES.md keeps every past release,
       # and body_path on the whole file published all of them — v0.17.6's release
-      # carried the v0.17.0 notes and a setup section for a retired feature.
+      # carried the v0.17.0 notes and a setup section for a feature that no
+      # longer exists.
       # The current release is always the first `## ` block; older ones follow
       # as `## vX.Y.Z`.
       - name: Extract this version's notes

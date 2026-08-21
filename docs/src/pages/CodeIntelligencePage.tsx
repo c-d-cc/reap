@@ -3,15 +3,9 @@ import { DocPage } from "@/components/DocPage";
 import { CodeBlock } from "@/components/CodeBlock";
 import { useT } from "@/i18n";
 
-/**
- * The code index page.
- *
- * The route is /docs/daemon and stays that way: renaming it would 404 every
- * link that already points here.
- */
-export default function DaemonPage() {
+export default function CodeIntelligencePage() {
   const t = useT();
-  const d = t.daemonPage;
+  const d = t.codeIntelligencePage;
   return (
     <DocLayout>
       <DocPage title={d.title} breadcrumb={d.breadcrumb}>

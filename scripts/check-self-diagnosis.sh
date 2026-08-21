@@ -16,20 +16,14 @@
 #   - npm 12 default : install scripts blocked, no integration at all (section 6)
 #   - gen-080        : agent files OpenCode could not parse (section 7)
 #
-# A daemon entry used to sit where the index one is. It was false when written
-# (gen-078) and stayed false for five generations: it claimed the gate caught a
-# packaging defect, while the gate only ever checked that installation succeeded
-# and that `fix --check` was quiet — both of which the defective install did. CI
-# was green the whole time with the defect live.
+# Every entry above was reproduced against the broken state before being listed.
+# A coverage claim written alongside a check that was never run against the
+# broken state is a guess, and this file is read by whoever is deciding what
+# still needs testing.
 #
-# Section 5 now asks a harder question than its predecessor did. "Are there
-# symbols?" was the assertion in place while blast radius returned zero for
-# every TypeScript project for five months. It asks instead whether the index
-# finds relationships the fixture is known to have.
-#
-# The lesson is in the ordering. A coverage claim written alongside a check that
-# was never run against the broken state is a guess, and this file is read by
-# whoever is deciding what still needs testing.
+# Section 5 asks whether the index finds relationships the fixture is known to
+# have, not whether it produced any symbols at all. "Are there symbols?" is
+# satisfied by a resolver that resolves nothing.
 #
 # Sections 5 through 7 exist because the first checks all ask the same question
 # of one client, one code path and one way of installing. REAP claims to support
@@ -247,34 +241,28 @@ green "  ok    no findings"
 # ── 5. The index: does the published bundle produce answers that make sense? ─
 #
 # Everything above verifies files landing in the right place. This section
-# refuses to accept that as evidence, for two reasons that both actually
-# happened.
+# refuses to accept that as evidence, for two reasons.
 #
-# The first is packaging. The retired daemon was declared as `file:./daemon`,
-# packed into nothing, and never published — so `daemon: true` installed a
-# broken symlink and every call site swallowed the failure. Nothing in a source
-# tree can see that, because in a source tree everything resolves. So this runs
-# the *installed* reap, under **node**, with bun made unavailable: bun hid two
+# The first is packaging: a source tree resolves everything, so nothing in one
+# can see a dependency that fails to resolve once installed. This runs the
+# *installed* reap, under **node**, with bun made unavailable — bun hid two
 # defects for three generations by resolving what node could not.
 #
-# The second is worse and is why the assertion below is shaped as it is. The
-# daemon's blast radius returned zero for every NodeNext project for five
-# months. 130 tests passed, this gate passed, CI was green the whole time —
-# because every check asked "did indexing run?" and none asked "does the answer
-# mean anything?". A grammar that fails to load, a resolver that resolves
-# nothing, an index written to the wrong place: all of them produce a confident
-# success and an empty graph.
+# The second is why the assertion below is shaped as it is. A grammar that fails
+# to load, a resolver that resolves nothing, an index written to the wrong
+# place: all of them produce a confident success and an empty graph, and every
+# one of them satisfies "did indexing run?".
 #
 # So the fixture below has known relationships, and the check is that the index
-# finds *those*, at a 100% import resolution rate. `nodes > 0` is exactly the
-# assertion that was in place while the defect shipped.
+# finds *those*, at a 100% import resolution rate.
 echo
 echo "Checking the built-in code index (installed bundle, node, no bun)..."
 
 IX_PROJECT=$(mktemp -d)
 
-# A NodeNext fixture: `.js` specifiers naming `.ts` files, which is the form the
-# retired resolver could never match, plus one call edge across files.
+# A NodeNext fixture: `.js` specifiers naming `.ts` files, plus one call edge
+# across files. A resolver that cannot map the one to the other returns an empty
+# blast radius for the whole chain.
 mkdir -p "$IX_PROJECT/src"
 cat > "$IX_PROJECT/src/leaf.ts" <<'IXEOF'
 export function leafHelper(n: number): number {
@@ -384,8 +372,7 @@ if [ "$IX_ATTEMPTED" != "2" ] || [ "$IX_RESOLVED" != "2" ]; then
   echo
   dim "        The fixture imports './leaf.js' and './middle.js', which are .ts"
   dim "        files — the NodeNext form. A resolver that cannot map .js to .ts"
-  dim "        returns an empty blast radius for every TypeScript project, which"
-  dim "        is what shipped for five months (gen-089)."
+  dim "        returns an empty blast radius for every TypeScript project."
   rm -rf "$IX_PROJECT"
   exit 1
 fi
@@ -398,16 +385,15 @@ fi
 
 if [ "$IX_ETOTAL" != "$IX_EDISTINCT" ]; then
   red "  FAIL  $IX_ETOTAL edges of which $IX_EDISTINCT distinct — duplicates are back"
-  dim "        The retired storage appended without a key, so every re-index"
-  dim "        multiplied the edge count and every count-based figure with it."
+  dim "        A store that appends without a key multiplies the edge count on"
+  dim "        every re-index, and every count-based figure with it."
   rm -rf "$IX_PROJECT"
   exit 1
 fi
 
-# The index belongs to the project, not to the home directory. The daemon put it
-# in ~/.reap/daemon/ because a single global process served every project; an
-# in-process indexer has no such reason, and derived data in HOME is what
-# gen-088 spent a generation removing.
+# The index belongs to the project, not to the home directory: it is derived
+# data keyed to one repository's commits, and nothing in HOME can be keyed to
+# that.
 # Compared through `pwd -P`: reap reports `process.cwd()`, which is resolved,
 # while `mktemp -d` on macOS hands back the /var symlink to /private/var. The
 # two spell one directory and a literal comparison fails on every macOS run.
@@ -417,7 +403,13 @@ if [ "$IX_PATH" != "$IX_REAL/.reap/.index" ]; then
   rm -rf "$IX_PROJECT"
   exit 1
 fi
-if [ -e "$FAKE_HOME/.reap/daemon" ] || [ -e "$FAKE_HOME/.reap/index" ]; then
+# Reuse the name the comparison above just validated. This used to spell it a
+# second time, as `index` against an actual `.index`, and so could not fire for
+# anything at all. `$IX_PATH` is now guaranteed to end in the right directory
+# name because the check above exits on any mismatch — which is also where a
+# rename of `.index` would go red first.
+IX_DIRNAME=$(basename "$IX_PATH")
+if [ -e "$FAKE_HOME/.reap/$IX_DIRNAME" ]; then
   red "  FAIL  indexing wrote into the home directory ($FAKE_HOME/.reap)"
   ls -la "$FAKE_HOME/.reap" | while IFS= read -r line; do dim "        $line"; done
   rm -rf "$IX_PROJECT"
@@ -444,15 +436,13 @@ if [ "$IX_DEPS" != "src/middle.ts,src/top.ts" ]; then
   red "  FAIL  blast radius of src/leaf.ts is '$IX_DEPS', expected 'src/middle.ts,src/top.ts'"
   echo
   dim "        top.ts imports middle.ts imports leaf.ts. Changing the leaf affects"
-  dim "        both — directly and transitively. An empty answer here is the exact"
-  dim "        result the retired daemon gave for every real project."
+  dim "        both — directly and transitively. An empty answer here means the"
+  dim "        resolver produced nothing usable."
   rm -rf "$IX_PROJECT"
   exit 1
 fi
 
-# Nothing changed since the commit, so nothing should be re-parsed. The retired
-# pipeline had this branch and never reached it: its only caller omitted the
-# argument that selected it, so all four triggers did a full rebuild.
+# Nothing changed since the commit, so nothing should be re-parsed.
 IX_AGAIN=$(cd "$IX_PROJECT" && HOME="$FAKE_HOME" PATH="$IX_NOBUN:$PATH" \
   "$REAP_BIN" index update 2>&1)
 IX_MODE=$(node -e '
@@ -469,20 +459,8 @@ if [ "$IX_MODE" != "up-to-date|0" ]; then
   exit 1
 fi
 
-# No resident process. Stated last, after five commands have demonstrably run,
-# so "nothing is listening" cannot be satisfied by nothing having happened.
-if command -v lsof >/dev/null 2>&1; then
-  if lsof -iTCP:17224 -sTCP:LISTEN >/dev/null 2>&1; then
-    red "  FAIL  something is listening on 17224 — the daemon port"
-    dim "        REAP no longer starts a process. If this is yours, stop it;"
-    dim "        if REAP started it, the removal is incomplete."
-    rm -rf "$IX_PROJECT"
-    exit 1
-  fi
-fi
-
 rm -rf "$IX_PROJECT"
-green "  ok    index built under node from the published bundle: 2/2 imports, known blast radius, no duplicates, no process"
+green "  ok    index built under node from the published bundle: 2/2 imports, known blast radius, no duplicates"
 
 # ── 6. Install scripts blocked: is what we ship still usable? ──────────────
 #
@@ -756,9 +734,10 @@ printf 'devtool\n' > "$UN_CMDS/reapdev.publish.md"
 printf 'agent\n'   > "$UN_AGENTS/my-agent.md"
 printf 'secret\n'  > "$UN_HOME/.reap/my-private-key.pem"
 
-# The daemon's own data. Section 8 never runs a daemon, so without planting
-# this the later "~/.reap/daemon is gone" check could not fail — it would be
-# asserting the absence of something that never existed.
+# `~/.reap/daemon/` — stale data on machines that carry it, and one of the
+# entries `REAP_HOME_ENTRIES` allowlists for removal. Nothing here creates it,
+# so without planting it the later "it is gone" check could not fail: it would
+# be asserting the absence of something that never existed.
 mkdir -p "$UN_HOME/.reap/daemon/indexes"
 printf '{}\n' > "$UN_HOME/.reap/daemon/registry.json"
 
@@ -789,16 +768,13 @@ for before in "$UN_HOME/.reap/reap-guide.md" "$UN_HOME/.reap/.install-stamp"; do
   fi
 done
 if [ ! -d "$UN_PKG" ] || [ ! -d "$UN_HOME/.reap/daemon" ] || [ ! -e "$UN_BIN" ]; then
-  red "  FAIL  nothing to uninstall — package dir, daemon dir or bin link absent before the run"
+  red "  FAIL  nothing to uninstall — package dir, ~/.reap/daemon or bin link absent before the run"
   exit 1
 fi
 green "  ok    installed state to remove ($UN_CMDS_BEFORE commands, $UN_AGENTS_BEFORE agents)"
 
-# 17288 is an address nothing in this script uses. The daemon is stopped before
-# the files are deleted, and without a port of its own that stop would reach
-# whatever daemon the developer happens to be running.
 set +e
-UN_OUT=$(cd "$UN_HOME" && HOME="$UN_HOME" npm_config_prefix="$UN_PREFIX" REAP_DAEMON_PORT=17288 \
+UN_OUT=$(cd "$UN_HOME" && HOME="$UN_HOME" npm_config_prefix="$UN_PREFIX" \
   "$UN_BIN" uninstall --confirm 2>&1)
 UN_CODE=$?
 set -e

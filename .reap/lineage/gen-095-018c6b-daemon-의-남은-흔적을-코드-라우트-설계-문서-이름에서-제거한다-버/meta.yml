@@ -1,0 +1,20 @@
+id: gen-095-018c6b
+type: embryo
+goal: daemon 의 남은 흔적을 코드·라우트·설계 문서·이름에서 제거한다 — 버전업 경로의 청소 코드는 남긴다
+parents:
+  - gen-094-61a545
+timeline:
+  - stage: learning
+    at: 2026-08-20T23:13:52.157Z
+  - stage: planning
+    at: 2026-08-20T23:18:24.307Z
+  - stage: implementation
+    at: 2026-08-20T23:20:14.141Z
+  - stage: validation
+    at: 2026-08-20T23:32:58.763Z
+  - stage: completion
+    at: 2026-08-21T00:25:34.078Z
+status: completed
+fitnessFeedback:
+  text: ok
+  evaluatedAt: 2026-08-21T01:27:56.010Z

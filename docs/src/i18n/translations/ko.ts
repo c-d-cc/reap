@@ -21,7 +21,7 @@ export const ko: Translations = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
-      daemon: "Code Intelligence",
+      codeIntelligence: "Code Intelligence",
       advanced: "고급",
       collaborationOverview: "분산 워크플로우",
       mergeGeneration: "Merge Generation",
@@ -827,8 +827,8 @@ priority: medium
 작업에 대한 설명.`,
   },
 
-  // Code Intelligence Page (route stays /docs/daemon so links keep working)
-  daemonPage: {
+  // Code Intelligence Page
+  codeIntelligencePage: {
     title: "Code Intelligence",
     breadcrumb: "가이드",
     intro: "REAP 는 코드 인덱스를 내장합니다. 설치할 것도, 띄울 것도, 백그라운드에서 도는 프로세스도 없습니다. Tree-sitter 파서가 추적 중인 모든 파일을 훑어 정의된 심볼과 그 사이의 호출·import 를 기록하고, 결과를 .reap/.index/ 에 gzip 된 JSON 으로 저장합니다. 15개 언어가 함께 배포되며 네이티브 빌드가 없습니다 — grammar 가 WebAssembly 입니다.",
@@ -854,7 +854,7 @@ symbols: 1530  (function 902, method 341, class 187, type 100)
 edges:   3688  (CALLS 3145, IMPORTS 543)
 imports: 543/543 resolved (100%)
 commit:  1a2b3c4`,
-    statusNote: "(예시 수치입니다.) 이 한 줄이 없어서 5개월을 잃었습니다. 이 인덱서의 전신은 표준 TypeScript 프로젝트에서 import 를 하나도 해석하지 못했고 — ./x.js specifier 를 그것을 만들어내는 x.ts 에 대응시키지 못했습니다 — blast radius 가 계속 0을 반환하는 동안 모든 테스트가 통과했고 CI 는 내내 초록이었습니다. 모든 검사가 '인덱싱이 돌았는가'를 물었고 '결과가 말이 되는가'는 아무도 묻지 않았기 때문입니다.",
+    statusNote: "(예시 수치입니다.) 중요한 것은 imports 줄입니다. impact 가 아는 것은 전부 해석된 import edge 에서 나오므로, 해석률이 낮으면 그래프가 불완전하다는 뜻이고 그때 빈 blast radius 는 '없음'이 아니라 '알 수 없음'입니다. ./x.js specifier 를 그것을 만들어내는 x.ts 에 대응시키지 못하는 해석기는 여기서 0을 보고합니다 — 그래서 '인덱싱이 돌았는가'로 추론하지 않고 해석률을 화면에 띄웁니다.",
     locationTitle: "인덱스가 있는 곳",
     locationDesc: ".reap/.index/ 안에 manifest.json 과 gzip 된 그래프 하나로 있고, reap init 과 reap update 가 .gitignore 에 추가합니다. 프로젝트를 지우면 인덱스도 함께 사라지고 홈 디렉토리에는 아무것도 쌓이지 않습니다. gitignore 하는 이유는 크기가 아닙니다 — 인덱스를 커밋하면 그것을 담은 커밋을 다시 인덱싱해야 하고, 이 과정은 끝나지 않습니다. .reap/.index/ 는 언제 지워도 안전합니다. 다음 명령이 다시 만듭니다.",
     whenTitle: "언제 쓰는가",

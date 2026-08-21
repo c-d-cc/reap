@@ -1,8 +1,4 @@
 // Graph and analysis types for the built-in code indexer.
-//
-// Ported from the retired `@c-d-cc/reap-daemon` package. The daemon's own
-// types (registry entries, HTTP envelopes, port/idle config) are gone — an
-// indexer that runs inside the CLI has no clients and no registry.
 
 export type SymbolKind = "function" | "method" | "class" | "interface" | "type" | "enum" | "module";
 export type EdgeKind = "CONTAINS" | "CALLS" | "IMPORTS" | "EXTENDS" | "IMPLEMENTS";
@@ -46,10 +42,9 @@ export interface ImpactResult {
 /**
  * How many relative import specifiers were seen, and how many found a file.
  *
- * This pair is the whole reason the indexer's flagship analysis could return
- * zero for five months without anyone noticing: every check asked whether
- * indexing ran, none asked whether the result made sense. `reap index status`
- * reports the ratio, so a resolver that stops resolving is visible on the
+ * A resolver that stops resolving produces a confident success and an empty
+ * graph, which "did indexing run?" cannot tell apart from a correct one.
+ * `reap index status` reports this ratio, so the failure is visible on the
  * first run rather than on the day someone finally reads a blast radius.
  */
 export interface ImportStats {

@@ -129,13 +129,9 @@ export class IndexStore {
   /**
    * Replace the index with `snapshot`.
    *
-   * A whole-snapshot write, not an append. The SQLite storage this replaces had
-   * no key on its edge table and used a plain INSERT, so five indexing runs left
-   * five copies of every edge — 7,354 rows for 1,482 distinct ones. A live
-   * daemon rebuilt its graph in memory each time and looked fine; a restart
-   * loaded the inflated one, and every count-based analysis was wrong by the
-   * number of times the project had been indexed. Serialising the whole graph
-   * removes the concept of appending, so the defect has no place to live.
+   * A whole-snapshot write, not an append. Serialising the whole graph removes
+   * the concept of appending, so a storage layer cannot accumulate duplicate
+   * edges across runs and leave every count-based figure inflated.
    */
   write(snapshot: IndexSnapshot, meta: { lastIndexedCommit: string | null; stats: IndexStats }): void {
     mkdirSync(this.dir, { recursive: true });

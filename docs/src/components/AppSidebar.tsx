@@ -25,7 +25,7 @@ export function useNavGroups() {
         { title: t.nav.items.lineage, href: "/docs/lineage" },
         { title: t.nav.items.backlog, href: "/docs/backlog" },
         { title: t.nav.items.hooks, href: "/docs/hooks" },
-        { title: t.nav.items.daemon, href: "/docs/daemon" },
+        { title: t.nav.items.codeIntelligence, href: "/docs/code-intelligence" },
         { title: t.nav.items.advanced, href: "/docs/advanced" },
       ]
     },

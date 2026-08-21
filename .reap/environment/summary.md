@@ -20,7 +20,7 @@
 - CLI Framework: 자체 구현 (`src/libs/cli.ts`) — commander/yargs 대신
 - Crypto: Node.js native `crypto` (nonce, hash)
 - VCS: Git (child_process 직접 호출)
-- Type System: TypeScript 5.7, strict mode, ESM
+- Type System: TypeScript — 선언은 `^5.7.0`, **실제로 도는 것은 5.9.3** (caret 범위라 갈린다. 수치를 인용할 땐 `npx tsc --version` 을 볼 것). strict mode, ESM
 
 ## Source Structure
 
@@ -41,7 +41,7 @@
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline — **unit 629 / e2e 331 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
+현재 baseline — **unit 640 / e2e 329 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
 
 `src/indexer/` 의 이식된 모듈(call-resolver/impact/scanner/parser/pipeline)에는 **unit test 가 없다** — 그쪽은 지금 e2e 로만 덮인다.
 
@@ -49,7 +49,17 @@
 
 지원 자산:
 - `tests/helpers/setup.ts` — `cli` / `cliRaw` / `setupProject` / `setupGitProject` / `advanceStage` / `cleanup`. 대부분의 e2e·scenario 가 여기만 import 한다. **`cli()` 는 HOME 을 격리하지 않는다** — CLI 진입점이 사용자 레벨 자산을 동기화하므로 스위트 실행이 개발자의 실제 `~/.claude/`·`~/.reap/` 에 버전당 1회 쓴다. 사용자 레벨을 다루는 테스트는 `cliWithHome`(각 파일 로컬, `XDG_CONFIG_HOME` 도 함께 제거) 을 쓴다
-- `tests/fixtures/indexer-sample/` — 소형 TypeScript 프로젝트(5 파일). 심볼 관계 `main → validateId + formatUser`
+- `tests/unit/shipped-docs-no-daemon.test.ts` — **트리 전체를 훑어 폐기된 이름을 금지하는 검사.**
+  대상은 `src` · `docs/src` · `scripts` · `.github` · genome 3파일 · **`tests/` 전부**.
+  두 가지가 눈에 띄지 않는다: **`tests/` 는 submodule 이라 listing 을 그 안에서 떠야 하고**
+  (루트에서 `git ls-files tests` 는 gitlink 한 줄만 낸다 — 아무것도 훑지 않으면서 통과한다),
+  **`git ls-files` 는 `-z` 없이는 비-ASCII 경로를 C-quote 한다** (이 저장소의 backlog 파일명이 전부
+  한글이다). 제외는 **경로 하나에 근거 하나**이며 묶으면 안 된다 — 묶인 항목은 그중 하나만 읽힌다.
+  범위 밖: `README*` · `RELEASE_*` · `CLAUDE.md` · `AGENTS.md` · `.reap/environment/*` ·
+  `.claude/commands/*` (전부 현재 clean 이지만 **검사는 없다**)
+- `tests/unit/docs-wiring.test.ts` — `docs/src/App.tsx` 의 `<Route path>` 와 `AppSidebar.tsx` 의
+  `href` 가 일치하는지 + 5개 로케일이 페이지 키를 각각 정확히 1회 갖는지. **라우트 불일치는 어떤
+  언어에서도 타입 오류가 아니다** — 증상은 NotFound 로 가는 사이드바 항목뿐이라 테스트가 필요하다
 - `tests/e2e/index-incremental.test.ts` — **판정 기준이 "incremental 결과 == full rebuild 결과"** 다. "incremental 이 돌았는가"만 묻던 판이 blocker 넷을 통과시켰다. `snapshot()` 은 집계가 아니라 **edge 집합 자체**를 비교하고 shard 는 `manifest.shards` 로 찾는다
 
 버전 의존 assertion 주의: `tests/e2e/update-migration.test.ts` 는 패키지 버전을 `package.json` 에서 읽는다(`PKG_VERSION`). 릴리즈 버전을 하드코딩하면 bump 마다 깨진다 — 단, "특정 버전의 migration note"를 검증하는 케이스는 하드코딩이 맞다.
@@ -86,7 +96,12 @@
 - `scripts/check-docs-version.sh` — 릴리즈 문서 정합성 게이트. `RELEASE_NOTICE.md` / `RELEASE_NOTES.md` / 5개 로케일 changelog 가 `package.json` 과 일치하는지 + **로케일 간 항목 집합 동일성** + migration note 가 패키지 버전을 넘지 않는지 검사. `release.yml` 의 `npm publish` 앞과 `reapdev.versionBump` Step 5-1 에서 실행
 
 ### npm scripts
-- `npm run build` — bun build → 단일 번들 + 정적 자산 복사 / `npm run dev` — bun 직접 실행(빌드 불필요) / `npm run typecheck` — tsc --noEmit
+- `npm run build` — bun build → 단일 번들 + 정적 자산 복사 / `npm run dev` — bun 직접 실행(빌드 불필요) / `npm run typecheck` — tsc --noEmit (**`src/**` 만 본다**)
+- `npm run typecheck:docs` — `cd docs && npx tsc --noEmit -p tsconfig.json`. **`docs/` 를 타입체크하는
+  유일한 수단**이다: 루트 tsconfig 는 `src/**` 만 담고 `vite build` 는 esbuild 라 타입을 보지 않는다.
+  `Translations = typeof en` + `Record<string, Translations>` 구조 덕에 **로케일 하나만 개명하면 red** 다.
+  `.github/workflows/docs.yml` 이 배포 전에 같은 명령을 돌린다 (스크립트를 `cd docs` 형태로 둔 이유 —
+  CI 호출과 철자를 하나로 유지한다)
 - `npm run test:unit` — bun test **--isolate** tests/unit/ (격리 이유는 위 Tests 절)
 - `npm run test:e2e` / `npm run test:scenario` / `npm run test` (전체)
 - `postinstall` — skill 자동 설치 + v0.15 감지 안내
@@ -142,8 +157,9 @@ tarball → 격리 설치 → **node 로 실행**(가짜 `bun` 을 PATH 에 넣�
 
 **못 보는 것 둘**: (1) **incremental 을 건드리지 않는다** — fixture 를 한 번만 커밋하므로 두 번째
 `index update` 는 `up-to-date` 다. gen-089 의 blocker 넷 중 셋이 그 경로였고 **게이트는 전부
-통과시켰을 것이다**(그쪽은 `tests/e2e/index-incremental.test.ts` 담당). (2) **`lsof` 단언이
-fail-open** — `command -v lsof` 에 `else` 가 없어 lsof 없는 러너에서는 amber SKIP 도 없이 사라진다.
+통과시켰을 것이다**(그쪽은 `tests/e2e/index-incremental.test.ts` 담당). (2) **상주 프로세스를 보는
+단언은 없다** — 있던 것은 한 포트 번호만 봐서 판별력이 없었고 gen-095 가 지웠다. 성공 문구도 그에 맞게
+줄였다: 게이트가 검사하지 않는 것을 성공 문구가 주장하면 그것이 곧 과약속이다.
 
 게이트 전체가 macOS 에서 **14~18초**(gen-088 실측). 네이티브 의존이 사라져 리눅스 컴파일 비용도 없다.
 

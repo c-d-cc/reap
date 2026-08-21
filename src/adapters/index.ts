@@ -163,11 +163,9 @@ export async function ensureUserLevelAssets(opts: {
  * things in it. Anything absent from this list survives by default, which is
  * the safe direction to be wrong in.
  *
- * `daemon/` is what the retired daemon left: a registry of indexed project
- * paths and a SQLite symbol graph per project. Nothing writes it since 0.17.6
- * — it is listed so a machine that once opted in gets it cleaned up rather
- * than carrying it forever. `reap update` removes the same directory, for the
- * users who are staying.
+ * `daemon/` is stale data no version of REAP writes any more. It is listed so
+ * that a machine still carrying it gets it cleaned up; `reap update` removes
+ * the same directory for users who are staying.
  *
  * reap:carrier(reap-home-asset-set)
  */

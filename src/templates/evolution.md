@@ -110,6 +110,12 @@ Tag every item with the kind of evidence behind it:
 
 When unsure, run `grep -rn "<functionName>" tests/`. Zero hits means `[read]`.
 
+**`[ran]` goes stale — after changing a value, re-run the sentence that measured it.** A marker beside
+a value can at least be grepped; **an artifact has no marker.** So the question after an edit is not
+"what sits next to this" but **"which earlier sentence was a measurement of what I just changed"**.
+**Do not check by the number alone** — it can coincide, and where it does, checking the number passes
+while the claim is false.
+
 ## Architecture Change = Genome Sync
 
 When adding new features/structures or changing architecture, if the change affects how the AI should behave, it MUST be reflected in the genome (evolution.md or application.md).

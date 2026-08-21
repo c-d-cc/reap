@@ -43,22 +43,20 @@ export interface UninstallDeps extends InstallKindDeps {
 }
 
 /**
- * The retired daemon package (gen-089). Kept here, in the one command that
- * cleans up after REAP, precisely because nothing else refers to it any more —
- * it is deprecated on npm but still installed globally wherever someone opted
- * in before 0.17.6.
+ * Deprecated on npm, still installed globally wherever someone opted in before
+ * 0.17.6. Named here, in the one command that cleans up after REAP, because
+ * nothing else in the codebase refers to it.
  */
 export const DAEMON_PACKAGE = "@c-d-cc/reap-daemon";
 
 /**
  * Which packages npm should be asked to remove.
  *
- * The retired daemon (`@c-d-cc/reap-daemon`) is still named, unconditionally.
- * gen-089 removed the code that could tell whether it was installed and where
- * from, and asking npm to remove a package that is absent is a no-op — so the
- * alternative to naming it is leaving a deprecated global package behind on
- * every machine that ever enabled it. Someone who ran the daemon from a source
- * checkout never installed it globally, so nothing is taken from them either.
+ * `@c-d-cc/reap-daemon` is named unconditionally. Nothing left in REAP can tell
+ * whether it is installed or from where, and asking npm to remove an absent
+ * package is a no-op — so the alternative to naming it is leaving a deprecated
+ * global package behind on every machine that ever enabled it. A source
+ * checkout was never a global install, so nothing is taken from anyone.
  */
 export function npmRemovalTargets(): string[] {
   return [DAEMON_PACKAGE, REAP_PACKAGE];
@@ -126,8 +124,8 @@ export async function execute(confirm?: boolean, deps: UninstallDeps = {}): Prom
     kept.push(...result.kept);
   }
 
-  // 2. The client-agnostic half: the guide, the install stamp, and whatever the
-  //    retired daemon left behind in ~/.reap/daemon/.
+  // 2. The client-agnostic half: the guide, the install stamp, and the stale
+  //    data under ~/.reap/daemon/.
   const reapHome = await removeReapHomeAssets(home);
   removed.push(...reapHome.removed);
   kept.push(...reapHome.kept);
@@ -150,7 +148,7 @@ export async function execute(confirm?: boolean, deps: UninstallDeps = {}): Prom
   // in particular exists *because* the package is already gone, and telling
   // that user it is still installed is wrong for the one case the recovery path
   // was built for — but saying nothing strands the user who removed reap and
-  // left the daemon behind, which is the likelier residue.
+  // left `@c-d-cc/reap-daemon` behind, which is the likelier residue.
   const packageMayRemain = !npmRan;
   const plural = packages.length > 1 ? "either package is" : "the package is";
 

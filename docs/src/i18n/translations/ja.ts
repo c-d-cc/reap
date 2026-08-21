@@ -21,7 +21,7 @@ export const ja: Translations = {
       lineage: "Lineage",
       backlog: "Backlog",
       hooks: "Hooks",
-      daemon: "Code Intelligence",
+      codeIntelligence: "Code Intelligence",
       advanced: "上級",
       collaborationOverview: "分散ワークフロー",
       mergeGeneration: "Merge Generation",
@@ -826,8 +826,8 @@ priority: medium
 タスクの説明。`,
   },
 
-  // Code Intelligence Page (route stays /docs/daemon so links keep working)
-  daemonPage: {
+  // Code Intelligence Page
+  codeIntelligencePage: {
     title: "Code Intelligence",
     breadcrumb: "ガイド",
     intro: "REAP はコードインデックスを内蔵しています。インストールするものも、起動するものも、バックグラウンドで動くプロセスもありません。Tree-sitter パーサーが追跡中のすべてのファイルを走査し、定義されたシンボルとその間の呼び出し・import を記録して、結果を .reap/.index/ に gzip された JSON として保存します。15 言語が同梱され、ネイティブビルドはありません — グラマーは WebAssembly です。",
@@ -853,7 +853,7 @@ symbols: 1530  (function 902, method 341, class 187, type 100)
 edges:   3688  (CALLS 3145, IMPORTS 543)
 imports: 543/543 resolved (100%)
 commit:  1a2b3c4`,
-    statusNote: "（例示の数値です。）この一行がなかったために 5 か月を失いました。このインデクサーの前身は標準的な TypeScript プロジェクトで import を一つも解決できず — ./x.js という specifier を、それを生成する x.ts に対応づけられませんでした — blast radius がゼロを返し続ける間、すべてのテストは通り CI はずっと緑でした。どの検査も「インデックスは走ったか」を問い、「その答えは意味をなすか」を誰も問わなかったからです。",
+    statusNote: "（例示の数値です。）重要なのは imports の行です。impact が知っていることはすべて解決済みの import edge から来るため、解決率が低ければグラフは不完全であり、そのとき空の blast radius は「なし」ではなく「不明」を意味します。./x.js という specifier を、それを生成する x.ts に対応づけられない解決器はここでゼロを報告します — だからこそ「インデックスは走ったか」から推し量るのではなく、解決率を画面に出しています。",
     locationTitle: "インデックスの置き場所",
     locationDesc: ".reap/.index/ の中に manifest.json と gzip されたグラフ一つとして置かれ、reap init と reap update が .gitignore に追加します。プロジェクトを削除すればインデックスも一緒に消え、ホームディレクトリには何も溜まりません。gitignore する理由はサイズではありません — インデックスをコミットすると、それを含むコミットを再びインデックスする必要が生じ、この過程は終わりません。.reap/.index/ はいつ削除しても安全です。次のコマンドが作り直します。",
     whenTitle: "使いどころ",
