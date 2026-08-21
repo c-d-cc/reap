@@ -32,7 +32,10 @@
 - typecheck · typecheck:docs · build · self-diagnosis(8절) · `--check` · `--orphans` 통과
 - `fix --check` 0 error / 2 warning (gen-052 상속분)
 - genome: `application.md` **249**/250 · `evolution.md` **297**/300 (adapt 후)
-- 잔여 backlog **9 → 8건** · **미푸시 10 커밋**(gen-097·098·099 + chore 7), push 는 사용자 확인 후
+- 잔여 backlog **9 → 8건**
+- **gen-097·098·099 가 아직 push 되지 않았다.** 개수는 적지 않는다 — 커밋 하나가 그 숫자를
+  낡게 만들고, 실제로 그것을 고친 커밋이 그 값을 다시 틀리게 했다.
+  `git log --oneline origin/main..HEAD | wc -l` 로 볼 것. push 는 사용자 확인 후
 
 ### 다음 세션이 알아야 할 것
 
