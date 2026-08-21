@@ -50,7 +50,12 @@ function redirectFromRootOnce(): void {
   }
 
   const tags = navigator.languages?.length ? navigator.languages : [navigator.language];
-  const target = rootRedirectTarget(window.location.pathname, tags, tabHasSeenAPage);
+  const target = rootRedirectTarget(
+    window.location.pathname,
+    tags,
+    tabHasSeenAPage,
+    window.location.search + window.location.hash,
+  );
   if (!target) return;
 
   window.location.replace(target);

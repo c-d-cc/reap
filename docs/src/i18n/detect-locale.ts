@@ -78,6 +78,13 @@ export function preferredLocale(tags: readonly string[]): Locale | null {
  *   - **Never for English.** `/` already is English. Returning it would be a
  *     redirect to the current page.
  *
+ * `suffix` is the query string and fragment, carried across verbatim. Without
+ * it `/?utm_source=x` became `/ko/` and `/#top` became `/ko/` — every campaign
+ * parameter and every anchor on a shared root link discarded, but only for
+ * non-English visitors, which is the kind of asymmetry nobody notices. It is a
+ * parameter rather than a `location` read so that this stays a pure function
+ * and the behaviour is testable without a browser.
+ *
  * The prerendered `/` stays English whatever this returns: it runs in a
  * browser, after the bytes a crawler sees have already been served. That is
  * why it is a client-side move and not a build-time or hosting-level one.
@@ -86,10 +93,11 @@ export function rootRedirectTarget(
   pathname: string,
   tags: readonly string[],
   tabHasSeenAPage: boolean,
+  suffix = "",
 ): string | null {
   if (pathname !== "/") return null;
   if (tabHasSeenAPage) return null;
   const locale = preferredLocale(tags);
   if (!locale || locale === DEFAULT_LOCALE) return null;
-  return localeHref(locale, "/");
+  return localeHref(locale, "/") + suffix;
 }

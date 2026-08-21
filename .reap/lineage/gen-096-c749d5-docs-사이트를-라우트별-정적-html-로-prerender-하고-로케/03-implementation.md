@@ -405,9 +405,41 @@ ok    locale ko: <html lang="ko"> on every page      ← 존재하지 않는 23�
 
 ## 테스트 (submodule `tests/`)
 
-`tests/unit/docs-wiring.test.ts` 에 `docs root redirect` 블록 **7개** 추가 → 파일 19 pass.
+`tests/unit/docs-wiring.test.ts` 에 `docs root redirect` 블록 **8개** + 4차 수정분 **3개** + `docs routable path` 블록 **3개** 추가 → 파일 **26 pass**.
 BCP-47 매칭 / 번체 배제 / `/` 전용 / 탭당 1회 / 영어 제외 / 타깃이 라우트 테이블의 로케일 루트인지 /
 **클라이언트 배선**(`replace` 사용 + `assign`·`href=` 부재 + **플래그가 navigate 앞에 있는지**).
 
 마지막 것은 소스 텍스트 단언이다. 브라우저를 띄우는 스위트가 없어서이며, **순서만 바꾼 변형도 red 가 되는지**
 확인했다 (§ 04 § 3).
+
+---
+
+## 4차 검토 수정 (team lead 직접 수행, 2026-08-21)
+
+인계 시점에 subagent 를 전부 종료하고 team lead 가 이어받았다. gen-096 의 작업은 먼저
+`2940031` 로 커밋했다 — 다른 세션이 진행 중인 `vision/design/reap-cell.md` ·
+`vision/goals.md` · `vision/design/reap-tree.md` 세 경로는 `git add -A -- . ':!<path>'`
+**pathspec 제외**로 빼냈다. `skip-worktree` 나 `stash` 와 달리 파일도 git 상태도 건드리지
+않으므로 되돌릴 것이 없고, 그 세션이 편집 중이어도 빼앗지 않는다. 커밋 전후 세 경로의
+sha1 이 동일함을 확인했다.
+
+| 대상 | 변경 |
+|---|---|
+| `tests/unit/docs-wiring.test.ts` | F1 단언 2개(`reads the tab flag before it writes it`, `actually calls the redirect`), F5 단언 1개, F6 블록 3개 |
+| `scripts/check-docs-prerender.mjs` | F2 — 주석 제거 후 `type="module"` 요구 / F3 — `visibleText` docblock 정정 |
+| `docs/src/i18n/detect-locale.ts` | F5 — `suffix` 매개변수 |
+| `docs/src/main.tsx` | F5 — `location.search + location.hash` 전달 |
+| `docs/src/i18n/locale-path.ts` | F6 — `routablePath` 신설 (`/index.html` 흡수 + 기존 트레일링 슬래시) |
+| `docs/src/App.tsx` | F6 — location hook 이 `routablePath` 사용 |
+| `.reap/life/03,04-*.md` | F4 — 수치·테스트명 정정, § 6c 신설, § 4 한계 4건 추가 |
+
+**negative 6종 전부 red 확인 후 복원** — 읽기/쓰기 교환 · 호출 삭제 · `nomodule` 치환 ·
+script 주석화 · suffix 폐기 · `/index.html` 처리 제거. 각각 **정확히 1개** 테스트만,
+그것도 해당 단언만 red 였다.
+
+**단언을 쓰다가 그 자리에서 같은 결함을 만들었다.** *"호출이 하이드레이션보다 앞선다"* 를
+`main.indexOf("hydrateRoot")` 와 비교했는데 `hydrateRoot` 는 **1행 import 에도 있다** —
+순서와 무관하게 항상 참인 단언이었다. baseline 이 red 로 떠서 잡혔고 `hydrateRoot(container`
+로 고쳤다. **negative 를 돌리기 전에 baseline 을 먼저 돌렸기 때문에 드러났다.**
+
+`docs/scripts/prerender.mjs` 는 손대지 않았다. 115 페이지 / 2,283 kB 로 재빌드했다.

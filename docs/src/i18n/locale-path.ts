@@ -102,3 +102,32 @@ export function localeUrl(origin: string, locale: Locale, route: string): string
 export function stripTrailingSlash(pathname: string): string {
   return pathname.length > 1 && pathname.endsWith("/") ? pathname.slice(0, -1) : pathname;
 }
+
+/**
+ * The address the router should match, given the address the browser is at.
+ *
+ * Two host behaviours are folded away here, both of which produce an address
+ * that names a page the router has no route for:
+ *
+ *   - **`/dir` vs `/dir/`.** GitHub Pages 301s the first to the second, so the
+ *     address the browser hydrates at is one slash away from the address the
+ *     prerender rendered. Measured: 110 of 115 pages hydrated with the sidebar
+ *     forgetting which page it was on.
+ *   - **`/index.html`.** Pages serves the file directly, at 200, with the full
+ *     prerendered home page in it — and the router has no `/index.html` route,
+ *     so hydration mismatched (React #418) and the visitor landed on NotFound
+ *     under a URL that had just delivered the home page. Before prerendering
+ *     the same address also gave NotFound, but from an empty `#root`: no
+ *     markup to disagree with, so no exception. The 404 is old; the error is
+ *     ours. `/ko/index.html` and the other three locale roots are the same
+ *     case, which is why the suffix is stripped before the slash.
+ *
+ * Not a redirect: the URL in the bar is left alone. This only decides what to
+ * render, so a link someone already has keeps working and does not bounce.
+ */
+export function routablePath(pathname: string): string {
+  const withoutIndex = pathname.endsWith("/index.html")
+    ? pathname.slice(0, -"index.html".length)
+    : pathname;
+  return stripTrailingSlash(withoutIndex);
+}

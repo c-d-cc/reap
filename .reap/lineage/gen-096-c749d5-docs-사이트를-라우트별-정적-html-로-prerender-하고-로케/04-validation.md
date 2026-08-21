@@ -150,18 +150,29 @@ CNAME 을 로컬 주소로 둔 임시 ROOT. fail/pass 양쪽을 관측했다. **
 
 ### 3d. unit (`tests/unit/docs-wiring.test.ts`)
 
-신규 7개. **다섯 가지 변형이 각각 정확히 1개 테스트만** red 로 만든다 (단언이 겹치지 않는다):
+신규 **11개**(파일 26 pass). 변형별 red 는 다음과 같다:
 
-| 변형 | red 가 된 테스트 |
-|---|---|
-| `pathname !== "/"` 가드 제거 | `only the site root redirects` |
-| `alreadyRedirected` 가드 제거 | `it happens once, and never for English` |
-| 번체를 간체에 매칭 | `Simplified Chinese matches; Traditional does not` |
-| `location.replace` → `assign` | `the client entry replaces the history entry and records it first` |
-| **플래그 기록을 navigate 뒤로 이동**(순서만) | 같은 테스트 |
+| 변형 | red 가 된 테스트 | 개수 |
+|---|---|---|
+| `pathname !== "/"` 가드 제거 | `only the site root redirects` | 1 |
+| `tabHasSeenAPage` 가드 제거 | `it happens once, and never for English` | 1 |
+| 번체를 간체에 매칭 | `Simplified Chinese matches; Traditional does not` | 1 |
+| `location.replace` → `assign` | `…replaces the history entry` + `…marks the tab before it decides anything` | **2** |
+| 플래그 기록을 navigate 뒤로 이동(순서만) | `…marks the tab before it decides anything` | 1 |
+| **읽기/쓰기 순서 교환**(4차 F1) | `…reads the tab flag before it writes it` | 1 |
+| **`redirectFromRootOnce();` 호출 삭제**(4차 F1) | `…actually calls the redirect` | 1 |
+| **suffix 를 버림**(4차 F5) | `…carries the query string and the fragment` | 1 |
+| **`/index.html` 처리 제거**(4차 F6) | `/index.html and the locale roots resolve to a real route` | 1 |
 
-마지막 것이 중요하다 — 이 저장소의 교훈("순서가 결정이면 순서 단언만이 그것을 지킨다")대로,
-**기능은 그대로 두고 순서만 바꾼 변형**을 따로 돌려 red 를 확인했다.
+**앞선 판에 있던 "다섯 변형이 각각 정확히 1개만 red" 는 거짓이었다.** 3차에서 테스트를
+둘로 쪼갠 뒤 `assign` 변형이 2개를 red 로 만든다 — 순서 단언이 `main.indexOf("window.location.replace")`
+와 비교하는데 그 문자열이 사라지면 `-1` 이 되어 **순서와 무관한 이유로** red 가 되기 때문이다.
+결함은 아니지만, 그 문장은 겹치지 않음을 변별력의 근거로 내세웠고 그 근거가 사라졌다.
+
+**4차가 F1 로 지적한 것**: 위 표의 어느 줄도 *"리디렉션이 실제로 일어나는가"* 를 보지 않았다.
+`getItem`/`setItem` 을 맞바꾸거나 호출을 지우면 기능이 죽는데 unit 657·두 게이트 전부 초록이었다.
+지금은 마지막 네 줄이 그것을 덮는다 — 다만 여전히 **소스 순서와 순수 함수**를 볼 뿐,
+브라우저에서 이동이 일어나는 것은 보지 않는다. 그것을 보는 것은 저장소에 없다.
 
 ### 3e. 빌드 불변식
 
@@ -175,6 +186,17 @@ CNAME 을 로컬 주소로 둔 임시 ROOT. fail/pass 양쪽을 관측했다. **
 이 라운드에서 **줄어든 것과 늘어난 것**을 함께 적는다.
 
 **여전히 못 잡는다**:
+
+- **리디렉션이 브라우저에서 실제로 일어나는 것.** 4차 F1 이후 소스 순서 단언 4개가 그 자리를
+  지키지만, 그것들은 **문자열의 위치와 순수 함수**를 볼 뿐이다. 이동 자체를 보는 것은 저장소에 없다 —
+  브라우저 프로브는 scratchpad 일회성이었고 인계 시점에 저장소로 들어가지 못했다
+- **로케일 간 본문 비교가 정확 일치라는 것** (4차 F8). 영어 본문에 로케일별 토큰 하나만 섞으면
+  통과한다. 실질 방어는 `Translations = typeof en` 의 타입 검사이고, 현실적 회귀
+  (`translations[locale] ?? en`)는 여전히 잡힌다 — 그러나 *"번역이 실제로 실렸다"* 는 아니다
+- **영어 페이지가 없는 라우트를 교차 비교가 건너뛴다** (4차 F7). 파일 부재는 별도 검사가 red 로
+  만들지만, *"모든 번역 페이지가 영어와 다르다"* 는 문장 자체는 그 상태에서도 초록이다
+- **존재하지 않는 도메인을 CNAME 에 적는 것** (4차 F9). 층2 는 `SKIP`(exit 0) 을 내는데
+  `.mjs` 헤더는 층2 가 잡는다고 적었다 — 남이 소유한 도메인은 red 가 되지만 아무도 없는 도메인은 아니다
 
 - **속성 수준 하이드레이션 불일치.** § 2 에서 측정했다 — 프로덕션 React 는 속성을 비교하지 않으므로
   콘솔도 첫 화면도 조용하다. 브라우저 프로브조차 F1 을 통과시킨다. `assertSlashInvariant` 의 바이트
@@ -322,11 +344,44 @@ new (awk, 리터럴) : off_host=2
 
 `404.html` 하이드레이션(임의 주소 4종, 콘솔 에러 0, 주소 불변) / 404 게이트 블록(통과하는 잘못된
 404 를 만들지 못함) / 층1 sitemap 집합 / "0 pages examined" 가드 / `cp` 제거의 부작용 / `preferredLocale`
-경계 / unit 7개의 변별력(순서-only 변형 포함) / 리디렉션 범위(`/` 외 어떤 주소도 트리거하지 않음).
+경계 / unit 11개의 변별력(순서-only 변형 포함) / 리디렉션 범위(`/` 외 어떤 주소도 트리거하지 않음).
 
-### 6c. 4차 독립 검토
+### 6c. 4차 독립 검토 — **blocking 1 + 10건. 또 이 라운드의 수정 안에 있었다** (네 번째)
 
-결과는 아래에 기록한다.
+검토자가 헤드리스 Chrome + 격리 fixture 로 측정했고, **모든 변형을 바이트 단위로 복원**했다
+(`main.tsx` sha256 이 작업 전 값과 동일, `docs/dist` 재빌드 후 asset 해시 복귀).
+
+**고친 것 6건** — 전부 `[negative]` 로 재현 후 수정, 수정 후 재현 실패 확인:
+
+| | 무엇 | 지금 |
+|---|---|---|
+| **F1** | **이 세대의 기능에 관측자가 없었다.** `getItem`/`setItem` 을 맞바꾸거나 `redirectFromRootOnce();` 를 지우면 리디렉션이 죽는데 unit 657·층1·층2 전부 초록. 3차의 순서 단언은 `setItem < rootRedirectTarget` 만 보고 **인접 순서**를 안 봤다 | 두 단언 추가. 변형 각각 **정확히 1개**, 해당 단언만 red |
+| **F2** | `<script[^>]+src=` 가 `nomodule` 과 **주석 처리된 script** 를 받았다. 둘 다 하이드레이션 0. `nomodule` 은 `@vitejs/plugin-legacy` 가 실제로 내는 형태 | 주석 제거 후 `type="module"` 요구. 두 변형 다 `115 page(s) reference no /assets/*.js` |
+| **F3** | `visibleText` docblock 이 **M2 가 반증한 문장**을 유지 — 정정문은 200줄 아래 비교부에만 썼다 | 왜 거짓인지와 함께 정정 |
+| **F4** | artifact 수치 3건이 거짓 (§ 3d 참조) | 정정 |
+| **F5** | 리디렉션이 **쿼리·프래그먼트를 버렸다** (`/?utm_source=x` → `/ko/`) | `suffix` 매개변수로 관통. 순수 함수라 브라우저 없이 테스트됨 |
+| **F6** | `/index.html` 이 200 + 홈 마크업인데 라우트가 없어 **React #418** 후 404 화면. 404 는 이전에도 그랬으나 **에러는 이 세대가 만들었다** | `routablePath` 가 `/index.html` 을 흡수. 리디렉션이 아니라 렌더 판정만 바꾼다 |
+
+**F1 단언을 쓰다가 그 자리에서 같은 결함을 만들었다.** *"호출이 하이드레이션보다 앞선다"* 를
+`main.indexOf("hydrateRoot")` 와 비교했는데 **`hydrateRoot` 는 1행 import 에도 있다** — 순서와
+무관하게 항상 참이 되는 단언이었다. baseline 이 red 로 떠서 잡혔고 `hydrateRoot(container` 로
+고쳤다. 4차가 F4 에서 지적한 것(`-1` 비교로 인한 우연한 red)과 **같은 형태**다.
+
+**기록만 하고 고치지 않은 것**:
+
+- **F8** — 로케일 간 본문 비교가 **정확 일치**라, 영어 본문에 로케일별 토큰 하나만 섞으면 통과한다.
+  실질 방어는 `Translations = typeof en` 의 타입 검사이고, 현실적 회귀(`translations[locale] ?? en`)는
+  여전히 잡힌다. **§ 4 의 한계 목록이 로케일 스왑만 적고 이 경우를 적지 않았다는 것**이 지적의 절반이다
+- **F7** — 영어 페이지가 없는 라우트를 교차 비교가 건너뛴다. 파일 부재는 별도 검사가 red 로 만들지만
+  *"모든 번역 페이지가 영어와 다르다"* 는 문장은 그 상태에서도 초록이다
+- **F9/F10** — `check-docs-live.sh` 의 문장 둘이 과약속한다. 존재하지 않는 도메인 CNAME 은
+  **SKIP(exit 0)** 인데 `.mjs` 헤더는 층2 가 잡는다고 적었고, 0-URL 가드는 distinct **경로**를 세면서
+  "URL 을 하나도 나열하지 않았다"고 말한다
+- **F11** — `preferredLocale` 의 비-문자열 가드에 테스트가 없다
+
+**검토자가 깨뜨리지 못한 것**: B1 수정 자체(4개 로케일 전부 유지, 새 탭은 이동, 뒤로가기 루프 없음) ·
+M2/M3/M4 negative 전부 재현 · `awk index()` 호스트 비교 · `target=_blank` 의 `sessionStorage` 상속
+(오히려 올바른 답 — 클릭한 것이 영어 진입점이므로) · 정규식 대소문자·속성순서 공격 · § 6b 의 숫자 전부.
 
 ---
 
@@ -341,3 +396,11 @@ new (awk, 리터럴) : off_host=2
 - 실 사이트 층2 는 **red 가 정상** — 아직 배포되지 않았다
 - 3차 독립 검토의 blocking 1 + moderate 3 + 산문 5 를 **재현 → 수정 → 재현 실패** 로 닫았다.
   environment 2건만 reflect 로 넘긴다 (§ 6b M5)
+- **4차 독립 검토의 blocking 1 + 5건을 같은 절차로 닫았고 5건은 기록만 했다** (§ 6c).
+  5차는 받지 않았다 — 인계 시점의 사용자 지시이며, **이 라운드의 수정은 검토받지 않았다.**
+  push 는 하지 않으므로 릴리즈 전에 받아볼 수 있다
+
+**최종 실측** (2026-08-21, HEAD `2940031` + 미커밋):
+unit **663** / e2e **329** / scenario **44**, 전부 0 fail · 층1 PASSED · 층2 로컬 PASSED ·
+typecheck·typecheck:docs·build 0 · 자기진단 8절 · check-docs-version 0 ·
+`fix --check` 0 error / 2 warning(gen-052 상속분) · 빌드 115 페이지 / 2,283 kB

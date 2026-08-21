@@ -6,7 +6,7 @@ import NotFound from "@/pages/not-found";
 import { useEffect } from "react";
 import { LanguageProvider } from "@/i18n";
 import { type Locale } from "@/i18n/types";
-import { localePrefix, stripTrailingSlash } from "@/i18n/locale-path";
+import { localePrefix, routablePath } from "@/i18n/locale-path";
 import { useBrowserLocation } from "wouter/use-browser-location";
 import { ROUTES } from "@/routes";
 
@@ -34,7 +34,7 @@ const queryClient = new QueryClient();
  */
 const useNormalizedLocation: typeof useBrowserLocation = (opts) => {
   const [path, navigate] = useBrowserLocation(opts);
-  return [stripTrailingSlash(path), navigate];
+  return [routablePath(path), navigate];
 };
 
 function Router() {

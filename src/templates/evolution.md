@@ -95,6 +95,7 @@ If you write a check and immediately see it pass, you do not know whether it cat
 - Run it against the **broken** state first and confirm the failure. That failure is the evidence the check is real.
 - Do the same per assertion — break a known-good value, confirm the failure, restore it (negative test).
 - **Record what the check cannot see, alongside its results.** Passing means "no problem within the check's scope". Without a stated limit, the next person trusts it further than it goes.
+- **Ask what would still be green if the feature were simply removed.** A suite can assert around a feature — its pure helpers, the order of strings in a file — without anything observing that the feature happens. And if every row of a coverage table shares one premise, adding rows cannot help: the shared premise is the dimension nobody varied.
 
 ### Record what kind of evidence you have — and "ran it" must name the command
 

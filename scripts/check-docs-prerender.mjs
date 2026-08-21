@@ -139,8 +139,17 @@ let firstLang,
  * not a single word was translated. The check was defeated by the one element
  * it was written to look past. `<main>` excludes the navbar entirely.
  *
- * Missing or malformed `<main>` yields "", which makes every comparison equal
- * and the run red. That is the direction to be wrong in.
+ * Missing or malformed `<main>` yields "". That was once written here as
+ * "makes every comparison equal, so the run is red — the direction to be wrong
+ * in", and it is false. If ONE page loses its `<main>` the comparison is "" vs
+ * the English text, which is UNEQUAL, so the cross-locale line says the pages
+ * differ — truthfully and about nothing. It is only equal when both sides are
+ * empty. The run is red in that case because of the separate `noMain` count
+ * below, not because of this function.
+ *
+ * The corrected reasoning was written 200 lines down, at the comparison, and
+ * this docblock — the one a reader of `visibleText` meets first — kept the
+ * defeated one. Same shape as the defect that produced it.
  */
 function visibleText(html) {
   const start = html.indexOf("<main");
@@ -255,11 +264,25 @@ for (const file of pages()) {
       firstAsset ??= `${where} references ${m[1]}, which does not exist`;
     }
   }
-  // A <script>, matched as a <script>. Counting any `/assets/*.js` reference
-  // also counted `<link rel="modulepreload" href="…">`, which downloads the
-  // bundle and never runs it — measured: swapping every script tag for a
-  // modulepreload passed this section on all 115 pages.
-  const scripts = [...html.matchAll(/<script[^>]+src="(\/assets\/[^"]+\.js)"/g)].length;
+  // A <script> that can actually run, matched as one.
+  //
+  // Three narrowings, each from a measured escape:
+  //   - `<link rel="modulepreload" href="…">` downloads the bundle and never
+  //     runs it. Counting any `/assets/*.js` reference accepted it on all 115.
+  //   - `<script nomodule src="…">` is skipped by every browser that supports
+  //     modules — which is all of them here. It is also exactly what
+  //     `@vitejs/plugin-legacy` emits, so a misconfiguration dropping the
+  //     modern tag would ship a site that renders and never hydrates.
+  //   - a tag inside `<!-- … -->` is text. The regex saw the tag; the browser
+  //     sees a comment.
+  //
+  // So: require `type="module"` (what Vite emits) and strip comments first.
+  // Both were measured passing before this line was narrowed, with the browser
+  // reporting `hydrated=false` on `/`, `/ko/` and `/docs/quick-start`.
+  const runnable = html.replace(/<!--[\s\S]*?-->/g, "");
+  const scripts = [
+    ...runnable.matchAll(/<script[^>]*\btype="module"[^>]*\bsrc="(\/assets\/[^"]+\.js)"/g),
+  ].length;
   if (scripts === 0) {
     noScript++;
     firstScript ??= `${where} references no /assets/*.js — it would render but never hydrate`;
