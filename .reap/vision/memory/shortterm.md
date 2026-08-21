@@ -32,7 +32,7 @@
 - typecheck · typecheck:docs · build · self-diagnosis(8절) · `--check` · `--orphans` 통과
 - `fix --check` 0 error / 2 warning (gen-052 상속분)
 - genome: `application.md` **249**/250 · `evolution.md` **297**/300 (adapt 후)
-- 잔여 backlog **9 → 8건** · **미푸시 7 커밋**, push 는 사용자 확인 후
+- 잔여 backlog **9 → 8건** · **미푸시 10 커밋**(gen-097·098·099 + chore 7), push 는 사용자 확인 후
 
 ### 다음 세션이 알아야 할 것
 
