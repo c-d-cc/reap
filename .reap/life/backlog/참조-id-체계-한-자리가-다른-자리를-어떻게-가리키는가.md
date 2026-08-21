@@ -5,9 +5,17 @@ priority: medium
 createdAt: 2026-08-21T00:00:00.000Z
 ---
 
-# milestone 의 goal 매칭이 정확 일치라 goals.md 의 자연스러운 표기를 거부한다
+# 참조 ID 체계 — 한 자리가 다른 자리를 어떻게 가리키는가
 
-## Problem
+> `v018-지식-축-정리` milestone 의 **첫 generation**. 소비자는 셋이다 —
+> milestone→goal · memory 의 `from`/`to` · idea 의 졸업 경로.
+>
+> 아래 두 증상이 이 backlog 를 낳았다. **증상이 범위가 아니다** — 둘 다 "참조가 제목·형식에
+> 묶여 있다"의 사례이고, 해결은 참조 체계 자체다.
+
+## Problem — 증상 둘
+
+### 증상 1 — goal 매칭이 정확 일치라 goals.md 의 자연스러운 표기를 거부한다
 
 `validateForMain` 은 milestone 의 `goal:` 이 `goals.md` 의 **항목 제목 또는 섹션 이름과 정확히
 일치**할 것을 요구한다(공백 축약·대소문자 무시만 허용). gen-097 이 첫 milestone 을 만들자마자
@@ -35,7 +43,7 @@ milestone:  goal: 배포 형태를 사용자 도구로 인식되게 한다
 gen-097 은 goals.md 쪽을 고쳐서(제목을 짧게, 설명을 HTML 주석으로) 넘어갔다. **그것이 옳은
 방향인지가 이 backlog 의 질문이다.**
 
-### 두 번째 증상 — `## Generations` 의 이어진 줄이 조용히 버려진다
+### 증상 2 — `## Generations` 의 이어진 줄이 조용히 버려진다
 
 `readGenerations` 는 `- [x]` / `- [ ]` 로 시작하는 줄만 읽는다. 항목을 두 줄로 쓰면
 **둘째 줄이 사라진다** — 파일은 멀쩡한데 후보 목록에서 문장이 중간에 끊긴다:
@@ -50,9 +58,6 @@ gen-097 은 goals.md 쪽을 고쳐서(제목을 짧게, 설명을 HTML 주석으
 gen-097 은 항목을 한 줄로 줄이고 상세를 HTML 주석으로 옮겨 넘어갔다.
 
 ## Solution — **ID 체계로 간다 (사용자 결정, 2026-08-21)**
-
-> 이 backlog 는 이제 **`v018-지식-축-정리` milestone 의 첫 generation 인 "참조·ID 체계"의
-> seed** 다. 범위가 milestone→goal 하나에서 **참조 전체**로 넓어졌다.
 
 앞서 검토한 셋(매칭 넓히기 / 표기 규약 / ID) 중 **ID 를 채택한다.** 앞의 둘은 기각한다:
 
