@@ -6,3 +6,4 @@
 - [Rebuild the scratch harness](feedback_rebuild_scratch_harness.md) — e2e runs dist/, not src/: rebuild after every mutation, cross-check findings against a library-level repro
 - [Inherited worktree review](feedback_inherited_worktree_review.md) — read `git diff --cached` yourself; staged deletions hide from both the builder's diff and residue greps
 - [Re-run claims after repairs](feedback_rerun_claims_after_repairs.md) — a later round's repair can falsify an earlier section's verified command; re-run it yourself
+- [Self-report the verdict first](feedback_self_report_verdict.md) — the reply to the builder can be lost silently; record it with `report-evaluator` before replying

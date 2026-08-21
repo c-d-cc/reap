@@ -488,9 +488,50 @@ export function buildEvaluatorPrompt(
   lines.push("");
   lines.push("- You MUST NOT write, edit, or create any source files. Use Read/Grep/Glob/Bash only.");
   lines.push("- You MUST NOT run git commands that modify state (`git commit`, `git push`, `git checkout`, `git reset`).");
+  // reap:carrier(evaluator-self-report-bc56fe66)
   lines.push("- You MUST NOT run `reap run` commands — the lifecycle is the builder's responsibility.");
+  lines.push("  **One exception**: `--phase report-evaluator` (below). It advances nothing — no stage, no");
+  lines.push("  nonce, no transition. It is the one `reap run` that is not lifecycle.");
   lines.push("- You MUST NOT produce numerical scores, ratings, or percentages (Goodhart's Law).");
   lines.push("- Your verdict is an **advisor recommendation**, not a binding judgment. The builder owns the lifecycle verdict; the human owns final fitness.");
+  lines.push("");
+
+  // ── Self-report (gen-100) ─────────────────────────────────
+  //
+  // The verdict must not travel only through the reply. gen-099 opted into the
+  // evaluator and received nothing across three follow-ups; gen-100 measured
+  // the same subagent running correctly and executing every instruction sent to
+  // it, with only the reply direction lost. A review that reaches nobody is
+  // indistinguishable from a review that never happened.
+  //
+  // The evaluator has Bash, so it can write its own verdict to the generation
+  // state. That path does not depend on the reply arriving.
+  // reap:carrier(evaluator-self-report-bc56fe66)
+  // The same instruction is in the shipped agent definition
+  // (src/templates/agents/reap-evaluate.md § Phase 6) — a fresh install reads
+  // that copy, this one is what a running generation hands over, and the
+  // HARD-GATE carve-out above is what makes either of them legal.
+  const reportCommand = opts.stage === "fitness" ? "completion" : "validation";
+  lines.push("## Record Your Verdict Yourself — Before You Reply");
+  lines.push("");
+  lines.push("Your reply to the builder is not a guaranteed channel. A previous generation opted");
+  lines.push("into an independent review, received nothing across three follow-ups, and only later");
+  lines.push("learned the evaluator had been running the whole time — its replies were lost. That");
+  lines.push("generation's adversarial review ended up being the builder's own.");
+  lines.push("");
+  lines.push("So write your verdict to the generation state first, then reply as usual:");
+  lines.push("");
+  lines.push("```bash");
+  lines.push(`reap run ${reportCommand} --phase report-evaluator --severity high --summary "<one line>"   # escalate`);
+  lines.push(`reap run ${reportCommand} --phase report-evaluator --severity low  --summary "<one line>"   # informational`);
+  lines.push(`reap run ${reportCommand} --phase report-evaluator --severity none --summary ""             # reviewed, no concern`);
+  lines.push("```");
+  lines.push("");
+  lines.push("Call it once per concern, and call it with `none` when you have none — an unrecorded");
+  lines.push("clean review looks exactly like a review that never happened.");
+  lines.push("");
+  lines.push("This is a side-channel state append. It does not advance any stage, consume any nonce,");
+  lines.push("or decide anything: the builder still owns the verdict and the human still owns fitness.");
   lines.push("");
 
   // ── Fallback ──────────────────────────────────────────────

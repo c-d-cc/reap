@@ -16,6 +16,8 @@ import { executeHooks } from "../../../core/hooks.js";
 import { parseCruiseCount, advanceCruise, clearCruise } from "../../../core/cruise.js";
 import { gitCommitAll, checkSubmoduleDirty, pushSubmodules } from "../../../core/git.js";
 import { buildEvaluatorPrompt, loadReapKnowledge } from "../../../core/prompt.js";
+import { execute as executeReportEvaluator } from "./report-evaluator.js";
+import { recordEvaluatorSilenceIfUnreported, formatEvaluatorRun, hasUnreviewedStage } from "../../../core/evaluator-run.js";
 import { listMilestones } from "../../../core/milestone.js";
 import {
   detectMaturity,
@@ -35,6 +37,15 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
 
   const s = state!;
   const isMerge = s.type === "merge";
+
+  // ── Sub-phase: report-evaluator (gen-100) ─────────────────
+  // The fitness evaluator's channel. Same owner as validation's — see
+  // ./report-evaluator.ts. Advances nothing; `feedback` carries the
+  // JSON-encoded {severity, summary} that run/index.ts packed.
+  if (phase === "report-evaluator") {
+    await executeReportEvaluator(paths, feedback);
+    return;
+  }
 
   // ── Phase 1: reflect ──────────────────────────────────────
   if (!phase || phase === "reflect") {
@@ -198,7 +209,39 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
         evaluatorSection.push("The evaluator scores the generation along the 6 fitness dimensions (qualitative — no numeric scores).");
         evaluatorSection.push("Surface every concern to the user in your fitness summary; the human owns the final feedback.");
         evaluatorSection.push("");
-        evaluatorSection.push("**Fallback** — if the evaluator subagent fails, document the failure and continue. Fitness phase is not gated on the evaluator.");
+        evaluatorSection.push("**Have the evaluator record its own verdict too.** `reap-evaluate` has `Bash`, so add");
+        evaluatorSection.push("this line to the prompt you send it:");
+        evaluatorSection.push("");
+        evaluatorSection.push("> When you have reached your verdict, record it yourself before replying:");
+        evaluatorSection.push("> `reap run completion --phase report-evaluator --severity <high|low|none> --summary \"<one line>\"`");
+        evaluatorSection.push("");
+        evaluatorSection.push("**Fallback** — if no verdict reaches you, for any reason (the Agent tool is absent,");
+        evaluatorSection.push("the subagent errors, the reply is malformed, or it simply never answers):");
+        evaluatorSection.push("- Tell the user the evaluator produced no verdict, and say which of those you observed.");
+        evaluatorSection.push("- Continue. Fitness is not gated on the evaluator.");
+        evaluatorSection.push("- **Record it** — do not leave it silent:");
+        evaluatorSection.push("  `reap run completion --phase report-evaluator --severity unreachable --summary \"launched, no reply after N checks\"`");
+      }
+
+      // gen-100: the human about to give fitness feedback needs to know whether
+      // this generation was independently reviewed at all. Before this, a
+      // generation that received no review looked exactly like one that was
+      // reviewed and came back clean, and the only reason gen-099's user learned
+      // otherwise is that its builder typed the fact in by hand.
+      const evaluatorHistorySection: string[] = [];
+      if (evaluatorEnabled && (s.evaluatorRuns ?? []).length > 0) {
+        evaluatorHistorySection.push("");
+        evaluatorHistorySection.push("### Independent Review — what actually happened");
+        evaluatorHistorySection.push("");
+        for (const r of s.evaluatorRuns!) evaluatorHistorySection.push(formatEvaluatorRun(r));
+        if (hasUnreviewedStage(s)) {
+          evaluatorHistorySection.push("");
+          evaluatorHistorySection.push("**This generation went without an independent review at one or more stages.**");
+          evaluatorHistorySection.push("Its adversarial review was the builder's own. Tell the user this in your fitness");
+          evaluatorHistorySection.push("summary — it changes how much a clean validation is worth, and REAP's own longterm");
+          evaluatorHistorySection.push("memory records three generations where every review round found its defects inside");
+          evaluatorHistorySection.push("the previous round's repair.");
+        }
       }
 
       const priorConcernsSection: string[] = [];
@@ -236,6 +279,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
         fallbackPrompt.push("3. Submit: `reap run completion --phase fitness --feedback \"<human feedback>\"`");
         fallbackPrompt.push("");
         fallbackPrompt.push("Cruise can be resumed manually with `reap cruise <N>` once the concern is resolved.");
+        fallbackPrompt.push(...evaluatorHistorySection);
         fallbackPrompt.push(...evaluatorSection);
 
         emitOutput({
@@ -250,6 +294,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
             cruiseAborted: true,
             previousCruiseCount: config!.cruiseCount,
             evaluatorConcerns: s.evaluatorConcerns,
+            evaluatorRuns: s.evaluatorRuns ?? [],
             evaluator: evaluatorEnabled
               ? { enabled: true, prompt: fitnessEvaluatorPrompt }
               : { enabled: false },
@@ -275,6 +320,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
           "Uncertain/risky → stop cruise and request human feedback",
         ];
         cruisePrompt.push(...priorConcernsSection);
+        cruisePrompt.push(...evaluatorHistorySection);
         cruisePrompt.push(...evaluatorSection);
 
         emitOutput({
@@ -288,6 +334,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
             cruiseMode: true,
             cruiseCount: config!.cruiseCount,
             evaluatorConcerns: s.evaluatorConcerns ?? [],
+            evaluatorRuns: s.evaluatorRuns ?? [],
             evaluator: evaluatorEnabled
               ? { enabled: true, prompt: fitnessEvaluatorPrompt }
               : { enabled: false },
@@ -310,6 +357,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
           'Submit: reap run completion --phase fitness --feedback "human feedback here"',
         ];
         supervisedPrompt.push(...priorConcernsSection);
+        supervisedPrompt.push(...evaluatorHistorySection);
         supervisedPrompt.push(...evaluatorSection);
 
         emitOutput({
@@ -322,6 +370,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
             goal: s.goal,
             cruiseMode: false,
             evaluatorConcerns: s.evaluatorConcerns ?? [],
+            evaluatorRuns: s.evaluatorRuns ?? [],
             evaluator: evaluatorEnabled
               ? { enabled: true, prompt: fitnessEvaluatorPrompt }
               : { enabled: false },
@@ -345,6 +394,11 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
     const config = configContent ? (YAML.parse(configContent) as ReapConfig) : null;
     const maturity = detectMaturity(s.type, config?.cruiseCount);
     const generationCount = await gm.countLineage();
+
+    // gen-100: fitness is over by the time adapt runs, so this is the last
+    // point at which "no fitness verdict arrived" is still a fact about a stage
+    // that has happened. Recorded, never enforced — adapt proceeds identically.
+    const fitnessSilence = recordEvaluatorSilenceIfUnreported(s, "fitness", config?.evaluator === true);
 
     setTransitionNonces(s, "completion:adapt");
     await gm.save(s);
@@ -436,13 +490,27 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
     promptSections.push("- Next generation candidates and improvement ideas go in the **artifact text only** (Next Generation Hints section).");
     promptSections.push("- The human will decide which suggestions become backlog items after reviewing the artifact.");
     promptSections.push("");
+    if ((s.evaluatorRuns ?? []).length > 0) {
+      promptSections.push("");
+      promptSections.push("### Independent Review — what actually happened");
+      promptSections.push("");
+      for (const r of s.evaluatorRuns!) promptSections.push(formatEvaluatorRun(r));
+      if (hasUnreviewedStage(s)) {
+        promptSections.push("");
+        promptSections.push("**Record in the completion artifact that this generation went without an independent");
+        promptSections.push("review at one or more stages**, and say what its adversarial review consisted of");
+        promptSections.push("instead. Lineage is where a later generation reads how much this one was checked.");
+      }
+    }
+
+    promptSections.push("");
     promptSections.push("When done: reap run completion --phase commit");
 
     emitOutput({
       status: "prompt",
       command: "completion",
       phase: "adapt",
-      completed: ["gate", "reflect", "fitness"],
+      completed: ["gate", "reflect", "fitness", ...(fitnessSilence ? ["evaluator-silence-recorded"] : [])],
       context: {
         id: s.id,
         goal: s.goal,
@@ -450,6 +518,7 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
         maturity,
         generationCount,
         fitnessFeedback,
+        evaluatorRuns: s.evaluatorRuns ?? [],
         visionGoals: visionGoals?.slice(0, 2000),
       },
       prompt: promptSections.filter(Boolean).join("\n"),

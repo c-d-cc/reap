@@ -10,7 +10,7 @@
 
 0.17.7 은 npm 에 발행됐고 reap.cc 도 배포됐다(gen-088~096 + 문서 정리). 상세는 lineage 가 소유한다.
 
-**남은 것 둘 — 둘 다 "검토를 안 받았다"이지 결함이 아니다**:
+**남은 것 둘 — 둘 다 "검토를 안 받았다"이지 결함이 아니고, gen-100 이후로는 실제로 받을 수 있다**(회신이 아니라 CLI 로):
 1. **층2 게이트**(`check-agent-integration.sh`, ~$0.25) 재실행. gen-091 이후 소스가 계속 바뀌었다
 2. **gen-096 의 4차 수정분(F1~F6)이 검토받지 않았다.** 그 세대에서 "직전 라운드의 수정 안에 결함이
    있다"가 네 번 연속 성립했으므로 다섯 번째를 기대하는 것이 합리적이다
@@ -28,12 +28,9 @@
 - `v018-지식-축-정리` — ~~참조·ID 체계~~(gen-098) → ~~carrier hash8~~(gen-099) → **경계 설계(3축)**
   → memory → idea → interview
 
-**나눈 이유**: 완료 조건이 서로를 뒷받침하지 않고(memory 가 flat 인 것은 REAP 이 한 도구로 보이는
-증거가 아니다), goal 이 다르고, 브랜치가 다르다. **`plan` 을 빼자 둘이 순차가 아니라 병렬이 됐다** —
-plugin 에 의존하는 것은 `interview` 하나뿐이다.
-
-**`.reap/plan/` 과 `/reap.plan` 은 v0.18 에서 제외**(사용자, 2026-08-21).
-`vision/design/backlogs_plan-track/` 이 두 backlog 와 재검토 포인트를 갖는다.
+**둘은 병렬이다** — plugin 에 의존하는 것은 `interview` 하나뿐이다.
+**`.reap/plan/` 과 `/reap.plan` 은 v0.18 에서 제외**(사용자, 2026-08-21);
+`vision/design/backlogs_plan-track/` 이 두 backlog 와 재검토 포인트를 갖고,
 그래서 경계 설계는 **4축이 아니라 3축**이다.
 
 **참조 ID 체계는 gen-098 이 끝냈다** — `.reap/sequence/<type>.md` append-only, milestone→goal 이
@@ -66,3 +63,6 @@ self-evolving 중이라 예기치 못한 genome 변경이 더 있을 수 있다.
 `vision/design/evaluator-agent.md` 의 잔여 절이다. **gen-097 이 이 항목의 성격을 바꿨다** —
 milestone 이 있으면 다음 goal 은 추천이 아니라 계획에서 나온다. 위임할 것이 무엇으로 남는지
 다시 볼 것.
+
+**gen-100 이 전제를 하나 바꿨다**: evaluator 의 **회신은 도착하지 않는다**(전송 계층, REAP 밖).
+무엇을 위임하든 **결과물은 파일이나 CLI 로 나와야 한다** — 이것이 adapt 위임 설계의 제약이다.

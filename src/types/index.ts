@@ -37,8 +37,10 @@ export type GenerationType = "embryo" | "normal" | "merge";
 /**
  * A single concern raised by the reap-evaluate subagent during a stage.
  *
- * The builder records these via `reap run validation --phase report-evaluator
- * --severity <high|low> --summary "..."` after receiving the evaluator's reply.
+ * Recorded via `run <validation|completion> --phase report-evaluator
+ * --severity <high|low> --summary "..."` — by the builder relaying the
+ * evaluator's reply, or by the evaluator itself (it has Bash, and its reply to
+ * the builder is not guaranteed to arrive — see EvaluatorRun).
  * Each entry persists across stages by living on the GenerationState, so the
  * subsequent fitness phase can detect unresolved high-impact concerns and
  * automatically abort cruise mode (gen-067, Issue follow-up of #20).
@@ -58,6 +60,41 @@ export interface EvaluatorConcern {
   /** One-line description suitable for inclusion in a prompt or report. */
   summary: string;
   /** ISO 8601 timestamp captured at the moment the CLI ran. */
+  recordedAt: string;
+}
+
+/**
+ * What became of one evaluator invocation, for one stage.
+ *
+ * gen-099 opted into the evaluator and received nothing: three follow-ups went
+ * unanswered while — as gen-100 measured — the subagent was running the whole
+ * time and executing instructions sent to it. Only the reply direction was
+ * lost. Nothing in the generation state recorded that, because the fallback
+ * prompt said to skip the CLI call when the evaluator did not work out.
+ *
+ * So the outcomes below are deliberately four, not two. `"clean"` is a review
+ * that happened; the other three are the ways a generation can end up without
+ * one, and each is a different fact:
+ *
+ * - `"unreachable"` — someone tried and says so. The evaluator was launched
+ *   and no verdict came back, or the Agent tool was absent.
+ * - `"not-reported"` — **nobody said anything.** Written by REAP itself at
+ *   `validation --phase complete` / `completion --phase adapt` when the
+ *   evaluator is enabled and no run was recorded. This is the entry that makes
+ *   silence observable, and it is the only one REAP can produce on its own:
+ *   REAP cannot see whether an agent was launched, but it can see whether a
+ *   verdict ever arrived.
+ *
+ * None of them gates anything. A missing review is reported, never enforced —
+ * an environment may have no Agent tool at all.
+ */
+export interface EvaluatorRun {
+  /** The lifecycle stage the evaluator was invoked for. */
+  stage: "validation" | "fitness";
+  outcome: "clean" | "concern" | "unreachable" | "not-reported";
+  /** Free text: the concern summary, or why no verdict arrived. */
+  detail?: string;
+  /** ISO 8601 timestamp captured at the moment the entry was written. */
   recordedAt: string;
 }
 
@@ -87,6 +124,16 @@ export interface GenerationState {
    * pre-gen-067.
    */
   evaluatorConcerns?: EvaluatorConcern[];
+  /**
+   * What is known about whether the evaluator ran at all (gen-100).
+   *
+   * `evaluatorConcerns` cannot answer that: a clean review, a lost reply and a
+   * generation where nobody invoked the evaluator all leave it absent, so an
+   * empty list means "no concerns OR no review" and the two are indistinguishable
+   * byte for byte. This field separates them. Absent means the generation
+   * predates gen-100 or ran with `evaluator: false`.
+   */
+  evaluatorRuns?: EvaluatorRun[];
 }
 
 // ── Sequence (identity registry) ────────────────────────────

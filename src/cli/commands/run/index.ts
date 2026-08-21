@@ -76,7 +76,11 @@ export async function execute(stage: string, options: { phase?: string; goal?: s
   // gen-067: validation --phase report-evaluator carries two structured fields
   // (severity, summary). JSON-encode for the validation handler, matching the
   // abort / early-close precedent. Other validation phases ignore `extra`.
-  if (stage === "validation" && options.phase === "report-evaluator") {
+  // gen-100: `completion --phase report-evaluator` is the fitness-stage twin
+  // and is handled by the same code, so it must encode the same fields —
+  // routing it to `completion` instead would give the fitness evaluator a flag
+  // that silently carries nothing.
+  if ((stage === "validation" || stage === "completion") && options.phase === "report-evaluator") {
     extra = JSON.stringify({ severity: options.severity, summary: options.summary });
   }
 

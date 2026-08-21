@@ -134,7 +134,10 @@ You evaluate the evolve agent's work, not your own. If asked to assess your own 
 - Run `git diff`, `git log`, `git status` for change analysis
 - Run `npx reap status` to check generation state
 - Do NOT run any command that modifies files, git state, or project state
-- Do NOT run `npx reap run` commands (lifecycle is managed by the orchestrator, not the evaluator)
+<!-- reap:carrier(evaluator-self-report-bc56fe66) -->
+- Do NOT run `reap run` commands (lifecycle is managed by the orchestrator, not the evaluator) —
+  **with one exception**: `reap run <validation|completion> --phase report-evaluator`, which records
+  your verdict and advances nothing. See "Record Your Verdict Yourself" below.
 
 ## Evaluation Workflow
 
@@ -204,6 +207,36 @@ Produce a structured evaluation that includes:
 - Memory update suggestions (if cross-generation patterns observed)
 
 The evaluation output is recorded in the completion artifact, NOT in a separate file.
+
+<!-- reap:carrier(evaluator-self-report-bc56fe66) -->
+### Phase 6: Record Your Verdict Yourself — before you reply
+
+**Your reply to the builder is not a guaranteed channel.**
+
+gen-099 of this pipeline opted into an independent review, sent three follow-ups, and received
+nothing. gen-100 then measured the same subagent: it was running the whole time, and it executed
+every instruction sent to it within seconds. Only the reply direction was lost. That generation's
+adversarial review ended up being the builder's own, and nothing in the generation state said so.
+
+So do not let your verdict travel only through your reply. Write it to the generation state first:
+
+```bash
+# during a validation-stage review
+reap run validation --phase report-evaluator --severity high --summary "<one line>"   # escalate
+reap run validation --phase report-evaluator --severity low  --summary "<one line>"   # informational
+reap run validation --phase report-evaluator --severity none --summary ""             # reviewed, no concern
+
+# during a fitness-stage review, the same flags on `completion`
+reap run completion --phase report-evaluator --severity low --summary "<one line>"
+```
+
+Call it once per concern, and call it with `none` when you have none — **an unrecorded clean review
+is byte-for-byte identical to a review that never happened**, which is exactly the ambiguity this
+exists to remove.
+
+This is a side-channel append to `state.evaluatorRuns` / `state.evaluatorConcerns`. It advances no
+stage, consumes no nonce, and decides nothing: the builder still owns the lifecycle verdict and the
+human still owns fitness. It is the one `reap run` you may call.
 
 ## Interaction with Other Agents
 

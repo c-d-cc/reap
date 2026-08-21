@@ -1,6 +1,6 @@
 import YAML from "yaml";
 import type { ReapPaths } from "../../../core/paths.js";
-import type { ReapConfig, EvaluatorConcern } from "../../../types/index.js";
+import type { ReapConfig } from "../../../types/index.js";
 import { GenerationManager } from "../../../core/generation.js";
 import { readTextFile } from "../../../core/fs.js";
 import { emitOutput, emitError } from "../../../core/output.js";
@@ -8,13 +8,21 @@ import { verifyTransition, setTransitionNonces, prepareStageEntry, performTransi
 import { copyArtifactTemplate } from "../../../core/template.js";
 import { checkArtifactsFilled } from "../../../core/artifact-check.js";
 import { buildEvaluatorPrompt, loadReapKnowledge } from "../../../core/prompt.js";
+import { recordEvaluatorSilenceIfUnreported } from "../../../core/evaluator-run.js";
+import { execute as executeReportEvaluator } from "./report-evaluator.js";
 
 export async function execute(paths: ReapPaths, phase?: string, extra?: string): Promise<void> {
   const gm = new GenerationManager(paths);
   const state = await gm.current();
 
   if (!state) emitError("validation", "No active generation.");
-  if (state!.stage !== "validation") emitError("validation", `Current stage is '${state!.stage}', not 'validation'.`);
+  // gen-100: `report-evaluator` is a side-channel, not a lifecycle step, so it
+  // is exempted from the stage guard here and delegated further down — the
+  // fitness evaluator runs during `completion`, and ./report-evaluator.ts owns
+  // the narrower guard that admits exactly those two stages.
+  if (state!.stage !== "validation" && phase !== "report-evaluator") {
+    emitError("validation", `Current stage is '${state!.stage}', not 'validation'.`);
+  }
 
   const isMerge = state!.type === "merge";
 
@@ -27,70 +35,7 @@ export async function execute(paths: ReapPaths, phase?: string, extra?: string):
   // informational write to support cross-stage signalling (validation →
   // fitness cruise abort).
   if (phase === "report-evaluator") {
-    let severity: string | undefined;
-    let summary: string | undefined;
-    if (extra) {
-      try {
-        const parsed = JSON.parse(extra) as { severity?: string; summary?: string };
-        severity = parsed.severity;
-        summary = parsed.summary;
-      } catch {
-        emitError("validation", "report-evaluator: failed to parse options. Expected --severity and --summary.");
-      }
-    }
-
-    if (!severity) {
-      emitError("validation", "report-evaluator requires --severity <high|low|none>.");
-    }
-
-    const sev = severity!.toLowerCase();
-    if (sev === "none") {
-      // Explicit no-op: builder reports the evaluator raised no concerns.
-      // State is untouched; this lets the builder log "all clear" without
-      // polluting evaluatorConcerns with empty entries.
-      emitOutput({
-        status: "ok",
-        command: "validation",
-        phase: "report-evaluator",
-        completed: ["gate", "noop"],
-        context: { id: s.id, severity: "none" },
-        message: "Evaluator reported no concern — state unchanged.",
-      });
-      return;
-    }
-
-    if (sev !== "high" && sev !== "low") {
-      emitError("validation", `report-evaluator: invalid severity '${severity}'. Use high, low, or none.`);
-    }
-
-    if (!summary || summary.trim().length === 0) {
-      emitError("validation", "report-evaluator requires --summary \"<one-line description>\".");
-    }
-
-    const concern: EvaluatorConcern = {
-      stage: "validation",
-      severity: sev as "high" | "low",
-      summary: summary!.trim(),
-      recordedAt: new Date().toISOString(),
-    };
-
-    if (!s.evaluatorConcerns) s.evaluatorConcerns = [];
-    s.evaluatorConcerns.push(concern);
-    await gm.save(s);
-
-    emitOutput({
-      status: "ok",
-      command: "validation",
-      phase: "report-evaluator",
-      completed: ["gate", "concern-recorded"],
-      context: {
-        id: s.id,
-        severity: concern.severity,
-        summary: concern.summary,
-        total: s.evaluatorConcerns.length,
-      },
-      message: `Evaluator concern recorded (severity=${concern.severity}). Total: ${s.evaluatorConcerns.length}.`,
-    });
+    await executeReportEvaluator(paths, extra);
     return;
   }
 
@@ -221,13 +166,31 @@ export async function execute(paths: ReapPaths, phase?: string, extra?: string):
       promptLines.push("  `reap run validation --phase report-evaluator --severity low --summary \"<one-line description>\"`");
       promptLines.push("- Clean review (no concern):");
       promptLines.push("  `reap run validation --phase report-evaluator --severity none --summary \"\"`");
+      promptLines.push("- **No verdict reached you** (see Fallback below):");
+      promptLines.push("  `reap run validation --phase report-evaluator --severity unreachable --summary \"<what happened>\"`");
       promptLines.push("");
-      promptLines.push("This call does NOT advance the lifecycle — it only appends to `state.evaluatorConcerns`.");
+      promptLines.push("This call does NOT advance the lifecycle — it only appends to the generation state.");
       promptLines.push("");
-      promptLines.push("**Fallback** — if the evaluator subagent fails (tool unavailable, model error, malformed reply):");
-      promptLines.push("- Tell the user the evaluator could not run and why.");
+      promptLines.push("**Have the evaluator record its own verdict too.** `reap-evaluate` has `Bash`, so add");
+      promptLines.push("this line to the prompt you send it:");
+      promptLines.push("");
+      promptLines.push("> When you have reached your verdict, record it yourself before replying:");
+      promptLines.push("> `reap run validation --phase report-evaluator --severity <high|low|none> --summary \"<one line>\"`");
+      promptLines.push("");
+      promptLines.push("gen-100 measured a `reap-evaluate` subagent that ran correctly, executed every");
+      promptLines.push("instruction sent to it, and whose replies never arrived. When the verdict travels");
+      promptLines.push("only through the reply, a lost reply loses the review — and gen-099 lost one that way.");
+      promptLines.push("");
+      promptLines.push("**Fallback** — if no verdict reaches you, for any reason (the Agent tool is absent,");
+      promptLines.push("the subagent errors, the reply is malformed, or it simply never answers):");
+      promptLines.push("- Tell the user the evaluator produced no verdict, and say which of those you observed.");
       promptLines.push("- Continue normal validation. The evaluator is opt-in advice, not a gate.");
-      promptLines.push("- Skip the `report-evaluator` CLI call (no concern was generated).");
+      promptLines.push("- **Record it** — do not leave it silent:");
+      promptLines.push("  `reap run validation --phase report-evaluator --severity unreachable --summary \"launched, no reply after N checks\"`");
+      promptLines.push("");
+      promptLines.push("If you skip that call, REAP records `not-reported` for you at");
+      promptLines.push("`validation --phase complete`, so the absence is visible either way — but only your");
+      promptLines.push("own entry can say *what happened*.");
     }
 
     emitOutput({
@@ -245,6 +208,17 @@ export async function execute(paths: ReapPaths, phase?: string, extra?: string):
     verifyTransition("validation", s, "validation:complete");
     await verifyArtifact("validation", paths.artifact, "validation", isMerge);
 
+    // gen-100: the last moment at which "nobody reported anything" is still a
+    // fact about *this* stage. REAP cannot observe whether the subagent was
+    // launched — the launch happens in the agent, after this process has
+    // exited — but it can observe that no verdict ever arrived, and that is the
+    // fact worth seeing. Recorded, never enforced: the transition below runs
+    // identically either way.
+    const completeConfig = await readTextFile(paths.config);
+    const completeEvaluatorEnabled =
+      (completeConfig ? (YAML.parse(completeConfig) as ReapConfig) : null)?.evaluator === true;
+    const silence = recordEvaluatorSilenceIfUnreported(s, "validation", completeEvaluatorEnabled);
+
     prepareStageEntry(s, "completion:entry");
     await gm.save(s);
 
@@ -256,9 +230,22 @@ export async function execute(paths: ReapPaths, phase?: string, extra?: string):
       status: "ok",
       command: "validation",
       phase: "complete",
-      completed: ["gate", "validation-work", "artifact-verify", "auto-transition"],
-      context: { id: s.id, nextStage: next },
-      message: `Validation complete. Auto-advanced to ${next}. Run: reap run ${next}`,
+      completed: [
+        "gate", "validation-work", "artifact-verify",
+        ...(silence ? ["evaluator-silence-recorded"] : []),
+        "auto-transition",
+      ],
+      context: {
+        id: s.id,
+        nextStage: next,
+        ...(silence ? { evaluatorRun: silence } : {}),
+      },
+      message:
+        `Validation complete. Auto-advanced to ${next}. Run: reap run ${next}` +
+        (silence
+          ? " — NOTE: evaluator is enabled but no verdict was reported for validation. " +
+            "Recorded as 'not-reported'; this generation's adversarial review was the builder's own."
+          : ""),
       nextCommand: `reap run ${next}`,
     });
   }

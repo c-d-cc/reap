@@ -266,9 +266,11 @@ evaluator 호출은 **1회 감사가 아니다.** gen-089 는 3라운드가 필�
   green 을 허가로 읽으면 옳은 수정을 지운다
 - 해소된 concern 도 `--severity none` 으로 낮추지 마라 — 그 채널은 "미해결"이 아니라
   "fitness 를 보는 사람이 알아야 할 것"을 나른다
-- **evaluator 가 회신하지 않으면 그 사실을 `report-evaluator` 로 남겨라.** gen-099 에서 무응답인
-  채 idle 로 끝났고 적대적 검토가 전부 자기 것이 됐다. **fallback 이 조용하면 그것은 fallback 이
-  아니라 침묵이다** — 아무 흔적이 없으면 다음 사람은 검토를 받은 세대와 구분하지 못한다
+- **회신을 기다리지 마라 — 오지 않는다.** gen-100 이 실측했다: evaluator 는 spawn 되고 지시를
+  받고 실행하지만 **회신 방향만 도달하지 않는다.** 그래서 판정은 `report-evaluator` 로 **state
+  에서** 읽는다(`evaluatorRuns`/`evaluatorConcerns` 를 polling). 회신도 없고 state 도 비었으면
+  `--severity unreachable` 로 남겨라 — **fallback 이 조용하면 그것은 fallback 이 아니라 침묵이다.**
+  아무것도 안 남기면 REAP 이 `not-reported` 를 대신 쓰지만, *무슨 일이 있었는지*는 너만 안다
 
 ## 아키텍처 변경 시 genome 동기화
 

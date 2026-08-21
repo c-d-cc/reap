@@ -1,51 +1,49 @@
 # Shortterm Memory
 
-## 세션 요약 (gen-099, 2026-08-22)
+## 세션 요약 (gen-100, 2026-08-22)
 
-### carrier 표식 ID 가 `<slug>-<hash8>` 이 됐고 검사가 강제한다
+### evaluator 무응답의 원인 — agent 가 아니라 **회신 경로**였다
 
-`scripts/list-carriers.sh` 재작성. **관대한 패턴으로 걷고 나서 가른다** — 좁힌 패턴으로 걸으면
-해시 없는 표식이 아예 안 보여 검사가 자기 목적에 침묵한다. 유효 / **언급**(`<`·`>`·공백 포함 →
-무시) / 위반. `--check` 는 표식이 숨는 **4가지**를 잡고 exit 1, `ci.yml` 이 `npm ci` **앞에서**
-돌린다. `--new <slug>` 가 hash 를 뽑고 `--root <dir>` 가 테스트를 가능하게 한다.
-상세는 `environment/summary.md`, 경위는 lineage.
+learning 에서 실험 셋으로 갈랐다. `reap-evaluate` 는 spawn 되고, 메시지를 받고, 지시를
+**13초 만에 실행한다**(Bash 로 파일을 쓰게 해서 확인). 도달하지 않는 것은
+**agent → 호출자 방향의 회신뿐**이다. gen-099 의 evaluator 는 놀고 있던 게 아니라
+내내 돌고 있었다 — 그 세대의 관측은 정확했고 **해석이 틀렸다.**
 
-**14 → 13개.** 사라진 `id` 는 처음부터 표식이 아니라 산문의 자리표시자였다 — 세 세대가
-헷갈렸던 것. **표식 3개는 값 옆이 아니라 예시 옆에 있었고**, 옮기자
-`memory-tier-classification` 이 12 → **11 로 줄었다**. 줄어든 것이 맞다.
+**전송 계층은 클라이언트의 것이고 REAP 이 고칠 수 없다.** 고친 것은 REAP 안의 셋:
+fallback 이 흔적을 남기지 말라고 **명시적으로 지시**하던 줄 · `--severity none` 이 no-op 이라
+"검토받고 clean"과 "검토 못 받음"이 바이트 동일하던 것 · 판정이 **회신 경로에만** 매달려
+있던 것. 셋째가 근본 대응이다 — evaluator 는 `Bash` 를 갖고 있으니 스스로 CLI 를 친다.
 
-### adapt 에서 genome 을 둘 고쳤다
+**그러려면 evaluator 의 HARD-GATE 에 예외를 뚫어야 했다** — `"You MUST NOT run reap run"`
+이 유일한 생존 경로를 막고 있었다. 지시만 추가했다면 금지 쪽이 이겼을 것이다.
 
-1. **§ 독립 검토에 항목 추가** — evaluator 무응답도 `report-evaluator` 로 남길 것.
-   **fallback 이 조용하면 그것은 fallback 이 아니라 침묵이다** (fitness 지적을 규칙으로 고정)
-2. **`### Clarity 판단 기준` 목록이 코드와 어긋나 있었다** — genome 은 "backlog 에 task 있음 →
-   high", 코드(`src/core/clarity.ts`)는 **high-priority 2건 이상**. 목록을 지우고 소유자를
-   가리킨다. **shipped `src/templates/evolution.md` 에도 같은 목록이 배포되고 있었다** —
-   즉 모든 신규 프로젝트가 코드와 모순되는 genome 을 받고 있었다. 함께 고쳤고, 기존
-   프로젝트에는 migration note 로만 도달한다(v0.18 릴리즈 세대).
-   **`evolution.md` 가 301줄이 되어 줄이려 훑다가 나온 발견이다 — 크기 경고가 내용 검토를
-   강제했다.**
+### 그리고 그 fix 로 **실제로 독립 검토를 2라운드 받았다**
+
+두 라운드 다 **회신은 오지 않았다.** 판정은 두 번 다 `current.yml` 에 남았다.
+같은 환경, 같은 침묵, 다른 결과 — 이것이 이 세대의 유일하게 결정적인 증거다.
+
+지적 6건 전부 진짜였고 전부 처리했다. **라운드2 의 셋은 전부 라운드1 의 수정 안에 있었다**
+(genome 이 세 세대 연속 관측한 것의 네 번째 성립). 그중 하나는 **내 04-validation 의
+`[실행]` 수치가 라운드1 수정으로 낡은 것** — gen-095 가 정확히 그렇게 걸렸고 longterm 에
+적혀 있는데도 반복했다.
 
 ### 지금 상태
 
-- unit **791** / e2e **379** / scenario **62**, 전부 0 fail
-- typecheck · typecheck:docs · build · self-diagnosis(8절) · `--check` · `--orphans` 통과
+- unit **818** / e2e **391** / scenario **62**, 전부 0 fail (신규 39 케이스)
+- typecheck · build · self-diagnosis(8절) · `--check`(80 marker/14 id) · `--orphans` 통과
 - `fix --check` 0 error / 2 warning (gen-052 상속분)
-- genome: `application.md` **249**/250 · `evolution.md` **297**/300 (adapt 후)
-- 잔여 backlog **9 → 8건**
-- **gen-097·098·099 가 아직 push 되지 않았다.** 개수는 적지 않는다 — 커밋 하나가 그 숫자를
-  낡게 만들고, 실제로 그것을 고친 커밋이 그 값을 다시 틀리게 했다.
-  `git log --oneline origin/main..HEAD | wc -l` 로 볼 것. push 는 사용자 확인 후
+- negative **16회 전부 red** 확인
+- 미푸시 커밋 수는 `git log --oneline origin/main..HEAD | wc -l` 로 볼 것. push 는 사용자 확인 후
 
 ### 다음 세션이 알아야 할 것
 
-- **(최우선) evaluator 가 왜 조용히 아무것도 안 했는지 조사.** fitness 가 이것을 지목했다 —
-  남은 4세대가 전부 자기검토만 받는 것을 막으려면 원인부터. 조사 방향 셋은 gen-099 의
-  05-completion hints 1 (agent 정의 설치 / 호출 코드 경로 / Agent 도구 부재 fallback)
-- **e2e 1 fail 미재현은 flake 이전에 명령 문제였다** — `| grep "^ [0-9]+ (pass|fail)"` 가
-  `(fail)` 줄을 버렸다. bun 은 이름을 이미 출력하고 있었다. **항상 `tee` 로 남기고 grep 은
-  로그에 대고 할 것.** flake 유도는 `npx bun test <dir> --rerun-each 5` (존재 확인함)
-- **산문에서 표식 토큰을 인용할 땐 닫힌 형태 + 꺾쇠 자리표시자**로 쓸 것. 이 세대가 두 번
-  걸렸다(environment 와 memory). 여는 괄호만 붙은 조각은 그 자체로 결함 신호다
-- **milestone 의 다음 항목**: `지식 축 경계 통합 설계` (milestone·idea·memory 3축).
-  seed 는 `vision/design/backlogs_v0.18/`. **Exit Criteria 는 아직 하나도 충족되지 않았다**
+- **`evaluator: true` 인데 판정이 없으면 이제 `current.yml` 에 `not-reported` 가 남는다.**
+  fitness prompt 가 그 사실을 사람에게 말한다. **게이트가 아니다** — 전이는 그대로다
+- **evaluator 를 띄울 때 회신을 기다리지 마라.** 오지 않는다. `current.yml` 의
+  `evaluatorRuns`/`evaluatorConcerns` 를 폴링하는 것이 맞는 방법이다
+  (`until grep -q evaluatorRuns .reap/life/current.yml`)
+- **닫지 못한 것 하나**: stage 재진입 없이 validation 안에서 제자리 수정하면 라운드1 판정이
+  라운드2 를 대신한다. 렌더된 `recordedAt` 이 유일한 완화다. 닫으려면 게이트가 되므로
+  닫지 않았다 (04-validation § 6)
+- **라운드 3 를 돌리지 않았다** — 수렴 판단이 아니라 예산이다. `report-evaluator --severity low`
+  로 기록했다

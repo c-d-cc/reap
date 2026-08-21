@@ -63,8 +63,8 @@ program
   .option("--source-action <sourceAction>", "Source action for abort/early-close (rollback, stash, hold, none — rollback only for abort)")
   .option("--save-backlog", "Save progress to backlog on abort")
   .option("--defer-tasks <value>", "For early-close: auto-defer unchecked tasks to new backlog (true|false, default true)")
-  .option("--severity <severity>", "For validation --phase report-evaluator: evaluator concern severity (high|low|none — none is a no-op)")
-  .option("--summary <summary>", "For validation --phase report-evaluator: one-line evaluator concern summary")
+  .option("--severity <severity>", "For run <validation|completion> --phase report-evaluator: high|low (a concern) | none (reviewed, clean) | unreachable (no verdict arrived)")
+  .option("--summary <summary>", "For run <validation|completion> --phase report-evaluator: one-line concern summary, or why no verdict arrived")
   .action(async (stage: string, options: { phase?: string; goal?: string; type?: string; parents?: string; feedback?: string; reason?: string; backlog?: string | false; milestone?: string; sourceAction?: string; saveBacklog?: boolean; deferTasks?: string; severity?: string; summary?: string }) => {
     await runExecute(stage, options);
   });

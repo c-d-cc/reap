@@ -41,7 +41,7 @@
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline — **unit 791 / e2e 379 / scenario 62, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
+현재 baseline — **unit 818 / e2e 391 / scenario 62, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
 
 `src/indexer/` 의 이식된 모듈(call-resolver/impact/scanner/parser/pipeline)에는 **unit test 가 없다** — 그쪽은 지금 e2e 로만 덮인다.
 
@@ -57,6 +57,9 @@
   한글이다). 제외는 **경로 하나에 근거 하나**이며 묶으면 안 된다 — 묶인 항목은 그중 하나만 읽힌다.
   범위 밖: `README*` · `RELEASE_*` · `CLAUDE.md` · `AGENTS.md` · `.reap/environment/*` ·
   `.claude/commands/*` (전부 현재 clean 이지만 **검사는 없다**)
+- `tests/unit/evaluator-self-report-shipped.test.ts` — **배포되는 agent 정의가 자기보고 경로를 갖고
+  있는지** (gen-100). `buildEvaluatorPrompt` 가 런타임에 같은 텍스트를 공급해 **배포 사본의 부재를
+  가려준다** — 사본을 통째로 지워도 전 스위트가 초록이었다(실측)
 - `tests/unit/list-carriers.test.ts` — **`scripts/list-carriers.sh` 의 유일한 테스트 (gen-099)**.
   `--root` 로 임시 픽스처 트리를 스캔시킨다 — 저장소를 스캔하면 누가 표식을 하나 더하는 순간
   케이스의 의미가 바뀐다. 저장소의 다른 bash 게이트 4종에는 아직 이런 하네스가 없다
@@ -86,9 +89,7 @@
 리눅스 러너 조건은 `oven/bun:<ver>-debian` + `apt-get install git` + `-e GIT_CONFIG_GLOBAL=/dev/null` 로 만든다 (기본 `oven/bun` 에는 git 이 없다).
 
 ### scripts/ (프로젝트 루트)
-- `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates)
-- `scripts/alpha-publish.sh` — alpha 배포 헬퍼
-- `scripts/postinstall.sh` — npm postinstall hook
+- `scripts/build.sh` — bun build + 정적 자산 복사 (claude-code skills, opencode plugin/templates) / `scripts/alpha-publish.sh` — alpha 배포 헬퍼 / `scripts/postinstall.sh` — npm postinstall hook
 - `scripts/check-self-diagnosis.sh` — **자기진단 게이트**. `npm pack` → 격리 HOME/prefix 에 설치 → `reap init` → `fix --check` 가 **경고·에러 0** 을 요구. 8개 절: 빌드·설치·init·진단 / **인덱스** / install script 차단 / OpenCode / uninstall. init 절은 **greenfield 가 `environment/source-map.md` 를 실질 내용과 함께 쓰는지**도 요구한다 — 배포되는 genome 이 그 파일을 읽으라고 지시하므로, 전제를 installer 가 만들지 않으면 규칙이 허공을 가리킨다. release publish 앞 + CI 매 push 양쪽에서 실행. 대화로 채워지는 genome/goals 는 스크립트가 채운 뒤 진단 — 그것까지 요구하면 REAP 정상 동작에 fail 한다. 끄는 스위치는 두지 않는다 — 비용이 문제가 되면 release 전용으로 옮긴다
 - `scripts/list-carriers.sh` — **carrier 표식 조회·검사 (gen-078, gen-099)**. ID 는 `<slug>-<hash8>`.
   ID 자리를 `[^)]*` 로 두는 **관대한 패턴**으로 걷은 뒤 셋으로 가른다 — 유효 / **언급**(`<`·`>`·공백 포함 →
@@ -106,8 +107,8 @@
   없다**(shipped `reap-guide.md` 는 저장소에서 복사해 쓰라고 안내한다)
 <!-- reap:carrier(agent-integration-gate-verdicts-e1fafca9) -->
 - `scripts/check-agent-integration.sh` — **agent 통합 검증 / 층2 (gen-079, gen-091)**. 헤드리스 `claude -p` 로 `/reap.start` 를 시키고 **`current.yml` 생성 여부**로 판정한다. **격리하지 않는다** — Claude Code 는 로그인을 slash command 와 같은 `~/.claude/` 에 두므로 HOME 격리 시 인증을 잃는다. 현재 설치를 읽기만 하고 임시 프로젝트에만 쓴다(권한 허용 `Bash(reap:*)` 도 그 안에만). **~$0.25/회** 라 CI 아닌 릴리즈 전 (`reapdev.versionBump` Step 5-2).
-  - **답이 셋이다** — pass / FAIL / **amber SKIP(exit 0)**. 세 번째는 `/reap.start` 가 시키는 `reap run` 명령이 거부됐을 때이며 *"검사가 아무것도 측정하지 못했다"* 를 뜻한다. **검사 실패와 측정 실패는 다르다** — gen-091 이전에는 그것을 FAIL 로, 그것도 `This is the gen-063 failure exactly` 로 단정해 릴리즈가 없는 결함을 쫓았다. 부재 FAIL 은 이제 원인을 열거하고 agent 응답과 거부 항목을 함께 싣는다.
-  - **통과가 증명하는 것은 하나 반이다.** `CLI reachable` 은 생성된 generation 이 증명한다. `slash command 노출` 은 **agent 가 우회 금지 지시를 지켰을 때만** 성립한다 — 슬래시 커맨드는 CLI 의 wrapper 라 우회가 바이트 동일한 파일을 남긴다(gen-079 실측). **`@` import 로드와 SessionStart hook 발화는 증명하지 않는다** — `/reap.start` 는 둘 없이도 성공한다. 여섯 세대 동안 넷을 주장했다.
+  - **답이 셋이다** — pass / FAIL / **amber SKIP(exit 0)**. 세 번째는 `/reap.start` 가 시키는 `reap run` 명령이 거부됐을 때이며 *"검사가 아무것도 측정하지 못했다"* 를 뜻한다. **검사 실패와 측정 실패는 다르다.** 부재 FAIL 은 원인을 열거하고 agent 응답과 거부 항목을 함께 싣는다.
+  - **통과가 증명하는 것은 하나 반이다.** `CLI reachable` 은 생성된 generation 이 증명한다. `slash command 노출` 은 **agent 가 우회 금지 지시를 지켰을 때만** 성립한다 — 슬래시 커맨드는 CLI 의 wrapper 라 우회가 바이트 동일한 파일을 남긴다(gen-079 실측). **`@` import 로드와 SessionStart hook 발화는 증명하지 않는다** — `/reap.start` 는 둘 없이도 성공한다.
 - `scripts/check-version-floors.sh` — **버전 하한 게이트**. reap 이 사용자에게 "이 버전으로 올려라"라고 말하는 숫자(`package.json` 의 `reap.autoUpdateMinVersion`)가 npm 에 **실제로 발행돼 있는지** 검사한다. 값은 소스에서 읽는다(carrier 표식). 네트워크 실패·비-JSON 은 amber SKIP, **패키지 자체가 없으면(`E404`) FAIL** — 그 둘을 구분하지 않으면 이름 오타가 조용히 통과한다. `release.yml` 의 `npm publish` 앞. **CI 에는 없다** — 매 push 마다 네트워크가 필요하고, 코드와 무관한 이유로 주기적으로 SKIP 을 내는 검사는 사람이 스크롤로 넘긴다
 - `scripts/check-docs-prerender.sh` + `.mjs` — **docs prerender 게이트 / 층1 (gen-096)**. 빌드 산출물을 읽어 115 페이지가 실제로 놓였는지 본다: 개수·크기 하한·영어 무접두사·README 가 거는 15경로·sitemap·robots 는 `.sh` 가, **페이지 내부의 값**은 `.mjs` 가 본다 — canonical / hreflang **대상 URL** / 언어 셀렉터 href / 활성 로케일 / 참조 asset 존재. `.mjs` 는 기대값을 **파일의 디스크상 위치에서 재계산**하며 `entry-server.tsx` 를 import 하지 않는다 (검사기가 대상과 기대값을 공유하면 틀린 값이 자기 자신과 일치한다). 로케일 목록만 소유자 `docs/src/i18n/types.ts` 에서 읽는다. `docs.yml` 의 upload 앞에 있고 **`paths:` 에 이 두 파일이 들어 있다** — 없으면 게이트를 고쳐도 게이트가 안 돈다.
   - **못 보는 것**: 배포된 사이트에 대한 일체(층2 담당) · 실제 브라우저 하이드레이션 · `404.html`(게이트는 `cp` **앞**에서 돌고 `index.html` 만 센다) · description 이 없는 4개 라우트(원본 문자열이 없어 의도된 부재)
@@ -122,15 +123,15 @@
   `Translations = typeof en` + `Record<string, Translations>` 구조 덕에 **로케일 하나만 개명하면 red** 다.
   `.github/workflows/docs.yml` 이 배포 전에 같은 명령을 돌린다 (스크립트를 `cd docs` 형태로 둔 이유 —
   CI 호출과 철자를 하나로 유지한다)
-- `npm run test:unit` — bun test **--isolate** tests/unit/ (격리 이유는 위 Tests 절)
-- `npm run test:e2e` / `npm run test:scenario` / `npm run test` (전체)
+- `npm run test:unit` — bun test **--isolate** tests/unit/ (격리 이유는 위 Tests 절) / `npm run test:e2e` / `npm run test:scenario` / `npm run test` (전체)
 - `postinstall` — skill 자동 설치 + v0.15 감지 안내
 
 ## Types (주요 타입)
 - `HookResult` — hook 실행 결과 (name, event, type, status, exitCode, stdout, stderr, content, skipReason)
 - `ReapHookEvent` — 라이프사이클 hook 이벤트 union type (14개 이벤트)
 - `ReapOutput.status` — `"ok" | "prompt" | "error" | "artifact-incomplete"`
-- `EvaluatorConcern` — `{ stage: "validation" | "fitness", severity: "low" | "high", summary: string, recordedAt: string }`. Validation→fitness signalling channel. severity는 binary (Goodhart 회피). high = cruise auto-abort 트리거. `GenerationState.evaluatorConcerns?: EvaluatorConcern[]` 로 노출.
+- `EvaluatorConcern` — `{ stage: "validation" | "fitness", severity: "low" | "high", summary: string, recordedAt: string }`. Validation→fitness signalling channel. severity는 binary (Goodhart 회피). high = cruise auto-abort 트리거. `GenerationState.evaluatorConcerns?: EvaluatorConcern[]` 로 노출. **fitness 쪽 producer 는 gen-100 이 처음 만들었다** (`run completion --phase report-evaluator`) — gen-090 L7.
+- `EvaluatorRun` — `{ stage, outcome: "clean" | "concern" | "unreachable" | "not-reported", detail?, recordedAt }`. **독립 검토가 있었는지 자체**를 답한다 — `evaluatorConcerns` 는 빈 목록이 "concern 없음"과 "검토 없음" 양쪽이라 답할 수 없었다(셋이 바이트 동일). **`unreachable` 을 `EvaluatorConcern.severity` union 에 넣지 않은 것은 의도다**: concern 이 되면 cruise auto-abort 를 건드려 게이트가 되고, union 을 넓히면 소비자 전부가 새 값을 다뤄야 한다(gen-077).
 - indexer 타입 — `SymbolNode` / `GraphEdge` / `FileNode`(경로·언어·**파일별 import 통계**) / `ImportStats` /
   **`SymbolReference`** (참조 하나) / **`ImportSpecifier`** (해석 전 import specifier). 뒤의 둘은
   스냅샷에 **저장된다** — call·import 해석이 전체 그래프 의존이라 incremental 이 재파싱하지 않은
