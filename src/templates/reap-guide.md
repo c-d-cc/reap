@@ -225,13 +225,17 @@ Anything one item may point at carries a **REAP-assigned id**, in one of two fam
 
 | | Kinds | Form | Registry |
 |---|---|---|---|
-| **Numbered** | goal · milestone · design · idea · memory | `goal-004` | `.reap/sequence/<type>.md` |
-| **Hashed** | backlog | `bklog-a3f8c2` | none |
+| **Numbered** | goal · milestone · design | `goal-004` | `.reap/sequence/<type>.md` |
+| **Hashed** | backlog · idea · memory | `bklog-a3f8c2` | none |
 
 Which family a kind belongs to is a question about **how long its items are cited**. A goal is named
-for years. A backlog is created, consumed, archived to lineage and removed — nothing names
-`bklog-a3f8c2` afterwards, so spending a permanent number on it would leave the registry growing a
-dead row per item. Uniqueness comes from the hash instead, and there is nothing to keep in sync.
+for years. A backlog is consumed and removed; an idea in `freememo/` is written to be thrown away or
+promoted; a memory entry is pruned every reflect. Nothing names those afterwards, so spending a
+permanent number on one would leave the registry growing a dead row per item. Uniqueness comes from
+the hash instead, and there is nothing to keep in sync.
+
+A prefix belongs to exactly one family, which is what keeps `goal-123456` and `mem-123456` from both
+parsing two ways — six digits are also six hex characters.
 
 The hash is random, not derived from the title: an id derived from wording changes when the wording
 does, which is the thing ids exist to escape.

@@ -40,7 +40,7 @@ Vision은 Goals, Milestones, Memory, Design 네 가지로 구성된다.
 한 항목이 다른 항목을 가리킬 때는 **제목이 아니라 ID** 를 쓴다 — `goal: goal-004`. 제목은 바뀐다:
 이 프로젝트는 goal 이 완료될 때 이력을 제목에 덧붙이므로 **정기적으로** 바뀐다.
 
-- **ID 를 손으로 짓지 마라.** `reap make goal|milestone|backlog` 이 부여한다 — goal·milestone 류는 **번호**(레지스트리 기록), backlog 는 **해시**(레지스트리 없음). 소비·삭제되는 유형에 영구 번호를 쓰면 레지스트리가 죽은 행으로만 자란다
+- **ID 를 손으로 짓지 마라.** `reap make goal|milestone|backlog` 이 부여한다 — goal·milestone·design 은 **번호**(레지스트리 기록), backlog·idea·memory 는 **해시**(레지스트리 없음). 소비·폐기되는 유형에 영구 번호를 쓰면 레지스트리가 죽은 행으로만 자란다
 - **`from:` 에는 가장 직접적인 원인 하나의 ID** (`--from gen-098-99c09a`). 대개 generation 이지만 design·goal·milestone·backlog 무엇이든 될 수 있다. **관련된 것들의 목록이 아니다** — 맥락까지 적으면 "관련 있음"이 되고 그러면 아무것도 답하지 않는다
 - **불투명한 참조를 만나면 `reap sequence <id>`** — 찾아 헤매지 말 것
 - **ID 는 검사를 없애지 않고 하나 늘린다.** 병합이 같은 번호를 조용히 둘로 만들 수 있으니 `fix --check` 의 ID 경고를 무시하지 마라

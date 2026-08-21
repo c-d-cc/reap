@@ -138,9 +138,10 @@ When one item points at another it cites an **id**, not a title — `goal: goal-
 Titles change; a project that records the completing generation in a goal's wording rewrites them
 as a matter of routine.
 
-- **Do not invent ids.** `reap make goal|milestone|backlog` assigns them. Goals and milestones are
-  **numbered** (recorded in a registry); a backlog is **hashed** (`bklog-a3f8c2`, no registry) —
-  spending a permanent number on a kind that is consumed and removed grows a registry of dead rows
+- **Do not invent ids.** `reap make goal|milestone|backlog` assigns them. Goal, milestone and design are
+  **numbered** (recorded in a registry); backlog, idea and memory are **hashed** (`bklog-a3f8c2`, no
+  registry) — spending a permanent number on a kind that is consumed or pruned grows a registry of
+  dead rows
 - **`from:` names ONE id — the most direct cause** (`--from gen-098-99c09a`). Usually a generation,
   but a design document, goal, milestone or backlog works the same. **Not a list of what it relates
   to**: adding the surrounding context turns it into "related to", which answers nothing

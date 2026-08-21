@@ -6,11 +6,11 @@
 
 한 항목이 다른 항목을 **제목이 아니라 ID** 로 가리킨다. 계열이 둘이다:
 
-- **Numbered** (goal · milestone · design · idea · memory) — `.reap/sequence/<type>.md`,
+- **Numbered** (goal · milestone · design) — `.reap/sequence/<type>.md`,
   **append-only** 라 항목을 지워도 행이 남는다. **번호 재사용이 구조적으로 불가능**하고
   그래서 별도 카운터가 없다
-- **Hashed** (backlog) — `bklog-a3f8c2`, 레지스트리 없음. 소비·삭제되는 유형에 영구 번호를 쓰면
-  레지스트리가 죽은 행으로만 자란다
+- **Hashed** (backlog · idea · memory) — `bklog-a3f8c2`, 레지스트리 없음. 소비·폐기되는 유형에
+  영구 번호를 쓰면 레지스트리가 죽은 행으로만 자란다
 
 소비자도 둘이다 — milestone 의 `goal:`(한 종류) 과 backlog 의 `from:`(**가장 직접적인 원인 하나**,
 종류는 열려 있음). 후자가 memory 의 `from` 이 쓸 모양이다.
@@ -35,7 +35,7 @@
 
 ### 지금 상태
 
-- unit **771** / e2e **379** / scenario **62**, 전부 0 fail
+- unit **773** / e2e **379** / scenario **62**, 전부 0 fail
 - typecheck · typecheck:docs · build · self-diagnosis(8절) · `--orphans` 전부 통과
 - `fix --check` 0 error / 2 warning (gen-052 상속분)
 - genome: `evolution.md` **298**/300 · `application.md` **249**/250
@@ -46,11 +46,11 @@
 
 - **다음은 `carrier ID 에 hash8`** (`bklog-76e909`). 이 세대가 만든 해시 생성·고유성 검사·레지스트리를
   재사용한다. `backlogs_v0.17_residual` 의 `list-carriers.sh 산문 오탐` 건을 **같은 세대에서** 처리할 것
-- **`ds-`·`idea-`·`mem-` 은 prefix 만 예약**돼 있다. 실제 부여는 소비자가 생기는 세대가 한다 —
+- **`ds-`·`idea-`·`mem-` 은 prefix 만 예약**돼 있다 (`ds-` 는 번호, 나머지 둘은 해시). 실제 부여는 소비자가 생기는 세대가 한다 —
   `vision/design/` 은 frontmatter 가 없고 읽는 코드도 없어 지금 부여하면 닻을 못 내린다
-- **idea 와 memory 가 어느 계열인지 미결이다.** 둘 다 backlog 과 같은 churn 을 갖는다
-  (`freememo` 는 "어디로든, 또는 삭제", memory 는 reflect 마다 pruning). 지금은 numbered 에 있고,
-  옮기는 것은 `HASHED_TYPES` 에 한 줄이며 **타입 시스템이 나머지 호출부를 짚어준다**
+- **idea·memory 는 hashed 로 확정됐다** (사용자, gen-098 직후 minor fix). 둘 다 backlog 과 같은
+  churn 이다 — `freememo` 는 "어디로든, 또는 삭제", memory 는 reflect 마다 pruning.
+  **numbered 로 남은 것은 goal·milestone·design 셋**
 - **기존 프로젝트는 아직 이 버전을 받으면 ID 경고를 본다.** migration note 가 유일한 도달 채널이고
   버전 bump 를 동반해야 하므로 v0.18 릴리즈 세대가 쓴다
 - **milestone 파일 항목은 한 줄로 쓸 것** — 이어진 줄은 이제 folding 되지만, HTML 주석 블록은
