@@ -143,6 +143,7 @@ export const zhCN: Translations = {
   // Quick Start Page
   quickstart: {
     title: "快速开始",
+    description: "从安装 REAP 到运行第一个 generation — 前置条件、/reap.evolve 命令，以及生命周期各阶段产生的产物。",
     breadcrumb: "入门",
     prerequisites: "前置条件",
     prerequisiteItems: [
@@ -184,6 +185,7 @@ export const zhCN: Translations = {
   // Core Concepts Page
   concepts: {
     title: "核心概念",
+    description: "构成 REAP 项目的四个层次 — Vision、Knowledge、Generation、Civilization — 以及它们相互作用的原则。",
     breadcrumb: "指南",
     fourAxisTitle: "四层架构",
     fourAxisDesc: "REAP 由四个相互关联的层组成：",
@@ -511,6 +513,7 @@ strictMerge: true   # 限制直接使用 git pull/push/merge`,
   // Advanced Page
   advanced: {
     title: "高级功能",
+    description: "基于签名的阶段锁定、lineage 压缩与进入模式 — 让长期演进的 REAP 项目保持一致的机制。",
     breadcrumb: "指南",
     signatureTitle: "基于签名的锁定",
     signatureDesc: "REAP 使用加密 nonce 链来强制阶段排序。没有有效的 nonce，AI 代理无法推进到下一阶段——即使它试图跳过。",
@@ -1029,6 +1032,7 @@ commit:  1a2b3c4`,
   // Release Notes Page
   releaseNotes: {
     title: "发布说明",
+    description: "每个 REAP 版本的变更内容：新增命令、行为变化，以及既有项目所需的迁移步骤。",
     breadcrumb: "其他",
     versions: [
       {

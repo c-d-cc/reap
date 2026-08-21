@@ -10,6 +10,13 @@ export default defineConfig({
   base: "/",
   define: {
     __REAP_VERSION__: JSON.stringify(rootPkg.version),
+    // The copyright year is fixed at build time so that the server and the
+    // browser agree on it. `new Date().getFullYear()` used to be evaluated in
+    // both, which was harmless while the page was rendered only in a browser;
+    // once the page is prerendered it becomes a hydration mismatch on a text
+    // node every 1 January, and a year that stays stale until someone happens
+    // to touch docs/**.
+    __BUILD_YEAR__: JSON.stringify(String(new Date().getFullYear())),
   },
   plugins: [
     react(),

@@ -13,7 +13,7 @@ export function Footer() {
           </a>
         </div>
         <p className="text-xs text-muted-foreground/50">
-          &copy; {new Date().getFullYear()} C to D. All rights reserved.
+          &copy; {__BUILD_YEAR__} C to D. All rights reserved.
         </p>
       </div>
     </footer>

@@ -9,6 +9,12 @@ on:
       - 'media/**'
       - 'README*.md'
       - '.github/workflows/docs.yml'
+      # The gate below lives outside docs/ and nothing else runs it — not
+      # ci.yml, not release.yml. Without these two lines, editing the gate does
+      # not run the gate, and a change to it would first execute whenever
+      # someone happened to touch a documentation page.
+      - 'scripts/check-docs-prerender.sh'
+      - 'scripts/check-docs-prerender.mjs'
 
 permissions:
   contents: read
@@ -46,12 +52,23 @@ jobs:
         working-directory: docs
         run: npx tsc --noEmit -p tsconfig.json
 
+      # `npm run build`, not `npx vite build`. The build is three steps now —
+      # the client bundle, an SSR bundle of `src/entry-server.tsx`, and the
+      # prerender pass that renders all 23 routes in all 5 locales into
+      # `dist/public/<route>/index.html`. Calling vite directly would run the
+      # first of the three and deploy the shell, which is the state gen-096
+      # exists to end.
       - name: Build docs
         working-directory: docs
-        run: npx vite build
+        run: npm run build
 
-      - name: Copy index.html to 404.html for SPA routing
-        run: cp docs/dist/public/index.html docs/dist/public/404.html
+      # Layer 1: the files landed, with the right contents. Placed before the
+      # upload so a shell-only build stops the deploy instead of replacing a
+      # working site with one. See the header of the script for what it does
+      # not check — everything about the served site, which is layer 2
+      # (scripts/check-docs-live.sh) and needs this deploy to have happened.
+      - name: Check prerendered output
+        run: bash scripts/check-docs-prerender.sh
 
       - uses: actions/upload-pages-artifact@v3
         with:

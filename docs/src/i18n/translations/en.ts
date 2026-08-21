@@ -141,6 +141,7 @@ export const en = {
   // Quick Start Page
   quickstart: {
     title: "Quick Start",
+    description: "Install REAP, initialize a project, and run your first generation — the prerequisites, the /reap.evolve command, and what each lifecycle stage produces.",
     breadcrumb: "Getting Started",
     prerequisites: "Prerequisites",
     prerequisiteItems: [
@@ -181,6 +182,7 @@ export const en = {
   // Core Concepts Page
   concepts: {
     title: "Core Concepts",
+    description: "The four layers a REAP project is built from — Vision, Knowledge, Generation and Civilization — and the principles that govern how they interact.",
     breadcrumb: "Guide",
     fourAxisTitle: "4-Layer Architecture",
     fourAxisDesc: "REAP consists of four interconnected layers:",
@@ -509,6 +511,7 @@ strictMerge: true   # Restrict raw git pull/push/merge`,
   // Advanced Page
   advanced: {
     title: "Advanced",
+    description: "Signature-based stage locking, lineage compression and entry modes — the mechanisms that keep a long-running REAP project consistent.",
     breadcrumb: "Guide",
     signatureTitle: "Signature-Based Locking",
     signatureDesc: "REAP uses a cryptographic nonce chain to enforce stage ordering. Without a valid nonce, the AI agent cannot advance to the next stage — even if it tries to skip ahead.",
@@ -1027,6 +1030,7 @@ commit:  1a2b3c4`,
   // Release Notes Page
   releaseNotes: {
     title: "Release Notes",
+    description: "What changed in each REAP release: new commands, behaviour changes, and the migration steps an existing project needs to take.",
     breadcrumb: "Other",
     versions: [
       {

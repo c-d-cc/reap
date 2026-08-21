@@ -1,9 +1,16 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="dark">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
-    <title>REAP</title>
+    <!--app-head-start-->
+    <!-- The prerenderer replaces everything between the two app-head markers,
+         this comment included, with the title, description and hreflang links
+         of the page it is building. The title below is what `vite dev` and any
+         un-prerendered build show — the comment lives inside the markers so it
+         is not shipped, 115 times, describing a substitution that has already
+         happened. -->
+    <title>REAP</title><!--app-head-end-->
     <link rel="icon" type="image/png" href="/favicon.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>

@@ -143,6 +143,7 @@ export const de: Translations = {
   // Quick Start Page
   quickstart: {
     title: "Schnellstart",
+    description: "REAP installieren, ein Projekt initialisieren und die erste Generation ausführen — Voraussetzungen, der Befehl /reap.evolve und die Artefakte jeder Phase.",
     breadcrumb: "Erste Schritte",
     prerequisites: "Voraussetzungen",
     prerequisiteItems: [
@@ -184,6 +185,7 @@ export const de: Translations = {
   // Core Concepts Page
   concepts: {
     title: "Kernkonzepte",
+    description: "Die vier Schichten eines REAP-Projekts — Vision, Knowledge, Generation und Civilization — und die Prinzipien, nach denen sie zusammenwirken.",
     breadcrumb: "Leitfaden",
     fourAxisTitle: "4-Schichten-Architektur",
     fourAxisDesc: "REAP besteht aus vier miteinander verbundenen Schichten:",
@@ -511,6 +513,7 @@ strictMerge: true   # Rohes git pull/push/merge einschränken`,
   // Advanced Page
   advanced: {
     title: "Erweitert",
+    description: "Signaturbasierte Phasensperre, Lineage-Kompression und Entry Modes — die Mechanismen, die ein langlebiges REAP-Projekt konsistent halten.",
     breadcrumb: "Leitfaden",
     signatureTitle: "Signaturbasierte Sperrung",
     signatureDesc: "REAP verwendet eine kryptographische Nonce-Kette zur Durchsetzung der Phasenreihenfolge. Ohne eine gültige Nonce kann der KI-Agent nicht zur nächsten Phase vorrücken — selbst wenn er versucht, vorwärts zu springen.",
@@ -1029,6 +1032,7 @@ commit:  1a2b3c4`,
   // Release Notes Page
   releaseNotes: {
     title: "Versionshinweise",
+    description: "Was sich in jeder REAP-Version geändert hat: neue Befehle, Verhaltensänderungen und die Migrationsschritte für bestehende Projekte.",
     breadcrumb: "Sonstiges",
     versions: [
       {

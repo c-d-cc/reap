@@ -206,8 +206,51 @@ incremental 이 재파싱하지 않은 파일까지 재해석해야 한다. 없�
 
 ## docs/ — reap.cc 문서 사이트
 
-별도 repo 가 아니라 **본 repo 안의 Vite + React 앱**이다 (`docs/`, 자체 `package.json`). `.github/workflows/docs.yml` 이 `docs/**`, `media/**`, `README*.md` 변경을 main push 시 GitHub Pages 로 배포하고(`docs/public/CNAME` = `reap.cc`), `index.html` 을 `404.html` 로 복사해 SPA fallback 을 만든다. 빌드는 `cd docs && npx vite build` → `docs/dist/public/`.
+별도 repo 가 아니라 **본 repo 안의 Vite + React 앱**이다 (`docs/`, 자체 `package.json`).
+`.github/workflows/docs.yml` 이 main push 시 GitHub Pages 로 배포한다 (`docs/public/CNAME` = `reap.cc`).
 
-콘텐츠는 마크다운이 아니라 **`docs/src/i18n/translations/{en,ko,ja,de,zh-CN}.ts`** — 5개 로케일 각각이 전체 문서 텍스트를 담은 TS 객체다. changelog 는 각 로케일의 `releaseNotes.versions[]` 배열(최신이 첫 원소).
+**빌드는 세 단계이고 `npm run build` 로만 부른다.** `npx vite build` 는 첫 단계뿐이라 셸 하나만 나간다:
 
-**주의**: TS 객체이므로 구문 오류 시 빌드가 깨진다 — 수정 후 반드시 `npx vite build` 확인. 그리고 5개 로케일을 **모두** 갱신해야 한다. 일부만 고치면 로케일 drift 가 생기며 `scripts/check-docs-version.sh` 가 이를 검사한다.
+```
+vite build                                          → dist/public/   (클라이언트)
+vite build --ssr src/entry-server.tsx --outDir dist/server
+node scripts/prerender.mjs                          → 115 페이지 + sitemap.xml + robots.txt
+```
+
+### 라우팅과 로케일
+
+- **`docs/src/routes.ts` 가 라우트 목록의 단일 소유자**다. `App.tsx` 가 `ROUTES.map` 으로 `<Route>` 를
+  만들고 prerender 가 같은 배열을 읽는다. 각 항목이 `meta(t)` 로 `<title>`/description 을 낸다 —
+  전부 기존 번역 문자열에서 온다
+- **로케일은 URL 이 정한다.** 영어는 접두사 없음(`/docs/x`), 나머지는 `/ko/docs/x` 형태.
+  `docs/src/i18n/locale-path.ts` 가 그 사상을 소유한다. **영어에 `/en/` 을 붙이면 안 된다** —
+  `README*.md` 5개가 `reap.cc/docs/*` 를 80회 걸고 그 README 는 npm tarball 에 실린다
+- 라우트는 로케일당 복제되지 않는다. `<Router base="/ko">` 하나가 base 를 잘라내고 `<Link>` 에
+  다시 붙인다
+- **GitHub Pages 는 `/docs/x` 를 `/docs/x/` 로 301 한다.** 그래서 브라우저가 하이드레이션하는
+  주소는 prerender 가 렌더한 주소와 한 슬래시 다르다. `App.tsx` 의 `useNormalizedLocation` 이
+  이것을 흡수하고, `entry-server.tsx` 의 `assertSlashInvariant` 가 **모든 페이지를 두 주소로 렌더해
+  바이트 동일을 요구**하며 다르면 빌드를 중단한다 (비용 +4%)
+
+### 판단은 `src/` 안에 둔다
+
+`docs/tsconfig.json` 의 `include` 가 `["src/**/*"]` 다 — **`docs/scripts/` 는 타입체크되지 않는다.**
+그래서 렌더·메타·sitemap 생성은 전부 `docs/src/entry-server.tsx` 에 있고 `docs/scripts/prerender.mjs`
+는 파일 쓰기만 한다. 사이트 origin 은 `docs/public/CNAME` 이 소유하며 드라이버가 읽어 주입한다.
+
+`index.html` 의 `<!--app-head-start/end-->` 사이가 페이지별 head 로 치환된다. **치환 3종은 전부
+fail-closed** — 마커가 없으면 조용히 셸 115장이 나가므로 throw 한다.
+
+### 콘텐츠
+
+마크다운이 아니라 **`docs/src/i18n/translations/{en,ko,ja,de,zh-CN}.ts`** — 5개 로케일 각각이 전체
+문서 텍스트를 담은 TS 객체다. changelog 는 각 로케일의 `releaseNotes.versions[]` 배열(최신이 첫 원소).
+
+**주의**: TS 객체이므로 구문 오류 시 빌드가 깨진다 — 수정 후 반드시 `npm run build` 확인. 그리고 5개
+로케일을 **모두** 갱신해야 한다. 일부만 고치면 로케일 drift 가 생기며 `scripts/check-docs-version.sh`
+가 이를 검사한다.
+
+### 죽은 코드
+
+`docs/src/components/ui/sidebar.tsx` 와 `docs/src/hooks/use-mobile.tsx` 는 **importer 가 0** 이다
+(shadcn 보일러플레이트). `docs/src/pages/CLIPage.tsx` 는 어느 라우트에도 연결돼 있지 않다.

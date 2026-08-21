@@ -143,6 +143,7 @@ export const ko: Translations = {
   // Quick Start Page
   quickstart: {
     title: "빠른 시작",
+    description: "REAP 설치부터 첫 generation 실행까지 — 사전 준비물, /reap.evolve 명령, 그리고 라이프사이클 각 단계가 남기는 산출물.",
     breadcrumb: "시작하기",
     prerequisites: "사전 요구사항",
     prerequisiteItems: [
@@ -184,6 +185,7 @@ export const ko: Translations = {
   // Core Concepts Page
   concepts: {
     title: "핵심 개념",
+    description: "REAP 프로젝트를 이루는 네 개의 층 — Vision, Knowledge, Generation, Civilization — 과 이들이 상호작용하는 원칙.",
     breadcrumb: "가이드",
     fourAxisTitle: "4계층 아키텍처",
     fourAxisDesc: "REAP는 네 개의 상호 연결된 계층으로 구성됩니다:",
@@ -512,6 +514,7 @@ strictMerge: true   # 직접 git pull/push/merge 제한`,
   // Advanced Page
   advanced: {
     title: "고급",
+    description: "서명 기반 단계 잠금, lineage 압축, 진입 모드 — 오래 이어지는 REAP 프로젝트의 일관성을 지키는 장치들.",
     breadcrumb: "가이드",
     signatureTitle: "서명 기반 잠금",
     signatureDesc: "REAP는 암호학적 nonce 체인을 사용하여 단계 순서를 강제합니다. 유효한 nonce 없이는 AI 에이전트가 다음 단계로 진행할 수 없습니다 — 건너뛰려고 해도 불가능합니다.",
@@ -1030,6 +1033,7 @@ commit:  1a2b3c4`,
   // Release Notes Page
   releaseNotes: {
     title: "릴리즈 노트",
+    description: "REAP 릴리즈별 변경 사항 — 새 명령, 동작 변경, 그리고 기존 프로젝트에 필요한 마이그레이션 절차.",
     breadcrumb: "기타",
     versions: [
       {

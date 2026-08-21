@@ -41,7 +41,7 @@
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline — **unit 640 / e2e 329 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
+현재 baseline — **unit 649 / e2e 329 / scenario 44, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
 
 `src/indexer/` 의 이식된 모듈(call-resolver/impact/scanner/parser/pipeline)에는 **unit test 가 없다** — 그쪽은 지금 e2e 로만 덮인다.
 
@@ -93,6 +93,9 @@
   - **답이 셋이다** — pass / FAIL / **amber SKIP(exit 0)**. 세 번째는 `/reap.start` 가 시키는 `reap run` 명령이 거부됐을 때이며 *"검사가 아무것도 측정하지 못했다"* 를 뜻한다. **검사 실패와 측정 실패는 다르다** — gen-091 이전에는 그것을 FAIL 로, 그것도 `This is the gen-063 failure exactly` 로 단정해 릴리즈가 없는 결함을 쫓았다. 부재 FAIL 은 이제 원인을 열거하고 agent 응답과 거부 항목을 함께 싣는다.
   - **통과가 증명하는 것은 하나 반이다.** `CLI reachable` 은 생성된 generation 이 증명한다. `slash command 노출` 은 **agent 가 우회 금지 지시를 지켰을 때만** 성립한다 — 슬래시 커맨드는 CLI 의 wrapper 라 우회가 바이트 동일한 파일을 남긴다(gen-079 실측). **`@` import 로드와 SessionStart hook 발화는 증명하지 않는다** — `/reap.start` 는 둘 없이도 성공한다. 여섯 세대 동안 넷을 주장했다.
 - `scripts/check-version-floors.sh` — **버전 하한 게이트**. reap 이 사용자에게 "이 버전으로 올려라"라고 말하는 숫자(`package.json` 의 `reap.autoUpdateMinVersion`)가 npm 에 **실제로 발행돼 있는지** 검사한다. 값은 소스에서 읽는다(carrier 표식). 네트워크 실패·비-JSON 은 amber SKIP, **패키지 자체가 없으면(`E404`) FAIL** — 그 둘을 구분하지 않으면 이름 오타가 조용히 통과한다. `release.yml` 의 `npm publish` 앞. **CI 에는 없다** — 매 push 마다 네트워크가 필요하고, 코드와 무관한 이유로 주기적으로 SKIP 을 내는 검사는 사람이 스크롤로 넘긴다
+- `scripts/check-docs-prerender.sh` + `.mjs` — **docs prerender 게이트 / 층1 (gen-096)**. 빌드 산출물을 읽어 115 페이지가 실제로 놓였는지 본다: 개수·크기 하한·영어 무접두사·README 가 거는 15경로·sitemap·robots 는 `.sh` 가, **페이지 내부의 값**은 `.mjs` 가 본다 — canonical / hreflang **대상 URL** / 언어 셀렉터 href / 활성 로케일 / 참조 asset 존재. `.mjs` 는 기대값을 **파일의 디스크상 위치에서 재계산**하며 `entry-server.tsx` 를 import 하지 않는다 (검사기가 대상과 기대값을 공유하면 틀린 값이 자기 자신과 일치한다). 로케일 목록만 소유자 `docs/src/i18n/types.ts` 에서 읽는다. `docs.yml` 의 upload 앞에 있고 **`paths:` 에 이 두 파일이 들어 있다** — 없으면 게이트를 고쳐도 게이트가 안 돈다.
+  - **못 보는 것**: 배포된 사이트에 대한 일체(층2 담당) · 실제 브라우저 하이드레이션 · `404.html`(게이트는 `cp` **앞**에서 돌고 `index.html` 만 센다) · description 이 없는 4개 라우트(원본 문자열이 없어 의도된 부재)
+- `scripts/check-docs-live.sh` — **docs 배포본 게이트 / 층2 (gen-096)**. 115 URL 에 HTTP 를 보내 200 · 셸 아님 · `<html lang>` · 로케일 내 고유 `<title>` · sitemap · robots 를 본다. **답이 셋** — pass / FAIL / **amber SKIP(exit 0)**, 세 번째는 호스트가 응답하지 않을 때이며 *"검사가 아무것도 측정하지 못했다"* 를 뜻한다. **origin 을 인자로 받는다**: `python3 -m http.server` 로 `dist/public` 을 띄우면 **2초에 pass 를 관측할 수 있다** — 그 서버가 Pages 의 두 동작(디렉토리 인덱스, `/dir`→`/dir/` 301)을 재현하기 때문이다. 로컬 pass 가 증명하지 못하는 것은 실제 Pages 동작·DNS/TLS·배포 워크플로가 빌드한 것을 올렸는지다. CI 에 없다 — 배포 후 수동
 - `scripts/check-docs-version.sh` — 릴리즈 문서 정합성 게이트. `RELEASE_NOTICE.md` / `RELEASE_NOTES.md` / 5개 로케일 changelog 가 `package.json` 과 일치하는지 + **로케일 간 항목 집합 동일성** + migration note 가 패키지 버전을 넘지 않는지 검사. `release.yml` 의 `npm publish` 앞과 `reapdev.versionBump` Step 5-1 에서 실행
 
 ### npm scripts
@@ -137,6 +140,7 @@
 | 시점 | 검사 | 어디서 | 비용 |
 |---|---|---|---|
 | `ci.yml` (매 push) | build + **자기진단**(층1, claude-code + **OpenCode**) | reap | 무료 |
+| `docs.yml` (docs 변경 시) | docs 빌드 + **prerender 게이트**(층1) | reap | 무료 |
 | main push | **테스트 전체** (unit/e2e/scenario) | **reap-test** | 무료 |
 | `release.yml` (`v*` 태그) | 문서 정합성 + **버전 하한** + 자기진단 + build + publish | reap | 무료 |
 | 릴리즈 전 수동 (`reapdev.versionBump` 5-2) | **agent 통합**(층2) | 로컬 | ~$0.25 |

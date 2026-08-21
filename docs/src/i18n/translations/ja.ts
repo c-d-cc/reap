@@ -143,6 +143,7 @@ export const ja: Translations = {
   // Quick Start Page
   quickstart: {
     title: "クイックスタート",
+    description: "REAP のインストールから最初の generation 実行まで — 前提条件、/reap.evolve コマンド、各ライフサイクル段階が残す成果物。",
     breadcrumb: "はじめに",
     prerequisites: "前提条件",
     prerequisiteItems: [
@@ -184,6 +185,7 @@ export const ja: Translations = {
   // Core Concepts Page
   concepts: {
     title: "コアコンセプト",
+    description: "REAP プロジェクトを構成する四つの層 — Vision、Knowledge、Generation、Civilization — と、それらが相互作用する原則。",
     breadcrumb: "ガイド",
     fourAxisTitle: "4層アーキテクチャ",
     fourAxisDesc: "REAPは相互接続された4つの層で構成されています：",
@@ -511,6 +513,7 @@ strictMerge: true   # 直接のgit pull/push/mergeを制限`,
   // Advanced Page
   advanced: {
     title: "上級",
+    description: "署名ベースのステージロック、lineage 圧縮、エントリーモード — 長く続く REAP プロジェクトの一貫性を保つ仕組み。",
     breadcrumb: "ガイド",
     signatureTitle: "署名ベースのロック",
     signatureDesc: "REAPは暗号学的nonceチェーンを使用してステージの順序を強制します。有効なnonceがなければ、AIエージェントは次のステージに進めません — スキップしようとしても。",
@@ -1029,6 +1032,7 @@ commit:  1a2b3c4`,
   // Release Notes Page
   releaseNotes: {
     title: "リリースノート",
+    description: "REAP の各リリースでの変更点 — 新しいコマンド、動作の変更、既存プロジェクトに必要な移行手順。",
     breadcrumb: "その他",
     versions: [
       {

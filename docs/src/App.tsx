@@ -5,6 +5,10 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import NotFound from "@/pages/not-found";
 import { useEffect } from "react";
 import { LanguageProvider } from "@/i18n";
+import { type Locale } from "@/i18n/types";
+import { localePrefix, stripTrailingSlash } from "@/i18n/locale-path";
+import { useBrowserLocation } from "wouter/use-browser-location";
+import { ROUTES } from "@/routes";
 
 function ScrollToTop() {
   const [location] = useLocation();
@@ -14,73 +18,70 @@ function ScrollToTop() {
   return null;
 }
 
-import { HeroPage } from "@/pages/HeroPage";
-import Introduction from "@/pages/Introduction";
-import QuickStartPage from "@/pages/QuickStartPage";
-import CoreConceptsPage from "@/pages/CoreConceptsPage";
-import LifecyclePage from "@/pages/LifecyclePage";
-import GenomePage from "@/pages/GenomePage";
-import EnvironmentPage from "@/pages/EnvironmentPage";
-import LineagePage from "@/pages/LineagePage";
-import BacklogPage from "@/pages/BacklogPage";
-import VisionPage from "@/pages/VisionPage";
-import AdvancedPage from "@/pages/AdvancedPage";
-import CommandReferencePage from "@/pages/CommandReferencePage";
-import HookReferencePage from "@/pages/HookReferencePage";
-import HooksPage from "@/pages/HooksPage";
-import CodeIntelligencePage from "@/pages/CodeIntelligencePage";
-import ConfigurationPage from "@/pages/ConfigurationPage";
-import ComparisonPage from "@/pages/ComparisonPage";
-import DistributedOverviewPage from "@/pages/DistributedOverviewPage";
-import MergeLifecyclePage from "@/pages/MergeLifecyclePage";
-import MergeCommandsPage from "@/pages/MergeCommandsPage";
-import SelfEvolvingPage from "@/pages/SelfEvolvingPage";
-import MigrationGuidePage from "@/pages/MigrationGuidePage";
-import ReleaseNotesPage from "@/pages/ReleaseNotesPage";
-
 const queryClient = new QueryClient();
+
+/**
+ * wouter's own location hook, with the host's trailing slash taken off.
+ *
+ * The prerenderer renders `/docs/quick-start`; GitHub Pages serves that file
+ * from a directory and 301s the browser to `/docs/quick-start/`. Without this
+ * the two disagree, and `useLocation()` is read while rendering in two places
+ * — so the disagreement is a hydration mismatch, not a cosmetic one.
+ *
+ * Replacing the hook rather than normalising at each caller means every
+ * present and future reader of `useLocation()` sees one form. `<Link>` is
+ * unaffected: it builds hrefs from `base + href`, never from the location.
+ */
+const useNormalizedLocation: typeof useBrowserLocation = (opts) => {
+  const [path, navigate] = useBrowserLocation(opts);
+  return [stripTrailingSlash(path), navigate];
+};
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={HeroPage} />
-      <Route path="/docs/introduction" component={Introduction} />
-      <Route path="/docs/quick-start" component={QuickStartPage} />
-      <Route path="/docs/core-concepts" component={CoreConceptsPage} />
-      <Route path="/docs/lifecycle" component={LifecyclePage} />
-      <Route path="/docs/genome" component={GenomePage} />
-      <Route path="/docs/vision" component={VisionPage} />
-      <Route path="/docs/environment" component={EnvironmentPage} />
-      <Route path="/docs/lineage" component={LineagePage} />
-      <Route path="/docs/backlog" component={BacklogPage} />
-      <Route path="/docs/hooks" component={HooksPage} />
-      <Route path="/docs/code-intelligence" component={CodeIntelligencePage} />
-      <Route path="/docs/hook-reference" component={HookReferencePage} />
-      <Route path="/docs/command-reference" component={CommandReferencePage} />
-      <Route path="/docs/configuration" component={ConfigurationPage} />
-      <Route path="/docs/comparison" component={ComparisonPage} />
-      <Route path="/docs/distributed-workflow" component={DistributedOverviewPage} />
-      <Route path="/docs/merge-generation" component={MergeLifecyclePage} />
-      <Route path="/docs/merge-commands" component={MergeCommandsPage} />
-      <Route path="/docs/self-evolving" component={SelfEvolvingPage} />
-      <Route path="/docs/migration-guide" component={MigrationGuidePage} />
-      <Route path="/docs/release-notes" component={ReleaseNotesPage} />
-      <Route path="/docs/advanced" component={AdvancedPage} />
+      {ROUTES.map((r) => (
+        <Route key={r.path} path={r.path} component={r.component} />
+      ))}
       <Route component={NotFound} />
     </Switch>
   );
 }
 
-function App() {
+/**
+ * `locale` and `ssrPath` are what makes this tree renderable on a server.
+ *
+ * The locale arrives as a prop because it is a fact about the URL, and the URL
+ * is known in both places: the browser reads `location.pathname`, the
+ * prerenderer knows which page it is building. Nothing has to be detected.
+ *
+ * `base` is the locale prefix, so the routes in `routes.ts` are declared once
+ * rather than once per locale. wouter strips `base` from the location before matching and
+ * prepends it to every `<Link>`, which means the sidebar and navbar point at
+ * `/ko/docs/…` inside a Korean page without knowing that locales exist.
+ *
+ * `ssrPath` removes the last browser global from the render path: wouter only
+ * reads the real `location` when `ssrPath` is absent.
+ *
+ * It is NOT the same path the browser will have, which is what an earlier
+ * version of this comment claimed. The prerenderer writes `<route>/index.html`
+ * and GitHub Pages answers `/route` with a 301 to `/route/`, so the browser
+ * hydrates one slash away from what was rendered. `useNormalizedLocation`
+ * above is what closes that gap, and `assertSlashInvariant` in entry-server.tsx
+ * refuses to build if it ever stops closing it.
+ */
+function App({ locale, ssrPath }: { locale: Locale; ssrPath?: string }) {
   useEffect(() => {
     document.documentElement.classList.add("dark");
   }, []);
 
+  const base = import.meta.env.BASE_URL.replace(/\/$/, "") + localePrefix(locale);
+
   return (
-    <LanguageProvider>
+    <LanguageProvider locale={locale}>
       <QueryClientProvider client={queryClient}>
         <TooltipProvider>
-          <WouterRouter base={import.meta.env.BASE_URL.replace(/\/$/, "")}>
+          <WouterRouter base={base} ssrPath={ssrPath} hook={useNormalizedLocation}>
             <ScrollToTop />
             <Router />
           </WouterRouter>

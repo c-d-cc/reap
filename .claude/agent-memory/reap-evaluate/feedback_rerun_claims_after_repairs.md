@@ -24,3 +24,21 @@ grep for the discredited argument across the tree — the copy in a test-file he
 outlives the copy in the learning artifact.
 
 Related: [[inherited-worktree-review]], [[negative-test-discrimination]]
+
+**Extension — recompute NUMBERS in prose, not only commands.** A magnitude quoted
+as justification ("the shortest page is 1,645 characters, so this is not a close
+call"; "against the live site — 14 failures") is a measurement, and a later repair
+in the same round can falsify it while every test stays green. In gen-096 round 3
+both of those were stale: 1,645 was the `#root` figure from the *defeated* first
+version of the check and the `<main>` version measures 1,207; the live-site count
+had moved 14 → 18 in a paragraph that itself explained why such a number goes
+stale. Recompute every figure a comment offers as evidence — it costs one command
+and it is where this repository's recurring stale-prose defect actually lands.
+
+**And for UX/redirect behaviour, drive a real browser.** Headless Chrome plus
+node's built-in `WebSocket` over CDP needs zero dependencies:
+`--headless=new --remote-debugging-port=N`, then `Emulation.setUserAgentOverride
+{acceptLanguage}` to set `navigator.language`. That is how the gen-096 redirect
+defect was found — the builder's own browser table tested only the sequence that
+began at `/`, so the flag was always already set. Vary the ENTRY point, not just
+the actions.

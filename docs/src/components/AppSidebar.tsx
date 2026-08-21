@@ -103,7 +103,7 @@ export function SidebarFooter({ expanded }: { expanded?: boolean }) {
           <img src="/ctod-logo.png" alt="C to D" className="h-5" />
         </a>
       </div>
-      <p className="text-xs text-muted-foreground/30 text-center">&copy; {new Date().getFullYear()} C to D.<br />All rights reserved.</p>
+      <p className="text-xs text-muted-foreground/30 text-center">&copy; {__BUILD_YEAR__} C to D.<br />All rights reserved.</p>
     </div>
   );
 }
