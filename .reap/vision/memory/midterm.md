@@ -22,30 +22,27 @@
 실제 사용자에게 의미가 있는 것만 쓴다. 사용자에게 달라진 것이 전혀 없으면
 `<!-- no-user-facing-change -->` 로 선언하고 항목을 만들지 않는다.
 
-## 0.18 — milestone 이 생겼으므로 계획은 milestone 파일로 옮긴다
+## 0.18 — milestone 둘로 나뉘었다. 계획은 milestone 파일이 갖는다
 
-gen-097 이 milestone 을 도입했다. **다음 할 일은 v0.18 milestone 을 만들어 그 계획을 담는 것**이며,
-`vision/design/backlogs_v0.18/` 6건이 그 generation 목록의 원본이다.
+**계획 자체를 여기 옮겨 적지 않는다** — `vision/milestones/` 두 파일이 소유한다.
+여기는 그 파일에 담기지 않는 것만.
 
-**순서** (`plugin 전환` 이 앞인 이유는 새 skill 2개가 어느 배포 구조에서 태어날지 먼저 확정돼야
-하기 때문): plugin 전환 → **지식 축 경계 통합 설계(milestone·plan·idea·memory 4축)** →
-memory 재설계 + plan·idea 자리 → interview → `/reap.plan` → 문서.
+- `v018-배포-형태를-plugin-으로` (**main**) — 리서치 → 구현(별도 브랜치) → 릴리즈
+- `v018-지식-축-정리` — 경계 설계(3축) → memory → idea → interview
 
-경계 설계를 한 세대에 몰아넣는 이유는 따로 하면 genome·reap-guide·5 로케일·migration note 에서
-경계가 어긋나기 때문이다. gen-097 이 4축 중 하나(milestone↔midterm)를 이미 그었다.
+**나눈 이유**: 완료 조건이 서로를 뒷받침하지 않고(memory 가 flat 인 것은 REAP 이 한 도구로 보이는
+증거가 아니다), goal 이 다르고, 브랜치가 다르다. **`plan` 을 빼자 둘이 순차가 아니라 병렬이 됐다** —
+plugin 에 의존하는 것은 `interview` 하나뿐이다.
 
-**별도 브랜치로 간다** — 중간 상태가 main 에 있으면 사용자가 반쯤 바뀐 구조를 받는다.
-gen-097(milestone)은 배포 형태와 무관하므로 main 에 있고, plugin 브랜치가 그것을 상속한다.
+**`.reap/plan/` 과 `/reap.plan` 은 v0.18 에서 제외**(사용자, 2026-08-21).
+`vision/design/backlogs_plan-track/` 이 두 backlog 와 재검토 포인트를 갖는다.
+그래서 경계 설계는 **4축이 아니라 3축**이다.
 
-**미결 셋**: (a) **A/B 배포 형태 확정** — `command` source 발견(2026-08-20)이 판단을 뒤집는다.
+**미결 둘**: (a) **A/B 배포 형태 확정** — `command` source 발견(2026-08-20)이 판단을 뒤집는다.
 명령이 세션마다 재실행되므로 `npm i -g` 한 번으로 CLI 와 plugin 이 동시에 갱신되고, 따라서
-auto-update 가 plugin 갱신의 유일한 경로가 된다. 근거·측정은 `vision/design/plugin-distribution.md`
-§ 4 가 소유하며 **미독 절 3개**(결정 대기 / 미측정 / plugin cache)가 남아 있다.
-(b) **update 관련 backlog 4건 삭제 여부** — (a)에 종속. (c) migration note 를 건별로 쓸지 한 번에 쓸지.
-
-**v0.18 릴리즈 세대가 반드시 해야 하는 것 둘** (gen-097 이 의도적으로 미룬 것):
-`src/templates/migration/v0.18.0.md` (기존 프로젝트에 규칙이 도달하는 유일한 채널) ·
-**docs 5 로케일에 milestone 문서**. 후자는 미발행 기능을 사이트에 띄우지 않으려고 미뤘다.
+auto-update 가 plugin 갱신의 유일한 경로가 된다. `vision/design/plugin-distribution.md` § 4 가
+근거를 소유하며 **미독 절 3개**(결정 대기 / 미측정 / plugin cache)가 남아 있다.
+(b) **update 관련 backlog 4건 삭제 여부** — (a)에 종속.
 
 ## 0.17 잔여 backlog 9건 — plugin 전환 이후에 재검토
 

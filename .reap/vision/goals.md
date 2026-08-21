@@ -37,11 +37,13 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [ ] P4 orchestration — goal 배정 + 수확 대조
 - [ ] Fitness 모델 확정 — cell 단위 인간 판단. self-fitness 금지 원칙과의 정합성
 
-### Planning — goal 과 generation 사이
+### 지식 축 — 계획과 맥락을 어디에 두는가
 - [x] Milestone 도입 (gen-097 — `vision/milestones/`, main 1개 + 나머지 소비 가능, 경계 3요소 강제. 다음 세대 제안이 토큰 겹침 휴리스틱에서 계획으로 바뀌었다)
-- [ ] `.reap/plan/` — "무엇을 만들 것인가"의 정본
-- [ ] `.reap/idea/` — 아직 단단하지 않은 지식의 자리
-- [ ] memory 를 flat + 메타데이터로 재설계
+- [ ] `.reap/idea/` — 아직 단단하지 않은 지식의 자리 (research / freememo / files)
+- [ ] memory 를 flat + 메타데이터로 재설계 — 살아있는 것의 요약만 prompt 에 올린다
+- [ ] interview — 모호성을 제거하는 독립 대화 절차
+      <!-- `.reap/plan/` 과 `/reap.plan` 은 v0.18 에서 제외됐다 (사용자, 2026-08-21).
+           backlog 는 vision/design/backlogs_plan-track/ 이 갖는다 -->
 
 ### Agent Client 확장
 - [x] OpenCode adapter (gen-063~064 완료 — opencode.json + plugin + AGENTS.md + dump-state + slash commands `/reap.*`. 4-항목 verification: static load / dynamic refresh / entry-point / slash trigger 모두 충족)

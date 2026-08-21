@@ -35,6 +35,20 @@ milestone:  goal: 배포 형태를 사용자 도구로 인식되게 한다
 gen-097 은 goals.md 쪽을 고쳐서(제목을 짧게, 설명을 HTML 주석으로) 넘어갔다. **그것이 옳은
 방향인지가 이 backlog 의 질문이다.**
 
+### 두 번째 증상 — `## Generations` 의 이어진 줄이 조용히 버려진다
+
+`readGenerations` 는 `- [x]` / `- [ ]` 로 시작하는 줄만 읽는다. 항목을 두 줄로 쓰면
+**둘째 줄이 사라진다** — 파일은 멀쩡한데 후보 목록에서 문장이 중간에 끊긴다:
+
+```
+파일:   - [ ] plugin 배포 형태 리서치·설계 — A/B 확정. `plugin-distribution.md`
+              의 미독 절 3개를 먼저 읽는다
+출력:   - plugin 배포 형태 리서치·설계 — A/B 확정. `plugin-distribution.md`
+```
+
+**같은 질문의 다른 증상이다** — 파서가 받는 형식이 사람이 자연히 쓰는 것보다 좁다.
+gen-097 은 항목을 한 줄로 줄이고 상세를 HTML 주석으로 옮겨 넘어갔다.
+
 ## Solution
 
 세 갈래이고 **어느 것이든 근거가 필요하다**:
@@ -48,7 +62,8 @@ gen-097 은 goals.md 쪽을 고쳐서(제목을 짧게, 설명을 HTML 주석으
 
 ## Files to Change
 
-- `src/core/milestone.ts` — `validateForMain` 의 `normalize` (1안)
+- `src/core/milestone.ts` — `validateForMain` 의 `normalize` (1안) · `readGenerations` 의
+  이어진 줄 처리 (두 번째 증상)
 - `src/core/vision.ts` — `goalIdentifiers` (1·3안)
 - `src/core/integrity.ts` — goals.md 표기 검사 (2안)
 - `.reap/genome/evolution.md` + `src/templates/evolution.md` — 규약 (2안)
