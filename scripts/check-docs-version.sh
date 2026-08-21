@@ -27,6 +27,7 @@ fail() {
   FAILURES=$((FAILURES + 1))
 }
 pass() { green "  ok    $1"; }
+note() { dim   "  note  $1"; }
 
 # Sorted list of every version in a locale's releaseNotes array.
 locale_versions() {
@@ -78,8 +79,10 @@ elif [ -z "$NOTES_TOP_ARCHIVE" ]; then
 else
   # Confirm What's New is non-empty (the section between the title and the first ---)
   WHATS_NEW_LINES=$(sed -n '/^## What.s New/,/^---/p' RELEASE_NOTES.md | grep -c '^- ')
-  if [ "$WHATS_NEW_LINES" -eq 0 ]; then
-    fail "What's New has no entries" "The GitHub release body would be empty."
+  if [ "$WHATS_NEW_LINES" -eq 0 ] && grep -q '^<!-- no-user-facing-change -->$' RELEASE_NOTES.md; then
+    pass "What's New declares no user-facing change; previous release v$NOTES_TOP_ARCHIVE archived"
+  elif [ "$WHATS_NEW_LINES" -eq 0 ]; then
+    fail "What's New has no entries" "The GitHub release body would be empty. If this release changes nothing a user would act on, write <!-- no-user-facing-change --> there instead."
   else
     pass "What's New has $WHATS_NEW_LINES entries; previous release v$NOTES_TOP_ARCHIVE archived"
   fi
@@ -87,16 +90,48 @@ fi
 echo
 
 # ── 3. docs changelog — latest entry per locale
+#
+# A release with nothing a user would act on does not need a changelog entry —
+# but "deliberately omitted" and "forgotten" look identical from here, and
+# forgotten is what happened before gen-073 wrote this check. So the omission
+# has to be declared, in the one file a release cannot skip:
+#
+#     ## What's New
+#
+#     <!-- no-user-facing-change -->
+#
+# Present → the locale entries may stop at the previous version. Absent → every
+# locale must carry an entry for this version, exactly as before.
+#
+# Omission has to be in ALL five locales: § 4 compares the version sets and
+# catches a partial one. That is deliberate — a changelog that lists a version
+# in two languages and not the other three is the gen-073 defect, declared or not.
 echo "docs changelog — latest entry (reap.cc)"
-for L in "${LOCALES[@]}"; do
-  LATEST=$(locale_latest "$L")
-  if [ "$LATEST" = "$PKG_VERSION" ]; then
-    pass "$L.ts → $LATEST"
-  else
-    fail "$L.ts → $LATEST, expected $PKG_VERSION" \
-         "Add a { version: \"$PKG_VERSION\", notes: \"...\" } entry at the top of releaseNotes.versions."
-  fi
-done
+if grep -q '^<!-- no-user-facing-change -->$' RELEASE_NOTES.md; then
+  note "v$PKG_VERSION declares no user-facing change"
+  note "locale entries may stop at the previous version"
+  for L in "${LOCALES[@]}"; do
+    LATEST=$(locale_latest "$L")
+    if [ "$LATEST" = "$PKG_VERSION" ]; then
+      pass "$L.ts → $LATEST (an entry was written anyway)"
+    elif printf '%s\n%s\n' "$LATEST" "$PKG_VERSION" | sort -V -C; then
+      pass "$L.ts → $LATEST (no entry for $PKG_VERSION, as declared)"
+    else
+      fail "$L.ts → $LATEST, which is ahead of $PKG_VERSION" \
+           "A changelog entry names a version that has not been released."
+    fi
+  done
+else
+  for L in "${LOCALES[@]}"; do
+    LATEST=$(locale_latest "$L")
+    if [ "$LATEST" = "$PKG_VERSION" ]; then
+      pass "$L.ts → $LATEST"
+    else
+      fail "$L.ts → $LATEST, expected $PKG_VERSION" \
+           "Add a { version: \"$PKG_VERSION\", notes: \"...\" } entry at the top of releaseNotes.versions, or declare <!-- no-user-facing-change --> in RELEASE_NOTES.md."
+    fi
+  done
+fi
 echo
 
 # ── 4. docs changelog — locale sets must be identical

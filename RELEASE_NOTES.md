@@ -10,7 +10,6 @@
 - **`reap uninstall`** removes what npm cannot. Slash commands, agent definitions, `~/.reap/` and the SessionStart hook entries are written by REAP's own code, and `npm uninstall -g` leaves every one of them behind — the orphaned hook kept calling a command that no longer existed, on every session. Already removed the package? `npx @c-d-cc/reap uninstall --confirm`.
 - **Installing REAP into a project no longer changes your global install.** A project-local copy, an `npx` run and a source checkout now leave your machine alone.
 - **`autoUpdate: false` now actually turns auto-update off.** The setting has been in `.reap/config.yml` since v0.16 and nothing read it. It stops the install and only the install — the warning that your copy is too old to fix automatically still reaches you.
-- **The daemon is retired.** `reap update` removes `daemon` / `daemonBin` from your config and deletes `~/.reap/daemon/`. Remove the global package with `npm uninstall -g @c-d-cc/reap-daemon`.
 - **Agents are told to read `environment/source-map.md` before changing code**, and `reap init` now creates that file for greenfield projects. Existing projects get the rule through the v0.17.6 migration note.
 
 ## v0.17.5

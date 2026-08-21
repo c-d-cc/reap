@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { useT } from "@/i18n";
+import { noteSections } from "@/lib/release-notes";
 
 /**
  * Render inline backticks as <code> spans, leaving other text untouched.
@@ -23,15 +24,16 @@ function renderInline(text: string): ReactNode[] {
 }
 
 /**
- * Render notes string with optional `**Title**` section markers.
- *  - With markers: each `**Title**` starts a new section (bold heading + description).
- *  - Without markers: rendered as plain paragraph (backward compat with older entries).
+ * Render a note, either as `**Title**` sections or as a plain paragraph.
+ *
+ * The section split — and the removal of a separator the author wrote by hand —
+ * lives in `@/lib/release-notes` so a test can exercise it without a renderer.
+ * The dash between title and description is inserted here and only here.
  */
 function renderNotes(notes: string): ReactNode {
-  const parts = notes.split(/\*\*([^*]+)\*\*/g);
+  const sections = noteSections(notes);
 
-  if (parts.length === 1) {
-    // No section markers — plain paragraph.
+  if (sections.length === 0) {
     return (
       <p className="text-sm text-muted-foreground leading-relaxed">
         {renderInline(notes)}
@@ -39,19 +41,11 @@ function renderNotes(notes: string): ReactNode {
     );
   }
 
-  const sections: { title: string; desc: string }[] = [];
-  for (let i = 1; i < parts.length; i += 2) {
-    sections.push({
-      title: parts[i],
-      desc: (parts[i + 1] || "").trim().replace(/^[.,:;]\s*/, ""),
-    });
-  }
-
   return (
     <ul className="space-y-3 list-none p-0 m-0">
       {sections.map((s, i) => (
         <li key={i} className="leading-relaxed">
-          <span className="font-semibold text-foreground">{s.title}</span>
+          <span className="font-semibold text-foreground">{renderInline(s.title)}</span>
           {s.desc && (
             <>
               <span className="text-muted-foreground"> — </span>

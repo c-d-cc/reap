@@ -8,9 +8,9 @@ CLI 는 달라진 것이 없습니다. 배포되는 `genome/evolution.md` 에 �
 
 ## v0.17.6
 ### en
-A code index is built in — nothing to install, no port, no background process: `reap index status | search | impact | callers | callees`. Fifteen languages, no native build; the index is keyed by commit, lives in `.reap/.index/` and is gitignored. `reap uninstall` removes what npm cannot — slash commands, agent definitions, `~/.reap/` and the SessionStart hook entries, which `npm uninstall -g` leaves behind. Installing REAP into a project no longer changes your global install, and `autoUpdate: false` now actually turns auto-update off. The daemon is retired: `reap update` clears `daemon` / `daemonBin` and deletes `~/.reap/daemon/`; remove the global package with `npm uninstall -g @c-d-cc/reap-daemon`.
+A code index is built in — nothing to install, no port, no background process: `reap index status | search | impact | callers | callees`. Fifteen languages, no native build; the index is keyed by commit, lives in `.reap/.index/` and is gitignored. `reap uninstall` removes what npm cannot — slash commands, agent definitions, `~/.reap/` and the SessionStart hook entries, which `npm uninstall -g` leaves behind. Installing REAP into a project no longer changes your global install, and `autoUpdate: false` now actually turns auto-update off.
 ### ko
-코드 인덱스가 내장됐습니다 — 설치할 것도 포트도 상주 프로세스도 없습니다: `reap index status | search | impact | callers | callees`. 15개 언어를 지원하고 네이티브 빌드가 없으며, 인덱스는 커밋 기준이고 `.reap/.index/` 에 있으며 gitignore 됩니다. `reap uninstall` 이 npm 이 지우지 못하는 것을 지웁니다 — slash command·agent 정의·`~/.reap/`·SessionStart hook 항목은 `npm uninstall -g` 로 사라지지 않습니다. 프로젝트에 REAP 을 설치해도 전역 설치가 더 이상 바뀌지 않고, `autoUpdate: false` 가 실제로 자동 업데이트를 끕니다. daemon 은 폐기됐습니다 — `reap update` 가 `daemon` / `daemonBin` 을 지우고 `~/.reap/daemon/` 도 삭제합니다. 전역 패키지는 `npm uninstall -g @c-d-cc/reap-daemon` 으로 제거하세요.
+코드 인덱스가 내장됐습니다 — 설치할 것도 포트도 상주 프로세스도 없습니다: `reap index status | search | impact | callers | callees`. 15개 언어를 지원하고 네이티브 빌드가 없으며, 인덱스는 커밋 기준이고 `.reap/.index/` 에 있으며 gitignore 됩니다. `reap uninstall` 이 npm 이 지우지 못하는 것을 지웁니다 — slash command·agent 정의·`~/.reap/`·SessionStart hook 항목은 `npm uninstall -g` 로 사라지지 않습니다. 프로젝트에 REAP 을 설치해도 전역 설치가 더 이상 바뀌지 않고, `autoUpdate: false` 가 실제로 자동 업데이트를 끕니다.
 
 ## v0.17.5
 ### en
