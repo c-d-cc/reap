@@ -24,14 +24,15 @@ REAP 자신도 그 파이프라인 위에서 진화한다.
 - [ ] Vision/Goal/Memory 관리 위임
 - [ ] 세대별 작업 기록 및 다음 작업 할당
 
-### Tree — 계층형 pipeline
-> 설계 문서: `vision/design/reap-tree.md`
+### Cell — 다중 pipeline 상호작용
+> 설계 문서: `vision/design/reap-cell.md` (구 `reap-tree.md` — 개명 근거는 그 문서 §2.1)
 
-- [ ] Tree 개념 정의 확정 — 노드 경계, merge 와의 구분, 지식 전파 방향 (설계 문서 완성)
-- [ ] Phase 1 관측 — parent 가 child 를 알고 child lineage 요약을 받는다 (실행 제어 없음)
-- [ ] Phase 2 지식 전파 — parent genome/vision 하향 상속 + child 교훈 상향 요약
-- [ ] Phase 3 orchestration — parent 가 child pipeline 을 트리거·대기하는 engine
-- [ ] Fitness 모델 확정 — child 단위 인간 판단 vs parent 통합. self-fitness 금지 원칙과의 정합성
+- [ ] P0 설계 확정 — 인터페이스 표현 형식 / 다중 agent 동시성 제어 (전제는 단일 머신·단일 조직으로 확정)
+- [ ] P1 카탈로그 — 인터페이스 선언 + provides/consumes. 전파 없음
+- [ ] P2 파급 — depends-on 파생 + impact + 알림 채널 & 커서 게이트
+- [ ] P3 지식 전파 — governs 상속 + 상향 요약 + 충돌 감지
+- [ ] P4 orchestration — goal 배정 + 수확 대조
+- [ ] Fitness 모델 확정 — cell 단위 인간 판단. self-fitness 금지 원칙과의 정합성
 
 ### Agent Client 확장
 - [x] OpenCode adapter (gen-063~064 완료 — opencode.json + plugin + AGENTS.md + dump-state + slash commands `/reap.*`. 4-항목 verification: static load / dynamic refresh / entry-point / slash trigger 모두 충족)
