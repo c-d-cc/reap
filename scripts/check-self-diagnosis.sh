@@ -192,12 +192,14 @@ Fixture project used by the self-diagnosis gate.
 
 Single-purpose: exists only to verify a fresh install diagnoses cleanly.
 FILLER
-cat >> "$PROJECT/.reap/vision/goals.md" <<'FILLER'
-
-## Goal Items
-
-- [ ] Verify a freshly installed REAP reports nothing about itself
-FILLER
+# Goals go in through `reap make goal`, which is what init tells the agent to
+# do: it assigns the id that milestones and memory cite. Appending the item by
+# hand here would leave it without one, and the diagnosis below would report
+# that — correctly, and about the fixture rather than the install.
+printf '\n## Goal Items\n' >> "$PROJECT/.reap/vision/goals.md"
+(cd "$PROJECT" && "$REAP_BIN" make goal \
+  --title "Verify a freshly installed REAP reports nothing about itself" \
+  --section "Goal Items" >/dev/null)
 
 # ── 4. Ask REAP about its own handiwork ─────────────────────────────────────
 #

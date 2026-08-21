@@ -4,8 +4,9 @@ import { detectV15 } from "../../../core/integrity.js";
 import { makeBacklog } from "./backlog.js";
 import { makeHook } from "./hook.js";
 import { makeMilestone } from "./milestone.js";
+import { makeGoal } from "./goal.js";
 
-const RESOURCES = ["backlog", "hook", "milestone"] as const;
+const RESOURCES = ["backlog", "hook", "milestone", "goal"] as const;
 
 export async function execute(resource: string, options: Record<string, string | undefined>): Promise<void> {
   const paths = createPaths(process.cwd());
@@ -19,6 +20,8 @@ export async function execute(resource: string, options: Record<string, string |
     await makeHook(paths, options);
   } else if (resource === "milestone") {
     await makeMilestone(paths, options);
+  } else if (resource === "goal") {
+    await makeGoal(paths, options);
   } else {
     emitError("make", `Unknown resource '${resource}'. Available: ${RESOURCES.join(", ")}`);
   }

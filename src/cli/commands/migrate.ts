@@ -400,6 +400,7 @@ export async function executeMain(paths: ReapPaths): Promise<void> {
     await ensureDir(paths.vision);
     await ensureDir(paths.visionDesign);
     await ensureDir(paths.visionMilestones);
+    await ensureDir(paths.sequence);
     await ensureDir(join(paths.vision, "memory"));
     await ensureDir(paths.hooks);
   });

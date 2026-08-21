@@ -68,7 +68,7 @@ ${buildHardGateBlock()}
 ${claudeMdSection}
 
 4. Ask: "What is the long-term vision and major milestones for this project?" (skippable)
-5. Write vision/goals.md.
+5. Add each goal with \`reap make goal --title "<goal>" --section "<section>"\` — it assigns the id that milestones and memory will cite. Do NOT write items into vision/goals.md by hand; an item with no id cannot be referenced, and \`reap fix --check\` reports it.
 6. Suggest: "Ready to start the first embryo generation? What should the goal be?"
 7. If confirmed: \`reap run start --type embryo --goal "<goal>"\`
 `;

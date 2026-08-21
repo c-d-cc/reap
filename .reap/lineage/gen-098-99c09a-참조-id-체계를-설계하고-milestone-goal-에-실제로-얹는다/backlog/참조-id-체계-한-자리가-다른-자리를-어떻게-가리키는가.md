@@ -1,8 +1,12 @@
 ---
+id: bklog-d8e9ca
 type: task
-status: pending
+status: consumed
 priority: medium
 createdAt: 2026-08-21T00:00:00.000Z
+from: gen-097-e3ae8e
+consumedBy: gen-098-99c09a
+consumedAt: 2026-08-21T11:17:20.836Z
 ---
 
 # 참조 ID 체계 — 한 자리가 다른 자리를 어떻게 가리키는가

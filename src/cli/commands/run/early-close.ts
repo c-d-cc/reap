@@ -4,6 +4,7 @@ import { GenerationManager } from "../../../core/generation.js";
 import { readTextFile } from "../../../core/fs.js";
 import { emitOutput, emitError } from "../../../core/output.js";
 import { archiveEarlyClose } from "../../../core/archive.js";
+import { makeHashedId } from "../../../core/sequence.js";
 import {
   createDeferredBacklog,
   extractUncheckedTasks,
@@ -125,7 +126,9 @@ export async function execute(paths: ReapPaths, phase?: string, extra?: string):
     // Create deferred backlog file if requested.
     let deferredBacklogFile: string | undefined;
     if (deferTasks) {
+      const deferredId = makeHashedId("backlog");
       deferredBacklogFile = await createDeferredBacklog(paths.backlog, {
+        id: deferredId,
         fromGenId: s.id,
         closedAtStage: s.stage,
         goal: s.goal,

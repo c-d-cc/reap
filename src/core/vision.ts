@@ -10,6 +10,12 @@ export interface VisionGoal {
   checked: boolean;
   section: string;
   raw: string;
+  /**
+   * REAP-assigned id (`goal-004`), or "" for an item written before ids
+   * existed. Absent is parsed, not rejected — an existing project must keep
+   * working until its migration note runs.
+   */
+  id: string;
 }
 
 export interface NextGoalCandidate {
@@ -20,16 +26,62 @@ export interface NextGoalCandidate {
 }
 
 /**
- * Every name a milestone may cite as its owning goal — item titles and the
- * sections they sit in. Raw; the caller decides how to compare.
+ * The ids a milestone may cite as its owning goal.
+ *
+ * Ids only — titles are deliberately absent. A title changes (this project
+ * appends the completing generation to it), and a reference that survives that
+ * is the entire reason ids exist. Leaving a title fallback would keep the
+ * unstable half forever.
  */
-export function goalIdentifiers(content: string): string[] {
-  const out: string[] = [];
-  for (const g of parseGoals(content)) {
-    out.push(g.title);
-    if (g.section) out.push(g.section);
+export function goalIds(content: string): string[] {
+  return parseGoals(content).filter((g) => g.id).map((g) => g.id);
+}
+
+/** Goal items with no id — what `fix --check` reports and migration fixes. */
+export function goalsWithoutId(content: string): VisionGoal[] {
+  return parseGoals(content).filter((g) => !g.id);
+}
+
+/**
+ * Append a goal item under a section, creating the section when absent.
+ *
+ * Append only — no existing line is read back and rewritten. `goals.md` is
+ * user-authored, and this is the first path where REAP writes into one; the
+ * safety is that there is no code here that can touch a line somebody wrote.
+ */
+export function appendGoalLine(
+  content: string,
+  section: string,
+  id: string,
+  title: string,
+): string {
+  const line = `- [ ] \`${id}\` ${title}`;
+  const lines = content.split(/\r?\n/);
+
+  let sectionStart = -1;
+  for (let i = 0; i < lines.length; i++) {
+    const m = lines[i].match(/^###\s+(.+?)\s*$/);
+    if (m && m[1].trim() === section.trim()) {
+      sectionStart = i;
+      break;
+    }
   }
-  return out;
+
+  if (sectionStart === -1) {
+    const base = content.replace(/\s*$/, "");
+    return `${base}\n\n### ${section}\n${line}\n`;
+  }
+
+  // Last line of the section that is not blank — insert after it, so the item
+  // lands at the end of the list rather than before trailing prose.
+  let insertAt = sectionStart;
+  for (let i = sectionStart + 1; i < lines.length; i++) {
+    if (/^###?\s/.test(lines[i])) break;
+    if (lines[i].trim() !== "") insertAt = i;
+  }
+
+  lines.splice(insertAt + 1, 0, line);
+  return lines.join("\n");
 }
 
 // ── Stop words for keyword matching ──────────────────────────
@@ -66,11 +118,16 @@ export function parseGoals(content: string): VisionGoal[] {
     // Match checkbox items
     const checkboxMatch = line.match(/^-\s+\[([ x])\]\s+(.+)/);
     if (checkboxMatch) {
+      // `- [ ] \`goal-004\` title` — the id is stripped from the title so a
+      // title comparison never sees it and the id has one home.
+      const body = checkboxMatch[2].trim();
+      const idMatch = body.match(/^`(goal-\d+)`\s*(.*)$/);
       goals.push({
-        title: checkboxMatch[2].trim(),
+        title: (idMatch ? idMatch[2] : body).trim(),
         checked: checkboxMatch[1] === "x",
         section: currentSection,
         raw: line,
+        id: idMatch ? idMatch[1] : "",
       });
     }
   }

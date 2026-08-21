@@ -171,6 +171,8 @@ An orphan (an ID in exactly one file) means either the marker is unnecessary, or
 │   ├── resources/             #   External reference documents — API docs, SDK specs (on-demand)
 │   ├── docs/                  #   Project reference documents — design docs, specs (on-demand)
 │   └── source-map.md          #   Code structure + dependencies (on-demand)
+├── sequence/                  # Identity registry — one file per kind, append-only
+│   └── <type>.md              #   id | title | createdAt. A number is never reused
 ├── vision/                    # Long-term goals and direction
 │   ├── goals.md               #   North star objectives
 │   ├── milestones/            #   Plans between a goal and its generations (opt-in)
@@ -216,6 +218,89 @@ A single generation. Carries one goal through the Life Cycle. State is tracked i
 - `merge` — Distributed merge lifecycle (detect → mate → merge → reconcile → validation → completion).
 
 **Generation ID format**: `gen-{NNN}-{hash}` (e.g. `gen-042-a3f8c2`)
+
+### Identity and references
+
+Anything one item may point at carries a **REAP-assigned id**, in one of two families:
+
+| | Kinds | Form | Registry |
+|---|---|---|---|
+| **Numbered** | goal · milestone · design · idea · memory | `goal-004` | `.reap/sequence/<type>.md` |
+| **Hashed** | backlog | `bklog-a3f8c2` | none |
+
+Which family a kind belongs to is a question about **how long its items are cited**. A goal is named
+for years. A backlog is created, consumed, archived to lineage and removed — nothing names
+`bklog-a3f8c2` afterwards, so spending a permanent number on it would leave the registry growing a
+dead row per item. Uniqueness comes from the hash instead, and there is nothing to keep in sync.
+
+The hash is random, not derived from the title: an id derived from wording changes when the wording
+does, which is the thing ids exist to escape.
+
+A generation is outside both — it already has `gen-097-e3ae8e`, and `lineage/` is its registry.
+
+**References cite the id, never the title.** A title changes: a project that records the completing
+generation in a goal's wording rewrites it as a matter of routine, and a title reference breaks
+every time that happens.
+
+```yaml
+# vision/milestones/v018-….md
+id: ms-001
+goal: goal-004        # not the wording
+```
+
+**A reference is recorded where the item is, not in a separate index.** A backlog names its cause in
+its own frontmatter:
+
+```yaml
+id: bklog-a3f8c2
+from: gen-098-99c09a
+```
+
+**`from` is one id: the thing that most directly caused this item.** Usually a generation — the one
+that ran into the problem — but never only that. A design document whose conclusion produced the
+work, a goal, a milestone, a backlog that split in two: any of them can be the cause, and the kind
+is read off the prefix.
+
+It is not a list of what the item relates to. Naming the surrounding context alongside the cause
+makes the field mean "related to", and a field that means that answers nothing.
+
+`reap make backlog --from <id>` refuses anything that is not an id, so a typo cannot become a link
+that points nowhere. What `fix --check` resolves afterwards is only what has an authoritative source
+right now: goal ids against `goals.md`, milestone ids against the milestone files. A generation may
+have been compressed out of lineage, and `ds-`/`idea-`/`mem-` are reserved but not yet assigned, so
+demanding those resolve would report REAP working as intended.
+
+**The registry is `.reap/sequence/<type>.md`, one file per kind, and it is append-only.**
+
+```markdown
+<!-- reap:sequence(goal) — append only. A number handed out is never handed out again. -->
+| id | title | createdAt |
+|---|---|---|
+| goal-004 | Make the distribution look like one tool | 2026-08-21 |
+```
+
+Deleting an item leaves its row behind, and that is the point: the number stays spoken for, so an
+old reference to it can never come to mean something else. There is no counter field — the highest
+row *is* the counter.
+
+It is a committed markdown table rather than a database because it has to **merge**. Two branches
+that both add items produce a conflict a person can read and resolve; a binary file produces one
+nobody can.
+
+- `reap make goal --title "<t>" --section "<s>"` — the one path where REAP writes into
+  `vision/goals.md`. It appends a line and touches nothing else.
+- `reap make milestone` / `reap make backlog` — assign an id and record it.
+- `reap sequence [type|id]` — read the registry. `reap sequence ds-007` answers "what is that?",
+  which is what keeps an opaque reference legible. A hashed id has no row; it says so and points at
+  `life/backlog/` or `lineage/`, where the item itself carries it.
+
+**Ids add a check rather than removing one.** Two branches each appending a row at the end of the
+same registry file produce no git conflict — both lines land, and two items answer to one id.
+`reap fix --check` reports that, plus items with no id and references to ids that are not there. For
+the hashed family there is no registry to disagree with, so what it checks instead is that each item
+has an id of the right shape and that no two live items share one — which happens when a file is
+copied.
+All three are warnings: these files are user-authored, and `reap fix` will not rewrite them.
 
 ### Milestone
 
@@ -412,7 +497,10 @@ All REAP interactions go through `/reap.*` slash commands. These are the primary
 
 ## CLI Commands (no slash command equivalent)
 - `reap make backlog --type <type> --title <title> [--body <body>] [--priority <priority>]` — Create backlog item (type: genome-change, environment-change, task)
-- `reap make milestone --title <title> --goal <vision goal>` — Create a milestone (template; fill in Exit Criteria / Out of Scope / Generations before it can be used)
+- `reap make goal --title <title> --section <section>` — Add a vision goal and assign its id (appends to `vision/goals.md`; never edits an existing line)
+- `reap make backlog --type <type> --title <title> [--from <id>]` — Create a backlog item. `--from` names the one thing that most directly caused it
+- `reap make milestone --title <title> --goal <goal id>` — Create a milestone (template; fill in Exit Criteria / Out of Scope / Generations before it can be used)
+- `reap sequence [type|id]` — Read the identity registry. With an id, answers what it names
 - `reap milestone [list|main <slug>|close <slug>]` — List milestones, move the focus, or mark one completed. `main` refuses a milestone with an unfilled boundary, a goal that matches nothing in `goals.md`, or one already completed
 - `reap make hook --event <event> --name <name> [--type md|sh] [--condition <condition>] [--order <order>]` — Create hook file with correct naming and frontmatter
 - `reap cruise <count>` — Set cruise mode (pre-approve N generations for autonomous execution)

@@ -35,22 +35,33 @@ Vision은 Goals, Milestones, Memory, Design 네 가지로 구성된다.
 - generation 완료 시 달성한 goal을 `[x]`로 마킹 제안
 - Goals cleanup: goals.md는 **미래** 목표를 위한 공간이지 과거 성과의 아카이브가 아니다. 완료 항목(`[x]`)이 누적되어 문서가 forward-looking 역할을 잃어간다고 판단되면, 구체적으로 어떤 항목을 제거할지 인간에게 제안하고 승인을 받아라. 최근 완료된 항목은 아직 참조 가치가 있을 수 있고, 오래 안정된 항목은 제거해도 된다. 항상 인간 확인 후 제거.
 
+### 참조는 ID 로 한다 (gen-098)
+
+한 항목이 다른 항목을 가리킬 때는 **제목이 아니라 ID** 를 쓴다 — `goal: goal-004`. 제목은 바뀐다:
+이 프로젝트는 goal 이 완료될 때 이력을 제목에 덧붙이므로 **정기적으로** 바뀐다.
+
+- **ID 를 손으로 짓지 마라.** `reap make goal|milestone|backlog` 이 부여한다 — goal·milestone 류는 **번호**(레지스트리 기록), backlog 는 **해시**(레지스트리 없음). 소비·삭제되는 유형에 영구 번호를 쓰면 레지스트리가 죽은 행으로만 자란다
+- **`from:` 에는 가장 직접적인 원인 하나의 ID** (`--from gen-098-99c09a`). 대개 generation 이지만 design·goal·milestone·backlog 무엇이든 될 수 있다. **관련된 것들의 목록이 아니다** — 맥락까지 적으면 "관련 있음"이 되고 그러면 아무것도 답하지 않는다
+- **불투명한 참조를 만나면 `reap sequence <id>`** — 찾아 헤매지 말 것
+- **ID 는 검사를 없애지 않고 하나 늘린다.** 병합이 같은 번호를 조용히 둘로 만들 수 있으니 `fix --check` 의 ID 경고를 무시하지 마라
+
+기법(prefix 표 · 레지스트리 형식 · append-only 인 이유)은 `~/.reap/reap-guide.md` § Identity and references 가 소유한다.
+
 ### Milestones (`vision/milestones/`)
 
 goal 과 generation 사이의 계획 단위. 하나의 milestone 안에서 **여러 generation 이 수행된다.**
 
-- **경계 3요소가 없으면 milestone 이 아니다** — 소속 goal(`goal:`) · `## Exit Criteria` · `## Out of Scope`.
-  셋 중 하나라도 비면 goal 후보를 내지 못하고 main 이 될 수도 없다. `reap milestone main` 이 거부한다
-- **완료 조건은 판정 가능한 사실**이어야 한다. 정량 메트릭 금지(Goodhart) — 최종 판정은 인간이 한다
-- **main 은 초점이지 제약이 아니다.** 정확히 하나가 main 이지만, 다음 generation 의 후보는
-  **유효한 모든 open milestone** 에서 나온다(main 먼저). 뒤쪽 계획의 항목을 앞당기는 것은 정상이며,
-  `reap run start --phase create --milestone <slug>` 으로 명시한다
-- **닫는 것은 인간이 한다.** reflect 에서 exit criteria 충족을 판단해 **제안**하되 스스로 닫지 마라
-- **milestone 없이도 REAP 은 동작한다.** goal → generation 직결로 충분한 프로젝트가 있다. opt-in
+- **경계 3요소가 없으면 milestone 이 아니다** — 소속 goal · `## Exit Criteria` · `## Out of Scope`
+- **main 은 초점이지 제약이 아니다.** 다음 generation 후보는 **유효한 모든 open milestone** 에서
+  나온다(main 먼저). 뒤쪽 계획의 항목을 앞당기는 것은 정상이며 `--milestone <slug>` 로 명시한다
+- **닫는 것은 인간이 한다.** reflect 에서 판단해 **제안**하되 스스로 닫지 마라
+- **milestone 없이도 REAP 은 동작한다.** opt-in
 
-**milestone 과 midterm memory 의 경계**: 계획에 속하는 것(무엇을 언제 어떤 순서로, 무엇이 범위 밖인지,
-얼마나 남았는지)은 **milestone 파일**이 갖는다. midterm 은 계획에 담기지 않는 진행 맥락 — 보류된 판단,
-합의된 방향, 아직 milestone 이 없는 트랙 — 만 갖는다. 같은 내용을 양쪽에 두지 마라.
+**milestone 과 midterm memory 의 경계**: 계획에 속하는 것(무엇을 언제 어떤 순서로, 무엇이 범위
+밖인지, 얼마나 남았는지)은 **milestone 파일**이 갖는다. midterm 은 계획에 담기지 않는 진행 맥락만.
+같은 내용을 양쪽에 두지 마라. **goals.md 에도 마찬가지다** — 계획을 goal 항목으로 쪼개 적지 마라.
+
+기법은 `~/.reap/reap-guide.md` § Milestone 이 소유한다.
 
 ### Design (`vision/design/`)
 프로젝트의 설계 문서를 보관하는 공간. Memory와의 구분:
@@ -71,23 +82,11 @@ AI가 프로젝트 맥락을 자유롭게 기록하는 공간. 3-tier 구조는 
 
 ### Memory 분류 Decision Tree (AI용 의무 절차)
 
-memory에 무언가를 쓰려고 할 때 위에서 아래로 적용한다.
+**위 표를 위에서 아래로 적용한다** — 즉시 필요한가(shortterm) → 살아있는 트랙인가(midterm) →
+남길 설계 교훈인가(longterm) → 아니면 **기록하지 않는다**. 네 번째가 기본값이다.
+전문은 `~/.reap/reap-guide.md` § Memory Classification Decision Tree 가 소유한다.
 
-```
-1. 다음 세션에서 즉시 필요한가?
-   → Yes: shortterm.md
-
-2. 아직 완료되지 않은 진행 중인 트랙/계획인가?
-   → Yes: midterm.md
-
-3. 완료됐지만 설계 교훈으로 남겨야 하는가?
-   → Yes: longterm.md
-
-4. 완료됐고 특별한 교훈도 없는가?
-   → 기록하지 않는다 (memory에 보관 불필요, lineage에 보존됨)
-```
-
-**중요**: "혹시 쓸모 있을지도" 같은 추측으로 longterm에 쌓지 마라. 사라져도 lineage/git history에 보존된다.
+**"혹시 쓸모 있을지도"로 longterm 에 쌓지 마라.** 사라져도 lineage/git history 에 보존된다.
 
 ### Memory Pruning 정책 — reflect phase 의무
 

@@ -6,6 +6,18 @@ import { readTextFile, writeTextFile } from "./fs.js";
 export interface BacklogItem {
   filename: string;
   path: string;
+  /** REAP-assigned id (`bklog-a3f8c2`), or "" for a file written before ids. */
+  id: string;
+  /**
+   * The id of **the one thing that most directly caused this item**, or "".
+   *
+   * Not a list of everything related. Usually a generation — the one that ran
+   * into the problem — but it may be any kind: a design document whose
+   * conclusion produced the work, a goal, a milestone, a backlog that split.
+   * Surrounding context is not a cause; naming several makes the field mean
+   * "related to", and then it answers nothing.
+   */
+  from: string;
   type: "genome-change" | "environment-change" | "task";
   status: "pending" | "consumed";
   priority: "high" | "medium" | "low";
@@ -37,6 +49,8 @@ export async function scanBacklog(backlogDir: string): Promise<BacklogItem[]> {
     items.push({
       filename: entry,
       path: filePath,
+      id: (frontmatter.id as string) ?? "",
+      from: parseSingleId(frontmatter.from),
       type: (frontmatter.type as BacklogItem["type"]) ?? "task",
       status: (frontmatter.status as BacklogItem["status"]) ?? "pending",
       priority: (frontmatter.priority as BacklogItem["priority"]) ?? "medium",
@@ -141,6 +155,22 @@ export async function consumeBacklog(filePath: string, genId: string): Promise<C
   return { status: "ok" };
 }
 
+/**
+ * `from: gen-098-99c09a` → the id.
+ *
+ * Brackets and quotes are tolerated on the way in — a file written by hand, or
+ * by the earlier list form, still reads — but only the first entry is kept.
+ * The field names one cause.
+ */
+function parseSingleId(raw: unknown): string {
+  if (typeof raw !== "string") return "";
+  return raw
+    .replace(/^\[|\]$/g, "")
+    .split(",")[0]
+    .trim()
+    .replace(/^["']|["']$/g, "");
+}
+
 function parseFrontmatter(content: string): Record<string, string> {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
@@ -208,6 +238,10 @@ export interface CreateBacklogOptions {
   title: string;
   body?: string;
   priority?: string;
+  /** REAP-assigned id. Absent for callers that predate the registry. */
+  id?: string;
+  /** Id of the one thing that most directly caused this item. */
+  from?: string;
 }
 
 /**
@@ -227,11 +261,11 @@ export async function createBacklog(
   const body = opts.body ? `\n${opts.body}\n` : "";
 
   const content = `---
-type: ${opts.type}
+${opts.id ? `id: ${opts.id}\n` : ""}type: ${opts.type}
 status: pending
 priority: ${priority}
 createdAt: ${new Date().toISOString()}
----
+${opts.from ? `from: ${opts.from}\n` : ""}---
 
 # ${opts.title}
 ${body}
@@ -263,6 +297,9 @@ export interface DeferredBacklogInput {
   goal: string;
   /** Reason text from the early-close. */
   closeReason: string;
+  /** REAP-assigned id. Absent leaves the item unreferenceable — `fix --check` says so. */
+  id?: string;
+
   /** Extracted unchecked tasks (e.g. ["T005 ...", "T010 ..."]). May be empty. */
   taskList: string[];
 }
@@ -275,7 +312,7 @@ export interface DeferredBacklogInput {
  * - type: task
  * - status: pending
  * - priority: medium
- * - derivedFrom: {gen-id}
+ * - from: {gen-id}
  * - closedAtStage: {stage}
  *
  * If taskList is empty, the body notes that no auto-extracted tasks were
@@ -293,11 +330,11 @@ export async function createDeferredBacklog(
     : "_원본 generation에서 미완 task 자동 추출 결과 없음 — 본문을 사용자가 직접 채워야 함._";
 
   const content = `---
-type: task
+${input.id ? `id: ${input.id}\n` : ""}type: task
 status: pending
 priority: medium
 createdAt: ${new Date().toISOString()}
-derivedFrom: ${input.fromGenId}
+from: ${input.fromGenId}
 closedAtStage: ${input.closedAtStage}
 ---
 

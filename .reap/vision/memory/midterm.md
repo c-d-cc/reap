@@ -16,11 +16,8 @@
    있다"가 네 번 연속 성립했으므로 다섯 번째를 기대하는 것이 합리적이다
 
 **발행 문서 수정 규칙 (사용자 승인, 2026-08-21)**: 예외 기준은 *역사성*이 아니라 **실행 가능성**이다 —
-따라 하면 실패하는 지시는 고치되 버전 항목은 남긴다.
-
-**release note 작성 규칙 (사용자 지시, 2026-08-21)**: docs 사이트 관련 설명은 넣지 않는다.
-실제 사용자에게 의미가 있는 것만 쓴다. 사용자에게 달라진 것이 전혀 없으면
-`<!-- no-user-facing-change -->` 로 선언하고 항목을 만들지 않는다.
+따라 하면 실패하는 지시는 고치되 버전 항목은 남긴다. (release note 작성 규칙은
+`.claude/commands/reapdev.versionBump.md` 가 소유한다.)
 
 ## 0.18 — milestone 둘로 나뉘었다. 계획은 milestone 파일이 갖는다
 
@@ -28,7 +25,8 @@
 여기는 그 파일에 담기지 않는 것만.
 
 - `v018-배포-형태를-plugin-으로` (**main**) — 리서치 → 구현(별도 브랜치) → 릴리즈
-- `v018-지식-축-정리` — **참조·ID 체계** → 경계 설계(3축) → memory → idea → interview
+- `v018-지식-축-정리` — ~~참조·ID 체계~~(gen-098) → **carrier hash8** → 경계 설계(3축) →
+  memory → idea → interview
 
 **나눈 이유**: 완료 조건이 서로를 뒷받침하지 않고(memory 가 flat 인 것은 REAP 이 한 도구로 보이는
 증거가 아니다), goal 이 다르고, 브랜치가 다르다. **`plan` 을 빼자 둘이 순차가 아니라 병렬이 됐다** —
@@ -38,9 +36,13 @@ plugin 에 의존하는 것은 `interview` 하나뿐이다.
 `vision/design/backlogs_plan-track/` 이 두 backlog 와 재검토 포인트를 갖는다.
 그래서 경계 설계는 **4축이 아니라 3축**이다.
 
-**참조·ID 체계가 맨 앞이다** (사용자 결정, 2026-08-21). 먼저 잡지 않으면 memory 의 `from`/`to` 와
-idea 의 졸업 경로가 각자 참조 방식을 발명한다. 설계만 하지 않고 milestone→goal 에 실제로 얹는다 —
-소비자 없는 체계는 검증되지 않는다. seed 는 goal 매칭 backlog 1건.
+**참조 ID 체계는 gen-098 이 끝냈다** — `.reap/sequence/<type>.md` append-only, milestone→goal 이
+첫 소비자. **`ds-`·`idea-`·`mem-` 은 prefix 만 예약**됐고 실제 부여는 소비자가 생기는 세대가 한다
+(design 은 frontmatter 도 읽는 코드도 없어 지금 부여하면 닻을 못 내린다).
+
+**다음은 carrier hash8** (`<slug>-<hash8>`, 사용자 결정). gen-098 이 만든 해시 생성·고유성 검사·
+레지스트리를 재사용하므로 직후여야 한다. `backlogs_v0.17_residual` 의 `list-carriers.sh 산문 오탐`
+건을 **같은 세대에서** 처리할 것 — 형식이 바뀌면 어차피 같은 파일을 만진다.
 
 **미결 둘**: (a) **A/B 배포 형태 확정** — `command` source 발견(2026-08-20)이 판단을 뒤집는다.
 명령이 세션마다 재실행되므로 `npm i -g` 한 번으로 CLI 와 plugin 이 동시에 갱신되고, 따라서
@@ -50,9 +52,8 @@ auto-update 가 plugin 갱신의 유일한 경로가 된다. `vision/design/plug
 
 ## 0.17 잔여 backlog 9건 — plugin 전환 이후에 재검토
 
-`vision/design/backlogs_v0.17_residual/` 로 이관했다(README 가 항목별 재검토 질문과 소멸 후보
-여부를 갖는다). **7건이 REAP 자기 기계장치에 대한 것**이고, plugin 전환 후 어느 것이 살아남는지
-판정하기 전에 고치면 헛일이 된다.
+`vision/design/backlogs_v0.17_residual/` + README(항목별 재검토 질문·소멸 후보 여부).
+**7건이 REAP 자기 기계장치**라, plugin 전환 후 무엇이 살아남는지 판정하기 전에 고치면 헛일이 된다.
 
 ## Embryo → Normal transition
 

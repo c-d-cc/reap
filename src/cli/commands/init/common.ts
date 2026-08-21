@@ -65,6 +65,7 @@ export async function initCommon(
   await ensureDir(paths.vision);
   await ensureDir(paths.visionDesign);
   await ensureDir(paths.visionMilestones);
+  await ensureDir(paths.sequence);
   await ensureDir(paths.memory);
   await ensureDir(paths.hooks);
 

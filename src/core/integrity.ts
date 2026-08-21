@@ -4,6 +4,9 @@ import { homedir } from "os";
 import YAML from "yaml";
 import type { ReapPaths } from "./paths.js";
 import { listMilestones, isValidMilestone, mainMilestone } from "./milestone.js";
+import { findDuplicates, idsOfType, parseId, parseHashedId, isReapId } from "./sequence.js";
+import { parseGoals } from "./vision.js";
+import { scanBacklog } from "./backlog.js";
 import { readTextFile, fileExists } from "./fs.js";
 import {
   LIFECYCLE_STAGES,
@@ -117,6 +120,7 @@ export async function checkIntegrity(
   await checkGenome(paths, errors, warnings);
   await checkMemorySize(paths, warnings);
   await checkMilestones(paths, warnings);
+  await checkSequence(paths, warnings);
   await checkBacklog(paths, errors, warnings);
 
   return { errors, warnings };
@@ -591,6 +595,114 @@ async function checkGenome(
       warnings.push(
         `genome/${gf.name}: appears to be placeholder-only (no substantive content)`,
       );
+    }
+  }
+}
+
+// ── identity registry (gen-098) ──────────────────────────────
+
+/**
+ * Three things the id scheme can be wrong about.
+ *
+ * **Duplicates** are the one people expect ids to remove and that ids in fact
+ * create: two branches each append a row at the end of the same registry file,
+ * the lines differ, git merges both without a conflict, and two items now
+ * answer to one id. Nothing else in the system notices.
+ *
+ * **Items with no id** cannot be referenced. Harmless on their own, which is
+ * why they need reporting — a project that never sees this warning quietly
+ * keeps half its goals unaddressable.
+ *
+ * **References to ids the registry does not have** are the stale link the
+ * scheme exists to prevent, arriving by a different door: a hand-typed id, or
+ * a registry rolled back while the item that cited it was not.
+ *
+ * Warnings only. `goals.md` and the milestone files are user-authored and
+ * `fixProject` has no counterpart to any of this.
+ */
+async function checkSequence(paths: ReapPaths, warnings: string[]): Promise<void> {
+  for (const dup of await findDuplicates(paths.sequence)) {
+    warnings.push(
+      `sequence/${dup.type}.md: '${dup.id}' appears ${dup.count} times — two items answer to one id. Renumber all but one (a merged branch does this without a git conflict).`,
+    );
+  }
+
+  const goalsContent = (await readTextFile(paths.visionGoals)) ?? "";
+  const goals = parseGoals(goalsContent);
+  const knownGoalIds = await idsOfType(paths.sequence, "goal");
+
+  const withoutId = goals.filter((g) => !g.id);
+  if (withoutId.length > 0) {
+    warnings.push(
+      `vision/goals.md: ${withoutId.length} item(s) have no id and cannot be referenced — e.g. "${withoutId[0].title.slice(0, 40)}". Add ids so milestones can cite them.`,
+    );
+  }
+  for (const g of goals) {
+    if (g.id && knownGoalIds.size > 0 && !knownGoalIds.has(g.id)) {
+      warnings.push(`vision/goals.md: '${g.id}' is not in sequence/goal.md — the registry does not know it.`);
+    }
+  }
+
+  const goalIdSet = new Set(goals.filter((g) => g.id).map((g) => g.id));
+  for (const m of await listMilestones(paths.visionMilestones)) {
+    if (!m.id) {
+      warnings.push(`vision/milestones/${m.slug}.md: no 'id:' in frontmatter.`);
+    }
+    const cited = m.goal.trim();
+    if (!cited) continue;
+    if (!parseId(cited)) {
+      warnings.push(`vision/milestones/${m.slug}.md: goal '${cited}' is not an id — cite the goal id, not its title.`);
+    } else if (!goalIdSet.has(cited)) {
+      warnings.push(`vision/milestones/${m.slug}.md: goal '${cited}' is not in vision/goals.md — broken reference.`);
+    }
+  }
+
+  // Backlog ids are hashed, so there is no registry to compare against —
+  // uniqueness comes from the hash. What is still worth checking is that each
+  // item HAS one, and that no two live items share it (a hand-copied file).
+  const backlog = await scanBacklog(paths.backlog);
+  const backlogWithoutId = backlog.filter((b) => !b.id);
+  if (backlogWithoutId.length > 0) {
+    warnings.push(
+      `life/backlog/: ${backlogWithoutId.length} item(s) have no id — e.g. '${backlogWithoutId[0].filename}'.`,
+    );
+  }
+  for (const b of backlog) {
+    if (b.id && !parseHashedId(b.id)) {
+      warnings.push(`life/backlog/${b.filename}: id '${b.id}' is not a backlog id (expected 'bklog-' + 6 hex).`);
+    }
+  }
+  // `from:` names what caused an item. Only the kinds with an authoritative
+  // source right now are resolved — goals and milestones. The rest must merely
+  // be a well-formed id: a generation may have been compressed out of lineage,
+  // and design/idea/memory ids are reserved but not yet assigned, so demanding
+  // resolution there would warn about REAP working as intended.
+  const milestoneIds = new Set(
+    (await listMilestones(paths.visionMilestones)).map((m) => m.id).filter(Boolean),
+  );
+  for (const b of backlog) {
+    const ref = b.from;
+    if (!ref) continue;
+    if (!isReapId(ref)) {
+      warnings.push(`life/backlog/${b.filename}: from '${ref}' is not a REAP id.`);
+      continue;
+    }
+    const numbered = parseId(ref);
+    if (numbered?.type === "goal" && !goalIdSet.has(ref)) {
+      warnings.push(`life/backlog/${b.filename}: from '${ref}' is not in vision/goals.md — broken reference.`);
+    }
+    if (numbered?.type === "milestone" && milestoneIds.size > 0 && !milestoneIds.has(ref)) {
+      warnings.push(`life/backlog/${b.filename}: from '${ref}' names no milestone — broken reference.`);
+    }
+  }
+
+  const seenBacklogIds = new Map<string, number>();
+  for (const b of backlog) {
+    if (b.id) seenBacklogIds.set(b.id, (seenBacklogIds.get(b.id) ?? 0) + 1);
+  }
+  for (const [id, count] of seenBacklogIds) {
+    if (count > 1) {
+      warnings.push(`life/backlog/: '${id}' is on ${count} items — a copied file keeps the original's id.`);
     }
   }
 }

@@ -85,6 +85,7 @@ function getRequiredDirs(paths: ReapPaths): string[] {
     paths.vision,
     paths.visionDesign,
     paths.visionMilestones,
+    paths.sequence,
     paths.memory,
     paths.hooks,
   ];

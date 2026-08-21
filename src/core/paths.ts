@@ -22,6 +22,7 @@ export interface ReapPaths {
   visionGoals: string;
   visionDesign: string;
   visionMilestones: string;
+  sequence: string;
   memory: string;
   memoryLongterm: string;
   memoryMidterm: string;
@@ -63,6 +64,7 @@ export function createPaths(root: string): ReapPaths {
     visionGoals: join(vision, "goals.md"),
     visionDesign: join(vision, "design"),
     visionMilestones: join(vision, "milestones"),
+    sequence: join(reap, "sequence"),
     memory,
     memoryLongterm: join(memory, "longterm.md"),
     memoryMidterm: join(memory, "midterm.md"),

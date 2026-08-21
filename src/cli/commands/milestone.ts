@@ -1,7 +1,7 @@
 import { createPaths } from "../../core/paths.js";
 import { emitOutput, emitError } from "../../core/output.js";
 import { readTextFile } from "../../core/fs.js";
-import { goalIdentifiers } from "../../core/vision.js";
+import { goalIds } from "../../core/vision.js";
 import {
   listMilestones,
   mainMilestone,
@@ -71,7 +71,7 @@ export async function execute(action: string | undefined, slug?: string): Promis
   if (effective === "main") {
     if (!slug) emitError("milestone", "Usage: reap milestone main <slug>");
     const goalsContent = (await readTextFile(paths.visionGoals)) ?? "";
-    const result = await setMain(paths.visionMilestones, slug!, goalIdentifiers(goalsContent));
+    const result = await setMain(paths.visionMilestones, slug!, goalIds(goalsContent));
     if (result.status === "error") emitError("milestone", result.reason ?? "Could not set main");
 
     emitOutput({

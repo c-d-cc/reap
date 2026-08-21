@@ -1,5 +1,6 @@
 ---
-goal: 배포 형태를 사용자 도구로 인식되게 한다
+id: ms-001
+goal: goal-004
 status: open
 main: true
 createdAt: 2026-08-21T00:00:00.000Z

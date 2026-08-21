@@ -89,6 +89,43 @@ export interface GenerationState {
   evaluatorConcerns?: EvaluatorConcern[];
 }
 
+// ── Sequence (identity registry) ────────────────────────────
+
+/**
+ * Kinds whose ids are **numbered** — they are cited long after they are made,
+ * and their population is stable enough that a running number reads as an
+ * ordering rather than noise.
+ *
+ * The registry that backs these is append-only, so a number is spent forever.
+ * That is only worth its bookkeeping where the id will be cited later.
+ */
+export const SEQUENCED_TYPES = ["goal", "milestone", "design", "idea", "memory"] as const;
+export type SequencedType = (typeof SEQUENCED_TYPES)[number];
+
+/**
+ * Kinds whose ids are **hashed** — created and consumed constantly, and cited
+ * only while they are alive.
+ *
+ * A backlog is consumed, archived to lineage and removed. Nobody names
+ * `bklog-a3f8c2` afterwards: the reference that matters is
+ * `current.yml.sourceBacklog` for one generation, and after that lineage holds
+ * the file itself. A number would buy nothing and leave the registry growing a
+ * dead row per item forever, so uniqueness comes from the hash instead and
+ * there is no registry to keep.
+ */
+export const HASHED_TYPES = ["backlog"] as const;
+export type HashedType = (typeof HASHED_TYPES)[number];
+
+/** Every kind REAP assigns an id to. `generation` is absent — it has `gen-NNN-hash`. */
+export type SequenceType = SequencedType | HashedType;
+
+/** One row of `.reap/sequence/<type>.md`. */
+export interface SequenceEntry {
+  id: string;
+  title: string;
+  createdAt: string;
+}
+
 // ── Milestone ───────────────────────────────────────────────
 
 /** One entry of a milestone's `## Generations` checklist. */
@@ -109,6 +146,8 @@ export interface MilestoneGeneration {
 export interface Milestone {
   /** Filename without `.md`. */
   slug: string;
+  /** REAP-assigned id (`ms-002`), or "" for a file written before ids existed. */
+  id: string;
   path: string;
   /** The `# ` heading. */
   title: string;

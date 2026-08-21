@@ -37,6 +37,46 @@ function sectionLines(body: string, heading: string): string[] | null {
 }
 
 /**
+ * Fold a section's raw lines into one logical line per bullet.
+ *
+ * A bullet wrapped onto a second line used to lose everything after the first
+ * one — silently, since the file still looked right. In `## Exit Criteria`
+ * that truncated the standard a generation is judged against.
+ *
+ * A continuation is a non-empty, non-bullet line following a bullet. A blank
+ * line closes the bullet, so prose after a gap is not swallowed. HTML comments
+ * are dropped whole — a milestone keeps its long-form notes in one, and
+ * folding that into the last entry would be worse than truncating it.
+ */
+function foldContinuations(lines: string[]): string[] {
+  const out: string[] = [];
+  let inComment = false;
+  let open = false;
+
+  for (const line of lines) {
+    if (inComment) {
+      if (line.includes("-->")) inComment = false;
+      continue;
+    }
+    if (/^\s*<!--/.test(line)) {
+      if (!line.includes("-->")) inComment = true;
+      continue;
+    }
+    if (line.trim() === "") {
+      open = false;
+      continue;
+    }
+    if (/^\s*[-*]\s+/.test(line)) {
+      out.push(line.trim());
+      open = true;
+      continue;
+    }
+    if (open) out[out.length - 1] += ` ${line.trim()}`;
+  }
+  return out;
+}
+
+/**
  * A section's bullet items. Checklist markers are stripped, so a boundary
  * written as a checklist still reads as a boundary.
  */
@@ -45,8 +85,8 @@ function readBullets(body: string, heading: string): string[] {
   if (!lines) return [];
 
   const items: string[] = [];
-  for (const line of lines) {
-    const bullet = line.match(/^\s*[-*]\s+(.*)$/);
+  for (const line of foldContinuations(lines)) {
+    const bullet = line.match(/^[-*]\s+(.*)$/);
     if (!bullet) continue;
     const text = bullet[1].replace(/^\[[ xX]\]\s*/, "").trim();
     if (text) items.push(text);
@@ -60,8 +100,8 @@ function readGenerations(body: string): MilestoneGeneration[] {
   if (!lines) return [];
 
   const items: MilestoneGeneration[] = [];
-  for (const line of lines) {
-    const bullet = line.match(/^\s*[-*]\s+\[([ xX])\]\s+(.*)$/);
+  for (const line of foldContinuations(lines)) {
+    const bullet = line.match(/^[-*]\s+\[([ xX])\]\s+(.*)$/);
     if (!bullet) continue;
     const text = bullet[2].trim();
     if (text) items.push({ checked: bullet[1].toLowerCase() === "x", text });
@@ -88,6 +128,7 @@ export function parseMilestone(content: string, slug: string, path: string): Mil
   return {
     slug,
     path,
+    id: fm.id ?? "",
     title: heading ? heading[1].trim() : slug,
     goal: fm.goal ?? "",
     status: fm.status === "completed" ? "completed" : "open",
@@ -197,11 +238,11 @@ function normalize(text: string): string {
  * `reap make backlog` does. Refusing an unfilled milestone the focus is what
  * enforces "no milestone without a boundary".
  *
- * `knownGoals` are raw names from `goalIdentifiers`; normalising both sides
- * here keeps one comparison rule, and keeps this module free of the goals
- * file format.
+ * `knownGoalIds` comes from `goalIds`. Ids, never titles: the goal a milestone
+ * serves keeps its identity when somebody rewrites its wording, and that is
+ * what this reference is for.
  */
-export function validateForMain(m: Milestone, knownGoals: readonly string[]): MilestoneValidation {
+export function validateForMain(m: Milestone, knownGoalIds: readonly string[]): MilestoneValidation {
   if (m.status === "completed") {
     return { ok: false, reason: `'${m.slug}' is completed — a finished plan cannot be the focus.` };
   }
@@ -215,12 +256,18 @@ export function validateForMain(m: Milestone, knownGoals: readonly string[]): Mi
     return { ok: false, reason: `'${m.slug}' has no 'goal:' in its frontmatter — every milestone belongs to a vision goal.` };
   }
 
-  const known = new Set(knownGoals.map(normalize));
-  if (!known.has(normalize(m.goal))) {
-    const sample = knownGoals.slice(0, 8).map((g) => `  - ${g}`).join("\n");
+  const cited = m.goal.trim();
+  if (!/^goal-\d+$/.test(cited)) {
     return {
       ok: false,
-      reason: `goal '${m.goal}' matches no item or section in vision/goals.md. Known items:\n${sample}`,
+      reason: `goal '${cited}' is not a goal id. Cite the id from vision/goals.md (e.g. 'goal-004'), not the title — a title changes and the reference would go stale.`,
+    };
+  }
+  if (!knownGoalIds.includes(cited)) {
+    const sample = knownGoalIds.slice(0, 12).join(", ");
+    return {
+      ok: false,
+      reason: `goal '${cited}' is not in vision/goals.md. Known ids: ${sample || "(none — goals.md has no ids yet)"}`,
     };
   }
 
@@ -275,7 +322,7 @@ export interface SetMainResult {
 export async function setMain(
   dir: string,
   slug: string,
-  knownGoals: readonly string[],
+  knownGoalIds: readonly string[],
 ): Promise<SetMainResult> {
   const all = await listMilestones(dir);
   const target = findMilestone(all, slug);
@@ -283,7 +330,7 @@ export async function setMain(
     return { status: "error", reason: `No milestone '${slug}' in ${dir}` };
   }
 
-  const verdict = validateForMain(target, knownGoals);
+  const verdict = validateForMain(target, knownGoalIds);
   if (!verdict.ok) return { status: "error", reason: verdict.reason };
 
   let previousMain: string | undefined;
@@ -339,6 +386,8 @@ export async function closeMilestone(dir: string, slug: string): Promise<CloseRe
 export interface CreateMilestoneOptions {
   title: string;
   goal: string;
+  /** REAP-assigned id. The filename stays the human-readable slug. */
+  id: string;
 }
 
 /** Create a milestone from the template. Returns the filename. */
@@ -351,6 +400,7 @@ export async function createMilestone(
   const filename = `${slug}.md`;
 
   const content = `---
+id: ${opts.id}
 goal: ${opts.goal}
 status: open
 main: false

@@ -132,24 +132,42 @@ Long-term project objectives. During the adapt phase, gap analysis against goals
 
 Goals cleanup: goals.md is a space for **future** objectives, not an archive of past achievements. When completed items (`[x]`) accumulate and the document loses focus as a forward-looking plan, propose specific items for removal to the human for approval. This is a contextual judgment — recently completed items may still have reference value, while long-stable items can be cleared. Always get human confirmation before removing.
 
+### Reference by id, never by title (gen-098)
+
+When one item points at another it cites an **id**, not a title — `goal: goal-004`.
+Titles change; a project that records the completing generation in a goal's wording rewrites them
+as a matter of routine.
+
+- **Do not invent ids.** `reap make goal|milestone|backlog` assigns them. Goals and milestones are
+  **numbered** (recorded in a registry); a backlog is **hashed** (`bklog-a3f8c2`, no registry) —
+  spending a permanent number on a kind that is consumed and removed grows a registry of dead rows
+- **`from:` names ONE id — the most direct cause** (`--from gen-098-99c09a`). Usually a generation,
+  but a design document, goal, milestone or backlog works the same. **Not a list of what it relates
+  to**: adding the surrounding context turns it into "related to", which answers nothing
+- **Meeting an opaque reference, run `reap sequence <id>`** rather than going looking
+- **Ids add a check rather than removing one.** A merge can produce two items answering to one id,
+  silently. Do not skip the id warnings from `fix --check`
+
+The mechanics — prefix table, registry format, why it is append-only — are owned by
+`~/.reap/reap-guide.md` § Identity and references.
+
 ### Milestones (`vision/milestones/`)
 
-The planning unit between a goal and a generation. **Several generations run inside one milestone.**
+The planning unit between a goal and a generation. **Several generations run inside one milestone**,
+and it is opt-in.
 
-- **Without its three boundary parts it is not a milestone** — the owning goal (`goal:`), `## Exit Criteria`
-  and `## Out of Scope`. If any is empty it offers no goal candidates and cannot become main;
-  `reap milestone main` refuses it
-- **Exit criteria must be verifiable facts.** No quantitative metrics (Goodhart) — the human makes the final call
-- **Main is the focus, not a restriction.** Exactly one milestone is main, but candidates for the next
-  generation come from **every valid open milestone** (main first). Pulling an item forward from a later
-  plan is ordinary; name it with `reap run start --phase create --milestone <slug>`
-- **The human closes it.** In reflect, judge whether the exit criteria are met and **propose** closing —
-  never close it yourself
-- **REAP works without milestones.** Some projects are served by goal → generation directly. Opt-in
+- **Without its three boundary parts it is not a milestone** — the owning goal, `## Exit Criteria`,
+  `## Out of Scope`
+- **Main is the focus, not a restriction.** Candidates come from **every valid open milestone**
+  (main first). Pulling an item forward is ordinary; name it with `--milestone <slug>`
+- **The human closes it.** Judge in reflect and **propose** — never close one yourself
 
-**Milestone vs. midterm memory**: whatever belongs to the plan — what happens in what order, what is out
-of scope, how much is left — lives in the milestone file. Midterm keeps only the ongoing context a plan
-does not hold: deferred judgments, agreed directions, tracks with no milestone yet. Never both.
+**Milestone vs. midterm memory**: whatever belongs to the plan — what happens in what order, what is
+out of scope, how much is left — lives in the milestone file. Midterm keeps only the ongoing context
+a plan does not hold. Never both. **The same goes for `goals.md`** — do not split a plan into goal
+items.
+
+The mechanics are owned by `~/.reap/reap-guide.md` § Milestone.
 
 ### Design (`vision/design/`)
 Space for project design documents. Distinction from Memory:
@@ -176,23 +194,12 @@ Memory rules:
 
 ### Memory Classification Decision Tree (mandatory for AI)
 
-When you have something to write to memory, apply top-to-bottom:
+**Apply the table above top to bottom** — needed immediately (shortterm) → a live track (midterm) →
+a design lesson worth keeping (longterm) → otherwise **do not record it**. The fourth is the
+default. The full tree is owned by `~/.reap/reap-guide.md` § Memory Classification Decision Tree.
 
-```
-1. Is this needed in the next session immediately?
-   → Yes: shortterm.md
-
-2. Is this an ongoing, incomplete track or plan?
-   → Yes: midterm.md
-
-3. Is this a finished design lesson worth preserving?
-   → Yes: longterm.md
-
-4. Is this finished with no special lesson?
-   → Do NOT record (lineage and git history preserve it)
-```
-
-**Important**: Do not stash "might-be-useful" notes in longterm. If it disappears, it's still in lineage and git history.
+**Do not stash "might-be-useful" notes in longterm.** If it disappears, lineage and git history
+still have it.
 
 ### Memory Update Criteria
 

@@ -18,7 +18,7 @@
 ```
 src/
 ├── types/index.ts              — 타입 정의 (GenerationState, ReapConfig, ReapOutput 등)
-├── core/                       — 핵심 로직 (31 modules)
+├── core/                       — 핵심 로직 (32 modules)
 │   ├── lifecycle.ts            — stage 순서 정의 (next/prev) + transition graph (NORMAL_TRANSITIONS, MERGE_TRANSITIONS, getTransitions). **stage:phase 가 자기 목록에 들어 있으면 self-loop = 그 phase 재진입 허용** — nonce 는 매번 재발급·검증·소비되므로 무결성은 유지된다. 현재 `completion:fitness` 와 `validation:entry` 둘
 │   ├── generation.ts           — generation CRUD, ID 생성
 │   ├── paths.ts                — .reap/ 경로 상수 (ReapPaths 인터페이스, memory/resources/docs 경로 포함)
@@ -64,6 +64,15 @@ src/
 │   ├── notice.ts               — release notice (fetchReleaseNotice: RELEASE_NOTICE.md에서 버전+언어별 노트 추출)
 │   ├── report.ts               — auto issue report (autoReport: gh issue create wrapper, best-effort)
 │   ├── template.ts             — artifact 템플릿 복사
+│   ├── sequence.ts             — **정체성 레지스트리의 단일 소유자** (gen-098).
+│   │                             `.reap/sequence/<type>.md` 는 **append-only** 이고 행이 지워지지
+│   │                             않으므로 **레지스트리 자체가 카운터**다 — `nextId` 는 최대값+1 이며
+│   │                             지운 항목의 번호가 되돌아오지 않는다. 별도 카운터 필드가 없는 이유.
+│   │                             유형별 파일이라 서로 다른 유형을 건드리는 브랜치는 충돌하지 않지만,
+│   │                             **같은 유형은 둘 다 끝에 덧붙어 git 이 충돌 없이 병합한다** —
+│   │                             `findDuplicates` 가 그것만을 위해 있다. markdown 표인 이유는
+│   │                             커밋되고 merge 돼야 하기 때문(바이너리는 사람이 못 푼다).
+│   │                             `SEQUENCE_PREFIX` 가 유형별 prefix 를 소유하며 `gen-` 은 여기 없다
 │   ├── milestone.ts            — **milestone 의 단일 소유자** (gen-097). 파싱·조회·검증·전이·생성.
 │   │                             `status`(open/completed)와 `main` 은 frontmatter 에 저장되고
 │   │                             **유효성(경계 3요소)은 저장되지 않는다** — 내용에서 파생한다
@@ -74,7 +83,7 @@ src/
 │   │                             `validateForMain` 은 `knownGoals: string[]` 을 받는다 —
 │   │                             `vision.ts` 와의 순환 import 를 끊고, goals 파일 형식을 모른다.
 │   │                             frontmatter 쓰기는 라인 단위(YAML 왕복 금지)
-│   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). `goalIdentifiers()` 가 milestone 의 `goal:` 매칭 대상을 낸다. **milestone 이 있으면 `buildVisionGapAnalysis` 의 "Next Generation Candidates" 절이 토큰 겹침 휴리스틱 대신 계획에서 나온다** — 소진·완료·경계 미충족이면 휴리스틱으로 되돌아간다
+│   └── vision.ts               — vision goals 파싱, gap 분석, 다음 goal 제안, 프로젝트 진단, vision 발전 제안 (adapt phase 지원). `goalIds()` 가 milestone 이 인용할 수 있는 **goal ID** 를 낸다 — **제목은 일부러 없다**(제목이 바뀌어도 참조가 살아야 하므로). `appendGoalLine()` 은 `reap make goal` 전용이며 **줄을 끼워 넣기만** 한다. **milestone 이 있으면 `buildVisionGapAnalysis` 의 "Next Generation Candidates" 절이 토큰 겹침 휴리스틱 대신 계획에서 나온다** — 소진·완료·경계 미충족이면 휴리스틱으로 되돌아간다
 ├── cli/
 │   ├── index.ts                — CLI 진입점, 커맨드 라우팅 (init, status, config, run, make, cruise, install-skills, fix, destroy, **uninstall**, clean, check-version, update, load-context, dump-state, **index**).
 │   │                             **`program.parse()` 앞에서 `ensureUserLevelAssets` 를 await** — 명령을 가리지 않는다.
