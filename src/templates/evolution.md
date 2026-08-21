@@ -13,11 +13,7 @@ AI adjusts communication depth based on the current context's clarity level.
 | Medium | Direction exists, details unclear | Present options + tradeoffs |
 | Low | Goal ambiguous, next steps unknown | Active interaction — questions, examples, suggestions |
 
-### Clarity Indicators
-- vision/goals.md has specific, actionable goals → high
-- Backlog has clear tasks → high
-- Genome is unstable (embryo, frequent changes) → low
-- Short lineage, direction not established → low
+**The criteria belong to the code** — `calculateClarity()` counts the signals and prints its reasons into the phase prompt. Restating them in prose makes them drift, and they had: this file used to say "backlog has clear tasks → high" where the code asks for **two or more high-priority items**. Something two places can share gets an owner, not a copy.
 
 ## Genome Management Principles
 
@@ -25,7 +21,7 @@ AI adjusts communication depth based on the current context's clarity level.
 - **Normal**: Genome is immutable. Changes go to backlog → applied at adapt phase → effective from next generation.
 - **Lessons discovered mid-generation go into the completion artifact**. Genome modifications happen at adapt phase. Changing genome mid-generation undermines the foundation of prior work in that generation.
 
-<!-- reap:carrier(source-map-read-rule) -->
+<!-- reap:carrier(source-map-read-rule-a227a34e) -->
 ## Code Quality Principles
 
 Before writing new code, always read existing code first to understand established patterns.
@@ -88,6 +84,7 @@ Decision rule: **"Does a person have to remember this step every time?"** → If
 - Wire it into a path that **cannot be bypassed** (release workflow, phase transition, commit hook).
 - Add the check to the instruction, and **record why the instruction alone was insufficient** — otherwise the next person reverts to "let's write it out in more detail".
 
+<!-- reap:carrier(gate-writing-discipline-af52f991) -->
 ### When building a check — make it fail first
 
 If you write a check and immediately see it pass, you do not know whether it catches anything. "The check works" and "the check is inert" look identical.
@@ -97,6 +94,7 @@ If you write a check and immediately see it pass, you do not know whether it cat
 - **Record what the check cannot see, alongside its results.** Passing means "no problem within the check's scope". Without a stated limit, the next person trusts it further than it goes.
 - **Ask what would still be green if the feature were simply removed.** A suite can assert around a feature — its pure helpers, the order of strings in a file — without anything observing that the feature happens. And if every row of a coverage table shares one premise, adding rows cannot help: the shared premise is the dimension nobody varied.
 
+<!-- reap:carrier(evidence-tagging-ab1eb844) -->
 ### Record what kind of evidence you have — and "ran it" must name the command
 
 Writing only "verified" in an artifact makes **running the command and reading the code look the same.** That distinction collapsed in two consecutive generations, and a blocking defect came through each time.
@@ -177,7 +175,7 @@ Space for project design documents. Distinction from Memory:
 
 Decision rule: "Is this content worth documenting as an independent topic?" → Yes = Design, No = Memory.
 
-<!-- reap:carrier(memory-tier-classification) -->
+<!-- reap:carrier(memory-tier-classification-fa69f636) -->
 ### Memory (`vision/memory/`)
 Free-form space for the AI to record project-related knowledge. The 3-tier structure is classified by **what the content is for** (content-type), NOT by how long it will live (lifespan). Lifespan requires predicting the future, which the AI can't do reliably — that judgment burden leads to misclassification and bloat.
 
@@ -217,7 +215,7 @@ when a track completes**, and longterm entries are **deleted once genome documen
 - Principles already in genome (no duplication)
 - Generation-specific debug logs (lineage preserves them)
 
-<!-- reap:carrier(environment-refresh-targets) -->
+<!-- reap:carrier(environment-refresh-targets-b4a95f5d) -->
 ## Environment Refresh at Completion
 
 Incrementally update environment/ during reflect phase:

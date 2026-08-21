@@ -49,7 +49,7 @@ async function cleanupStaleSkills(targetDir: string): Promise<string[]> {
  *
  * Mirrors `opencodeCommandsDir` in the OpenCode adapter.
  *
- * reap:carrier(claude-code-commands-path)
+ * reap:carrier(claude-code-commands-path-4bd29da9)
  */
 export function claudeCodeCommandsDir(home: string = homedir()): string {
   return join(home, ".claude", "commands");
@@ -91,7 +91,7 @@ export async function installSlashCommandsOnly(home: string = homedir()): Promis
  * Silent, idempotent, and prefix-anchored — user-supplied files in the same
  * directories survive every run.
  *
- * reap:carrier(user-level-asset-set)
+ * reap:carrier(user-level-asset-set-b7a3fef9)
  */
 export async function syncUserLevelAssets(home: string = homedir()): Promise<
   UserLevelSyncResult & {
@@ -212,7 +212,7 @@ export async function installAgents(home: string = homedir()): Promise<{
 /**
  * Copy reap-guide.md to ~/.reap/ so all projects reference a single, up-to-date copy.
  *
- * reap:carrier(reap-home-asset-set)
+ * reap:carrier(reap-home-asset-set-94949259)
  */
 export async function installReapGuide(home: string = homedir()): Promise<boolean> {
   const reapHome = join(home, ".reap");
@@ -314,7 +314,7 @@ export async function registerSessionHooks(home: string = homedir()): Promise<bo
  * directory of copies, one is a JSON edit), so the only thing keeping the two
  * in step is proximity.
  *
- * reap:carrier(user-level-asset-set)
+ * reap:carrier(user-level-asset-set-b7a3fef9)
  *
  * `~/.reap/` is deliberately not handled here: nothing in it is
  * client-specific, so it is removed once by `removeReapHomeAssets` in the

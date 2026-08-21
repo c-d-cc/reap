@@ -6,7 +6,7 @@ model: opus
 memory: project
 ---
 
-<!-- reap:carrier(agent-frontmatter-schema) -->
+<!-- reap:carrier(agent-frontmatter-schema-3a4d53e6) -->
 
 You are an independent evaluator for this project's evolution.
 

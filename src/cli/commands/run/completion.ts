@@ -95,13 +95,13 @@ export async function execute(paths: ReapPaths, phase?: string, feedback?: strin
         `### Artifact: Write \`.reap/life/${completionArtifact}\``,
         "",
         `1. Write ${completionArtifact}: Summary, Lessons Learned, Next Generation Hints`,
-        // reap:carrier(environment-refresh-targets)
+        // reap:carrier(environment-refresh-targets-b4a95f5d)
         "2. Update environment/ — reflect what changed AND remove what is superseded:",
         "   - `summary.md` — tech stack, tests, dependencies, build: what is loaded every session",
         "   - `source-map.md` — the code's structure: modules added or removed, and what each is for. Whichever file holds the structure description is the one to update; do not maintain it in both",
         "   - **Delete statements that are no longer true** (removed files/modules, abandoned decisions)",
         "   - **Do NOT accumulate per-generation changelog entries.** environment describes the CURRENT state; lineage and git history own the history",
-        // reap:carrier(memory-tier-classification)
+        // reap:carrier(memory-tier-classification-fa69f636)
         "3. Update memory (`.reap/vision/memory/`). Tiers are classified by **content-type** (what the content is for), NOT by lifespan:",
         "   - Decision tree — apply top-to-bottom:",
         "     1. Needed in the next session immediately? → `shortterm.md`",

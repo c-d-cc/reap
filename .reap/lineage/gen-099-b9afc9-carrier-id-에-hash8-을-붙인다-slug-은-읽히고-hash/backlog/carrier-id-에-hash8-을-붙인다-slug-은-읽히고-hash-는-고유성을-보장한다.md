@@ -1,10 +1,12 @@
 ---
 id: bklog-76e909
 type: task
-status: pending
+status: consumed
 priority: medium
 createdAt: 2026-08-21T00:00:00.000Z
 from: gen-098-99c09a
+consumedBy: gen-099-b9afc9
+consumedAt: 2026-08-21T13:34:00.406Z
 ---
 
 # carrier ID 에 hash8 을 붙인다 — slug 은 읽히고 hash 는 고유성을 보장한다

@@ -8,7 +8,7 @@ rm -rf dist
 
 # Bundle TypeScript → single JS file
 #
-# reap:carrier(zero-native-dependency)
+# reap:carrier(zero-native-dependency-0ca719d7)
 # web-tree-sitter stays external, and the reason is narrower than it looks.
 #
 # Inlining it was tried (gen-089) and the self-diagnosis gate still passed under

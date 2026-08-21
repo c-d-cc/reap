@@ -917,7 +917,7 @@ export async function checkUserLevelArtifacts(
     );
   }
 
-  // reap:carrier(claude-code-commands-path)
+  // reap:carrier(claude-code-commands-path-4bd29da9)
   // (Note) `~/.claude/commands/` (claude-code) and
   // `~/.config/opencode/commands/` (opencode) are the canonical slash-command
   // locations. Adapters declare them via `userLevelDirs()`; the caller injects

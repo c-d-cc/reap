@@ -59,7 +59,7 @@ jobs:
       - name: Install OpenCode (for the self-diagnosis gate)
         run: npm i -g opencode-ai
 
-      # reap:carrier(self-diagnosis-covered-incidents)
+      # reap:carrier(self-diagnosis-covered-incidents-a8c5d58c)
       # Install the tarball we are about to publish and ask REAP whether the
       # result is healthy. #22 was only ever visible after installing, and so
       # was a resolver that resolved nothing: section 5 requires the index to

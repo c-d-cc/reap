@@ -54,7 +54,7 @@ export const claudeCodeAdapter: AdapterModule = {
     return await removeUserLevelAssets(home);
   },
 
-  // reap:carrier(claude-code-commands-path)
+  // reap:carrier(claude-code-commands-path-4bd29da9)
   userLevelDirs(home?: string): string[] {
     // `~/.claude/agents/` is deliberately absent: installAgents writes
     // `reap-*.md` there, which the checker matches with a `reap.` prefix — the

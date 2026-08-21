@@ -105,7 +105,7 @@ export interface AdapterModule {
    * copies directories, one edits JSON, one writes a single file — so the only
    * thing keeping them in step is that whoever adds a fifth asset is looking at
    * both. Each adapter implements them in the same file for the same reason,
-   * and both carry `reap:carrier(user-level-asset-set)`.
+   * and both carry `reap:carrier(user-level-asset-set-b7a3fef9)`.
    *
    * npm never runs code at uninstall time — `preuninstall` and `postuninstall`
    * were measured on npm 10 and 12, global and local, and fire in neither — so

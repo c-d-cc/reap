@@ -229,7 +229,7 @@ export async function installPluginFile(projectRoot: string): Promise<void> {
  * Install reap-guide.md to `~/.reap/` (shared between adapters — same logic
  * as claude-code installer; duplicated to avoid cross-adapter import).
  *
- * reap:carrier(reap-home-asset-set)
+ * reap:carrier(reap-home-asset-set-94949259)
  */
 export async function installReapGuide(home: string = homedir()): Promise<boolean> {
   const reapHome = join(home, ".reap");
@@ -278,7 +278,7 @@ function claudeCodeSkillsDir(): string {
 /**
  * Where OpenCode keeps its user-level configuration.
  *
- * reap:carrier(opencode-config-path)
+ * reap:carrier(opencode-config-path-203454f8)
  *
  * `~/.config` is only the default. OpenCode follows the XDG base directory
  * spec, so when XDG_CONFIG_HOME is set it reads there instead — and REAP has
@@ -422,7 +422,7 @@ export function opencodeAgentsDir(
  * Map the tool names REAP writes in its agent templates onto OpenCode
  * permission keys.
  *
- * reap:carrier(agent-frontmatter-schema)
+ * reap:carrier(agent-frontmatter-schema-3a4d53e6)
  */
 const OPENCODE_TOOL_PERMISSIONS: Record<string, string> = {
   Read: "read",
@@ -457,10 +457,10 @@ const OPENCODE_TOOL_PERMISSIONS: Record<string, string> = {
  *               for "model not found" on every user without that provider.
  *               Omitted, so the user's default applies.
  *
- * The templates carry a `reap:carrier(agent-frontmatter-schema)` marker so that
+ * The templates carry a `reap:carrier(agent-frontmatter-schema-3a4d53e6)` marker so that
  * anyone editing their frontmatter finds this translation.
  *
- * reap:carrier(agent-frontmatter-schema)
+ * reap:carrier(agent-frontmatter-schema-3a4d53e6)
  */
 export function toOpenCodeAgent(source: string): string {
   const fm = source.match(/^---\r?\n([\s\S]*?)\r?\n---\r?\n?/);
@@ -643,7 +643,7 @@ export async function registerSessionIntegration(projectRoot: string): Promise<v
  * update` path on the grounds that postinstall owned it — an assumption npm 12
  * removed, and CLAUDE.md/AGENTS.md import that file by path.
  *
- * reap:carrier(user-level-asset-set)
+ * reap:carrier(user-level-asset-set-b7a3fef9)
  */
 export async function syncUserLevelAssets(home: string = homedir()): Promise<
   UserLevelSyncResult & {
@@ -674,7 +674,7 @@ export async function syncUserLevelAssets(home: string = homedir()): Promise<
  * reason the Claude Code adapter does: the shared list cannot be shared as a
  * value, so proximity is what keeps the two in step.
  *
- * reap:carrier(user-level-asset-set)
+ * reap:carrier(user-level-asset-set-b7a3fef9)
  *
  * Paths go through `opencodeCommandsDir` / `opencodeAgentsDir` rather than
  * being spelled out, so removal follows `XDG_CONFIG_HOME` exactly as

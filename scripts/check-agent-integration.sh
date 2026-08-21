@@ -122,7 +122,7 @@ printDenials() {
   '
 }
 
-# reap:carrier(agent-integration-gate-verdicts)
+# reap:carrier(agent-integration-gate-verdicts-e1fafca9)
 # This gate answers three ways — pass / FAIL / amber SKIP — and the skip is for
 # a refusal of a command containing `reap run`. Said in reap-guide
 # § Verifying a Release,

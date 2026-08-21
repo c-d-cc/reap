@@ -175,7 +175,7 @@ export const ja: Translations = {
     commandLoadingDesc: "REAPスラッシュコマンドはREAPプロジェクトでのみ読み込まれます — 非REAPプロジェクトでは表示されません。",
     commandLoadingDetails: [
       { label: "ソース", desc: "コマンドのオリジナルは~/.reap/commands/に保存されます（reap initとreap updateでインストール）" },
-      // reap:carrier(claude-code-commands-path)
+      // reap:carrier(claude-code-commands-path-4bd29da9)
       { label: "読み込み", desc: "REAPプロジェクトを開くと、セッションhookが自動的にコマンドを.claude/commands/にシンボリックリンクします" },
       { label: "非REAPプロジェクト", desc: "シンボリックリンクが作成されないため、AIエージェントのスキルリストにREAPスキルは表示されません" },
       { label: "後方互換性", desc: "~/.claude/commands/のリダイレクトスタブにより、移行中の古いセットアップも動作し続けます" },
@@ -905,7 +905,7 @@ commit:  1a2b3c4`,
     cruisePauseDesc: "クルーズは次の場合に自動的に一時停止し、人間の入力を要求します：(1) 不確実性が AI の信頼度閾値を超えた場合、(2) 人間の判断が必要な決定の場合（例：互換性を破る API 変更）、(3) バックログに矛盾する優先度がある場合。すべての N 個の Generation が完了した後、人間がバッチレビューを行います。",
     memoryTitle: "メモリシステム",
     memoryDesc: "メモリは AI がセッションと Generation にわたってコンテキストを永続化する自由形式の記録システムです。Genome（変更制限あり）や Lineage（時間とともに圧縮される）とは異なり、メモリは常にアクセス可能で自由に書き込めます。",
-    // reap:carrier(memory-tier-classification)
+    // reap:carrier(memory-tier-classification-fa69f636)
     memoryHeaders: ["階層", "役割", "判断基準", "Pruning"],
     memoryRows: [
       ["shortterm", "セッション引き継ぎ", "「今すぐ必要か？」", "毎 Generation 置き換え — 蓄積しない"],

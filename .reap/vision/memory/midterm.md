@@ -25,8 +25,8 @@
 여기는 그 파일에 담기지 않는 것만.
 
 - `v018-배포-형태를-plugin-으로` (**main**) — 리서치 → 구현(별도 브랜치) → 릴리즈
-- `v018-지식-축-정리` — ~~참조·ID 체계~~(gen-098) → **carrier hash8** → 경계 설계(3축) →
-  memory → idea → interview
+- `v018-지식-축-정리` — ~~참조·ID 체계~~(gen-098) → ~~carrier hash8~~(gen-099) → **경계 설계(3축)**
+  → memory → idea → interview
 
 **나눈 이유**: 완료 조건이 서로를 뒷받침하지 않고(memory 가 flat 인 것은 REAP 이 한 도구로 보이는
 증거가 아니다), goal 이 다르고, 브랜치가 다르다. **`plan` 을 빼자 둘이 순차가 아니라 병렬이 됐다** —
@@ -40,20 +40,19 @@ plugin 에 의존하는 것은 `interview` 하나뿐이다.
 첫 소비자. **`ds-`·`idea-`·`mem-` 은 prefix 만 예약**됐고 실제 부여는 소비자가 생기는 세대가 한다
 (design 은 frontmatter 도 읽는 코드도 없어 지금 부여하면 닻을 못 내린다).
 
-**다음은 carrier hash8** (`<slug>-<hash8>`, 사용자 결정). gen-098 이 만든 해시 생성·고유성 검사·
-레지스트리를 재사용하므로 직후여야 한다. `backlogs_v0.17_residual` 의 `list-carriers.sh 산문 오탐`
-건을 **같은 세대에서** 처리할 것 — 형식이 바뀌면 어차피 같은 파일을 만진다.
-
 **미결 둘**: (a) **A/B 배포 형태 확정** — `command` source 발견(2026-08-20)이 판단을 뒤집는다.
 명령이 세션마다 재실행되므로 `npm i -g` 한 번으로 CLI 와 plugin 이 동시에 갱신되고, 따라서
 auto-update 가 plugin 갱신의 유일한 경로가 된다. `vision/design/plugin-distribution.md` § 4 가
 근거를 소유하며 **미독 절 3개**(결정 대기 / 미측정 / plugin cache)가 남아 있다.
 (b) **update 관련 backlog 4건 삭제 여부** — (a)에 종속.
 
-## 0.17 잔여 backlog 9건 — plugin 전환 이후에 재검토
+## 0.17 잔여 backlog 8건 — plugin 전환 이후에 재검토
 
 `vision/design/backlogs_v0.17_residual/` + README(항목별 재검토 질문·소멸 후보 여부).
-**7건이 REAP 자기 기계장치**라, plugin 전환 후 무엇이 살아남는지 판정하기 전에 고치면 헛일이 된다.
+**대부분이 REAP 자기 기계장치**라, plugin 전환 후 무엇이 살아남는지 판정하기 전에 고치면 헛일이 된다.
+gen-099 가 `list-carriers.sh 산문 오탐` 을 해소해 **8건**이다 — carrier 형식을 바꾸느라 어차피
+같은 파일을 만졌기 때문이며, 그것이 곁다리 처리의 조건이다(따로 했으면 형식 검사가 그 오탐을
+경고에서 에러로 승격시켰을 것이다).
 
 ## Embryo → Normal transition
 

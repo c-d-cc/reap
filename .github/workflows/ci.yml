@@ -12,6 +12,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      # Free, offline, and the only thing that enforces the carrier id format.
+      # A marker written without its hash is invisible to every other check — it
+      # simply stops being found by grep, which is the whole point of the
+      # marker. It needs nothing but bash and grep, so it runs before the
+      # install and the build: a broken build must not hide a broken marker.
+      - name: Carrier markers
+        run: bash scripts/list-carriers.sh --check
+
       - uses: oven-sh/setup-bun@v2
 
       - uses: actions/setup-node@v4

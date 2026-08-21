@@ -13,11 +13,7 @@ AI의 소통 깊이는 현재 맥락의 구체화(clarity) 수준에 따라 자�
 | Medium | 방향은 있으나 세부 미정 | 선택지 + 트레이드오프 제시 |
 | Low | 목표 모호, 다음 할 일 불명확 | 적극 interaction — 질문, 예시, 보기 |
 
-### Clarity 판단 기준
-- vision/goals.md에 구체적 goal 존재 → high
-- backlog에 명확한 task 있음 → high
-- genome이 불안정 (embryo, 잦은 수정) → low
-- lineage 짧고 방향 미확정 → low
+**판단 기준은 코드가 소유한다** — `src/core/clarity.ts` 의 `calculateClarity()` 가 신호를 세고 그 근거를 phase prompt 에 그대로 싣는다. 산문이 그 규칙을 다시 적으면 어긋나고, **실제로 어긋나 있었다**: genome 은 "backlog 에 명확한 task 있음 → high" 라 적었으나 코드는 **high-priority 2건 이상**을 요구한다. 공유 가능한 것은 표식이 아니라 소유자를 갖는다.
 
 ## Genome 관리 원칙
 
@@ -70,7 +66,7 @@ goal 과 generation 사이의 계획 단위. 하나의 milestone 안에서 **여
 
 판단 기준: "이 내용이 하나의 독립된 주제로 문서화할 만한가?" → Yes면 Design, No면 Memory.
 
-<!-- reap:carrier(memory-tier-classification) -->
+<!-- reap:carrier(memory-tier-classification-fa69f636) -->
 ### Memory (`vision/memory/`)
 AI가 프로젝트 맥락을 자유롭게 기록하는 공간. 3-tier 구조는 **"무엇을 위한 내용인가"(content-type)** 기준으로 분류한다. lifespan으로 판단하지 마라 — AI는 미래를 모르므로 그 추론이 매번 부담이 되고 오분류를 누적시킨다.
 
@@ -102,7 +98,7 @@ longterm 은 **genome 과 중복되면 삭제**.
 **environment·artifact·genome·lineage 가 이미 갖는 것은 memory 에 쓰지 않는다.** 읽기·쓰기와
 tier 간 이동은 자유이며, longterm 30~50줄 / midterm 50~70줄을 넘으면 pruning 미수행 신호다.
 
-<!-- reap:carrier(source-map-read-rule) -->
+<!-- reap:carrier(source-map-read-rule-a227a34e) -->
 ## Code Quality Principles
 
 새 코드를 작성하기 전에 반드시 기존 코드를 읽고 패턴을 파악한다.
@@ -233,6 +229,7 @@ gen-073 사례: `reapdev.versionBump` skill 은 `docs/src/i18n/translations/` �
 - 개별 항목도 마찬가지 — 정상 값을 일부러 깨뜨려 fail 을 확인하고 복원한다 (negative test)
 - **검사가 못 잡는 것을 결과와 함께 기록한다.** 통과는 "검사 범위 안에서 문제없음"일 뿐이다. 한계를 적어두지 않으면 다음 사람이 그 검사를 실제보다 신뢰한다
 
+<!-- reap:carrier(gate-writing-discipline-af52f991) -->
 ### 게이트에 대해 쓰는 문장의 규율
 
 - **잡는다고 적은 사례는 재현해 확인한 것만 적는다.** gen-078 의 한 항목이 **거짓인 채 다섯 세대를
@@ -244,6 +241,7 @@ gen-073 사례: `reapdev.versionBump` skill 은 `docs/src/i18n/translations/` �
 - **두 층은 서로를 추론하지 못한다** — "파일이 놓였는가"와 "클라이언트가 읽는가"는 별개다(gen-063)
 - **기능을 지우면 무엇이 여전히 초록인가**를 물어라. gen-096 은 리디렉션을 한 줄로 끌 수 있었고 unit 657·게이트 둘 다 통과했다 — 단언이 전부 순수 함수와 **파일 안 문자열 순서**에 있었기 때문이다. 그리고 **케이스 표의 모든 행이 한 전제를 공유하면 행을 늘려도 소용없다**: 27개 브라우저 판정이 전부 *"`/` 에 도착"* 으로 시작해 진입 지점이 변수가 된 적이 없었다
 
+<!-- reap:carrier(evidence-tagging-ab1eb844) -->
 ### 검증 근거는 종류를 구분해 적는다 — 그리고 "실행"은 명령을 지목할 수 있어야 한다
 
 artifact 에 "확인함"이라고만 적으면 **직접 돌려본 것과 코드를 읽고 판단한 것이 같아 보인다.** 두 세대 연속으로 그 구분이 무너져 blocking 결함이 나왔다.
@@ -268,6 +266,9 @@ evaluator 호출은 **1회 감사가 아니다.** gen-089 는 3라운드가 필�
   green 을 허가로 읽으면 옳은 수정을 지운다
 - 해소된 concern 도 `--severity none` 으로 낮추지 마라 — 그 채널은 "미해결"이 아니라
   "fitness 를 보는 사람이 알아야 할 것"을 나른다
+- **evaluator 가 회신하지 않으면 그 사실을 `report-evaluator` 로 남겨라.** gen-099 에서 무응답인
+  채 idle 로 끝났고 적대적 검토가 전부 자기 것이 됐다. **fallback 이 조용하면 그것은 fallback 이
+  아니라 침묵이다** — 아무 흔적이 없으면 다음 사람은 검토를 받은 세대와 구분하지 못한다
 
 ## 아키텍처 변경 시 genome 동기화
 
@@ -275,7 +276,7 @@ evaluator 호출은 **1회 감사가 아니다.** gen-089 는 3라운드가 필�
 
 판단 기준: "다음 세션의 새 agent가 이 변경을 몰라도 올바르게 동작할 수 있는가?" → No이면 genome 업데이트 필수.
 
-<!-- reap:carrier(environment-refresh-targets) -->
+<!-- reap:carrier(environment-refresh-targets-b4a95f5d) -->
 ## Completion 시 환경 갱신
 
 reflect phase에서 environment/ 를 점진적으로 업데이트:

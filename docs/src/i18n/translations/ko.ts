@@ -175,7 +175,7 @@ export const ko: Translations = {
     commandLoadingDesc: "REAP 슬래시 명령어는 REAP 프로젝트에서만 로딩됩니다 — REAP가 아닌 프로젝트에서는 나타나지 않습니다.",
     commandLoadingDetails: [
       { label: "소스", desc: "명령어 원본은 ~/.reap/commands/에 저장됩니다 (reap init과 reap update로 설치됨)" },
-      // reap:carrier(claude-code-commands-path)
+      // reap:carrier(claude-code-commands-path-4bd29da9)
       { label: "로딩", desc: "REAP 프로젝트를 열면 세션 hook이 자동으로 .claude/commands/에 심볼릭 링크를 생성합니다" },
       { label: "비-REAP 프로젝트", desc: "심볼릭 링크가 생성되지 않으므로 AI 에이전트의 스킬 목록에 REAP 스킬이 나타나지 않습니다" },
       { label: "하위 호환성", desc: "~/.claude/commands/의 리다이렉트 스텁이 마이그레이션 중 이전 설정의 호환성을 유지합니다" },
@@ -906,7 +906,7 @@ commit:  1a2b3c4`,
     cruisePauseDesc: "크루즈는 다음 경우에 자동으로 일시정지하고 인간의 입력을 요청합니다: (1) 불확실성이 AI의 신뢰 임계값을 초과할 때, (2) 인간의 판단이 필요한 결정일 때 (예: 호환성을 깨는 API 변경), (3) 백로그에 상충하는 우선순위가 있을 때. 모든 N개의 Generation이 완료된 후 인간이 일괄 검토합니다.",
     memoryTitle: "메모리 시스템",
     memoryDesc: "메모리는 AI가 세션과 Generation 간에 맥락을 유지하는 자유 형식 기록 시스템입니다. Genome(수정 제한)이나 Lineage(시간이 지나면 압축)와 달리 메모리는 항상 접근 가능하고 자유롭게 쓸 수 있습니다.",
-    // reap:carrier(memory-tier-classification)
+    // reap:carrier(memory-tier-classification-fa69f636)
     memoryHeaders: ["계층", "역할", "판단 기준", "Pruning"],
     memoryRows: [
       ["shortterm", "세션 핸드오프", "\"지금 당장 필요한가?\"", "매 Generation 교체 — 누적하지 않음"],

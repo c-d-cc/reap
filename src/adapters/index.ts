@@ -72,7 +72,7 @@ export async function resolveAgentClient(
  */
 type InstallStamp = Record<string, string>;
 
-// reap:carrier(reap-home-asset-set)
+// reap:carrier(reap-home-asset-set-94949259)
 export function installStampPath(home: string = homedir()): string {
   return join(home, ".reap", ".install-stamp");
 }
@@ -167,7 +167,7 @@ export async function ensureUserLevelAssets(opts: {
  * that a machine still carrying it gets it cleaned up; `reap update` removes
  * the same directory for users who are staying.
  *
- * reap:carrier(reap-home-asset-set)
+ * reap:carrier(reap-home-asset-set-94949259)
  */
 const REAP_HOME_ENTRIES = ["reap-guide.md", ".install-stamp", "daemon"] as const;
 

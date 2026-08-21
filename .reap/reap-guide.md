@@ -24,7 +24,7 @@ REAP consists of four interconnected layers:
 
 Memory is a free-form recording system under `.reap/vision/memory/` where AI can persist project context across sessions and generations. Unlike Genome (which has modification constraints) or Lineage (which gets compressed), Memory is always accessible and freely writable.
 
-<!-- reap:carrier(memory-tier-classification) -->
+<!-- reap:carrier(memory-tier-classification-fa69f636) -->
 ### 3-Tier Structure — content-type based
 
 Tiers are classified by **what the content is for** (content-type), NOT by how long it will live (lifespan). Lifespan requires predicting the future, which the AI can't reliably do — that judgment burden has historically led to misclassification and bloat.
@@ -105,7 +105,7 @@ The second drives a headless agent against your current installation and judges 
 
 It reads your installation rather than a throwaway one, because a client keeps its login beside its commands — isolating one discards the other. Run `reap install-skills` first so it sees your current sources.
 
-<!-- reap:carrier(agent-integration-gate-verdicts) -->
+<!-- reap:carrier(agent-integration-gate-verdicts-e1fafca9) -->
 It answers three ways, not two. Alongside pass and fail there is an amber skip, for when the client refused the `reap run` command /reap.start issues, stopping the agent before it ever reached REAP — the check measured nothing, and saying so is not the same as saying REAP is broken. It reported one such run as a missing slash command once, and $0.26 of the release's $0.53 went on a defect that was not there. A missing generation now names every cause that produces it rather than picking one.
 
 What a pass establishes is narrower than it used to claim, and the two halves do not rest on the same thing. That the CLI works is proved by the generation itself. That the client surfaced the slash command is not — a slash command wraps the CLI, so an agent that could not find it and ran `reap run start` by hand leaves an identical file behind, which is what happened the first time this check was built. That half rests on the agent obeying an instruction not to bypass. And neither half says CLAUDE.md's `@` imports loaded or the SessionStart hook fired: `/reap.start` needs neither to succeed.
@@ -117,27 +117,38 @@ Some facts are known in more than one place — an install path known by both th
 Files that know such a fact say so:
 
 ```ts
-// reap:carrier(claude-code-commands-path)
+// reap:carrier(<slug>-<hash8>)
 export function claudeCodeCommandsDir(home = homedir()): string { ... }
 ```
 
 ```markdown
-<!-- reap:carrier(memory-tier-classification) -->
+<!-- reap:carrier(<slug>-<hash8>) -->
 ```
 
-Before changing a shared fact, find everywhere that knows it:
+An id is a **slug and eight hex characters**. The slug is first because the only thing a marker does is get read beside the value it guards — a hash in front would put the name where nobody looks. The hash is drawn at random when the marker is created and never derived from the slug, for the same reason goal and backlog ids are not derived from their titles: an id that follows the name changes when the name does.
+
+Without it a collision is undetectable. Two facts given the same slug make `grep` return unrelated files, and nothing can tell they are two facts.
+
+Before changing a shared fact, find everywhere that knows it — `grep -rn "reap:carrier(<the-id>)" .` — or ask the script. It lives in REAP's own repository rather than in the package, so a project adopting the convention copies it; the grep works anywhere:
 
 ```bash
-grep -rn "reap:carrier(claude-code-commands-path)" .
-bash scripts/list-carriers.sh            # every ID and where it lives
-bash scripts/list-carriers.sh --orphans  # IDs recorded in one file only
+bash scripts/list-carriers.sh                  # every id and where it lives
+bash scripts/list-carriers.sh --orphans        # ids recorded in one file only
+bash scripts/list-carriers.sh --check          # every way a marker hides; exit 1 if any
+bash scripts/list-carriers.sh --new <slug>     # a marker with a fresh, unused hash
 ```
+
+Do not compose an id by hand — `--new` draws one. A person cannot know which slugs and hashes are already spoken for, and a marker copied from somewhere else onto a different fact is indistinguishable from one fact recorded in two files, which is the normal case. That is the limit of what the hash buys: it prevents an accidental collision, not a duplicated line.
+
+Prose that *explains* the convention writes the angle brackets, as this section does. Anything holding `<`, `>` or whitespace is not a marker and is ignored — that is the whole rule, and it is why a release note describing the feature does not become a phantom carrier.
 
 The marker sits next to the value, so whoever edits the value sees it. A list kept elsewhere only helps the person who remembers to go read it — REAP kept such a list and #22 still slipped through it, because every entry was a document and #22 was code disagreeing with code.
 
 **Prefer sharing over marking.** If two pieces of code need the same *value*, give it one owner and inject or import it — then there is nothing to keep in sync. Markers are for what cannot be shared: prose, translations, prompt strings, the set of values a function can return.
 
-An orphan (an ID in exactly one file) means either the marker is unnecessary, or the other places that know the fact were never marked. The second is the state #21 and #22 were in.
+An orphan (an id in exactly one file) means either the marker is unnecessary, or the other places that know the fact were never marked. The second is the state #21 and #22 were in.
+
+Changing the ids in bulk is the moment to ask, file by file, whether that file actually knows the fact or merely quotes it — a marker beside an *example* of the convention is a marker nowhere near the value, which is the arrangement markers replaced. A count that goes **down** is the right answer there.
 
 ## File Size Guidelines
 
@@ -631,6 +642,7 @@ When you see a `# Pending Migrations` section:
 
 REAP supports multiple AI clients via the `agentClient` field in `.reap/config.yml`:
 
+<!-- reap:carrier(claude-code-commands-path-4bd29da9) -->
 | Client | Static knowledge | Dynamic state | Slash commands |
 |---|---|---|---|
 | `claude-code` | `@` references in `CLAUDE.md` (auto-imported by Claude Code) | `SessionStart` hook → `reap load-context` (injects into context) | `~/.claude/commands/reap.*.md` (installed by `reap install-skills`) |
@@ -645,7 +657,7 @@ For OpenCode users, see `AGENTS.md` (auto-generated by `reap update`) for the pr
 
 ### Evaluator agent (opt-in)
 
-<!-- reap:carrier(opencode-config-path) -->
+<!-- reap:carrier(opencode-config-path-203454f8) -->
 OpenCode's paths below are defaults. It follows the XDG base directory spec, so when `XDG_CONFIG_HOME` is set REAP installs under `$XDG_CONFIG_HOME/opencode/` instead — the client reads there, and writing to `~/.config` would leave it with nothing.
 
 Both adapters install bundled agent definitions (`reap-evolve.md`, `reap-evaluate.md`) to the client's user-level agents directory (`~/.claude/agents/` for Claude Code, `~/.config/opencode/agent/` for OpenCode). The install runs on `reap install-skills` AND `reap update`, so user-level agents stay in sync with the bundled REAP version. Set `evaluator: true` in `.reap/config.yml` to launch `reap-evaluate` as an independent reviewer during the validation stage (advisor role — the builder owns the final verdict).

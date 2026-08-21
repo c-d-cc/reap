@@ -99,7 +99,7 @@ Open your AI agent (Claude Code or OpenCode) and use slash commands:
 
 `/reap.evolve` drives the entire generation lifecycle — from learning through completion. The AI explores the project, plans the work, implements it, validates, and reflects. This is the primary command for day-to-day development.
 
-<!-- reap:carrier(opencode-config-path) -->
+<!-- reap:carrier(opencode-config-path-203454f8) -->
 > **OpenCode users**: After `/reap.init`, edit `.reap/config.yml` to set `agentClient: opencode`, then run `reap update` to regenerate client-specific assets (`opencode.json`, `.opencode/plugins/reap-plugin.ts`, `AGENTS.md`, and slash commands at `~/.config/opencode/commands/`).
 
 > **Note:** Users interact with REAP through `/reap.*` slash commands in their AI agent. The CLI is the internal engine that powers those commands.
@@ -258,7 +258,7 @@ Pre-approve N generations for autonomous execution:
 
 REAP integrates with AI agents through an adapter layer keyed by the `agentClient` config field. Currently supported clients:
 
-<!-- reap:carrier(claude-code-commands-path) -->
+<!-- reap:carrier(claude-code-commands-path-4bd29da9) -->
 - **Claude Code** (`agentClient: claude-code`, default) — static knowledge via `@` imports in `CLAUDE.md`; dynamic state via `SessionStart` hook (`reap load-context`); slash commands installed to `~/.claude/commands/reap.*.md`.
 - **OpenCode** (`agentClient: opencode`) — static knowledge via `opencode.json`'s `instructions` field; dynamic state via `.reap/.session-state.md`, auto-refreshed by the bundled OpenCode plugin (`.opencode/plugins/reap-plugin.ts`) on `session.created` / `tool.execute.before`; slash commands installed to `~/.config/opencode/commands/reap.*.md` (`$XDG_CONFIG_HOME` is honoured when set).
 

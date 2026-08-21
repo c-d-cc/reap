@@ -253,7 +253,7 @@ N世代分の自律実行を事前承認：
 REAPは`agentClient` configフィールドをキーとするアダプタレイヤーを通じてAIエージェントと統合します。現在サポートされているクライアント:
 
 - **Claude Code** (`agentClient: claude-code`, デフォルト) — `CLAUDE.md`の`@`インポートで静的ナレッジ; SessionStartフック(`reap load-context`)で動的状態を注入; スラッシュコマンドは`~/.claude/commands/reap.*.md`にインストール。
-<!-- reap:carrier(opencode-config-path) -->
+<!-- reap:carrier(opencode-config-path-203454f8) -->
 - **OpenCode** (`agentClient: opencode`) — `opencode.json`の`instructions`フィールドで静的ナレッジ; `.reap/.session-state.md`で動的状態を伝達、バンドルされたOpenCodeプラグイン(`.opencode/plugins/reap-plugin.ts`)が`session.created` / `tool.execute.before`時に自動更新; スラッシュコマンドは`~/.config/opencode/commands/reap.*.md` (`$XDG_CONFIG_HOME` is honoured when set)にインストール。
 
 `.reap/config.yml`を編集してから`reap install-skills`に続いて`reap update`を実行することでクライアントを切り替えます。REAPはエントリーポイントファイル(CLAUDE.md vs AGENTS.md)、セッション統合、およびクライアント固有のアセットを再生成します。スラッシュコマンドディレクトリの`reap.`プレフィックスは予約されています — インストールはcleanup-then-copy方式で、その場所の`reap.*.md`ファイルを上書きします。カスタムコマンドには別のプレフィックス(`mytool.md`、`team.md`など)を使用してください。

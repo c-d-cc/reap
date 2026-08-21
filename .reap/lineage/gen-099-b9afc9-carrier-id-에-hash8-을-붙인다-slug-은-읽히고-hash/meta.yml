@@ -1,0 +1,37 @@
+id: gen-099-b9afc9
+type: embryo
+goal: carrier ID 에 hash8 을 붙인다 — slug 은 읽히고 hash 는 고유성을 보장한다 (+ list-carriers.sh
+  산문 오탐 제거)
+parents:
+  - gen-098-99c09a
+timeline:
+  - stage: learning
+    at: 2026-08-21T13:34:00.400Z
+  - stage: planning
+    at: 2026-08-21T13:37:34.460Z
+  - stage: implementation
+    at: 2026-08-21T13:44:39.194Z
+  - stage: validation
+    at: 2026-08-21T13:57:23.126Z
+  - stage: completion
+    at: 2026-08-21T14:28:42.480Z
+milestoneId: v018-지식-축-정리
+status: completed
+fitnessFeedback:
+  text: >-
+    승인. 이대로 commit 하라.
+
+
+    작업을 받아들인다. 형식이 검사로 강제되고, 이관이 스크립트 출력과 무관하게 HEAD 대조로 확인됐고, negative 13회가 붙었다.
+    `id` 가 애초에 표식이 아니었다는 판정 — 세 세대가 헷갈렸던 것을 실측으로 끝낸 것 — 이 이 세대에서 가장 값어치 있다.
+
+
+    초록인 뒤에 결함 일곱을 스스로 잡은 것도 옳게 한 것이다. 특히 로케일 collation 은 눈으로도 독해로도 안 보이는 종류이고,
+    "수정 안에 또 결함" 은 genome 이 반복 관측한 것의 또 한 번의 실증이다.
+
+
+    지적 하나 — evaluator 무응답은 이 세대에서 되돌리지 않고 다음 세대가 조사한다. opt-in 한 evaluator 가 조용히
+    아무것도 하지 않았고, 남은 6세대가 전부 자기검토만 받는 것을 막으려면 원인부터 봐야 한다. genome 의 'Subagent
+    calls as lifecycle gates' 가 advisor + fallback 을 요구하는데, fallback 이 조용하면 그것은
+    fallback 이 아니라 침묵이다.
+  evaluatedAt: 2026-08-21T20:39:00.204Z

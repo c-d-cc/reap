@@ -10,7 +10,7 @@
 
 - Runtime: Bun (build), Node.js (execution)
 - Build: `bun build` → single bundle (`dist/cli/index.js`, ~0.63MB) + `dist/grammars/` (15 wasm)
-<!-- reap:carrier(zero-native-dependency) -->
+<!-- reap:carrier(zero-native-dependency-0ca719d7) -->
 - Dependencies: `yaml` v2 + `web-tree-sitter` 0.22.6 — **네이티브 빌드 0**. 후자는 번들에서
   `--external` 이며, 그 근거는 `scripts/build.sh` 주석이 소유한다 (인라인하면 깨진다는 것은
   **입증되지 않았다** — gen-089 가 시험했고 통과했다)
@@ -41,7 +41,7 @@
 
 ### tests/ submodule (reap-test repo, main branch)
 
-현재 baseline — **unit 773 / e2e 379 / scenario 62, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
+현재 baseline — **unit 791 / e2e 379 / scenario 62, 세 스위트 모두 0 fail.** 이 수치와 다르면 회귀를 의심할 것 (다음 세대가 판단하는 기준이므로 변경 시 갱신).
 
 `src/indexer/` 의 이식된 모듈(call-resolver/impact/scanner/parser/pipeline)에는 **unit test 가 없다** — 그쪽은 지금 e2e 로만 덮인다.
 
@@ -57,6 +57,9 @@
   한글이다). 제외는 **경로 하나에 근거 하나**이며 묶으면 안 된다 — 묶인 항목은 그중 하나만 읽힌다.
   범위 밖: `README*` · `RELEASE_*` · `CLAUDE.md` · `AGENTS.md` · `.reap/environment/*` ·
   `.claude/commands/*` (전부 현재 clean 이지만 **검사는 없다**)
+- `tests/unit/list-carriers.test.ts` — **`scripts/list-carriers.sh` 의 유일한 테스트 (gen-099)**.
+  `--root` 로 임시 픽스처 트리를 스캔시킨다 — 저장소를 스캔하면 누가 표식을 하나 더하는 순간
+  케이스의 의미가 바뀐다. 저장소의 다른 bash 게이트 4종에는 아직 이런 하네스가 없다
 - `tests/unit/docs-wiring.test.ts` — `docs/src/App.tsx` 의 `<Route path>` 와 `AppSidebar.tsx` 의
   `href` 가 일치하는지 + 5개 로케일이 페이지 키를 각각 정확히 1회 갖는지. **라우트 불일치는 어떤
   언어에서도 타입 오류가 아니다** — 증상은 NotFound 로 가는 사이드바 항목뿐이라 테스트가 필요하다
@@ -87,8 +90,21 @@
 - `scripts/alpha-publish.sh` — alpha 배포 헬퍼
 - `scripts/postinstall.sh` — npm postinstall hook
 - `scripts/check-self-diagnosis.sh` — **자기진단 게이트**. `npm pack` → 격리 HOME/prefix 에 설치 → `reap init` → `fix --check` 가 **경고·에러 0** 을 요구. 8개 절: 빌드·설치·init·진단 / **인덱스** / install script 차단 / OpenCode / uninstall. init 절은 **greenfield 가 `environment/source-map.md` 를 실질 내용과 함께 쓰는지**도 요구한다 — 배포되는 genome 이 그 파일을 읽으라고 지시하므로, 전제를 installer 가 만들지 않으면 규칙이 허공을 가리킨다. release publish 앞 + CI 매 push 양쪽에서 실행. 대화로 채워지는 genome/goals 는 스크립트가 채운 뒤 진단 — 그것까지 요구하면 REAP 정상 동작에 fail 한다. 끄는 스위치는 두지 않는다 — 비용이 문제가 되면 release 전용으로 옮긴다
-- `scripts/list-carriers.sh` — **carrier 표식 조회 (gen-078)**. `reap:carrier(<id>)` 마커를 grep 해 ID 별 파일 목록 출력. `--orphans` 는 1개 파일에만 있는 ID 탐지 — 표식 불필요이거나 **다른 carrier 를 빠뜨린 것**(#21/#22 의 상태)
-<!-- reap:carrier(agent-integration-gate-verdicts) -->
+- `scripts/list-carriers.sh` — **carrier 표식 조회·검사 (gen-078, gen-099)**. ID 는 `<slug>-<hash8>`.
+  ID 자리를 `[^)]*` 로 두는 **관대한 패턴**으로 걷은 뒤 셋으로 가른다 — 유효 / **언급**(`<`·`>`·공백 포함 →
+  무시) / 위반. **좁힌 패턴으로 걷으면 해시 없는 표식이 아예 안 보여 검사가 자기 목적에 침묵한다.**
+  `--check` 는 표식이 숨는 **네 가지**(형식 위반 · 닫는 괄호 없음 · 한 slug 에 hash 둘 · 한 hash 를
+  slug 둘이 씀)를 보고하고 exit 1 하며 **`ci.yml` 이 `npm ci` 앞에서 돌린다**(빌드 실패가 가려선
+  안 되므로). `--orphans` 는 note 일 뿐 exit 코드에 영향 없고, 반쪽(slug 또는 hash)이 일치하는
+  형제를 함께 지목한다 — 해시 오타는 눈으로 안 보인다. `--new <slug>` 가 안 쓰인 hash 를 뽑고
+  이미 쓰인 slug 을 거부한다. `--root <dir>` 로 임의 트리 스캔(테스트가 이것을 쓴다).
+  **`LC_ALL=C` 필수** — UTF-8 로케일에서 bash `case` 의 `[a-z]`·`[0-9a-f]` 가 collation 범위라
+  대문자 해시를 유효로 판정했다. `--exclude='list-carriers.*'` 는 이 스크립트와 그 테스트 —
+  표식 텍스트가 선언이 아니라 입력인 유일한 두 파일이다.
+  **못 보는 것**: 기존 표식 줄을 복사해 다른 사실 옆에 붙인 것(정상 경우와 구분 불가) ·
+  CI 는 submodule 을 받지 않아 `tests/` 를 스캔하지 않는다 · **사용자 프로젝트에는 이 스크립트가
+  없다**(shipped `reap-guide.md` 는 저장소에서 복사해 쓰라고 안내한다)
+<!-- reap:carrier(agent-integration-gate-verdicts-e1fafca9) -->
 - `scripts/check-agent-integration.sh` — **agent 통합 검증 / 층2 (gen-079, gen-091)**. 헤드리스 `claude -p` 로 `/reap.start` 를 시키고 **`current.yml` 생성 여부**로 판정한다. **격리하지 않는다** — Claude Code 는 로그인을 slash command 와 같은 `~/.claude/` 에 두므로 HOME 격리 시 인증을 잃는다. 현재 설치를 읽기만 하고 임시 프로젝트에만 쓴다(권한 허용 `Bash(reap:*)` 도 그 안에만). **~$0.25/회** 라 CI 아닌 릴리즈 전 (`reapdev.versionBump` Step 5-2).
   - **답이 셋이다** — pass / FAIL / **amber SKIP(exit 0)**. 세 번째는 `/reap.start` 가 시키는 `reap run` 명령이 거부됐을 때이며 *"검사가 아무것도 측정하지 못했다"* 를 뜻한다. **검사 실패와 측정 실패는 다르다** — gen-091 이전에는 그것을 FAIL 로, 그것도 `This is the gen-063 failure exactly` 로 단정해 릴리즈가 없는 결함을 쫓았다. 부재 FAIL 은 이제 원인을 열거하고 agent 응답과 거부 항목을 함께 싣는다.
   - **통과가 증명하는 것은 하나 반이다.** `CLI reachable` 은 생성된 generation 이 증명한다. `slash command 노출` 은 **agent 가 우회 금지 지시를 지켰을 때만** 성립한다 — 슬래시 커맨드는 CLI 의 wrapper 라 우회가 바이트 동일한 파일을 남긴다(gen-079 실측). **`@` import 로드와 SessionStart hook 발화는 증명하지 않는다** — `/reap.start` 는 둘 없이도 성공한다. 여섯 세대 동안 넷을 주장했다.
@@ -127,20 +143,20 @@
 - `ReapConfig.lastMigratedVersion?: string` — 이 프로젝트가 어디까지 migration 됐는지 추적. 미설정 시 "0.0.0" fallback. `reap update --mark-migrated` 가 현재 패키지 버전으로 갱신. **CONFIG_DEFAULTS에 포함 금지** — optional tracking 필드이며 spurious config diff 유발.
 - `PendingMigration` — `{ version: string, instructions: string }`. `detectPendingMigrations` 반환 타입. `reap update` context + load-context SessionStart + dump-state.md sync 3곳에서 동일 데이터 emit.
 
-## Carrier Markers (gen-078)
+## Carrier Markers (gen-078, gen-099)
 
-여러 곳이 아는 사실에는 그 사실을 아는 파일마다 `reap:carrier(<id>)` 주석을 심는다. 값을 바꾸기 전에 `grep -rn "reap:carrier(<id>)" .` 또는 `bash scripts/list-carriers.sh` 로 전부 찾는다.
+여러 곳이 아는 사실에는 그 사실을 아는 파일마다 `reap:carrier(<slug>-<hash8>)` 주석을 심는다. 값을 바꾸기 전에 `grep -rn "reap:carrier(<the-id>)" .` 또는 `bash scripts/list-carriers.sh` 로 전부 찾는다. **ID 는 손으로 짓지 않는다** — `--new <slug>` 가 뽑는다.
 
 등록된 ID 와 파일 목록은 **`bash scripts/list-carriers.sh` 가 출력한다** — 여기에 옮겨 적으면 그것이 곧 어긋날 목록이 된다(이 원칙이 생긴 이유 그대로). 그래서 적지 않는다.
 
 **공유 가능하면 표식보다 공유가 낫다** — 같은 값을 두 코드가 알면 DI·import 로 하나로 만들어 carrier 수를 줄인다. 표식은 공유가 불가능한 경우(문서, 다국어, prompt 문자열, 반환값 union)를 위한 것이다.
 
-<!-- reap:carrier(self-diagnosis-covered-incidents) -->
+<!-- reap:carrier(self-diagnosis-covered-incidents-a8c5d58c) -->
 ## CI / Release 게이트 (gen-073, gen-078, gen-079, gen-081, gen-083)
 
 | 시점 | 검사 | 어디서 | 비용 |
 |---|---|---|---|
-| `ci.yml` (매 push) | build + **자기진단**(층1, claude-code + **OpenCode**) | reap | 무료 |
+| `ci.yml` (매 push) | **carrier 표식** + build + **자기진단**(층1, claude-code + **OpenCode**) | reap | 무료 |
 | `docs.yml` (docs 변경 시) | docs 빌드 + **prerender 게이트**(층1) | reap | 무료 |
 | main push | **테스트 전체** (unit/e2e/scenario) | **reap-test** | 무료 |
 | `release.yml` (`v*` 태그) | 문서 정합성 + **버전 하한** + 자기진단 + build + publish | reap | 무료 |
@@ -227,6 +243,6 @@ claude-code adapter 는 `~/.claude/` 를 쓰며 XDG 와 무관하다.
 
 설계 원칙(파일 기반 상태 / JSON stdout / transition graph + nonce / 2-level compression / adapter pattern)은 **처방적이므로 `genome/application.md` 가 소유한다.** 여기에는 현재 상태로만 확인되는 두 가지만 남긴다.
 
-<!-- reap:carrier(zero-native-dependency) -->
+<!-- reap:carrier(zero-native-dependency-0ca719d7) -->
 - **Zero *native* dependency** (원칙은 `genome/application.md` 가 소유한다): production dependency 는 `yaml` 과 `web-tree-sitter` 둘. 후자는 WASM 이라 node-gyp/prebuild 가 없다 — 그래서 인덱서가 패키지에 내장될 수 있다. CLI 프레임워크도 자체 구현(`src/libs/cli.ts`)
 - **`reap make` pattern**: template 기반 resource 생성 (현재 `backlog`, `hook`)

@@ -147,7 +147,7 @@ src/
 │       ├── status.ts           — 현재 상태 조회
 │       ├── fix.ts              — .reap/ 구조 진단 및 복구 (--check 옵션)
 │       ├── destroy.ts          — **프로젝트에서** REAP 제거 (--confirm 필수, .reap/ + CLAUDE.md + .gitignore). 출력이 `context.nextStep: "reap uninstall"` 과 안내 문구로 머신 레벨 제거를 가리킨다 — 제거 있을 때와 no-op 일 때 **양쪽** 다
-│       ├── uninstall.ts        — **머신에서** REAP 제거 (2-phase, `--confirm`). 순서: 진입 훅 우회 → 양 adapter 홈 자산 → `~/.reap/` allowlist → npm. **두 목록의 소유자는 코드다** — 홈 자산은 `reap:carrier(reap-home-asset-set)` 이, 전역 제거 대상은 `npmRemovalTargets()` 가 갖는다. 산문이 그 값을 다시 적으면 어긋나므로 여기에 열거하지 않는다(gen-094 에서 README 가 실제로 어긋났다). 두 목록 모두 **지금 코드가 쓰지 않는 항목을 포함**하며, 그것이 의도다 — 미존재 시 no-op 이고, 빼면 예전에 그것을 켰던 머신에 영구히 남는다. `detectInstallKind`(**`core/package-info.ts` 소유**, gen-092 에 이동)이 global/npx/local/checkout/unknown 을 가르고 **global 일 때만 npm 을 부른다** — `npm root -g` 와 패키지 루트의 `node_modules` 를 **realpath 정규화 후** 비교(안 하면 symlink 를 거치는 모든 전역 설치가 'global 아님'으로 오판된다). `UninstallDeps extends InstallKindDeps` 가 npm 호출·경로 판정을 주입 가능하게 한다. npm 실패는 전체 실패가 아니다
+│       ├── uninstall.ts        — **머신에서** REAP 제거 (2-phase, `--confirm`). 순서: 진입 훅 우회 → 양 adapter 홈 자산 → `~/.reap/` allowlist → npm. **두 목록의 소유자는 코드다** — 홈 자산은 `reap:carrier(reap-home-asset-set-94949259)` 이, 전역 제거 대상은 `npmRemovalTargets()` 가 갖는다. 산문이 그 값을 다시 적으면 어긋나므로 여기에 열거하지 않는다(gen-094 에서 README 가 실제로 어긋났다). 두 목록 모두 **지금 코드가 쓰지 않는 항목을 포함**하며, 그것이 의도다 — 미존재 시 no-op 이고, 빼면 예전에 그것을 켰던 머신에 영구히 남는다. `detectInstallKind`(**`core/package-info.ts` 소유**, gen-092 에 이동)이 global/npx/local/checkout/unknown 을 가르고 **global 일 때만 npm 을 부른다** — `npm root -g` 와 패키지 루트의 `node_modules` 를 **realpath 정규화 후** 비교(안 하면 symlink 를 거치는 모든 전역 설치가 'global 아님'으로 오판된다). `UninstallDeps extends InstallKindDeps` 가 npm 호출·경로 판정을 주입 가능하게 한다. npm 실패는 전체 실패가 아니다
 │       ├── clean.ts            — 선택적 상태 초기화 (--lineage, --life, --backlog, --hooks)
 │       ├── update.ts           — 프로젝트 업데이트 (v0.15→migrate 위임, v0.16→config backfill/디렉토리 보충/CLAUDE.md 보수, --post-upgrade 지원)
 ├── libs/cli.ts                 — 자체 CLI 프레임워크 (~858 lines)
@@ -158,7 +158,7 @@ src/
 │   │                             비교해 필요할 때만 설치. `"synced"|"partial"|"current"|"failed"`, silent · never throws.
 │   │                             **`complete` 일 때만 stamp** — 부분 설치를 성공으로 굳히면 그 자체가 무증상 실패가 된다
 │   ├── types.ts                — AdapterModule (installSkills / ensureProjectIntegration / registerSessionIntegration /
-│   │                             **removeUserLevelAssets(home?) → UserLevelRemovalResult{removed, kept}** — `syncUserLevelAssets` 의 역연산이며 **바로 옆에 선언**한다. 목록은 값으로 공유할 수 없어(디렉토리 복사 / JSON 편집 / 단일 파일) 인접성이 유일한 동기화 수단이다. 양쪽에 `reap:carrier(user-level-asset-set)` /
+│   │                             **removeUserLevelAssets(home?) → UserLevelRemovalResult{removed, kept}** — `syncUserLevelAssets` 의 역연산이며 **바로 옆에 선언**한다. 목록은 값으로 공유할 수 없어(디렉토리 복사 / JSON 편집 / 단일 파일) 인접성이 유일한 동기화 수단이다. 양쪽에 `reap:carrier(user-level-asset-set-b7a3fef9)` /
 │   │                             **syncUserLevelAssets(home?) → UserLevelSyncResult{complete, missing}** / **userLevelDirs(home?)** —
 │   │                             후자는 정식 설치 위치의 단일 소유자이며 integrity checker 가 주입받는다 (issue #22))
 │   ├── claude-code/

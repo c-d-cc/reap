@@ -7,7 +7,7 @@
 # 19 warnings, for six generations — but the output was noisy enough that
 # whoever looked filtered for the lines they cared about.
 #
-# reap:carrier(self-diagnosis-covered-incidents)
+# reap:carrier(self-diagnosis-covered-incidents-a8c5d58c)
 # This turns that into a gate: install from the actual publish artifact and
 # require a clean bill of health. Four past incidents fail against it —
 #   - #22            : install-skills wrote where fix --check called legacy
