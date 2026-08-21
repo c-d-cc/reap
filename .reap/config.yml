@@ -4,7 +4,7 @@ autoSubagent: true
 agentClient: claude-code
 autoUpdate: true
 autoIssueReport: false
-strictEdit: true
+strictEdit: false
 strictMerge: true
 evaluator: true
 lastMigratedVersion: 0.17.6

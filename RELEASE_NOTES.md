@@ -1,44 +1,23 @@
 ## What's New
 
-The documentation site was serving one empty shell for every page, and nothing said so.
-
-- **`reap.cc/docs/*` returned HTTP 404 for every page, and had since the site went up.** The site is a single-page app on GitHub Pages: every address got the same 939-byte shell, the shell booted, the router drew the right page, and a human saw a perfect site. Search engines saw a 404 and indexed none of it. Only the root was ever indexed.
-- **Every page is now rendered at build time** — 23 routes across five languages, 115 files, each with its own content, `<title>`, `<meta description>`, canonical URL and `hreflang` alternates, plus a `sitemap.xml` and a `robots.txt` that did not exist. The smallest page went from 939 bytes to 15 kB.
-- **Languages have their own addresses.** English keeps the addresses it had — `reap.cc/docs/quick-start` — and the other four are prefixed: `/ko/docs/quick-start`, `/ja/…`, `/de/…`, `/zh-CN/…`. Before this the five shared one URL and the language was chosen by your browser, which meant a crawler could index only one of them and a link you shared showed a different language to whoever opened it. Landing on `/` still sends you to your own language once, per tab; every other address is left exactly as you asked for it.
-- **The daemon is gone from the documentation, not just from the code.** v0.17.6 retired it, and the docs kept explaining what it had been — including a migration note that told you to run `npm i -g @c-d-cc/reap-daemon`, a package that is deprecated, into the context of every session, in projects that had never enabled it. The `/docs/daemon` page is now `/docs/code-intelligence`. **If you have a link to the old address, it will stop working** — it was never reachable to a search engine, but a bookmark is.
-- **A page that never hydrates, a sitemap that names one URL 115 times, and a translation that shipped as English all used to pass the checks.** Each was caught by a review round rather than by the gate that was supposed to catch it, and each is now a value comparison rather than a count.
-
-Nothing about the CLI changed. If you do not read the documentation site, this release does nothing for you.
+- **Nothing about the CLI changed.** Two rules were added to the `genome/evolution.md` REAP ships. Existing projects get them through a migration note that `reap update` surfaces — your own genome is never overwritten.
 
 ---
 
 ## v0.17.6
 
-REAP ships a code index, and it now returns answers that are not empty.
-
-- **`reap index`.** Nothing to install, no port, no background process: `reap index status`, `reap index impact <file>`, `reap index search <query>`, `reap index callers <symbolId>`, `reap index callees <symbolId>`. Fifteen languages, no native build — the Tree-sitter grammars are WebAssembly.
-- **Blast radius used to return zero for every standard TypeScript project, and had for five months.** The resolver never mapped a `./x.js` specifier to the `x.ts` that produces it, so a NodeNext codebase produced an import graph with no edges in it. 130 tests passed, the release gate passed, CI was green throughout — because every check asked whether indexing had run and none asked whether the answer meant anything.
-- **So `reap index status` reports the import resolution rate**, and the release gate now requires a known relationship to be found rather than a nonzero symbol count. The number that would have caught this on day one is on screen.
-- **Indexing is keyed by commit.** The index records the SHA it describes, so deciding what to re-parse is one `git diff`. A full index of REAP itself takes ~0.3s. Queries refresh themselves when HEAD has moved, so the only eager trigger left is the commit at the end of `completion`. The trade-off: uncommitted work is not in the index.
-- **The index lives in `.reap/.index/`**, gitignored, and goes when the project goes — not in your home directory.
-- **`reap uninstall`** removes what npm cannot. `npm uninstall -g @c-d-cc/reap` deletes the package and nothing else — the slash commands, agent definitions, `~/.reap/` and the SessionStart hook entries were written by REAP's own code, and `preuninstall`/`postuninstall` do not fire on npm 10 or 12. The leftover hook kept calling a command that no longer existed, on every session. Already removed the package? `npx @c-d-cc/reap uninstall --confirm`.
-- **Agents are told to read `environment/source-map.md` before changing code**, and `reap init` now creates that file for greenfield projects. It never did — `adoption` writes one from a scan of your tree, greenfield had nothing to scan — so shipping the rule on its own would have sent every new project's agent looking for a file that does not exist. The rule matters because `summary.md` is loaded into context every session and source-map is not: a structure document nothing tells the agent to open is a structure document that sits there while the code it describes gets edited. Existing projects own their `genome/evolution.md` and `reap update` does not touch it, so the v0.17.6 migration note carries the rule to them, along with what to do when the file itself is missing. The note fixes the other half of that file in the same pass: it still told the reflect phase to keep the structure description in `summary.md`, so installing the reading rule on its own would have left an agent sent to a file that nothing is told to write — the state the note itself calls worse than an absent file.
-- **Installing REAP into a project no longer changes your global install.** The auto-update asked `reap --version` for the currently installed version, which is whatever binary is first on PATH rather than the package the code belongs to, and then upgraded the global installation unconditionally. Install REAP into a project while an older one sits globally and the postinstall upgraded the global one — an installation the user never mentioned. It also meant the release gate diagnosed the published package instead of the tarball it had just packed, which is how this was found. REAP now reads its own `package.json`, and only a global installation upgrades itself: a project-local copy, an `npx` run and a source checkout are left alone. The version is read in one place now instead of five, four of which said in a comment that they were copies of each other.
-- **And `autoUpdate: false` now turns it off.** The switch has been in `.reap/config.yml` since v0.16 — created by `reap init`, preserved by `reap update`, printed by `reap config`, documented as "auto-update enabled" — and read by nothing. Setting it `false` showed you `false` and updated you anyway. It now stops the install, and only the install: the hard-floor warning that says your copy is too old for REAP to fix automatically still reaches you, because someone who declined automatic fixing is exactly who needs to hear it. `reap update` and an `npm install -g` you typed yourself are unaffected — the flag governs the one install REAP performs on its own. If the config cannot be read at all, auto-update stays on — npm runs postinstall in the package directory, where no project config exists, so reading "cannot tell" as "off" would have disabled it for everyone rather than for the people who asked. The cost of that choice is worth stating: the flag governs the recurring path (every session), not the moment you install REAP itself, which cannot see your project's config.
-
-Two further analyses are deliberately absent — community detection and process tracing. The first was connected components under another name, so its cohesion score was the constant 1.00; the second called every function whose callers could not be resolved an entry point.
-
----
+- **`reap index` — a code index is built in.** Nothing to install, no port, no background process: `reap index status | search | impact <file> | callers <symbolId> | callees <symbolId>`. Fifteen languages, no native build. The index is keyed by commit, lives in `.reap/.index/` and is gitignored — uncommitted work is deliberately not in it.
+- **`reap uninstall`** removes what npm cannot. Slash commands, agent definitions, `~/.reap/` and the SessionStart hook entries are written by REAP's own code, and `npm uninstall -g` leaves every one of them behind — the orphaned hook kept calling a command that no longer existed, on every session. Already removed the package? `npx @c-d-cc/reap uninstall --confirm`.
+- **Installing REAP into a project no longer changes your global install.** A project-local copy, an `npx` run and a source checkout now leave your machine alone.
+- **`autoUpdate: false` now actually turns auto-update off.** The setting has been in `.reap/config.yml` since v0.16 and nothing read it. It stops the install and only the install — the warning that your copy is too old to fix automatically still reaches you.
+- **The daemon is retired.** `reap update` removes `daemon` / `daemonBin` from your config and deletes `~/.reap/daemon/`. Remove the global package with `npm uninstall -g @c-d-cc/reap-daemon`.
+- **Agents are told to read `environment/source-map.md` before changing code**, and `reap init` now creates that file for greenfield projects. Existing projects get the rule through the v0.17.6 migration note.
 
 ## v0.17.5
 
-- **REAP installs its own integration on first run.** npm 12 blocks install scripts for global installs by default, which left the slash commands, agent definitions, guide and session hook unplaced — REAP looked installed and had no integration at all, with no error. Any `reap` command now places them once per version.
-- **`reap run push` reports git's actual error** instead of a generic message about the remote and the network.
-- **`reap help` lists `/reap.run` and `/reap.report`**, which it never did.
-
-Releases now publish through npm trusted publishing (OIDC) rather than a long-lived token.
-
----
+- **REAP installs its own integration on first run.** npm 12 blocks install scripts for global installs, which left slash commands, agent definitions and the session hook unplaced — with no error. The binary worked and the integration was simply absent.
+- **`reap run push` reports git's actual error** instead of a guess.
+- **`reap help` lists `/reap.run` and `/reap.report`.**
 
 ## v0.17.4
 
