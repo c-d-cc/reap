@@ -1,5 +1,19 @@
 ## What's New
 
+The documentation site was serving one empty shell for every page, and nothing said so.
+
+- **`reap.cc/docs/*` returned HTTP 404 for every page, and had since the site went up.** The site is a single-page app on GitHub Pages: every address got the same 939-byte shell, the shell booted, the router drew the right page, and a human saw a perfect site. Search engines saw a 404 and indexed none of it. Only the root was ever indexed.
+- **Every page is now rendered at build time** — 23 routes across five languages, 115 files, each with its own content, `<title>`, `<meta description>`, canonical URL and `hreflang` alternates, plus a `sitemap.xml` and a `robots.txt` that did not exist. The smallest page went from 939 bytes to 15 kB.
+- **Languages have their own addresses.** English keeps the addresses it had — `reap.cc/docs/quick-start` — and the other four are prefixed: `/ko/docs/quick-start`, `/ja/…`, `/de/…`, `/zh-CN/…`. Before this the five shared one URL and the language was chosen by your browser, which meant a crawler could index only one of them and a link you shared showed a different language to whoever opened it. Landing on `/` still sends you to your own language once, per tab; every other address is left exactly as you asked for it.
+- **The daemon is gone from the documentation, not just from the code.** v0.17.6 retired it, and the docs kept explaining what it had been — including a migration note that told you to run `npm i -g @c-d-cc/reap-daemon`, a package that is deprecated, into the context of every session, in projects that had never enabled it. The `/docs/daemon` page is now `/docs/code-intelligence`. **If you have a link to the old address, it will stop working** — it was never reachable to a search engine, but a bookmark is.
+- **A page that never hydrates, a sitemap that names one URL 115 times, and a translation that shipped as English all used to pass the checks.** Each was caught by a review round rather than by the gate that was supposed to catch it, and each is now a value comparison rather than a count.
+
+Nothing about the CLI changed. If you do not read the documentation site, this release does nothing for you.
+
+---
+
+## v0.17.6
+
 REAP ships a code index, and it now returns answers that are not empty.
 
 - **`reap index`.** Nothing to install, no port, no background process: `reap index status`, `reap index impact <file>`, `reap index search <query>`, `reap index callers <symbolId>`, `reap index callees <symbolId>`. Fifteen languages, no native build — the Tree-sitter grammars are WebAssembly.
