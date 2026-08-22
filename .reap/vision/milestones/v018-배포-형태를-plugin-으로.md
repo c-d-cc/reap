@@ -29,14 +29,14 @@ createdAt: 2026-08-21T00:00:00.000Z
 
 ## Generations
 - [x] gen-097 — milestone 도입 (main 에 있고, plugin 브랜치가 상속한다)
-- [ ] plugin 배포 형태 리서치·설계 — A/B 확정 + migration 설계
 - [ ] plugin 전환 구현 (별도 브랜치)
 - [ ] 0.18 릴리즈 — bump + migration note + docs 5 로케일 (셋은 분리 불가)
 
 <!-- 항목은 한 줄이어야 한다 — `readGenerations` 가 `- [ ]` 줄만 읽어 이어진 줄을 버린다.
      상세는 여기 아래에 둔다.
 
-     리서치: `vision/design/plugin-distribution.md` 의 미독 절 3개(결정 대기 / 미측정 /
-       plugin cache)를 먼저 읽는다.
+     리서치·설계는 generation 이 아니라 `vision/design/plugin-distribution.md` 한 파일이
+       소유한다 (사용자, 2026-08-22). 실측 12건 + 결정 9건이 그 문서에 닫혀 있고,
+       구현 세대는 그 문서의 § 1(무엇을 만드는가)과 § 4(반드시 지킬 것)부터 읽는다.
      구현이 별도 브랜치인 이유: 중간 상태가 main 에 있으면 사용자가 반쯤 바뀐 구조를 받는다.
      릴리즈 셋이 분리 불가인 이유: `check-docs-version.sh` § 5 가 note 버전 > 패키지 버전을 막는다. -->
