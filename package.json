@@ -1,0 +1,23 @@
+{
+  "name": "reap",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "module": "src/cli.ts",
+  "bin": {
+    "reap": "src/cli.ts"
+  },
+  "scripts": {
+    "test": "bun test",
+    "typecheck": "tsc --noEmit",
+    "build": "bun build --compile src/cli.ts --outfile dist/reap"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "tree-sitter-wasms": "^0.1.13",
+    "typescript": "^5"
+  },
+  "dependencies": {
+    "web-tree-sitter": "0.22.6"
+  }
+}

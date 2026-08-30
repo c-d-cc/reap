@@ -1,0 +1,3 @@
+language: ko
+agentClient: claude-code
+workspaceId: {{workspaceId}}

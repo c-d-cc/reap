@@ -1,0 +1,9 @@
+sources:
+  - id: ps-4f2a91
+    root: ./docs/superpowers/specs/reap
+    role: 설계 — REAP가 무엇이고 무엇이 참이어야 하는가
+    convention: conventions/ps-4f2a91-reap.md
+  - id: ps-4b485d
+    root: ./docs/reap-plan/reap_v_0_18_migration
+    role: reap v0.18 귀환 작전 계획
+    convention: conventions/ps-4b485d-reap-v018-migration.md

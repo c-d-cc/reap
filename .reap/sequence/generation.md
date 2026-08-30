@@ -1,0 +1,68 @@
+<!-- reap:sequence(generation) — append only. 발급된 번호는 다시 발급되지 않는다. -->
+| id | title | createdAt |
+|---|---|---|
+| gen-0001-exec | 저장소 레이아웃과 reap init | 2026-08-22 |
+| gen-0002-exec | id, 문서, make, mark | 2026-08-22 |
+| gen-0003-exec | ctx 조립 | 2026-08-22 |
+| gen-0004-plan | ctx가 무엇을 조립하는가 | 2026-08-22 |
+| gen-0005-plan | ctx의 스코프와 훅·skill 경계 | 2026-08-22 |
+| gen-0006-plan | 작업 맥락은 skill이 조립한다 | 2026-08-22 |
+| gen-0007-plan | memory를 어떻게 소비하는가 | 2026-08-22 |
+| gen-0008-exec | ctx 재작업 — 지도만 준다 | 2026-08-22 |
+| gen-0009-exec | 플러그인과 훅 | 2026-08-22 |
+| gen-0010-exec | 플러그인 한 바퀴 — 새 세션 검증 | 2026-08-22 |
+| gen-0011-plan | 증분 1 fitness와 증분 2 자르기 | 2026-08-22 |
+| gen-0012-exec | 저장 레이아웃 재편 — vision·life·archive | 2026-08-23 |
+| gen-0013-exec | 이 리포를 새 레이아웃으로 옮긴다 | 2026-08-23 |
+| gen-0014-plan | map.md — 저장 구조가 스스로를 설명한다 | 2026-08-23 |
+| gen-0015-exec | id 계열 통합 — gen-NNNN-type | 2026-08-23 |
+| gen-0016-exec | fix 유형과 cleanup skill | 2026-08-23 |
+| gen-0017-exec | map.md와 최종 갱신 | 2026-08-23 |
+| gen-0018-plan | 닫히는 즉시 archive로 — 판단을 소멸시킨다 | 2026-08-23 |
+| gen-0019-plan | life/generations는 작업 세트다 — gen-0018을 되돌린다 | 2026-08-23 |
+| gen-0020-exec | cleanup의 기준을 참고 가치로 바꾼다 | 2026-08-23 |
+| gen-0021-fix | 02-flow.md의 세션 흐름 도식을 현재 ctx의 의도에 맞춘다 | 2026-08-23 |
+| gen-0022-plan | 증분 2를 ms-003으로 자른다 — 맥락이 쌓인다 | 2026-08-23 |
+| gen-0023-exec | context.md와 build-context를 드러낸다 | 2026-08-23 |
+| gen-0024-exec | 결정의 자리와 reap decide | 2026-08-23 |
+| gen-0025-exec | decisions 제도를 내린다 | 2026-08-23 |
+| gen-0026-exec | make backlog와 make idea | 2026-08-23 |
+| gen-0027-exec | 로드맵과 spec 정합 | 2026-08-23 |
+| gen-0028-exec | make generation --backlog | 2026-08-23 |
+| gen-0029-exec | backlog가 archive로 내려갈 길을 낸다 | 2026-08-23 |
+| gen-0030-exec | 근거는 둘을 함께 가질 수 있다 | 2026-08-23 |
+| gen-0031-exec | carve-milestone skill을 만든다 | 2026-08-23 |
+| gen-0032-plan | 남은 plan을 전부 milestone으로 자른다 | 2026-08-23 |
+| gen-0033-fix | ms-005를 backlog로 되돌리고 번호를 보정한다 | 2026-08-23 |
+| gen-0034-fix | sequence는 최종 내용만 담는다 | 2026-08-23 |
+| gen-0035-exec | make milestone에 --focus를 둔다 | 2026-08-23 |
+| gen-0036-exec | 만들지 않기로 한 것의 자리 — carrier와 hooks | 2026-08-23 |
+| gen-0037-fix | carrier를 spec으로 되돌리고 id-slug 체계를 얹는다 | 2026-08-23 |
+| gen-0038-exec | 세대를 열 값이 있는지 먼저 판단한다 | 2026-08-23 |
+| gen-0039-plan | 코드 인덱싱 체계를 명문화한다 — indexer와 carrier | 2026-08-23 |
+| gen-0040-plan | plan 축의 경계를 세운다 — track | 2026-08-23 |
+| gen-0041-exec | plan/을 최상위로 올린다 | 2026-08-23 |
+| gen-0042-exec | track을 1급으로 만든다 | 2026-08-23 |
+| gen-0043-exec | tracks.md를 이주하고 evolve·cleanup이 track을 다룬다 | 2026-08-23 |
+| gen-0044-plan | track을 걷어낸다 — plan을 만드는 일은 묶음이 아니다 | 2026-08-23 |
+| gen-0045-plan | 기획을 별도 플러그인으로 내보낸다 | 2026-08-23 |
+| gen-0046-plan | init과 interview — 정본 지식을 세우는 절차 | 2026-08-30 |
+| gen-0047-exec | make loop · mark loop · --plan 거부 | 2026-08-30 |
+| gen-0048-exec | loop skill · 어휘 · 기존 skill 정리 | 2026-08-30 |
+| gen-0049-exec | sources.yml 파싱과 plan sources&#124;convention | 2026-08-30 |
+| gen-0050-exec | interview skill과 부르는 지점 | 2026-08-30 |
+| gen-0051-exec | init skill — 정본 지식을 세우는 절차 | 2026-08-30 |
+| gen-0052-exec | plan/loops를 life/loops로 | 2026-08-30 |
+| gen-0053-exec | evolution 씨앗에 결정을 남기는 법 | 2026-08-30 |
+| gen-0054-exec | report-issue skill | 2026-08-30 |
+| gen-0055-exec | seq와 idea가 내려갈 길 | 2026-08-30 |
+| gen-0056-exec | carrier — 표식 발급과 조회 | 2026-08-30 |
+| gen-0057-exec | doctor — 확정 검사와 안내선 | 2026-08-30 |
+| gen-0058-exec | 파서를 싣는다 — WASM probe와 스캔 | 2026-08-30 |
+| gen-0059-exec | orch — workspace-id probe · claim/release · barrier/roster | 2026-08-30 |
+| gen-0060-exec | bind — 열린 세대에 세션을 다시 묶는다 | 2026-08-30 |
+| gen-0061-exec | apocalypse·snapshot — v0.18 브랜치를 세운다 | 2026-08-30 |
+| gen-0062-exec | 개명 — reap를 reap으로, 코드와 저장소를 함께 | 2026-08-30 |
+| gen-0063-exec | 구 기획 정리 — ms-002를 닫고 ms-001을 재편한다 | 2026-08-30 |
+| gen-0064-exec | 검증 — v0.18 브랜치의 Exit Criteria를 전부 세운다 | 2026-08-30 |
+| gen-0065-exec | 전면 개명과 v0.18 재구축 — 커밋 트리에서 옛 이름을 지운다 | 2026-08-30 |

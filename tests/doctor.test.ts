@@ -1,0 +1,117 @@
+import { afterEach, expect, test } from "bun:test";
+import { mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
+import { cleanupTempDirs, commit, initRepo, tempDir } from "./helpers.ts";
+import { run } from "../src/cli.ts";
+import { diagnose } from "../src/doctor.ts";
+
+afterEach(cleanupTempDirs);
+
+async function project(): Promise<string> {
+  const root = tempDir();
+  initRepo(root);
+  writeFileSync(join(root, "a.txt"), "a");
+  commit(root, "첫 커밋");
+  await run(["init"], root);
+  for (const f of ["genome/application.md", "genome/evolution.md", "environment/summary.md"]) {
+    writeFileSync(join(root, ".reap", f), "# 채움\n");
+  }
+  return root;
+}
+
+function kinds(root: string) {
+  const r = diagnose(root);
+  return { defects: r.defects.map((f) => f.kind), notes: r.notes.map((f) => f.kind), r };
+}
+
+test("깨끗한 프로젝트는 결함이 없고 doctor는 아무것도 쓰지 않는다", async () => {
+  const root = await project();
+  const before = statSync(join(root, ".reap", "map.md")).mtimeMs;
+  const result = await run(["doctor"], root);
+  expect(result.ok).toBe(true);
+  expect(result.message).toContain("결함 0");
+  expect(statSync(join(root, ".reap", "map.md")).mtimeMs).toBe(before);
+});
+
+test("커밋 없이 닫힌 generation을 잡는다 — 근본 거래의 성적표", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가"], root);
+  await run(["make", "generation", "--milestone", "ms-001", "--title", "나"], root);
+  await run(["mark", "generation", "gen-0001-exec", "--closed"], root);
+  const { defects, r } = kinds(root);
+  expect(defects).toContain("커밋 없이 닫힌 generation");
+  expect(r.defects.find((f) => f.kind === "커밋 없이 닫힌 generation")!.detail).toContain("gen-0001-exec");
+});
+
+test("끊긴 참조를 잡는다 — from · milestone · backlog · consumedBy · loop.milestones · refs", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가", "--from", "loop-0009-plan"], root);
+  await run(["make", "generation", "--milestone", "ms-001", "--title", "나"], root);
+  writeFileSync(
+    join(root, ".reap", "life", "backlog", "bk-aaaaaa-x.md"),
+    "---\nid: bk-aaaaaa\nslug: x\ntype: t\ntitle: x\nstatus: consumed\nconsumedBy: gen-0077-exec\n---\n",
+  );
+  writeFileSync(join(root, ".reap", "life", "loops", "loop-0001-plan-y.md"), "---\nid: loop-0001-plan\nslug: y\ntype: plan\ntitle: y\nstatus: closed\nmilestones:\n  - ms-042\n---\n");
+  writeFileSync(join(root, ".reap", "plan", "sources.yml"), "sources:\n  - id: ps-4f2a91\n    root: .\n    role: r\n    convention: c.md\n");
+  const ms = join(root, ".reap", "vision", "milestones", "ms-001-가", "milestone.md");
+  writeFileSync(ms, readFileSync(ms, "utf8").replace("status: open", "refs:\n  - ps-4f2a91:없는파일.md\nstatus: open"));
+  const { r } = kinds(root);
+  const broken = r.defects.filter((f) => f.kind === "끊긴 참조").map((f) => f.detail).join("\n");
+  expect(broken).toContain("loop-0009-plan");
+  expect(broken).toContain("gen-0077-exec");
+  expect(broken).toContain("ms-042");
+  expect(broken).toContain("없는파일.md");
+});
+
+test("focus가 둘이면 잡고, 열린 채 바인딩 안 된 generation은 참고로 낸다", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가", "--focus"], root);
+  await run(["make", "milestone", "--title", "나"], root);
+  const nb = join(root, ".reap", "vision", "milestones", "ms-002-나", "milestone.md");
+  writeFileSync(nb, readFileSync(nb, "utf8").replace("status: open", "status: open\nfocus: true"));
+  await run(["make", "generation", "--milestone", "ms-001", "--title", "다"], root);
+  writeFileSync(join(root, ".reap", ".session"), "sessionId: other\n");
+  const { defects, notes } = kinds(root);
+  expect(defects).toContain("focus가 둘");
+  expect(notes).toContain("열린 채 바인딩 안 된 generation");
+});
+
+test("map.md가 씨앗과 어긋나면 참고로 내고, 레지스트리에 없는 id는 결함이다", async () => {
+  const root = await project();
+  writeFileSync(join(root, ".reap", "map.md"), "# 내 지도\n");
+  writeFileSync(join(root, ".reap", "life", "generations", "gen-0005-fix-z.md"), "---\nid: gen-0005-fix\nslug: z\ntype: fix\ntitle: z\nstatus: open\n---\n");
+  const { defects, notes } = kinds(root);
+  expect(notes).toContain("map.md가 씨앗과 다르다");
+  expect(defects).toContain("레지스트리에 없는 id");
+});
+
+test("안내선 — 주입되는 파일이 크면 경고하고, 졸업 조건 없는 research는 참고다", async () => {
+  const root = await project();
+  writeFileSync(join(root, ".reap", "genome", "application.md"), `# A\n${"가".repeat(7000)}\n`);
+  writeFileSync(join(root, ".reap", "idea", "research", "idea-b1b1b1-q.md"), "---\nid: idea-b1b1b1\nslug: q\nkind: research\ntitle: q\nstatus: open\n---\n\n## 무엇이 미정인가\n\n?\n");
+  const { notes, r } = kinds(root);
+  expect(notes).toContain("크기 안내선");
+  expect(r.notes.find((f) => f.kind === "크기 안내선")!.detail).toContain("genome/application.md");
+  expect(notes).toContain("졸업 조건이 없는 idea");
+});
+
+test("기록 안 상대 링크가 깨지면 결함이다", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가"], root);
+  const ms = join(root, ".reap", "vision", "milestones", "ms-001-가", "milestone.md");
+  writeFileSync(ms, readFileSync(ms, "utf8") + "\n[spec](../../../../docs/없음.md) [ok](./milestone.md) [web](https://x.y/z)\n");
+  const { r } = kinds(root);
+  const links = r.defects.filter((f) => f.kind === "깨진 상대 링크");
+  expect(links.length).toBe(1);
+  expect(links[0]!.detail).toContain("없음.md");
+});
+
+test("carrier 충돌은 결함, 고아는 참고다", async () => {
+  const root = await project();
+  const mark = (h: string, s: string) => ["reap:", "carrier-", h, "-", s].join("");
+  writeFileSync(join(root, "one.md"), `${mark("111111", "a")}\n`);
+  writeFileSync(join(root, "two.md"), `${mark("222222", "a")}\n`);
+  const { defects, notes } = kinds(root);
+  expect(defects).toContain("carrier");
+  expect(notes).toContain("carrier 고아");
+});
