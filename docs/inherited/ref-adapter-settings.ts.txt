@@ -1,0 +1,165 @@
+import { readFile, writeFile, rename, unlink } from "fs/promises";
+import { fileExists } from "../../core/fs.js";
+
+/**
+ * Writing to the user's `~/.claude/settings.json`, without being able to break
+ * it.
+ *
+ * Claude Code validates that file as a whole: one value it does not recognise
+ * and the entire file is skipped — model, permissions, hooks and all — with a
+ * "Files with errors are skipped entirely" notice at session start. gen-101's
+ * research hit exactly that by declaring a marketplace with `source: "command"`,
+ * which is a *plugin* source and not a marketplace one, and lost every other
+ * setting in the file until it was removed.
+ *
+ * So REAP does not write what it has not first checked, and does not leave a
+ * half-written file behind if the check was wrong.
+ */
+
+/**
+ * Marketplace source discriminants Claude Code actually implements.
+ *
+ * Measured, not read from a document: the binary carries `source==="github"`,
+ * `"git"`, `"url"`, `"file"`, `"directory"` and `"local"` in its marketplace
+ * resolution, and rejects anything else at settings-parse time. `"command"` is
+ * absent on purpose — it is a plugin source, and putting it here is the exact
+ * mistake this module exists to prevent. `"npm"` is absent because the binary
+ * answers it with "NPM marketplace sources not yet implemented".
+ */
+const MARKETPLACE_SOURCES = ["github", "git", "url", "file", "directory", "local"] as const;
+
+export type MarketplaceSource = { source: (typeof MARKETPLACE_SOURCES)[number] } & Record<
+  string,
+  unknown
+>;
+
+/**
+ * Is this something Claude Code will accept as a marketplace entry?
+ *
+ * Returns the reason it will not, rather than a boolean, because the caller
+ * has to be able to say why it declined to write — a silent skip here is
+ * indistinguishable from success, and that is the failure mode the whole
+ * module is about.
+ */
+export function marketplaceEntryProblem(entry: unknown): string | null {
+  if (entry === null || typeof entry !== "object") return "entry is not an object";
+  const source = (entry as { source?: unknown }).source;
+  if (source === null || typeof source !== "object") return "entry.source is not an object";
+  const kind = (source as { source?: unknown }).source;
+  if (typeof kind !== "string") return "entry.source.source is not a string";
+  if (!(MARKETPLACE_SOURCES as readonly string[]).includes(kind)) {
+    return `entry.source.source is "${kind}", which Claude Code does not accept as a marketplace source (accepted: ${MARKETPLACE_SOURCES.join(", ")})`;
+  }
+  if (kind === "github" && typeof (source as { repo?: unknown }).repo !== "string") {
+    return "a github marketplace needs a string `repo`";
+  }
+  return null;
+}
+
+/** `plugin@marketplace` — the key shape `enabledPlugins` uses. */
+export function enabledPluginsKeyProblem(key: string): string | null {
+  return /^[a-z0-9][a-z0-9-]*@[a-z0-9][a-z0-9-]*$/i.test(key)
+    ? null
+    : `"${key}" is not of the form plugin@marketplace`;
+}
+
+export type SettingsWrite =
+  | { ok: true; changed: boolean }
+  | { ok: false; reason: string; wrote: false };
+
+/**
+ * Read the file, let `edit` change it, check what came back, and only then
+ * write — through a temporary file, so a settings.json that survives is either
+ * the old one or a complete new one.
+ *
+ * `edit` returns `false` to mean "nothing to do", which skips the write
+ * entirely rather than rewriting the file with identical bytes.
+ */
+export async function editSettings(
+  settingsPath: string,
+  edit: (settings: Record<string, unknown>) => boolean,
+): Promise<SettingsWrite> {
+  let settings: Record<string, unknown> = {};
+  if (await fileExists(settingsPath)) {
+    let raw: string;
+    try {
+      raw = await readFile(settingsPath, "utf-8");
+    } catch (e) {
+      return { ok: false, reason: `cannot read ${settingsPath}: ${String(e)}`, wrote: false };
+    }
+    try {
+      const parsed = JSON.parse(raw);
+      if (parsed === null || typeof parsed !== "object" || Array.isArray(parsed)) {
+        return { ok: false, reason: "settings.json is not a JSON object", wrote: false };
+      }
+      settings = parsed as Record<string, unknown>;
+    } catch {
+      // A hand-edited file that will not parse. REAP must not clobber it, and
+      // must not report success either: the caller declines to stamp, so the
+      // next run tries again instead of the change being lost at this version.
+      return { ok: false, reason: "settings.json does not parse; leaving it alone", wrote: false };
+    }
+  }
+
+  let changed: boolean;
+  try {
+    changed = edit(settings);
+  } catch (e) {
+    return { ok: false, reason: `edit failed: ${String(e)}`, wrote: false };
+  }
+  if (!changed) return { ok: true, changed: false };
+
+  const problem = reapKeysProblem(settings);
+  if (problem !== null) return { ok: false, reason: problem, wrote: false };
+
+  let serialized: string;
+  try {
+    serialized = JSON.stringify(settings, null, 2) + "\n";
+    JSON.parse(serialized);
+  } catch (e) {
+    return { ok: false, reason: `result does not serialize: ${String(e)}`, wrote: false };
+  }
+
+  const tmp = `${settingsPath}.reap-tmp`;
+  try {
+    await writeFile(tmp, serialized, "utf-8");
+    JSON.parse(await readFile(tmp, "utf-8"));
+    await rename(tmp, settingsPath);
+    return { ok: true, changed: true };
+  } catch (e) {
+    try {
+      await unlink(tmp);
+    } catch {}
+    return { ok: false, reason: `write failed: ${String(e)}`, wrote: false };
+  }
+}
+
+/**
+ * Check the two keys REAP owns. Everything else in the file belongs to the
+ * user and is none of our business — validating it would mean refusing to
+ * write because of something we did not put there.
+ */
+function reapKeysProblem(settings: Record<string, unknown>): string | null {
+  const marketplaces = settings.extraKnownMarketplaces;
+  if (marketplaces !== undefined) {
+    if (marketplaces === null || typeof marketplaces !== "object") {
+      return "extraKnownMarketplaces is not an object";
+    }
+    for (const [name, entry] of Object.entries(marketplaces as Record<string, unknown>)) {
+      const problem = marketplaceEntryProblem(entry);
+      if (problem !== null) return `extraKnownMarketplaces["${name}"]: ${problem}`;
+    }
+  }
+
+  const enabled = settings.enabledPlugins;
+  if (enabled !== undefined) {
+    if (enabled === null || typeof enabled !== "object") return "enabledPlugins is not an object";
+    for (const [key, value] of Object.entries(enabled as Record<string, unknown>)) {
+      const problem = enabledPluginsKeyProblem(key);
+      if (problem !== null) return `enabledPlugins: ${problem}`;
+      if (typeof value !== "boolean") return `enabledPlugins["${key}"] is not a boolean`;
+    }
+  }
+
+  return null;
+}

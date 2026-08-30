@@ -1,0 +1,57 @@
+---
+id: ms-002
+goal: goal-019
+status: open
+main: false
+createdAt: 2026-08-21T00:00:00.000Z
+---
+
+# v0.18 — 지식 축 정리
+
+## Exit Criteria
+- **한 자리가 다른 자리를 가리키는 방식이 하나다** — milestone→goal · memory 의 `from`/`to` ·
+  idea 의 졸업 경로가 같은 참조 체계를 쓴다. 끊어진 참조는 `fix --check` 가 보고한다
+- **무엇이 어느 자리에 가는지 genome 이 답한다** — milestone · idea · memory 세 축의 경계가
+  한 세대에서 함께 정해졌고, `reap-guide` 와 5개 로케일이 같은 말을 한다
+- `.reap/idea/` 가 존재하고 **`research/` · `freememo/` · `files/` 의 졸업 경로**가 문서에 있다
+- memory 가 flat + 메타데이터로 동작하고, prompt 에는 **살아있는 것의 요약만** 올라간다.
+  `load-context` 와 `dump-state-sync` 가 byte-identical 하게 낸다
+- `/reap.interview` 가 실제로 호출되고, **선택지+자유입력+추천 형식**을 클라이언트와 무관하게 지킨다
+
+## Out of Scope
+- **plugin 배포 형태** — 별도 milestone(`v018-배포-형태를-plugin-으로`, main)
+- **`.reap/plan/` 과 `/reap.plan`** — v0.18 에서 제외 (사용자, 2026-08-21).
+  그래서 경계 설계는 **4축이 아니라 3축**이다
+- **0.18 발행** — 릴리즈 generation 은 plugin milestone 이 갖는다. 이 milestone 의 완료 조건은
+  전부 main 에서 관측 가능하다
+- **memory 의 `expires` 를 날짜 기반으로 하는 것** — genome 이 "lifespan 으로 분류하지 마라"를
+  명시한다. 사건 기반만 검토 대상
+
+## Generations
+- [x] 참조·ID 체계 — 한 자리가 다른 자리를 어떻게 가리키는가 (gen-098)
+- [x] carrier ID 에 hash8 을 붙인다 (gen-099 — `<slug>-<hash8>`, `--check` 가 CI 에서 형식 강제, 산문 오탐 소멸)
+- [ ] 지식 축 경계 통합 설계 — milestone · idea · memory 3축을 한 세대에서 닫는다
+- [ ] memory 를 flat + 메타데이터로 재설계
+- [ ] `.reap/idea/` 자리 신설
+- [ ] interview skill (plugin 전환 이후)
+
+<!-- 항목은 한 줄이어야 한다 — `readGenerations` 가 `- [ ]` 줄만 읽는다. 상세는 여기.
+
+     참조·ID 체계가 맨 앞인 이유 (사용자 결정, 2026-08-21): 먼저 잡지 않으면 memory 의
+       from/to 와 idea 의 졸업 경로가 각자 참조 방식을 발명하고, 그 뒤에 통일하려면 셋을
+       동시에 고쳐야 한다. 주소를 가질 대상 목록은 이미 확정돼 있으므로 경계 설계를
+       기다릴 이유가 없다 — 경계는 "무엇이 어디로 가는가"이고 참조는 "무엇이 주소를 갖는가"다.
+       설계만 하지 않고 기존 소비자(milestone→goal)에 실제로 얹는다. 소비자 없는 체계는
+       검증되지 않는다.
+       seed backlog: `참조-id-체계-한-자리가-다른-자리를-어떻게-가리키는가.md`
+
+     carrier hash8 이 참조 ID 체계 직후인 이유 (사용자 결정, 2026-08-21): 앞 세대가 만드는
+       해시 생성·고유성 검사·레지스트리 형식을 그대로 재사용한다. 먼저 하면 두 번 만든다.
+       backlogs_v0.17_residual 의 `list-carriers.sh 산문 오탐` 건을 같은 세대에서 함께 처리할 것.
+
+     경계 설계를 한 세대에 몰아넣는 이유: 따로 하면 genome·reap-guide·5 로케일·migration note
+       에서 경계가 어긋난다.
+     memory 재설계의 실질 난이도: 개념이 아니라 static(`@` import) → dynamic 전환이다.
+       memory 를 아는 곳이 12곳.
+     interview 가 plugin 뒤인 이유: 새 skill 이 어느 배포 구조에서 태어날지 먼저 확정돼야 한다.
+       이 milestone 의 유일한 교차 의존. -->
