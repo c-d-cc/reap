@@ -19,5 +19,8 @@
   },
   "dependencies": {
     "web-tree-sitter": "0.22.6"
+  },
+  "reap": {
+    "autoUpdateMinVersion": "0.18.0"
   }
 }
