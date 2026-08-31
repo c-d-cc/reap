@@ -55,6 +55,8 @@ git mv .reap .reap-v0_17    # git 추적 중일 때. 아니면: mv .reap .reap-v
 
 `reap init`으로 새 `.reap/`을 세운다. `config.yml`의 `language`·`agentClient`는 구 config 값을 이어받아 적는다 — 그 둘만이 양쪽에 다 있는 사용자 설정이다.
 
+**language는 형식이 다르다** — v0.17은 단어(`korean`), v0.18은 ISO 코드다. 변환: korean→ko · english→en · japanese→ja · chinese→zh-cn · spanish→es · french→fr · german→de · portuguese→pt. 표에 없으면 그대로 두고 기록 파일에 남긴다. (실물 검증 gen-0073이 잡은 마찰)
+
 ## 6/8 — 이주는 subagent가 한다
 
 주 세션의 컨텍스트를 구 데이터로 채우지 않는다 — **매핑 표와 지시문은 [migration-map.md](references/migration-map.md)에 있고, 그 문서 전체를 subagent에게 주어 수행시킨다.** 아홉 매핑의 확정 근거는 ps-4b485d의 04-migration-skill.md다.
