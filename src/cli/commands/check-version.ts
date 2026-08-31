@@ -11,6 +11,7 @@ import { fetchReleaseNotice } from "../../core/notice.js";
 // what an alpha reaches is neither guard — performAutoUpdate returns at its
 // "-alpha" check long before comparing. See the note on `execute` below.
 import { semverGt, semverGte } from "../../core/semver.js";
+import { getRegistryVersionsDaily, upgradeAnnouncement } from "../../core/upgrade-bridge.js";
 import {
   detectInstallKind,
   runningVersionOrNull,
@@ -66,6 +67,26 @@ export function getInstalledVersion(deps: InstallKindDeps = {}): string | null {
 export function queryLatestVersion(): string | null {
   try {
     const result = execSync("npm view @c-d-cc/reap version", {
+      encoding: "utf-8",
+      timeout: 10_000,
+      stdio: ["pipe", "pipe", "pipe"],
+    });
+    const trimmed = result.trim();
+    return trimmed || null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Query the version published on the npm dist-tag `next`, if any.
+ * Returns null on any failure (network, timeout, tag absent).
+ * The 0.17.8 bridge reads this — v0.18 is published on `next`, never as
+ * `latest`, so `queryLatestVersion` alone can no longer see an upgrade.
+ */
+export function queryNextVersion(): string | null {
+  try {
+    const result = execSync("npm view @c-d-cc/reap@next version", {
       encoding: "utf-8",
       timeout: 10_000,
       stdio: ["pipe", "pipe", "pipe"],
@@ -442,7 +463,23 @@ export async function execute(): Promise<void> {
   //
   // gen-043 made this call unconditional and the config field stayed behind,
   // read by nothing, for fifty generations; gen-093 wired it up.
-  const result = performAutoUpdate(root);
+  // 0.17.8 bridge: at most one npm round-trip per day. The three registry
+  // queries (latest, floor, next) go through the daily cache, and
+  // `performAutoUpdate` receives the cached answers through the seams it
+  // already has — its decision order is untouched.
+  const versions = getRegistryVersionsDaily({
+    queryLatest: queryLatestVersion,
+    queryMinVersion: queryAutoUpdateMinVersion,
+    queryNext: queryNextVersion,
+  });
+  const result = performAutoUpdate(root, {
+    latestVersion: () => versions.latest,
+    minVersion: () => versions.minVersion,
+  });
+
+  // 0.17.8 bridge: v0.18 lives on the `next` tag and never arrives by itself.
+  const announcement = upgradeAnnouncement(versions.next);
+  if (announcement) console.error(announcement);
 
   // Show release notice after successful upgrade
   if (result.action === "upgraded" && result.to) {

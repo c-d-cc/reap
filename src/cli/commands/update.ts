@@ -11,6 +11,12 @@ import { autoReport } from "../../core/report.js";
 import { execute as migrateExecute } from "./migrate.js";
 import { ensureIndexIgnored } from "./init/common.js";
 import { getAdapter } from "../../adapters/index.js";
+import { getRegistryVersionsDaily, upgradeAnnouncement } from "../../core/upgrade-bridge.js";
+import {
+  queryAutoUpdateMinVersion,
+  queryLatestVersion,
+  queryNextVersion,
+} from "./check-version.js";
 import {
   detectPendingMigrations,
   type PendingMigration,
@@ -39,6 +45,41 @@ async function removeRetiredDaemonData(): Promise<string | null> {
     // Best-effort: a permission error here must not fail an update.
     return null;
   }
+}
+
+/** Where `reap update` fetches the upgrade-agent definition from (design § 9). */
+export const UPGRADE_AGENT_URL =
+  "https://raw.githubusercontent.com/c-d-cc/reap/main/docs/upgrade-agent/reap-upgrade.md";
+
+export interface UpgradeAgentDeps {
+  home?: string;
+  fetchText?: (url: string) => Promise<string>;
+}
+
+async function defaultFetchText(url: string): Promise<string> {
+  const res = await fetch(url, { signal: AbortSignal.timeout(15_000) });
+  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  return await res.text();
+}
+
+/**
+ * Install the guided upgrade agent into `~/.claude/agents/reap-upgrade.md`.
+ *
+ * All-or-nothing (user decision, design § 9): any failure — network, empty
+ * body, unwritable home — throws, and the caller prints the manual path
+ * instead. Nothing is written unless the definition was fully fetched, so
+ * there is no half-installed state to clean up.
+ */
+export async function installUpgradeAgent(deps: UpgradeAgentDeps = {}): Promise<string> {
+  const home = deps.home ?? homedir();
+  const fetchText = deps.fetchText ?? defaultFetchText;
+  const body = await fetchText(UPGRADE_AGENT_URL);
+  if (!body.trim()) throw new Error("empty agent definition");
+  const dir = join(home, ".claude", "agents");
+  await ensureDir(dir);
+  const target = join(dir, "reap-upgrade.md");
+  await writeTextFile(target, body);
+  return target;
 }
 
 /** Default values for ReapConfig fields — used for backfill */
@@ -299,6 +340,35 @@ export async function execute(
     updated.push(".gitignore: could not add .reap/.index/ (check file permissions)");
   } else if (ignoreAction !== "skipped") {
     updated.push(`.gitignore: .reap/.index/ (${ignoreAction})`);
+  }
+
+  // 7. 0.17.8 bridge: when v0.18 sits on the npm `next` tag, install the
+  //    guided upgrade agent and say so. On any failure print the manual path
+  //    and change nothing — no half-upgraded state (design § 9). The registry
+  //    is read through the same daily cache the session hook uses.
+  try {
+    const versions = getRegistryVersionsDaily({
+      queryLatest: queryLatestVersion,
+      queryMinVersion: queryAutoUpdateMinVersion,
+      queryNext: queryNextVersion,
+    });
+    const announcement = upgradeAnnouncement(versions.next);
+    if (announcement) {
+      console.error(announcement);
+      try {
+        const agentPath = await installUpgradeAgent();
+        updated.push(`upgrade agent installed: ${agentPath}`);
+        console.error(
+          "[REAP] Next: start a Claude session and invoke the `reap-upgrade` agent to perform the guided upgrade.",
+        );
+      } catch {
+        console.error(
+          "[REAP] Could not download the upgrade agent (network?). Manual path: npm install -g @c-d-cc/reap@next",
+        );
+      }
+    }
+  } catch {
+    // The bridge must never break `reap update`.
   }
 
   // Report
