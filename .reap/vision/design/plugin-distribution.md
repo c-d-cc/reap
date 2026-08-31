@@ -1,226 +1,262 @@
-# Plugin 배포 형태 — 리서치 결과
+# Plugin 배포 형태 — 설계
 
-> backlog `reap-배포-형태를-skill-나열에서-plugin-으로-전환.md` 가 요구한 선행 리서치 산출물.
-> 조사일 2026-08-19~20. **구현은 이 문서의 「결정 대기」가 닫힌 뒤에 착수한다.**
+> **상태**: 리서치·실측 완료 (2026-08-19~22). 결정 9건 전부 닫힘. **구현만 남았다.**
+> 이 문서 하나가 산출물이다 — 리서치를 별도 generation 으로 두지 않는다 (사용자, 2026-08-22).
+> milestone: `v018-배포-형태를-plugin-으로` (ms-001, goal-004)
 
-> **daemon 폐기 결정 (2026-08-20) 이후 읽는 법.** 상주 daemon 은 폐기되고 indexer 가 reap 패키지에
-> 내장된다(backlog `daemon-폐기-및-indexer-내장…`). 이 문서의 daemon 서술은 **폐기 전 상태**이며,
-> 폐기가 이 문서를 무효화하지는 않는다 — plugin 배포와 daemon 은 독립 축이다.
-> 폐기가 실제로 바꾸는 것은 § 「`reap uninstall` 이 전환 후 무엇이 되는가」 하나뿐이고,
-> 그 자리에 무엇이 어떻게 바뀌는지 적어두었다.
+## 1. 무엇을 만드는가
 
-## 이 문서가 답하는 것
+npm 패키지 안에 plugin 디렉토리를 하나 두고, 사용자 홈에 흩어져 있던 21개를 그리로 옮긴다.
 
-두 개의 서로 다른 질문이 같은 해법을 가리켜 여기서 만났다.
+```
+@c-d-cc/reap 패키지
+└── plugin/
+    ├── .claude-plugin/plugin.json
+    ├── commands/          ← ~/.claude/commands/reap.*.md  19개
+    ├── agents/            ← ~/.claude/agents/reap-*.md     2개
+    └── hooks/hooks.json   ← ~/.claude/settings.json 의 SessionStart 항목
+```
 
-- **backlog 의 질문** — `/plugin` 화면에서 REAP 이 Plugin 한 줄이 아니라 Skills 19줄로 나열된다. 하나의 도구로 인식되지 않고, 설치·갱신·제거가 클라이언트의 패키지 관리 경로 밖에 있다.
-- **사용자의 질문 (2026-08-20)** — "사용자 로컬에 굳이 설치하지 않고 원격 repo 에서 관리하면 로컬에 들고 있을 필요가 없어지지 않나?"
+배포 경로는 **작은 github marketplace + `command` plugin source + `mode: "link"`**:
 
-두 번째 질문에는 **아니오** 가 답이다. 그리고 그 아니오가 첫 번째 질문의 가치를 더 선명하게 만든다.
+```json
+// marketplace.json (별도 소형 repo)
+{ "name": "reap", "owner": { "name": "c-d-cc" },
+  "plugins": [
+    { "name": "reap",
+      "source": { "source": "command", "command": "reap plugin-root", "mode": "link" } }
+  ] }
+```
 
-## 확정 사실
+`reap plugin-root` 가 설치된 패키지의 `plugin/` 절대경로를 stdout 한다. Claude Code 는 캐시
+디렉토리를 만들되 **내용은 그 자리로 symlink** 한다. 따라서 `npm i -g @c-d-cc/reap` 한 번으로
+CLI 와 plugin 이 **동시에** 갱신되고 사본이 존재하지 않는다.
 
-### 1. 로컬에서 없앨 수 없다 — 바뀌는 것은 관리 주체다
+**남는 것**: `~/.reap/reap-guide.md` 1개 (§ 3 결정 1). **OpenCode 는 이 전환의 바깥이다** (§ 3 결정 4).
 
-plugin 도 `~/.claude/plugins/cache/{marketplace}/{plugin}/{version}/` 아래로 **전부 내려받는다**. 로컬 파일이 사라지는 것이 아니라, 그 파일을 **누가 놓고 누가 지우는가**가 REAP 에서 Claude Code 로 넘어간다.
+## 2. 확정 사실 — 전부 실측 (Claude Code 2.1.239)
 
-그것이 작은 이득이 아니다. gen-087(npm 12 의 install script 차단)과 gen-088(제거 경로 부재)은 **둘 다 "REAP 이 남의 홈에 직접 파일을 쓴다"에서 파생된 문제**다. 관리 주체가 넘어가면 그 부류가 통째로 사라진다.
-
-### 2. plugin 이 담을 수 있는 것 — 필요한 것은 전부 담긴다
-
-slash command · subagent 정의 · **SessionStart hook** · skill · MCP server.
-
-hook 은 실물로 확인했다 — `~/.claude/plugins/cache/ouroboros/ouroboros/0.50.5/hooks/hooks.json` 이 `SessionStart` 를 `${CLAUDE_PLUGIN_ROOT}` 경유 명령으로 등록한다. REAP 은 PATH 의 `reap` 을 부르면 되므로 더 단순하다.
-
-### 3. 이름이 바뀐다 — `/reap.start` → `/reap:start`
-
-규칙은 `/plugin-name:command-name` 이고, plugin 이름과 같은 이름의 command 하나만 접두사 없이 축약된다.
-
-근거: `~/.claude/plugins/cache/gptaku-plugins/insane-design/0.5.4/README.md` 가 `/insane-design:analysis`, `/insane-design:apply`, `/insane-design:build`, `/insane-design:verify` 를 호출법 표로 나열하고, 같은 이름의 `insane-design.md` 만 `/insane-design` 으로 불린다.
-
-**agent 도 같다** — `plugin-name:agent-name` 으로 `@-mention` 에 나온다. `subagent_type: "reap-evolve"` 를 지시하는 곳이 CLAUDE.md 템플릿 · AGENTS.md 템플릿 · reap-guide · phase prompt 문자열에 흩어져 있다.
-
-파일명도 바뀐다. `reap.start.md` 를 그대로 두면 `/reap:reap.start` 가 되므로 `start.md` 여야 한다.
-
-**이것이 이번 리서치에서 가장 무거운 발견이다.** 얻는 것이 "관리 주체 이전"인데 잃는 것이 "사용자 전원의 명령어"라면 저울이 자명하지 않다.
-
-### 4. 갱신 비대칭 — 그리고 그것을 없애는 경로
-
-plugin 은 **갱신 알림만 자동이고 실행은 수동**이다(세션 시작 시 "마켓플레이스에 새 커밋이 있습니다 … `/plugin` 메뉴에서 업데이트하세요"). REAP CLI 는 `autoUpdate: true` 로 자동 갱신된다. 그대로 두면 **어긋남이 예외가 아니라 일상**이 된다.
-
-marketplace source 6종 중 둘이 이 문제를 다룬다:
-
-| source | 형태 | 버전 어긋남 |
-|---|---|---|
-| `npm` | `{"source":"npm","package":"…","version":"^0.18.0"}` | **남는다** — 버전이 여전히 둘, 핀으로 범위만 제어 |
-| `command` | `{"source":"command","command":"reap plugin-root"}` (Claude Code ≥ v2.1.229) | **원리적으로 불가능** — 명령이 plugin 디렉토리 절대경로를 stdout 하고 **세션마다 재실행**된다. `npm i -g @c-d-cc/reap` 한 번으로 CLI 와 plugin 이 동시에 갱신된다 |
-
-`command` source 는 backlog 의 미결 "npm postinstall 로 배치 가능한가"에 대한 실질적 답이기도 하다. 대가는 클라이언트 버전 하한과, 사용자가 "명령을 실행하는 plugin 소스"를 승인해야 한다는 점.
-
-### 5. plugin 은 npm 의존을 선언할 수 없다
-
-REAP 의 slash command 는 전부 `reap run …` 을 실행한다. plugin 만 설치한 사용자는 **명령이 보이는데 전부 실패한다**. plugin `bin/` 으로 PATH 에 실행파일을 넣을 수는 있으나 그러면 reap 이 두 벌 존재해 버전 어긋남을 자초한다.
-
-### 6. 사용자 조작 없이 설치할 수 있다 — 다만 침습적이다
-
-`extraKnownMarketplaces` + `enabledPlugins` 를 `settings.json` 에 쓰면 `/plugin marketplace add` 없이 등록·활성화된다. REAP 은 이미 그 파일을 쓰고 있으므로 메커니즘 교체가 아니라 **payload 교체**다. 다만 사용자의 `/plugin` 화면에 "내가 추가한 적 없는 marketplace" 가 나타난다 — 지금의 hook 등록보다 침습적이다.
-
-(사용자 스코프 `~/.claude/settings.json` 동작은 **추정** — 문서 예시는 프로젝트 스코프다.)
-
-## 클라이언트별 비교 — 비대칭이 확정됐다
-
-| | claude-code | opencode |
-|---|---|---|
-| 한 단위 설치·활성화·버전 관리 | **있다** (plugin) | **없다** |
-| slash command 원격 배포 | plugin | **불가** — 공식 문서가 "command 는 npm 패키지에서 발견되지 않는다"고 명시 |
-| agent 원격 배포 | plugin | **불명** (문서 침묵 — 부재가 아니라 미확인) |
-| SessionStart 상당 | plugin hook | `.opencode/plugins/reap-plugin.ts` (런타임 훅) |
-| npm 으로 배포 가능한 것 | — | **plugin(런타임 훅)만** — `plugin: ["@scope/pkg"]` 한 줄로 파일 복사를 대체 |
-
-`.opencode/plugins/reap-plugin.ts` 는 **claude-code plugin 의 대응물이 아니다.** backlog 의 추정이 맞았다 — `session.created` / `tool.execute.before` 에서 `reap dump-state --silent` 를 실행하는 런타임 훅이며 command·agent·skill 을 담지 않는다.
-
-**따라서 전환하면 REAP 은 두 클라이언트에 영구히 다른 배포 형태를 유지한다.** backlog 가 "비대칭을 어디에 문서화하는가"라고 물어둔 것이 이제 가정이 아니라 확정 사실이다. 대상: `application.md § Adapter Layer` + `reap-guide § AI Client Support` 표 + 5 로케일.
-
-전환으로 OpenCode 가 얻는 것은 딱 하나 — `reap-plugin.ts` 파일 복사가 npm 패키지명 한 줄이 된다. command·agent 는 그대로다.
-
-## 자산별 원격화 가능성
-
-| 자산 | 현재 위치 | 읽는 주체 | 원격화 | 근거 |
-|---|---|---|---|---|
-| slash command 19 | `~/.claude/commands/reap.*.md` | Claude Code | **가능** | plugin `commands/` |
-| agent 정의 2 | `~/.claude/agents/reap-*.md` | Claude Code | **가능** (이름 변경 동반) | plugin `agents/` |
-| SessionStart hook | `~/.claude/settings.json` | Claude Code | **가능** | plugin `hooks/hooks.json` (실물 확인) |
-| `~/.reap/reap-guide.md` | `~/.reap/` | **CLAUDE.md 의 `@` import** | **조건부 — 아래 미결 1** | 경로를 문자 그대로 참조 |
-| opencode command·agent | `$XDG_CONFIG_HOME/opencode/…` | OpenCode | **불가** | 위 표 |
-| `.reap/` 프로젝트 구조 | 프로젝트 | REAP | **불가** | `reap init` 산출물 |
-| `reap` CLI 바이너리 | npm 전역 | 사용자·hook·plugin | **불가** | 모든 command 가 이것을 실행 |
-| ~~`@c-d-cc/reap-daemon`~~ | npm 전역 | REAP | — | **폐기 결정 (2026-08-20).** indexer 가 reap 에 내장된다 |
-| **구 산출물** `~/.reap/daemon/` (registry·indexes·pid) | `~/.reap/` | — | — | daemon 이 만든 것. **폐기 시 전부 삭제한다** — 아래 § |
-| **새 인덱스** (내장 indexer) | **프로젝트 `.reap/` 하위** (2026-08-20 결정) | REAP | **불가** | 프로젝트 파생물. `destroy` 가 `.reap/` 를 지우며 따라간다 |
-
-### SessionStart hook 이 정적 파일로 대체 불가능한 이유
-
-`buildKnowledgeContext` (`src/cli/commands/load-context.ts`) 의 5개 절 중 정적인 것은 `# Language` 하나뿐이다.
-
-- `# Current State` — `.reap/life/current.yml`. **stage 전환마다 바뀐다** (한 세션에 3회 이상 가능)
-- `# Strict Mode` — config 플래그 × **현재 stage** 의 곱
-- `# Code Intelligence` — `config.daemon === true` 일 때만. **조건부 존재**이고 `@` import 는 조건부일 수 없다
-- `# Pending Migrations` — **설치된 npm 패키지 버전**에 의존. 어떤 프로젝트 파일도 이 값을 모른다
-
-그리고 비-REAP 디렉토리에서 조용히 종료한다 — 정적 import 로 표현 불가.
-
-정확한 서술은 "정적 파일이면 된다"가 아니라 **"정적 파일을 쓰는 훅이 필요하다"** 이다(`.reap/.session-state.md` 가 그 예이고 OpenCode 는 그것을 읽는다). plugin 이 hook 을 소유해도 그 hook 이 `reap load-context` 를 실행하므로 **CLI 의존은 남는다.**
-
-## gen-087 / gen-088 과의 관계
-
-### gen-087 `ensureUserLevelAssets` — 죽지 않고 payload 가 바뀐다
-
-claude-code 의 파일 21개 복사는 사라지지만, **OpenCode 몫이 통째로 남고** `extraKnownMarketplaces`/`enabledPlugins` 를 쓰는 새 책임이 생긴다. `AdapterModule.syncUserLevelAssets` / `UserLevelSyncResult.complete` / `.install-stamp` 라는 **계약 구조는 유지**된다.
-
-### gen-088 `reap uninstall` — 버려지지 않고 전환의 전제가 된다
-
-- backlog 미결 1번 "기존 `~/.claude/commands/reap.*.md` 19개가 plugin 과 중복 노출되는데 **누가 언제 지우는가**" 의 답이 gen-088 의 `removeUserLevelAssets` 다
-- `settings.json` 에서 "사용자 것은 남기고 REAP 것만 빼는" 수술 로직이 `extraKnownMarketplaces`/`enabledPlugins` 에 **같은 모양 그대로** 필요하다
-- `/plugin uninstall` 은 `~/.reap/` 도 npm 패키지도 모른다 — **`reap uninstall` 은 전환 후에도 유일한 완전 제거 경로**다
-
-**따라서 전환 세대는 gen-088 머지 이후여야 한다.** 순서가 고정된다.
-
-### `reap uninstall` 이 전환 후 무엇이 되는가
-
-gen-088 이 만든 4단계 구조를 그대로 놓고 본다. **바뀌는 것은 3단계 하나뿐이다.**
-
-| 단계 | 전환 후 |
+| | 사실 |
 |---|---|
-| 1. 진입 훅 우회 | **남는다** — `ensureUserLevelAssets` 가 OpenCode 때문에 산다 |
-| 2. daemon 정지 + `~/.reap/daemon/` | plugin 과 무관. **단 daemon 폐기로 별도로 바뀐다 — 아래** |
-| 3. 홈 자산 제거 | **payload 가 바뀐다** (아래) |
-| 4. npm 패키지 제거 | **무변경** (제거 대상 목록은 daemon 폐기로 줄어든다) |
+| F1 | **plugin SessionStart hook 은 발화한다.** github · directory · command source 전부. `${CLAUDE_PLUGIN_ROOT}` 는 hook command 안에서 전개된다 |
+| F2 | **issue #11509 은 해소됐다** — 로컬 directory source 에서도 발화한다 |
+| F3 | **`command` 는 marketplace source 가 아니라 *plugin* source 다.** marketplace 로 선언하면 스키마가 거부한다 |
+| F4 | **`mode` 는 `link` 와 `copy` 둘.** `link` 는 원본을 그 자리에서 쓴다(내용 디렉토리가 전부 symlink). **Windows 미지원** |
+| F5 | **`npm` marketplace source 는 미구현이다** (`NPM marketplace sources not yet implemented`) |
+| F6 | **`command` source 는 대화형 승인이 필수다.** 비대화형에서는 명령이 표시만 되고 실행되지 않는다 |
+| F7 | **settings.json 검증은 all-or-nothing.** 값 하나가 틀리면 그 파일 전체가 무시된다 |
+| F8 | **`${CLAUDE_PLUGIN_ROOT}` 는 CLAUDE.md 의 `@` import 에서 전개되지 않는다.** 문자 그대로 남는다 |
+| F9 | 이름 규칙이 셋이다 — command `plugin:command`(**축약 없음**) · agent `plugin:agent`(동명 공존) · skill **bare**(동명 shadowing) |
+| F10 | **OpenCode 의 npm plugin 은 agent 도 command 도 기여하지 못한다.** 런타임 훅 전용 |
+| F11 | plugin cache 는 marketplace 제거 직후에는 남는다. 클라이언트에 수명 관리 기제가 있다(`.in_use/{pid}` · `.last_inuse_sweep` · `.parked` · `claude plugin prune`) |
+| F12 | `claude plugin list` 는 **project scope 를 못 읽는다** — 활성화돼 있어도 `disabled` 로 표시하고 `details` 는 "not found" |
 
-`/plugin uninstall` 은 `~/.reap/` 도 npm 패키지도 모른다. **`reap uninstall` 은 전환 후에도 유일한 완전 제거 경로다.**
+## 3. 결정 — 9건 전부 닫힘
 
-#### daemon 폐기가 2단계를 어떻게 바꾸는가 (2026-08-20 결정)
+| # | 결정 | 근거 |
+|---|---|---|
+| 1 | **`reap-guide.md` 는 `~/.reap/` 에 그대로 둔다** | SessionStart `additionalContext` 의 길이 상한이 낮다(사용자). guide 는 52KB 라 주입 불가. F8 이 "plugin 안을 `@` 로 가리키기"도 막는다 |
+| 2 | **marketplace 는 github, plugin source 는 `command`+`link`** | F5 로 A/B 가 성립하지 않는다. 문서가 세운 A/B 축은 marketplace source 와 plugin source 를 섞은 것이었다 |
+| 3 | **이름 변경을 받아들이고 전수 갱신** | F9 — 축약이 없으므로 콜론형으로 통일. `/reap.start`→`/reap:start`, `reap-evolve`→`reap:reap-evolve` |
+| 4 | **OpenCode 는 런타임 훅만 npm 화** | F10. command 19 + agent 2 는 파일로 남는다. 조사 부족이 아니라 클라이언트의 구조 |
+| 5 | **REAP 이 사용자 `settings.json` 에 marketplace 를 쓴다** | 이미 SessionStart hook 을 쓰고 있다. payload 교체이지 새 침습이 아니다. **단 F7 이 전제 조건을 붙인다 — § 4** |
+| 6 | **설치 scope 는 user** | REAP 은 프로젝트마다 쓰인다. project scope 면 F6 승인을 프로젝트마다 반복하고 F12 까지 겹친다 |
+| 7 | **REAP 은 plugin cache 를 건드리지 않는다** | F11 — 클라이언트가 수명을 관리한다. `reap uninstall` 은 `/plugin uninstall` 을 **안내**하는 데서 멈춘다 |
+| 8 | **REAP 은 skill 을 내지 않는다** | F9 의 shadowing. 지금도 내지 않으므로 비용 0. command·agent 는 네임스페이스가 붙어 충돌 개념이 없다 |
+| 9 | **순서**: gen-088 머지 이후 → 구현(별도 브랜치) → 릴리즈 | § 5 |
 
-상주 프로세스가 없어지면 **uninstall 이 단순해진다.** gen-088 이 daemon 때문에 지고 있던 제약 셋이 함께 사라진다:
+## 4. 구현 세대가 반드시 지킬 것
 
-- **"stop 이 먼저"라는 순서 제약이 없어진다.** 유휴 30분 상주하는 프로세스가 지운 파일을 다시 쓰는 경합이 애초에 성립하지 않는다. `stopDaemonIfRunning` 과 그것을 만들며 함께 고친 D2(`daemon stop` 이 꺼진 daemon 을 띄우는 문제)는 대상 자체가 사라진다
-- **npm 제거 대상이 둘에서 하나로 준다.** `@c-d-cc/reap-daemon` 이 없어지므로 `reap` 만 지우면 된다
-- **`source === "checkout"` 예외가 사라진다.** 사용자 작업 트리를 npm 에 넘기지 않으려던 가드는 daemon 위치 조회(`locateDaemon`)에 딸린 것이었다
+1. **`settings.json` 은 쓰기 전에 검증한다.** F7 때문이다. 모양 하나가 틀리면 사용자의
+   model·permissions·hooks 가 **전부** 무효화된다. 이 리서치가 실제로 그것을 밟았다.
+   "쓰고 나서 사용자가 발견"은 허용되지 않는 실패 양상이다.
+2. **구 경로 21개를 지우는 주체와 시점을 코드로 정한다.** gen-088 의 `removeUserLevelAssets` 가
+   그 자리다 — 사용자 것은 남기고 REAP 것만 빼는 수술 로직이 이미 있다.
+3. **`extraKnownMarketplaces` 항목을 처음부터 uninstall 대상에 넣는다.** 넣지 않으면
+   REAP 이 사라진 뒤에도 매 세션 없는 명령(`reap plugin-root`)을 부른다 —
+   **gen-088 이 없앤 것과 정확히 같은 모양이 자리만 옮긴 것**이다.
+4. **plugin 을 disable 한 상태의 CLI 동작을 사용자에게 알린다.** F12 가 지금 거짓을 말한다.
+5. **Windows 는 `link` 를 못 쓴다** (F4). `copy` 폴백을 둘지, Windows 를 미지원으로 둘지 정한다.
+   `copy` 로 떨어지면 갱신 비대칭이 되살아난다 — 그때 무엇이 갱신을 유발하는지 답해야 한다.
+6. **`claude plugin validate --strict` 를 CI 게이트로 건다.** manifest 오류를 사용자가 아니라
+   CI 가 먼저 만나야 한다.
 
-**구 산출물과 새 인덱스는 별개다.** 섞으면 "지운다"의 대상이 흐려진다.
+## 5. gen-087 / gen-088 과의 관계
 
-##### 구 산출물 `~/.reap/daemon/` — 폐기와 함께 전부 지운다
+**gen-087 `ensureUserLevelAssets` 는 죽지 않는다.** claude-code 의 파일 21개 복사는 사라지지만
+**OpenCode 몫이 통째로 남고**(결정 4), `~/.reap/reap-guide.md` 도 남고(결정 1),
+`extraKnownMarketplaces`/`enabledPlugins` 를 쓰는 새 책임이 생긴다. 계약 구조
+(`syncUserLevelAssets` / `UserLevelSyncResult.complete` / `.install-stamp`)는 유지된다.
 
-daemon 이 만든 것은 daemon 과 함께 사라져야 한다. registry.json · indexes/ · daemon.pid 전부다. 남길 이유가 없다 — 그것을 읽을 코드가 없어지기 때문이다.
+**gen-088 `reap uninstall` 은 전환의 전제다.** `/plugin uninstall` 은 `~/.reap/` 도 npm 패키지도
+모른다 — `reap uninstall` 은 전환 후에도 **유일한 완전 제거 경로**다. 4단계 중 바뀌는 것은
+3단계(홈 자산 제거)의 payload 하나이며, claude-code 쪽이
+*"파일 21개 제거"* → *"`settings.json` 에서 REAP 항목만 빼기"* 가 된다.
 
-**지우는 자리는 폐기 generation 의 migration note 다.** `reap update` 시점에 정리된다. `reap uninstall` 을 기다리는 것은 답이 아니다 — 그것은 "REAP 자체를 지울 때까지 남아 있다"는 뜻이고, 계속 쓸 사용자의 홈에 죽은 디렉토리가 영구히 남는다.
+**따라서 전환 세대는 gen-088 머지 이후여야 한다. 순서가 고정된다.**
 
-**그리고 `reap uninstall` 의 allowlist 에서도 항목을 빼지 마라 — 안전망으로.** migration 을 돌리지 않은 사용자, 여러 머신 중 한 곳만 갱신한 사용자가 남는다. allowlist 에 죽은 항목 하나를 두는 비용은 0 이고, 빼면 그 사용자들의 잔여물을 지울 경로가 사라진다. **본선은 migration, 보조는 uninstall.**
+`~/.reap/` 밑 구 상주-인덱스 기제의 산출물 정리는 그 기제를 폐기한 generation 의 migration note 가 갖는다 —
+plugin 전환과 독립이며, `uninstall` allowlist 에서는 **항목을 빼지 않는다**(migration 을 돌리지
+않은 사용자를 위한 안전망. 비용 0).
 
-##### 새 인덱스 — 프로젝트 레벨이므로 애초에 사용자 레벨 문제가 아니다
+## 6. 남은 미측정
 
-`~/.reap/` 이 아니라 `.reap/` 하위다. 결과:
+착수 전에 필요하면 잰다. **부재를 증명으로 읽지 않는다.**
 
-- **`reap uninstall` 의 allowlist 에 새로 추가할 것이 없다** — 사용자 레벨을 떠났으므로 그 명령의 관심사가 아니다
-- **정리는 `reap destroy` 가 이미 한다** — `.reap/` 를 통째로 지우므로 자동으로 따라간다. 새 코드가 필요 없다
-- **`.gitignore` 에 넣어야 한다.** 프로젝트 파생물이고 커밋되면 안 된다. `reap init` 의 gitignore 처리와 `destroy` 의 gitignore 정리 양쪽이 아는 사실이 되므로 **carrier 표식 후보**다
+- `npm` marketplace source 의 런타임 동작 — F5 는 `[독해]` 근거 둘(에러 문자열의 위치,
+  판별자 1회 vs `command` 15회)이며 실제로 시도하지는 않았다
+- SessionStart `additionalContext` 의 정확한 길이 상한 — 사용자 제공. 관측된 값은
+  superpowers 3,321자 / `reap load-context` 2,026자로 둘 다 상한에 닿지 않는다
+- plugin cache sweep 의 발동 조건·임계값 (F11)
+- skill 의 네임스페이스 우회(`plugin:skill`)가 가능한지 — 결정 8이 이 미측정 위에 서지 않도록
+  skill 을 아예 쓰지 않는 쪽으로 닫았다
+- 동명 command 의 정식 호출(`/reap:reap`) — 축약(`/reap`)이 실패하는 것만 확인했다
+- `${CLAUDE_PLUGIN_ROOT}` 가 CLAUDE.md 외의 `@` import 에서 전개되는지
 
-3단계의 변화:
+## 7. 기각한 안
 
-- **claude-code** — "파일 21개 제거"가 **"`settings.json` 의 `extraKnownMarketplaces` + `enabledPlugins` 에서 REAP 항목만 빼기"** 가 된다. gen-088 이 만든 **개별 hook 단위 수술 로직이 같은 모양 그대로 재사용된다** — 사용자 것은 남기고 REAP 것만 빼는 구조
-- **opencode** — **통째로 남는다.** 전환은 claude-code 편면이다
-- **`~/.reap/`** — allowlist 는 그대로. `reap-guide.md` 항목만 미결 1의 결정에 따라 달라진다
+- **"원격에만 두고 로컬에는 두지 않는다"** — plugin 도 버전별 캐시로 전부 내려받는다. 그런 형태는 없다
+- **plugin `bin/` 으로 CLI 까지 배포** — reap 이 두 벌 존재해 없애려던 버전 어긋남을 자초한다
+- **`postuninstall` 훅으로 정리** — npm 이 `preuninstall`/`postuninstall` 을 실행하지 않는다
+  (npm 10.9.4 전역·로컬, 12.0.2 에서 격리 probe 로 측정)
+- **`reap-guide.md` 를 plugin skill 로 옮기기** — 동작이 "항상 로드"에서 "필요할 때 로드"로 바뀐다
+- **SessionStart 로 guide 본문 주입** — 길이 상한(결정 1)
 
-### 새로 생기는 잔여물 — 같은 결함이 다른 자리에서 재발한다
+## 8. 근거 — 어떻게 알아냈는가
 
-**marketplace source 를 `command` 로 고르면** plugin 실체가 npm 패키지 안에 있으므로 `npm uninstall` 이 파일을 지운다. 그러나 **`settings.json` 의 등록 항목은 남고, 그것이 가리키는 명령(`reap plugin-root`)은 더 이상 존재하지 않는다.** Claude Code 는 세션마다 그 명령을 재실행하므로 매번 실패한다.
+**실측 방법.** 일회용 marketplace 1개 + plugin 2개(`reapdir` = directory source,
+`reapcmd` = command source + `mode:link`)를 만들어 임시 프로젝트에 `--scope project` 로 설치하고,
+대화형 세션에서 관측했다. plugin 로딩·hook 발화·`@` import 전개는 **세션 시작 시점**에
+일어나므로 실행 중인 세션에서는 관측할 수 없다.
 
-**이것은 gen-088 이 없앤 것과 정확히 같은 모양이다** — "REAP 이 사라진 뒤에도 매 세션 없는 명령을 부르는 `settings.json` 엔트리". 자리만 `hooks` 에서 `extraKnownMarketplaces` 로 옮긴다.
+**대조군을 세웠다.** 부재를 주장하려면 부재가 스스로 증명돼야 한다:
+- F8(전개 안 됨)은 같은 파일의 평범한 `@./control.md` 가 **전개됨**을 먼저 확인한 뒤에야 유효하다
+- F10(OpenCode)은 셋을 세웠다 — plugin 이 실제로 로드되는가(sentinel 파일: **양성**) ·
+  agent 파일이 정상인가(`.opencode/agent/` 에 두면 목록에 **나타남**) ·
+  plugin 설정만 두면(**안 나타남**)
 
-따라서 **전환 설계는 이 항목을 처음부터 uninstall 대상에 넣어야 한다.** 나중에 발견하면 gen-088 을 한 번 더 하게 된다.
+**F1 은 probe 없이 나왔다.** `superpowers`(plugin, github source)의 `hooks/hooks.json` 이
+SessionStart 를 `${CLAUDE_PLUGIN_ROOT}` 경유로 등록하고, 그 hook 을 직접 실행한 출력이
+세션 컨텍스트에 **바이트 동일하게** 들어와 있었다. *"측정 불가"라고 적는 것보다 재는 것이 쌌다.*
 
-### 설계 판단이 필요한 것 — plugin cache 를 누가 지우는가
+**틀렸던 것 하나.** 세션 시작 알림(`[GPTAKU 플러그인 업데이트 있음]`)을 plugin hook 의 증거로
+읽을 뻔했다. 실제로는 `~/.claude/settings.json` → `~/.claude/scripts/` 의 **사본**이었다 —
+REAP 이 지금 하는 것과 같은 패턴이며, plugin hook 의 증거가 아니라 그 반대의 증거였다.
 
-`~/.claude/plugins/cache/{marketplace}/{plugin}/{version}/` 는 **Claude Code 소유**다.
+**F3·F7 은 실패에서 나왔다.** 문서의 표대로 `command` 를 marketplace source 로 선언했더니
+`extraKnownMarketplaces.…source.source: Invalid input` 으로 거부됐고, 그 한 줄이
+**같은 파일의 유효한 항목까지 전부 무효화**해 probe 가 통째로 안 실렸다.
+gen-079 가 OpenCode 에서 겪은 실패 양상이 Claude Code 에도 있다.
 
-- REAP 이 직접 지우면 클라이언트의 설치 상태 기록과 어긋난다
-- 등록만 해제하고 캐시를 남기면 그것도 잔여물이다 (버전별로 쌓인다)
-- `/plugin uninstall` 을 사용자가 따로 쳐야 한다면, "한 명령으로 끝난다"는 gen-088 의 설계 원칙이 깨진다
+## 9. 업그레이드 경로 — 0.18 은 자동으로 도달하지 않는다 (사용자, 2026-08-22)
 
-**셋 중 무엇도 자명하지 않다. 전환 세대가 답해야 한다.**
+**결정: 0.18 로의 이행은 자동 갱신으로 하지 않는다.** 사용자가 명시적으로 시작하고,
+전용 upgrade agent 가 수행한다.
 
-## 결정 대기 — 사람이 답해야 할 것
+근거는 § 2 의 F6 이다 — `command` plugin source 는 대화형 승인을 요구한다. 자동 갱신은
+세션 도중에 일어나므로, 승인할 사람이 없는 시점에 구 슬래시 커맨드 19개가 사라진다.
+**자동 갱신을 막으면 그 구간이 구조적으로 사라진다**: 사용자가 셸에서 의도적으로 올리고,
+다음 세션에서 승인 창과 새 커맨드를 함께 받는다.
 
-1. **`~/.reap/reap-guide.md` 처리** — 나머지 설계가 여기 매달려 있다
-   - (a) `~/.reap/` 에 그대로 둔다 → 가장 작다. 대신 `ensureUserLevelAssets` 가 이것 하나 때문에 산다
-   - (b) plugin skill 로 옮기고 `@` import 삭제 → **"항상 로드"가 "필요할 때 로드"로 동작이 바뀐다.** phase prompt 들이 전량 주입을 전제하고 서 있다
-   - (c) SessionStart hook 이 본문을 `additionalContext` 로 주입 → 매 세션 토큰 비용 무조건 지불
-   - **`AGENTS.md` 도 같은 파일을 참조**하므로 두 adapter 가 결정을 공유한다. (b) 를 고르면 OpenCode 는 여전히 파일이 필요해 **두 곳에 존재**하게 된다
-2. **marketplace source — `command` 인가 `npm` 인가.** `command` 만이 갱신 어긋남을 없앤다
-3. **이름 변경(`/reap.start` → `/reap:start`, `reap-evolve` → `reap:reap-evolve`)을 받아들일 것인가.** 받아들이면 템플릿·guide·prompt·5 로케일·README 전수 갱신. 안 받아들이면 부분 전환
-4. **adapter 비대칭을 확정할 것인가** — "REAP 은 클라이언트마다 다르게 설치된다"가 영구 사실이 된다
-5. **`extraKnownMarketplaces` 를 사용자 `settings.json` 에 REAP 이 스스로 써도 되는가** — 침습성 판단
-6. **0.18 브랜치 안에서 gen-088 이후 순서 확정**
-7. **`plugin cache` 를 제거 시 어떻게 할 것인가** — REAP 이 지우면 클라이언트 상태와 어긋나고, 남기면 잔여물이며, 사용자가 `/plugin uninstall` 을 따로 쳐야 한다면 "한 명령으로 끝난다"는 gen-088 의 원칙이 깨진다 (위 § 참조)
+### 차단 기제는 이미 있다
 
-## 미측정 — 전환 가능성을 좌우한다
+`performAutoUpdate` 5단계의 `autoUpdateMinVersion` 하한. 0.18 을 floor `"0.18.0"` 으로
+발행하면 그 아래 버전은 전부 `blocked` 가 되고 설치 대신 안내만 나간다. **코드 변경 없이
+`package.json` 값 하나**이며, `scripts/check-version-floors.sh` 가 그 버전이 실제로
+발행됐는지 릴리즈 전에 검사한다.
 
-**착수 전에 반드시 실측할 것.** 아래는 문서·검색 근거일 뿐이다.
+### 발행 — `latest` 를 0.17.8 에 두고 0.18 은 `next` 태그로
 
-1. **issue #11509 — 로컬 file-based marketplace 의 plugin 에서 SessionStart hook 미발화.** 현재 유효한지 미확인. `command`/`directory` source 를 고르면 **직격**이고, REAP 의 동적 컨텍스트 주입이 전부 그 hook 에 걸려 있다. **가장 매력적인 경로(2번 결정의 `command`)를 막을 수 있는 리스크다**
-2. **`${CLAUDE_PLUGIN_ROOT}` 가 CLAUDE.md 의 `@` import 에서 전개되는가.** plugins-reference 가 치환 위치를 hook commands / MCP·LSP configs / monitor commands 셋으로 **열거**하고 `@` import 는 그 목록에 없다. 부재로 읽으면 "전개 안 됨"이지만 **열거가 완전하다는 보장이 문서에 없다**
-3. **plugin 설치 상태에서 `/reap:start` 가 실제로 인식되는가** — 층2 검증 대상. backlog 가 이미 경고했다: **파일이 놓인 것과 클라이언트가 그것을 읽는 것은 별개다**(gen-063/079)
-4. `not used in N days` 표시가 REAP 동작에 주는 영향 — 미조사
+`queryLatestVersion` 도 `queryAutoUpdateMinVersion` 도 `npm view` 로 **dist-tag `latest`** 를
+읽는다 `[실행]`: 이 패키지에는 `alpha` 태그가 따로 있는데도 `npm view @c-d-cc/reap version` 은
+latest 를 낸다. **어느 버전이 `latest` 인지는 우리가 정한다.**
 
-## 기각한 안
+| 사용자 | 결과 |
+|---|---|
+| 0.17.7 | latest=0.17.8, floor=0.16.0 → 하한 통과 → **자동으로 0.17.8 로 올라간다** |
+| 0.17.8 | latest 가 자기 자신 → 자동 갱신 없음. 일일 확인이 "0.18 이 `next` 에 있다"를 안내 |
+| 안내를 따름 | `reap update` → upgrade agent → `npm i -g @c-d-cc/reap@next` |
 
-- **"원격에만 두고 로컬에는 두지 않는다"** — plugin 도 버전별 캐시 디렉토리로 전부 내려받는다. 이런 형태는 존재하지 않는다
-- **plugin `bin/` 으로 CLI 까지 배포** — reap 이 두 벌 존재하게 되어 없애려던 버전 어긋남을 자초한다
-- **`postuninstall` 훅으로 정리** (gen-088 관련) — npm 이 `preuninstall`/`postuninstall` 을 실행하지 않는다. npm 10.9.4(전역·로컬)와 12.0.2 에서 격리 probe 로 측정했다
+**"창"이 경쟁이 아니라 우리가 정하는 기간이 된다.** 며칠을 기다릴 필요가 없고, 늦게 켠
+사용자도 놓치지 않는다 — 0.17.7 사용자는 **언제 켜든** 0.17.8 을 받는다.
 
-## 근거의 종류
+이 방식에서는 **floor 가 이행에 필요하지 않다.** 0.18 이 `latest` 가 아니므로 아무도 자동으로
+거기 가지 않는다. `autoUpdateMinVersion: "0.18.0"` 은 나중에 0.18 을 `latest` 로 승격할 때를
+위한 안전장치로 남긴다.
 
-- **실물 확인**: plugin cache 디렉토리 구조, `ouroboros` 의 `hooks/hooks.json`·`plugin.json`, `insane-design` 의 README 호출법 표, `find ~/.claude/plugins -iname "*reap*"` 0건(REAP 은 plugin 이 아니다), 세션 시작 시의 marketplace 갱신 알림
-- **코드 확인**: `src/adapters/{claude-code,opencode}/install.ts`, `src/adapters/index.ts`, `src/adapters/types.ts`, `src/cli/index.ts`, `src/cli/commands/load-context.ts`, `src/core/integrity.ts`, `src/templates/claude-md-section.md`
-- **문서 확인**: Claude Code plugins-reference / plugin-marketplaces, OpenCode Plugins / Commands
-- **추정**: `extraKnownMarketplaces` 의 사용자 스코프 동작, OpenCode 가 npm plugin 에서 agent 를 발견하는지
-- **미측정**: 위 「미측정」 절 전부
+**대가**: 승격 전까지 `npm i -g @c-d-cc/reap` 는 0.17.8 을 준다. 이행할 것이 없는 **신규
+사용자도 구버전을 받는다** — 이 방식에서 유일하게 어색한 지점이며, 승격 시점을 정하는 것이
+그 답이다.
+
+*(초안은 "0.17.7 사용자는 구제할 수 없다"라고 적었다. dist-tag 를 계산에 넣지 않은 결과였고,
+넣으면 구제된다.)*
+
+### 0.17.8 이 하는 일
+
+1. **0.18 출시 안내** — latest 가 0.18 이상이면 "자동으로 올라가지 않는다, `/reap.update` 를
+   쳐라"를 출력한다
+2. **하루 한 번만 확인한다.** 지금 `check-version` 은 SessionStart hook 이면서
+   `npm view` 를 **매 세션** 친다 — 실측 **0.34~1.2초**가 모든 세션 시작에 붙는다.
+   일일 캐시는 새 검사만이 아니라 **이미 있는 이 비용**을 함께 없앤다
+3. **`reap update` 가 upgrade agent 를 설치하고 넘긴다**
+
+### upgrade agent
+
+정의 파일은 **reap github repo** 에 둔다. `reap update` 가 받아서 사용자 레벨 agent 로 설치한다.
+
+**네트워크 실패 시 중단하고 수동 안내** (사용자 결정) — 절반만 된 상태를 만들지 않는다.
+
+수행 범위: **npm 설치 → 승인 안내 → 검증 → 0.18 구조로 migration.**
+즉 사용자가 하는 일은 agent 를 부르는 것 하나다.
+
+### 브랜치가 다르다
+
+0.17.8 은 **main** 의 작업이다. 이 문서가 서술하는 0.18 전환은 별도 브랜치이고,
+`/reap.update` 라는 이름 자체가 0.17 의 것이다(0.18 에서는 `/reap:update`).
+**milestone 에 별도 generation 으로 세운다.**
+
+## 10. 설치 스크립트를 현관으로 둔다 (사용자, 2026-08-22)
+
+**결정: `curl | bash` 설치 스크립트를 만들되, npm 을 대체하지 않고 감싼다.**
+
+스크립트가 하는 일: node 확인 → `npm i -g @c-d-cc/reap` → **plugin 등록·승인을 대화형으로**
+→ 검증. npm 절차가 사용자에게 보이지 않고, 설치의 앞단을 우리가 통제한다.
+
+### 이것이 F6 을 해결한다
+
+`command` plugin source 는 **대화형 터미널**을 요구한다(§ 2 F6). 설치 스크립트가 바로
+그것이다 — 스크립트가 `claude plugin install reap@c-d-cc` 를 실행하면 사용자가 그 자리에서
+승인한다. **"설치 → 재시작 → 승인" 세 단계가 한 단계로 접힌다.**
+
+주의: `curl | bash` 는 stdin 이 파이프라 프롬프트가 막힌다. `< /dev/tty` 로 열어야 하며,
+**그것이 실제로 `claude plugin install` 의 승인에 통하는지는 미측정**이다.
+
+### 그래서 plugin source 는 `command` 를 유지한다
+
+승인 마찰이 스크립트로 해소되고, Windows 는 `mode: "copy"` 로 이미 처리했다. 남는 대가는
+조직의 `disableCommandPluginSources` 하나인데, **스크립트가 그 실패를 관측해 사용자에게
+말할 수 있다** — 보이지 않던 실패가 보이는 실패가 된다.
+
+`github` source(내용 벤더링)를 택하지 않은 이유는 **매 릴리즈마다 marketplace repo 에
+발행하는 단계가 늘어나기 때문**이다. genome 이 가장 경계하는 형태 — 여러 곳이 아는 사실이고
+사람이 기억해야 하는 절차다. `command` 는 plugin 내용이 npm 패키지 안에 있으므로
+어긋날 자리가 없다.
+
+### npm 을 바이너리로 대체하는 것은 별도 축이다
+
+검토했고 **이 milestone 에 넣지 않는다.** 실측: `bun build --compile` 이 **62MB 바이너리를
+184ms 에** 만들고 실제로 돈다. 이웃 도구들이 그 길을 간다(opencode 126MB, claude 325MB).
+`web-tree-sitter` 인라인도 gen-089 가 이미 시험해 통과시켰다.
+
+그런데 컴파일된 바이너리는 **즉시 `--version` 이 `0.0.0`** 이었다 `[실행]` —
+`ownPackageRoot()` 가 디스크의 `package.json` 을 찾는데 바이너리 안에는 없다.
+같은 이유로 `detectInstallKind` · `pluginDir` · grammar 경로가 전부 걸린다.
+**`package-info.ts` 가 "다섯 곳이 알던 값을 하나로 모은" 파일인데, 컴파일 주입이라는
+새 형태로 그 문제가 돌아온다.**
+
+그 밖에 따라오는 것: 플랫폼별 CI 매트릭스(현재 전무) · 자체 업데이터 ·
+`npx @c-d-cc/reap uninstall` 복구 경로 소멸 · Windows 용 PowerShell 스크립트.
+
+**그리고 "postinstall 문제가 해결된다"는 이유로는 부족하다** — 그 문제는 gen-087 이
+이미 해결했다(사용자 레벨 설치가 CLI 진입 훅으로 옮겨졌고 npm 과 무관하게 동작한다).
+바이너리 전환의 이득은 중복 경로 제거이지 살아있는 결함의 수정이 아니다.
