@@ -5,9 +5,9 @@ title: v0.18 브랜치 신설과 귀환
 from: loop-0003-plan
 refs:
   - ps-4b485d:02-branch-return.md
-status: open
-focus: true
+status: closed
 openedAt: 2026-08-30T23:12:25Z
+closedAt: 2026-08-30T23:53:06Z
 ---
 
 ## Background
@@ -56,3 +56,12 @@ loop-0003이 낳았다. 근거는 `ps-4b485d:02-branch-return.md`. 자르기 전
 - 전수 grep 개명에서 놓친 표기가 나왔는가 — 나왔다면 어떤 종류였는가
 - 작업 리포(reap)와 기록 리포(reap)가 갈라진 상태가 어디서 아팠는가 — M2·M3 진행 방식에 반영할 것
 - task 넷 크기가 맞았는가
+
+## Fitness (2026-08-31, 사람)
+
+1. apocalypse·snapshot 두 커밋 구조 — **"그렇다"**, 앞으로도 쓴다
+2. 개명 누락 — **"너무 많다, 과감하게 전면 치환하라"**: 보수적 범위(기록·spec 보존)를 기각. 전면 개명 + v0.18 재구축으로 이행(gen-0065). 커밋 트리·신규 메시지에서 옛 이름 0건으로 검증
+3. 작업/기록 리포 분리 — **"이대로 간다"** (정본은 이 리포, 작전 끝에 동기화)
+4. task 넷 크기 — **"맞았다"**
+
+읽기: 2가 이 milestone의 실질 결함이었고 같은 milestone 안(gen-0065)에서 고쳐 닫는다. 1·3·4는 M2·M3의 진행 방식으로 승계.

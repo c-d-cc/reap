@@ -21,4 +21,6 @@ REAP(`~/cdws/reap`)는 reap(`~/cdws/reap`)의 v0.18을 위해 별도로 만들�
 
 ## 잘린 것
 
-- M1 ([02-branch-return.md](02-branch-return.md)) → **ms-013** (2026-08-31). M2·M3는 M1이 끝난 뒤 자른다 — M2는 브랜치가 서야 하고, M3는 M2의 판단에 걸려 있다
+- M1 ([02-branch-return.md](02-branch-return.md)) → **ms-013** (2026-08-31, 닫힘)
+- M2 ([03-compat.md](03-compat.md)) → **ms-014** (2026-08-31, 닫힘)
+- M3 ([04-migration-skill.md](04-migration-skill.md)) → **ms-015** (2026-08-31)

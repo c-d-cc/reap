@@ -22,11 +22,11 @@
 | `genome/` 3종 | **그대로** — 사용자가 쓴 규범이다. 다만 v0.17 구조를 전제한 문구는 이행 안내 대상 |
 | `memory/` shortterm·midterm·longterm | lessons 성격만 `vision/memory/lessons.md`로 **선별** — 시효 지난 것은 버린다 |
 | `life/backlog/` | `life/backlog/` — frontmatter를 v0.18 형식으로 |
-| `life/current.yml` (진행 중 generation) | 열린 것이 있으면 **이주 전에 닫으라고 안내**하고 block? — 미결 |
+| `life/current.yml` (진행 중 generation) | **열려 있으면 block** — 구 도구로 닫거나, 못 닫으면 사람의 명시 확인 후에만 진행 (gen-0070, uncommitted와 동일 원칙) |
 | `vision/milestones/` | `vision/milestones/` — 열린 milestone의 형식 변환 |
-| `vision/goals.md` | 미결 — goal 개념의 거취가 M2 판단에 걸려 있다 |
-| `vision/design/` | 미결 — plan source로 등록하는가, `idea/`로 보내는가 |
-| `lineage/` · `sequence/` | 미결 — 세대 이력을 승계하는가, `.reap-v0_18` 세대는 1번부터인가 |
+| `vision/goals.md` | **plan source로 이주** — goal 개념은 안 가져온다(M2 판정, gen-0066). 살아 있는 목표 서술은 plan source 문서로, 죽은 것은 버린다 |
+| `vision/design/` | **`idea/files/`로 이주** — 아직 채택 여부가 판정 안 된 설계 자료의 자리. plan source 승격은 안내만 한다(등록은 사용자 판단) (gen-0070) |
+| `lineage/` · `sequence/` | **승계하지 않는다** — 원본이 `.reap-v0_17/`에 통째로 남는 것이 곧 이력이다. v0.18 세대·레지스트리는 1번부터 (gen-0070) |
 | `config.yml` | 새 형식으로 재작성. `autoUpdate` 등 폐기 필드는 버리고 그 사실을 기록에 남긴다 |
 | `hooks/` · `migration-state.yml` · `.session-state.md` | 폐기 — 기제 자체가 사라졌다 |
 

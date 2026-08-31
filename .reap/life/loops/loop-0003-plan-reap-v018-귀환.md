@@ -7,8 +7,12 @@ refs:
   - ps-4f2a91:08-delivery.md
 startedAt: 2026-08-30T22:48:35Z
 startCommit: d7087b8
-status: open
-milestones: []
+status: closed
+milestones:
+  - ms-013
+  - ms-014
+  - ms-015
+closedAt: 2026-08-31T14:28:10Z
 ---
 ## Question
 
@@ -46,10 +50,27 @@ reap를 reap(~/cdws/reap)의 v0.18로 되돌려 넣는 길을 정한다. 배포 
 - 기능 잔여 판단 6건(03-compat.md의 미결 표) — M2에서
 | 브랜치 첫 커밋 구조 | — | **apocalypse commit**(구 소스 전부 삭제) 후 **snapshot commit**(reap 적재) — 두 커밋으로 가른다 | 사람 추가 지시 |
 
-## Outcome (진행 중)
+## Outcome
 
 - plan source **ps-4b485d** 신설 (`docs/reap-plan/reap_v_0_18_migration/` — README + 01~04)
 - **ms-013** (v0.18 브랜치 신설과 귀환, focus) 잘림 — task 넷
 - backlog **bk-bb11a1** (plan source 만료 분기 절차)
 - M2(호환)·M3(migration skill)는 **아직 안 잘랐다** — M1 종료 후 이 loop를 이어 자른다. 그래서 loop는 열린 채다
 | ms-013 fitness 중 방향 전환 | 개명 범위: 코드·플러그인만(기록·spec은 역사로 보존) vs 전면 | **전면** — 대소문자만 구분해 과감하게, 기록·히스토리도 싹다. v0.18 커밋 트리에 reap 문자열을 아예 남기지 않는다. 절차: reap 리포 안에서 replace를 먼저 완수 → v0.18을 apocalypse 시점으로 되돌려 재적재 | **사람이 agent의 보수적 범위를 기각** |
+
+- **ms-013 닫힘 (2026-08-31)** — reap 리포 `v0.18` 브랜치: 1d1429b(apocalypse) · f164a05(snapshot, 출처 1a0b8fe) · 9993230(승계물). 트리·신규 커밋 메시지에 옛 이름 0건. main 55c020d(구 기획 정리), gen-101은 legacy/v017-plugin-distribution 보존. **다음: 이 loop를 이어 M2(호환)를 자른다**
+| 기능 대조 6건 (ms-014 task 1) | 각각 만든다/안 만든다 | **전부 안 만든다/안 가져온다** — check-version(대상 없음)·uninstall(spec 유지, 구 자산은 M3)·config·status(YAGNI)·goal(plan source가 대체)·notice(배포 단계) | 위임 하 agent 판정 (gen-0066) |
+- **ms-014 닫힘 (2026-08-31)** — v0.18: floor 0.18.0 + docs/release-policy.md(latest 금지·next 태그). 기능 6건 전부 안 만듦 확정. main 363e6e3(tests 4b29014): 0.17.8 다리 — upgrade-bridge 모듈(일일 캐시·next 안내)·installUpgradeAgent·agent stub(docs/upgrade-agent/). 전 스위트 통과(unit 829·e2e 391·scenario 62). **다음: M3(migration skill)를 자른다**
+| 이주 매핑 미결 3건 (ms-015 task 1) | 각 2안 | 열린 generation은 **block**(동일 원칙) · design/은 **idea/files/**(승격은 안내만) · lineage/sequence는 **비승계**(원본 보존이 이력) | 위임 하 agent 판정 (gen-0070) |
+- **ms-015 닫힘 (2026-08-31)** — migrate skill(판정·차단·고지·격리·subagent 이주·검증·기록·홈 정리 allowlist) + upgrade agent 본문(main) + **실물 검증**(reap main의 진짜 v0.17 데이터, doctor 0·원본 무손상·lessons 34→32 선별)
+- **작전 완료.** 범위(브랜치 신설·호환·migration skill)가 전부 실현됐다. 범위 밖으로 남긴 것: 발행 전부(0.17.8 publish·next 태그·latest 승격·설치 스크립트), 홈 자산 정리의 실행, 미푸시 브랜치들의 push
+
+## Dead Ends
+
+- **ps-4f2a91 확장** — 계획을 기존 spec에 쓰려다 사람이 막음: 소비 완료된 소스였다. 새 문서 세트(ps-4b485d) 신설로 전환, 절차 공백은 bk-bb11a1로
+- **보수적 개명 범위**(기록·spec을 역사로 보존) — fitness에서 기각됨. 전면 치환 + v0.18 재구축으로
+- **히스토리 병합 이식**(추천안) — 사람이 스냅샷 선택. 기록 해시 단절은 인지된 대가
+
+## Open Questions — 전부 답함
+
+0.17.8 다리 범위(→M2 포함, gen-0068) · 기록 이식(→gen-0061) · 매핑 세부(→gen-0070) · 기능 6건(→gen-0066)

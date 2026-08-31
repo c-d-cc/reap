@@ -12,13 +12,13 @@
 
 reap에 상당물이 이미 있는 것: `fix --check`→`doctor`, `load-context`→`ctx`, `sequence`→`seq`, 자동 이슈 보고→`report-issue` skill, `install-skills`→플러그인 설치로 대체.
 
-**미결 — M2에서 사람과 정한다** (결론이 아니라 판단 대상 목록이다):
+**판정 완료 (2026-08-31, gen-0066 — 사람의 전체 위임 하에 agent가 판정, loop-0003 Dialogue 기록):**
 
-| reap 기능 | 쟁점 |
-|---|---|
-| `check-version`/버전 안내 | 바이너리 배포에서 상당물이 필요한가 (brew는 자체 갱신 경로가 있다) |
-| `uninstall` | spec은 "플러그인 지우면 끝"으로 결정했으나, migration skill이 구 자산 제거에 gen-088 로직을 승계하므로 경계를 다시 그어야 한다 |
-| `config` 명령 | reap는 config.yml을 도구가 읽기만 한다 |
-| `status` 명령 | reap는 `index status`뿐, 전반 상태 표시가 없다 |
-| goal 개념 (`vision/goals.md`) | reap에는 없다 — plan source가 그 자리를 대체했는가 |
-| RELEASE notice · 5로케일 문서 | 배포 밖이지만 v0.18 브랜치에 틀은 남길 것인가 |
+| reap 기능 | 판정 | 근거 |
+|---|---|---|
+| `check-version`/버전 안내 | **만들지 않는다** | 0.18은 latest 비사용이라 자동 확인의 대상이 없다. brew 경로는 brew가 갱신을 안다. 필요 신호가 실제로 오면 그때 backlog로 |
+| `uninstall` | **만들지 않는다** — spec 결정 유지 | 플러그인 제거로 끝. 구 v0.17 자산 제거는 migration skill(M3)의 경계 안이다 |
+| `config` 명령 | **만들지 않는다** | config.yml 직접 편집 + `doctor` 검증으로 충분 (YAGNI) |
+| `status` 명령 | **만들지 않는다** | `ctx` 상태 줄·`doctor`·`index status`가 이미 그 자리다 (YAGNI) |
+| goal 개념 (`vision/goals.md`) | **가져오지 않는다** | plan source가 그 자리를 대체했다. goals.md의 데이터 이주는 M3 매핑이 담당 |
+| RELEASE notice · 5로케일 | **틀을 남기지 않는다** | 배포 단계의 일. 0.17.8 다리는 main의 기존 notice 기제를 그대로 쓴다 |
