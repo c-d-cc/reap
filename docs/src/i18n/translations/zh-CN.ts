@@ -1041,11 +1041,11 @@ commit:  1a2b3c4`,
       },
       {
         version: "0.17.6",
-        notes: "**`reap index` —— 代码索引已内置。** 无需安装，没有端口，没有常驻进程：`reap index status | search | impact | callers | callees`。支持 15 种语言，没有原生构建。索引以提交为基准，存放在 `.reap/.index/` 并被 gitignore —— 未提交的改动有意不纳入其中。\n\n**`reap uninstall`** 会删除 npm 删不掉的东西 —— slash command、agent 定义、`~/.reap/` 以及 SessionStart 钩子条目，这些在 `npm uninstall -g` 之后仍会残留。已经删掉包了？用 `npx @c-d-cc/reap uninstall --confirm`。\n\n**把 REAP 装进项目不再改动你的全局安装**，并且 **`autoUpdate: false` 现在真的会关闭自动更新** —— 这个设置自 v0.16 起就在 `.reap/config.yml` 里，却没有任何代码读取它。\n\n**daemon 已停用。** `reap update` 会从配置中移除 `daemon` / `daemonBin` 并删除 `~/.reap/daemon/`。全局包请用 `npm uninstall -g @c-d-cc/reap-daemon` 移除。",
+        notes: "**代码索引已内置。** 只需 `reap index`，无需安装，没有端口，没有常驻进程：`reap index status | search | impact <file> | callers <symbolId> | callees <symbolId>`。支持 15 种语言，没有原生构建。索引以提交为基准，存放在 `.reap/.index/` 并被 gitignore，因此未提交的改动有意不纳入其中。\n\n**`reap uninstall` 会删除 npm 删不掉的东西。** slash command、agent 定义、`~/.reap/` 以及 SessionStart 钩子条目在 `npm uninstall -g` 之后仍会残留，而残留的钩子会不断调用一个已经不存在的命令。已经删掉包了？用 `npx @c-d-cc/reap uninstall --confirm`。\n\n**把 REAP 装进项目不再改动你的全局安装。** 项目内安装、`npx` 运行和源码检出现在都不会碰你的机器。\n\n**`autoUpdate: false` 现在真的会关闭自动更新。** 这个设置自 v0.16 起就在 `.reap/config.yml` 里，却没有任何代码读取它。它只会停止安装 —— 版本过低、REAP 无法自动修复的警告仍会送达。",
       },
       {
         version: "0.17.5",
-        notes: "**REAP 在首次运行时自行安装集成。** npm 12 会阻止全局安装的 install script，导致 slash command、agent 定义和 session hook 都没有落位 —— 而且**没有任何报错**。二进制能用，集成却不存在。**`reap run push` 现在报告 git 的实际错误**而不是猜测，**`reap help` 也会列出 `/reap.run` 与 `/reap.report`**。",
+        notes: "**REAP 在首次运行时自行安装集成。** npm 12 会阻止全局安装的 install script，导致 slash command、agent 定义和 session hook 都没有落位，而且没有任何报错 —— 二进制能用，集成却不存在。\n\n**`reap run push` 会报告 git 的实际错误**，而不是猜测的原因。\n\n**`reap help` 会列出 `/reap.run` 与 `/reap.report`。**",
       },
       {
         version: "0.17.4",

@@ -1042,11 +1042,11 @@ commit:  1a2b3c4`,
       },
       {
         version: "0.17.6",
-        notes: "**`reap index` — 코드 인덱스가 내장됐습니다.** 설치할 것도 포트도 상주 프로세스도 없습니다: `reap index status | search | impact | callers | callees`. 15개 언어를 지원하고 네이티브 빌드가 없습니다. 인덱스는 커밋 기준이며 `.reap/.index/` 에 있고 gitignore 됩니다 — 커밋하지 않은 작업은 의도적으로 들어가지 않습니다.\n\n**`reap uninstall`** 이 npm 이 지우지 못하는 것을 지웁니다 — slash command, agent 정의, `~/.reap/`, SessionStart hook 항목은 `npm uninstall -g` 로 사라지지 않습니다. 이미 패키지를 지우셨다면 `npx @c-d-cc/reap uninstall --confirm`.\n\n**프로젝트에 REAP 을 설치해도 전역 설치가 더 이상 바뀌지 않습니다.** 그리고 **`autoUpdate: false` 가 실제로 자동 업데이트를 끕니다** — v0.16 부터 `.reap/config.yml` 에 있었지만 아무도 읽지 않던 설정입니다.\n\n**daemon 은 폐기됐습니다.** `reap update` 가 config 에서 `daemon` / `daemonBin` 을 지우고 `~/.reap/daemon/` 도 삭제합니다. 전역 패키지는 `npm uninstall -g @c-d-cc/reap-daemon` 으로 제거하세요.",
+        notes: "**코드 인덱스가 내장됐습니다.** `reap index` 하나면 되고 설치할 것도 포트도 상주 프로세스도 없습니다: `reap index status | search | impact <file> | callers <symbolId> | callees <symbolId>`. 15개 언어를 지원하고 네이티브 빌드가 없습니다. 인덱스는 커밋 기준이라 `.reap/.index/` 에 있고 gitignore 되며, 커밋하지 않은 작업은 의도적으로 들어가지 않습니다.\n\n**`reap uninstall` 이 npm 이 지우지 못하는 것을 지웁니다.** slash command, agent 정의, `~/.reap/`, SessionStart hook 항목은 `npm uninstall -g` 로 사라지지 않고, 남은 hook 은 없는 명령을 계속 불렀습니다. 이미 패키지를 지우셨다면 `npx @c-d-cc/reap uninstall --confirm`.\n\n**프로젝트에 REAP 을 설치해도 전역 설치가 바뀌지 않습니다.** 프로젝트 로컬 설치, `npx` 실행, 소스 체크아웃은 이제 머신을 건드리지 않습니다.\n\n**`autoUpdate: false` 가 실제로 자동 업데이트를 끕니다.** 이 설정은 v0.16 부터 `.reap/config.yml` 에 있었지만 아무도 읽지 않았습니다. 설치만 멈추며, 버전이 너무 낮아 자동으로 고칠 수 없다는 경고는 그대로 도달합니다.",
       },
       {
         version: "0.17.5",
-        notes: "**REAP 이 첫 실행 때 자기 통합을 직접 설치합니다.** npm 12 가 전역 설치의 install script 를 차단하면서 slash command·agent 정의·session hook 이 놓이지 않았고 **오류조차 나지 않았습니다** — 바이너리는 동작하는데 통합만 없는 상태였습니다. **`reap run push` 가 추측 대신 git 의 실제 오류를 보고**하고, **`reap help` 에 `/reap.run` 과 `/reap.report`** 가 나옵니다.",
+        notes: "**REAP 이 첫 실행 때 자기 통합을 직접 설치합니다.** npm 12 가 전역 설치의 install script 를 차단하면서 slash command, agent 정의, session hook 이 놓이지 않았고 오류조차 나지 않았습니다. 바이너리는 동작하는데 통합만 없는 상태였습니다.\n\n**`reap run push` 가 git 의 실제 오류를 보고합니다.** 추측한 원인 대신 git 이 낸 문장을 그대로 보여줍니다.\n\n**`reap help` 에 `/reap.run` 과 `/reap.report` 가 나옵니다.**",
       },
       {
         version: "0.17.4",

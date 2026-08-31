@@ -1041,11 +1041,11 @@ commit:  1a2b3c4`,
       },
       {
         version: "0.17.6",
-        notes: "**`reap index` — コードインデックスが内蔵されました。** インストールするものもポートも常駐プロセスもありません: `reap index status | search | impact | callers | callees`。15 言語に対応し、ネイティブビルドはありません。インデックスはコミット単位で、`.reap/.index/` に置かれ gitignore されます — 未コミットの作業は意図的に含まれません。\n\n**`reap uninstall`** が npm では消せないものを消します — slash command、agent 定義、`~/.reap/`、SessionStart フックの項目は `npm uninstall -g` では残ります。すでにパッケージを削除済みなら `npx @c-d-cc/reap uninstall --confirm`。\n\n**プロジェクトに REAP を入れてもグローバルインストールが変わらなくなりました。** そして **`autoUpdate: false` が実際に自動更新を止めます** — この設定は v0.16 から `.reap/config.yml` にありましたが、誰も読んでいませんでした。\n\n**デーモンは廃止されました。** `reap update` が設定から `daemon` / `daemonBin` を削除し、`~/.reap/daemon/` も消します。グローバルパッケージは `npm uninstall -g @c-d-cc/reap-daemon` で削除してください。",
+        notes: "**コードインデックスが内蔵されました。** `reap index` だけで済み、インストールするものもポートも常駐プロセスもありません: `reap index status | search | impact <file> | callers <symbolId> | callees <symbolId>`。15 言語に対応し、ネイティブビルドはありません。インデックスはコミット単位で `.reap/.index/` に置かれ gitignore されるため、未コミットの作業は意図的に含まれません。\n\n**`reap uninstall` が npm では消せないものを消します。** slash command、agent 定義、`~/.reap/`、SessionStart フックの項目は `npm uninstall -g` では残り、残ったフックは存在しないコマンドを呼び続けていました。すでにパッケージを削除済みなら `npx @c-d-cc/reap uninstall --confirm`。\n\n**プロジェクトに REAP を入れてもグローバルインストールが変わりません。** プロジェクトローカルの導入、`npx` 実行、ソースチェックアウトはマシンに触れなくなりました。\n\n**`autoUpdate: false` が実際に自動更新を止めます。** この設定は v0.16 から `.reap/config.yml` にありましたが、誰も読んでいませんでした。止まるのはインストールだけで、バージョンが低すぎて自動修正できないという警告は届きます。",
       },
       {
         version: "0.17.5",
-        notes: "**REAP が初回実行時に自身の統合をインストールします。** npm 12 がグローバルインストールの install script をブロックするため、slash command・agent 定義・session hook が配置されず、**エラーすら出ませんでした** — バイナリは動くのに統合だけが無い状態です。**`reap run push` が推測ではなく git の実際のエラーを報告**し、**`reap help` に `/reap.run` と `/reap.report`** が並びます。",
+        notes: "**REAP が初回実行時に自身の統合をインストールします。** npm 12 がグローバルインストールの install script をブロックするため、slash command、agent 定義、session hook が配置されず、エラーすら出ませんでした。バイナリは動くのに統合だけが無い状態です。\n\n**`reap run push` が git の実際のエラーを報告します。** 推測した原因ではなく git が出した文をそのまま表示します。\n\n**`reap help` に `/reap.run` と `/reap.report` が並びます。**",
       },
       {
         version: "0.17.4",
