@@ -11,20 +11,25 @@ description: Use when a project carries v0.17-era REAP data - a .reap/ with the 
 
 1. 판정 · 2. 사전 차단 · 3. 고지와 동의 · 4. 격리 · 5. 새 구조 · 6. 이주(subagent) · 7. 검증 · 8. 기록과 홈 정리 안내
 
-## 1/8 — 판정: 무엇이 있는지부터. 어떤 파일도 옮기기 전에
+## 1/8 — 판정: 스크립트가 한다. 어떤 파일도 옮기기 전에
 
-`.reap/`을 열어 **구조 지문**을 본다.
+**판정은 사람 지시(2026-09-01)로 스크립트가 소유한다** — 확률에 의존하면 안 되는 것은 스크립트의 몫이다.
 
-| 지문 | v0.17이다 |
-|---|---|
-| `config.yml`에 `autoSubagent` · `autoUpdate` · `lastMigratedVersion` · `strictEdit` 중 하나라도 | ✓ |
-| `vision/memory/shortterm.md`(3단 memory) 또는 `lineage/` 또는 `life/current.yml` | ✓ |
+```bash
+bash <이 skill 디렉토리>/scripts/detect-version.sh <프로젝트 루트>
+```
 
-| 지문 | v0.18이다 — **이주할 것 없음**으로 종료 |
-|---|---|
-| `map.md` + `vision/`·`life/`·`archive/` 3단 + `sequence/generation.md` | ✓ |
+첫 줄이 판정이고, 다음 줄이 근거(걸린 표지 파일 목록)다. **근거 줄을 사용자에게 그대로 보여준다.**
 
-**`agentClient`·`language`는 지문이 아니다** — 양쪽 config에 다 있다. **둘 다 아니면 멈추고 사람에게 보인다** — v0.15·v0.16은 구 reap의 `reap migrate`가 담당하던 영역이라 이 skill이 아는 척하면 안 된다. `.reap/`이 아예 없으면 이 skill의 일이 아니다(`init`이다).
+| 판정 | 뜻 | 다음 |
+|---|---|---|
+| `v017` | 0.17에만 있는 파일(lineage/·shortterm.md·current.yml·hooks/·sequence/goal.md)이 걸림 | 2/8로 진행 |
+| `v018` | 0.18에서 새로 생긴 파일(map.md·sequence/generation.md)이 걸림 | **이주할 것 없음** — 종료 |
+| `none` | `.reap/` 없음 | 이 skill의 일이 아니다 — `init` |
+| `mixed` | 양쪽 표지가 함께 걸림 — 반쯤 이주됐거나 오염 | **멈추고 사람에게.** 무엇이 걸렸는지 근거 줄과 함께 |
+| `unknown` | `.reap/`은 있는데 양쪽 표지가 전부 없음 | **멈추고 사람에게** — v0.15/0.16은 구 reap의 `reap migrate` 영역 |
+
+**이름이 같다고 표지가 아니다** — `sequence/`와 `vision/milestones/`는 양쪽 버전에 다 있다(v0.17은 sequence/goal.md·milestone.md, v0.18은 sequence/generation.md). 스크립트가 그 구별을 소유하므로 skill·agent가 눈대중으로 다시 판정하지 않는다.
 
 ## 2/8 — 사전 차단: 둘 중 하나라도 걸리면 진행하지 않는다
 
