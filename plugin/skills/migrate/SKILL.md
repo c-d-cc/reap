@@ -23,7 +23,7 @@ bash <이 skill 디렉토리>/scripts/detect-version.sh <프로젝트 루트>
 
 | 판정 | 뜻 | 다음 |
 |---|---|---|
-| `v017` | 0.17에만 있는 파일(lineage/·shortterm.md·current.yml·hooks/·sequence/goal.md)이 걸림 | 2/8로 진행 |
+| `v017` | 0.17에만 있는 파일(lineage/·shortterm.md·current.yml·hooks 안의 파일·sequence/goal.md)이 걸림 | 2/8로 진행 |
 | `v018` | 0.18에서 새로 생긴 파일(map.md·sequence/generation.md)이 걸림 | **이주할 것 없음** — 종료 |
 | `none` | `.reap/` 없음 | 이 skill의 일이 아니다 — `init` |
 | `mixed` | 양쪽 표지가 함께 걸림 — 반쯤 이주됐거나 오염 | **멈추고 사람에게.** 무엇이 걸렸는지 근거 줄과 함께 |

@@ -21,7 +21,9 @@ v18=(); v17=()
 [ -d "$r/lineage" ]                     && v17+=("lineage/")
 [ -f "$r/vision/memory/shortterm.md" ]  && v17+=("vision/memory/shortterm.md")
 [ -f "$r/life/current.yml" ]            && v17+=("life/current.yml")
-[ -d "$r/hooks" ]                       && v17+=("hooks/")
+# hooks/ 디렉토리는 표지가 아니다 — v0.18도 hooks 자리를 유지한다(사람, 2026-09-01).
+# v0.17만이 조건 스크립트 파일을 싣는다.
+[ -n "$(find "$r/hooks" -type f -print -quit 2>/dev/null)" ] && v17+=("hooks/ 안의 파일")
 [ -f "$r/sequence/goal.md" ]            && v17+=("sequence/goal.md")
 
 if [ ${#v18[@]} -gt 0 ] && [ ${#v17[@]} -gt 0 ]; then verdict="mixed"
