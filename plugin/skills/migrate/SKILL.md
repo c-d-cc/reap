@@ -57,7 +57,7 @@ git mv .reap .reap-v0_17    # git 추적 중일 때. 아니면: mv .reap .reap-v
 
 ## 6/8 — 이주는 subagent가 한다
 
-주 세션의 컨텍스트를 구 데이터로 채우지 않는다 — **매핑 표와 지시문은 [migration-map.md](references/migration-map.md)에 있고, 그 문서를 subagent에게 주어 수행시킨다.** 이 문서는 task 2가 채운다.
+주 세션의 컨텍스트를 구 데이터로 채우지 않는다 — **매핑 표와 지시문은 [migration-map.md](references/migration-map.md)에 있고, 그 문서 전체를 subagent에게 주어 수행시킨다.** 아홉 매핑의 확정 근거는 ps-4b485d의 04-migration-skill.md다.
 
 ## 7/8 — 검증
 
@@ -65,4 +65,4 @@ git mv .reap .reap-v0_17    # git 추적 중일 때. 아니면: mv .reap .reap-v
 
 ## 8/8 — 기록과 홈 정리 안내
 
-기록 파일(`archive/migration-v0_17.md`)의 형식과 홈 자산 정리 절차는 [migration-map.md](references/migration-map.md)의 뒷부분이 담는다.
+기록 파일(`archive/migration-v0_17.md`)의 형식과 홈 자산 정리 allowlist는 [migration-map.md](references/migration-map.md)의 뒷부분이 담는다 — doctor 출력이 기록에 들어가야 완료이고, 홈 정리는 목록 동의 후에만 한다.
