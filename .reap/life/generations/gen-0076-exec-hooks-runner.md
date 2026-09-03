@@ -6,7 +6,9 @@ milestone: ms-017
 title: 훅 실행기와 make hook — 파싱·조건·실행·템플릿
 startedAt: 2026-09-03T14:44:37Z
 startCommit: 1a3ba0c
-status: open
+status: closed
+closedAt: 2026-09-03T14:59:23Z
+endCommit: 4024a94
 ---
 ## Intent
 
