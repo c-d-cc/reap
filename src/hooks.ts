@@ -28,7 +28,8 @@ export type HookMeta = {
 
 export type HookOutput = { file: string; text: string };
 export type HookFailure = { file: string; reason: string };
-export type RunHooksResult = { outputs: HookOutput[]; failures: HookFailure[] };
+export type HookSkipped = { file: string; reason: string };
+export type RunHooksResult = { outputs: HookOutput[]; failures: HookFailure[]; skipped: HookSkipped[] };
 export type RunHooksOptions = { timeoutMs?: number; conditionTimeoutMs?: number };
 
 const DEFAULT_TIMEOUT_MS = 60_000;
@@ -55,18 +56,20 @@ export function listHooks(root: string, event: string): HookMeta[] {
 
 /**
  * 조건 판정 → order 정렬(`listHooks`가 이미 함) → 실행. **절대 throw하지 않는다** —
- * exit≠0·timeout·조건 스크립트 없음은 전부 failures로 보낸다.
+ * exit≠0·timeout은 failures로, **조건 미충족은 skipped로** 보낸다(실패가 아니다).
+ * 조건 스크립트 자체가 없는 것은 failures다 — doctor가 결함으로 잡을 것이다.
  */
 export function runHooks(root: string, event: string, ctx: { id?: string } = {}, options: RunHooksOptions = {}): RunHooksResult {
   const timeoutMs = options.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   const conditionTimeoutMs = options.conditionTimeoutMs ?? DEFAULT_CONDITION_TIMEOUT_MS;
   const outputs: HookOutput[] = [];
   const failures: HookFailure[] = [];
+  const skipped: HookSkipped[] = [];
 
   for (const hook of listHooks(root, event)) {
     const condition = evaluateCondition(root, hook.condition, conditionTimeoutMs);
     if (!condition.met) {
-      failures.push({ file: hook.file, reason: condition.reason });
+      (condition.missing ? failures : skipped).push({ file: hook.file, reason: condition.reason });
       continue;
     }
     const full = join(paths(root).hooks, hook.file);
@@ -84,16 +87,16 @@ export function runHooks(root: string, event: string, ctx: { id?: string } = {},
     outputs.push({ file: hook.file, text: (result.stdout ?? "").trim() });
   }
 
-  return { outputs, failures };
+  return { outputs, failures, skipped };
 }
 
-function evaluateCondition(root: string, condition: string, timeoutMs: number): { met: true } | { met: false; reason: string } {
+function evaluateCondition(root: string, condition: string, timeoutMs: number): { met: true } | { met: false; reason: string; missing: boolean } {
   if (condition === "always") return { met: true };
   const script = join(paths(root).hookConditions, `${condition}.sh`);
-  if (!existsSync(script)) return { met: false, reason: `조건 스크립트가 없습니다: ${condition}.sh` };
+  if (!existsSync(script)) return { met: false, reason: `조건 스크립트가 없습니다: ${condition}.sh`, missing: true };
   const result = spawnSync("bash", [script], { cwd: root, timeout: timeoutMs, encoding: "utf8" });
   const failure = shFailure(result);
-  if (failure) return { met: false, reason: `조건이 참이 아닙니다: ${condition} (${failure})` };
+  if (failure) return { met: false, reason: `조건이 참이 아닙니다: ${condition} (${failure})`, missing: false };
   return { met: true };
 }
 

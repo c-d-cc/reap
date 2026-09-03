@@ -3,7 +3,8 @@ import { basename, join } from "node:path";
 import { findEntry, formatDoc, listEntries, parseDoc, patch, slugify } from "./doc.ts";
 import type { Entry } from "./doc.ts";
 import { head } from "./git.ts";
-import { HOOK_EVENTS, isHookEvent } from "./hooks.ts";
+import { HOOK_EVENTS, isHookEvent, runHooks } from "./hooks.ts";
+import type { RunHooksResult } from "./hooks.ts";
 import type { GenerationType, LoopType } from "./id.ts";
 import { issue } from "./id.ts";
 import { requireRefs } from "./plan.ts";
@@ -30,7 +31,7 @@ export type MakeGeneration = {
   fix?: boolean;
   now: string;
 };
-export type Made = { id: string; path: string };
+export type Made = { id: string; path: string; hooks?: RunHooksResult };
 
 export function makeMilestone(root: string, opts: MakeMilestone): Made {
   // 인용은 확정 가능한 것만 검사한다 — 소스가 등록돼 있고 파일이 그 안에 있는가. id 발급 전에 본다
@@ -54,7 +55,8 @@ export function makeMilestone(root: string, opts: MakeMilestone): Made {
   // 빈 파일로 둔다. 안내 문구를 넣으면 지워지지 않은 채 남아 진짜 내용과 섞인다.
   const handoff = join(dir, "handoff.md");
   if (!existsSync(handoff)) writeFileAtomic(handoff, "");
-  return { id, path };
+  const hooks = runHooks(root, "milestone.made", { id });
+  return { id, path, hooks };
 }
 
 /**
@@ -103,7 +105,8 @@ export function makeGeneration(root: string, opts: MakeGeneration): Made {
   const path = join(dir, `${id}-${slug}.md`);
   writeFileAtomic(path, formatDoc(data, bodyOf(root, "generation.md")));
   bindSession(root, id, milestone?.id);
-  return { id, path };
+  const hooks = runHooks(root, "gen.made", { id });
+  return { id, path, hooks };
 }
 
 /**
@@ -190,7 +193,8 @@ export function markGeneration(
   }
   const endCommit = head(root);
   patch(entry.path, { status: "closed", closedAt: now, endCommit: endCommit ?? null });
-  return { id: entry.id, path: entry.path };
+  const hooks = runHooks(root, "gen.closed", { id: entry.id });
+  return { id: entry.id, path: entry.path, hooks };
 }
 
 /**
@@ -233,7 +237,8 @@ export function markMilestone(root: string, needle: string, flag: "focus" | "clo
   const dest = join(paths(root).archiveMilestones, basename(entry.dir));
   ensureDir(paths(root).archiveMilestones);
   renameSync(entry.dir, dest);
-  return { id: entry.id, path: join(dest, "milestone.md") };
+  const hooks = runHooks(root, "milestone.closed", { id: entry.id });
+  return { id: entry.id, path: join(dest, "milestone.md"), hooks };
 }
 
 /**

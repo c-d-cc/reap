@@ -86,21 +86,23 @@ test("runHooks가 조건이 참인 훅만 돌리고 md 본문을 그대로 돌�
   expect(result.outputs).toEqual([{ file: "gen.made.note.md", text: "본문 내용입니다\n" }]);
 });
 
-test("runHooks가 조건이 거짓이면 훅을 건너뛰고 failures에 적는다", async () => {
+test("runHooks가 조건이 거짓이면 훅을 건너뛰고 skipped에 적는다 — 실패가 아니다", async () => {
   const root = await project();
   writeCondition(root, "no.sh", "#!/usr/bin/env bash\nexit 1\n");
   writeHook(root, "gen.made.note.md", "---\ncondition: no\n---\n본문\n");
   const result = runHooks(root, "gen.made", {});
   expect(result.outputs).toEqual([]);
-  expect(result.failures).toHaveLength(1);
-  expect(result.failures[0]!.file).toBe("gen.made.note.md");
+  expect(result.failures).toEqual([]);
+  expect(result.skipped).toHaveLength(1);
+  expect(result.skipped[0]!.file).toBe("gen.made.note.md");
 });
 
-test("runHooks가 조건 스크립트가 없으면 failures에 적고 던지지 않는다", async () => {
+test("runHooks가 조건 스크립트가 없으면 failures에 적고 던지지 않는다 — skipped가 아니다", async () => {
   const root = await project();
   writeHook(root, "gen.made.note.md", "---\ncondition: no-such-condition\n---\n본문\n");
   const result = runHooks(root, "gen.made", {});
   expect(result.outputs).toEqual([]);
+  expect(result.skipped).toEqual([]);
   expect(result.failures).toHaveLength(1);
   expect(result.failures[0]!.file).toBe("gen.made.note.md");
 });
@@ -190,4 +192,108 @@ test("make hook이 프로젝트 템플릿 오버라이드를 따른다", async (
   expect(result.ok).toBe(true);
   const content = readFileSync(join(paths(root).hooks, "gen.made.custom.md"), "utf8");
   expect(content).toContain("오버라이드 본문");
+});
+
+// ── 여섯 지점 발화 ──
+
+test("make milestone이 milestone.made를 발화하고 출력을 --- hooks --- 뒤에 붙인다", async () => {
+  const root = await project();
+  writeHook(root, "milestone.made.note.sh", "#!/usr/bin/env bash\necho 만들어짐\n");
+  const result = await run(["make", "milestone", "--title", "가"], root);
+  expect(result.ok).toBe(true);
+  expect(result.message).toContain("--- hooks ---");
+  expect(result.message).toContain("[milestone.made.note.sh]");
+  expect(result.message).toContain("만들어짐");
+});
+
+test("mark milestone --closed가 milestone.closed를 발화한다", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가"], root);
+  writeHook(root, "milestone.closed.note.sh", "#!/usr/bin/env bash\necho 닫힘\n");
+  const result = await run(["mark", "milestone", "ms-001", "--closed"], root);
+  expect(result.ok).toBe(true);
+  expect(result.message).toContain("닫힘");
+});
+
+test("mark milestone --focus는 milestone.closed를 발화하지 않는다", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가"], root);
+  await run(["make", "milestone", "--title", "나"], root);
+  writeHook(root, "milestone.closed.note.sh", "#!/usr/bin/env bash\necho 닫힘\n");
+  const result = await run(["mark", "milestone", "ms-002", "--focus"], root);
+  expect(result.ok).toBe(true);
+  expect(result.message).not.toContain("--- hooks ---");
+});
+
+test("make generation이 gen.made를 발화한다", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가"], root);
+  writeHook(root, "gen.made.note.sh", "#!/usr/bin/env bash\necho 만들어짐\n");
+  const result = await run(["make", "generation", "--milestone", "ms-001", "--title", "나"], root);
+  expect(result.ok).toBe(true);
+  expect(result.message).toContain("만들어짐");
+});
+
+test("mark generation --closed가 gen.closed를 발화한다", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가"], root);
+  await run(["make", "generation", "--milestone", "ms-001", "--title", "나"], root);
+  writeHook(root, "gen.closed.note.sh", "#!/usr/bin/env bash\necho 닫힘\n");
+  const result = await run(["mark", "generation", "gen-0001-exec", "--closed"], root);
+  expect(result.ok).toBe(true);
+  expect(result.message).toContain("닫힘");
+});
+
+test("mark generation --aborted·--archived는 훅을 발화하지 않는다", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가"], root);
+  await run(["make", "generation", "--milestone", "ms-001", "--title", "나"], root);
+  writeHook(root, "gen.closed.note.sh", "#!/usr/bin/env bash\necho 닫힘\n");
+  const archived = await run(["mark", "generation", "gen-0001-exec", "--archived"], root);
+  expect(archived.ok).toBe(true);
+  expect(archived.message).not.toContain("--- hooks ---");
+});
+
+test("훅이 exit 1이어도 명령은 성공이고 실패 사유는 stderr에 담긴다", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가"], root);
+  writeHook(root, "gen.made.fail.sh", "#!/usr/bin/env bash\nexit 1\n");
+  const result = await run(["make", "generation", "--milestone", "ms-001", "--title", "나"], root);
+  expect(result.ok).toBe(true);
+  expect(result.message).not.toContain("--- hooks ---");
+  expect(result.stderr).toContain("hook 실패: gen.made.fail.sh");
+});
+
+test("훅이 exit 1이어도 make generation이 세대 파일과 .session을 남긴다 (03-hooks 검증할 동작 1)", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가"], root);
+  writeHook(root, "gen.made.fail.sh", "#!/usr/bin/env bash\nexit 1\n");
+  const result = await run(["make", "generation", "--milestone", "ms-001", "--title", "나"], root);
+  expect(result.ok).toBe(true);
+  expect(existsSync(join(paths(root).generations, "gen-0001-exec-나.md"))).toBe(true);
+  expect(existsSync(paths(root).session)).toBe(true);
+  expect(readFileSync(paths(root).session, "utf8")).toContain("generation: gen-0001-exec");
+});
+
+test(".md 훅 본문이 mark generation --closed 출력 뒤에 그대로 붙는다 (03-hooks 검증할 동작 3)", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가"], root);
+  await run(["make", "generation", "--milestone", "ms-001", "--title", "나"], root);
+  writeHook(root, "gen.closed.note.md", "---\ncondition: always\n---\n검토해야 할 변경사항입니다.\n둘째 줄.\n");
+  const result = await run(["mark", "generation", "gen-0001-exec", "--closed"], root);
+  expect(result.ok).toBe(true);
+  expect(result.message).toBe(
+    "닫았습니다: gen-0001-exec\n\n--- hooks ---\n[gen.closed.note.md]\n검토해야 할 변경사항입니다.\n둘째 줄.\n",
+  );
+});
+
+test("조건 미충족 훅(skipped)은 메시지에도 stderr에도 나타나지 않는다", async () => {
+  const root = await project();
+  await run(["make", "milestone", "--title", "가"], root);
+  writeCondition(root, "no.sh", "#!/usr/bin/env bash\nexit 1\n");
+  writeHook(root, "gen.made.note.md", "---\ncondition: no\n---\n본문\n");
+  const result = await run(["make", "generation", "--milestone", "ms-001", "--title", "나"], root);
+  expect(result.ok).toBe(true);
+  expect(result.message).not.toContain("--- hooks ---");
+  expect(result.stderr).toBeUndefined();
 });
