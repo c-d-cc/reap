@@ -39,7 +39,7 @@ archive/   더는 참고하지 않는 것 — generations, milestones, backlog, 
 - `environment/` — `summary.md`(현재 기술 스택·빌드·테스트), `source-map.md`(선택, 코드 구조), `resources/`(채택한 외부 스펙)
 - `idea/` — 아직 단단하지 않은 지식. `research/`(조사, 결론 없음) · `freememo/`(자유 메모) · `files/`(외부 참고자료)
 - `sequence/` — id 레지스트리. `<type>.md` 하나씩, append-only
-- `hooks/` — `{event}.{name}.{md|sh}`와 `conditions/`
+- `hooks/` — `{event}.{name}.{md|sh}`. 이벤트는 `gen.made`·`gen.closed`·`milestone.made`·`milestone.closed`·`orch.claimed`·`orch.barrier.released` 여섯뿐이다. `conditions/<c>.sh`가 조건 스크립트다 — `init`이 `always.sh`를 놓는다(씨앗 목록에는 안 든다)
 - `templates/` — 이 프로젝트가 번들 템플릿을 덮어쓸 때 쓰는 자리 (있으면 씨앗보다 이긴다)
 
 ## id 형식

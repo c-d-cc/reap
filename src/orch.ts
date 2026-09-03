@@ -2,6 +2,8 @@ import { execFileSync } from "node:child_process";
 import { closeSync, existsSync, mkdirSync, openSync, readdirSync, readFileSync, rmSync, writeSync } from "node:fs";
 import { homedir } from "node:os";
 import { join } from "node:path";
+import { runHooks } from "./hooks.ts";
+import type { RunHooksResult } from "./hooks.ts";
 import { readSession, workspaceId, writeFileAtomic } from "./store.ts";
 
 function sleepSync(ms: number): void {
@@ -12,7 +14,7 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-export type Claim = { resource: string; holder: string; acquiredAt: string; expiresAt: string };
+export type Claim = { resource: string; holder: string; acquiredAt: string; expiresAt: string; hooks?: RunHooksResult };
 export type Barrier = { name: string; expect: number; arrived: { who: string; at: string }[] };
 export type Agent = { name: string; state?: string; cwd?: string };
 
@@ -64,6 +66,7 @@ function log(dir: string, event: Record<string, unknown>): void {
 /**
  * `O_EXCL` — 파일이 곧 자물쇠다. 만료된 claim은 가져갈 수 있고 탈취는 로그에 남는다:
  * 죽은 세션 때문에 교착되는 것이 조용히 덮이는 것보다 낫다.
+ * 성공(새 claim·갱신·탈취)한 뒤에만 `orch.claimed`를 발화한다 — 파일 쓰기가 끝난 뒤다.
  */
 export function claim(root: string, topic: string, resource: string, ttlMs: number, env = process.env): Claim {
   const dir = orchDir(root, topic, env);
@@ -74,26 +77,31 @@ export function claim(root: string, topic: string, resource: string, ttlMs: numb
   const at = now();
   const expiresAt = `${new Date(Date.now() + ttlMs).toISOString().slice(0, 19)}Z`;
   const body = `resource: ${resource}\nholder: ${me}\nacquiredAt: ${at}\nexpiresAt: ${expiresAt}\n`;
+  let acquired = false;
   try {
     const fd = openSync(path, "wx");
     writeSync(fd, body);
     closeSync(fd);
     log(dir, { event: "claim", resource, holder: me, expiresAt });
-    return { resource, holder: me, acquiredAt: at, expiresAt };
+    acquired = true;
   } catch (error) {
     if ((error as NodeJS.ErrnoException).code !== "EEXIST") throw error;
   }
-  const current = readKv(path);
-  if (current.holder === me) {
-    writeFileAtomic(path, body);
-    return { resource, holder: me, acquiredAt: at, expiresAt };
+  if (!acquired) {
+    const current = readKv(path);
+    if (current.holder === me) {
+      writeFileAtomic(path, body);
+      acquired = true;
+    } else if (current.expiresAt && current.expiresAt < at) {
+      writeFileAtomic(path, body);
+      log(dir, { event: "takeover", resource, from: current.holder, to: me, expiredAt: current.expiresAt });
+      acquired = true;
+    } else {
+      throw new Error(`이미 잡혀 있습니다: ${resource} — holder ${current.holder}, 만료 ${current.expiresAt}`);
+    }
   }
-  if (current.expiresAt && current.expiresAt < at) {
-    writeFileAtomic(path, body);
-    log(dir, { event: "takeover", resource, from: current.holder, to: me, expiredAt: current.expiresAt });
-    return { resource, holder: me, acquiredAt: at, expiresAt };
-  }
-  throw new Error(`이미 잡혀 있습니다: ${resource} — holder ${current.holder}, 만료 ${current.expiresAt}`);
+  const hooks = runHooks(root, "orch.claimed", { id: resource });
+  return { resource, holder: me, acquiredAt: at, expiresAt, hooks };
 }
 
 export function release(root: string, topic: string, resource: string, env = process.env): void {
@@ -151,7 +159,11 @@ export function arrive(root: string, topic: string, name: string, expect: number
   }
 }
 
-/** `--timeout`은 필수다. 만료 시 **누가 오지 않았는지**를 낸다 — roster를 알면 이름으로, 모르면 개수로. */
+/**
+ * `--timeout`은 필수다. 만료 시 **누가 오지 않았는지**를 낸다 — roster를 알면 이름으로, 모르면 개수로.
+ * `released`를 발견하는 매 호출이 `orch.barrier.released`를 발화한다 — 도달을 감지한 것도 파일
+ * 쓰기(`arrive`)가 끝난 뒤의 일이다.
+ */
 export async function waitBarrier(
   root: string,
   topic: string,
@@ -159,14 +171,15 @@ export async function waitBarrier(
   expect: number,
   timeoutMs: number,
   env = process.env,
-): Promise<{ released: boolean; barrier: Barrier; missing: string[] }> {
+): Promise<{ released: boolean; barrier: Barrier; missing: string[]; hooks?: RunHooksResult }> {
   const path = join(orchDir(root, topic, env), "barriers", `${encode(name)}.yml`);
   const deadline = Date.now() + timeoutMs;
   for (;;) {
     const b = readBarrier(path, name, expect);
     if (b.arrived.length >= b.expect) {
       log(orchDir(root, topic, env), { event: "barrier.released", barrier: name });
-      return { released: true, barrier: b, missing: [] };
+      const hooks = runHooks(root, "orch.barrier.released", { id: name });
+      return { released: true, barrier: b, missing: [], hooks };
     }
     if (Date.now() >= deadline) {
       const here = new Set(b.arrived.map((a) => a.who));

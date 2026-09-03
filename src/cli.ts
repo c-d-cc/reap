@@ -1,4 +1,4 @@
-import { existsSync, readFileSync } from "node:fs";
+import { chmodSync, existsSync, readFileSync } from "node:fs";
 import { join, relative, resolve } from "node:path";
 import { assemble, hookEnvelope } from "./ctx.ts";
 import {
@@ -18,6 +18,7 @@ import {
 } from "./entries.ts";
 import { isLoopType, LOOP_TYPES, isRegistered, isValid, kindOf, readRegistry } from "./id.ts";
 import type { Kind } from "./id.ts";
+import type { RunHooksResult } from "./hooks.ts";
 import { findSource, formatSources, makePlanSource, readSources } from "./plan.ts";
 import { diagnose, formatReport } from "./doctor.ts";
 import { Indexer, formatStatus } from "./index/indexer.ts";
@@ -35,7 +36,7 @@ import {
 import { render, template } from "./templates.ts";
 import pkg from "../package.json" with { type: "json" };
 
-export type Result = { ok: boolean; message: string; data?: unknown };
+export type Result = { ok: boolean; message: string; data?: unknown; stderr?: string };
 
 const USAGE = `사용법: reap <명령>
 
@@ -126,7 +127,7 @@ async function orch(cwd: string, argv: string[]): Promise<Result> {
   if (sub === "claim") {
     if (!arg || arg.startsWith("--")) throw new Error("orch claim <resource> [--ttl 30m]");
     const c = claim(root, topic, arg, parseTtl(flags.value("--ttl") ?? "30m"));
-    return { ok: true, message: `잡았습니다: ${c.resource} — ${c.holder}, 만료 ${c.expiresAt}`, data: c };
+    return withHooks({ ok: true, message: `잡았습니다: ${c.resource} — ${c.holder}, 만료 ${c.expiresAt}`, data: c }, c.hooks);
   }
   if (sub === "release") {
     if (!arg || arg.startsWith("--")) throw new Error("orch release <resource>");
@@ -141,7 +142,7 @@ async function orch(cwd: string, argv: string[]): Promise<Result> {
     if (!Number.isFinite(timeout) || timeout <= 0) throw new Error("--timeout <초>는 필수입니다 — 오지 않는 참가자를 무한정 기다리지 않습니다");
     arrive(root, topic, arg, expect);
     const r = await waitBarrier(root, topic, arg, expect, timeout * 1000);
-    if (r.released) return { ok: true, message: `barrier ${arg} 통과 — ${r.barrier.arrived.map((a) => a.who).join(", ")}`, data: r };
+    if (r.released) return withHooks({ ok: true, message: `barrier ${arg} 통과 — ${r.barrier.arrived.map((a) => a.who).join(", ")}`, data: r }, r.hooks);
     const missing = r.missing.length ? `오지 않은 세션: ${r.missing.join(", ")}` : `도착 ${r.barrier.arrived.length}/${r.barrier.expect} — roster를 알 수 없어 누구인지는 모른다`;
     return { ok: false, message: `barrier ${arg} 시간 초과 (${timeout}s). ${missing}`, data: r };
   }
@@ -332,7 +333,7 @@ function mark(cwd: string, argv: string[]): Result {
     }
     if (!flags.has("--closed")) throw new Error("--closed · --aborted · --archived 중 하나가 필요합니다.");
     const marked = markGeneration(root, needle, "closed", timestamp());
-    return { ok: true, message: `닫았습니다: ${marked.id}`, data: marked };
+    return withHooks({ ok: true, message: `닫았습니다: ${marked.id}`, data: marked }, marked.hooks);
   }
 
   if (kind === "backlog") {
@@ -361,7 +362,7 @@ function mark(cwd: string, argv: string[]): Result {
     }
     if (flags.has("--closed")) {
       const marked = markMilestone(root, needle, "closed", timestamp());
-      return { ok: true, message: `닫고 옮겼습니다: ${marked.id}\n  ${relative(root, marked.path)}`, data: marked };
+      return withHooks({ ok: true, message: `닫고 옮겼습니다: ${marked.id}\n  ${relative(root, marked.path)}`, data: marked }, marked.hooks);
     }
     throw new Error("--focus 또는 --closed가 필요합니다.");
   }
@@ -443,12 +444,33 @@ function plan(cwd: string, argv: string[]): Result {
   throw new Error(`plan은 sources · convention <ps-id>를 읽습니다: ${sub ?? "(없음)"}`);
 }
 
-function made2result(root: string, label: string, made: { id: string; path: string }): Result {
-  return {
-    ok: true,
-    message: `${label} ${made.id}\n  ${relative(root, made.path)}`,
-    data: made,
-  };
+function made2result(root: string, label: string, made: { id: string; path: string; hooks?: RunHooksResult }): Result {
+  return withHooks(
+    {
+      ok: true,
+      message: `${label} ${made.id}\n  ${relative(root, made.path)}`,
+      data: made,
+    },
+    made.hooks,
+  );
+}
+
+/**
+ * 훅 출력을 명령 message 뒤에 붙인다 — 빈 줄 + `--- hooks ---` + `[<file>]`과 텍스트.
+ * failures는 stderr에 `hook 실패: <file> — <reason>`. skipped는 아무것도 안 낸다 —
+ * 실패가 아니라 조건이 안 맞아 건너뛴 것이다. 훅이 실패해도 `ok`는 건드리지 않는다.
+ */
+function withHooks(result: Result, hooks?: RunHooksResult): Result {
+  if (!hooks) return result;
+  const out: Result = { ...result };
+  if (hooks.outputs.length > 0) {
+    const block = hooks.outputs.flatMap((o) => [`[${o.file}]`, o.text]);
+    out.message = `${result.message}\n\n--- hooks ---\n${block.join("\n")}`;
+  }
+  if (hooks.failures.length > 0) {
+    out.stderr = hooks.failures.map((f) => `hook 실패: ${f.file} — ${f.reason}`).join("\n");
+  }
+  return out;
 }
 
 function requireRoot(cwd: string): string {
@@ -518,6 +540,14 @@ function init(cwd: string, force: boolean): Result {
     writeFileAtomic(target, template(root, name));
     created.push(`.reap/${file}`);
   }
+  // 지식 씨앗(SEEDS)이 아니다 — `init --check`의 비교 대상에 넣으면 아무도 안 고치는
+  // 게 정상인 조건 스크립트가 계속 "씨앗인 채"로 잡힌다.
+  const always = join(p.hookConditions, "always.sh");
+  if (!existsSync(always)) {
+    writeFileAtomic(always, template(root, "condition-always.sh"));
+    chmodSync(always, 0o755);
+    created.push(".reap/hooks/conditions/always.sh");
+  }
   if (ignoreLocal(root)) created.push(".gitignore");
 
   return {
@@ -569,5 +599,6 @@ function ignoreLocal(root: string): boolean {
 if (import.meta.main) {
   const result = await run(process.argv.slice(2), process.cwd());
   (result.ok ? console.log : console.error)(result.message);
+  if (result.stderr) console.error(result.stderr);
   process.exit(result.ok ? 0 : 1);
 }

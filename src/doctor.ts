@@ -3,6 +3,7 @@ import { dirname, join, relative, resolve } from "node:path";
 import { checkCarriers, orphans, scanCarriers } from "./carrier.ts";
 import { listEntries } from "./doc.ts";
 import type { Entry } from "./doc.ts";
+import { HOOK_EVENTS, listHooks } from "./hooks.ts";
 import { isValid, kindOf, readRegistry, isRegistered } from "./id.ts";
 import type { Kind } from "./id.ts";
 import { validateRef } from "./plan.ts";
@@ -162,7 +163,40 @@ export function diagnose(root: string): Report {
     notes.push({ kind: "carrier 고아", detail: `${c.id}-${c.slugs.join("|")} — 한 파일에만 있다. 표식이 불필요하거나 나머지가 표식되지 않았다` });
   }
 
+  // 10. hooks — 파일명 규약, 이벤트, 조건 스크립트
+  for (const finding of checkHooks(root)) defects.push(finding);
+
   return { defects, notes };
+}
+
+/** `hooks/{event}.{name}.{md|sh}` 규약, 이벤트 여섯, 조건 스크립트 실재를 본다. `conditions/`와 dot 파일은 뺀다. */
+function checkHooks(root: string): Finding[] {
+  const out: Finding[] = [];
+  const dir = paths(root).hooks;
+  if (!existsSync(dir)) return out;
+
+  const recognized = new Set<string>();
+  for (const event of HOOK_EVENTS) {
+    for (const hook of listHooks(root, event)) {
+      recognized.add(hook.file);
+      if (hook.condition !== "always" && !existsSync(join(paths(root).hookConditions, `${hook.condition}.sh`))) {
+        out.push({ kind: "훅 조건 스크립트 없음", detail: `hooks/${hook.file} → conditions/${hook.condition}.sh` });
+      }
+    }
+  }
+
+  const shape = /^(.+)\.([^.]+)\.(md|sh)$/;
+  for (const name of readdirSync(dir)) {
+    if (name.startsWith(".")) continue;
+    const full = join(dir, name);
+    if (!statSync(full).isFile()) continue; // conditions/ 는 디렉토리라 여기서 빠진다
+    if (recognized.has(name)) continue;
+    const match = shape.exec(name);
+    if (match) out.push({ kind: "모르는 훅 이벤트", detail: `hooks/${name} → ${match[1]}` });
+    else out.push({ kind: "훅 파일명 규약 밖", detail: `hooks/${name}` });
+  }
+
+  return out;
 }
 
 export function formatReport(r: Report): string {

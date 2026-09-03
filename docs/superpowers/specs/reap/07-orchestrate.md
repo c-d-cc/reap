@@ -65,11 +65,11 @@ REAP는 만남의 장소만 제공하므로 세션을 깨울 수 없다. 조율�
 
 REAP의 14개 이벤트는 5단계 lifecycle에 묶여 있었다. 고정 단계가 사라지면서 실제로 의미 있는 경계만 남았다.
 
-### 언제 만드는가 — 아직 아니다
+### 제공한다 — 결정 (사람, 2026-09-01)
 
-**hooks는 아직 만들지 않는다.** `.reap/hooks/`와 `hooks/conditions/`는 `init`이 이미 만들지만 비어 있고, `make hook`도 이벤트 발화도 없다.
+**v0.18도 hooks를 제공한다.** `make hook --event <e> --name <n> [--type md|sh] [--condition <c>] [--order <n>]`이 `.reap/hooks/{event}.{name}.{md|sh}`를 놓고, 위 여섯 지점(`make generation`·`mark generation --closed`·`make milestone`·`mark milestone --closed`·`orch claim`(성공)·`orch barrier`(해제))이 발화한다. `init`이 `hooks/conditions/always.sh`를 씨앗으로 놓는다. 검증할 동작과 파일 규약은 [03-hooks.md](03-hooks.md)가 규범이다.
 
-미루는 이유는 **훅이 순수 YAGNI이기 때문이다** — 아무도 훅을 쓰고 싶어 하기 전까지는. 그런데 "쓰고 싶어졌다"를 판정할 수단이 없으면 영영 판정이 안 되므로, **무엇을 보면 만들 때인지를 셋으로 못 박는다.**
+**이벤트를 여섯 밖으로 늘릴 때만** 아래 셋을 판정 기준으로 쓴다 — hooks 자체를 만들지 여부는 더는 열린 질문이 아니다.
 
 1. **같은 수동 동작이 세대마다 반복된다.** `make`나 `mark` 직후에 매번 사람이 같은 것을 치고 있다
 2. **그 동작이 REAP가 직접 매개하는 지점에 걸린다.** 이벤트는 위의 여섯뿐이다. 그 밖의 지점을 원한다면 훅이 아니라 다른 것이 필요한 것이다

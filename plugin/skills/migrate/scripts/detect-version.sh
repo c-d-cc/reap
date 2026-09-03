@@ -7,7 +7,12 @@
 #
 # 이름이 같아도 표지가 못 되는 것들: sequence/ 와 vision/milestones/ 는 양쪽에 다 있다
 # (v0.17은 sequence/goal.md·milestone.md, v0.18은 sequence/generation.md).
-# config.yml 의 agentClient·language 도 양쪽에 있다. 아래 목록만이 명백하다.
+# config.yml 의 agentClient·language 도 양쪽에 있다. hooks/conditions/ 도 양쪽에 있다 —
+# v0.18 init도 hooks/conditions/always.sh를 놓는다(사람, 2026-09-01). 표지는 hooks/
+# 바로 아래(conditions/ 제외)의 이벤트 훅 파일 중, 파일명이 v0.17 이벤트 관례(onXxx —
+# onLifeStarted·onCompleted·onMerge* 등 14종 전부 이 꼴이다)로 시작하는 것뿐이다.
+# v0.18 이벤트(gen.*·milestone.*·orch.*)로 시작하는 훅 파일은 표지가 아니다.
+# 아래 목록만이 명백하다.
 set -u
 root="${1:-.}"
 r="$root/.reap"
@@ -21,9 +26,11 @@ v18=(); v17=()
 [ -d "$r/lineage" ]                     && v17+=("lineage/")
 [ -f "$r/vision/memory/shortterm.md" ]  && v17+=("vision/memory/shortterm.md")
 [ -f "$r/life/current.yml" ]            && v17+=("life/current.yml")
-# hooks/ 디렉토리는 표지가 아니다 — v0.18도 hooks 자리를 유지한다(사람, 2026-09-01).
-# v0.17만이 조건 스크립트 파일을 싣는다.
-[ -n "$(find "$r/hooks" -type f -print -quit 2>/dev/null)" ] && v17+=("hooks/ 안의 파일")
+# hooks/ 디렉토리 자체와 conditions/ 는 표지가 아니다. hooks/ 바로 아래의 이벤트 훅
+# 파일(*.sh·*.md) 중 v0.17 관례(onXxx)로 시작하는 파일명만 0.17 표지다.
+v17_hooks=$(find "$r/hooks" -maxdepth 1 -type f \( -name '*.sh' -o -name '*.md' \) -print 2>/dev/null \
+  | xargs -I{} basename {} 2>/dev/null | grep -E '^on[A-Z]')
+[ -n "$v17_hooks" ] && v17+=("hooks/ 안의 v0.17 훅 파일")
 [ -f "$r/sequence/goal.md" ]            && v17+=("sequence/goal.md")
 
 if [ ${#v18[@]} -gt 0 ] && [ ${#v17[@]} -gt 0 ]; then verdict="mixed"
