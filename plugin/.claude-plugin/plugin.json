@@ -1,7 +1,7 @@
 {
   "name": "reap",
   "description": "AI와 사람이 소프트웨어를 함께 진화시키기 위한 규약과 도구. 작업의 모양을 결정하지 않고, 작업이 쓸 수 있는 도구와 저장 규약을 제공한다.",
-  "version": "0.1.0",
+  "version": "0.18.0",
   "author": { "name": "HyeonIL Choi" },
   "keywords": ["workflow", "agent", "evolution", "planning"]
 }

@@ -42,13 +42,18 @@ tests/          <module>.test.ts · helpers.ts · hook.test.sh (셸)
 ## 빌드와 테스트
 
 ```bash
-bun test         # 172개
+bun test         # 177개
 ./tests/hook.test.sh   # 훅 스크립트 5종 (bun test가 돌리지 않는다)
 bun run typecheck   # tsc --noEmit
-bun run build       # bun build --compile → dist/reap (약 89MB — 문법 15개 28MB 포함)
+bun run build       # bun build --compile → dist/reap (약 89.5MB — 문법 15개 28MB 포함)
+bun run build:node  # bun build --target=node → dist/node/reap.js + wasm 16개 (gitignore, npm 채널)
 ```
 
-Bun 1.3.10 · TypeScript 5.9 · web-tree-sitter 0.22.6(런타임) · tree-sitter-wasms(문법, dev).
+Bun 1.3.10 · TypeScript 5.9 · web-tree-sitter 0.22.6(dev, 번들에 인라인) · tree-sitter-wasms(문법, dev).
+
+`build:node`는 ESM 235KB(`reap.js`, shebang·실행 비트 포함) + wasm 16개 27MB를 `dist/node/`에 낸다.
+`npm pack --dry-run`으로 실측한 tarball은 18파일 · 2.7MB(unpacked 28.3MB). `src/`·`tests/`·`plugin/`·`.reap/`는
+`files: ["dist/node"]`라 담기지 않는다.
 
 ## 템플릿 번들링
 
