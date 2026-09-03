@@ -6,7 +6,9 @@ backlog: bk-bb11a1
 title: loop skill — plan source 소비 완료 판정과 확장/신설 질문
 startedAt: 2026-09-03T15:58:13Z
 startCommit: 66ed570
-status: open
+status: closed
+closedAt: 2026-09-03T15:58:37Z
+endCommit: 5dcdb2a
 ---
 ## Intent
 
