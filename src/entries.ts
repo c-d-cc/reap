@@ -1,13 +1,14 @@
-import { existsSync, renameSync, rmSync } from "node:fs";
+import { chmodSync, existsSync, renameSync, rmSync } from "node:fs";
 import { basename, join } from "node:path";
 import { findEntry, formatDoc, listEntries, parseDoc, patch, slugify } from "./doc.ts";
 import type { Entry } from "./doc.ts";
 import { head } from "./git.ts";
+import { HOOK_EVENTS, isHookEvent } from "./hooks.ts";
 import type { GenerationType, LoopType } from "./id.ts";
 import { issue } from "./id.ts";
 import { requireRefs } from "./plan.ts";
 import { bindSession, ensureDir, paths, readSession, unbindSession, writeFileAtomic } from "./store.ts";
-import { template } from "./templates.ts";
+import { render, template } from "./templates.ts";
 
 export type MakeBacklog = { title: string; slug?: string; type: string; from?: string; now: string };
 export type MakeIdea = { title: string; slug?: string; kind: IdeaKind; now: string };
@@ -16,6 +17,8 @@ export type MakeLoop = { title: string; slug?: string; type: LoopType; from?: st
 
 /** 닫힌 loop를 `life/loops/`에 이만큼 남긴다. 넘치면 오래된 것부터 archive로. */
 export const CLOSED_LOOPS_KEPT = 10;
+
+export type MakeHook = { event: string; name: string; type?: string; condition?: string; order?: string };
 
 export type MakeMilestone = { title: string; slug?: string; from?: string; refs?: string[]; focus?: boolean; now: string };
 export type MakeGeneration = {
@@ -354,6 +357,40 @@ export function makeIdea(root: string, opts: MakeIdea): Made {
   data.createdAt = opts.now;
   data.status = "open";
   return writeLoose(root, paths(root)[IDEA_DIRS[opts.kind]], id, slug, data, `idea-${opts.kind}.md`);
+}
+
+/**
+ * 이벤트는 여섯뿐이다 — `hooks.ts`의 `HOOK_EVENTS`가 정본이다. 파일명은 발화 시점에
+ * `listHooks`가 다시 파싱할 수 있어야 하므로 여기서 조립한 규약(`{event}.{name}.{type}`)을 어기지 않는다.
+ */
+export function makeHook(root: string, opts: MakeHook): Made {
+  if (!isHookEvent(opts.event)) {
+    throw new Error(`hook에는 --event가 필요합니다: ${HOOK_EVENTS.join(" · ")} (받은 값: ${opts.event || "(없음)"})`);
+  }
+  if (!opts.name || !/^[a-zA-Z0-9_-]+$/.test(opts.name)) {
+    throw new Error(`hook에는 --name이 필요합니다. 영문자·숫자·-·_만 씁니다 (받은 값: ${opts.name || "(없음)"})`);
+  }
+  const type = opts.type ?? "md";
+  if (type !== "md" && type !== "sh") {
+    throw new Error(`--type은 md 또는 sh입니다: ${type}`);
+  }
+  const condition = opts.condition ?? "always";
+  const order = opts.order !== undefined ? Number(opts.order) : 50;
+  if (!Number.isInteger(order)) {
+    throw new Error(`--order는 정수입니다: ${opts.order}`);
+  }
+
+  const filename = `${opts.event}.${opts.name}.${type}`;
+  const dir = paths(root).hooks;
+  ensureDir(dir);
+  const path = join(dir, filename);
+  if (existsSync(path)) throw new Error(`이미 있습니다: ${filename}`);
+
+  const templateName = type === "md" ? "hook-md.md" : "hook-sh.sh";
+  const content = render(template(root, templateName), { condition, order: String(order) });
+  writeFileAtomic(path, content);
+  if (type === "sh") chmodSync(path, 0o755);
+  return { id: filename, path };
 }
 
 function writeLoose(

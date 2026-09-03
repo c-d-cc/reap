@@ -22,6 +22,9 @@ const REQUIRED = [
   "map.md",
   "loop.md",
   "convention.md",
+  "hook-md.md",
+  "hook-sh.sh",
+  "condition-always.sh",
 ];
 
 test("이 증분에 필요한 번들 템플릿이 전부 있고 비어 있지 않다", () => {
