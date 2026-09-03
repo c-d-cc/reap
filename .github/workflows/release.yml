@@ -1,0 +1,66 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v0.18.*'
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    if: startsWith(github.ref, 'refs/tags/v0.18.')
+    runs-on: ubuntu-latest
+    # Trusted publishing (OIDC): npm mints a short-lived credential for this
+    # exact repository and workflow instead of us holding a long-lived token.
+    # A job-level block replaces the top-level one entirely, so contents: read
+    # is restated here for the checkout.
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://registry.npmjs.org
+
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun test
+      - run: bash tests/hook.test.sh
+      - run: bun run build
+      - run: bash scripts/verify-package.sh
+
+      # Trusted publishing needs npm 11.5.1 or later and Node 22 ships npm 10.
+      - run: npm i -g npm@latest
+
+      # No token: the OIDC credential is exchanged at publish time. --tag next
+      # keeps 0.18 off the latest dist-tag — see docs/release-policy.md.
+      - run: npm publish --tag next --access public
+
+  github-release:
+    if: startsWith(github.ref, 'refs/tags/v0.18.')
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Only this version's section. RELEASE_NOTES.md keeps every past release,
+      # and body_path on the whole file would publish all of them. The current
+      # release is always the first `## ` block; older ones follow as `## vX.Y.Z`.
+      - name: Extract this version's notes
+        run: awk '/^## /{n++} n==1' RELEASE_NOTES.md > /tmp/release-body.md
+
+      - name: Fail if the extracted notes are empty
+        run: test -s /tmp/release-body.md
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          body_path: /tmp/release-body.md
+          generate_release_notes: false
