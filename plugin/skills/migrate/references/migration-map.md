@@ -4,7 +4,7 @@
 
 ## subagent에게 (6/8)
 
-주 세션은 이주 데이터를 읽지 않는다 — 아래를 수행하는 것은 Task(subagent)다. subagent는 각 매핑을 시작할 때 "이주 N/9: <대상>"을 출력하고, 끝에 기록 파일 초안을 반환한다.
+주 세션은 이주 데이터를 읽지 않는다 — 아래를 수행하는 것은 Task(subagent)다. subagent는 각 매핑을 시작할 때 "이주 N/10: <대상>"을 출력하고, 끝에 기록 파일 초안을 반환한다.
 
 **공통 규칙**
 - **모든 `reap` 명령은 대상 프로젝트 루트에서 실행한다.** reap은 상위 디렉토리로 `.reap/`을 탐색하므로, 다른 리포 안에서 실행하면 **그쪽 저장소에 쓴다.** 첫 `make` 직후 산출 파일 경로가 대상 프로젝트 아래인지 확인하고, 아니면 즉시 멈춘다
@@ -23,8 +23,9 @@
 | 5 | `vision/goals.md` | **plan source 후보 초안**으로: 살아 있는 목표 서술만 추려 `docs/plan/goals-v017-이관.md`(리포 내 임의 위치) 초안을 만들고, **등록(`make plan-source`)은 사용자에게 안내만** — goal 개념은 v0.18에 없다 |
 | 6 | `vision/design/` | 문서마다 `reap make idea --kind file --title <제목>`으로 `idea/files/`에. 출처(원본 경로)와 가져온 날짜, 졸업 조건("이 설계가 채택되면 plan source 또는 environment로")을 채운다 |
 | 7 | `config.yml` | 새 config는 5/8에서 이미 섰다(language·agentClient 승계). **폐기 필드 목록**(autoSubagent·autoUpdate·strictEdit·strictMerge·evaluator·cruiseCount·autoIssueReport·lastMigratedVersion 등)을 기록 파일에 남긴다 — 설정이 조용히 사라지면 안 된다 |
-| 8 | `lineage/` · `sequence/` | **승계하지 않는다.** 원본이 `.reap-v0_17/`에 통째로 남는 것이 이력이다. v0.18 세대는 1번부터 |
+| 8 | `lineage/` · `sequence/` · `reap-guide.md` | **승계하지 않는다.** 원본이 `.reap-v0_17/`에 통째로 남는 것이 이력이다. v0.18 세대는 1번부터. `reap-guide.md`는 v0.17이 번들한 안내문(5단계 lifecycle 전체를 설명)이라 v0.18의 것으로 대체된다 — 사용자 지식이 아니므로 옮기지 않는다 |
 | 9 | `hooks/` · `migration-state.yml` · `.session-state.md` · `.index/` | **폐기** — 기제 자체가 사라졌다. 기록 파일에 한 줄씩 |
+| 10 | `environment/summary.md`·`source-map.md`·`resources/`·`domain/`·`docs/` | `summary.md`→`.reap/environment/summary.md`로 **그대로** — init이 놓은 씨앗을 덮어쓴다(씨앗은 사용자 지식이 아니다). `source-map.md`→그대로(있으면). `resources/`→그대로. `domain/`·`docs/`는 v0.18에 자리가 없다 — `.reap/environment/resources/domain/`·`resources/docs/`로 옮기고 기록 파일에 적는다(내용은 고치지 않는다). 5단계 lifecycle 등 v0.17 구조를 전제한 문구는 genome과 같은 "이행 안내 대상" |
 
 ## 기록 파일 (8/8) — `.reap/archive/migration-v0_17.md`
 
@@ -33,9 +34,9 @@
 migratedAt: <ISO 초 단위>
 from: v0.17 (.reap-v0_17/)
 ---
-## 옮긴 것            # 매핑 #별 원본→목적지와 건수
+## 옮긴 것            # 매핑 #별 원본→목적지와 건수 — environment 절(요약·resources·domain/docs 이동) 포함
 ## 옮기지 않은 것      # 무엇을, 왜 — 폐기 config 필드 목록 포함
-## 이행 안내 대상      # genome의 v0.17 전제 문구 목록
+## 이행 안내 대상      # genome·environment의 v0.17 전제 문구 목록
 ## 검증               # doctor 출력 전문
 ## 홈 정리            # 수행했으면 지운 목록, 안 했으면 "미수행"
 ```

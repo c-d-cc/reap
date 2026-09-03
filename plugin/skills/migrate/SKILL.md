@@ -40,7 +40,7 @@ bash <이 skill 디렉토리>/scripts/detect-version.sh <프로젝트 루트>
 
 동의를 받기 전에 보여줄 것 셋:
 
-- **단계 목록**(위의 여덟)과 지금 프로젝트에서 각 단계가 다룰 분량(memory 파일 크기, lineage 개수, backlog 개수 — `ls | wc -l` 수준의 실측)
+- **단계 목록**(위의 여덟)과 지금 프로젝트에서 각 단계가 다룰 분량(memory 파일 크기, lineage 개수, backlog 개수, environment 파일 수 — `ls | wc -l` 수준의 실측)
 - **토큰 고지**: 이주는 memory·기록 전체를 읽고 선별하는 작업이라 **토큰 사용량이 매우 클 수 있다**
 - **비파괴 약속**: 원본은 `.reap-v0_17/`로 이름만 바뀌어 전부 남고, 되돌리기는 mv 한 번이다
 
@@ -64,7 +64,7 @@ git mv .reap .reap-v0_17    # git 추적 중일 때. 아니면: mv .reap .reap-v
 
 ## 6/8 — 이주는 subagent가 한다
 
-주 세션의 컨텍스트를 구 데이터로 채우지 않는다 — **매핑 표와 지시문은 [migration-map.md](references/migration-map.md)에 있고, 그 문서 전체를 subagent에게 주어 수행시킨다.** 아홉 매핑의 확정 근거는 ps-4b485d의 04-migration-skill.md다.
+주 세션의 컨텍스트를 구 데이터로 채우지 않는다 — **매핑 표와 지시문은 [migration-map.md](references/migration-map.md)에 있고, 그 문서 전체를 subagent에게 주어 수행시킨다.** 열 매핑 중 1~9의 확정 근거는 ps-4b485d의 04-migration-skill.md, environment(10)는 04-migrate-docs.md다.
 
 ## 7/8 — 검증
 

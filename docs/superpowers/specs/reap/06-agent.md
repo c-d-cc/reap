@@ -40,6 +40,7 @@ reap ctx [--milestone <ms-id>] [--hook]
 agent가 `handoff.md`를 읽으려면 그것이 존재한다는 것과 어디 있는지를 알아야 한다. **그것은 판단이 아니라 사실이므로 도구가 준다.**
 
 ```
+응답 언어: ko
 현재 milestone: ms-004 인증 세션 관리 개편 (focus, open)
   .reap/vision/milestones/ms-004-auth-session/
     milestone.md · handoff.md
@@ -51,6 +52,8 @@ agent가 `handoff.md`를 읽으려면 그것이 존재한다는 것과 어디 �
 구조: .reap/map.md
 작업을 시작하면 /reap:evolve, 마무리하면 /reap:complete
 ```
+
+`config.language`가 있으면 응답 언어 줄을 낸다. 없으면 안 낸다.
 
 **이번 세대가 열 만한 것은 이름을, 있다는 사실만 알면 되는 것은 개수를 낸다.**
 
