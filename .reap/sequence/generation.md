@@ -80,3 +80,4 @@
 | gen-0077-exec | npm 패키지 — node 호환 세 파일·패키지 모양·ci/release 워크플로 | 2026-09-03 |
 | gen-0078-exec | README와 RELEASE_NOTES 0.18.0 — 설치·첫 사용·이주·제거 | 2026-09-03 |
 | gen-0079-exec | 훅 발화 여섯 지점·doctor 검사·init 씨앗·spec 갱신 | 2026-09-03 |
+| gen-0080-exec | 이주 매핑 보강 — environment/ 이주와 ctx 언어 줄, 실물 재검증 | 2026-09-03 |
