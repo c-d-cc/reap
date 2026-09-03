@@ -115,3 +115,29 @@ test("carrier 충돌은 결함, 고아는 참고다", async () => {
   expect(defects).toContain("carrier");
   expect(notes).toContain("carrier 고아");
 });
+
+test("hooks — 규약 밖 파일명·모르는 이벤트·없는 조건 스크립트를 결함으로 낸다", async () => {
+  const root = await project();
+  const hooks = join(root, ".reap", "hooks");
+  writeFileSync(join(hooks, "그냥파일.txt"), "x");
+  writeFileSync(join(hooks, "onLifeStarted.legacy.sh"), "#!/usr/bin/env bash\necho x\n");
+  writeFileSync(join(hooks, "gen.made.needs-cond.sh"), "#!/usr/bin/env bash\n# condition: no-such-condition\necho x\n");
+  const { defects, r } = kinds(root);
+  expect(defects).toContain("훅 파일명 규약 밖");
+  expect(defects).toContain("모르는 훅 이벤트");
+  expect(defects).toContain("훅 조건 스크립트 없음");
+  expect(r.defects.find((f) => f.kind === "훅 파일명 규약 밖")!.detail).toContain("그냥파일.txt");
+  expect(r.defects.find((f) => f.kind === "모르는 훅 이벤트")!.detail).toContain("onLifeStarted.legacy.sh");
+  expect(r.defects.find((f) => f.kind === "훅 조건 스크립트 없음")!.detail).toContain("gen.made.needs-cond.sh");
+});
+
+test("hooks — conditions/ 안의 파일과 규약에 맞는 훅은 결함이 아니다", async () => {
+  const root = await project();
+  const hooks = join(root, ".reap", "hooks");
+  writeFileSync(join(hooks, "gen.made.ok.sh"), "#!/usr/bin/env bash\necho x\n");
+  writeFileSync(join(root, ".reap", "hooks", "conditions", "always.sh"), "#!/usr/bin/env bash\nexit 0\n");
+  const { defects } = kinds(root);
+  expect(defects).not.toContain("훅 파일명 규약 밖");
+  expect(defects).not.toContain("모르는 훅 이벤트");
+  expect(defects).not.toContain("훅 조건 스크립트 없음");
+});
