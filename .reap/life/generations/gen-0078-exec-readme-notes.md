@@ -6,7 +6,9 @@ milestone: ms-018
 title: README와 RELEASE_NOTES 0.18.0 — 설치·첫 사용·이주·제거
 startedAt: 2026-09-03T14:47:50Z
 startCommit: fd19707
-status: open
+status: closed
+closedAt: 2026-09-03T14:57:28Z
+endCommit: a91a526
 ---
 ## Intent
 
