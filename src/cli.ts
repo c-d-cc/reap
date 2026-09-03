@@ -6,6 +6,7 @@ import {
   isIdeaKind,
   makeBacklog,
   makeGeneration,
+  makeHook,
   makeIdea,
   markIdea,
   makeLoop,
@@ -48,6 +49,7 @@ const USAGE = `사용법: reap <명령>
   make backlog    --type <t> --title "<제목>" [--slug <s>] [--from <id>]
   make plan-source --root <path> --role "<역할>" [--slug <s>]
   make idea       --kind research|freememo|file --title "<제목>" [--slug <s>]
+  make hook       --event <e> --name <n> [--type md|sh] [--condition <c>] [--order <n>]
   mark loop       <loop-id> --closed [--milestone <ms-id>]... | --aborted
   mark generation <gen-id> --closed | --aborted | --archived
   mark backlog    <bk-id> --consumed [--by <gen-id>] | --archived
@@ -229,6 +231,18 @@ function make(cwd: string, argv: string[]): Result {
     };
   }
 
+  // hook은 제목이 아니라 이벤트·이름으로 조립된다
+  if (kind === "hook") {
+    const made = makeHook(root, {
+      event: flags.value("--event") ?? "",
+      name: flags.value("--name") ?? "",
+      type: flags.value("--type"),
+      condition: flags.value("--condition"),
+      order: flags.value("--order"),
+    });
+    return made2result(root, "hook", made);
+  }
+
   const title = flags.value("--title");
   if (!title) throw new Error("--title이 필요합니다.");
 
@@ -286,7 +300,7 @@ function make(cwd: string, argv: string[]): Result {
       return made2result(root, "idea", made);
     }
     default:
-      throw new Error(`make는 loop · milestone · generation · backlog · idea · plan-source를 만듭니다: ${kind ?? "(없음)"}`);
+      throw new Error(`make는 loop · milestone · generation · backlog · idea · hook · plan-source를 만듭니다: ${kind ?? "(없음)"}`);
   }
 }
 
