@@ -6,9 +6,9 @@ from: loop-0004-plan
 refs:
   - ps-5e948f:02-distribution.md
   - ps-5e948f:06-release.md
-status: open
-focus: true
+status: closed
 openedAt: 2026-09-03T14:40:21Z
+closedAt: 2026-09-03T15:09:09Z
 ---
 ## Background
 
@@ -45,3 +45,9 @@ openedAt: 2026-09-03T14:40:21Z
 - Bun 없는 머신에서 설치 → 첫 세대까지 막힘 없이 갔는가
 - 번들 크기(wasm 포함)가 설치 체감을 해쳤는가
 - release.yml을 사람이 읽고 "latest로 갈 길이 없다"를 확신할 수 있는가
+
+## Fitness (2026-09-04, 사람의 전체 위임 하 agent 판정)
+
+- **Bun 없는 머신에서 설치 → 첫 세대까지** — 이 머신에서 PATH 필터링으로 확인(`scripts/verify-package.sh`). 별도 머신은 CI가 처음 돈다. 유보 → ms-019 왕복 검증이 다시 본다
+- **번들 크기** — unpacked 28.3MB, tarball 2.7MB. v0.17 npm 패키지도 wasm을 실었으므로 체감 변화 없음. 지연 로드는 신호가 오면 backlog
+- **release.yml에서 latest로 갈 길이 없는가** — `npm publish` 한 줄, `--tag next` 상수. 태그 필터도 `v0.18.*`. 확신할 수 있다

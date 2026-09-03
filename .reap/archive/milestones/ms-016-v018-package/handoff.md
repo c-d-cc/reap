@@ -18,3 +18,7 @@ task 1·2·3 전부 됐다(`gen-0077-exec`, 브랜치 `ms-016-package`). Exit Cr
 - 번들 크기(wasm 포함, unpacked 28.3MB)가 설치 체감을 해쳤는가
 - `release.yml`을 읽고 "latest로 갈 길이 없다"를 확신할 수 있는가
 - "Bun 없는 머신에서 설치 → 첫 세대까지"는 이 개발 머신에서 PATH만 필터링해 확인했다. Bun이 아예 없는 별도 머신·CI 러너에서의 확인은 `ci.yml`이 실제로 돌 때가 처음이다
+
+## cleanup (닫을 때)
+
+archive로 내림: gen-0073·0074·0075(ms-015 잔여 — 산출물이 skill·스크립트·lessons에 반영됨), gen-0077(이 milestone), gen-0078(README — 산출물이 파일). gen-0076·0079는 ms-017이 열려 있어 남김.

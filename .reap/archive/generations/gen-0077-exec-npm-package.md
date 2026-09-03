@@ -6,7 +6,9 @@ milestone: ms-016
 title: npm 패키지 — node 호환 세 파일·패키지 모양·ci/release 워크플로
 startedAt: 2026-09-03T14:46:33Z
 startCommit: d54a758
-status: open
+status: closed
+closedAt: 2026-09-03T15:08:46Z
+endCommit: 56568a9
 ---
 ## Intent
 
