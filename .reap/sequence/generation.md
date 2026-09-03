@@ -83,3 +83,4 @@
 | gen-0080-exec | 이주 매핑 보강 — environment/ 이주와 ctx 언어 줄, 실물 재검증 | 2026-09-03 |
 | gen-0081-exec | 0.17.8 준비 — bump·릴리스 노트·upgrade agent URL·전 스위트 | 2026-09-03 |
 | gen-0080-fix | 훅확인 | 2026-09-03 |
+| gen-0082-exec | 왕복 검증 — tarball 설치 새 프로젝트, v0.17 표본 upgrade agent 경로 이주 | 2026-09-03 |

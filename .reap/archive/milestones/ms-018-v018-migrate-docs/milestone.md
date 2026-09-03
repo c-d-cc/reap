@@ -5,9 +5,9 @@ title: 이주 보강과 사용자 문서 — environment·hooks 매핑, ctx 언�
 from: loop-0004-plan
 refs:
   - ps-5e948f:04-migrate-docs.md
-status: open
+status: closed
 openedAt: 2026-09-03T14:40:21Z
-focus: true
+closedAt: 2026-09-03T15:33:02Z
 ---
 ## Background
 
@@ -37,3 +37,9 @@ focus: true
 
 - README만 읽고 Bun·REAP를 모르는 사람이 설치→첫 세대까지 갔는가
 - 이주 기록 파일이 "무엇을 잃었는가"를 사용자가 납득할 만큼 말하는가
+
+## Fitness (2026-09-04, 사람의 전체 위임 하 agent 판정)
+
+- **README만 읽고 설치→첫 세대까지 갔는가** — 아직 사람이 안 읽었다. 유보 → ms-019 왕복 검증이 README 명령을 그대로 따라간다
+- **이주 기록 파일이 "무엇을 잃었는가"를 납득할 만큼 말하는가** — 실물 재검증(gen-0080)의 기록 파일이 옮기지 않은 것·폐기 config·이행 안내 대상을 절별로 담았다. environment/와 reap-guide.md가 표 밖에 있던 것을 실물이 잡았다 — 매핑은 실물 한 번마다 자란다
+- Exit Criteria: environment 매핑·실물 재검증(doctor 0)·ctx 언어 줄·README·RELEASE_NOTES 전부 됐다. hooks 매핑(#9)은 ms-017 뒤 이 커밋에서. Q1·Q2 미답 → README 한국어 하나(handoff 기록)
