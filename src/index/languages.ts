@@ -36,11 +36,7 @@ export type Language = { name: string; extensions: string[]; wasm: string; query
 
 const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
 
-/**
- * node 번들에서 `type: "file"` 임포트는 이 파일 위치 기준 상대경로 문자열로 나온다.
- * Bun 컴파일에서는 이미 절대(가상) 경로다 — cwd 기준이면 안 된다: 다른 디렉토리에서
- * 부르면 못 찾는다.
- */
+/** 번들 파일 위치 기준으로 wasm 경로를 푼다. Bun 컴파일은 이미 절대 경로다. */
 function resolveWasm(path: string): string {
   return isAbsolute(path) ? path : join(MODULE_DIR, path);
 }
