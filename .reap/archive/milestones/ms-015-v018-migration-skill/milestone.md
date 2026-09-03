@@ -6,7 +6,6 @@ from: loop-0003-plan
 refs:
   - ps-4b485d:04-migration-skill.md
 status: closed
-focus: true
 openedAt: 2026-08-31T14:08:16Z
 closedAt: 2026-08-31T14:28:10Z
 ---

@@ -7,3 +7,7 @@ sources:
     root: ./docs/reap-plan/reap_v_0_18_migration
     role: reap v0.18 귀환 작전 계획
     convention: conventions/ps-4b485d-reap-v018-migration.md
+  - id: ps-5e948f
+    root: ./docs/reap-plan/reap_v_0_18_release
+    role: reap v0.18 완성·출시 계획
+    convention: conventions/ps-5e948f-reap-v018-release.md
