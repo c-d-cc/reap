@@ -49,7 +49,7 @@ reap --version
 
 ## v0.17에서 왔다면
 
-v0.17.7 이하는 `reap update`가 0.17.8로 자동 올린다. 0.17.8이 upgrade agent를 설치하고, 그 agent가 v0.18 CLI와 플러그인을 설치한 뒤 `/reap:migrate`로 넘긴다. `migrate` skill이 8단계로 데이터를 옮기고, 원본은 `.reap-v0_17/`에 그대로 보존한다 — 되돌릴 수 있다.
+v0.17.7 이하는 세션 시작 시 자동 갱신으로 0.17.8이 된다. 0.17.8에서 `reap update`를 치면 upgrade agent가 설치되고, 그 agent가 v0.18 CLI와 플러그인을 설치한 뒤 `/reap:migrate`로 넘긴다. `migrate` skill이 8단계로 데이터를 옮기고, 원본은 `.reap-v0_17/`에 그대로 보존한다 — 되돌릴 수 있다.
 
 v0.18에서 잃는 것:
 

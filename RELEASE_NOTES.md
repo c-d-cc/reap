@@ -20,11 +20,11 @@ REAP가 파이프라인 실행기에서 규약과 도구 제공자로 다시 만
 - `status`·`config`·`check-version`·`uninstall` 명령
 - 다국어 지원 — 한국어 전용이다
 
-## 오는 법
+### 오는 법
 
-v0.17.7 이하는 `reap update`가 0.17.8로 자동 올린다. 0.17.8이 설치하는 upgrade agent가 v0.18 CLI와 플러그인을 설치하고 `/reap:migrate`로 넘긴다. 원본 데이터는 `.reap-v0_17/`에 그대로 보존된다.
+v0.17.7 이하는 세션 시작 시 자동 갱신으로 0.17.8이 된다. 0.17.8에서 `reap update`가 설치하는 upgrade agent가 v0.18 CLI와 플러그인을 설치하고 `/reap:migrate`로 넘긴다. 원본 데이터는 `.reap-v0_17/`에 그대로 보존된다.
 
-## 알아둘 것
+### 알아둘 것
 
 - npm `next` 태그로 나간다 — `latest`가 아니므로 기존 사용자에게 자동으로 오지 않는다. 새로 설치하려면 `npm i -g @c-d-cc/reap@next`
 - 한국어 전용이다. 비한국어 사용자는 이번 릴리스에서 다뤄지지 않는다
