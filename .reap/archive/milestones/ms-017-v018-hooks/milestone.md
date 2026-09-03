@@ -5,9 +5,9 @@ title: hooks — 이벤트 여섯과 make hook
 from: loop-0004-plan
 refs:
   - ps-5e948f:03-hooks.md
-status: open
+status: closed
 openedAt: 2026-09-03T14:40:21Z
-focus: true
+closedAt: 2026-09-03T15:24:14Z
 ---
 ## Background
 
@@ -44,3 +44,9 @@ focus: true
 
 - 이 리포 자신이 훅을 하나라도 쓰고 싶어졌는가 (spec의 신호 1)
 - 훅 출력이 명령 출력 뒤에 붙는 방식이 agent에게 읽혔는가, 묻혔는가
+
+## Fitness (2026-09-04, 사람의 전체 위임 하 agent 판정)
+
+- **이 리포 자신이 훅을 쓰고 싶어졌는가** — 아직 아니다. 실물 검증(gen.made 훅 → stdout)은 기제 확인이었지 필요에서 나온 것이 아니다. 유보 → 실사용에서 다시 본다
+- **훅 출력이 명령 뒤에 붙는 방식이 agent에게 읽히는가** — `--- hooks ---` 구분과 `[파일명]` 머리로 출력에 붙는다. skill이 그 출력을 읽으라고 말하지는 않는다 — 읽히는지는 첫 사용자가 답한다. 유보
+- Exit Criteria 7항목 전부 handoff의 대조표에 근거가 있다. 실물 검증에서 worktree가 id를 발급해 레지스트리 번호가 겹쳤다(gen-0080-fix / gen-0080-exec) — lessons로 올림

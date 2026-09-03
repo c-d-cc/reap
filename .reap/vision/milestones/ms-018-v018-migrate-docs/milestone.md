@@ -7,6 +7,7 @@ refs:
   - ps-5e948f:04-migrate-docs.md
 status: open
 openedAt: 2026-09-03T14:40:21Z
+focus: true
 ---
 ## Background
 

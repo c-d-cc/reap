@@ -132,3 +132,11 @@ exec의 근거를 `--milestone`과 `--backlog` 둘로 넓히면서 "정확히 �
 ## 검증 명령을 파이프에 넣으면 종료 코드는 마지막 명령의 것이다
 
 `bun test | tail -3 && git commit`은 테스트가 실패해도 커밋한다 — `&&`가 보는 것은 tail의 exit 0이다. 실제로 빨간 스위트가 커밋됐다. 검증 명령은 파이프 없이 돌려 exit를 직접 받거나, `set -o pipefail`을 먼저 건다. 그리고 진행 중인 merge/cherry-pick 위에서 잰 초록은 미커밋 트리의 초록이다 — 판정은 커밋된 상태에서 한다.
+
+## worktree 병렬에서 id 발급은 조율자만 한다
+
+worktree마다 `.reap/`가 사본이라 `make generation`을 두 곳에서 부르면 **같은 번호가 두 번 발급된다.** 실제로 그랬다 — 주 트리가 `gen-0080-exec`을 열어둔 사이 worktree의 실물 검증이 `gen-0080-fix`를 만들었고, merge에서 레지스트리가 충돌했다. 행은 둘 다 남긴다(append-only). **조율자가 주 트리에서 세대를 열고 커밋한 뒤 worktree를 만들고, worktree는 `bind`만 한다.** worktree에서 도구 동작을 확인할 일이 있으면 `--aborted`로 지워도 레지스트리 행은 남으므로, 그 확인은 임시 리포에서 한다.
+
+## v0.17 바이너리는 첫 실행에 홈으로 자기를 설치한다
+
+`~/cdws/reap_v17`에서 테스트·빌드를 돌린 subagent가 v0.17 `reap`를 실행했고, v0.17.5의 "첫 실행 시 자체 통합 설치"가 `~/.claude/commands/reap.*.md` 19개·agent 2개·SessionStart 훅 2개·`~/.reap/reap-guide.md`를 놓았다. v0.18 개발 세션에 v0.17 slash command가 함께 보이게 된다. **v0.17 리포에서 무엇이든 실행하는 agent에게는 `HOME`을 임시 디렉토리로 바꿔 주거나, 끝난 뒤 v0.17 `reap uninstall`의 allowlist로 걷어낸다.** 자동 모드는 `~/.claude/settings.json` 편집을 막으므로 걷어내는 것은 사람의 손이다.

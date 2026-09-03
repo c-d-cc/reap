@@ -19,6 +19,7 @@ claude -n reap-<topic>-<role> -w <worktree>      # 예: reap-auth-writer, reap-a
 
 - `<topic>`이 공유 상태의 방(`~/.reap/orch/<workspace-id>/<topic>/`)을 정한다. workspace-id는 **worktree 간에 수렴한다**(probe로 확인) — 방이 갈라지지 않는다
 - **같은 디렉토리에서 세션 둘은 안 된다.** `.reap/.session`(세대 바인딩)이 한 파일이라 나중 세션이 앞의 것을 덮는다. worktree마다 `.reap/`가 별개라 worktree로 가르면 문제가 없다. 이것이 실제로 겪은 유일한 병렬 문제였다
+- **id는 조율자가 주 트리에서 발급한다.** worktree마다 `.reap/`가 사본이라 두 곳에서 `make generation`을 부르면 같은 번호가 두 번 나온다(실제로 겹쳤다 — `lessons.md`). 조율자가 세대를 열어 커밋한 뒤 worktree를 만들고, worktree의 세션은 `reap bind <gen-id>`만 한다. 도구 동작 확인은 임시 리포에서 — worktree에서 `make`를 부르면 레지스트리 행이 남는다
 - 세션 이름을 `orch`에 알리려면 `REAP_AGENT=reap-<topic>-<role>`을 환경에 둔다. 없으면 세션 id가 주소다 — `roster`가 이름으로 못 찾는다
 
 ## 2. 손대기 전에 잡는다

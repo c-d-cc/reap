@@ -6,7 +6,9 @@ milestone: ms-017
 title: 훅 발화 여섯 지점·doctor 검사·init 씨앗·spec 갱신
 startedAt: 2026-09-03T14:59:23Z
 startCommit: 4024a94
-status: open
+status: closed
+closedAt: 2026-09-03T15:24:14Z
+endCommit: dd02528
 ---
 ## Intent
 
