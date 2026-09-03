@@ -6,7 +6,9 @@ milestone: ms-018
 title: 이주 매핑 보강 — environment/ 이주와 ctx 언어 줄, 실물 재검증
 startedAt: 2026-09-03T15:09:27Z
 startCommit: 9839459
-status: open
+status: closed
+closedAt: 2026-09-03T15:32:14Z
+endCommit: 9dee591
 ---
 ## Intent
 
