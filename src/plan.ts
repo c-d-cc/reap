@@ -10,24 +10,42 @@ export type MakePlanSource = { root: string; role: string; slug?: string; now: s
 
 /**
  * `sources.yml`은 `config.yml`과 달리 중첩이 있어 `readKV`로 못 읽는다.
- * **YAML 파서를 들이지 않는다** — Bun이 `Bun.YAML`을 갖고 있어 의존이 늘지 않는다.
- * 손으로 쓴 파일을 그대로 읽어야 하므로 형식을 도구에 맞춰 낮추지도 않는다.
+ * **YAML 파서를 들이지 않는다** — `writeSources`가 내는 고정 모양만 손으로 읽는다.
  */
 export function readSources(root: string): Source[] {
   const path = paths(root).planSources;
   if (!existsSync(path)) return [];
-  const text = readFileSync(path, "utf8");
-  const parsed = Bun.YAML.parse(text) as { sources?: unknown } | null;
-  const list = parsed && Array.isArray(parsed.sources) ? parsed.sources : [];
-  return list
-    .filter((item): item is Record<string, unknown> => typeof item === "object" && item !== null)
-    .map((item) => ({
-      id: String(item.id ?? ""),
-      root: String(item.root ?? ""),
-      role: String(item.role ?? ""),
-      convention: String(item.convention ?? ""),
-    }))
-    .filter((source) => source.id !== "");
+  return parseSources(readFileSync(path, "utf8"));
+}
+
+function parseSources(text: string): Source[] {
+  const trimmed = text.trim();
+  if (trimmed === "" || trimmed === "sources: []") return [];
+  const lines = text.split("\n");
+  if (lines[0] !== "sources:") throw new Error(`sources.yml 형식이 깨졌습니다 — 첫 줄이 "sources:"가 아닙니다: ${lines[0] ?? ""}`);
+  const sources: Source[] = [];
+  let i = 1;
+  while (i < lines.length) {
+    const line = lines[i]!;
+    if (line.trim() === "") {
+      i++;
+      continue;
+    }
+    const idMatch = /^  - id: (.*)$/.exec(line);
+    if (!idMatch) throw new Error(`sources.yml 형식이 깨졌습니다 — 예상치 못한 줄입니다: ${line}`);
+    const id = idMatch[1] ?? "";
+    const fields: Record<"root" | "role" | "convention", string> = { root: "", role: "", convention: "" };
+    for (const key of ["root", "role", "convention"] as const) {
+      i++;
+      const fieldLine = lines[i];
+      const fieldMatch = fieldLine === undefined ? null : new RegExp(`^    ${key}: (.*)$`).exec(fieldLine);
+      if (!fieldMatch) throw new Error(`sources.yml 형식이 깨졌습니다 — ${id}의 ${key} 줄이 없거나 형식이 다릅니다: ${fieldLine ?? "(없음)"}`);
+      fields[key] = fieldMatch[1] ?? "";
+    }
+    sources.push({ id, ...fields });
+    i++;
+  }
+  return sources;
 }
 
 /**

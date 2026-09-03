@@ -1,3 +1,5 @@
+import { dirname, isAbsolute, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import coreWasm from "../../node_modules/web-tree-sitter/tree-sitter.wasm" with { type: "file" };
 import cWasm from "../../node_modules/tree-sitter-wasms/out/tree-sitter-c.wasm" with { type: "file" };
 import cSharpWasm from "../../node_modules/tree-sitter-wasms/out/tree-sitter-c_sharp.wasm" with { type: "file" };
@@ -32,29 +34,40 @@ import typescriptQuery from "./queries/typescript-tags.scm" with { type: "text" 
 
 export type Language = { name: string; extensions: string[]; wasm: string; query: string };
 
+const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
+
+/**
+ * node 번들에서 `type: "file"` 임포트는 이 파일 위치 기준 상대경로 문자열로 나온다.
+ * Bun 컴파일에서는 이미 절대(가상) 경로다 — cwd 기준이면 안 된다: 다른 디렉토리에서
+ * 부르면 못 찾는다.
+ */
+function resolveWasm(path: string): string {
+  return isAbsolute(path) ? path : join(MODULE_DIR, path);
+}
+
 /** web-tree-sitter 런타임. 문법과 함께 바이너리에 실린다. */
-export const CORE_WASM = coreWasm;
+export const CORE_WASM = resolveWasm(coreWasm);
 
 /**
  * 파서는 바이너리가 싣는다 — 설치 즉시 동작해야 하고, 사용자 환경에서 찾는 모델은
  * "없으면 조용히 꺼진다"가 된다. 확장자는 파일명에서 유도할 수 없으므로 여기에만 산다.
  */
 export const LANGUAGES: readonly Language[] = [
-  { name: "typescript", extensions: [".ts", ".mts", ".cts"], wasm: typescriptWasm, query: typescriptQuery },
-  { name: "tsx", extensions: [".tsx"], wasm: tsxWasm, query: tsxQuery },
-  { name: "javascript", extensions: [".js", ".mjs", ".cjs", ".jsx"], wasm: javascriptWasm, query: javascriptQuery },
-  { name: "python", extensions: [".py"], wasm: pythonWasm, query: pythonQuery },
-  { name: "go", extensions: [".go"], wasm: goWasm, query: goQuery },
-  { name: "rust", extensions: [".rs"], wasm: rustWasm, query: rustQuery },
-  { name: "java", extensions: [".java"], wasm: javaWasm, query: javaQuery },
-  { name: "kotlin", extensions: [".kt", ".kts"], wasm: kotlinWasm, query: kotlinQuery },
-  { name: "c_sharp", extensions: [".cs"], wasm: cSharpWasm, query: cSharpQuery },
-  { name: "c", extensions: [".c", ".h"], wasm: cWasm, query: cQuery },
-  { name: "cpp", extensions: [".cpp", ".hpp", ".cc", ".hh", ".cxx"], wasm: cppWasm, query: cppQuery },
-  { name: "ruby", extensions: [".rb"], wasm: rubyWasm, query: rubyQuery },
-  { name: "php", extensions: [".php"], wasm: phpWasm, query: phpQuery },
-  { name: "swift", extensions: [".swift"], wasm: swiftWasm, query: swiftQuery },
-  { name: "dart", extensions: [".dart"], wasm: dartWasm, query: dartQuery },
+  { name: "typescript", extensions: [".ts", ".mts", ".cts"], wasm: resolveWasm(typescriptWasm), query: typescriptQuery },
+  { name: "tsx", extensions: [".tsx"], wasm: resolveWasm(tsxWasm), query: tsxQuery },
+  { name: "javascript", extensions: [".js", ".mjs", ".cjs", ".jsx"], wasm: resolveWasm(javascriptWasm), query: javascriptQuery },
+  { name: "python", extensions: [".py"], wasm: resolveWasm(pythonWasm), query: pythonQuery },
+  { name: "go", extensions: [".go"], wasm: resolveWasm(goWasm), query: goQuery },
+  { name: "rust", extensions: [".rs"], wasm: resolveWasm(rustWasm), query: rustQuery },
+  { name: "java", extensions: [".java"], wasm: resolveWasm(javaWasm), query: javaQuery },
+  { name: "kotlin", extensions: [".kt", ".kts"], wasm: resolveWasm(kotlinWasm), query: kotlinQuery },
+  { name: "c_sharp", extensions: [".cs"], wasm: resolveWasm(cSharpWasm), query: cSharpQuery },
+  { name: "c", extensions: [".c", ".h"], wasm: resolveWasm(cWasm), query: cQuery },
+  { name: "cpp", extensions: [".cpp", ".hpp", ".cc", ".hh", ".cxx"], wasm: resolveWasm(cppWasm), query: cppQuery },
+  { name: "ruby", extensions: [".rb"], wasm: resolveWasm(rubyWasm), query: rubyQuery },
+  { name: "php", extensions: [".php"], wasm: resolveWasm(phpWasm), query: phpQuery },
+  { name: "swift", extensions: [".swift"], wasm: resolveWasm(swiftWasm), query: swiftQuery },
+  { name: "dart", extensions: [".dart"], wasm: resolveWasm(dartWasm), query: dartQuery },
 ];
 
 const BY_EXT = new Map<string, Language>();

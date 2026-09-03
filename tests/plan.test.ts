@@ -32,6 +32,31 @@ test("손으로 쓴 sources.yml을 읽는다 — 중첩이 있어도", async () 
   ]);
 });
 
+test("빈 sources.yml과 sources: []는 빈 목록이다", async () => {
+  const root = await project();
+  writeFileSync(join(root, ".reap", "plan", "sources.yml"), "");
+  expect(readSources(root)).toEqual([]);
+  writeFileSync(join(root, ".reap", "plan", "sources.yml"), "sources: []\n");
+  expect(readSources(root)).toEqual([]);
+});
+
+test("쓰기→읽기 왕복이 같다", async () => {
+  const root = await project();
+  await run(["make", "plan-source", "--root", "./docs/spec", "--role", "설계"], root);
+  const before = readSources(root);
+  const text = readFileSync(join(root, ".reap", "plan", "sources.yml"), "utf8");
+  writeFileSync(join(root, ".reap", "plan", "sources.yml"), text);
+  expect(readSources(root)).toEqual(before);
+});
+
+test("깨진 sources.yml은 한국어 에러다", async () => {
+  const root = await project();
+  writeFileSync(join(root, ".reap", "plan", "sources.yml"), "sources: [{id: x}]\n");
+  expect(() => readSources(root)).toThrow(/형식이 깨졌습니다/);
+  writeFileSync(join(root, ".reap", "plan", "sources.yml"), "sources:\n  - id: ps-4f2a91\n    root: ./docs/spec\n");
+  expect(() => readSources(root)).toThrow(/형식이 깨졌습니다/);
+});
+
 test("sources.yml이 없으면 빈 목록이다", async () => {
   const root = await project();
   expect(readSources(root)).toEqual([]);
