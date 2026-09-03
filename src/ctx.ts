@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, join, relative } from "node:path";
 import { findEntry, listEntries } from "./doc.ts";
 import type { Entry } from "./doc.ts";
-import { paths, readSession } from "./store.ts";
+import { paths, readConfig, readSession } from "./store.ts";
 
 const ENTRY = "작업을 시작하면 /reap:evolve, 마무리하면 /reap:complete";
 
@@ -40,6 +40,9 @@ export function hookEnvelope(context: string): string {
 function status(root: string, asked?: string): string {
   const p = paths(root);
   const lines: string[] = [];
+
+  const language = readConfig(root).language;
+  if (language !== "") lines.push(`응답 언어: ${language}`);
 
   const chosen = pickMilestone(root, asked);
   if (chosen) {

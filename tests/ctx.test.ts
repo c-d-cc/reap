@@ -188,6 +188,34 @@ test("바인딩된 milestone이 닫혀 있으면 그것을 현재로 내지 않�
   expect(assemble(root)).not.toContain("현재 milestone");
 });
 
+test("config.language가 있으면 응답 언어 줄이 상태 블록 첫 줄에 온다", async () => {
+  const root = await project();
+  const text = assemble(root);
+  const marker = "<!-- reap 상태 -->\n";
+  const idx = text.indexOf(marker);
+  expect(idx).toBeGreaterThanOrEqual(0);
+  expect(text.slice(idx + marker.length).split("\n")[0]).toBe("응답 언어: ko");
+});
+
+test("config.language가 비어 있으면 응답 언어 줄이 없다", async () => {
+  const root = await project();
+  writeFileSync(
+    join(root, ".reap", "config.yml"),
+    "language: \nagentClient: claude-code\nworkspaceId: x\n",
+  );
+  expect(assemble(root)).not.toContain("응답 언어");
+});
+
+test("--hook의 JSON 본문에도 응답 언어 줄이 실린다", async () => {
+  const root = await project();
+  const result = await run(["ctx", "--hook"], root);
+  expect(result.ok).toBe(true);
+  const parsed = JSON.parse(result.message) as {
+    hookSpecificOutput: { additionalContext: string };
+  };
+  expect(parsed.hookSpecificOutput.additionalContext).toContain("응답 언어: ko");
+});
+
 test("REAP 디렉토리가 없으면 빈 문자열이고 던지지 않는다", () => {
   const root = tempDir();
   expect(() => assemble(root)).not.toThrow();
