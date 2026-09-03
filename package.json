@@ -1,23 +1,29 @@
 {
-  "name": "reap",
-  "version": "0.1.0",
-  "private": true,
+  "name": "@c-d-cc/reap",
+  "version": "0.18.0",
+  "description": "AI와 사람이 소프트웨어를 함께 진화시키기 위한 규약과 도구. 작업의 모양을 결정하지 않고, 작업이 쓸 수 있는 도구와 저장 규약을 제공한다.",
+  "license": "MIT",
+  "repository": "github:c-d-cc/reap",
+  "keywords": ["workflow", "agent", "evolution", "planning"],
   "type": "module",
-  "module": "src/cli.ts",
   "bin": {
-    "reap": "src/cli.ts"
+    "reap": "dist/node/reap.js"
+  },
+  "files": ["dist/node"],
+  "engines": {
+    "node": ">=20"
   },
   "scripts": {
     "test": "bun test",
     "typecheck": "tsc --noEmit",
-    "build": "bun build --compile src/cli.ts --outfile dist/reap"
+    "build": "bun build --compile src/cli.ts --outfile dist/reap",
+    "build:node": "bun build --target=node --banner=\"#!/usr/bin/env node\" --entry-naming=reap.js src/cli.ts --outdir dist/node",
+    "prepublishOnly": "bun run build:node"
   },
   "devDependencies": {
     "@types/bun": "latest",
     "tree-sitter-wasms": "^0.1.13",
-    "typescript": "^5"
-  },
-  "dependencies": {
+    "typescript": "^5",
     "web-tree-sitter": "0.22.6"
   },
   "reap": {

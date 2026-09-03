@@ -1,0 +1,26 @@
+name: CI
+
+on:
+  push:
+    branches: [v0.18, main]
+  pull_request:
+    branches: [v0.18, main]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - run: bun install --frozen-lockfile
+      - run: bun run typecheck
+      - run: bun test
+      - run: bash tests/hook.test.sh
+      - run: bun run build
+      - run: bash scripts/verify-package.sh

@@ -4,6 +4,14 @@ import { homedir } from "node:os";
 import { join } from "node:path";
 import { readSession, workspaceId, writeFileAtomic } from "./store.ts";
 
+function sleepSync(ms: number): void {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
+}
+
+function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export type Claim = { resource: string; holder: string; acquiredAt: string; expiresAt: string };
 export type Barrier = { name: string; expect: number; arrived: { who: string; at: string }[] };
 export type Agent = { name: string; state?: string; cwd?: string };
@@ -129,7 +137,7 @@ export function arrive(root: string, topic: string, name: string, expect: number
       closeSync(fd);
       break;
     } catch {
-      Bun.sleepSync(10);
+      sleepSync(10);
     }
   }
   try {
@@ -165,7 +173,7 @@ export async function waitBarrier(
       const missing = roster(topic).filter((a) => !here.has(a.name)).map((a) => a.name);
       return { released: false, barrier: b, missing };
     }
-    await Bun.sleep(Math.min(500, Math.max(50, deadline - Date.now())));
+    await sleep(Math.min(500, Math.max(50, deadline - Date.now())));
   }
 }
 
