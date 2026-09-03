@@ -1,5 +1,5 @@
 import { afterEach, expect, test } from "bun:test";
-import { existsSync, readFileSync, writeFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { cleanupTempDirs, initRepo, tempDir } from "./helpers.ts";
 import { run } from "../src/cli.ts";
@@ -100,4 +100,25 @@ test("--version이 package.json의 버전을 낸다 — issue를 올릴 때 쓴�
   const result = await run(["--version"], tempDir());
   expect(result.ok).toBe(true);
   expect(result.message).toMatch(/^reap \d+\.\d+\.\d+$/);
+});
+
+test("init이 hooks/conditions/always.sh를 실행 비트와 함께 놓지만 씨앗 목록에는 넣지 않는다", async () => {
+  const root = tempDir();
+  await run(["init"], root);
+  const always = join(root, ".reap", "hooks", "conditions", "always.sh");
+  expect(existsSync(always)).toBe(true);
+  expect(readFileSync(always, "utf8").length).toBeGreaterThan(0);
+  expect(statSync(always).mode & 0o111).not.toBe(0);
+  expect(Object.keys(SEEDS)).not.toContain("hooks/conditions/always.sh");
+  const check = await run(["init", "--check"], root);
+  expect(check.message).not.toContain("always.sh");
+});
+
+test("init --force가 이미 있는 always.sh를 건드리지 않는다", async () => {
+  const root = tempDir();
+  await run(["init"], root);
+  const always = join(root, ".reap", "hooks", "conditions", "always.sh");
+  writeFileSync(always, "#!/usr/bin/env bash\nexit 1\n");
+  await run(["init", "--force"], root);
+  expect(readFileSync(always, "utf8")).toBe("#!/usr/bin/env bash\nexit 1\n");
 });
