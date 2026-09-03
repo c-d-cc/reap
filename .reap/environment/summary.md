@@ -24,6 +24,7 @@ src/
   carrier.ts    carrier 표식 — 리포를 훑어 발급·조회·검사. 표식 자체가 레지스트리
   index/        코드 인덱스 — languages(문법 15 + scm 질의, 바이너리에 실림) · parser · graph · resolve(import/call) · store(.reap/.index) · indexer(커밋 단위 갱신·질의)
   orch.ts       병렬 조율 — claim(O_EXCL·TTL·탈취 로그)·release·barrier·roster(claude agents)·status. 공유 상태는 ~/.reap/orch/
+  hooks.ts      hooks — listHooks(파일명 규약 파싱)·runHooks(condition·order·timeout, 절대 throw 안 함). 이벤트 여섯은 HOOK_EVENTS
   plan.ts       plan source — sources.yml 읽기(Bun.YAML)·쓰기(손 형식), make plan-source, --ref 검증
   templates.ts  번들 템플릿과 프로젝트 오버라이드
   templates/    번들 템플릿 원본 (텍스트 임포트로 바이너리에 실린다)
