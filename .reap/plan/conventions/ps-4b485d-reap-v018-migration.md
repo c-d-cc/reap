@@ -20,3 +20,5 @@ root: `./docs/reap-plan/reap_v_0_18_migration`
 ## 수명
 
 v0.18 브랜치가 서고 M1~M3가 끝나면 이 세트는 소비 완료다 — 살아남을 규범은 v0.18 브랜치의 spec·genome으로 옮기고, 여기는 기록으로 남는다.
+
+**소비 완료 (2026-08-31, ms-013~015 닫힘).** 살아남은 규범은 v0.18 브랜치의 spec·genome·migrate skill로 옮겨졌다. 후속은 ps-5e948f가 잇는다.

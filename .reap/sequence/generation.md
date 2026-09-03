@@ -84,3 +84,4 @@
 | gen-0081-exec | 0.17.8 준비 — bump·릴리스 노트·upgrade agent URL·전 스위트 | 2026-09-03 |
 | gen-0080-fix | 훅확인 | 2026-09-03 |
 | gen-0082-exec | 왕복 검증 — tarball 설치 새 프로젝트, v0.17 표본 upgrade agent 경로 이주 | 2026-09-03 |
+| gen-0083-exec | loop skill — plan source 소비 완료 판정과 확장/신설 질문 | 2026-09-03 |

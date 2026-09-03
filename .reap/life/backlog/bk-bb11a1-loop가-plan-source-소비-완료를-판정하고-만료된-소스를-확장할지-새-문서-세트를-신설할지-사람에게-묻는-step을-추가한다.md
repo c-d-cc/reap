@@ -4,7 +4,8 @@ slug: loop가-plan-source-소비-완료를-판정하고-만료된-소스를-확�
 type: process
 title: loop가 plan source 소비 완료를 판정하고, 만료된 소스를 확장할지 새 문서 세트를 신설할지 사람에게 묻는 step을 추가한다
 createdAt: 2026-08-30T23:09:54Z
-status: open
+status: consumed
+consumedBy: gen-0083-exec
 ---
 
 ## 배경
