@@ -6,7 +6,9 @@ milestone: ms-020
 title: evolve 위임 모드 — 판단 절·brief 템플릿·complete 검토·spec 06
 startedAt: 2026-09-04T00:07:05Z
 startCommit: 142c11e
-status: open
+status: closed
+closedAt: 2026-09-04T00:13:38Z
+endCommit: 0606374
 ---
 ## Intent
 
