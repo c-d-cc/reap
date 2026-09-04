@@ -6,3 +6,7 @@ dist/
 
 .superpowers/
 .reap/.index/
+
+site/node_modules
+site/.vitepress/dist
+site/.vitepress/cache

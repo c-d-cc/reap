@@ -18,7 +18,9 @@
     "typecheck": "tsc --noEmit",
     "build": "bun build --compile src/cli.ts --outfile dist/reap",
     "build:node": "bun build --target=node --banner=\"#!/usr/bin/env node\" --entry-naming=reap.js src/cli.ts --outdir dist/node",
-    "prepublishOnly": "bun run build:node"
+    "prepublishOnly": "bun run build:node",
+    "site:dev": "bun run --cwd site dev",
+    "site:build": "bun run --cwd site build"
   },
   "devDependencies": {
     "@types/bun": "latest",
