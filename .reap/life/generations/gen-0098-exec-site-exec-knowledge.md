@@ -6,7 +6,9 @@ milestone: ms-022
 title: 문서 Execution 축 4쪽·지식 4쪽
 startedAt: 2026-09-04T15:35:39Z
 startCommit: 9c4295c
-status: open
+status: closed
+closedAt: 2026-09-04T15:52:02Z
+endCommit: 0a68afb
 ---
 ## Intent
 
