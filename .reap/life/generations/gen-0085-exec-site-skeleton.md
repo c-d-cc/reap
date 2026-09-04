@@ -6,7 +6,9 @@ milestone: ms-022
 title: 문서 사이트 골격과 앞쪽 네 쪽 — VitePress·docs.yml·소개·설치·첫 사용·개념
 startedAt: 2026-09-04T00:07:05Z
 startCommit: 142c11e
-status: open
+status: closed
+closedAt: 2026-09-04T00:17:08Z
+endCommit: 9c5c6a0
 ---
 ## Intent
 
