@@ -24,6 +24,10 @@ import LoopPage from "@/pages/LoopPage";
 import PlanPage from "@/pages/PlanPage";
 import IdeaPage from "@/pages/IdeaPage";
 import CarveMilestonePage from "@/pages/CarveMilestonePage";
+import GenerationPage from "@/pages/GenerationPage";
+import DelegationPage from "@/pages/DelegationPage";
+import BacklogPage from "@/pages/BacklogPage";
+import ClosingMilestonePage from "@/pages/ClosingMilestonePage";
 import { makePlaceholderPage } from "@/pages/PlaceholderPage";
 
 export const SITE_NAME = "REAP";
@@ -124,23 +128,23 @@ export const ROUTES: RouteDef[] = [
   // Execution 축
   {
     path: "/docs/generation",
-    component: makePlaceholderPage("generation"),
-    meta: placeholderMeta("generation"),
+    component: GenerationPage,
+    meta: (t) => ({ title: page(t.generationPage.title), description: t.generationPage.description }),
   },
   {
     path: "/docs/delegation",
-    component: makePlaceholderPage("delegation"),
-    meta: placeholderMeta("delegation"),
+    component: DelegationPage,
+    meta: (t) => ({ title: page(t.delegationPage.title), description: t.delegationPage.description }),
   },
   {
     path: "/docs/backlog",
-    component: makePlaceholderPage("backlog"),
-    meta: placeholderMeta("backlog"),
+    component: BacklogPage,
+    meta: (t) => ({ title: page(t.backlogPage.title), description: t.backlogPage.description }),
   },
   {
     path: "/docs/closing-milestone",
-    component: makePlaceholderPage("closingMilestone"),
-    meta: placeholderMeta("closingMilestone"),
+    component: ClosingMilestonePage,
+    meta: (t) => ({ title: page(t.closingMilestonePage.title), description: t.closingMilestonePage.description }),
   },
 
   // 지식

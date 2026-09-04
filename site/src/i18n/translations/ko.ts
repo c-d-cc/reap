@@ -426,58 +426,12 @@ export interface Translations {
     exampleCode: string;
   };
 
-  genomePage: {
-    title: string;
-    breadcrumb: string;
-    description: string;
-    intro: string;
-    filesTitle: string;
-    filesHeaders: string[];
-    files: [string, string][];
-    injectionTitle: string;
-    injectionDesc: string;
-    seedTitle: string;
-    seedDesc: string;
-    seedCode: string;
-    fillOrderTitle: string;
-    fillOrderDesc: string;
-    fillOrderSteps: { title: string; desc: string }[];
-    sizeTitle: string;
-    sizeDesc: string;
-  };
-
-  environmentPage: {
-    title: string;
-    breadcrumb: string;
-    description: string;
-    intro: string;
-    filesTitle: string;
-    filesHeaders: string[];
-    files: [string, string][];
-    useTitle: string;
-    useDesc: string;
-    notUseNote: string;
-  };
-
-  visionMemoryPage: {
-    title: string;
-    breadcrumb: string;
-    description: string;
-    intro: string;
-    visionTitle: string;
-    visionDesc: string;
-    memoryTitle: string;
-    memoryDesc: string;
-    graduationTitle: string;
-    graduationDesc: string;
-    handoffVsLessonsTitle: string;
-    handoffVsLessonsDesc: string;
-    notInjectedNote: string;
-  };
-
   placeholder: {
     notice: string;
     pages: {
+      genome: { title: string; breadcrumb: string; description: string };
+      environment: { title: string; breadcrumb: string; description: string };
+      visionMemory: { title: string; breadcrumb: string; description: string };
       claimBarrier: { title: string; breadcrumb: string; description: string };
       configuration: { title: string; breadcrumb: string; description: string };
       doctor: { title: string; breadcrumb: string; description: string };
@@ -1481,78 +1435,12 @@ $ reap mark milestone ms-001 --closed
   .reap/archive/milestones/ms-001-login/milestone.md`,
   },
 
-  genomePage: {
-    title: "Genome",
-    breadcrumb: "지식",
-    description: "제품 정체성, 행동 규칙, 절대 제약 — 매 세션 그대로 주입되는 규범 지식.",
-    intro: "genome은 어떻게 만들어야 하는가를 담는 규범 지식입니다. environment가 지금 무엇이 있는지를 서술한다면, genome은 처방입니다 — 그리고 세 파일로 나뉩니다.",
-    filesTitle: "세 파일",
-    filesHeaders: ["파일", "담는 것"],
-    files: [
-      ["application.md", "제품 정체성과 아키텍처. plan source에 이미 있는 규범은 옮겨 적지 않습니다 — 두 곳에 있으면 어긋나고, 다음 세대가 어느 쪽을 읽을지 모릅니다"],
-      ["evolution.md", "AI가 따르는 행동 규칙. 무엇을 사람에게 묻고 무엇을 스스로 정할지, 반복하면 안 되는 실수"],
-      ["invariants.md", "절대 제약. 사람만 고칩니다"],
-    ],
-    injectionTitle: "매 세션 그대로 주입됩니다",
-    injectionDesc: "SessionStart 훅이 reap ctx를 부르면 genome 전체와 environment/summary.md, 상태 줄이 실립니다. 다른 지식은 이름만 나고 필요할 때 열지만, genome은 세 파일 전부가 매번 그대로 들어갑니다 — 그래서 커지면 다른 지식의 자리를 밀어냅니다.",
-    seedTitle: "씨앗과 init --check",
-    seedDesc: "reap init이 놓는 것은 내용이 아니라 질문 문장입니다. 씨앗인 채로 남으면 모든 세션이 빈 프롬프트를 맥락으로 받습니다. 씨앗인지는 번들 템플릿과 내용이 같은지로 판정하고, --check는 보고만 합니다 — 쓰지 않습니다.",
-    seedCode: `$ reap init --check
-씨앗인 채 남은 파일:
-  .reap/genome/application.md
-  .reap/genome/evolution.md
-  .reap/genome/invariants.md
-  .reap/environment/summary.md
-  .reap/vision/memory/lessons.md
-  .reap/map.md`,
-    fillOrderTitle: "init skill이 채우는 순서",
-    fillOrderDesc: "reap init(CLI)은 자리를 만들 뿐이고, 채우는 순서는 init skill이 정합니다.",
-    fillOrderSteps: [
-      { title: "1. plan source 등록", desc: "기획 문서가 있으면 먼저 등록합니다. 이게 먼저인 이유는 application.md가 무엇을 옮겨 적지 않을지가 여기서 정해지기 때문입니다" },
-      { title: "2. environment/summary.md", desc: "지금 무엇이 있는지 먼저 서술합니다" },
-      { title: "3. genome/application.md", desc: "plan source와 겹치지 않는 만큼만 씁니다" },
-      { title: "4. genome/evolution.md", desc: "앞의 셋을 채우며 이 프로젝트를 겪은 뒤에 쓰는 것이 낫기 때문에 마지막입니다" },
-    ],
-    sizeTitle: "크기 안내선",
-    sizeDesc: "genome 파일 하나가 6.0KB, 주입 총량이 16.0KB를 넘으면 doctor가 참고로 보고합니다. 결함이 아니라 참고입니다 — 넘었다는 것은 커졌다는 뜻이지 틀렸다는 뜻이 아닙니다.",
-  },
-
-  environmentPage: {
-    title: "Environment",
-    breadcrumb: "지식",
-    description: "현재 기술 스택과 소스 구조 — summary는 주입, 나머지는 필요할 때.",
-    intro: "environment는 현상 지식입니다. genome이 어떻게 만들어야 하는가라면 environment는 지금 무엇이 있는가이고, 셋으로 나뉩니다.",
-    filesTitle: "셋",
-    filesHeaders: ["파일·디렉토리", "무엇을 담나"],
-    files: [
-      ["summary.md", "현재 기술 스택, 소스 구조, 빌드·테스트 방법. 매 세션 genome과 함께 그대로 주입됩니다"],
-      ["source-map.md", "각 모듈이 무엇을 위한 것이고 왜 그렇게 생겼는지 — 코드 인덱스가 못 보는 의도. 선택이고 필요할 때 읽습니다"],
-      ["resources/", "실제로 채택한 외부 스펙·API 문서. 필요할 때만 열립니다"],
-    ],
-    useTitle: "무엇을 쓰고 무엇을 안 쓰는가",
-    useDesc: "summary.md가 담는 것은 다음 세션이 어디서부터 손대야 하는지이지 코드의 내용이 아닙니다. 코드를 실제로 읽어 아는 일은 코드 인덱스의 몫이고, environment는 그 결과를 옮겨 적지 않습니다. idea/files/에 있는 자료와의 경계도 채택 여부입니다 — 지금 쓰고 있는 스펙이면 resources/, 쓸지도 모르는 자료면 idea/files/이고 채택되는 순간 옮겨집니다.",
-    notUseNote: "resources/는 목록을 따로 관리하지 않습니다. 무엇이 있는지는 디렉토리를 읽는 것이 곧 목록이라, 별도의 색인 파일을 두면 갱신을 잊는 순간 어긋납니다.",
-  },
-
-  visionMemoryPage: {
-    title: "Vision과 Memory",
-    breadcrumb: "지식",
-    description: "milestone이 쌓이는 자리와 프로젝트 전역 교훈이 쌓이는 자리.",
-    intro: "vision/은 하려는 것을 담습니다 — 잘라낸 실행 단위인 milestones/와, 프로젝트를 가로지르는 교훈인 memory/. life나 archive와 달리 vision은 시간이 아니라 무엇을 하려는가로 갈립니다.",
-    visionTitle: "vision/milestones/",
-    visionDesc: "열린 milestone과 아직 닫히지 않은 것들이 여기 삽니다. 닫히면 디렉토리 전체가 archive/milestones/로 옮겨지고, milestone.md·handoff.md·tasks/가 함께 보존됩니다.",
-    memoryTitle: "memory/lessons.md",
-    memoryDesc: "프로젝트가 사는 동안 계속 자라는 단 하나의 파일입니다. 결론 안 난 물음은 여기 두지 않습니다 — 그건 idea/research/의 자리입니다. 물음은 닫히는 것이고 교훈은 쌓이는 것이라, 한 파일에 섞으면 어느 쪽도 정리되지 않습니다.",
-    graduationTitle: "나가는 문 — 졸업",
-    graduationDesc: "자라기만 하는 문서는 언젠가 아무도 읽지 않습니다. 반복 확인된 교훈은 genome/evolution.md의 규칙으로 졸업하고 lessons에서 지웁니다. 더는 유효하지 않은 것도 지웁니다 — 기술 선택이 바뀌었거나 그 실수를 만들 수 있는 코드가 사라졌으면 그 교훈은 잡음입니다. 제목만 읽고도 무엇에 관한 교훈인지 알 수 있게 씁니다 — 열어봐야 아는 제목은 주입되지 않는 문서에서 안 읽힙니다.",
-    handoffVsLessonsTitle: "handoff와 lessons의 구분",
-    handoffVsLessonsDesc: "다음 세션에 필요한 것은 handoff.md, 프로젝트를 가로질러 반복 확인된 것은 lessons.md입니다. 이 구분이 무너지면 lessons가 handoff의 우회로가 되고, 그러면 아무도 안 읽는 파일이 됩니다.",
-    notInjectedNote: "memory는 주입되지 않습니다. 상태 줄이 위치만 알리고, 필요한 agent가 직접 엽니다.",
-  },
-
   placeholder: {
     notice: "이 문서는 준비 중입니다.",
     pages: {
+      genome: { title: "Genome", breadcrumb: "지식", description: "제품 정체성, 행동 규칙, 절대 제약." },
+      environment: { title: "Environment", breadcrumb: "지식", description: "현재 기술 스택, 소스 구조, 빌드·테스트 방법." },
+      visionMemory: { title: "Vision과 Memory", breadcrumb: "지식", description: "milestone과 교훈이 쌓이는 자리." },
       claimBarrier: { title: "Claim과 Barrier", breadcrumb: "협업", description: "두 세션 이상이 동시에 작업할 때의 자원 선점과 합류 지점." },
       configuration: { title: "설정", breadcrumb: "레퍼런스", description: ".reap/config.yml의 필드." },
       doctor: { title: "Doctor", breadcrumb: "레퍼런스", description: "확정적으로 검사 가능한 것만 보고하는 점검 도구." },
@@ -1729,28 +1617,28 @@ $ reap mark milestone ms-001 --closed
   },
 
   codeIndex: {
-    title: "Code Intelligence",
+    title: "코드 인덱스",
     breadcrumb: "지식",
-    description: "커밋 단위로 갱신되는 코드 인덱스입니다. 15개 언어, 설치할 것은 없습니다.",
-    intro: "reap index는 커밋 단위로 자동 갱신되는 코드 인덱스를 질의합니다. 상주 프로세스도 백그라운드 감시자도 없습니다 — 질의가 스스로 HEAD와 인덱스를 비교해 필요하면 먼저 올린 뒤 답합니다.",
+    description: "커밋 단위로 갱신되는 코드 인덱스. 15개 언어, 설치할 것 없음.",
+    intro: "reap index는 커밋 단위로 자동 갱신되는 코드 인덱스를 질의한다. 상주 프로세스도 백그라운드 감시자도 없다 — 질의가 스스로 HEAD와 인덱스를 비교해 필요하면 먼저 올린 뒤 답한다.",
     subcommandsTitle: "하위 명령",
-    subcommandsCode: `reap index update [--full]    # 인덱스를 HEAD와 맞춥니다 (기본값, 인자 없이 index만 쳐도 이것)
+    subcommandsCode: `reap index update [--full]    # 인덱스를 HEAD와 맞춘다 (기본, 인자 없이 index만 쳐도 이것)
 reap index status             # 개수, import 해석률, 인덱싱된 커밋
 reap index impact <file>...   # 이 파일을 바꾸면 어디까지 닿는가
-reap index search <query>     # 정의를 찾습니다. file:line과 함께
+reap index search <query>     # 정의를 찾는다. file:line과 함께
 reap index callers <symbolId> # 누가 이것을 부르는가
 reap index callees <symbolId> # 이것이 무엇을 부르는가`,
-    commitNote: "git diff 하나로 무엇을 다시 파싱할지 정해지므로, 커밋 안 된 작업은 인덱스에 없습니다. 방금 쓰고 커밋 안 한 심볼은 search가 못 찾고, 새 파일은 impact에 나오지 않습니다.",
+    commitNote: "git diff 하나로 무엇을 다시 파싱할지 정해지므로, 커밋 안 된 작업은 인덱스에 없다. 방금 쓰고 커밋 안 한 심볼은 search가 못 찾고 새 파일은 impact에 안 나온다.",
     whenTitle: "언제 index고 언제 grep인가",
     indexWhenTitle: "index",
-    indexWhenDesc: "정의가 어디 있는지(search), 이 파일을 바꾸면 무엇이 영향받는지(impact), 누가 무엇을 부르는지(callers/callees)를 물을 때 씁니다. 파서가 파싱한 심볼과 CALLS·IMPORTS 관계에서 답이 나옵니다.",
+    indexWhenDesc: "정의가 어디 있는지(search), 이 파일을 바꾸면 무엇이 영향받는지(impact), 누가 무엇을 부르는지(callers/callees)를 물을 때. 파서가 파싱한 심볼과 CALLS·IMPORTS 관계에서 답이 나온다.",
     grepWhenTitle: "grep",
-    grepWhenDesc: "커밋 안 된 변경, 문자열 자체를 찾을 때(주석·문서·설정 파일), index가 커버하지 않는 언어의 세부(대부분 언어는 심볼·CALLS는 되지만 IMPORTS·impact는 JS/TS와 Python만 됩니다)에 씁니다.",
-    resolutionTitle: "해석률이 낮으면 빈 결과는 \"모름\"입니다",
-    resolutionDesc: "status가 내는 줄 중 가장 중요한 것은 import 해석률입니다. impact가 아는 것은 전부 해석된 import edge에서 오므로, 해석률이 낮으면 impact의 빈 결과는 \"영향 없음\"이 아니라 \"모름\"입니다. 인덱싱이 돌았는지가 아니라 무엇을 아는지를 status로 먼저 확인합니다.",
-    callResolutionNote: "호출 해석은 이름 기반 휴리스틱입니다 — 타입 해석 없이 이름과 위치로 동명이인을 고르므로 오버로드와 동적 디스패치에서는 틀릴 수 있습니다.",
-    noInstallTitle: "설치 없이 돕니다",
-    noInstallDesc: "파서는 바이너리에 실려 있습니다. 15개 언어(TS·TSX·JS·Python·Go·Rust·Java·Kotlin·C#·C·C++·Ruby·PHP·Swift·Dart)를 지원하고, git 저장소가 아니면 인덱싱하지 않습니다 — 서술할 수 없는 것을 인덱싱하는 대신 그렇게 알립니다. 인덱스는 .reap/.index/에 살고 init이 gitignore에 넣습니다.",
+    grepWhenDesc: "커밋 안 된 변경, 문자열 자체를 찾을 때(주석·문서·설정 파일), index가 커버하지 않는 언어의 세부(대부분 언어는 심볼·CALLS는 되지만 IMPORTS·impact는 JS/TS와 Python만 된다).",
+    resolutionTitle: "해석률이 낮으면 빈 결과는 \"모름\"이다",
+    resolutionDesc: "status가 내는 줄 중 가장 중요한 것은 import 해석률이다. impact가 아는 것은 전부 해석된 import edge에서 오므로, 해석률이 낮으면 impact의 빈 결과는 \"영향 없음\"이 아니라 \"모름\"이다. 인덱싱이 돌았는지가 아니라 무엇을 아는지를 status로 먼저 확인한다.",
+    callResolutionNote: "호출 해석은 이름 기반 휴리스틱이다 — 타입 해석 없이 이름과 위치로 동명이인을 고르므로 오버로드와 동적 디스패치에서는 틀릴 수 있다.",
+    noInstallTitle: "설치 없이 돈다",
+    noInstallDesc: "파서는 바이너리에 실려 있다. 15개 언어(TS·TSX·JS·Python·Go·Rust·Java·Kotlin·C#·C·C++·Ruby·PHP·Swift·Dart)를 지원하고, git 저장소가 아니면 인덱싱하지 않는다 — 서술할 수 없는 것을 인덱싱하는 대신 그렇게 말한다. 인덱스는 '.reap/.index/'에 살고 init이 gitignore에 넣는다.",
   },
 
   orchestrate: {
