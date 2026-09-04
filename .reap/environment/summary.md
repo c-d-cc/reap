@@ -29,7 +29,7 @@ src/
   templates.ts  번들 템플릿과 프로젝트 오버라이드
   templates/    번들 템플릿 원본 (텍스트 임포트로 바이너리에 실린다)
   text-modules.d.ts   `*.md`·`*.yml` 텍스트 임포트를 위한 타입 선언
-tests/          <module>.test.ts · helpers.ts · hook.test.sh (셸)
+tests/          <module>.test.ts · helpers.ts · hook.test.sh (셸) — submodule, c-d-cc/reap-test v0.18
 ```
 
 증분 2까지 반영됐다.
@@ -51,6 +51,10 @@ bun run build:node  # bun build --target=node → dist/node/reap.js + wasm 16개
 ```
 
 Bun 1.3.10 · TypeScript 5.9 · web-tree-sitter 0.22.6(dev, 번들에 인라인) · tree-sitter-wasms(문법, dev).
+
+`tests/`는 private 리포 `c-d-cc/reap-test`의 v0.18 브랜치를 가리키는 submodule이다. 로컬에서는
+체크아웃된 채로 `bun test`·`./tests/hook.test.sh`가 그대로 돈다. CI(`ci.yml`·`release.yml`)는
+테스트를 직접 돌리지 않고 push에서 `reap-test`로 dispatch한다 — 결과는 그 리포의 워크플로에서 본다.
 
 `build:node`는 ESM 235KB(`reap.js`, shebang·실행 비트 포함) + wasm 16개 27MB를 `dist/node/`에 낸다.
 `npm pack --dry-run`으로 실측한 tarball은 18파일 · 2.7MB(unpacked 28.3MB). `src/`·`tests/`·`plugin/`·`.reap/`는
