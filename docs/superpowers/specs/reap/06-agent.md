@@ -109,7 +109,7 @@ milestone이 없으면 그 묶음을 내지 않고, 열린 세대가 없으면 �
 
 | skill | 언제 | 무엇을 |
 |---|---|---|
-| `evolve` | 세대를 열 때 | **plan·exec·fix 중 무엇인지 먼저 판단하고**, 지금 열어도 되는지, exec이면 **어느 근거(milestone 또는 backlog 항목)로** 무엇을 제목으로 여는지 정한다. `reap make generation`을 호출하고, 기록 어휘를 참고해 의도를 적는다. **그다음은 자율 구간이다** — 맥락을 조립하는 skill로 넘기지 않는다(위의 `왜 milestone 본문은 조립하지 않는가`) |
+| `evolve` | 세대를 열 때 | **plan·exec·fix 중 무엇인지 먼저 판단하고**, 지금 열어도 되는지, exec이면 **어느 근거(milestone 또는 backlog 항목)로** 무엇을 제목으로 여는지 정한다. `reap make generation`을 호출하고, 기록 어휘를 참고해 의도를 적는다. **직접 할지 subagent에게 위임할지도 여기서 판단한다** — 위임하면 `references/delegate-brief.md`를 채워 준다. **그다음은 자율 구간이다** — 맥락을 조립하는 skill로 넘기지 않는다(위의 `왜 milestone 본문은 조립하지 않는가`) |
 | `complete` | 세대를 닫을 때 | **커밋 규칙 확인**(`git status --porcelain`, 시작 커밋 이후 커밋 유무), 커밋을 어떻게 나누는지, 기록 마무리, `handoff.md` 갱신, backlog 이월 판단, abort 여부. 확인이 끝나면 `reap mark generation --closed` |
 | `loop` | 새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것 | **loop를 열고 닫는다**(`make loop` · `mark loop --closed`). 유형을 정하고, 열린 loop 중 이어갈 것이 있는지 보고, plan source에 **쓴다** — 아래 **loop** 절의 여섯 판단. 산출물이 자리를 찾았는지 판단해 `carve-milestone`을 부르고 닫는다. `Dialogue`를 기록에 남긴다 |
 | `carve-milestone` | loop 안에서, 그리고 milestone을 닫을 때 | plan source를 읽고 실행 가능한 milestone으로 자른다. **자르기 전에 그 계획의 전제를 실제 흔적에 대보는 것**이 첫 동작이다. 크기 기준, 경계·종료조건·범위밖을 정하는 법, plan 인용법, fitness 질문을 자를 때 미리 쓰는 것. 그리고 **종료 절차 전체** — fitness → `cleanup` → `mark milestone --closed`. `complete`는 이 절차를 옮겨 적지 않고 가리키기만 한다 |
@@ -240,6 +240,16 @@ REAP는 기획을 쓴다. 쓰는 단위가 loop이고(`02-flow.md`의 `plan 축�
 *작다는 이유로 새 기능을 fix로 짓기* — fix의 기준은 크기가 아니라 **되돌리는가**다. 작은 새 기능은 fix가 아니라 exec이며, 근거가 필요하다. 근거는 backlog 항목 하나면 되므로 비싸지 않다. 이 구멍을 막지 않으면 세 번째 유형이 milestone 규율을 우회하는 뒷문이 된다.
 
 **애매하면 `interview`를 먼저 부른다.** 축을 잘못 고르는 것은 세대 하나를 통째로 낭비하는 일이고, 그것을 막는 데 드는 질문 두세 개는 싸다.
+
+### evolve의 셋째 판단 — 직접 할 것인가, 위임할 것인가
+
+축을 정한 뒤, 세대를 열기 전에 마지막으로 정한다. **기본은 직접** — 지금 세션이 그대로 일한다.
+
+위임 신호는 셋이다: 이 세대가 여러 파일과 긴 탐색을 요구해 주 세션의 맥락을 채울 것 같을 때, 사람이 위임을 요청했을 때, 둘 이상을 병렬로 굴릴 때(병렬이면 `orchestrate`의 worktree 분리를 따르고 id는 주 트리가 발급한다).
+
+위임하면 주 세션은 Intent를 적고 `evolve`가 갖는 brief 템플릿(`references/delegate-brief.md`)을 채워 subagent에게 준다. subagent는 같은 작업 트리에서 일하며 `make`·`mark`를 부르지 않는다 — id 발급과 `.session` 바인딩은 주 세션의 것이다. 끝나면 subagent는 세대 기록에 Outcome·Dead Ends만 남기고 **닫지 않는다.** 주 세션이 diff와 테스트로 검토한 뒤 `complete`로 닫는다.
+
+**"여기서부터 관여하지 않는다"는 위임 뒤에도 유지된다.** 위임은 관여가 아니라 실행 형태의 선택일 뿐, 무엇을 할지·언제 끝인지를 정하는 판단은 여전히 `evolve`·`complete`가 가진다.
 
 ## interview — 모호성을 제거하는 독립 절차
 

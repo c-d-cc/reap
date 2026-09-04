@@ -10,6 +10,7 @@
 | References | 근거로 삼은 것 — plan 인용, 코드 위치, 외부 문서, 낳은 loop |
 | Open Questions | 아직 정하지 못한 것, 사람에게 물어야 할 것 |
 | Dead Ends | 시도했다 접은 접근과 그 이유. 다음 세션이 같은 길을 다시 걷지 않게 한다 |
+| Delegation | 위임했다면 — brief를 누구에게 줬고 무엇을 받았는지 (선택) |
 | Outcome | 무엇을 했고 무엇이 남았는가 |
 | Notes | 위 어디에도 들어가지 않는 것 |
 
