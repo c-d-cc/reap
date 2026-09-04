@@ -13,6 +13,17 @@ description: Use when finishing work in a REAP project - verifying the commit ru
 
 `handoff.md`는 **교체할 것**이므로 지금 무엇이 적혀 있는지 먼저 본다.
 
+## 위임된 세대라면 먼저 검토한다
+
+세대 기록의 Intent에 "subagent가 한다"·"위임" 같은 말이 있으면 이 세대는 [evolve의 위임 절차](../evolve/SKILL.md)로 돌았다. 이 절이 커밋 규칙 확인보다 먼저다.
+
+- subagent가 적은 **Outcome**·**Dead Ends**를 읽는다
+- `git diff <startCommit>..HEAD --stat`으로 무엇이 바뀌었는지 직접 본다
+- **테스트는 주 세션이 직접 돌린다** — subagent의 보고를 그대로 믿지 않는다
+- brief의 규율을 어긴 흔적을 본다: 레지스트리에 subagent가 발급한 행이 있는가, `.session`이 subagent의 세대로 바뀌어 있는가, 세대가 이미 `closed`로 닫혀 있는가
+
+**어긴 흔적이 있으면 그것이 brief의 구멍이다.** subagent를 탓하지 않는다 — `delegate-brief.md` 템플릿에 그 규율이 빠졌거나 약했다는 뜻이므로 템플릿을 고친다.
+
 ## 그다음: 커밋 규칙을 확인한다
 
 **커밋되지 않은 상태로 세대를 닫지 않는다.** 이것이 REAP의 유일한 규칙이고, **도구는 이것을 검사하지 않는다.** 확인은 여기서 한다.
