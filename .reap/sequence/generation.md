@@ -102,3 +102,4 @@
 | gen-0098-exec | 문서 Execution 축 4쪽·지식 4쪽 | 2026-09-04 |
 | gen-0099-exec | 문서 협업 3쪽·레퍼런스 4쪽·기타 3쪽 | 2026-09-04 |
 | gen-0100-exec | migration-map·SKILL 개정 — 작업 상태 복원 매핑과 검증 스크립트 | 2026-09-04 |
+| gen-0101-exec | lineage → archive/generations 승계 스크립트, 해소된 backlog → archive/backlog, 번호 이어가기 | 2026-09-04 |
