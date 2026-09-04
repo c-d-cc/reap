@@ -1,6 +1,48 @@
 # Handoff — ms-022 문서 사이트
 
-## 검수 대기: 핵심 개념·Plan 축 7쪽 / 다음 task 5
+## 검수 대기: Execution 축·지식 8쪽 / 다음 task 6
+
+gen-0098-exec가 task 5(Execution 축 네 쪽 + 지식 네 쪽)를 전부 마쳤다.
+`git log --oneline -2`: Execution 축 4(Generation·위임 모드·Backlog·Milestone
+닫기와 Fitness) → 지식 4(Genome·Environment·Vision과 Memory, code-intelligence
+톤 정리) 두 커밋. 세대는 닫지 않았다 — 사람 검수 대기.
+
+**검수할 것**
+- Generation(`/docs/generation`) — exec·fix 근거 표, "작아도 여는 셋"이
+  `evolve` skill의 실제 기준과 맞는지, `.session` 바인딩 설명이 정확한지
+- 위임 모드(`/docs/delegation`) — brief 항목 표가 `delegate-brief.md` 템플릿을
+  옮겨 적지 않고 요약했는지, subagent 규율 여덟 줄이 과하거나 빠진 게 없는지
+- Backlog(`/docs/backlog`) — "두 항목이 겹칠 때" 절이 `02-flow.md`의 실제
+  사례(`bk-c3321b`)를 옮겨 적지 않고도 정확히 설명하는지
+- Milestone 닫기와 Fitness(`/docs/closing-milestone`) — Plan 축의
+  `/docs/carve-milestone`과 겹치는 정도가 적절한지(의도적으로 자르는 시점 vs
+  닫는 시점으로 관점을 나눴다 — Dead Ends 참고), cleanup 콜아웃의 "구체적 재개
+  상황" 문장이 실제로 도움이 되는지
+- Genome(`/docs/genome`) — `reap init --check` 실물 출력이 이 리포의 지금
+  상태와 맞는지(씨앗 여섯 개), 크기 안내선 숫자(6.0KB/16.0KB)가
+  `src/doctor.ts`의 `GUIDE`와 일치하는지
+- Environment(`/docs/environment`) — 세 자리 표가 `05-knowledge.md`의
+  "코드를 아는 세 층"과 혼동되지 않는지(environment의 source-map.md와 index는
+  다른 것)
+- Vision과 Memory(`/docs/vision-memory`) — "memory를 주입하지 않는 이유는
+  쓰지 않는다"는 지시를 지켰는지(사실만 — "주입되지 않습니다")
+- Code Intelligence(`/docs/code-intelligence`) — 문체만 바뀌고 사실이
+  안 바뀌었는지, 제목을 "Code Intelligence"로 바꾼 것이 nav 라벨과 사이드바에
+  일관되게 반영됐는지
+
+세부는 `.reap/life/generations/gen-0098-exec-site-exec-knowledge.md`의
+Outcome과 Dead Ends에.
+
+## 다음 task 6 — 협업 + 레퍼런스 + 기타
+
+tasks/에 6번 문서가 아직 없다 — milestone.md의 Plan Items를 보고
+tasks/6-....md를 먼저 쓴 뒤 진행한다. 남은 자리 표시: Claim과 Barrier·설정·
+Doctor·비교 넷(orchestrate·hooks·skill-reference·cli-reference·migration·
+release-notes는 이미 실제 페이지다 — 범위에서 제외인지 확인).
+
+## 지난 task 5 이전 handoff (기록)
+
+### 검수 대기: 핵심 개념·Plan 축 7쪽 / 다음 task 5
 
 gen-0097-exec가 task 4(핵심 개념 세 쪽 + Plan 축 네 쪽)를 전부 마쳤다.
 `git log --oneline -2`: 핵심 개념 3(두 축·판단확정사실·저장 구조) →
