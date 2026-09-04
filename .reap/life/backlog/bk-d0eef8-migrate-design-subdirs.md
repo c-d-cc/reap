@@ -4,7 +4,8 @@ slug: migrate-design-subdirs
 type: fix
 title: migrate 매핑 #6 — design 하위 디렉토리 문서군과 상호 상대 링크 처리 지침
 createdAt: 2026-09-04T15:44:37Z
-status: open
+status: consumed
+consumedBy: gen-0100-exec
 ---
 
 ## 배경

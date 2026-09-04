@@ -6,7 +6,9 @@ milestone: ms-024
 title: migration-map·SKILL 개정 — 작업 상태 복원 매핑과 검증 스크립트
 startedAt: 2026-09-04T15:59:41Z
 startCommit: 07ad883
-status: open
+status: closed
+closedAt: 2026-09-04T16:12:38Z
+endCommit: bd79356
 ---
 ## Intent
 
