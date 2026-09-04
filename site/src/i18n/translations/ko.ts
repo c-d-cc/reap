@@ -366,7 +366,7 @@ export const ko: Translations = {
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
     title: "REAP",
-    description: "AI와 사람이 협업하여 재귀적인 작업 흐름을 통해 소프트웨어를 진화시키는 규약과 도구입니다. 세션 간 컨텍스트가 유지되고, 개발은 Claude Code plugin의 skill을 따르며, 설계 문서가 코드와 함께 진화합니다.",
+    description: "AI와 사람이 협업하여 재귀적인 작업 흐름을 통해 소프트웨어를 진화시키는 규약과 도구입니다. 세션 간 컨텍스트가 유지되고, 구조화된 generation을 통해 코드가 진화하며, loop를 거치며 설계와 기획이 함께 진화합니다.",
     getStarted: "시작하기 →",
     breakingBand: {
       text: "v0.18.0은 이전 버전과 호환되지 않습니다. 저장 구조, 명령, 플러그인이 모두 바뀌었습니다.",
