@@ -85,3 +85,6 @@
 | gen-0080-fix | 훅확인 | 2026-09-03 |
 | gen-0082-exec | 왕복 검증 — tarball 설치 새 프로젝트, v0.17 표본 upgrade agent 경로 이주 | 2026-09-03 |
 | gen-0083-exec | loop skill — plan source 소비 완료 판정과 확장/신설 질문 | 2026-09-03 |
+| gen-0084-exec | evolve 위임 모드 — 판단 절·brief 템플릿·complete 검토·spec 06 | 2026-09-04 |
+| gen-0085-exec | 문서 사이트 골격과 앞쪽 네 쪽 — VitePress·docs.yml·소개·설치·첫 사용·개념 | 2026-09-04 |
+| gen-0086-exec | reap-test v0.18 브랜치와 dispatch 워크플로 | 2026-09-04 |
