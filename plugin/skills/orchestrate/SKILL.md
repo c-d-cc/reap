@@ -20,6 +20,7 @@ claude -n reap-<topic>-<role> -w <worktree>      # e.g. reap-auth-writer, reap-a
 - `<topic>` decides the shared-state room (`~/.reap/orch/<workspace-id>/<topic>/`). workspace-id **converges across worktrees** (confirm with probe) — the room doesn't split
 - **Two sessions in the same directory don't work.** `.reap/.session` (generation binding) is one file, so the later session overwrites the earlier one. Each worktree has its own `.reap/`, so splitting by worktree avoids the problem. This was the only parallel problem actually hit
 - **The coordinator issues ids from the main tree.** Each worktree's `.reap/` is a copy, so calling `make generation` from two places issues the same number twice (it actually collided — see `lessons.md`). The coordinator opens the generation, commits, then creates the worktree, and the worktree's session only does `reap bind <gen-id>`. Confirm tool behavior in a throwaway repo — calling `make` from a worktree leaves a registry row
+- If the repo has a submodule (e.g. `tests/`) checked out in the worktree, plain `git worktree remove` fails with "working trees containing submodules cannot be moved or removed" — use `git worktree remove --force`
 - To announce a session's name to `orch`, set `REAP_AGENT=reap-<topic>-<role>` in the environment. Without it, the session id is the address — `roster` can't find it by name
 
 ## 2. Claim before touching
