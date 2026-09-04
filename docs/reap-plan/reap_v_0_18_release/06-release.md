@@ -12,11 +12,12 @@
 
 ## v0.18 브랜치가 갖춰야 하는 것 (G6)
 
-- `.github/workflows/ci.yml` — bun test · hook.test.sh · typecheck · build. Q3의 답에 따라 in-repo 실행
-- `.github/workflows/release.yml` — 태그 `v0.18.*`에서 `npm publish --tag next --access public`. **`--tag next`가 없는 publish는 이 워크플로에 존재하지 않아야 한다.** floors 검사(`autoUpdateMinVersion`이 실재 발행인지)는 발행 뒤에야 참이 되므로 0.18.0 첫 발행에서는 건너뛰고 그 사실을 적는다
+- `.github/workflows/ci.yml` — typecheck · build · verify-package만(테스트는 직접 안 돌린다). `dispatch-tests` 잡이 push마다 `TEST_DISPATCH_TOKEN`으로 `c-d-cc/reap-test`에 dispatch — Q3 답 B(submodule + dispatch, v0.17 방식)
+- `.github/workflows/release.yml` — 태그 `v0.18.*`에서 `npm publish --tag next --access public`. **`--tag next`가 없는 publish는 이 워크플로에 존재하지 않아야 한다.** floors 검사(`autoUpdateMinVersion`이 실재 발행인지)는 발행 뒤에야 참이 되므로 0.18.0 첫 발행에서는 건너뛰고 그 사실을 적는다. **release는 테스트를 안 돌린다** — typecheck·build·verify만. 태그를 밀기 전에 마지막 push의 `dispatch-tests` 결과(reap-test 쪽 워크플로)를 사람이 확인한다
 - `RELEASE_NOTES.md` — 0.18.0 절
 - `package.json` — `@c-d-cc/reap` 0.18.0, `private` 제거, `bin`·`files`·`engines`, `reap.autoUpdateMinVersion: "0.18.0"` 유지
 - `plugin/.claude-plugin/plugin.json` — version 0.18.0
+- `TEST_DISPATCH_TOKEN` 시크릿 — fine-grained PAT, 대상 리포 `c-d-cc/reap-test`, 권한 contents:write. 이 리포(`c-d-cc/reap`)의 Actions 시크릿으로 등록. **reap-test v0.18 브랜치 push가 이 리포의 v0.18 push보다 먼저 있어야** dispatch가 존재하는 SHA를 가리킨다
 
 ## reap_v17이 갖춰야 하는 것
 

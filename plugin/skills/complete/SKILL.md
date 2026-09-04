@@ -35,6 +35,8 @@ git log <startCommit>..HEAD --oneline   # must have at least one new commit
 
 `startCommit` is in the generation record's frontmatter, and also shows on the status line.
 
+If `tests/` is a submodule, stage its pointer too (`git add tests`) before checking the rule.
+
 **Commits can be split into several.** That's better than one giant commit — they become the unit for reverting later.
 
 **If the rule isn't met, stop here.**
