@@ -323,16 +323,161 @@ export interface Translations {
     exampleCode: string;
   };
 
+  generationPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    groundsTitle: string;
+    groundsHeaders: string[];
+    grounds: [string, string][];
+    worthTitle: string;
+    worthDesc: string;
+    worthSmallTitle: string;
+    worthSmall: string[];
+    openTitle: string;
+    openCode: string;
+    openDesc: string;
+    bindingTitle: string;
+    bindingDesc: string;
+    bindCode: string;
+    bindDesc: string;
+    vocabTitle: string;
+    vocabDesc: string;
+    vocabHeaders: string[];
+    vocab: [string, string][];
+    commitTitle: string;
+    commitItems: string[];
+    commitDesc: string;
+    closeTitle: string;
+    closeCode: string;
+    closeDesc: string;
+    exampleTitle: string;
+    exampleDesc: string;
+    exampleCode: string;
+  };
+
+  delegationPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    defaultNote: string;
+    signalsTitle: string;
+    signals: string[];
+    briefTitle: string;
+    briefDesc: string;
+    briefHeaders: string[];
+    brief: [string, string][];
+    disciplineTitle: string;
+    disciplineDesc: string;
+    disciplineItems: string[];
+    reviewTitle: string;
+    reviewDesc: string;
+    reviewItems: string[];
+    parallelTitle: string;
+    parallelDesc: string;
+  };
+
+  backlogPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    makeTitle: string;
+    makeCode: string;
+    makeDesc: string;
+    groundsTitle: string;
+    groundsCode: string;
+    groundsDesc: string;
+    consumeTitle: string;
+    consumeCode: string;
+    consumeDesc: string;
+    lifeTitle: string;
+    lifeDesc: string;
+    overlapTitle: string;
+    overlapDesc: string;
+    exampleTitle: string;
+    exampleDesc: string;
+    exampleCode: string;
+  };
+
+  closingMilestonePage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    judgeTitle: string;
+    judgeDesc: string;
+    fitnessTitle: string;
+    fitnessDesc: string;
+    orderTitle: string;
+    orderDesc: string;
+    orderSteps: { title: string; desc: string }[];
+    cleanupTitle: string;
+    cleanupDesc: string;
+    cleanupTestNote: string;
+    handoffTitle: string;
+    handoffDesc: string;
+    lessonsTitle: string;
+    lessonsDesc: string;
+    exampleTitle: string;
+    exampleDesc: string;
+    exampleCode: string;
+  };
+
+  genomePage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    filesTitle: string;
+    filesHeaders: string[];
+    files: [string, string][];
+    injectionTitle: string;
+    injectionDesc: string;
+    seedTitle: string;
+    seedDesc: string;
+    seedCode: string;
+    fillOrderTitle: string;
+    fillOrderDesc: string;
+    fillOrderSteps: { title: string; desc: string }[];
+    sizeTitle: string;
+    sizeDesc: string;
+  };
+
+  environmentPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    filesTitle: string;
+    filesHeaders: string[];
+    files: [string, string][];
+    useTitle: string;
+    useDesc: string;
+    notUseNote: string;
+  };
+
+  visionMemoryPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    visionTitle: string;
+    visionDesc: string;
+    memoryTitle: string;
+    memoryDesc: string;
+    graduationTitle: string;
+    graduationDesc: string;
+    handoffVsLessonsTitle: string;
+    handoffVsLessonsDesc: string;
+    notInjectedNote: string;
+  };
+
   placeholder: {
     notice: string;
     pages: {
-      generation: { title: string; breadcrumb: string; description: string };
-      delegation: { title: string; breadcrumb: string; description: string };
-      backlog: { title: string; breadcrumb: string; description: string };
-      closingMilestone: { title: string; breadcrumb: string; description: string };
-      genome: { title: string; breadcrumb: string; description: string };
-      environment: { title: string; breadcrumb: string; description: string };
-      visionMemory: { title: string; breadcrumb: string; description: string };
       claimBarrier: { title: string; breadcrumb: string; description: string };
       configuration: { title: string; breadcrumb: string; description: string };
       doctor: { title: string; breadcrumb: string; description: string };
@@ -1161,16 +1306,253 @@ $ reap mark milestone ms-001 --closed
   .reap/archive/milestones/ms-001-login/milestone.md`,
   },
 
+  generationPage: {
+    title: "Generation",
+    breadcrumb: "Execution 축",
+    description: "exec와 fix 두 유형, 근거, 세션 바인딩, 커밋 규칙까지 세대 기록의 전부입니다.",
+    intro: "milestone이나 backlog를 근거로 실제 코드를 진화시키는 단위가 generation입니다. evolve가 축을 정하고 나면 이 세대는 exec 아니면 fix입니다 — 새 의도를 만드는 일은 generation이 아니라 loop입니다.",
+    groundsTitle: "두 유형과 근거",
+    groundsHeaders: ["유형", "근거"],
+    grounds: [
+      ["exec", "milestone 또는 backlog 항목 중 최소 하나가 있어야 열립니다. 둘 다 줄 수도 있습니다 — milestone이 갈래를 주고 backlog 항목이 그 갈래 안의 구체적 일을 줍니다"],
+      ["fix", "근거가 없습니다. 대신 되돌아갈 곳이 있어야 합니다 — 이미 있던 의도로 되돌리는 일이라 그 의도 자체가 경계입니다. 되돌릴 곳을 가리킬 수 없으면 그건 fix가 아니라 exec입니다"],
+    ],
+    worthTitle: "세대를 열 값이 있는가",
+    worthDesc: "한 번의 편집과 한 번의 커밋으로 끝나는 일은 generation이 아닙니다. 기록이 하는 일은 도는 동안 '무엇을 하려던 중이었나'를 붙잡아 두는 것이고, 한 번에 끝나는 일에는 그 '도는 동안'이 없습니다. 값 없이 열면 기록 파일과 레지스트리 행, 닫는 커밋만 남습니다.",
+    worthSmallTitle: "작아도 여는 셋",
+    worthSmall: [
+      "backlog 항목을 소비할 때 — consumedBy가 세대를 가리켜야 하므로 구조가 요구합니다",
+      "접은 접근이 있을 때 — 커밋은 한 것만 담고 안 한 것은 안 담습니다. Dead Ends는 기록에만 남습니다",
+      "다른 세션이 함께 돌 때 — 상태 줄의 열린 세대 표시가 진행 중임을 알리는 유일한 수단입니다",
+    ],
+    openTitle: "엽니다",
+    openCode: `reap make generation --milestone <ms-id> --title "<제목>" [--slug <s>]
+reap make generation --backlog <bk-id> --title "<제목>" [--slug <s>]   (--milestone과 겸용 가능)
+reap make generation --fix  --title "<제목>" [--slug <s>]`,
+    openDesc: "유형도 근거도 없으면 거부됩니다. --plan은 없습니다 — 새 의도는 make loop의 것입니다. 이미 consumed인 backlog 항목은 근거가 되지 못합니다.",
+    bindingTitle: ".session — 하나뿐인 바인딩",
+    bindingDesc: "make generation은 아이디 발급과 함께 .reap/.session에 이 세션을 묶습니다. 파일 하나라 세션 하나만 담기고, 나중 세션이 부르면 앞의 바인딩을 덮습니다 — 같은 디렉토리에서 세션 둘을 나란히 못 여는 이유입니다. abort 뒤나 다른 디렉토리에서 세션을 열었을 때처럼 바인딩을 잃으면 doctor가 '열린 채 바인딩 안 된 generation'으로 보고합니다.",
+    bindCode: "reap bind <gen-id>",
+    bindDesc: "내 세대인데 바인딩만 없어졌을 때 다시 묶습니다. 남의 것이거나 버려진 것이면 --aborted로 지웁니다.",
+    vocabTitle: "기록 어휘",
+    vocabDesc: "CLI는 본문에 아무것도 깔지 않습니다. 대신 REAP는 적을 만한 항목과 그 뜻을 어휘로 둡니다 — 쓸 것만 쓰고 순서도 자유입니다.",
+    vocabHeaders: ["항목", "무엇을 담나"],
+    vocab: [
+      ["Intent", "왜 이 세대를 여는가, 무엇이 되면 끝인가"],
+      ["Working Plan", "지금 시점의 접근. 바뀌면 덮어씁니다"],
+      ["References", "근거로 삼은 것 — plan 인용, 코드 위치, 외부 문서"],
+      ["Open Questions", "아직 정하지 못한 것, 사람에게 물어야 할 것"],
+      ["Dead Ends", "시도했다 접은 접근과 그 이유. 다음 세션이 같은 길을 다시 걷지 않게 합니다"],
+      ["Outcome", "무엇을 했고 무엇이 남았는가"],
+    ],
+    commitTitle: "커밋 규칙",
+    commitItems: [
+      "git status --porcelain이 비어 있어야 합니다",
+      "startCommit 이후 새 커밋이 하나 이상 있어야 합니다",
+    ],
+    commitDesc: "게이트가 아닙니다 — mark는 검사하지 않고 complete skill이 확인합니다. 어긋난 기록은 doctor가 사후에 잡습니다.",
+    closeTitle: "닫습니다",
+    closeCode: "reap mark generation <gen-id> --closed | --aborted | --archived",
+    closeDesc: "--closed는 closedAt과 현재 HEAD를 endCommit에 찍습니다. --aborted는 기록을 지웁니다. --archived는 archive/generations/로 옮길 뿐 status는 건드리지 않습니다 — 그 판단은 cleanup의 몫입니다.",
+    exampleTitle: "실물",
+    exampleDesc: "backlog 항목 하나를 근거로 세대를 열고 실현한 뒤 닫은 예입니다.",
+    exampleCode: `$ reap make generation --backlog bk-1eb33a --title "로그인 폼 에러 메시지 다국어화"
+generation gen-0003-exec
+  .reap/life/generations/gen-0003-exec-로그인-폼-에러-메시지-다국어화.md
+
+(에러 메시지를 한국어로 바꾸고 커밋한 뒤)
+
+$ reap mark backlog bk-1eb33a --consumed --by gen-0003-exec
+소비 표시했습니다: bk-1eb33a
+
+$ reap mark generation gen-0003-exec --closed
+닫았습니다: gen-0003-exec`,
+  },
+
+  delegationPage: {
+    title: "위임 모드",
+    breadcrumb: "Execution 축",
+    description: "세대를 직접 할지 subagent에 맡길지 판단하는 절차와 brief 구성.",
+    intro: "generation을 열기로 정한 뒤, 세대를 시작하기 전 마지막으로 정하는 것이 실행 형태입니다. 기본은 직접입니다 — 지금 세션이 그대로 일합니다.",
+    defaultNote: "위임은 관여를 그만두는 것이 아니라 실행 형태를 고르는 것입니다. 무엇을 할지, 언제 끝인지를 정하는 판단은 evolve와 complete가 그대로 갖습니다.",
+    signalsTitle: "위임으로 기우는 신호 셋",
+    signals: [
+      "이 세대가 여러 파일과 긴 탐색을 요구해 주 세션의 맥락을 채울 것 같을 때",
+      "사람이 위임을 요청했을 때",
+      "둘 이상을 병렬로 굴릴 때 — 이때는 orchestrate의 worktree 분리를 따르고, 아이디는 주 트리가 발급합니다",
+    ],
+    briefTitle: "brief — 다섯 줄짜리 절차",
+    briefDesc: "위임하기로 정하면 세대 기록에 Intent를 먼저 적고, evolve가 갖는 brief 템플릿을 채워 subagent에게 건넵니다. 템플릿이 요구하는 항목은 이렇습니다.",
+    briefHeaders: ["항목", "무엇을 담나"],
+    brief: [
+      ["Read", "읽을 파일을 순서대로 — genome, milestone.md, 이번 task, 이 세대의 Intent, 그 밖에 필요한 것"],
+      ["Scope", "세대 기록에 적힌 Intent 그대로. subagent가 순서나 쪼갬은 자유롭게 바꿀 수 있습니다"],
+      ["Working tree", "절대경로 하나. 그 밖은 손대지 않습니다"],
+      ["Discipline", "아래 규율 목록 그대로"],
+      ["When done", "기록에 Outcome을 남기고, 닫지 않고, git status --porcelain이 비어야 합니다"],
+      ["Report", "커밋 해시 목록, 테스트 결과, Intent에서 남은 것"],
+    ],
+    disciplineTitle: "subagent가 지키는 것",
+    disciplineDesc: "brief의 Discipline 절이 요구하는 것들입니다.",
+    disciplineItems: [
+      "절대경로만 씁니다. 작업 트리 밖은 손대지 않습니다",
+      "make도 mark도 부르지 않습니다 — 아이디 발급과 세션 바인딩은 주 세션의 것입니다",
+      ".reap/ 안에서는 이 세대의 기록 파일과 (milestone에 속하면) handoff.md만 건드립니다",
+      "테스트를 먼저 씁니다 — 구현 전에 실패하는 테스트",
+      "검증 명령을 파이프로 감싸지 않고 종료 코드를 그대로 봅니다",
+      "소스를 바꾸면 다시 빌드합니다. 되돌렸을 때도 마찬가지입니다",
+      "커밋을 의미 단위로 나누고 메시지는 한국어로 씁니다",
+      "push·rebase·commit --amend는 하지 않습니다",
+    ],
+    reviewTitle: "주 세션의 검토",
+    reviewDesc: "subagent가 끝내면 주 세션이 검토합니다. 위임이 관여를 그만두는 것이 아닌 이유가 이 절차에 있습니다.",
+    reviewItems: [
+      "git diff <startCommit>..HEAD --stat로 실제로 뭐가 바뀌었는지 직접 봅니다",
+      "테스트를 주 세션이 직접 돌립니다 — subagent의 보고를 그대로 믿지 않습니다",
+      "기록에 남긴 Outcome과 Dead Ends를 읽습니다",
+      "규율이 깨진 흔적을 찾습니다 — subagent가 발급한 레지스트리 행, .session이 넘어간 흔적, 이미 closed로 닫힌 기록. 흔적이 있으면 subagent 탓이 아니라 brief의 구멍입니다",
+    ],
+    parallelTitle: "병렬이면",
+    parallelDesc: "둘 이상을 동시에 굴릴 때는 이 판단만으로 끝나지 않습니다 — worktree를 가르고, 아이디를 누가 발급하는지, claim과 barrier를 어디 두는지가 필요합니다. orchestrate가 갖는 것들입니다.",
+  },
+
+  backlogPage: {
+    title: "Backlog",
+    breadcrumb: "Execution 축",
+    description: "지금 하지 않기로 한 일을 적어 다음 generation의 근거로 쓰는 자리.",
+    intro: "backlog 항목은 이월된 일입니다. milestone처럼 여러 갈래를 담지는 못하지만, 항목 하나가 하나의 경계를 줍니다 — 그래서 exec generation을 여는 근거가 됩니다.",
+    makeTitle: "만듭니다",
+    makeCode: `reap make backlog --type <t> --title "<제목>" [--slug <s>] [--from <id>]`,
+    makeDesc: "type은 관례이고 CLI가 강제하지 않습니다. --from은 이 항목이 어디서 나왔는지(막힌 generation, 발견한 문제)를 적어두는 자리로, 있으면 적고 없어도 됩니다.",
+    groundsTitle: "exec의 근거로 씁니다",
+    groundsCode: `reap make generation --backlog <bk-id> --title "<제목>"`,
+    groundsDesc: "backlog 항목 하나가 무엇을 할지 이미 다 적고 있으면, milestone을 새로 만들지 않고 이 항목만으로 세대를 엽니다. milestone을 또 만들면 경계가 두 곳에 적히고 두 곳은 어긋납니다. milestone의 한 갈래인데 그 갈래가 backlog 항목에 적혀 있다면 --milestone과 --backlog를 함께 줍니다.",
+    consumeTitle: "소비합니다",
+    consumeCode: `reap mark backlog <bk-id> --consumed [--by <gen-id>]`,
+    consumeDesc: "소비 표시만 하고 위치는 그대로입니다 — 상태와 위치는 다른 질문입니다. 이미 consumed인 항목은 근거가 되지 못합니다. 소비가 불완전했다면 무엇이 남았는지 담은 새 항목을 만듭니다.",
+    lifeTitle: "life에 남는 이유와 archive",
+    lifeDesc: "life/backlog/는 열린 항목만 두는 자리가 아니라 지금 참고할 값이 있는 항목의 작업 세트입니다. consumed라도 무엇을 물었고 답이 어떻게 뒤집혔는지가 읽을 값을 가질 수 있어, archive로 내리는 것은 판단입니다. 그 판단은 milestone을 닫을 때 cleanup이 하고, reap mark backlog <bk-id> --archived는 옮기기만 합니다.",
+    overlapTitle: "두 항목이 겹칠 때",
+    overlapDesc: "원칙은 항목 하나에 경계 하나지만, 두 항목이 같은 명령이나 같은 파일을 다뤄야 한다면 나눠서 소비하는 순간 절반만 끝난 상태가 남습니다. 그럴 때는 하나에만 --backlog를 주고 나머지는 세대 기록의 Intent에 적습니다. 우연히 겹치는 무관한 항목을 편의로 묶는 것과는 다릅니다.",
+    exampleTitle: "실물",
+    exampleDesc: "발견한 문제를 항목으로 남기고, 그 항목을 근거로 세대를 연 예입니다.",
+    exampleCode: `$ reap make backlog --type fix --title "로그인 폼 에러 메시지 다국어화"
+backlog bk-1eb33a
+  .reap/life/backlog/bk-1eb33a-로그인-폼-에러-메시지-다국어화.md
+
+$ reap make generation --backlog bk-1eb33a --title "로그인 폼 에러 메시지 다국어화"
+generation gen-0003-exec
+  .reap/life/generations/gen-0003-exec-로그인-폼-에러-메시지-다국어화.md`,
+  },
+
+  closingMilestonePage: {
+    title: "Milestone 닫기와 Fitness",
+    breadcrumb: "Execution 축",
+    description: "종료 조건을 사람이 판정하는 절차, fitness 질문, cleanup과 mark의 순서.",
+    intro: "milestone을 자를 때 종료 조건을 적어 두더라도, 그것이 충족됐는지는 도구가 판정하지 않습니다. REAP는 milestone 본문에 고정 제목을 두지 않으므로 검사할 수단이 아예 없고, 그래서 판정은 사람의 몫입니다.",
+    judgeTitle: "종료 조건 판정은 사람",
+    judgeDesc: "정량 지표는 없습니다 — 만들어내는 순간 그 지표를 맞추는 일이 목적을 대신하게 됩니다. exit criteria가 사람이 판정할 수 있는 상태로 쓰여 있다면, 남는 일은 그 상태가 실제로 됐는지 사람에게 확인받는 것뿐입니다.",
+    fitnessTitle: "자를 때 써둔 질문을 그대로 씁니다",
+    fitnessDesc: "milestone을 자르는 시점에 이미 'What to ask when this milestone closes' 절에 서너 개의 질문을 적어 뒀습니다. 끝난 뒤에 즉석에서 물으면 후회만 묻게 되므로, 닫을 때는 그 질문을 그대로 사람에게 던집니다 — '잘 됐나'가 아니라 '이번에 달라진 무엇이 실제로 나아졌는가'를 묻는 질문입니다.",
+    orderTitle: "순서",
+    orderDesc: "고정돼 있고, 뒤바꾸면 다음 세션이 기록을 잃습니다.",
+    orderSteps: [
+      { title: "1. fitness를 받아 milestone.md에 적습니다", desc: "답만이 아니라 어떻게 읽었는지도 적습니다. 유보된 답은 idea/research/로 보내 다음 milestone이 다시 묻게 합니다" },
+      { title: "2. cleanup을 부릅니다", desc: "life/generations/를 훑어 참고 가치가 다한 세대를 archive로 내리고, 옮긴 목록을 handoff.md에 남깁니다" },
+      { title: "3. reap mark milestone <ms-id> --closed", desc: "milestone 디렉토리 전체를 archive/milestones/로 옮깁니다. handoff.md도 함께 옮겨지므로, cleanup이 먼저 돌아야 그 기록이 살아서 archive로 갑니다" },
+    ],
+    cleanupTitle: "cleanup의 기준 — 참고 가치",
+    cleanupDesc: "life/generations/에 남길지 archive로 내릴지를 가르는 것은 milestone 소속이 아니라 '앞으로 이것을 볼 일이 있는가' 하나입니다. 열린 세대는 옮기지 않습니다 — 상태 줄에서 사라지면 세션이 죽은 것처럼 보여 evolve가 그 위에 새 세대를 엽니다.",
+    cleanupTestNote: "애매하면 남깁니다. 다만 '남긴다'가 이유를 지어내도 된다는 뜻은 아닙니다 — 어느 세션이 무엇을 하려고 이 파일을 다시 열지를 한 문장으로 쓸 수 없다면, 그건 애매한 게 아니라 옮길 차례입니다.",
+    handoffTitle: "handoff에 남길 것",
+    handoffDesc: "cleanup이 옮긴 세대와 backlog 목록, 그리고 판단이 갈렸던 것 — 참고 가치가 있어 보였는데 남긴 이유. 이것들이 handoff.md에 쓰여야 milestone이 archive로 옮겨진 뒤에도 다음 세션이 무엇이 어디로 갔는지 압니다.",
+    lessonsTitle: "lessons로 올릴 것",
+    lessonsDesc: "milestone 하나를 넘어 프로젝트 전체가 반복해서 겪은 것이라면 vision/memory/lessons.md로 올립니다. 한 번 겪은 것은 관찰이고 여러 번 겪은 것은 규칙입니다 — 반복 확인된 교훈은 다시 genome/evolution.md의 규칙으로 졸업하고 lessons에서는 지웁니다.",
+    exampleTitle: "실물",
+    exampleDesc: "generation과 loop가 먼저 닫히고, milestone이 마지막으로 archive/milestones/로 옮겨진 예입니다.",
+    exampleCode: `$ reap mark generation gen-0001-exec --closed
+닫았습니다: gen-0001-exec
+
+$ reap mark loop loop-0001-plan --closed --milestone ms-001
+닫았습니다: loop-0001-plan
+
+$ reap mark milestone ms-001 --closed
+닫고 옮겼습니다: ms-001
+  .reap/archive/milestones/ms-001-login/milestone.md`,
+  },
+
+  genomePage: {
+    title: "Genome",
+    breadcrumb: "지식",
+    description: "제품 정체성, 행동 규칙, 절대 제약 — 매 세션 그대로 주입되는 규범 지식.",
+    intro: "genome은 어떻게 만들어야 하는가를 담는 규범 지식입니다. environment가 지금 무엇이 있는지를 서술한다면, genome은 처방입니다 — 그리고 세 파일로 나뉩니다.",
+    filesTitle: "세 파일",
+    filesHeaders: ["파일", "담는 것"],
+    files: [
+      ["application.md", "제품 정체성과 아키텍처. plan source에 이미 있는 규범은 옮겨 적지 않습니다 — 두 곳에 있으면 어긋나고, 다음 세대가 어느 쪽을 읽을지 모릅니다"],
+      ["evolution.md", "AI가 따르는 행동 규칙. 무엇을 사람에게 묻고 무엇을 스스로 정할지, 반복하면 안 되는 실수"],
+      ["invariants.md", "절대 제약. 사람만 고칩니다"],
+    ],
+    injectionTitle: "매 세션 그대로 주입됩니다",
+    injectionDesc: "SessionStart 훅이 reap ctx를 부르면 genome 전체와 environment/summary.md, 상태 줄이 실립니다. 다른 지식은 이름만 나고 필요할 때 열지만, genome은 세 파일 전부가 매번 그대로 들어갑니다 — 그래서 커지면 다른 지식의 자리를 밀어냅니다.",
+    seedTitle: "씨앗과 init --check",
+    seedDesc: "reap init이 놓는 것은 내용이 아니라 질문 문장입니다. 씨앗인 채로 남으면 모든 세션이 빈 프롬프트를 맥락으로 받습니다. 씨앗인지는 번들 템플릿과 내용이 같은지로 판정하고, --check는 보고만 합니다 — 쓰지 않습니다.",
+    seedCode: `$ reap init --check
+씨앗인 채 남은 파일:
+  .reap/genome/application.md
+  .reap/genome/evolution.md
+  .reap/genome/invariants.md
+  .reap/environment/summary.md
+  .reap/vision/memory/lessons.md
+  .reap/map.md`,
+    fillOrderTitle: "init skill이 채우는 순서",
+    fillOrderDesc: "reap init(CLI)은 자리를 만들 뿐이고, 채우는 순서는 init skill이 정합니다.",
+    fillOrderSteps: [
+      { title: "1. plan source 등록", desc: "기획 문서가 있으면 먼저 등록합니다. 이게 먼저인 이유는 application.md가 무엇을 옮겨 적지 않을지가 여기서 정해지기 때문입니다" },
+      { title: "2. environment/summary.md", desc: "지금 무엇이 있는지 먼저 서술합니다" },
+      { title: "3. genome/application.md", desc: "plan source와 겹치지 않는 만큼만 씁니다" },
+      { title: "4. genome/evolution.md", desc: "앞의 셋을 채우며 이 프로젝트를 겪은 뒤에 쓰는 것이 낫기 때문에 마지막입니다" },
+    ],
+    sizeTitle: "크기 안내선",
+    sizeDesc: "genome 파일 하나가 6.0KB, 주입 총량이 16.0KB를 넘으면 doctor가 참고로 보고합니다. 결함이 아니라 참고입니다 — 넘었다는 것은 커졌다는 뜻이지 틀렸다는 뜻이 아닙니다.",
+  },
+
+  environmentPage: {
+    title: "Environment",
+    breadcrumb: "지식",
+    description: "현재 기술 스택과 소스 구조 — summary는 주입, 나머지는 필요할 때.",
+    intro: "environment는 현상 지식입니다. genome이 어떻게 만들어야 하는가라면 environment는 지금 무엇이 있는가이고, 셋으로 나뉩니다.",
+    filesTitle: "셋",
+    filesHeaders: ["파일·디렉토리", "무엇을 담나"],
+    files: [
+      ["summary.md", "현재 기술 스택, 소스 구조, 빌드·테스트 방법. 매 세션 genome과 함께 그대로 주입됩니다"],
+      ["source-map.md", "각 모듈이 무엇을 위한 것이고 왜 그렇게 생겼는지 — 코드 인덱스가 못 보는 의도. 선택이고 필요할 때 읽습니다"],
+      ["resources/", "실제로 채택한 외부 스펙·API 문서. 필요할 때만 열립니다"],
+    ],
+    useTitle: "무엇을 쓰고 무엇을 안 쓰는가",
+    useDesc: "summary.md가 담는 것은 다음 세션이 어디서부터 손대야 하는지이지 코드의 내용이 아닙니다. 코드를 실제로 읽어 아는 일은 코드 인덱스의 몫이고, environment는 그 결과를 옮겨 적지 않습니다. idea/files/에 있는 자료와의 경계도 채택 여부입니다 — 지금 쓰고 있는 스펙이면 resources/, 쓸지도 모르는 자료면 idea/files/이고 채택되는 순간 옮겨집니다.",
+    notUseNote: "resources/는 목록을 따로 관리하지 않습니다. 무엇이 있는지는 디렉토리를 읽는 것이 곧 목록이라, 별도의 색인 파일을 두면 갱신을 잊는 순간 어긋납니다.",
+  },
+
+  visionMemoryPage: {
+    title: "Vision과 Memory",
+    breadcrumb: "지식",
+    description: "milestone이 쌓이는 자리와 프로젝트 전역 교훈이 쌓이는 자리.",
+    intro: "vision/은 하려는 것을 담습니다 — 잘라낸 실행 단위인 milestones/와, 프로젝트를 가로지르는 교훈인 memory/. life나 archive와 달리 vision은 시간이 아니라 무엇을 하려는가로 갈립니다.",
+    visionTitle: "vision/milestones/",
+    visionDesc: "열린 milestone과 아직 닫히지 않은 것들이 여기 삽니다. 닫히면 디렉토리 전체가 archive/milestones/로 옮겨지고, milestone.md·handoff.md·tasks/가 함께 보존됩니다.",
+    memoryTitle: "memory/lessons.md",
+    memoryDesc: "프로젝트가 사는 동안 계속 자라는 단 하나의 파일입니다. 결론 안 난 물음은 여기 두지 않습니다 — 그건 idea/research/의 자리입니다. 물음은 닫히는 것이고 교훈은 쌓이는 것이라, 한 파일에 섞으면 어느 쪽도 정리되지 않습니다.",
+    graduationTitle: "나가는 문 — 졸업",
+    graduationDesc: "자라기만 하는 문서는 언젠가 아무도 읽지 않습니다. 반복 확인된 교훈은 genome/evolution.md의 규칙으로 졸업하고 lessons에서 지웁니다. 더는 유효하지 않은 것도 지웁니다 — 기술 선택이 바뀌었거나 그 실수를 만들 수 있는 코드가 사라졌으면 그 교훈은 잡음입니다. 제목만 읽고도 무엇에 관한 교훈인지 알 수 있게 씁니다 — 열어봐야 아는 제목은 주입되지 않는 문서에서 안 읽힙니다.",
+    handoffVsLessonsTitle: "handoff와 lessons의 구분",
+    handoffVsLessonsDesc: "다음 세션에 필요한 것은 handoff.md, 프로젝트를 가로질러 반복 확인된 것은 lessons.md입니다. 이 구분이 무너지면 lessons가 handoff의 우회로가 되고, 그러면 아무도 안 읽는 파일이 됩니다.",
+    notInjectedNote: "memory는 주입되지 않습니다. 상태 줄이 위치만 알리고, 필요한 agent가 직접 엽니다.",
+  },
+
   placeholder: {
     notice: "이 문서는 준비 중입니다.",
     pages: {
-      generation: { title: "Generation", breadcrumb: "Execution 축", description: "exec와 fix, 소스코드를 진화시키는 작업 사이클." },
-      delegation: { title: "위임 모드", breadcrumb: "Execution 축", description: "generation을 subagent에 위임하는 절차." },
-      backlog: { title: "Backlog", breadcrumb: "Execution 축", description: "지연되거나 발견된 이슈를 다음 generation으로 넘기는 자리." },
-      closingMilestone: { title: "Milestone 닫기와 Fitness", breadcrumb: "Execution 축", description: "사람의 fitness 평가와 cleanup·mark 순서." },
-      genome: { title: "Genome", breadcrumb: "지식", description: "제품 정체성, 행동 규칙, 절대 제약." },
-      environment: { title: "Environment", breadcrumb: "지식", description: "현재 기술 스택, 소스 구조, 빌드·테스트 방법." },
-      visionMemory: { title: "Vision과 Memory", breadcrumb: "지식", description: "milestone과 교훈이 쌓이는 자리." },
       claimBarrier: { title: "Claim과 Barrier", breadcrumb: "협업", description: "두 세션 이상이 동시에 작업할 때의 자원 선점과 합류 지점." },
       configuration: { title: "설정", breadcrumb: "레퍼런스", description: ".reap/config.yml의 필드." },
       doctor: { title: "Doctor", breadcrumb: "레퍼런스", description: "확정적으로 검사 가능한 것만 보고하는 점검 도구." },
@@ -1347,28 +1729,28 @@ $ reap mark milestone ms-001 --closed
   },
 
   codeIndex: {
-    title: "코드 인덱스",
+    title: "Code Intelligence",
     breadcrumb: "지식",
-    description: "커밋 단위로 갱신되는 코드 인덱스. 15개 언어, 설치할 것 없음.",
-    intro: "reap index는 커밋 단위로 자동 갱신되는 코드 인덱스를 질의한다. 상주 프로세스도 백그라운드 감시자도 없다 — 질의가 스스로 HEAD와 인덱스를 비교해 필요하면 먼저 올린 뒤 답한다.",
+    description: "커밋 단위로 갱신되는 코드 인덱스입니다. 15개 언어, 설치할 것은 없습니다.",
+    intro: "reap index는 커밋 단위로 자동 갱신되는 코드 인덱스를 질의합니다. 상주 프로세스도 백그라운드 감시자도 없습니다 — 질의가 스스로 HEAD와 인덱스를 비교해 필요하면 먼저 올린 뒤 답합니다.",
     subcommandsTitle: "하위 명령",
-    subcommandsCode: `reap index update [--full]    # 인덱스를 HEAD와 맞춘다 (기본, 인자 없이 index만 쳐도 이것)
+    subcommandsCode: `reap index update [--full]    # 인덱스를 HEAD와 맞춥니다 (기본값, 인자 없이 index만 쳐도 이것)
 reap index status             # 개수, import 해석률, 인덱싱된 커밋
 reap index impact <file>...   # 이 파일을 바꾸면 어디까지 닿는가
-reap index search <query>     # 정의를 찾는다. file:line과 함께
+reap index search <query>     # 정의를 찾습니다. file:line과 함께
 reap index callers <symbolId> # 누가 이것을 부르는가
 reap index callees <symbolId> # 이것이 무엇을 부르는가`,
-    commitNote: "git diff 하나로 무엇을 다시 파싱할지 정해지므로, 커밋 안 된 작업은 인덱스에 없다. 방금 쓰고 커밋 안 한 심볼은 search가 못 찾고 새 파일은 impact에 안 나온다.",
+    commitNote: "git diff 하나로 무엇을 다시 파싱할지 정해지므로, 커밋 안 된 작업은 인덱스에 없습니다. 방금 쓰고 커밋 안 한 심볼은 search가 못 찾고, 새 파일은 impact에 나오지 않습니다.",
     whenTitle: "언제 index고 언제 grep인가",
     indexWhenTitle: "index",
-    indexWhenDesc: "정의가 어디 있는지(search), 이 파일을 바꾸면 무엇이 영향받는지(impact), 누가 무엇을 부르는지(callers/callees)를 물을 때. 파서가 파싱한 심볼과 CALLS·IMPORTS 관계에서 답이 나온다.",
+    indexWhenDesc: "정의가 어디 있는지(search), 이 파일을 바꾸면 무엇이 영향받는지(impact), 누가 무엇을 부르는지(callers/callees)를 물을 때 씁니다. 파서가 파싱한 심볼과 CALLS·IMPORTS 관계에서 답이 나옵니다.",
     grepWhenTitle: "grep",
-    grepWhenDesc: "커밋 안 된 변경, 문자열 자체를 찾을 때(주석·문서·설정 파일), index가 커버하지 않는 언어의 세부(대부분 언어는 심볼·CALLS는 되지만 IMPORTS·impact는 JS/TS와 Python만 된다).",
-    resolutionTitle: "해석률이 낮으면 빈 결과는 \"모름\"이다",
-    resolutionDesc: "status가 내는 줄 중 가장 중요한 것은 import 해석률이다. impact가 아는 것은 전부 해석된 import edge에서 오므로, 해석률이 낮으면 impact의 빈 결과는 \"영향 없음\"이 아니라 \"모름\"이다. 인덱싱이 돌았는지가 아니라 무엇을 아는지를 status로 먼저 확인한다.",
-    callResolutionNote: "호출 해석은 이름 기반 휴리스틱이다 — 타입 해석 없이 이름과 위치로 동명이인을 고르므로 오버로드와 동적 디스패치에서는 틀릴 수 있다.",
-    noInstallTitle: "설치 없이 돈다",
-    noInstallDesc: "파서는 바이너리에 실려 있다. 15개 언어(TS·TSX·JS·Python·Go·Rust·Java·Kotlin·C#·C·C++·Ruby·PHP·Swift·Dart)를 지원하고, git 저장소가 아니면 인덱싱하지 않는다 — 서술할 수 없는 것을 인덱싱하는 대신 그렇게 말한다. 인덱스는 '.reap/.index/'에 살고 init이 gitignore에 넣는다.",
+    grepWhenDesc: "커밋 안 된 변경, 문자열 자체를 찾을 때(주석·문서·설정 파일), index가 커버하지 않는 언어의 세부(대부분 언어는 심볼·CALLS는 되지만 IMPORTS·impact는 JS/TS와 Python만 됩니다)에 씁니다.",
+    resolutionTitle: "해석률이 낮으면 빈 결과는 \"모름\"입니다",
+    resolutionDesc: "status가 내는 줄 중 가장 중요한 것은 import 해석률입니다. impact가 아는 것은 전부 해석된 import edge에서 오므로, 해석률이 낮으면 impact의 빈 결과는 \"영향 없음\"이 아니라 \"모름\"입니다. 인덱싱이 돌았는지가 아니라 무엇을 아는지를 status로 먼저 확인합니다.",
+    callResolutionNote: "호출 해석은 이름 기반 휴리스틱입니다 — 타입 해석 없이 이름과 위치로 동명이인을 고르므로 오버로드와 동적 디스패치에서는 틀릴 수 있습니다.",
+    noInstallTitle: "설치 없이 돕니다",
+    noInstallDesc: "파서는 바이너리에 실려 있습니다. 15개 언어(TS·TSX·JS·Python·Go·Rust·Java·Kotlin·C#·C·C++·Ruby·PHP·Swift·Dart)를 지원하고, git 저장소가 아니면 인덱싱하지 않습니다 — 서술할 수 없는 것을 인덱싱하는 대신 그렇게 알립니다. 인덱스는 .reap/.index/에 살고 init이 gitignore에 넣습니다.",
   },
 
   orchestrate: {
