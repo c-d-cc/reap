@@ -73,3 +73,10 @@ gen-0094-exec에서 홈 breaking change 띠와 `/docs/v018change`(소개 다음)
 
 **이 milestone은 사람 검수 전까지 닫지 않는다.** exit criteria의 "사람 검수"
 항목이 이 handoff와 별도로 남아 있다.
+
+## 사람 검수 (2026-09-04) — 방향 재설정
+
+1. VitePress 기각 → v0.17 앱 이식(gen-0093) ✔
+2. 문체: spec식 "-한다"체·중점 나열은 "AI 같다" → 합니다체·완결 문장으로 교정(gen-0095) ✔. 기준은 `~/cdws/reap_v17/docs/src/i18n/translations/ko.ts`
+3. **홈 구성·메시지는 v0.17 홈 그대로**(tagline "Recursive Evolutionary Autonomous Pipeline", 왜 REAP인가 5쌍, 구조, 작업 흐름, 설치, 핵심 개념, 문서 링크). spec 문장을 키워드로 쓰지 않는다. "무엇이 달라졌나"는 띠·v018change 몫 — **아직 미반영**
+4. **목차를 다시 잡는다** — 내용이 너무 줄었다. v0.17(23쪽)을 참고하되 Plan과 Execution을 대등한 축으로, agent의 자율 evolve를 앞세우는 구성. 28쪽 안을 사람에게 올렸고 답 대기. 확정 뒤 홈부터 한 쪽씩 써서 검수

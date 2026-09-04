@@ -6,7 +6,9 @@ milestone: ms-022
 title: 사이트 문구를 reap.cc 톤으로 다시 쓴다 — 합니다체·완결 문장·사용자 관점
 startedAt: 2026-09-04T14:06:12Z
 startCommit: 4a2d7ea
-status: open
+status: closed
+closedAt: 2026-09-04T14:20:12Z
+endCommit: d7761ea
 ---
 ## Intent
 
