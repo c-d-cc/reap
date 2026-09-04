@@ -9,6 +9,7 @@ export function useNavGroups() {
       label: t.nav.groups.gettingStarted,
       items: [
         { title: t.nav.items.introduction, href: "/docs/introduction" },
+        { title: t.nav.items.v018change, href: "/docs/v018change" },
         { title: t.nav.items.install, href: "/docs/install" },
         { title: t.nav.items.quickStart, href: "/docs/quick-start" },
         { title: t.nav.items.concepts, href: "/docs/concepts" },

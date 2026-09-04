@@ -7,6 +7,7 @@ import type { Translations } from "./i18n/translations/ko";
 
 import { HeroPage } from "@/pages/HeroPage";
 import Introduction from "@/pages/Introduction";
+import V018ChangePage from "@/pages/V018ChangePage";
 import InstallPage from "@/pages/InstallPage";
 import QuickStartPage from "@/pages/QuickStartPage";
 import ConceptsPage from "@/pages/ConceptsPage";
@@ -47,6 +48,11 @@ export const ROUTES: RouteDef[] = [
     path: "/docs/introduction",
     component: Introduction,
     meta: (t) => ({ title: page(t.intro.title), description: t.intro.description }),
+  },
+  {
+    path: "/docs/v018change",
+    component: V018ChangePage,
+    meta: (t) => ({ title: page(t.v018change.title), description: t.v018change.description }),
   },
   {
     path: "/docs/install",

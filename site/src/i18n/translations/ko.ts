@@ -8,6 +8,7 @@ export interface Translations {
     };
     items: {
       introduction: string;
+      v018change: string;
       install: string;
       quickStart: string;
       concepts: string;
@@ -65,6 +66,22 @@ export interface Translations {
     principlesNoteAfter: string;
     nextText: string;
     installLinkText: string;
+  };
+
+  v018change: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    tableTitle: string;
+    tableHeaders: string[];
+    table: [string, string][];
+    goneTitle: string;
+    goneItems: [string, string][];
+    sameTitle: string;
+    sameDesc: string;
+    migrateNote: string;
+    migrateLinkText: string;
   };
 
   install: {
@@ -273,6 +290,7 @@ export const ko: Translations = {
     },
     items: {
       introduction: "소개",
+      v018change: "v0.18에서 바뀐 것",
       install: "설치",
       quickStart: "첫 사용",
       concepts: "개념",
@@ -325,6 +343,7 @@ export const ko: Translations = {
     documentation: "문서",
     docLinks: [
       { href: "/docs/introduction", title: "소개", desc: "REAP란 무엇인가, 무엇이 달라졌나, 일곱 원칙." },
+      { href: "/docs/v018change", title: "v0.18에서 바뀐 것", desc: "v0.17 대응표, 사라진 것, 그대로인 것." },
       { href: "/docs/install", title: "설치", desc: "CLI와 Claude Code 플러그인을 따로 설치한다." },
       { href: "/docs/quick-start", title: "첫 사용", desc: "세 skill로 시작한다 — init·evolve·complete." },
       { href: "/docs/concepts", title: "개념", desc: "세 개의 층, 작업 단위, 3단 저장소, 상태 줄." },
@@ -368,6 +387,47 @@ export const ko: Translations = {
     principlesNoteAfter: "에 있다.",
     nextText: "시작하려면",
     installLinkText: "설치로.",
+  },
+
+  v018change: {
+    title: "v0.18에서 바뀐 것",
+    breadcrumb: "시작하기",
+    description: "v0.18에서 무엇이 바뀌었는지 — v0.17 대응표, 사라진 것, 그대로인 것.",
+    intro: "REAP는 5단계 lifecycle을 강제하는 파이프라인 실행기에서, agent가 판단을 위해 부르는 규약과 도구의 집합으로 다시 만들어졌다. 흐름을 스크립트가 정하지 않고, skill이 상황을 읽어 판단한다.",
+    tableTitle: "v0.17 → v0.18 대응",
+    tableHeaders: ["v0.17", "v0.18"],
+    table: [
+      ["5단계 lifecycle", "evolve·complete 판단"],
+      ["/reap.* 19종", "/reap: skill 10종"],
+      [".reap/ 단일 상태·lineage", "3단 저장소 vision·life·archive"],
+      ["current.yml", "세션 바인딩"],
+      ["memory 3단", "lessons·idea"],
+      ["goals.md", "plan source"],
+      ["hooks 14이벤트", "6이벤트"],
+      ["슬래시 커맨드 설치", "플러그인"],
+      ["npm latest", "next 태그"],
+      ["언어 4종", "en 기본·ko 카탈로그"],
+    ],
+    goneTitle: "사라진 것",
+    goneItems: [
+      ["run start/next/back/abort/early-close, /reap.* 흐름 명령 7종", "evolve·complete skill의 판단"],
+      ["cruise·cruiseCount", "없음"],
+      ["merge/pull/push lifecycle과 /reap.merge 등 3종", "orchestrate skill + git 직접"],
+      ["reap-evaluate evaluator agent", "orchestrate의 한 사용 사례"],
+      ["status·config·check-version·uninstall", "ctx 상태 줄·doctor·config 직접 편집·플러그인 제거"],
+      ["update·이주 안내 레이어·lastMigratedVersion", "migrate skill 1회 + 이후 doctor·init --check"],
+      ["fix --check·clean·destroy", "doctor·cleanup skill·rm -rf .reap + 플러그인 제거"],
+      ["install-skills·load-context·dump-state, opencode/codex adapter", "플러그인 설치·ctx --hook"],
+      ["/reap.knowledge·/reap.sync·/reap.refreshKnowledge", "init skill + genome 직접 편집"],
+      ["/reap.help 16주제·reap help 다국어", "README + skill 본문"],
+      ["/reap.report·autoIssueReport", "report-issue skill"],
+      ["autoSubagent·strictEdit·strictMerge·autoUpdate config", "없음 — 판단을 config로 빼지 않는다"],
+      ["index search --kind", "index search <q> (kind 없음, 출력에 이미 있다)"],
+    ],
+    sameTitle: "그대로인 것",
+    sameDesc: "genome 3종(application·evolution·invariants)·environment/·backlog·코드 인덱스·hooks 자리는 이번에도 그대로다.",
+    migrateNote: "v0.17에서 실제로 옮기려면",
+    migrateLinkText: "이주 가이드 →",
   },
 
   install: {
