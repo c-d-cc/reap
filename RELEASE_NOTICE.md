@@ -1,5 +1,11 @@
 # Release Notices
 
+## v0.17.8
+### en
+v0.18 is out on the npm `next` tag — it will not reach you through auto-update. Run `reap update` to install a guided upgrade agent, or stay on 0.17 for now (required if you work in a language other than Korean, since v0.18 is Korean-only). Version checks now run at most once a day.
+### ko
+v0.18 이 npm `next` 태그로 나왔습니다 — 자동 업데이트로는 오지 않습니다. `reap update` 를 실행하면 안내를 도와주는 upgrade agent 가 설치됩니다. 한국어 외 언어로 작업하신다면 0.17 에 머무세요(v0.18 은 한국어 전용입니다). 버전 확인은 이제 하루 한 번만 실행됩니다.
+
 ## v0.17.7
 ### en
 Nothing about the CLI changed. Two rules were added to the `genome/evolution.md` REAP ships; existing projects get them through a migration note that `reap update` surfaces, and your own genome is never overwritten.

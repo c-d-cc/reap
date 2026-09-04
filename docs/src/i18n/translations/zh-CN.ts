@@ -1036,6 +1036,10 @@ commit:  1a2b3c4`,
     breadcrumb: "其他",
     versions: [
       {
+        version: "0.17.8",
+        notes: "**v0.18 已在 npm `next` 标签上发布** —— 不会通过自动更新到达。运行 `reap update` 会安装一个引导式升级 agent，指引你安装 v0.18 并迁移项目。**v0.18 仅支持韩语** —— 如果你使用其他语言工作，请留在 0.17 系列。版本检查现在最多每天执行一次，会话启动因此更快。",
+      },
+      {
         version: "0.17.7",
         notes: "**CLI 没有任何变化。** 随 REAP 分发的 `genome/evolution.md` 新增了两条编写检查的规则。已有项目会通过 `reap update` 显示的迁移说明获得它们。",
       },

@@ -1034,6 +1034,10 @@ commit:  1a2b3c4`,
     breadcrumb: "Other",
     versions: [
       {
+        version: "0.17.8",
+        notes: "**v0.18 is out on the npm `next` tag** — it will not arrive via auto-update. `reap update` installs a guided upgrade agent that walks you through installing v0.18 and migrating your project. **v0.18 is Korean-only**; stay on 0.17 if you work in another language. Version checks now run at most once a day, so sessions start faster.",
+      },
+      {
         version: "0.17.7",
         notes: "**Nothing about the CLI changed.** Two rules were added to the `genome/evolution.md` REAP ships. Existing projects get them through a migration note that `reap update` surfaces.",
       },

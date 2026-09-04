@@ -1036,6 +1036,10 @@ commit:  1a2b3c4`,
     breadcrumb: "Sonstiges",
     versions: [
       {
+        version: "0.17.8",
+        notes: "**v0.18 ist da, auf dem npm-Tag `next`** — es erreicht Sie nicht über Auto-Update. `reap update` installiert einen geführten Upgrade-Agenten, der Sie durch die Installation von v0.18 und die Migration Ihres Projekts führt. **v0.18 ist nur auf Koreanisch** — bleiben Sie bei 0.17, wenn Sie in einer anderen Sprache arbeiten. Versionsprüfungen laufen jetzt höchstens einmal täglich, wodurch Sitzungen schneller starten.",
+      },
+      {
         version: "0.17.7",
         notes: "**Am CLI hat sich nichts geändert.** Der ausgelieferten `genome/evolution.md` wurden zwei Regeln zum Schreiben von Prüfungen hinzugefügt. Bestehende Projekte erhalten sie über eine Migrationsnotiz, die `reap update` anzeigt.",
       },

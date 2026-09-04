@@ -3,6 +3,10 @@ name: reap-upgrade
 description: Guided upgrade from REAP v0.17 to v0.18. Installed into ~/.claude/agents/ by `reap update` when v0.18 is available on the npm `next` tag. Verifies preconditions, installs v0.18, then hands the project migration to the v0.18 plugin's migrate skill.
 ---
 
+<!-- This file is fetched by 0.17.8's `reap update` from main
+     (raw.githubusercontent.com/c-d-cc/reap/main/docs/upgrade-agent/reap-upgrade.md).
+     It must be present on main before 0.17.8 is published. -->
+
 # REAP v0.17 → v0.18 upgrade agent
 
 You perform a guided, **all-or-nothing** upgrade. At every step: if the step
@@ -38,9 +42,21 @@ harmless.
 ## 3. Install the v0.18 plugin
 
 v0.18 ships its skills as a Claude Code plugin (the CLI alone has no skills).
-Follow the installed package's README for the plugin install — it requires
-the user's interactive approval, which you cannot give for them. Verify with
-the user that a new session shows the `/reap:*` skills before continuing.
+
+```bash
+claude plugin marketplace add c-d-cc/plugins
+claude plugin install reap@ctod-plugins
+```
+
+Both commands require the user's interactive approval, which you cannot give
+for them — ask the user to run or approve them. On any failure, STOP and
+print the two commands above as the manual path.
+
+Verify: a **new** Claude Code session must show 10 `/reap:*` skills and a
+SessionStart status line. If neither appears, the plugin install did not
+take — ask the user to check `claude plugin marketplace add c-d-cc/plugins`
+and `claude plugin install reap@ctod-plugins` ran without error before
+continuing.
 
 ## 4. Migrate the project
 

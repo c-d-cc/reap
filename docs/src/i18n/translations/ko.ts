@@ -1037,6 +1037,10 @@ commit:  1a2b3c4`,
     breadcrumb: "기타",
     versions: [
       {
+        version: "0.17.8",
+        notes: "**v0.18 이 npm `next` 태그로 나왔습니다** — 자동 업데이트로는 오지 않습니다. `reap update` 를 실행하면 v0.18 설치와 프로젝트 이주를 안내하는 upgrade agent 가 설치됩니다. **v0.18 은 한국어 전용**입니다 — 다른 언어로 작업하신다면 0.17 에 머무세요. 버전 확인이 하루 한 번으로 줄어 세션 시작이 빨라집니다.",
+      },
+      {
         version: "0.17.7",
         notes: "**CLI 는 달라진 것이 없습니다.** 배포되는 `genome/evolution.md` 에 검사 작성 규칙 두 가지가 추가됐습니다. 기존 프로젝트에는 `reap update` 가 migration note 로 안내합니다.",
       },

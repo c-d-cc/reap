@@ -1,6 +1,15 @@
 ## What's New
 
-- **Nothing about the CLI changed.** Two rules were added to the `genome/evolution.md` REAP ships. Existing projects get them through a migration note that `reap update` surfaces — your own genome is never overwritten.
+- **v0.18 is out — on the npm `next` tag, not `latest`.** It will not reach you through auto-update. Run `reap update` when you're ready: it installs a guided upgrade agent into `~/.claude/agents/` that walks you through installing v0.18 and migrating your project (`/reap:migrate`).
+- **v0.18 is Korean-only.** If you work in another language, stay on the 0.17 line — auto-update will not move you to 0.18 on its own.
+- **Version checks now run at most once a day** instead of on every session start, so sessions start faster.
+- No other CLI changes in this release.
+
+---
+
+## v0.17.7
+
+Nothing about the CLI changed. Two rules were added to the `genome/evolution.md` REAP ships. Existing projects get them through a migration note that `reap update` surfaces — your own genome is never overwritten.
 
 ---
 
