@@ -44,6 +44,5 @@ v0.18은 v0.17의 여러 기능을 상당물로 대체하거나 폐기했다.
 - **`install-skills`·`load-context`·`dump-state`, opencode/codex adapter** — 플러그인 설치·`ctx --hook`으로 대체, 나머지는 없음
 - **`/reap.help` 16주제, 다국어 `reap help`** — README와 skill 본문으로 대체
 - **`vision/goals.md`·`lineage/`·3단 memory·`current.yml`** — plan source·`lessons.md` 선별·`.session`으로 대체. 승계되지 않는 것도 있다
-- **다국어 지원** — v0.18은 한국어 전용이다
 
 전체 대조표는 [`docs/reap-plan/reap_v_0_18_release/01-gap.md`](https://github.com/c-d-cc/reap/blob/main/docs/reap-plan/reap_v_0_18_release/01-gap.md)에 있다.
