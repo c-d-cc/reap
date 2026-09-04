@@ -377,9 +377,9 @@ export const ko: Translations = {
     whyReapDesc: "AI 에이전트는 강력하지만, 구조 없이는 개발이 혼란스러워집니다. 매 세션마다 컨텍스트가 초기화됩니다. 기획은 한 번 쓰고 잊힙니다. 코드 변경이 목적 없이 흩어집니다. 설계 문서가 현실에서 벗어납니다. 과거 작업에서 얻은 교훈이 사라집니다.",
     problems: [
       { problem: "컨텍스트 손실", solution: "SessionStart 훅이 세션마다 genome, environment 요약, 상태 줄을 자동으로 주입합니다" },
-      { problem: "한 번 쓰고 잊히는 기획", solution: "loop가 plan source를 계속 다듬고, 그 계획을 milestone으로 잘라 실행과 이어 줍니다. 기획도 코드처럼 진화합니다" },
+      { problem: "한 번 쓰고 잊히는 기획", solution: "loop가 plan을 계속 다듬고, 그 계획을 milestone으로 잘라 실행과 이어 줍니다. 기획도 코드처럼 진화합니다" },
       { problem: "산발적 개발", solution: "milestone과 generation이 경계를 가진 작업 단위로 나뉘어 하나의 목표에 집중합니다" },
-      { problem: "설계-코드 괴리", solution: "plan source에 쓴 기획과 구현 사이의 간극은 backlog로 기록되고 다음 generation에서 반영됩니다" },
+      { problem: "설계-코드 괴리", solution: "plan과 구현 사이의 간극은 backlog로 기록되고 다음 generation에서 반영됩니다" },
       { problem: "잊혀진 교훈", solution: "lessons.md에 교훈이 쌓이고, 참고 가치가 다한 세대는 archive에 보존됩니다" },
       { problem: "협업 혼란", solution: "orchestrate skill이 claim과 barrier로 여러 세션의 작업을 조율합니다" },
     ],
@@ -387,7 +387,7 @@ export const ko: Translations = {
     structureDesc: "REAP가 하는 일은 .reap/ 아래 여섯 자리에 담깁니다.",
     structureItems: [
       { label: "Knowledge", sub: "genome + environment", desc: "genome은 규범(제품 정체성, AI 행동 규칙, 절대 제약), environment는 서술(기술 스택, 소스 구조)입니다. 모든 작업의 기반입니다." },
-      { label: "Plan", sub: "plan source + loop", desc: "제품을 만들기 위한 모든 생각입니다. 리포 밖일 수 있는 plan source에 loop가 씁니다." },
+      { label: "Plan", sub: "plan + loop", desc: "제품을 만들기 위한 모든 생각입니다. plan 문서는 리포 밖에 있어도 되며, loop가 그것을 다듬습니다." },
       { label: "Vision", sub: "milestone + memory", desc: "하려는 것입니다. loop에서 잘라낸 milestone과 쌓인 교훈이 여기 있습니다." },
       { label: "Life", sub: "generation + backlog", desc: "지금 살아 있는 것입니다. 진행 중이거나 아직 참고할 값이 있는 세대와 이월 항목이 여기 있습니다." },
       { label: "Archive", sub: "닫힌 milestone, generation, loop", desc: "더는 참고하지 않는 것입니다. milestone이 닫힐 때 cleanup skill이 여기로 내립니다." },
@@ -401,7 +401,7 @@ export const ko: Translations = {
         sub: "계획을 만들고 개선합니다",
         items: [
           { unit: "loop", what: "새 의도를 만듭니다. 기획, 설계, 화면, 아직 자리가 없는 아이디어를 다루며 여러 세션에 걸쳐 열려 있을 수 있습니다.", where: "life/loops/" },
-          { unit: "plan source", what: "리포 안팎 어디에 있든 기획 문서를 등록하고, 규약에 따라 읽고 씁니다. loop의 산출물이 여기에 쌓입니다.", where: "plan/sources.yml" },
+          { unit: "plan", what: "기획 문서입니다. 리포 안팎 어디에 있든 등록해 두면 loop가 규약에 따라 읽고 씁니다. loop의 산출물이 여기에 쌓입니다.", where: "plan/sources.yml" },
         ],
       },
       {
@@ -462,7 +462,7 @@ export const ko: Translations = {
     structureDesc: "REAP는 여섯 개의 자리로 구성됩니다:",
     structureItems: [
       { label: "Knowledge", sub: "genome + environment", path: ".reap/genome/ + .reap/environment/", desc: "genome(규범 — 제품 정체성, AI 행동 규칙, 절대 제약)과 environment(서술 — 기술 스택, 소스 구조). 모든 작업의 기반입니다." },
-      { label: "Plan", sub: "plan source + loop", path: ".reap/plan/ + .reap/life/loops/", desc: "제품을 만들기 위한 모든 생각입니다. 리포 밖일 수 있는 plan source에 loop가 씁니다." },
+      { label: "Plan", sub: "plan + loop", path: ".reap/plan/ + .reap/life/loops/", desc: "제품을 만들기 위한 모든 생각입니다. plan 문서는 리포 밖에 있어도 되며, loop가 그것을 다듬습니다." },
       { label: "Vision", sub: "milestone + memory", path: ".reap/vision/", desc: "하려는 것입니다. loop에서 잘라낸 milestone과 쌓인 교훈이 여기 있습니다." },
       { label: "Life", sub: "generation + backlog", path: ".reap/life/", desc: "지금 살아 있는 것입니다. 진행 중이거나 아직 참고할 값이 있는 세대와 이월 항목이 여기 있습니다." },
       { label: "Archive", sub: "닫힌 milestone, generation, loop", path: ".reap/archive/", desc: "더는 참고하지 않는 것입니다. milestone이 닫힐 때 cleanup skill이 여기로 내립니다." },
@@ -475,7 +475,7 @@ export const ko: Translations = {
     ├── config.yml                 # 언어, agentClient, workspace-id
     ├── map.md                     # 이 디렉토리가 무엇을 두는지 (씨앗)
     ├── plan/
-    │   ├── sources.yml             # 등록된 plan source
+    │   ├── sources.yml             # 등록된 plan 문서
     │   └── conventions/            # <ps-id>-<slug>.md — 읽고 쓰는 법
     ├── vision/                    # 하려는 것
     │   ├── memory/
@@ -519,7 +519,7 @@ export const ko: Translations = {
       [".reap/ 단일 상태·lineage", "3단 저장소 vision·life·archive"],
       ["current.yml", "세션 바인딩"],
       ["memory 3단", "lessons·idea"],
-      ["goals.md", "plan source"],
+      ["goals.md", "plan (등록된 기획 문서)"],
       ["hooks 14이벤트", "6이벤트"],
       ["슬래시 커맨드 설치", "플러그인"],
       ["npm latest", "next 태그"],
@@ -572,7 +572,7 @@ claude plugin install reap@ctod-plugins`,
       {
         title: "처음 한 번",
         command: "/reap:init",
-        desc: "정본 지식을 세웁니다 — plan source 등록, .reap/environment/summary.md, .reap/genome/. 프로젝트당 딱 한 번입니다. 이 skill만 상태 줄이 안내하지 못합니다 — .reap/가 없으면 SessionStart 훅이 침묵하므로 사람이 직접 불러야 합니다.",
+        desc: "정본 지식을 세웁니다 — plan 문서 등록, .reap/environment/summary.md, .reap/genome/. 프로젝트당 딱 한 번입니다. 이 skill만 상태 줄이 안내하지 못합니다 — .reap/가 없으면 SessionStart 훅이 침묵하므로 사람이 직접 불러야 합니다.",
       },
       {
         title: "세대를 엽니다",
@@ -701,7 +701,7 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
       {
         name: "init",
         when: "프로젝트당 딱 한 번, 맨 처음. .reap/가 없거나 있어도 씨앗 그대로일 때. 상태 줄이 안내하지 못하는 유일한 skill이라 사람이 직접 부른다.",
-        what: "reap init 뒤 plan source를 등록하고 environment/summary.md·genome/application.md·evolution.md를 채운 뒤 첫 milestone을 carve-milestone에 넘긴다.",
+        what: "reap init 뒤 plan 문서를 등록하고 environment/summary.md·genome/application.md·evolution.md를 채운 뒤 첫 milestone을 carve-milestone에 넘긴다.",
         notCalled: ".reap/가 있고 씨앗이 이미 채워져 있으면 이 skill의 일이 아니다.",
       },
       {
@@ -719,7 +719,7 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
       {
         name: "loop",
         when: "새 의도를 만들 때 — 기획(plan)·설계(design)·화면·흐름(uiux)·아직 자리 없는 것(idea).",
-        what: "loop를 열거나 이어 plan source에 쓰고 Dialogue를 기록하며, 자를 것이 정해지면 carve-milestone으로 넘겨 milestone을 낳고 닫는다.",
+        what: "loop를 열거나 이어 plan에 쓰고 Dialogue를 기록하며, 자를 것이 정해지면 carve-milestone으로 넘겨 milestone을 낳고 닫는다.",
         notCalled: "이미 실현할 의도가 서 있어 실행만 하면 될 때(그건 generation), 같은 물음을 다루는 loop가 이미 열려 있을 때(새로 열지 않고 잇는다).",
       },
       {
@@ -804,7 +804,7 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
       ["doctor", "'.reap/'의 상태를 확정적으로 검사 가능한 만큼만 검사해 보고한다. 파일을 쓰지 않고, 고치지도 않는다."],
       ["index", "코드 인덱스를 질의한다. update(HEAD와 맞춘다)·status(해석률)·impact(파급 범위)·search(정의 찾기)·callers/callees(호출 관계)로 갈린다."],
       ["orch", "여러 세션이 자원을 선점(claim/release)하고 합류점에서 기다리며(barrier) 서로를 본다(roster/status)."],
-      ["plan", "등록된 plan source 목록(sources)과 그 규약(convention <ps-id>)을 보여준다. plan source 자체는 리포 안팎 어디든 있을 수 있는 등록부다."],
+      ["plan", "등록된 plan 문서 목록(sources)과 그 규약(convention <ps-id>)을 보여줍니다. plan 문서는 리포 안팎 어디든 있을 수 있고, 여기는 그 등록부입니다."],
       ["ctx", "세션이 열릴 때 SessionStart 훅이 부르는 것과 같은 명령이다. genome·environment 요약과 상태 줄을 낸다. --milestone으로 다른 milestone 기준으로, --hook으로 훅이 부르는 형식 그대로 낼 수 있다."],
     ],
     indexLinkText: "코드 인덱스",
@@ -935,7 +935,7 @@ reap orch status [--topic <t>]     # claims · barriers`,
       ["fix --check·clean·destroy", "doctor·cleanup skill·rm -rf .reap + 플러그인 제거로 대체"],
       ["install-skills·load-context·dump-state, opencode/codex adapter", "플러그인 설치·ctx --hook으로 대체, 나머지는 없음"],
       ["/reap.help 16주제, 다국어 reap help", "README와 skill 본문으로 대체"],
-      ["vision/goals.md·lineage/·3단 memory·current.yml", "plan source·lessons.md 선별·.session으로 대체. 승계되지 않는 것도 있다"],
+      ["vision/goals.md·lineage/·3단 memory·current.yml", "plan 등록·lessons.md 선별·.session으로 대체. 승계되지 않는 것도 있다"],
     ],
   },
 
