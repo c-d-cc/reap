@@ -9,6 +9,7 @@ import type { Kind } from "./id.ts";
 import { validateRef } from "./plan.ts";
 import { paths, readSession } from "./store.ts";
 import { template } from "./templates.ts";
+import { t } from "./i18n.ts";
 
 export type Finding = { kind: string; detail: string };
 export type Report = { defects: Finding[]; notes: Finding[] };
@@ -53,11 +54,11 @@ export function diagnose(root: string): Report {
     const seen = new Map<string, string>();
     const registry = isRegistered(kind) ? new Set(readRegistry(root, kind).map((r) => r.id)) : null;
     for (const e of all[kind]) {
-      if (!isValid(e.id)) defects.push({ kind: "id 형식", detail: `${rel(root, e.path)}: ${e.id}` });
+      if (!isValid(e.id)) defects.push({ kind: t(root, "doctor.kind.id_format"), detail: `${rel(root, e.path)}: ${e.id}` });
       const prev = seen.get(e.id);
-      if (prev) defects.push({ kind: "id 중복", detail: `${e.id}: ${prev} · ${rel(root, e.path)}` });
+      if (prev) defects.push({ kind: t(root, "doctor.kind.id_duplicate"), detail: `${e.id}: ${prev} · ${rel(root, e.path)}` });
       seen.set(e.id, rel(root, e.path));
-      if (registry && !registry.has(e.id)) defects.push({ kind: "레지스트리에 없는 id", detail: `${e.id} (${rel(root, e.path)})` });
+      if (registry && !registry.has(e.id)) defects.push({ kind: t(root, "doctor.kind.id_unregistered"), detail: `${e.id} (${rel(root, e.path)})` });
     }
   }
 
@@ -67,14 +68,14 @@ export function diagnose(root: string): Report {
     const ids = Array.isArray(v) ? v.map(String) : typeof v === "string" ? [v] : [];
     for (const id of ids) {
       if (!isValid(id)) continue; // id 형식이 아닌 것(경로 등)은 참조로 세지 않는다
-      if (!exists(id)) defects.push({ kind: "끊긴 참조", detail: `${e.id}.${field} → ${id} (${rel(root, e.path)})` });
+      if (!exists(id)) defects.push({ kind: t(root, "doctor.kind.broken_ref"), detail: `${e.id}.${field} → ${id} (${rel(root, e.path)})` });
     }
   };
   for (const e of all.milestone) {
     refField(e, "from");
     for (const ref of Array.isArray(e.data.refs) ? e.data.refs.map(String) : []) {
       const problem = validateRef(root, ref);
-      if (problem) defects.push({ kind: "끊긴 참조", detail: `${e.id}.refs → ${ref}: ${problem}` });
+      if (problem) defects.push({ kind: t(root, "doctor.kind.broken_ref"), detail: `${e.id}.refs → ${ref}: ${problem}` });
     }
   }
   for (const e of all.generation) {
@@ -94,20 +95,20 @@ export function diagnose(root: string): Report {
   const bound = readSession(root).generation;
   for (const e of all.generation) {
     if (e.data.status === "closed" && e.data.startCommit && e.data.startCommit === e.data.endCommit) {
-      defects.push({ kind: "커밋 없이 닫힌 generation", detail: `${e.id} (${String(e.data.startCommit)})` });
+      defects.push({ kind: t(root, "doctor.kind.gen_closed_no_commit"), detail: `${e.id} (${String(e.data.startCommit)})` });
     }
     if (e.data.status === "open" && e.id !== bound) {
-      notes.push({ kind: "열린 채 바인딩 안 된 generation", detail: `${e.id} — 다른 세션의 것이거나 버려진 것. 내 것이면 reap bind ${e.id}, 버려진 것이면 mark --aborted` });
+      notes.push({ kind: t(root, "doctor.kind.gen_unbound"), detail: t(root, "doctor.detail.gen_unbound", { id: e.id }) });
     }
   }
 
   // 4. milestone — focus 둘
   const focused = all.milestone.filter((e) => e.data.status !== "closed" && String(e.data.focus) === "true");
-  if (focused.length > 1) defects.push({ kind: "focus가 둘", detail: focused.map((e) => e.id).join(", ") });
+  if (focused.length > 1) defects.push({ kind: t(root, "doctor.kind.duplicate_focus"), detail: focused.map((e) => e.id).join(", ") });
 
   // 5. map.md 씨앗
   if (existsSync(p.map) && readFileSync(p.map, "utf8") !== template(root, "map.md")) {
-    notes.push({ kind: "map.md가 씨앗과 다르다", detail: "프로젝트가 덧붙였거나 REAP가 레이아웃을 바꿨다. diff로 확인한다" });
+    notes.push({ kind: t(root, "doctor.kind.map_diverged"), detail: t(root, "doctor.detail.map_diverged") });
   }
 
   // 6. 크기 안내선 — 주입되는 것
@@ -115,34 +116,39 @@ export function diagnose(root: string): Report {
   for (const file of markdown(p.genome)) {
     const size = sizeOf(file);
     injected += size;
-    if (size > GUIDE.genomeFile) notes.push({ kind: "크기 안내선", detail: `${rel(root, file)} ${kb(size)} > ${kb(GUIDE.genomeFile)} — 매 세션 주입된다` });
+    if (size > GUIDE.genomeFile) notes.push({ kind: t(root, "doctor.kind.size_guideline"), detail: t(root, "doctor.detail.size_over", { path: rel(root, file), size: kb(size), limit: kb(GUIDE.genomeFile) }) });
   }
   const summary = join(p.environment, "summary.md");
   injected += sizeOf(summary);
-  if (sizeOf(summary) > GUIDE.genomeFile * 1.5) notes.push({ kind: "크기 안내선", detail: `${rel(root, summary)} ${kb(sizeOf(summary))} — 매 세션 주입된다` });
-  if (injected > GUIDE.injectedTotal) notes.push({ kind: "크기 안내선", detail: `주입 합계 ${kb(injected)} > ${kb(GUIDE.injectedTotal)}` });
+  if (sizeOf(summary) > GUIDE.genomeFile * 1.5) notes.push({ kind: t(root, "doctor.kind.size_guideline"), detail: t(root, "doctor.detail.size_over", { path: rel(root, summary), size: kb(sizeOf(summary)), limit: kb(GUIDE.genomeFile * 1.5) }) });
+  if (injected > GUIDE.injectedTotal) notes.push({ kind: t(root, "doctor.kind.size_guideline"), detail: t(root, "doctor.detail.injected_total", { size: kb(injected), limit: kb(GUIDE.injectedTotal) }) });
   const lessons = join(p.memory, "lessons.md");
   if (existsSync(lessons)) {
     const text = readFileSync(lessons, "utf8");
     const items = (text.match(/^#{2,3} /gm) ?? []).length;
     if (text.length > GUIDE.lessons || items > GUIDE.lessonsItems) {
-      notes.push({ kind: "누적 경고", detail: `lessons.md ${kb(text.length)} · 항목 ${items} — 졸업시킬 때다` });
+      notes.push({ kind: t(root, "doctor.kind.accumulation_warning"), detail: t(root, "doctor.detail.lessons_over", { size: kb(text.length), items }) });
     }
   }
   for (const e of all.milestone) {
     if (e.data.status === "closed") continue;
     const size = sizeOf(e.path);
-    if (size > GUIDE.milestone) notes.push({ kind: "크기 안내선", detail: `${rel(root, e.path)} ${kb(size)} > ${kb(GUIDE.milestone)} — 세대마다 열린다` });
+    if (size > GUIDE.milestone) notes.push({ kind: t(root, "doctor.kind.size_guideline"), detail: t(root, "doctor.detail.milestone_size_over", { path: rel(root, e.path), size: kb(size), limit: kb(GUIDE.milestone) }) });
   }
 
-  // 7. idea — 졸업 조건, 출처
+  // 7. idea — 졸업 조건, 출처. 헤딩 낱말은 프로젝트 언어(config.language)를 따른다 —
+  // 이 리포의 실물 idea는 한국어고, 새 프로젝트의 씨앗은 en이다.
+  const graduationWord = t(root, "doctor.pattern.graduation");
+  const sourcesWord = t(root, "doctor.pattern.sources");
+  const graduationHeading = new RegExp(`^#{2,3} .*${graduationWord}`, "m");
+  const sourcesHeading = new RegExp(`^#{2,3} .*${sourcesWord}`, "m");
   for (const e of all.idea) {
     if (e.dir.startsWith(p.archiveIdea)) continue;
     const kind = String(e.data.kind ?? "");
     if (kind !== "research" && kind !== "file") continue;
     const body = readFileSync(e.path, "utf8");
-    if (!/^#{2,3} .*졸업/m.test(body)) notes.push({ kind: "졸업 조건이 없는 idea", detail: `${e.id} (${rel(root, e.path)})` });
-    if (kind === "research" && !/^#{2,3} .*출처/m.test(body)) notes.push({ kind: "출처가 없는 research", detail: `${e.id}` });
+    if (!graduationHeading.test(body)) notes.push({ kind: t(root, "doctor.kind.idea_no_graduation"), detail: `${e.id} (${rel(root, e.path)})` });
+    if (kind === "research" && !sourcesHeading.test(body)) notes.push({ kind: t(root, "doctor.kind.research_no_sources"), detail: `${e.id}` });
   }
 
   // 8. 기록 안 상대 링크
@@ -152,7 +158,7 @@ export function diagnose(root: string): Report {
       const target = m[1]!;
       if (/^[a-z]+:/i.test(target) || target.startsWith("/")) continue;
       if (!existsSync(resolve(dirname(file), target))) {
-        defects.push({ kind: "깨진 상대 링크", detail: `${rel(root, file)} → ${target}` });
+        defects.push({ kind: t(root, "doctor.kind.broken_link"), detail: `${rel(root, file)} → ${target}` });
       }
     }
   }
@@ -160,7 +166,7 @@ export function diagnose(root: string): Report {
   // 9. carrier
   for (const problem of checkCarriers(root)) defects.push({ kind: "carrier", detail: `${problem.kind}: ${problem.detail}` });
   for (const c of orphans(scanCarriers(root))) {
-    notes.push({ kind: "carrier 고아", detail: `${c.id}-${c.slugs.join("|")} — 한 파일에만 있다. 표식이 불필요하거나 나머지가 표식되지 않았다` });
+    notes.push({ kind: t(root, "doctor.kind.carrier_orphan"), detail: t(root, "doctor.detail.carrier_orphan", { id: c.id, slugs: c.slugs.join("|") }) });
   }
 
   // 10. hooks — 파일명 규약, 이벤트, 조건 스크립트
@@ -180,7 +186,7 @@ function checkHooks(root: string): Finding[] {
     for (const hook of listHooks(root, event)) {
       recognized.add(hook.file);
       if (hook.condition !== "always" && !existsSync(join(paths(root).hookConditions, `${hook.condition}.sh`))) {
-        out.push({ kind: "훅 조건 스크립트 없음", detail: `hooks/${hook.file} → conditions/${hook.condition}.sh` });
+        out.push({ kind: t(root, "doctor.kind.hook_condition_missing"), detail: `hooks/${hook.file} → conditions/${hook.condition}.sh` });
       }
     }
   }
@@ -192,21 +198,21 @@ function checkHooks(root: string): Finding[] {
     if (!statSync(full).isFile()) continue; // conditions/ 는 디렉토리라 여기서 빠진다
     if (recognized.has(name)) continue;
     const match = shape.exec(name);
-    if (match) out.push({ kind: "모르는 훅 이벤트", detail: `hooks/${name} → ${match[1]}` });
-    else out.push({ kind: "훅 파일명 규약 밖", detail: `hooks/${name}` });
+    if (match) out.push({ kind: t(root, "doctor.kind.hook_unknown_event"), detail: `hooks/${name} → ${match[1]}` });
+    else out.push({ kind: t(root, "doctor.kind.hook_filename_invalid"), detail: `hooks/${name}` });
   }
 
   return out;
 }
 
-export function formatReport(r: Report): string {
-  const lines: string[] = [`결함 ${r.defects.length} · 참고 ${r.notes.length}`];
+export function formatReport(r: Report, root?: string | null): string {
+  const lines: string[] = [t(root, "doctor.report.header", { defects: r.defects.length, notes: r.notes.length })];
   if (r.defects.length > 0) {
-    lines.push("", "## 결함 — 확정적으로 틀린 것");
+    lines.push("", t(root, "doctor.report.defects_header"));
     for (const f of r.defects) lines.push(`- [${f.kind}] ${f.detail}`);
   }
   if (r.notes.length > 0) {
-    lines.push("", "## 참고 — 사람이 볼 것");
+    lines.push("", t(root, "doctor.report.notes_header"));
     for (const f of r.notes) lines.push(`- [${f.kind}] ${f.detail}`);
   }
   return lines.join("\n");

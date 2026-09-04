@@ -1,7 +1,7 @@
 import { afterEach, expect, test } from "bun:test";
 import { existsSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { cleanupTempDirs, commit, initRepo, tempDir } from "./helpers.ts";
+import { cleanupTempDirs, commit, initRepo, labelPrefix, tempDir } from "./helpers.ts";
 import { run } from "../src/cli.ts";
 import { parseDoc } from "../src/doc.ts";
 import { readSession } from "../src/store.ts";
@@ -476,5 +476,5 @@ test("bind가 열린 세대에 세션을 다시 묶는다 — abort로 잃은 �
   await run(["mark", "generation", "gen-0001-exec", "--closed"], root);
   const closed = await run(["bind", "gen-0001-exec"], root);
   expect(closed.ok).toBe(false);
-  expect(closed.message).toContain("닫힌");
+  expect(closed.message).toContain(labelPrefix("entries.gen_closed_no_bind").trim());
 });

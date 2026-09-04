@@ -7,6 +7,7 @@ import { assemble } from "../src/ctx.ts";
 import { parseDoc } from "../src/doc.ts";
 import { issue, kindOf, loopTypeOf, readRegistry } from "../src/id.ts";
 import { readSession } from "../src/store.ts";
+import { t } from "../src/i18n.ts";
 
 afterEach(cleanupTempDirs);
 
@@ -149,8 +150,8 @@ test("상태 줄이 열린 loop를 한 줄씩 내고 닫히면 사라진다", as
   await run(["make", "loop", "--type", "plan", "--title", "기획"], root);
   await run(["make", "loop", "--type", "design", "--title", "설계"], root);
   const text = assemble(root);
-  expect(text).toContain("열린 loop: loop-0001-plan 기획 — .reap/life/loops/loop-0001-plan-기획.md");
-  expect(text).toContain("열린 loop: loop-0002-design 설계 — .reap/life/loops/loop-0002-design-설계.md");
+  expect(text).toContain(t(root, "ctx.label.loop", { id: "loop-0001-plan", title: "기획", path: ".reap/life/loops/loop-0001-plan-기획.md" }));
+  expect(text).toContain(t(root, "ctx.label.loop", { id: "loop-0002-design", title: "설계", path: ".reap/life/loops/loop-0002-design-설계.md" }));
   await run(["mark", "loop", "loop-0001-plan", "--closed"], root);
   const after = assemble(root);
   expect(after).not.toContain("loop-0001-plan");

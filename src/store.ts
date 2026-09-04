@@ -151,7 +151,7 @@ export function workspaceId(cwd: string): string {
 export function readConfig(root: string): Config {
   const raw = readKV(paths(root).config);
   return {
-    language: raw.language ?? "ko",
+    language: raw.language ?? "",
     agentClient: raw.agentClient ?? "claude-code",
     workspaceId: raw.workspaceId ?? "",
   };

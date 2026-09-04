@@ -34,45 +34,20 @@ import {
   writeFileAtomic,
 } from "./store.ts";
 import { render, template } from "./templates.ts";
+import { t } from "./i18n.ts";
 import pkg from "../package.json" with { type: "json" };
 
 export type Result = { ok: boolean; message: string; data?: unknown; stderr?: string };
 
-const USAGE = `사용법: reap <명령>
-
-  --version
-  init [--force] | init --check     (--check: 씨앗 그대로인 지식 파일을 보고만 한다)
-  make loop       --type plan|design|uiux|idea --title "<제목>" [--slug <s>] [--from <id>] [--ref <ps-id>:<경로>]
-  make milestone  --title "<제목>" [--slug <s>] [--from <loop-id>] [--ref <ps-id>:<경로>] [--focus]
-  make generation --milestone <ms-id> --title "<제목>" [--slug <s>]
-  make generation --backlog <bk-id> --title "<제목>" [--slug <s>]   (--milestone과 겸용 가능)
-  make generation --fix  --title "<제목>" [--slug <s>]
-  make backlog    --type <t> --title "<제목>" [--slug <s>] [--from <id>]
-  make plan-source --root <path> --role "<역할>" [--slug <s>]
-  make idea       --kind research|freememo|file --title "<제목>" [--slug <s>]
-  make hook       --event <e> --name <n> [--type md|sh] [--condition <c>] [--order <n>]
-  mark loop       <loop-id> --closed [--milestone <ms-id>]... | --aborted
-  mark generation <gen-id> --closed | --aborted | --archived
-  mark backlog    <bk-id> --consumed [--by <gen-id>] | --archived
-  mark milestone <ms-id> --focus | --closed
-  mark idea       <idea-id> --archived
-  bind <gen-id>                   (열린 세대에 이 세션을 다시 묶는다)
-  seq [generation|milestone|loop|source|<id>]
-  carrier new <slug> | list [--orphans|--check]
-  doctor                          (보고만 한다. 결함이 있으면 실패로 끝난다)
-  index [update [--full] | status | impact <file>... | search <q> | callers <id> | callees <id>]
-  orch claim <resource> [--ttl 30m] | release <resource> | barrier <name> --expect <N> --timeout <s> | roster | status   [--topic <t>]
-  plan sources | convention <ps-id>
-  ctx [--milestone <ms-id>] [--hook]`;
-
 export async function run(argv: string[], cwd: string): Promise<Result> {
+  const root = findRoot(cwd);
   const [command, ...rest] = argv;
   switch (command) {
     case undefined:
     case "--help":
     case "-h":
     case "help":
-      return { ok: command === undefined ? false : true, message: USAGE };
+      return { ok: command === undefined ? false : true, message: t(root, "cli.usage") };
     case "--version":
     case "version":
       return { ok: true, message: `reap ${pkg.version}`, data: { version: pkg.version } };
@@ -90,9 +65,9 @@ export async function run(argv: string[], cwd: string): Promise<Result> {
       return attempt(() => seq(cwd, rest));
     case "bind":
       return attempt(() => {
-        if (!rest[0]) throw new Error("bind <gen-id>");
+        if (!rest[0]) throw new Error(t(root, "cli.bind_usage"));
         const bound = bindGeneration(requireRoot(cwd), rest[0]);
-        return { ok: true, message: `묶었습니다: ${bound.id}`, data: bound };
+        return { ok: true, message: t(root, "cli.bound", { id: bound.id }), data: bound };
       });
     case "carrier":
       return attempt(() => carrier(cwd, rest));
@@ -102,11 +77,12 @@ export async function run(argv: string[], cwd: string): Promise<Result> {
       return attemptAsync(() => orch(cwd, rest));
     case "doctor":
       return attempt(() => {
-        const report = diagnose(requireRoot(cwd));
-        return { ok: report.defects.length === 0, message: formatReport(report), data: report };
+        const r = requireRoot(cwd);
+        const report = diagnose(r);
+        return { ok: report.defects.length === 0, message: formatReport(report, r), data: report };
       });
     default:
-      return { ok: false, message: `모르는 명령입니다: ${command}\n\n${USAGE}` };
+      return { ok: false, message: `${t(root, "cli.unknown_command", { command: command! })}\n\n${t(root, "cli.usage")}` };
   }
 }
 
@@ -125,39 +101,39 @@ async function orch(cwd: string, argv: string[]): Promise<Result> {
   const flags = parseFlags([arg ?? "", ...rest].filter(Boolean));
   const topic = flags.value("--topic") ?? process.env.REAP_TOPIC ?? "main";
   if (sub === "claim") {
-    if (!arg || arg.startsWith("--")) throw new Error("orch claim <resource> [--ttl 30m]");
-    const c = claim(root, topic, arg, parseTtl(flags.value("--ttl") ?? "30m"));
-    return withHooks({ ok: true, message: `잡았습니다: ${c.resource} — ${c.holder}, 만료 ${c.expiresAt}`, data: c }, c.hooks);
+    if (!arg || arg.startsWith("--")) throw new Error(t(root, "orch.claim_usage"));
+    const c = claim(root, topic, arg, parseTtl(flags.value("--ttl") ?? "30m", root));
+    return withHooks(root, { ok: true, message: t(root, "orch.claimed", { resource: c.resource, holder: c.holder, expiresAt: c.expiresAt }), data: c }, c.hooks);
   }
   if (sub === "release") {
-    if (!arg || arg.startsWith("--")) throw new Error("orch release <resource>");
+    if (!arg || arg.startsWith("--")) throw new Error(t(root, "orch.release_usage"));
     release(root, topic, arg);
-    return { ok: true, message: `놓았습니다: ${arg}` };
+    return { ok: true, message: t(root, "orch.released", { resource: arg }) };
   }
   if (sub === "barrier") {
-    if (!arg || arg.startsWith("--")) throw new Error("orch barrier <name> --expect <N> --timeout <초>");
+    if (!arg || arg.startsWith("--")) throw new Error(t(root, "orch.barrier_usage"));
     const expect = Number(flags.value("--expect"));
     const timeout = Number(flags.value("--timeout"));
-    if (!Number.isInteger(expect) || expect < 1) throw new Error("--expect <N>이 필요합니다 (1 이상)");
-    if (!Number.isFinite(timeout) || timeout <= 0) throw new Error("--timeout <초>는 필수입니다 — 오지 않는 참가자를 무한정 기다리지 않습니다");
+    if (!Number.isInteger(expect) || expect < 1) throw new Error(t(root, "orch.expect_required"));
+    if (!Number.isFinite(timeout) || timeout <= 0) throw new Error(t(root, "orch.timeout_required"));
     arrive(root, topic, arg, expect);
     const r = await waitBarrier(root, topic, arg, expect, timeout * 1000);
-    if (r.released) return withHooks({ ok: true, message: `barrier ${arg} 통과 — ${r.barrier.arrived.map((a) => a.who).join(", ")}`, data: r }, r.hooks);
-    const missing = r.missing.length ? `오지 않은 세션: ${r.missing.join(", ")}` : `도착 ${r.barrier.arrived.length}/${r.barrier.expect} — roster를 알 수 없어 누구인지는 모른다`;
-    return { ok: false, message: `barrier ${arg} 시간 초과 (${timeout}s). ${missing}`, data: r };
+    if (r.released) return withHooks(root, { ok: true, message: t(root, "orch.barrier_passed", { name: arg, names: r.barrier.arrived.map((a) => a.who).join(", ") }), data: r }, r.hooks);
+    const missing = r.missing.length ? t(root, "orch.barrier_missing", { names: r.missing.join(", ") }) : t(root, "orch.barrier_unknown_missing", { arrived: r.barrier.arrived.length, expect: r.barrier.expect });
+    return { ok: false, message: t(root, "orch.barrier_timeout", { name: arg, timeout, missing }), data: r };
   }
   if (sub === "roster") {
     const agents = roster(topic);
-    return { ok: true, message: agents.length ? agents.map((a) => `${a.name}  ${a.state ?? "?"}  ${a.cwd ?? ""}`).join("\n") : `reap-${topic}-* 세션이 없거나 claude agents를 읽을 수 없다`, data: agents };
+    return { ok: true, message: agents.length ? agents.map((a) => `${a.name}  ${a.state ?? "?"}  ${a.cwd ?? ""}`).join("\n") : t(root, "orch.roster_empty", { topic }), data: agents };
   }
   if (sub === "status") {
     const s = orchStatus(root, topic);
-    const lines = [`topic ${topic} · 나 ${whoAmI(root)}`];
-    lines.push(s.claims.length ? "claims:" : "claims: 없음", ...s.claims.map((c) => `  ${c.resource}  ${c.holder}  만료 ${c.expiresAt}`));
-    lines.push(s.barriers.length ? "barriers:" : "barriers: 없음", ...s.barriers.map((b) => `  ${b.name}  ${b.arrived.length}/${b.expect}`));
+    const lines = [t(root, "orch.status_line", { topic, me: whoAmI(root) })];
+    lines.push(s.claims.length ? t(root, "orch.claims_header") : t(root, "orch.claims_none"), ...s.claims.map((c) => t(root, "orch.claim_line", { resource: c.resource, holder: c.holder, expiresAt: c.expiresAt })));
+    lines.push(s.barriers.length ? t(root, "orch.barriers_header") : t(root, "orch.barriers_none"), ...s.barriers.map((b) => t(root, "orch.barrier_line", { name: b.name, arrived: b.arrived.length, expect: b.expect })));
     return { ok: true, message: lines.join("\n"), data: s };
   }
-  throw new Error(`orch는 claim · release · barrier · roster · status입니다: ${sub ?? "(없음)"}`);
+  throw new Error(t(root, "orch.unknown_sub", { sub: sub ?? t(root, "cli.none") }));
 }
 
 /** 질의는 먼저 인덱스를 HEAD에 맞춘다. 커밋 안 된 것은 없다 — 그런 것은 grep이다. */
@@ -168,39 +144,39 @@ async function index(cwd: string, argv: string[]): Promise<Result> {
   if (sub === "update") {
     const r = await ix.update(rest.includes("--full"));
     const m = ix.manifest();
-    return { ok: true, message: `${r.mode} · 파일 ${r.files} · ${r.ms}ms\n${m ? formatStatus(m) : ""}`, data: r };
+    return { ok: true, message: `${t(root, "index.update_summary", { mode: r.mode, files: r.files, ms: r.ms })}\n${m ? formatStatus(m, root) : ""}`, data: r };
   }
   if (sub === "status") {
     await ix.ready();
     const m = ix.manifest();
-    if (!m) throw new Error("인덱스가 없습니다.");
-    return { ok: true, message: formatStatus(m), data: m };
+    if (!m) throw new Error(t(root, "index.no_index"));
+    return { ok: true, message: formatStatus(m, root), data: m };
   }
   await ix.ready();
   if (sub === "impact") {
-    if (rest.length === 0) throw new Error("index impact <file>...");
+    if (rest.length === 0) throw new Error(t(root, "index.impact_usage"));
     const r = ix.impact(rest.map((f) => relative(root, resolve(cwd, f))));
-    const lines = [`직접 ${r.direct.length} · 간접 ${r.indirect.length} · 심볼 ${r.symbols.length}`];
-    if (r.direct.length) lines.push("직접:", ...r.direct.map((f) => `  ${f}`));
-    if (r.indirect.length) lines.push("간접:", ...r.indirect.map((f) => `  ${f}`));
-    if (r.symbols.length) lines.push("심볼:", ...r.symbols.map((s) => `  ${s}`));
+    const lines = [t(root, "index.impact_summary", { direct: r.direct.length, indirect: r.indirect.length, symbols: r.symbols.length })];
+    if (r.direct.length) lines.push(t(root, "index.impact_direct_header"), ...r.direct.map((f) => `  ${f}`));
+    if (r.indirect.length) lines.push(t(root, "index.impact_indirect_header"), ...r.indirect.map((f) => `  ${f}`));
+    if (r.symbols.length) lines.push(t(root, "index.impact_symbols_header"), ...r.symbols.map((s) => `  ${s}`));
     const m = ix.manifest()!;
-    if (m.stats.imports.attempted > 0 && m.stats.imports.resolved / m.stats.imports.attempted < 0.8) lines.push("(해석률이 낮다 — 빈 결과는 '모름'이다)");
+    if (m.stats.imports.attempted > 0 && m.stats.imports.resolved / m.stats.imports.attempted < 0.8) lines.push(t(root, "index.low_resolution_note"));
     return { ok: true, message: lines.join("\n"), data: r };
   }
   if (sub === "search") {
-    if (!rest[0]) throw new Error("index search <query>");
+    if (!rest[0]) throw new Error(t(root, "index.search_usage"));
     const hits = ix.search(rest[0]);
-    return { ok: true, message: hits.length ? hits.map((n) => `${n.id}  ${n.kind}  ${n.file}:${n.line}`).join("\n") : "없음 (커밋 안 된 것은 인덱스에 없다)", data: hits };
+    return { ok: true, message: hits.length ? hits.map((n) => `${n.id}  ${n.kind}  ${n.file}:${n.line}`).join("\n") : t(root, "index.search_none"), data: hits };
   }
   if (sub === "callers" || sub === "callees") {
-    if (!rest[0]) throw new Error(`index ${sub} <symbolId>`);
-    if (!ix.node(rest[0])) throw new Error(`모르는 심볼입니다: ${rest[0]} (index search로 id를 찾습니다)`);
+    if (!rest[0]) throw new Error(t(root, "index.symbol_usage", { sub }));
+    if (!ix.node(rest[0])) throw new Error(t(root, "index.unknown_symbol", { id: rest[0] }));
     const edges = sub === "callers" ? ix.callers(rest[0]) : ix.callees(rest[0]);
     const ids = edges.map((e) => (sub === "callers" ? e.from : e.to)).sort();
-    return { ok: true, message: ids.length ? ids.map((id) => { const n = ix.node(id); return n ? `${id}  ${n.file}:${n.line}` : id; }).join("\n") : "없음", data: ids };
+    return { ok: true, message: ids.length ? ids.map((id) => { const n = ix.node(id); return n ? `${id}  ${n.file}:${n.line}` : id; }).join("\n") : t(root, "index.callers_none"), data: ids };
   }
-  throw new Error(`index는 update · status · impact · search · callers · callees입니다: ${sub}`);
+  throw new Error(t(root, "index.unknown_sub", { sub }));
 }
 
 /** 사용자 입력이 틀린 것은 예외가 아니라 결과다. 스택 트레이스를 사람에게 보이지 않는다. */
@@ -222,12 +198,12 @@ function make(cwd: string, argv: string[]): Result {
   if (kind === "plan-source") {
     const sourceRoot = flags.value("--root");
     const role = flags.value("--role");
-    if (!sourceRoot) throw new Error("plan-source에는 --root <path>가 필요합니다.");
-    if (!role) throw new Error("plan-source에는 --role \"<역할>\"이 필요합니다.");
+    if (!sourceRoot) throw new Error(t(root, "make.plan_source_needs_root"));
+    if (!role) throw new Error(t(root, "make.plan_source_needs_role"));
     const made = makePlanSource(root, { root: sourceRoot, role, slug: flags.value("--slug"), now });
     return {
       ok: true,
-      message: `plan-source ${made.id}\n  ${relative(root, made.path)}\n  ${relative(root, made.convention)}`,
+      message: t(root, "make.plan_source_result", { id: made.id, path: relative(root, made.path), convention: relative(root, made.convention) }),
       data: made,
     };
   }
@@ -245,13 +221,13 @@ function make(cwd: string, argv: string[]): Result {
   }
 
   const title = flags.value("--title");
-  if (!title) throw new Error("--title이 필요합니다.");
+  if (!title) throw new Error(t(root, "make.title_required"));
 
   switch (kind) {
     case "loop": {
       const type = flags.value("--type");
       if (!type || !isLoopType(type)) {
-        throw new Error(`loop에는 --type이 필요합니다: ${LOOP_TYPES.join(" · ")} (받은 값: ${type ?? "(없음)"})`);
+        throw new Error(t(root, "make.loop_needs_type", { types: LOOP_TYPES.join(" · "), got: type ?? t(root, "cli.none") }));
       }
       const made = makeLoop(root, {
         title,
@@ -288,20 +264,20 @@ function make(cwd: string, argv: string[]): Result {
     }
     case "backlog": {
       const type = flags.value("--type");
-      if (!type) throw new Error("backlog에는 --type이 필요합니다. 열거로 막지 않으므로 관례를 따릅니다(예: design).");
+      if (!type) throw new Error(t(root, "make.backlog_needs_type"));
       const made = makeBacklog(root, { title, slug: flags.value("--slug"), type, from: flags.value("--from"), now });
       return made2result(root, "backlog", made);
     }
     case "idea": {
       const kind = flags.value("--kind");
       if (!kind || !isIdeaKind(kind)) {
-        throw new Error(`idea에는 --kind가 필요합니다: research · freememo · file (받은 값: ${kind ?? "(없음)"})`);
+        throw new Error(t(root, "make.idea_needs_kind", { got: kind ?? t(root, "cli.none") }));
       }
       const made = makeIdea(root, { title, slug: flags.value("--slug"), kind, now });
       return made2result(root, "idea", made);
     }
     default:
-      throw new Error(`make는 loop · milestone · generation · backlog · idea · hook · plan-source를 만듭니다: ${kind ?? "(없음)"}`);
+      throw new Error(t(root, "make.unknown_kind", { kind: kind ?? t(root, "cli.none") }));
   }
 }
 
@@ -311,63 +287,63 @@ function mark(cwd: string, argv: string[]): Result {
   const flags = parseFlags(rest);
 
   if (kind === "loop") {
-    if (!needle) throw new Error("표시할 loop의 id가 필요합니다.");
+    if (!needle) throw new Error(t(root, "mark.loop_needs_id"));
     if (flags.has("--aborted")) {
       const marked = markLoop(root, needle, "aborted", timestamp());
-      return { ok: true, message: `기록을 지웠습니다: ${marked.id}`, data: marked };
+      return { ok: true, message: t(root, "mark.cleared", { id: marked.id }), data: marked };
     }
-    if (!flags.has("--closed")) throw new Error("--closed · --aborted 중 하나가 필요합니다.");
+    if (!flags.has("--closed")) throw new Error(t(root, "mark.need_flag_closed_aborted"));
     const marked = markLoop(root, needle, "closed", timestamp(), flags.values("--milestone"));
-    return { ok: true, message: `닫았습니다: ${marked.id}\n  ${relative(root, marked.path)}`, data: marked };
+    return { ok: true, message: t(root, "mark.closed", { id: marked.id, path: relative(root, marked.path) }), data: marked };
   }
 
   if (kind === "generation") {
-    if (!needle) throw new Error("표시할 generation의 id가 필요합니다.");
+    if (!needle) throw new Error(t(root, "mark.gen_needs_id"));
     if (flags.has("--aborted")) {
       const marked = markGeneration(root, needle, "aborted", timestamp());
-      return { ok: true, message: `기록을 지웠습니다: ${marked.id}`, data: marked };
+      return { ok: true, message: t(root, "mark.cleared", { id: marked.id }), data: marked };
     }
     if (flags.has("--archived")) {
       const marked = markGeneration(root, needle, "archived", timestamp());
-      return { ok: true, message: `옮겼습니다: ${marked.id}\n  ${relative(root, marked.path)}`, data: marked };
+      return { ok: true, message: t(root, "mark.moved", { id: marked.id, path: relative(root, marked.path) }), data: marked };
     }
-    if (!flags.has("--closed")) throw new Error("--closed · --aborted · --archived 중 하나가 필요합니다.");
+    if (!flags.has("--closed")) throw new Error(t(root, "mark.need_flag_gen"));
     const marked = markGeneration(root, needle, "closed", timestamp());
-    return withHooks({ ok: true, message: `닫았습니다: ${marked.id}`, data: marked }, marked.hooks);
+    return withHooks(root, { ok: true, message: t(root, "mark.gen_closed", { id: marked.id }), data: marked }, marked.hooks);
   }
 
   if (kind === "backlog") {
-    if (!needle) throw new Error("표시할 backlog의 id가 필요합니다.");
+    if (!needle) throw new Error(t(root, "mark.backlog_needs_id"));
     if (flags.has("--archived")) {
       const marked = markBacklog(root, needle, "archived");
-      return { ok: true, message: `옮겼습니다: ${marked.id}\n  ${relative(root, marked.path)}`, data: marked };
+      return { ok: true, message: t(root, "mark.moved", { id: marked.id, path: relative(root, marked.path) }), data: marked };
     }
-    if (!flags.has("--consumed")) throw new Error("--consumed · --archived 중 하나가 필요합니다.");
+    if (!flags.has("--consumed")) throw new Error(t(root, "mark.need_flag_backlog"));
     const marked = markBacklog(root, needle, "consumed", flags.value("--by"));
-    return { ok: true, message: `소비 표시했습니다: ${marked.id}`, data: marked };
+    return { ok: true, message: t(root, "mark.backlog_consumed", { id: marked.id }), data: marked };
   }
 
   if (kind === "idea") {
-    if (!needle) throw new Error("표시할 idea의 id가 필요합니다.");
-    if (!flags.has("--archived")) throw new Error("idea는 --archived만 받습니다.");
+    if (!needle) throw new Error(t(root, "mark.idea_needs_id"));
+    if (!flags.has("--archived")) throw new Error(t(root, "mark.idea_only_archived"));
     const marked = markIdea(root, needle, "archived");
-    return { ok: true, message: `옮겼습니다: ${marked.id}\n  ${relative(root, marked.path)}`, data: marked };
+    return { ok: true, message: t(root, "mark.moved", { id: marked.id, path: relative(root, marked.path) }), data: marked };
   }
 
   if (kind === "milestone") {
-    if (!needle) throw new Error("표시할 milestone의 id가 필요합니다.");
+    if (!needle) throw new Error(t(root, "mark.milestone_needs_id"));
     if (flags.has("--focus")) {
       const marked = markMilestone(root, needle, "focus", timestamp());
-      return { ok: true, message: `초점을 맞췄습니다: ${marked.id}`, data: marked };
+      return { ok: true, message: t(root, "mark.focused", { id: marked.id }), data: marked };
     }
     if (flags.has("--closed")) {
       const marked = markMilestone(root, needle, "closed", timestamp());
-      return withHooks({ ok: true, message: `닫고 옮겼습니다: ${marked.id}\n  ${relative(root, marked.path)}`, data: marked }, marked.hooks);
+      return withHooks(root, { ok: true, message: t(root, "mark.closed_moved", { id: marked.id, path: relative(root, marked.path) }), data: marked }, marked.hooks);
     }
-    throw new Error("--focus 또는 --closed가 필요합니다.");
+    throw new Error(t(root, "mark.need_flag_milestone"));
   }
 
-  throw new Error(`mark는 loop · generation · backlog · milestone · idea를 표시합니다: ${kind ?? "(없음)"}`);
+  throw new Error(t(root, "mark.unknown_kind", { kind: kind ?? t(root, "cli.none") }));
 }
 
 /**
@@ -380,7 +356,7 @@ function ctx(cwd: string, argv: string[]): Result {
   const root = findRoot(cwd);
   if (!root) {
     if (hook) return { ok: true, message: "" };
-    throw new Error("REAP 프로젝트가 아닙니다. 먼저 reap init을 실행합니다.");
+    throw new Error(t(root, "cli.not_a_project"));
   }
   const context = assemble(root, flags.value("--milestone"));
   if (hook) return { ok: true, message: context === "" ? "" : hookEnvelope(context) };
@@ -392,21 +368,21 @@ function carrier(cwd: string, argv: string[]): Result {
   const root = requireRoot(cwd);
   const [sub, arg, ...rest] = argv;
   if (sub === "new") {
-    if (!arg) throw new Error("carrier new <slug>");
+    if (!arg) throw new Error(t(root, "carrier.new_usage"));
     return { ok: true, message: newCarrier(root, arg) };
   }
   if (sub === "list") {
     const flags = parseFlags([arg ?? "", ...rest].filter(Boolean));
     if (flags.has("--check")) {
       const problems = checkCarriers(root);
-      if (problems.length === 0) return { ok: true, message: "표식에 문제가 없습니다." };
+      if (problems.length === 0) return { ok: true, message: t(root, "carrier.no_problems") };
       return { ok: false, message: problems.map((p) => `${p.kind}: ${p.detail}`).join("\n"), data: problems };
     }
     const all = scanCarriers(root);
     const shown = flags.has("--orphans") ? orphans(all) : all;
-    return { ok: true, message: formatCarriers(shown), data: shown };
+    return { ok: true, message: formatCarriers(shown, root), data: shown };
   }
-  throw new Error(`carrier는 new <slug> · list [--orphans|--check]입니다: ${sub ?? "(없음)"}`);
+  throw new Error(t(root, "carrier.unknown_sub", { sub: sub ?? t(root, "cli.none") }));
 }
 
 /** 레지스트리 조회. 표의 이스케이프를 되돌려 보여준다 — 사람이 읽는 것이다. */
@@ -421,10 +397,10 @@ function seq(cwd: string, argv: string[]): Result {
   if (!needle) return { ok: true, message: kinds.map(render).join("\n\n") };
   if (kinds.includes(needle as Kind)) return { ok: true, message: render(needle as Kind) };
   if (isRegistered(needle as Kind)) return { ok: true, message: render(needle as Kind) };
-  if (!isValid(needle)) throw new Error(`seq는 계열(${kinds.join(" · ")}) 또는 id를 받습니다. 레지스트리가 없는 계열(backlog·idea)은 조회할 것이 없습니다: ${needle}`);
+  if (!isValid(needle)) throw new Error(t(root, "seq.invalid", { kinds: kinds.join(" · "), needle }));
   const kind = kindOf(needle)!;
   const row = readRegistry(root, kind).find((r) => r.id === needle);
-  if (!row) throw new Error(`레지스트리에 없습니다: ${needle}`);
+  if (!row) throw new Error(t(root, "seq.not_found", { needle }));
   return { ok: true, message: `${row.id}  ${row.title}  ${row.createdAt}`, data: row };
 }
 
@@ -432,23 +408,24 @@ function seq(cwd: string, argv: string[]): Result {
 function plan(cwd: string, argv: string[]): Result {
   const [sub, needle] = argv;
   const root = requireRoot(cwd);
-  if (sub === "sources") return { ok: true, message: formatSources(readSources(root)), data: readSources(root) };
+  if (sub === "sources") return { ok: true, message: formatSources(readSources(root), root), data: readSources(root) };
   if (sub === "convention") {
-    if (!needle) throw new Error("plan convention <ps-id>");
+    if (!needle) throw new Error(t(root, "plan.convention_usage"));
     const source = findSource(root, needle);
-    if (!source) throw new Error(`등록되지 않은 plan source입니다: ${needle}`);
+    if (!source) throw new Error(t(root, "plan.unregistered_source", { id: needle }));
     const path = join(paths(root).plan, source.convention);
-    if (!existsSync(path)) throw new Error(`규약 문서가 없습니다: ${relative(root, path)}`);
+    if (!existsSync(path)) throw new Error(t(root, "plan.convention_missing", { path: relative(root, path) }));
     return { ok: true, message: readFileSync(path, "utf8"), data: source };
   }
-  throw new Error(`plan은 sources · convention <ps-id>를 읽습니다: ${sub ?? "(없음)"}`);
+  throw new Error(t(root, "plan.unknown_sub", { sub: sub ?? t(root, "cli.none") }));
 }
 
 function made2result(root: string, label: string, made: { id: string; path: string; hooks?: RunHooksResult }): Result {
   return withHooks(
+    root,
     {
       ok: true,
-      message: `${label} ${made.id}\n  ${relative(root, made.path)}`,
+      message: t(root, "make.result", { label, id: made.id, path: relative(root, made.path) }),
       data: made,
     },
     made.hooks,
@@ -460,7 +437,7 @@ function made2result(root: string, label: string, made: { id: string; path: stri
  * failures는 stderr에 `hook 실패: <file> — <reason>`. skipped는 아무것도 안 낸다 —
  * 실패가 아니라 조건이 안 맞아 건너뛴 것이다. 훅이 실패해도 `ok`는 건드리지 않는다.
  */
-function withHooks(result: Result, hooks?: RunHooksResult): Result {
+function withHooks(root: string, result: Result, hooks?: RunHooksResult): Result {
   if (!hooks) return result;
   const out: Result = { ...result };
   if (hooks.outputs.length > 0) {
@@ -468,14 +445,14 @@ function withHooks(result: Result, hooks?: RunHooksResult): Result {
     out.message = `${result.message}\n\n--- hooks ---\n${block.join("\n")}`;
   }
   if (hooks.failures.length > 0) {
-    out.stderr = hooks.failures.map((f) => `hook 실패: ${f.file} — ${f.reason}`).join("\n");
+    out.stderr = hooks.failures.map((f) => t(root, "cli.hook_failure", { file: f.file, reason: f.reason })).join("\n");
   }
   return out;
 }
 
 function requireRoot(cwd: string): string {
   const root = findRoot(cwd);
-  if (!root) throw new Error("REAP 프로젝트가 아닙니다. 먼저 reap init을 실행합니다.");
+  if (!root) throw new Error(t(root, "cli.not_a_project"));
   return root;
 }
 
@@ -522,7 +499,7 @@ function init(cwd: string, force: boolean): Result {
   if (existsSync(p.reap) && !force) {
     return {
       ok: false,
-      message: "이미 초기화되어 있습니다. 빠진 것만 채우려면 --force를 씁니다.",
+      message: t(root, "cli.already_initialized"),
     };
   }
 
@@ -553,8 +530,8 @@ function init(cwd: string, force: boolean): Result {
   return {
     ok: true,
     message: created.length > 0
-      ? `초기화했습니다: ${root}\n  ${created.join("\n  ")}`
-      : `빠진 것이 없습니다: ${root}`,
+      ? t(root, "cli.initialized", { root, created: created.join("\n  ") })
+      : t(root, "cli.nothing_missing", { root }),
     data: { root, created },
   };
 }
@@ -575,8 +552,8 @@ function checkSeeds(cwd: string): Result {
   return {
     ok: true,
     message: seeds.length > 0
-      ? `씨앗인 채 남은 파일:\n  ${seeds.map((f) => `.reap/${f}`).join("\n  ")}`
-      : "씨앗인 채 남은 파일이 없습니다.",
+      ? t(root, "cli.seeds_remaining", { files: seeds.map((f) => `.reap/${f}`).join("\n  ") })
+      : t(root, "cli.no_seeds_remaining"),
     data: { seeds },
   };
 }

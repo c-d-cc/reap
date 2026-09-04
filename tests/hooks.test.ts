@@ -1,10 +1,11 @@
 import { afterEach, expect, test } from "bun:test";
 import { chmodSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { cleanupTempDirs, commit, initRepo, tempDir } from "./helpers.ts";
+import { cleanupTempDirs, commit, initRepo, labelPrefix, tempDir } from "./helpers.ts";
 import { run } from "../src/cli.ts";
 import { listHooks, runHooks } from "../src/hooks.ts";
 import { paths } from "../src/store.ts";
+import { t } from "../src/i18n.ts";
 
 afterEach(cleanupTempDirs);
 
@@ -261,7 +262,7 @@ test("훅이 exit 1이어도 명령은 성공이고 실패 사유는 stderr에 �
   const result = await run(["make", "generation", "--milestone", "ms-001", "--title", "나"], root);
   expect(result.ok).toBe(true);
   expect(result.message).not.toContain("--- hooks ---");
-  expect(result.stderr).toContain("hook 실패: gen.made.fail.sh");
+  expect(result.stderr).toContain(`${labelPrefix("cli.hook_failure")}gen.made.fail.sh`);
 });
 
 test("훅이 exit 1이어도 make generation이 세대 파일과 .session을 남긴다 (03-hooks 검증할 동작 1)", async () => {
@@ -283,7 +284,7 @@ test(".md 훅 본문이 mark generation --closed 출력 뒤에 그대로 붙는�
   const result = await run(["mark", "generation", "gen-0001-exec", "--closed"], root);
   expect(result.ok).toBe(true);
   expect(result.message).toBe(
-    "닫았습니다: gen-0001-exec\n\n--- hooks ---\n[gen.closed.note.md]\n검토해야 할 변경사항입니다.\n둘째 줄.\n",
+    `${t(root, "mark.gen_closed", { id: "gen-0001-exec" })}\n\n--- hooks ---\n[gen.closed.note.md]\n검토해야 할 변경사항입니다.\n둘째 줄.\n`,
   );
 });
 

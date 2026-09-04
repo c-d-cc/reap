@@ -16,7 +16,7 @@
 set -u
 root="${1:-.}"
 r="$root/.reap"
-if [ ! -d "$r" ]; then echo "none"; echo "근거: $r 없음"; exit 0; fi
+if [ ! -d "$r" ]; then echo "none"; echo "evidence: $r missing"; exit 0; fi
 
 v18=(); v17=()
 # ── 0.18에서 새로 생긴 파일 ──
@@ -30,7 +30,7 @@ v18=(); v17=()
 # 파일(*.sh·*.md) 중 v0.17 관례(onXxx)로 시작하는 파일명만 0.17 표지다.
 v17_hooks=$(find "$r/hooks" -maxdepth 1 -type f \( -name '*.sh' -o -name '*.md' \) -print 2>/dev/null \
   | xargs -I{} basename {} 2>/dev/null | grep -E '^on[A-Z]')
-[ -n "$v17_hooks" ] && v17+=("hooks/ 안의 v0.17 훅 파일")
+[ -n "$v17_hooks" ] && v17+=("v0.17 hook files inside hooks/")
 [ -f "$r/sequence/goal.md" ]            && v17+=("sequence/goal.md")
 
 if [ ${#v18[@]} -gt 0 ] && [ ${#v17[@]} -gt 0 ]; then verdict="mixed"
@@ -39,7 +39,7 @@ elif [ ${#v17[@]} -gt 0 ]; then verdict="v017"
 else verdict="unknown"; fi
 
 echo "$verdict"
-[ ${#v18[@]} -gt 0 ] && echo "0.18 표지: ${v18[*]}"
-[ ${#v17[@]} -gt 0 ] && echo "0.17 표지: ${v17[*]}"
-[ "$verdict" = "unknown" ] && echo "근거: .reap/ 은 있으나 양쪽 표지가 전부 없음 — v0.15/0.16이거나 손상"
+[ ${#v18[@]} -gt 0 ] && echo "0.18 markers: ${v18[*]}"
+[ ${#v17[@]} -gt 0 ] && echo "0.17 markers: ${v17[*]}"
+[ "$verdict" = "unknown" ] && echo "evidence: .reap/ exists but neither side's markers are present — v0.15/0.16, or corrupted"
 exit 0

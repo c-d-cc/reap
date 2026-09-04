@@ -10,6 +10,7 @@ import { issue } from "./id.ts";
 import { requireRefs } from "./plan.ts";
 import { bindSession, ensureDir, paths, readSession, unbindSession, writeFileAtomic } from "./store.ts";
 import { render, template } from "./templates.ts";
+import { t } from "./i18n.ts";
 
 export type MakeBacklog = { title: string; slug?: string; type: string; from?: string; now: string };
 export type MakeIdea = { title: string; slug?: string; kind: IdeaKind; now: string };
@@ -37,7 +38,7 @@ export function makeMilestone(root: string, opts: MakeMilestone): Made {
   // 인용은 확정 가능한 것만 검사한다 — 소스가 등록돼 있고 파일이 그 안에 있는가. id 발급 전에 본다
   requireRefs(root, opts.refs);
   const id = issue(root, "milestone", opts.title, registryDate(opts.now));
-  const slug = opts.slug ?? slugify(opts.title);
+  const slug = opts.slug ?? slugify(opts.title, root);
   const dir = join(paths(root).milestones, `${id}-${slug}`);
   ensureDir(dir);
 
@@ -71,25 +72,21 @@ export function makeGeneration(root: string, opts: MakeGeneration): Made {
   // 그 안의 구체적 일을 준다. 배타인 것은 유형끼리다.
   const grounds = [opts.milestone !== undefined, opts.backlog !== undefined].filter(Boolean).length;
   if (opts.plan) {
-    throw new Error("generation에는 plan 유형이 없습니다. 새 의도를 만드는 일은 loop입니다: reap make loop --type plan|design|uiux|idea");
+    throw new Error(t(root, "entries.no_plan_type"));
   }
   const types = opts.fix === true ? 1 : 0;
   if (types === 1 && grounds > 0) {
-    throw new Error("--fix는 근거(--milestone·--backlog)와 함께 줄 수 없습니다.");
+    throw new Error(t(root, "entries.fix_no_grounds"));
   }
   if (types === 0 && grounds === 0) {
-    throw new Error(
-      "generation을 열려면 유형이나 근거가 필요합니다: " +
-        "exec은 --milestone <ms-id>와 --backlog <bk-id> 중 하나 이상(둘 다 가능), 되돌리는 일은 --fix. " +
-        "새 의도를 만드는 일이면 make loop.",
-    );
+    throw new Error(t(root, "entries.gen_needs_type_or_grounds"));
   }
 
   const type: GenerationType = opts.fix ? "fix" : "exec";
   const milestone = opts.milestone !== undefined ? resolveMilestone(root, opts.milestone) : null;
   const backlog = opts.backlog !== undefined ? resolveBacklog(root, opts.backlog) : null;
   const id = issue(root, "generation", opts.title, registryDate(opts.now), type);
-  const slug = opts.slug ?? slugify(opts.title);
+  const slug = opts.slug ?? slugify(opts.title, root);
 
   const data: Record<string, unknown> = { id, slug, type };
   if (milestone) data.milestone = milestone.id;
@@ -116,7 +113,7 @@ export function makeGeneration(root: string, opts: MakeGeneration): Made {
 export function makeLoop(root: string, opts: MakeLoop): Made {
   requireRefs(root, opts.refs);
   const id = issue(root, "loop", opts.title, registryDate(opts.now), opts.type);
-  const slug = opts.slug ?? slugify(opts.title);
+  const slug = opts.slug ?? slugify(opts.title, root);
   const data: Record<string, unknown> = { id, slug, type: opts.type, title: opts.title };
   if (opts.from) data.from = opts.from;
   if (opts.refs && opts.refs.length > 0) data.refs = opts.refs;
@@ -165,7 +162,7 @@ function archiveOverflowLoops(root: string): void {
  */
 export function bindGeneration(root: string, needle: string): Made {
   const entry = resolveGeneration(root, needle);
-  if (entry.data.status === "closed") throw new Error(`닫힌 세대에는 묶지 않습니다: ${entry.id}`);
+  if (entry.data.status === "closed") throw new Error(t(root, "entries.gen_closed_no_bind", { id: entry.id }));
   const milestone = typeof entry.data.milestone === "string" ? entry.data.milestone : undefined;
   bindSession(root, entry.id, milestone);
   return { id: entry.id, path: entry.path };
@@ -205,9 +202,9 @@ export function markGeneration(
 export function markBacklog(root: string, needle: string, flag: "consumed" | "archived", by?: string): Made {
   const found = findEntry(root, "backlog", needle);
   if ("ambiguous" in found) {
-    throw new Error(`backlog가 여럿에 걸립니다: ${found.ambiguous.map((e) => e.id).join(", ")}`);
+    throw new Error(t(root, "entries.backlog_ambiguous", { ids: found.ambiguous.map((e) => e.id).join(", ") }));
   }
-  if (!("entry" in found)) throw new Error(`backlog를 찾지 못했습니다: ${needle}`);
+  if (!("entry" in found)) throw new Error(t(root, "entries.backlog_not_found", { needle }));
   const entry = found.entry;
 
   if (flag === "archived") {
@@ -261,14 +258,11 @@ function focusOn(root: string, id: string): void {
 function resolveBacklog(root: string, needle: string): Entry {
   const found = findEntry(root, "backlog", needle);
   if ("ambiguous" in found) {
-    throw new Error(`backlog가 여럿에 걸립니다: ${found.ambiguous.map((e) => e.id).join(", ")}`);
+    throw new Error(t(root, "entries.backlog_ambiguous", { ids: found.ambiguous.map((e) => e.id).join(", ") }));
   }
-  if (!("entry" in found)) throw new Error(`backlog를 찾지 못했습니다: ${needle}`);
+  if (!("entry" in found)) throw new Error(t(root, "entries.backlog_not_found", { needle }));
   if (found.entry.data.status === "consumed") {
-    throw new Error(
-      `이미 consumed인 backlog는 근거가 되지 못합니다: ${found.entry.id}. ` +
-        "남은 일이 있다면 무엇이 남았는지를 담은 새 항목을 만듭니다.",
-    );
+    throw new Error(t(root, "entries.backlog_consumed_no_ground", { id: found.entry.id }));
   }
   return found.entry;
 }
@@ -277,9 +271,9 @@ function resolveMilestone(root: string, needle: string): Entry {
   const found = findEntry(root, "milestone", needle);
   if ("entry" in found) return found.entry;
   if ("ambiguous" in found) {
-    throw new Error(`milestone이 여럿에 걸립니다: ${found.ambiguous.map((e) => e.id).join(", ")}`);
+    throw new Error(t(root, "entries.milestone_ambiguous", { ids: found.ambiguous.map((e) => e.id).join(", ") }));
   }
-  throw new Error(`milestone을 찾지 못했습니다: ${needle}`);
+  throw new Error(t(root, "entries.milestone_not_found", { needle }));
 }
 
 function resolveGeneration(root: string, needle: string): Entry {
@@ -292,9 +286,9 @@ function resolveByKind(root: string, kind: "generation" | "loop", needle: string
   if (exact) return exact;
   if (candidates.length === 1) return candidates[0]!;
   if (candidates.length > 1) {
-    throw new Error(`${kind}이 여럿에 걸립니다: ${candidates.map((e) => e.id).join(", ")}`);
+    throw new Error(t(root, "entries.kind_ambiguous", { kind, ids: candidates.map((e) => e.id).join(", ") }));
   }
-  throw new Error(`${kind}을 찾지 못했습니다: ${needle}`);
+  throw new Error(t(root, "entries.kind_not_found", { kind, needle }));
 }
 
 function collect(found: ReturnType<typeof findEntry>): Entry[] {
@@ -331,7 +325,7 @@ export function isIdeaKind(value: string): value is IdeaKind {
  */
 export function makeBacklog(root: string, opts: MakeBacklog): Made {
   const id = issue(root, "backlog", opts.title, registryDate(opts.now));
-  const slug = opts.slug ?? slugify(opts.title);
+  const slug = opts.slug ?? slugify(opts.title, root);
   const data: Record<string, unknown> = { id, slug, type: opts.type, title: opts.title };
   if (opts.from) data.from = opts.from;
   data.createdAt = opts.now;
@@ -342,12 +336,12 @@ export function makeBacklog(root: string, opts: MakeBacklog): Made {
 /** backlog와 같은 모양이다 — 상태와 위치는 다른 질문이므로 status는 건드리지 않는다. */
 export function markIdea(root: string, needle: string, flag: "archived"): Made {
   const found = findEntry(root, "idea", needle);
-  if ("ambiguous" in found) throw new Error(`idea가 여럿에 걸립니다: ${found.ambiguous.map((e) => e.id).join(", ")}`);
-  if (!("entry" in found)) throw new Error(`idea를 찾지 못했습니다: ${needle}`);
+  if ("ambiguous" in found) throw new Error(t(root, "entries.idea_ambiguous", { ids: found.ambiguous.map((e) => e.id).join(", ") }));
+  if (!("entry" in found)) throw new Error(t(root, "entries.idea_not_found", { needle }));
   const entry = found.entry;
   const p = paths(root);
   const kindDir = basename(entry.dir);
-  if (entry.dir.startsWith(p.archiveIdea)) throw new Error(`이미 archive에 있습니다: ${entry.id}`);
+  if (entry.dir.startsWith(p.archiveIdea)) throw new Error(t(root, "entries.idea_already_archived", { id: entry.id }));
   const dest = join(p.archiveIdea, kindDir, basename(entry.path));
   ensureDir(join(p.archiveIdea, kindDir));
   renameSync(entry.path, dest);
@@ -357,7 +351,7 @@ export function markIdea(root: string, needle: string, flag: "archived"): Made {
 
 export function makeIdea(root: string, opts: MakeIdea): Made {
   const id = issue(root, "idea", opts.title, registryDate(opts.now));
-  const slug = opts.slug ?? slugify(opts.title);
+  const slug = opts.slug ?? slugify(opts.title, root);
   const data: Record<string, unknown> = { id, slug, kind: opts.kind, title: opts.title };
   data.createdAt = opts.now;
   data.status = "open";
@@ -370,26 +364,26 @@ export function makeIdea(root: string, opts: MakeIdea): Made {
  */
 export function makeHook(root: string, opts: MakeHook): Made {
   if (!isHookEvent(opts.event)) {
-    throw new Error(`hook에는 --event가 필요합니다: ${HOOK_EVENTS.join(" · ")} (받은 값: ${opts.event || "(없음)"})`);
+    throw new Error(t(root, "entries.hook_needs_event", { events: HOOK_EVENTS.join(" · "), got: opts.event || t(root, "cli.none") }));
   }
   if (!opts.name || !/^[a-zA-Z0-9_-]+$/.test(opts.name)) {
-    throw new Error(`hook에는 --name이 필요합니다. 영문자·숫자·-·_만 씁니다 (받은 값: ${opts.name || "(없음)"})`);
+    throw new Error(t(root, "entries.hook_needs_name", { got: opts.name || t(root, "cli.none") }));
   }
   const type = opts.type ?? "md";
   if (type !== "md" && type !== "sh") {
-    throw new Error(`--type은 md 또는 sh입니다: ${type}`);
+    throw new Error(t(root, "entries.hook_type_invalid", { type }));
   }
   const condition = opts.condition ?? "always";
   const order = opts.order !== undefined ? Number(opts.order) : 50;
   if (!Number.isInteger(order)) {
-    throw new Error(`--order는 정수입니다: ${opts.order}`);
+    throw new Error(t(root, "entries.hook_order_invalid", { order: opts.order ?? "" }));
   }
 
   const filename = `${opts.event}.${opts.name}.${type}`;
   const dir = paths(root).hooks;
   ensureDir(dir);
   const path = join(dir, filename);
-  if (existsSync(path)) throw new Error(`이미 있습니다: ${filename}`);
+  if (existsSync(path)) throw new Error(t(root, "entries.hook_already_exists", { filename }));
 
   const templateName = type === "md" ? "hook-md.md" : "hook-sh.sh";
   const content = render(template(root, templateName), { condition, order: String(order) });

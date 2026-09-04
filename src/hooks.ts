@@ -3,6 +3,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 import { parseDoc } from "./doc.ts";
 import { paths } from "./store.ts";
+import { t } from "./i18n.ts";
 
 export const HOOK_EVENTS = [
   "gen.made",
@@ -79,7 +80,7 @@ export function runHooks(root: string, event: string, ctx: { id?: string } = {},
     }
     const env = { ...process.env, REAP_HOOK_EVENT: event, ...(ctx.id !== undefined ? { REAP_HOOK_ID: ctx.id } : {}) };
     const result = spawnSync("bash", [full], { cwd: root, timeout: timeoutMs, env, encoding: "utf8" });
-    const failure = shFailure(result);
+    const failure = shFailure(result, root);
     if (failure) {
       failures.push({ file: hook.file, reason: failure });
       continue;
@@ -93,20 +94,20 @@ export function runHooks(root: string, event: string, ctx: { id?: string } = {},
 function evaluateCondition(root: string, condition: string, timeoutMs: number): { met: true } | { met: false; reason: string; missing: boolean } {
   if (condition === "always") return { met: true };
   const script = join(paths(root).hookConditions, `${condition}.sh`);
-  if (!existsSync(script)) return { met: false, reason: `조건 스크립트가 없습니다: ${condition}.sh`, missing: true };
+  if (!existsSync(script)) return { met: false, reason: t(root, "hooks.condition_missing", { condition }), missing: true };
   const result = spawnSync("bash", [script], { cwd: root, timeout: timeoutMs, encoding: "utf8" });
-  const failure = shFailure(result);
-  if (failure) return { met: false, reason: `조건이 참이 아닙니다: ${condition} (${failure})`, missing: false };
+  const failure = shFailure(result, root);
+  if (failure) return { met: false, reason: t(root, "hooks.condition_false", { condition, failure }), missing: false };
   return { met: true };
 }
 
 /** 실행 실패 사유를 한 곳에서 판정한다. 문제가 없으면 `undefined`. */
-function shFailure(result: ReturnType<typeof spawnSync>): string | undefined {
+function shFailure(result: ReturnType<typeof spawnSync>, root?: string | null): string | undefined {
   if (result.error) {
-    if ((result.error as NodeJS.ErrnoException).code === "ETIMEDOUT") return "시간 초과";
-    return `실행 실패: ${result.error.message}`;
+    if ((result.error as NodeJS.ErrnoException).code === "ETIMEDOUT") return t(root, "hooks.timeout");
+    return t(root, "hooks.exec_failed", { message: result.error.message });
   }
-  if (result.status !== 0) return `종료 코드 ${result.status}`;
+  if (result.status !== 0) return t(root, "hooks.exit_code", { status: result.status ?? "" });
   return undefined;
 }
 

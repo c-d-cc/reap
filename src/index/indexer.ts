@@ -13,6 +13,7 @@ import { extractSpecifiers, resolveCalls, resolveSpecifiers } from "./resolve.ts
 import type { Specifier } from "./resolve.ts";
 import { Store } from "./store.ts";
 import type { FileRow, Manifest, Stats } from "./store.ts";
+import { t } from "../i18n.ts";
 
 export type Scanned = { path: string; language: Language };
 export type Update = { mode: "full" | "incremental" | "up-to-date"; files: number; nodes: number; edges: number; commit: string | null; ms: number };
@@ -64,9 +65,9 @@ export class Indexer {
   }
 
   async update(full = false): Promise<Update> {
-    if (!isRepo(this.root)) throw new Error("git 저장소가 아닙니다. 인덱스는 커밋 단위라 커밋이 있어야 합니다 — git init 뒤 커밋을 하나 만듭니다.");
+    if (!isRepo(this.root)) throw new Error(t(this.root, "index.not_a_repo"));
     const commit = head(this.root);
-    if (!commit) throw new Error("커밋이 없습니다. 인덱스는 커밋을 서술합니다 — 첫 커밋을 만듭니다.");
+    if (!commit) throw new Error(t(this.root, "index.no_commits"));
     const manifest = full ? null : this.store.manifest();
     if (manifest && manifest.commit === commit) {
       return { mode: "up-to-date", files: 0, nodes: manifest.stats.nodes, edges: sum(manifest.stats.edges), commit, ms: 0 };
@@ -208,15 +209,15 @@ function sum(r: Record<string, number>): number {
 }
 
 /** `status`에서 가장 중요한 줄은 해석률이다 — 낮으면 빈 impact는 "없음"이 아니라 "모름"이다. */
-export function formatStatus(m: Manifest): string {
+export function formatStatus(m: Manifest, root?: string | null): string {
   const { attempted, resolved } = m.stats.imports;
-  const rate = attempted === 0 ? "해석할 import 없음" : `${resolved}/${attempted} (${Math.round((resolved / attempted) * 100)}%)`;
+  const rate = attempted === 0 ? t(root, "index.status.no_imports") : `${resolved}/${attempted} (${Math.round((resolved / attempted) * 100)}%)`;
   const lines = [
-    `커밋 ${m.commit ?? "(없음)"} · ${m.at}`,
-    `파일 ${m.stats.files} · 심볼 ${m.stats.nodes} · 간선 ${Object.entries(m.stats.edges).map(([k, v]) => `${k} ${v}`).join(" · ") || "0"}`,
-    `import 해석률 ${rate}`,
+    t(root, "index.status.commit_line", { commit: m.commit ?? t(root, "cli.none"), at: m.at }),
+    t(root, "index.status.counts_line", { files: m.stats.files, nodes: m.stats.nodes, edges: Object.entries(m.stats.edges).map(([k, v]) => `${k} ${v}`).join(" · ") || "0" }),
+    t(root, "index.status.rate_line", { rate }),
   ];
-  if (attempted > 0 && resolved / attempted < 0.8) lines.push("  경고: 해석률이 낮다 — impact의 빈 결과를 '없음'으로 읽으면 안 된다");
-  if (m.stats.languageFailures) for (const [l, why] of Object.entries(m.stats.languageFailures)) lines.push(`  경고: ${l} 문법을 못 실었다 — ${why}`);
+  if (attempted > 0 && resolved / attempted < 0.8) lines.push(t(root, "index.status.low_rate_warning"));
+  if (m.stats.languageFailures) for (const [l, why] of Object.entries(m.stats.languageFailures)) lines.push(t(root, "index.status.language_failure", { lang: l, why }));
   return lines.join("\n");
 }

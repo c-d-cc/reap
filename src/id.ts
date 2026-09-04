@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import { paths, writeFileAtomic } from "./store.ts";
+import { t } from "./i18n.ts";
 
 export type Kind = "milestone" | "generation" | "loop" | "source" | "backlog" | "idea";
 /** `plan`은 `loop-0001` 이전의 역사다 — 파싱은 하고 발급은 `entries.ts`가 막는다. */
@@ -94,8 +95,8 @@ export function readRegistry(root: string, kind: Kind): Row[] {
  * 한 폴더에 쌓였을 때 이름순 정렬이 시간순을 잃는다.
  */
 export function issue(root: string, kind: Kind, title: string, today: string, type?: GenerationType | LoopType): string {
-  const prefix = prefixOf(kind);
-  const suffix = kind === "generation" || kind === "loop" ? `-${requireType(kind, type)}` : "";
+  const prefix = prefixOf(kind, root);
+  const suffix = kind === "generation" || kind === "loop" ? `-${requireType(kind, type, root)}` : "";
   const pad = PREFIXES[prefix]?.pad;
   // 번호냐 해시냐는 접두사가 정하고, 레지스트리 행을 남기느냐는 별개다 — plan source는 해시인데 행을 남긴다
   if (!isRegistered(kind)) return `${prefix}-${randomHash()}`;
@@ -105,7 +106,7 @@ export function issue(root: string, kind: Kind, title: string, today: string, ty
   const next = rows.reduce((max, row) => Math.max(max, numberOf(row.id)), 0) + 1;
   const id = pad === undefined ? `${prefix}-${randomHash()}` : `${prefix}-${String(next).padStart(pad, "0")}${suffix}`;
 
-  const header = `<!-- reap:sequence(${kind}) — append only. 발급된 번호는 다시 발급되지 않는다. -->\n| id | title | createdAt |\n|---|---|---|\n`;
+  const header = `${t(root, "id.registry_header", { kind })}\n| id | title | createdAt |\n|---|---|---|\n`;
   const current = existsSync(path) ? readFileSync(path, "utf8") : header;
   const prefixText = current.endsWith("\n") ? current : `${current}\n`;
   writeFileAtomic(path, `${prefixText}| ${id} | ${escapeCell(title)} | ${today} |\n`);
@@ -117,17 +118,17 @@ function registryPath(root: string, kind: Kind): string | null {
   return name ? join(paths(root).sequence, name) : null;
 }
 
-function prefixOf(kind: Kind): string {
+function prefixOf(kind: Kind, root?: string | null): string {
   for (const [prefix, spec] of Object.entries(PREFIXES)) {
     if (spec.kind === kind) return prefix;
   }
-  throw new Error(`모르는 종류입니다: ${kind}`);
+  throw new Error(t(root, "id.unknown_kind", { kind }));
 }
 
-function requireType(kind: Kind, type?: GenerationType | LoopType): GenerationType | LoopType {
+function requireType(kind: Kind, type?: GenerationType | LoopType, root?: string | null): GenerationType | LoopType {
   if (!type) {
     const types = kind === "loop" ? LOOP_TYPES : GENERATION_TYPES;
-    throw new Error(`${kind} id에는 유형이 필요합니다: ${types.join(" | ")}`);
+    throw new Error(t(root, "id.type_required", { kind, types: types.join(" | ") }));
   }
   return type;
 }

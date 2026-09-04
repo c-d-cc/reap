@@ -3,8 +3,7 @@ import { basename, join, relative } from "node:path";
 import { findEntry, listEntries } from "./doc.ts";
 import type { Entry } from "./doc.ts";
 import { paths, readConfig, readSession } from "./store.ts";
-
-const ENTRY = "작업을 시작하면 /reap:evolve, 마무리하면 /reap:complete";
+import { t } from "./i18n.ts";
 
 /**
  * 세션이 열릴 때 주입될 본문을 조립한다.
@@ -42,40 +41,40 @@ function status(root: string, asked?: string): string {
   const lines: string[] = [];
 
   const language = readConfig(root).language;
-  if (language !== "") lines.push(`응답 언어: ${language}`);
+  if (language !== "") lines.push(t(root, "ctx.label.language", { language }));
 
   const chosen = pickMilestone(root, asked);
   if (chosen) {
-    lines.push(`현재 milestone: ${chosen.id} ${title(chosen)} (${flags(chosen)})`);
+    lines.push(t(root, "ctx.label.milestone", { id: chosen.id, title: title(chosen), flags: flags(chosen) }));
     lines.push(`  ${relative(root, chosen.dir)}/`);
     const docs = nonEmpty(["milestone.md", "handoff.md"].map((n) => join(chosen.dir, n)));
     if (docs.length > 0) lines.push(`    ${docs.map((d) => basename(d)).join(" · ")}`);
     const tasks = nonEmpty(markdown(join(chosen.dir, "tasks")));
-    if (tasks.length > 0) lines.push(`    ${tasks.map((t) => `tasks/${basename(t)}`).join(" · ")}`);
+    if (tasks.length > 0) lines.push(`    ${tasks.map((task) => `tasks/${basename(task)}`).join(" · ")}`);
   }
 
   const open = openGeneration(root);
   if (open) {
-    lines.push(`열린 세대: ${open.id} ${title(open)} — ${relative(root, open.path)}`);
+    lines.push(t(root, "ctx.label.generation", { id: open.id, title: title(open), path: relative(root, open.path) }));
     const started = [open.data.startedAt, open.data.startCommit].filter(Boolean);
-    if (started.length > 0) lines.push(`  ${started.join(" 시작, 시작 커밋 ")}`);
+    if (started.length > 0) lines.push(`  ${started.join(t(root, "ctx.started_join"))}`);
   }
 
   // loop는 여럿이 열리고 세션에 바인딩되지 않는다 — 열린 것 전부를 이름으로 낸다
   for (const loop of openLoops(root)) {
-    lines.push(`열린 loop: ${loop.id} ${title(loop)} — ${relative(root, loop.path)}`);
+    lines.push(t(root, "ctx.label.loop", { id: loop.id, title: title(loop), path: relative(root, loop.path) }));
   }
 
   const memory = nonEmpty(markdown(p.memory));
-  if (memory.length > 0) lines.push(`기억: ${memory.map((m) => relative(root, m)).join(" · ")}`);
+  if (memory.length > 0) lines.push(t(root, "ctx.label.memory", { list: memory.map((m) => relative(root, m)).join(" · ") }));
 
   const idea = ideaCounts(root);
-  if (idea !== "") lines.push(`덜 단단한 것: ${relative(root, p.idea)}/ (${idea})`);
+  if (idea !== "") lines.push(t(root, "ctx.label.idea", { path: relative(root, p.idea), counts: idea }));
 
-  if (nonEmpty([p.map]).length > 0) lines.push(`구조: ${relative(root, p.map)}`);
+  if (nonEmpty([p.map]).length > 0) lines.push(t(root, "ctx.label.map", { path: relative(root, p.map) }));
 
-  lines.push(ENTRY);
-  return `<!-- reap 상태 -->\n${lines.join("\n")}\n`;
+  lines.push(t(root, "ctx.entry"));
+  return `${t(root, "ctx.marker")}\n${lines.join("\n")}\n`;
 }
 
 /**

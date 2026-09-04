@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { cleanupTempDirs, commit, initRepo, tempDir } from "./helpers.ts";
 import { run } from "../src/cli.ts";
 import { scanCarriers } from "../src/carrier.ts";
+import { t } from "../src/i18n.ts";
 
 afterEach(cleanupTempDirs);
 
@@ -69,9 +70,9 @@ test("carrier list --check가 형식·충돌을 보고한다", async () => {
   writeFileSync(join(root, "dup.md"), `${mark("777777", "commands-path")}\n`);
   const check = await run(["carrier", "list", "--check"], root);
   expect(check.ok).toBe(false);
-  expect(check.message).toContain("한 해시에 slug 둘");
-  expect(check.message).toContain("한 slug에 해시 둘");
-  expect(check.message).toContain("형식");
+  expect(check.message).toContain(t(root, "carrier.kind.dup_slug"));
+  expect(check.message).toContain(t(root, "carrier.kind.dup_hash"));
+  expect(check.message).toContain(t(root, "carrier.kind.format"));
   expect(check.message).toContain("bad.md");
   const clean = await run(["carrier", "list", "--check"], (await project()));
   expect(clean.ok).toBe(true);

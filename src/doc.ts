@@ -2,6 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, dirname, join } from "node:path";
 import { type Kind, isValid, kindOf } from "./id.ts";
 import { paths, writeFileAtomic } from "./store.ts";
+import { t } from "./i18n.ts";
 
 export type Data = Record<string, unknown>;
 export type Entry = { id: string; kind: Kind; path: string; dir: string; data: Data };
@@ -54,12 +55,12 @@ export function patch(path: string, fields: Data): void {
 }
 
 /** slug는 사람이 읽기 위한 이름표다. 한글을 로마자로 바꾸지 않는다. */
-export function slugify(title: string): string {
+export function slugify(title: string, root?: string | null): string {
   const slug = title
     .toLowerCase()
     .replace(/[^\p{L}\p{N}]+/gu, "-")
     .replace(/^-+|-+$/g, "");
-  return slug === "" ? "무제" : slug;
+  return slug === "" ? t(root, "doc.untitled") : slug;
 }
 
 export function listEntries(root: string, kind: Kind): Entry[] {

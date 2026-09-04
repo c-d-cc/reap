@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { runHooks } from "./hooks.ts";
 import type { RunHooksResult } from "./hooks.ts";
 import { readSession, workspaceId, writeFileAtomic } from "./store.ts";
+import { t } from "./i18n.ts";
 
 function sleepSync(ms: number): void {
   Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, ms);
@@ -32,9 +33,9 @@ export function whoAmI(root: string, env = process.env): string {
   return env.REAP_AGENT?.trim() || readSession(root, env).sessionId;
 }
 
-export function parseTtl(text: string): number {
+export function parseTtl(text: string, root?: string | null): number {
   const m = /^(\d+)(s|m|h)?$/.exec(text.trim());
-  if (!m) throw new Error(`--ttl은 30m·2h·90s 꼴입니다: ${text}`);
+  if (!m) throw new Error(t(root, "orch.ttl_format", { text }));
   const n = Number(m[1]);
   return n * ({ s: 1, m: 60, h: 3600 }[m[2] ?? "m"] as number) * 1000;
 }
@@ -97,7 +98,7 @@ export function claim(root: string, topic: string, resource: string, ttlMs: numb
       log(dir, { event: "takeover", resource, from: current.holder, to: me, expiredAt: current.expiresAt });
       acquired = true;
     } else {
-      throw new Error(`이미 잡혀 있습니다: ${resource} — holder ${current.holder}, 만료 ${current.expiresAt}`);
+      throw new Error(t(root, "orch.already_claimed", { resource, holder: current.holder ?? "", expiresAt: current.expiresAt ?? "" }));
     }
   }
   const hooks = runHooks(root, "orch.claimed", { id: resource });
@@ -107,10 +108,10 @@ export function claim(root: string, topic: string, resource: string, ttlMs: numb
 export function release(root: string, topic: string, resource: string, env = process.env): void {
   const dir = orchDir(root, topic, env);
   const path = join(dir, "claims", `${encode(resource)}.yml`);
-  if (!existsSync(path)) throw new Error(`잡혀 있지 않습니다: ${resource}`);
+  if (!existsSync(path)) throw new Error(t(root, "orch.not_claimed", { resource }));
   const current = readKv(path);
   const me = whoAmI(root, env);
-  if (current.holder !== me) throw new Error(`남의 claim입니다: ${resource} — holder ${current.holder}. 만료를 기다리거나 그쪽에 말합니다`);
+  if (current.holder !== me) throw new Error(t(root, "orch.someone_elses_claim", { resource, holder: current.holder ?? "" }));
   rmSync(path);
   log(dir, { event: "release", resource, holder: me });
 }
