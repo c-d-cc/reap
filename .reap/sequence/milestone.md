@@ -20,3 +20,7 @@
 | ms-017 | hooks — 이벤트 여섯과 make hook | 2026-09-03 |
 | ms-018 | 이주 보강과 사용자 문서 — environment·hooks 매핑, ctx 언어, README, 릴리스 노트 | 2026-09-03 |
 | ms-019 | 왕복 검증과 발행 준비 — tarball 설치·이주 실물·0.17.8·마켓플레이스 | 2026-09-03 |
+| ms-020 | evolve 위임 모드 — subagent가 세대를 수행하고 주 세션이 검토·닫는다 | 2026-09-04 |
+| ms-021 | en 전환 — CLI 메시지 카탈로그, skill·템플릿 en, README en/ko | 2026-09-04 |
+| ms-022 | 문서 사이트 — VitePress, 한국어 먼저 | 2026-09-04 |
+| ms-023 | 테스트 비공개 — reap-test v0.18 submodule과 CI dispatch | 2026-09-04 |

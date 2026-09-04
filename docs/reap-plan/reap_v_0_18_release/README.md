@@ -13,7 +13,8 @@
 | [02-distribution.md](02-distribution.md) | G1 — npm(node) 배포 패키지의 모양과 실측 |
 | [03-hooks.md](03-hooks.md) | G3 — 이벤트 훅 여섯 |
 | [04-migrate-docs.md](04-migrate-docs.md) | G2·G4·G5 — migrate 보강, ctx 언어, README, 릴리스 노트 |
-| [05-open.md](05-open.md) | 방향 질문 Q1~Q5 — 사람의 답을 기다린다 |
+| [05-open.md](05-open.md) | 방향 질문 Q1~Q5 — 사람의 답(2026-09-04)과 경위 |
+| [07-i18n-docs-delegate.md](07-i18n-docs-delegate.md) | G9~G12 — en 전환·문서 사이트·테스트 비공개·evolve 위임 모드 |
 | [06-release.md](06-release.md) | G6·G8 — 발행 순서와 준비물, 왕복 검증 |
 
 ## 다른 문서와의 관계
@@ -30,4 +31,12 @@
 - G6(0.17.8·마켓플레이스)·G8 → **ms-019** 왕복 검증과 발행 준비
 - G7 → bk-bb11a1 (이미 있음, 세대 하나)
 
-ms-016과 ms-017은 서로 독립이라 병렬로 돈다(worktree 분리). ms-018은 둘 뒤, ms-019는 마지막.
+ms-016·017·018 닫힘(2026-09-04). ms-019는 task 1·2 완료.
+
+사람의 방향 답(2026-09-04) 뒤 추가:
+- G12 → **ms-020** evolve 위임 모드
+- G9 → **ms-021** en 전환과 ko 번역 층
+- G10 → **ms-022** 문서 사이트 (한국어 먼저)
+- G11 → **ms-023** 테스트 비공개 submodule + CI dispatch
+
+순서: ms-020(작다, skill 산문)이 ms-021보다 먼저 — 위임 모드 본문이 en 전환에 실린다. ms-022·023은 독립이라 병렬. 발행은 전부 뒤, 사람 지시로.

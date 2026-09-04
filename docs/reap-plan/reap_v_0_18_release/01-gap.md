@@ -14,6 +14,10 @@
 | G6 | RELEASE_NOTES · GitHub Release · CI(ci/docs/release.yml) | `.github/` 없음(apocalypse) | **release 준비물** — 0.18.0 노트, v0.18용 ci.yml·release.yml(`--tag next`), 0.17.8 bump·노트(reap_v17), 마켓플레이스 `reap2→reap` 준비 | v0.17 release.yml은 태그 push로 `npm publish`(태그 없음 = latest)한다. **그대로 두면 0.18 태그가 latest가 된다** — 차단의 원천이 무너진다 |
 | G7 | — | bk-bb11a1 열림 | **loop skill에 plan source 소비 완료 판정 step** | 이 loop 자체가 그 판정을 손으로 했다 |
 | G8 | — | 실물 검증은 migrate 1회(gen-0073) | **왕복 검증** — tarball 설치 → 새 프로젝트 init → 플러그인 로드 → v0.17 표본을 upgrade agent 경로로 이주 → doctor 0 | 발행 전 유일한 end-to-end |
+| G9 | CLI 4개 언어 · README 5로케일 | 한국어 전용 | **en 기본 + ko 번역 층** — CLI 메시지 카탈로그(`config.language`가 고른다), skill 본문 en(agent는 `응답 언어` 줄로 사용자 언어로 답한다), README en + README.ko | 사람 Q2 답 B (2026-09-04). genome의 문자열 규칙이 바뀐다 |
+| G10 | reap.cc 사이트 24쪽 × 5로케일 | 없음 | **새 문서 사이트** — 한국어 먼저, 사람 검수 뒤 확장 | 사람 Q1 답 (2026-09-04) |
+| G11 | 테스트 private 리포 submodule + CI dispatch | `tests/` 리포 안 | **reap-test `v0.18` 브랜치 submodule + dispatch** | 사람 Q3 답 B (2026-09-04) |
+| G12 | `/reap.evolve` — 세대를 subagent가 통째로 수행 | evolve는 주 세션이 직접 | **evolve 위임 모드** — 주 세션이 세대를 열고 Intent를 적은 뒤 subagent가 일하고 주 세션이 `complete` | 사람 Q4 답 B (2026-09-04). `.session`은 주 세션 것이라 충돌 없음 |
 
 ## 만들지 않는다 — 상당물이 있거나 폐기 확정
 
@@ -37,4 +41,4 @@
 
 ## 이 표를 읽는 법
 
-"만든다" 8건이 milestone 후보의 전부다. 여기 없는 v0.17 기능을 발견하면 이 표에 행을 더한 뒤 자른다 — 표 밖에서 만든 것은 근거가 없다.
+"만든다" 12건이 milestone 후보의 전부다 (G9~G12는 2026-09-04 사람의 방향 답에서 왔다). 여기 없는 v0.17 기능을 발견하면 이 표에 행을 더한 뒤 자른다 — 표 밖에서 만든 것은 근거가 없다.
