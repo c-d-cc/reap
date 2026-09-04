@@ -1614,14 +1614,113 @@ $ reap mark milestone ms-001 --closed
     notInjectedNote: "memory는 주입되지 않습니다. 상태 줄이 위치만 알리고, 필요한 agent가 직접 엽니다.",
   },
 
-  placeholder: {
-    notice: "이 문서는 준비 중입니다.",
-    pages: {
-      claimBarrier: { title: "Claim과 Barrier", breadcrumb: "협업", description: "두 세션 이상이 동시에 작업할 때의 자원 선점과 합류 지점." },
-      configuration: { title: "설정", breadcrumb: "레퍼런스", description: ".reap/config.yml의 필드." },
-      doctor: { title: "Doctor", breadcrumb: "레퍼런스", description: "확정적으로 검사 가능한 것만 보고하는 점검 도구." },
-      comparison: { title: "비교", breadcrumb: "기타", description: "REAP가 기존 스펙 기반 개발 도구와 어떻게 다른가." },
-    },
+  configurationPage: {
+    title: "설정",
+    breadcrumb: "레퍼런스",
+    description: ".reap/config.yml의 필드와 언어 해석 순서.",
+    intro: "reap init이 .reap/config.yml을 놓는다. 프로젝트 설정은 이 파일 하나다.",
+    yamlTitle: "config.yml",
+    yamlCode: `language: en
+agentClient: claude-code
+workspaceId: ba44307f94a6`,
+    fieldsTitle: "필드",
+    fieldHeaders: ["필드", "설명"],
+    fields: [
+      ["language", "CLI 출력 언어. init이 en으로 채운다. 비어 있으면 아래 해석 순서를 따른다"],
+      ["agentClient", "AI agent 클라이언트. 기본값 claude-code"],
+      ["workspaceId", "worktree 간에 수렴하는 해시. init이 리포 경로에서 계산해 채우고, orch의 공유 상태 경로(~/.reap/orch/<workspaceId>/)에 쓰인다. 사람이 손으로 바꾸는 값이 아니다"],
+    ],
+    langTitle: "언어 해석 순서",
+    langDesc: "config.language → REAP_LANG 환경변수 → en. .reap/가 없거나 config를 읽을 수 없으면(init 전, 프로젝트 밖) config 단계를 건너뛰고 REAP_LANG → en으로 간다. agent가 사용자에게 답하는 언어는 이와 별개다 — 상태 줄의 Response language 줄을 따른다.",
+    overrideTitle: ".reap/templates/가 번들을 이긴다",
+    overrideDesc: "make·init이 놓는 씨앗 파일은 번들 템플릿에서 온다. 같은 이름의 파일을 .reap/templates/ 아래 두면 번들보다 그 파일이 이긴다 — 프로젝트가 자기 기록 형식을 가지는 확장점이다.",
+    gitignoreTitle: ".gitignore",
+    gitignoreDesc: "init이 .reap/.session과 .reap/.index/를 .gitignore에 추가한다. .session은 worktree 로컬 상태라 커밋되면 다른 세션의 바인딩이 섞이고, .index/는 파생 데이터라 커밋하면 그 인덱스를 담은 커밋을 다시 인덱싱해야 해서 끝나지 않는다.",
+  },
+
+  doctorPage: {
+    title: "Doctor",
+    breadcrumb: "레퍼런스",
+    description: "확정적으로 검사 가능한 것만 보고하는 점검 도구.",
+    intro: "reap doctor는 .reap/의 상태를 확정적으로 검사 가능한 만큼만 검사해 보고한다. 파일을 쓰지 않고, 고치지도 않는다.",
+    splitTitle: "결함과 참고를 가른다",
+    splitDesc: "결함은 확정적으로 틀린 것이다 — 형식이 어긋났거나 참조가 끊겼거나 있어야 할 파일이 없다. 참고는 사람이 봐야 할 것이다 — 크기가 안내선을 넘었거나 바인딩을 잃은 generation이 있다. 결함이 하나라도 있으면 doctor는 실패로 끝난다. 참고만 있으면 성공으로 끝난다. 둘을 섞으면 참고가 결함을 묻는다.",
+    noFixDesc: "doctor는 아무것도 고치지 않는다. 결함을 알려줄 뿐이고, 고치는 것은 agent나 사람의 다음 행동이다.",
+    defectsTitle: "결함",
+    defectHeaders: ["결함", "무엇을 보는가"],
+    defects: [
+      ["id 형식", "발급된 id가 형식에 맞는지"],
+      ["id 중복", "같은 id가 두 곳 이상에 있는지"],
+      ["레지스트리에 없는 id", "발급 대장(sequence/)에 없는 id가 파일로 존재하는지"],
+      ["끊긴 참조", "milestone·generation·backlog·loop의 from·milestone·backlog·consumedBy·refs가 실재하는 항목을 가리키는지"],
+      ["커밋 없이 닫힌 generation", "닫힌 세대의 startCommit과 endCommit이 같은지 — 코드 변경 없이 닫혔다는 뜻"],
+      ["focus가 둘", "focus: true인 열린 milestone이 둘 이상인지"],
+      ["깨진 상대 링크", ".reap/ 안 마크다운 문서의 상대 링크가 실재 파일을 가리키는지"],
+      ["carrier", "reap:carrier-<hash6> 표식이 어긋나 있는지"],
+      ["훅 조건 스크립트 없음", "훅이 가리키는 conditions/<c>.sh가 실재하는지"],
+      ["모르는 훅 이벤트", "훅 파일명의 이벤트가 여섯 이벤트 안에 있는지"],
+      ["훅 파일명 규약 밖", "hooks/ 아래 파일이 {event}.{name}.{md|sh} 형식인지"],
+    ],
+    notesTitle: "참고",
+    noteHeaders: ["참고", "무엇을 보는가"],
+    notes: [
+      ["열린 채 바인딩 안 된 generation", "status: open인데 .session이 다른 id를 가리키거나 비어 있는지"],
+      ["map.md가 씨앗과 다르다", "프로젝트가 지도를 덧붙였거나 REAP가 레이아웃을 바꿨는지"],
+      ["크기 안내선", "genome 개별 파일·environment/summary.md·주입 합계·열린 milestone.md가 안내선을 넘는지"],
+      ["누적 경고", "lessons.md의 크기나 항목 수가 안내선을 넘는지 — 졸업시킬 때라는 신호"],
+      ["졸업 조건이 없는 idea", "research·file 유형 idea 문서에 졸업 조건 절이 있는지"],
+      ["출처가 없는 research", "research 문서에 출처 절이 있는지"],
+      ["carrier 고아", "표식이 한 파일에만 있어 짝이 없는지"],
+    ],
+    guideTitle: "크기 안내선의 출처",
+    guideDesc: "숫자는 규범이 아니라 이 리포의 실측에서 나온 참고다(2026-08-31, 세대 57) — 가장 큰 실물의 두 배 안팎이다. 넘으면 커진 것이지 잘못된 것은 아니다.",
+    guideHeaders: ["안내선", "값"],
+    guides: [
+      ["genome 파일 하나", "6.0KB"],
+      ["environment/summary.md", "9.0KB"],
+      ["주입 합계", "16.0KB"],
+      ["lessons.md", "16.0KB 또는 항목 24개"],
+      ["열린 milestone.md", "10.0KB"],
+    ],
+    exampleTitle: "실물 출력",
+    exampleDesc: "훅 하나가 없는 조건 스크립트를 가리키게 두고 genome 파일 하나를 키운 상태에서:",
+    exampleCode: `결함 1 · 참고 2
+
+## 결함 — 확정적으로 틀린 것
+- [훅 조건 스크립트 없음] hooks/gen.closed.notify.sh → conditions/ship-ready.sh
+
+## 참고 — 사람이 볼 것
+- [크기 안내선] .reap/genome/application.md 18.0KB > 6.0KB — 매 세션 주입된다
+- [크기 안내선] 주입 합계 19.0KB > 16.0KB`,
+  },
+
+  comparisonPage: {
+    title: "비교",
+    breadcrumb: "기타",
+    description: "REAP가 기존 스펙 기반 개발 도구·agent 워크플로·단순 CLAUDE.md와 어떻게 다른가.",
+    intro: "REAP를 세 갈래와 견준다 — 스펙 기반 개발 도구, agent 자율 워크플로 도구, 단순 CLAUDE.md 한 장. 다르게 만드는 지점은 대체로 두 축과 fitness, 자율 evolve로 모인다.",
+    items: [
+      {
+        title: "정적 스펙 vs 두 축의 순환",
+        desc: "스펙 기반 도구는 코드 전에 명세를 한 번 쓰고 구현으로 넘어간다. REAP는 Plan 축(loop)과 Execution 축(milestone·generation)이 따로 돌고, 실행 중 발견한 것은 backlog로 되먹여져 다음 세대나 다음 loop에 반영된다. 계획도 코드처럼 다시 쓰인다.",
+      },
+      {
+        title: "하드 게이트 vs 보고만 하는 doctor",
+        desc: "많은 agent 워크플로 도구는 lint·test 통과를 다음 단계로 가는 조건으로 강제한다. REAP의 doctor는 결함과 참고를 나눠 보고할 뿐 세대를 막지 않는다 — 판단은 agent와 사람의 몫으로 남는다.",
+      },
+      {
+        title: "정량 지표 vs 사람의 자연어 fitness",
+        desc: "milestone이 닫힐 때 점수나 커버리지 같은 정량 지표를 내지 않는다. 사람이 자연어로 무엇이 잘됐고 무엇이 아쉬웠는지 적는다. 지표를 만들면 그 지표를 맞추는 작업이 되기 쉽다.",
+      },
+      {
+        title: "CLAUDE.md 한 장 vs genome·environment 분리",
+        desc: "지침 파일 하나에 규범과 서술을 모두 적는 방식은 시간이 지나며 섞여 자란다. REAP는 genome(규범, 세대 중 불변)과 environment(서술, 기술 스택·구조)를 나누고, doctor의 크기 안내선으로 섞여 커지는 것을 알아챈다.",
+      },
+      {
+        title: "한 세션 전제 vs claim·barrier로 여러 세션",
+        desc: "대부분의 agent 워크플로는 세션 하나를 전제한다. REAP는 orchestrate skill로 여러 세션이 자원을 claim하고 barrier에서 합류점을 만든다 — 메시지 전달은 클라이언트가 하고, REAP는 만남의 장소만 준다.",
+      },
+    ],
   },
 
   skills: {
@@ -1849,6 +1948,48 @@ reap orch status [--topic <t>]     # claims · barriers`,
       ["ask <question>", "판단이 필요하다"],
     ],
     coordinatorNote: "세션이 셋 이상이면 하나가 조율자를 맡는다 — 갈래를 claim으로 못 박고, barrier 이름과 --expect를 정해 알리는 유일한 자리다. 끝나면 release하고 각자 complete로 세대를 닫는다.",
+  },
+
+  claimBarrierPage: {
+    title: "Claim과 Barrier",
+    breadcrumb: "협업",
+    description: "두 세션 이상이 동시에 작업할 때의 자원 선점과 합류 지점.",
+    intro: "orchestrate가 주는 만남의 장소 두 가지다 — 손대기 전에 잡는 claim, 합쳐야 하는 곳에 두는 barrier. 둘 다 파일 하나가 자물쇠다.",
+    sharedStateTitle: "공유 상태는 리포 밖에 있다",
+    sharedStateDesc: "claim과 barrier의 상태는 ~/.reap/orch/<workspace-id>/<topic>/에 산다. worktree마다 '.reap/'가 별개 사본이라 리포 안에 두면 공유되지 않는다. workspace-id는 같은 리포의 worktree 간에 같은 값으로 수렴한다.",
+    claimTitle: "claim — O_EXCL로 잡는다",
+    claimCode: `reap orch claim <resource> [--ttl 30m] [--topic <t>]
+reap orch release <resource> [--topic <t>]`,
+    claimDesc: "파일을 O_EXCL로 새로 열어 그 파일 자체가 자물쇠가 된다. resource는 자유 문자열이다 — milestone 갈래는 id(ms-004), 파일 영역은 경로 glob(src/auth/**)이 관례다. TTL이 지나면 다른 세션이 가져갈 수 있고, 그 탈취는 log.jsonl에 남는다. 이미 잡혀 있고 만료 전이면 거부된다 — holder에게 메시지로 묻거나 기다린다.",
+    claimExampleTitle: "실물 출력",
+    claimExampleCode: `$ reap orch claim "src/auth/**" --ttl 30m --topic demo
+잡았습니다: src/auth/** — 3e61761e0243, 만료 2026-09-04T16:26:19Z
+
+$ reap orch status --topic demo
+topic demo · 나 3e61761e0243
+claims:
+  src/auth/**  3e61761e0243  만료 2026-09-04T16:26:19Z
+barriers: 없음
+
+$ reap orch claim "src/auth/**" --topic demo   # 다른 세션에서
+이미 잡혀 있습니다: src/auth/** — holder 3e61761e0243, 만료 2026-09-04T16:26:19Z
+
+$ reap orch release "src/auth/**" --topic demo
+놓았습니다: src/auth/**`,
+    barrierTitle: "barrier — --expect·--timeout 필수",
+    barrierCode: "reap orch barrier <name> --expect <N> --timeout <초> [--topic <t>]",
+    barrierDesc: "--timeout은 필수다 — 오지 않는 참가자를 무한정 기다리지 않는다. 도착이 먼저 기록되고 나머지가 기다린다. expect 인원이 다 도착하면 그 자리에서 통과하고, 시간이 다 되면 누가 오지 않았는지를 낸다 — roster를 알면 이름으로, 모르면 도착 인원 수로. 테스트 전, 통합 커밋 전, milestone 닫기 전처럼 뒤 작업이 앞 작업 전부를 전제하는 지점에 둔다. 자주 두면 병렬이 직렬이 된다.",
+    barrierExampleTitle: "실물 출력",
+    barrierExampleCode: `$ reap orch barrier ready --expect 2 --timeout 2 --topic demo3   # 하나만 도착
+barrier ready 시간 초과 (2s). 도착 1/2 — roster를 알 수 없어 누구인지는 모른다
+
+$ reap orch barrier ready --expect 2 --timeout 5 --topic demo4   # 둘 다 도착
+barrier ready 통과 — reap-demo-writer, reap-demo-tester`,
+    rosterStatusTitle: "roster·status로 본다",
+    rosterStatusCode: `reap orch roster [--topic <t>]
+reap orch status [--topic <t>]`,
+    rosterStatusDesc: "roster는 claude agents --json에서 이름이 reap-<topic>-로 시작하는 세션만 추린다. 별도 참가 등록 절차는 없다 — 이름이 곧 참가이고, 세션이 죽으면 목록에서 저절로 사라진다. status는 지금 잡혀 있는 claim과 barrier를 함께 보여준다.",
+    backLinkText: "orchestrate 개요로 →",
   },
 
   migration: {

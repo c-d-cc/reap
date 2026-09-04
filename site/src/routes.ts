@@ -15,6 +15,10 @@ import CLIPage from "@/pages/CLIPage";
 import HooksPage from "@/pages/HooksPage";
 import CodeIndexPage from "@/pages/CodeIndexPage";
 import OrchestratePage from "@/pages/OrchestratePage";
+import ClaimBarrierPage from "@/pages/ClaimBarrierPage";
+import ConfigurationPage from "@/pages/ConfigurationPage";
+import DoctorPage from "@/pages/DoctorPage";
+import ComparisonPage from "@/pages/ComparisonPage";
 import MigrationPage from "@/pages/MigrationPage";
 import ReleaseNotesPage from "@/pages/ReleaseNotesPage";
 import TwoAxesPage from "@/pages/TwoAxesPage";
@@ -31,7 +35,6 @@ import ClosingMilestonePage from "@/pages/ClosingMilestonePage";
 import GenomePage from "@/pages/GenomePage";
 import EnvironmentPage from "@/pages/EnvironmentPage";
 import VisionMemoryPage from "@/pages/VisionMemoryPage";
-import { makePlaceholderPage } from "@/pages/PlaceholderPage";
 
 export const SITE_NAME = "REAP";
 
@@ -51,14 +54,6 @@ export interface RouteDef {
 
 /** `"Quick Start"` -> `"Quick Start — REAP"`. */
 const page = (title: string): string => `${title} — ${SITE_NAME}`;
-
-/** A placeholder route's title/description come from its own `placeholder.pages` entry. */
-const placeholderMeta =
-  (key: keyof Translations["placeholder"]["pages"]) =>
-  (t: Translations): RouteMeta => {
-    const p = t.placeholder.pages[key];
-    return { title: page(p.title), description: p.description };
-  };
 
 export const ROUTES: RouteDef[] = [
   {
@@ -180,8 +175,8 @@ export const ROUTES: RouteDef[] = [
   },
   {
     path: "/docs/claim-barrier",
-    component: makePlaceholderPage("claimBarrier"),
-    meta: placeholderMeta("claimBarrier"),
+    component: ClaimBarrierPage,
+    meta: (t) => ({ title: page(t.claimBarrierPage.title), description: t.claimBarrierPage.description }),
   },
   {
     path: "/docs/hooks",
@@ -202,20 +197,20 @@ export const ROUTES: RouteDef[] = [
   },
   {
     path: "/docs/configuration",
-    component: makePlaceholderPage("configuration"),
-    meta: placeholderMeta("configuration"),
+    component: ConfigurationPage,
+    meta: (t) => ({ title: page(t.configurationPage.title), description: t.configurationPage.description }),
   },
   {
     path: "/docs/doctor",
-    component: makePlaceholderPage("doctor"),
-    meta: placeholderMeta("doctor"),
+    component: DoctorPage,
+    meta: (t) => ({ title: page(t.doctorPage.title), description: t.doctorPage.description }),
   },
 
   // 기타
   {
     path: "/docs/comparison",
-    component: makePlaceholderPage("comparison"),
-    meta: placeholderMeta("comparison"),
+    component: ComparisonPage,
+    meta: (t) => ({ title: page(t.comparisonPage.title), description: t.comparisonPage.description }),
   },
   {
     path: "/docs/migration",
