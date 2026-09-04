@@ -27,7 +27,7 @@ The first line is the verdict, the next lines are the grounds (the list of marke
 | `v018` | Hits files new to 0.18 (`map.md`, `sequence/generation.md`) | **nothing to migrate** — stop |
 | `none` | No `.reap/` | not this skill's job — `init` |
 | `mixed` | Both sides' markers hit together — half-migrated or contaminated | **stop and go to a human**, with the grounds line for what was hit |
-| `unknown` | `.reap/` exists but neither side's markers are present | **stop and go to a human** — v0.15/0.16 falls under the old reap's `reap migrate` |
+| `unknown` | `.reap/` exists but neither side's markers are present — v0.15/0.16, or corrupted | **stop and go to a human** |
 
 **Sharing a name doesn't make it a marker** — `sequence/` and `vision/milestones/` exist on both sides (v0.17 has `sequence/goal.md`·`milestone.md`, v0.18 has `sequence/generation.md`). `config.yml`'s `agentClient`·`language` also exist on both. `hooks/` exists on both too — v0.18's `init` also places `hooks/conditions/always.sh`. The script owns that distinction so the skill and agent don't re-judge it by eye.
 
@@ -40,7 +40,7 @@ The first line is the verdict, the next lines are the grounds (the list of marke
 
 Three things to show before getting consent:
 
-- **The list of steps** (the eight above) and how much each will handle in this project (memory file sizes, lineage count, backlog count, environment file count — measured at the level of `ls | wc -l`)
+- **The list of steps** (the eight above) and how much each will handle in this project (memory file sizes, lineage count, backlog count, environment file count, **design document count** — `find vision/design -type f | wc -l`, files not directories — **the last lineage generation's id**, and **whether `CLAUDE.md` has a `## REAP` section** — measured at the level of `ls | wc -l`)
 - **Token notice**: migration reads and sorts through all of memory and the records, so **token usage can be very large**
 - **The non-destruction promise**: the original stays entirely, just renamed to `.reap-v0_17/`, and reverting is one `mv`
 
@@ -64,12 +64,22 @@ Set up a new `.reap/` with `reap init`. Carry `config.yml`'s `language`·`agentC
 
 ## 6/8 — A subagent does the migration
 
-Don't fill the main session's context with old data — **the mapping table and instructions are in [migration-map.md](references/migration-map.md), and that whole document is handed to a subagent to carry out.** For mappings 1-9, the confirmed grounds are ps-4b485d's 04-migration-skill.md; for environment (10), it's 04-migrate-docs.md.
+Don't fill the main session's context with old data — **the mapping table and instructions are in [migration-map.md](references/migration-map.md), and that whole document is handed to a subagent to carry out.** For mappings 1-9, the confirmed grounds are ps-4b485d's 04-migration-skill.md; for environment (10), it's 04-migrate-docs.md; for the working-state mappings 1·2·3·5·6·11·12, it's ms-024's `tasks/1-skill-revision.md` and selfview's real first-pass trace. Twelve mappings total.
 
-## 7/8 — Verification
+## 7/8 — Verification (working-state check)
 
 `reap doctor` has to come back at **zero defects.** If defects show up, fix them and run again — don't move to step 8 until it passes. Also check that `.reap-v0_17/` is untouched (`git status` should show no changes inside it).
 
+Structure alone isn't enough — run the working-state check too, the automatable half of "would the next session know how to continue if the original were deleted":
+
+```bash
+bash <this skill's directory>/scripts/verify-migration.sh <project root>
+```
+
+Every line has to read `ok:` — a single `FAIL:` line means mapping #1, #2/#11, or #12 was skipped or done wrong; go back and fix it, then run again. Don't move to step 8 until this script also exits 0. Put its full output in the record file's `## 검증`, right after the doctor output.
+
 ## 8/8 — Record and home cleanup guidance
 
-The format for the record file (`archive/migration-v0_17.md`) and the allowlist for home asset cleanup are in the back half of [migration-map.md](references/migration-map.md) — the `doctor` output has to be in the record for this to be complete, and home cleanup happens only after the list is approved.
+The format for the record file (`archive/migration-v0_17.md`) and the allowlist for home asset cleanup are in the back half of [migration-map.md](references/migration-map.md) — the `doctor` and `verify-migration.sh` outputs both have to be in the record for this to be complete, and home cleanup happens only after the list is approved.
+
+**Add a `## 다음 세션이 볼 것` section** — the full text of `reap ctx`'s status line block (everything from `<!-- reap 상태 -->` to the end of its output), pasted verbatim. This is the literal answer to "does the next session know how to continue if `.reap-v0_17/` is deleted" — show it to the human alongside the record file.
