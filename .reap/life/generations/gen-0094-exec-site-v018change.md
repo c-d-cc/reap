@@ -6,7 +6,9 @@ milestone: ms-022
 title: 홈 breaking change 띠와 /docs/v018change 페이지
 startedAt: 2026-09-04T02:58:07Z
 startCommit: 666fa90
-status: open
+status: closed
+closedAt: 2026-09-04T03:05:26Z
+endCommit: c87f5a0
 ---
 ## Intent
 
