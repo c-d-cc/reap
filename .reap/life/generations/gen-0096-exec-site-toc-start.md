@@ -6,7 +6,9 @@ milestone: ms-022
 title: 문서 목차 골격 28라우트, 홈 복원, 시작하기 4쪽
 startedAt: 2026-09-04T14:24:08Z
 startCommit: 6126ecc
-status: open
+status: closed
+closedAt: 2026-09-04T14:42:15Z
+endCommit: c29fe64
 ---
 ## Intent
 
