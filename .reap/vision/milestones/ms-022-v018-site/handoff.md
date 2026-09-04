@@ -1,6 +1,40 @@
 # Handoff — ms-022 문서 사이트
 
-## 검수 대기: 홈+시작하기 4쪽 / 다음 task 4
+## 검수 대기: 핵심 개념·Plan 축 7쪽 / 다음 task 5
+
+gen-0097-exec가 task 4(핵심 개념 세 쪽 + Plan 축 네 쪽)를 전부 마쳤다.
+`git log --oneline -2`: 핵심 개념 3(두 축·판단확정사실·저장 구조) →
+Plan 축 4(Loop·Plan·Idea와 Research·Milestone 자르기) 두 커밋. 세대는
+닫지 않았다 — 사람 검수 대기.
+
+**검수할 것**
+- 두 축(`/docs/two-axes`) — 사이클 비교 표(세션 바인딩·동시 개수·닫히는
+  조건·근거), 만나는 지점 다이어그램이 실제 관계를 정확히 그리는지
+- 판단·확정·사실(`/docs/three-layers`) — 세 층 표, `reap doctor` 실물
+  출력과 결함/참고 분류가 `04-commands.md`의 doctor 절과 어긋나지 않는지
+- 저장 구조(`/docs/storage`) — 트리가 지금 리포 `.reap/`와 맞는지(세대가
+  더 진행되면 gen 번호가 낡는다 — 정상. 구조 자체가 맞는지가 중요)
+- Loop(`/docs/loop`) — 유형 넷 표, 실물 예시(loop-0001-plan-auth)
+- Plan(`/docs/plan-source`, 제목 "Plan") — 등록부·규약·인용·소비 완료
+  네 절이 tasks/4의 요구를 다 담는지, `sources.yml` 실물이 최신인지
+- Idea와 Research(`/docs/idea`) — 실물 예시(idea-67a149)와 졸업 조건
+- Milestone 자르기(`/docs/carve-milestone`) — 크기 기준·닫는 순서·실물
+  예시(ms-001)가 carve-milestone skill과 어긋나지 않는지
+
+세부는 `.reap/life/generations/gen-0097-exec-site-concepts-plan.md`의
+Outcome에.
+
+## 다음 task 5 — Execution 축 + 지식
+
+tasks/에 5번 문서가 아직 없다 — milestone.md의 Plan Items 5번
+("Execution 축 4 + 지식 4")를 보고 tasks/5-....md를 먼저 쓴 뒤 진행한다.
+여덟 쪽: generation·위임 모드·backlog·Milestone 닫기와 Fitness·Genome·
+Environment·Vision과 Memory·코드 인덱스(이미 `CodeIndexPage.tsx`로 존재 —
+placeholder가 아니라 실제 페이지이므로 tasks/5 범위에서 제외인지 확인).
+
+## 지난 task 4 이전 handoff (기록)
+
+### 검수 대기: 홈+시작하기 4쪽 / 다음 task 4
 
 gen-0096-exec가 task 3(목차 골격 30라우트, 홈 복원, 시작하기 4쪽)을 전부 마쳤다.
 `git log --oneline -4`: 골격(라우트·사이드바·nav·placeholder) → 홈(구조 6장,
