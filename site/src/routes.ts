@@ -20,6 +20,10 @@ import ReleaseNotesPage from "@/pages/ReleaseNotesPage";
 import TwoAxesPage from "@/pages/TwoAxesPage";
 import ThreeLayersPage from "@/pages/ThreeLayersPage";
 import StoragePage from "@/pages/StoragePage";
+import LoopPage from "@/pages/LoopPage";
+import PlanPage from "@/pages/PlanPage";
+import IdeaPage from "@/pages/IdeaPage";
+import CarveMilestonePage from "@/pages/CarveMilestonePage";
 import { makePlaceholderPage } from "@/pages/PlaceholderPage";
 
 export const SITE_NAME = "REAP";
@@ -98,23 +102,23 @@ export const ROUTES: RouteDef[] = [
   // Plan 축
   {
     path: "/docs/loop",
-    component: makePlaceholderPage("loop"),
-    meta: placeholderMeta("loop"),
+    component: LoopPage,
+    meta: (t) => ({ title: page(t.loopPage.title), description: t.loopPage.description }),
   },
   {
     path: "/docs/plan-source",
-    component: makePlaceholderPage("planSource"),
-    meta: placeholderMeta("planSource"),
+    component: PlanPage,
+    meta: (t) => ({ title: page(t.planPage.title), description: t.planPage.description }),
   },
   {
     path: "/docs/idea",
-    component: makePlaceholderPage("idea"),
-    meta: placeholderMeta("idea"),
+    component: IdeaPage,
+    meta: (t) => ({ title: page(t.ideaPage.title), description: t.ideaPage.description }),
   },
   {
     path: "/docs/carve-milestone",
-    component: makePlaceholderPage("carveMilestone"),
-    meta: placeholderMeta("carveMilestone"),
+    component: CarveMilestonePage,
+    meta: (t) => ({ title: page(t.carveMilestonePage.title), description: t.carveMilestonePage.description }),
   },
 
   // Execution 축

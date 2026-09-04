@@ -219,13 +219,113 @@ export interface Translations {
     sessionDesc: string;
   };
 
+  loopPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    typesTitle: string;
+    typeHeaders: string[];
+    types: [string, string][];
+    openTitle: string;
+    openCode: string;
+    openDesc: string;
+    continueTitle: string;
+    continueDesc: string;
+    vocabTitle: string;
+    vocabDesc: string;
+    vocabHeaders: string[];
+    vocab: [string, string][];
+    closeTitle: string;
+    closeCode: string;
+    closeDesc: string;
+    stayOpenTitle: string;
+    stayOpenDesc: string;
+    exampleTitle: string;
+    exampleDesc: string;
+    exampleCode: string;
+  };
+
+  planPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    registerTitle: string;
+    registerCode: string;
+    registerDesc: string;
+    registryTitle: string;
+    registryDesc: string;
+    registryCode: string;
+    conventionTitle: string;
+    conventionDesc: string;
+    conventionRulesTitle: string;
+    conventionRules: string[];
+    citeTitle: string;
+    citeDesc: string;
+    citeCode: string;
+    lifespanTitle: string;
+    lifespanDesc: string;
+    lifespanCode: string;
+  };
+
+  ideaPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    kindsTitle: string;
+    kindHeaders: string[];
+    kinds: [string, string][];
+    makeTitle: string;
+    makeCode: string;
+    makeDesc: string;
+    exampleTitle: string;
+    exampleDesc: string;
+    exampleCode: string;
+    graduationTitle: string;
+    graduationDesc: string;
+    doctorTitle: string;
+    doctorItems: string[];
+    archiveTitle: string;
+    archiveDesc: string;
+    archiveCode: string;
+  };
+
+  carveMilestonePage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    checkTitle: string;
+    checkDesc: string;
+    sizeTitle: string;
+    sizeDesc: string;
+    sizeNote: string;
+    vocabTitle: string;
+    vocabDesc: string;
+    vocabHeaders: string[];
+    vocab: [string, string][];
+    fitnessQuestionsTitle: string;
+    fitnessQuestionsDesc: string;
+    carveTitle: string;
+    carveCode: string;
+    carveDesc: string;
+    focusTitle: string;
+    focusDesc: string;
+    retireTitle: string;
+    retireDesc: string;
+    closeTitle: string;
+    closeDesc: string;
+    closeSteps: { title: string; desc: string }[];
+    exampleTitle: string;
+    exampleDesc: string;
+    exampleCode: string;
+  };
+
   placeholder: {
     notice: string;
     pages: {
-      loop: { title: string; breadcrumb: string; description: string };
-      planSource: { title: string; breadcrumb: string; description: string };
-      idea: { title: string; breadcrumb: string; description: string };
-      carveMilestone: { title: string; breadcrumb: string; description: string };
       generation: { title: string; breadcrumb: string; description: string };
       delegation: { title: string; breadcrumb: string; description: string };
       backlog: { title: string; breadcrumb: string; description: string };
@@ -395,7 +495,7 @@ export const ko: Translations = {
       threeLayers: "판단·확정·사실",
       storage: "저장 구조",
       loop: "Loop",
-      planSource: "Plan Source",
+      planSource: "Plan",
       idea: "Idea와 Research",
       carveMilestone: "Milestone 자르기",
       generation: "Generation",
@@ -859,13 +959,211 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
     sessionDesc: ".session은 현재 세션에 바인딩된 generation id와 milestone id를 담습니다. worktree마다 별개 사본이므로 커밋하면 세션마다 값이 어긋납니다. .index/는 코드 인덱스입니다 — 크기 때문이 아니라, 커밋하면 그 커밋 자체를 다시 인덱싱해야 해서 gitignore됩니다. 둘 다 지워도 안전하고, 다음 동작이 다시 만듭니다.",
   },
 
+  loopPage: {
+    title: "Loop",
+    breadcrumb: "Plan 축",
+    description: "새 의도를 만드는 plan 축의 사이클 — 유형 넷, 여는 법, 잇는 법, 닫는 법.",
+    intro: "새 의도를 만드는 일은 generation이 아니라 loop입니다. 기획, 설계, 화면과 흐름, 아직 자리가 없는 아이디어 — 이 넷을 loop가 다루고, generation과는 다른 사이클로 돕니다.",
+    typesTitle: "유형 넷",
+    typeHeaders: ["유형", "산출물이 찾는 자리"],
+    types: [
+      ["plan", "plan source의 기획 문서, 그리고 거기서 잘린 milestone"],
+      ["design", "plan source의 설계 문서, milestone"],
+      ["uiux", "화면·흐름 문서, milestone"],
+      ["idea", "idea/research/, 또는 다른 유형의 loop로 졸업"],
+    ],
+    openTitle: "엽니다",
+    openCode: `reap make loop --type plan|design|uiux|idea --title "<제목>" [--from <id>] [--ref <ps-id>:<경로>]`,
+    openDesc: "유형은 산출물이 어디로 갈지로 정합니다. --from은 출처(계획 부족으로 막힌 generation, 앞선 loop, plan source 문서)이고 있으면 적고 없어도 됩니다 — 근거가 아니라 출처라 CLI가 검사하지 않습니다. 본문은 비어서 시작하고, 가장 먼저 Question을 적습니다 — 이 loop가 무엇을 정하려는 것인지가, 여러 세션에 걸치는 동안 기록을 쓸모 있게 만드는 유일한 것입니다.",
+    continueTitle: "먼저 열린 loop를 봅니다",
+    continueDesc: "상태 줄이 열린 loop를 한 줄씩 나열합니다. 같은 물음을 다루는 loop가 이미 열려 있으면 새로 열지 않고 거기서 잇습니다 — 새로 열면 논의가 두 기록으로 갈라집니다. 닫힌 loop도 읽을 값이 있습니다 — 지금 물음을 앞선 loop가 이미 다뤘을 수 있고, Dead Ends가 그것을 말해줍니다.",
+    vocabTitle: "기록에 적는 것",
+    vocabDesc: "어휘이지 템플릿이 아닙니다. 쓸 것만 쓰고, 순서도 정해져 있지 않습니다.",
+    vocabHeaders: ["항목", "무엇을 담나"],
+    vocab: [
+      ["Question", "무엇을 정하려는 것인가"],
+      ["Dialogue", "사람과 갈린 지점 — 무엇이 갈렸고 선택지가 무엇이었고 사람이 무엇을 골랐는가. 전사가 아니라 갈린 지점입니다"],
+      ["Explored", "무엇을 살펴봤는가, 전제를 실제 흔적에 대본 결과"],
+      ["Dead Ends", "시도했다 접은 접근과 그 이유"],
+      ["Outcome", "plan source에 쓴 것, 낳은 milestone, idea로 보낸 것"],
+      ["Open Questions", "결론 없이 남긴 것과 그것이 어디로 갔는가"],
+    ],
+    closeTitle: "닫습니다 — 산출물이 자리를 찾으면",
+    closeCode: `reap mark loop <loop-id> --closed [--milestone <ms-id>]...`,
+    closeDesc: "plan·design·uiux는 plan source에 쓰고, 실행할 것이 있으면 milestone까지 잘라야 닫힙니다. idea는 idea/research/에 남기거나 다른 유형의 loop로 졸업하면 닫힙니다. 이 loop가 낳은 milestone의 id를 --milestone에 적습니다 — milestone 쪽 from도 이 loop를 가리켜야 하고, carve-milestone이 --from <loop-id>로 씁니다.",
+    stayOpenTitle: "열린 채 두는 것이 정상입니다",
+    stayOpenDesc: "아직 자리를 못 찾았으면 다음 세션이 Question과 Dialogue를 읽고 잇습니다. 방향 자체가 죽었을 때만 --aborted로 지우고, 접은 이유는 idea/research/로 보냅니다 — 지워진 기록은 아무도 못 읽습니다. loop는 세션에 바인딩되지 않고 여럿이 나란히 열립니다. 닫힌 loop는 life/loops/에 남고, 방금 닫힌 것이 가장 자주 읽힙니다 — 그 milestone을 실행하는 세대가 Dialogue와 Dead Ends를 봅니다. 닫힌 것이 10개를 넘으면 오래된 것부터 archive/loops/로 내려가고, 이것은 판단이 아니라 개수라 mark loop --closed가 닫는 김에 합니다.",
+    exampleTitle: "실물",
+    exampleDesc: "인증을 붙이자는 loop를 열고, 로그인 붙이기 milestone을 잘라 닫은 예입니다.",
+    exampleCode: `$ reap make loop --type plan --title "인증 붙이기"
+loop loop-0001-plan
+  .reap/life/loops/loop-0001-plan-auth.md
+
+(carve-milestone으로 ms-001을 자른 뒤)
+
+$ reap mark loop loop-0001-plan --closed --milestone ms-001
+닫았습니다: loop-0001-plan
+  .reap/life/loops/loop-0001-plan-auth.md`,
+  },
+
+  planPage: {
+    title: "Plan",
+    breadcrumb: "Plan 축",
+    description: "리포 밖일 수 있는 기획 문서를 등록하고, 규약으로 읽고 쓰는 법을 기억합니다.",
+    intro: "제품을 만들기 위한 모든 생각 — 기획, 계획, 설계, 아이디어 — 을 REAP는 소스코드에 준하는 1급 artifact로 다룹니다. plan 문서를 .reap/ 안에 두라고 강제하지 않습니다. 리포 밖일 수도, 여러 곳일 수도 있습니다. 대신 각 plan을 어떻게 읽고 어떻게 쓰는지에 대한 규약을 기억합니다.",
+    registerTitle: "등록합니다",
+    registerCode: `reap make plan-source --root <path> --role "<역할>" [--slug <s>]`,
+    registerDesc: "--root는 그 plan이 사는 디렉토리입니다. 리포 안이든 밖이든, git이든 아니든 상관없습니다. --slug를 주지 않으면 --root의 디렉토리 이름에서 만듭니다. 등록하면 id가 발급되고, sources.yml에 행이 붙고, 그 소스를 읽고 쓰는 법을 적을 빈 규약 파일이 놓입니다.",
+    registryTitle: "등록부 — sources.yml",
+    registryDesc: "이 리포 자신도 plan source 셋을 등록해 두고 있습니다. 제품이 무엇이어야 하는가를 적은 설계 문서 하나와, 시기별 작전 계획 둘입니다.",
+    registryCode: `sources:
+  - id: ps-4f2a91
+    root: ./docs/superpowers/specs/reap
+    role: 설계 — REAP가 무엇이고 무엇이 참이어야 하는가
+    convention: conventions/ps-4f2a91-reap.md
+  - id: ps-4b485d
+    root: ./docs/reap-plan/reap_v_0_18_migration
+    role: reap v0.18 귀환 작전 계획
+    convention: conventions/ps-4b485d-reap-v018-migration.md
+  - id: ps-5e948f
+    root: ./docs/reap-plan/reap_v_0_18_release
+    role: reap v0.18 완성·출시 계획
+    convention: conventions/ps-5e948f-reap-v018-release.md`,
+    conventionTitle: "규약 — 어떻게 읽고 쓰는가",
+    conventionDesc: "conventions/<ps-id>-<slug>.md 한 파일에 그 소스를 읽는 법과 쓰는 법을 적습니다. loop가 이 소스에 쓸 때마다 먼저 규약을 읽고, 필요하면 규약 자체를 갱신합니다 — 다음 loop가 같은 판단을 다시 하지 않도록.",
+    conventionRulesTitle: "loop가 쓸 때 내리는 판단",
+    conventionRules: [
+      "어느 소스에 쓸 것인가 — 여러 plan source가 등록돼 있으면 이 내용이 어디에 속하는지 먼저 정합니다",
+      "쓰기 전에 규약(conventions/)을 먼저 읽습니다",
+      "새 문서를 쓸지, 있는 문서를 고칠지 정합니다",
+      "쓰고 나면 규약 자체를 갱신합니다 — 다음에 읽는 쪽이 최신 상태를 봅니다",
+      "아직 정해지지 않은 것을 확정처럼 쓰지 않습니다",
+      "그 소스가 git이면 커밋 규칙이 적용되고, 아니면 적용되지 않는다고 명시합니다",
+    ],
+    citeTitle: "인용합니다",
+    citeDesc: "milestone과 loop의 --ref가 <ps-id>:<경로> 형식으로 plan source의 특정 문서를 가리킵니다. make가 그 경로가 root 안에 실재하는지 확인하고, doctor가 나중에 다시 확인합니다 — 시점이 다르므로 중복이 아닙니다. 이 milestone(ms-022) 자체가 실례입니다.",
+    citeCode: `refs:
+  - ps-5e948f:07-i18n-docs-delegate.md`,
+    lifespanTitle: "소비 완료를 표시합니다",
+    lifespanDesc: "작전 계획처럼 끝이 있는 plan source는 규약 파일의 수명(Lifespan) 절에 소비 완료를 적습니다. 다음 loop가 이 절을 읽고, 여기 더 쓸지 새 소스를 세울지 판단합니다.",
+    lifespanCode: `## 수명
+
+v0.18 브랜치가 서고 M1~M3가 끝나면 이 세트는 소비 완료다 — 살아남을 규범은
+v0.18 브랜치의 spec·genome으로 옮기고, 여기는 기록으로 남는다.
+
+소비 완료 (2026-08-31, ms-013~015 닫힘). 살아남은 규범은 v0.18 브랜치의
+spec·genome·migrate skill로 옮겨졌다. 후속은 ps-5e948f가 잇는다.`,
+  },
+
+  ideaPage: {
+    title: "Idea와 Research",
+    breadcrumb: "Plan 축",
+    description: "아직 단단하지 않은 지식을 두는 자리 — research·freememo·files.",
+    intro: "결론이 안 난 조사, 형식 없는 메모, 나중에 참고할 외부 자료 — genome에 넣기엔 이르고 그렇다고 흘려보내기엔 아까운 것들이 idea/에 있습니다. 셋은 담는 것이 다릅니다.",
+    kindsTitle: "셋",
+    kindHeaders: ["종류", "담는 것"],
+    kinds: [
+      ["research", "조사 결과. 아직 결론이 나지 않은 것"],
+      ["freememo", "형식 없는 자유 메모"],
+      ["files", "외부 참고자료"],
+    ],
+    makeTitle: "만듭니다",
+    makeCode: `reap make idea --kind research|freememo|file --title "<제목>" [--slug <s>]`,
+    makeDesc: "research·files는 졸업 조건을 적는 문서로 시작합니다 — 무엇이 정해지면 이 idea가 결론을 얻는지, 무엇을 확인하면 신뢰할 수 있는지.",
+    exampleTitle: "실물",
+    exampleDesc: "세션 만료 정책을 조사만 해 두고 아직 결론을 내지 않은 예입니다.",
+    exampleCode: `$ reap make idea --kind research --title "세션 만료 정책 조사"
+idea idea-67a149
+  .reap/idea/research/idea-67a149-세션-만료-정책-조사.md
+
+---
+id: idea-67a149
+slug: 세션-만료-정책-조사
+kind: research
+title: 세션 만료 정책 조사
+createdAt: 2026-09-04T15:18:55Z
+status: open
+---
+
+## What's Undecided
+
+## Graduation Criteria
+
+## Sources
+
+- (primary/secondary · date verified)`,
+    graduationTitle: "졸업 조건",
+    graduationDesc: "research와 files 문서는 언제 결론이 난 것으로 볼지를 미리 적습니다. 적어 두지 않으면 다음에 열어봐도 아직 결론이 안 났는지 판단할 수 없고, 그 문서는 계속 열린 채로 남습니다. 결론이 나면 loop의 Dialogue나 plan source, genome 등 그것이 실제로 규율할 자리로 옮기고 idea 문서는 역할을 마칩니다.",
+    doctorTitle: "doctor가 idea에서 보는 것",
+    doctorItems: [
+      "졸업 조건이 비어 있는 research·files 문서",
+      "출처나 확인 날짜가 없는 문서",
+      "오래 방치된 항목 — 결론도 안 나고 손도 안 댄 것",
+    ],
+    archiveTitle: "정리합니다",
+    archiveDesc: "결론이 나서 다른 자리로 옮겨졌거나 더는 참고할 값이 없으면 archive로 내립니다.",
+    archiveCode: `reap mark idea <idea-id> --archived   # archive/idea/<kind>/로 이동`,
+  },
+
+  carveMilestonePage: {
+    title: "Milestone 자르기",
+    breadcrumb: "Plan 축",
+    description: "plan을 실행 가능한 단위로 자르는 절차 — 크기, 어휘, focus, 닫는 순서.",
+    intro: "loop 안에서, 이미 정해진 계획을 실행 가능한 단위로 자를 때 부릅니다. 무엇을 만들지 아직 정해지지 않았다면 자르는 게 아니라 정하는 것이고, 그건 loop와 interview의 몫입니다. backlog 항목 하나로 충분한 일이면 milestone을 만들지 않습니다 — 경계가 이미 항목에 있는데 milestone을 또 만들면 경계가 두 곳에 적히고, 두 곳에 있으면 어긋납니다.",
+    checkTitle: "먼저 전제를 실제 흔적에 대봅니다",
+    checkDesc: "plan에 적힌 것은 시도해 보기 전의 상상이고, 실제로 해 본 것이 그것을 이깁니다. 자르기 전에 plan이 전제한 것이 지금도 참인지 확인합니다 — 파일 크기를 재보거나, 얼마나 쓰이는지 세보거나, 관련 문서끼리 맞는지 grep 한 번이면 대개 충분합니다. 건너뛰면 아무도 안 쓰는 것을 위한 도구를 만들게 됩니다. 전제가 틀렸으면 자르기를 멈추고 그 칸을 다시 채웁니다.",
+    sizeTitle: "크기 — task 넷 안팎, 세대 여섯에서 열",
+    sizeDesc: "실측한 milestone 셋의 끝에 사람이 같은 답을 냈습니다 — 이 정도 크기를 유지하라고. 세대 수는 열·아홉·여섯이었고, task는 넷에서 다섯이었습니다. 숫자는 규칙이 아니라 기준선입니다 — 규칙 하나만 바꾼 milestone은 세대 셋으로 끝났고 그것도 맞았습니다. 그래도 크게 벗어나면 신호로 읽습니다 — task 여덟 개는 둘로 나뉠 수 있던 것이 하나로 묶였다는 뜻입니다.",
+    sizeNote: "아래 경계는 규칙입니다. 한 세대로 끝나는 일은 milestone이 아닙니다 — backlog 항목 하나로 충분하고, 자르기 전에 '이게 세대 몇 개짜리인가'를 먼저 답합니다. 답이 하나면 reap make backlog로 항목을 만들고 --backlog 근거로 엽니다.",
+    vocabTitle: "무엇을 씁니다",
+    vocabDesc: "어휘이지 템플릿이 아닙니다. 실제로 값이 있었던 것들입니다.",
+    vocabHeaders: ["항목", "무엇을 담나"],
+    vocab: [
+      ["Exit Criteria", "무엇이 되면 끝나는가. 사람이 판정할 수 있는 상태로 씁니다 — 정량 지표를 만들어내지 않습니다"],
+      ["Out of Scope", "이번에 하지 않기로 한 것. 경계는 안쪽만으로 정의되지 않습니다 — 왜 인접한 것을 안 하는지를 특히 적습니다"],
+      ["Background", "왜 지금 필요한가, plan의 어느 대목에서 나왔는가. 전제를 확인한 결과가 plan과 달랐다면 무엇이 바뀌었는지"],
+      ["Plan Items", "한 줄씩. 상세는 tasks/로 보냅니다. 순서에 이유가 있으면 그 이유를 적습니다"],
+      ["Constraints", "이 milestone에만 걸리는 제약. 프로젝트 전역 규칙은 genome/에 있고 옮겨 적지 않습니다"],
+      ["Open Questions", "자르는 시점에 정하지 못한 것. 어느 task가 답할지도 적습니다"],
+    ],
+    fitnessQuestionsTitle: "닫힐 때 물을 것을 미리 씁니다",
+    fitnessQuestionsDesc: "끝난 뒤에 쓰면 후회만 물어보게 됩니다. 자르는 시점에 'What to ask when this milestone closes' 절에 서너 개를 적어 두면 무엇을 검증할지 먼저 정해지고, milestone의 목적이 한 번 더 확인됩니다. '잘 됐나'가 아니라 '이번에 달라진 무엇이 실제로 나아졌는가'를 묻는 질문이어야 합니다.",
+    carveTitle: "자릅니다",
+    carveCode: `reap make milestone --title "<제목>" [--from <loop-id>] [--ref <ps-id>:<경로>] [--focus]`,
+    carveDesc: "--from은 이 milestone을 낳은 loop, --ref는 근거가 된 plan 문서입니다. 둘 다 검사하지 않습니다 — 사람이 읽는 메모라 정확히 적는 것이 이쪽의 몫입니다. 자른 뒤 milestone.md 본문과 tasks/<n>-<slug>.md를 씁니다 — 인터페이스·함정·완료 판정을 미리 적어 두면 그 task를 실행하는 세대가 다시 탐색하지 않아도 됩니다.",
+    focusTitle: "focus는 지금 시작할 것에만 줍니다",
+    focusDesc: "--focus가 없으면 방금 자른 milestone이 상태 줄에 나타나지 않고, 다음 세션이 그것이 있는지도 모릅니다. 자동으로 붙이지 않는 이유는 여러 개를 한 번에 자르면 마지막 것이 focus를 가로채기 때문입니다 — 실제로 넷을 한 번에 자른 적이 있고, 그다음 필요했던 것은 첫 번째였습니다. 여럿을 잘랐다면 지금 시작할 것 하나에만 줍니다.",
+    retireTitle: "plan에서 내립니다",
+    retireDesc: "자른 내용을 로드맵에 그대로 남겨두면 같은 것이 두 곳에 있게 됩니다. 잘라낸 칸을 지우고, 내용이 plan과 달라졌다면 왜 달라졌는지를 plan의 서두에 남깁니다 — 다음에 그 plan을 읽는 사람이 필요로 하는 것입니다.",
+    closeTitle: "닫습니다",
+    closeDesc: "스스로 닫지 않습니다. 종료 조건이 충족된 것 같으면 사람에게 알리고, 자르는 시점에 적어 둔 질문으로 fitness를 묻습니다. 정량 지표가 없으므로 사람의 자연어 평가가 유일한 fitness 신호입니다. 순서가 고정돼 있습니다.",
+    closeSteps: [
+      { title: "1. fitness를 받아 milestone.md에 적습니다", desc: "답만이 아니라 어떻게 읽었는지도 적습니다 — 유보된 답('아직 모른다')은 idea/research/로 보내 다음 milestone이 다시 묻게 합니다" },
+      { title: "2. cleanup을 부릅니다", desc: "mark milestone --closed는 milestone 디렉토리를 통째로 옮기므로, 순서가 바뀌면 cleanup이 남긴 기록을 다음 세션이 못 찾습니다" },
+      { title: "3. reap mark milestone <ms-id> --closed", desc: "archive/milestones/로 옮겨지고 milestone.md·handoff.md·tasks/가 함께 보존됩니다. 세대는 따라가지 않습니다 — cleanup이 참고 가치를 보고 이미 따로 내린 뒤입니다" },
+    ],
+    exampleTitle: "실물",
+    exampleDesc: "로그인 붙이기 milestone을 자르고, 한 세대로 실현한 뒤 닫은 예입니다.",
+    exampleCode: `$ reap make milestone --title "로그인 붙이기" --from loop-0001-plan --focus
+milestone ms-001
+  .reap/vision/milestones/ms-001-login/milestone.md
+
+(gen-0001-exec가 로그인 폼과 세션 발급을 마치고 커밋한 뒤)
+
+$ reap mark generation gen-0001-exec --closed
+닫았습니다: gen-0001-exec
+
+$ reap mark loop loop-0001-plan --closed --milestone ms-001
+닫았습니다: loop-0001-plan
+
+$ reap mark milestone ms-001 --closed
+닫고 옮겼습니다: ms-001
+  .reap/archive/milestones/ms-001-login/milestone.md`,
+  },
+
   placeholder: {
     notice: "이 문서는 준비 중입니다.",
     pages: {
-      loop: { title: "Loop", breadcrumb: "Plan 축", description: "새 의도를 만드는 plan 축의 사이클." },
-      planSource: { title: "Plan Source", breadcrumb: "Plan 축", description: "리포 밖일 수 있는 기획 문서의 등록부." },
-      idea: { title: "Idea와 Research", breadcrumb: "Plan 축", description: "아직 단단하지 않은 지식을 두는 자리." },
-      carveMilestone: { title: "Milestone 자르기", breadcrumb: "Plan 축", description: "plan을 실행 가능한 단위로 자르는 절차." },
       generation: { title: "Generation", breadcrumb: "Execution 축", description: "exec와 fix, 소스코드를 진화시키는 작업 사이클." },
       delegation: { title: "위임 모드", breadcrumb: "Execution 축", description: "generation을 subagent에 위임하는 절차." },
       backlog: { title: "Backlog", breadcrumb: "Execution 축", description: "지연되거나 발견된 이슈를 다음 generation으로 넘기는 자리." },
