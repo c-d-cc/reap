@@ -1,11 +1,12 @@
 import { afterEach, expect, test } from "bun:test";
 import { mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { cleanupTempDirs, tempDir } from "./helpers.ts";
+import { cleanupTempDirs, labelPrefix, tempDir } from "./helpers.ts";
 import { run } from "../src/cli.ts";
 import { assemble } from "../src/ctx.ts";
 import { patch } from "../src/doc.ts";
 import { bindSession } from "../src/store.ts";
+import { t } from "../src/i18n.ts";
 
 afterEach(cleanupTempDirs);
 
@@ -60,7 +61,7 @@ test("milestone 본문도 memory도 세대 기록도 실리지 않는다", async
 test("상태 줄이 milestone과 그 디렉토리의 파일 이름을 낸다", async () => {
   const { root, id } = await furnished();
   const text = assemble(root, id);
-  expect(text).toContain(`현재 milestone: ${id}`);
+  expect(text).toContain(t(root, "ctx.label.milestone", { id, title: "인증", flags: "open" }));
   expect(text).toContain("인증");
   expect(text).toContain(`.reap/vision/milestones/${id}-인증/`);
   expect(text).toContain("milestone.md");
@@ -120,14 +121,14 @@ test("map.md가 있으면 구조 줄을 내고, 통째로 싣지는 않는다", 
   const root = await project();
   writeFileSync(join(root, ".reap", "map.md"), "# Map\n\n지도본문\n");
   const text = assemble(root);
-  expect(text).toContain("구조: .reap/map.md");
+  expect(text).toContain(t(root, "ctx.label.map", { path: ".reap/map.md" }));
   expect(text).not.toContain("지도본문");
 });
 
 test("map.md가 비어 있으면 구조 줄이 없다", async () => {
   const root = await project();
   writeFileSync(join(root, ".reap", "map.md"), "");
-  expect(assemble(root)).not.toContain("구조:");
+  expect(assemble(root)).not.toContain(labelPrefix("ctx.label.map").trim());
 });
 
 test("열린 세대는 id와 기록 경로를 내고, 닫히면 그 줄이 사라진다", async () => {
@@ -135,17 +136,17 @@ test("열린 세대는 id와 기록 경로를 내고, 닫히면 그 줄이 사�
   const id = await milestone(root, "인증");
   await run(["make", "generation", "--milestone", id, "--title", "토큰 회전"], root);
   const text = assemble(root);
-  expect(text).toContain("열린 세대: gen-0001-exec");
+  expect(text).toContain(`${labelPrefix("ctx.label.generation")}gen-0001-exec`);
   expect(text).toContain("generations/gen-0001-exec-토큰-회전.md");
   await run(["mark", "generation", "gen-0001-exec", "--closed"], root);
-  expect(assemble(root)).not.toContain("열린 세대");
+  expect(assemble(root)).not.toContain(labelPrefix("ctx.label.generation").trim());
 });
 
 test("열린 fix 세대도 상태 줄에 나온다 — milestone이 없어도", async () => {
   const root = await project();
   await run(["make", "generation", "--fix", "--title", "깨진 빌드"], root);
   const text = assemble(root);
-  expect(text).toContain("열린 세대: gen-0001-fix");
+  expect(text).toContain(`${labelPrefix("ctx.label.generation")}gen-0001-fix`);
   expect(text).toContain("generations/gen-0001-fix-깨진-빌드.md");
 });
 
@@ -154,8 +155,8 @@ test("안내 줄은 milestone도 세대도 없을 때조차 나온다", async ()
   const text = assemble(root);
   expect(text).toContain("/reap:evolve");
   expect(text).toContain("/reap:complete");
-  expect(text).not.toContain("현재 milestone");
-  expect(text).not.toContain("열린 세대");
+  expect(text).not.toContain(labelPrefix("ctx.label.milestone").trim());
+  expect(text).not.toContain(labelPrefix("ctx.label.generation").trim());
 });
 
 test("바인딩이 --milestone보다, --milestone이 focus보다 우선한다", async () => {
@@ -185,16 +186,16 @@ test("바인딩된 milestone이 닫혀 있으면 그것을 현재로 내지 않�
   const id = await milestone(root, "끝난 것");
   patch(join(dirOf(root, id, "끝난-것"), "milestone.md"), { status: "closed" });
   bindSession(root, "gen-0001-exec", id, {});
-  expect(assemble(root)).not.toContain("현재 milestone");
+  expect(assemble(root)).not.toContain(labelPrefix("ctx.label.milestone").trim());
 });
 
 test("config.language가 있으면 응답 언어 줄이 상태 블록 첫 줄에 온다", async () => {
   const root = await project();
   const text = assemble(root);
-  const marker = "<!-- reap 상태 -->\n";
+  const marker = `${t(root, "ctx.marker")}\n`;
   const idx = text.indexOf(marker);
   expect(idx).toBeGreaterThanOrEqual(0);
-  expect(text.slice(idx + marker.length).split("\n")[0]).toBe("응답 언어: ko");
+  expect(text.slice(idx + marker.length).split("\n")[0]).toBe(t(root, "ctx.label.language", { language: "ko" }));
 });
 
 test("config.language가 비어 있으면 응답 언어 줄이 없다", async () => {
@@ -203,7 +204,7 @@ test("config.language가 비어 있으면 응답 언어 줄이 없다", async ()
     join(root, ".reap", "config.yml"),
     "language: \nagentClient: claude-code\nworkspaceId: x\n",
   );
-  expect(assemble(root)).not.toContain("응답 언어");
+  expect(assemble(root)).not.toContain(labelPrefix("ctx.label.language").trim());
 });
 
 test("--hook의 JSON 본문에도 응답 언어 줄이 실린다", async () => {
@@ -213,7 +214,7 @@ test("--hook의 JSON 본문에도 응답 언어 줄이 실린다", async () => {
   const parsed = JSON.parse(result.message) as {
     hookSpecificOutput: { additionalContext: string };
   };
-  expect(parsed.hookSpecificOutput.additionalContext).toContain("응답 언어: ko");
+  expect(parsed.hookSpecificOutput.additionalContext).toContain(t(root, "ctx.label.language", { language: "ko" }));
 });
 
 test("REAP 디렉토리가 없으면 빈 문자열이고 던지지 않는다", () => {

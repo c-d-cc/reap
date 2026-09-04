@@ -2,6 +2,13 @@ import { execFileSync } from "node:child_process";
 import { mkdtempSync, realpathSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { ko } from "../src/messages/ko.ts";
+import type { MessageKey } from "../src/i18n.ts";
+
+/** 카탈로그 문구의 `{param}` 앞부분만 뗀다 — 값을 모르고 딱지의 존재만 확인할 때 쓴다. */
+export function labelPrefix(key: MessageKey): string {
+  return ko[key].split("{")[0]!;
+}
 
 const created: string[] = [];
 

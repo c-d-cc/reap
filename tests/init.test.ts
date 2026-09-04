@@ -4,6 +4,7 @@ import { join } from "node:path";
 import { cleanupTempDirs, initRepo, tempDir } from "./helpers.ts";
 import { run } from "../src/cli.ts";
 import { DIRS, readConfig, SEEDS } from "../src/store.ts";
+import { t } from "../src/i18n.ts";
 
 afterEach(cleanupTempDirs);
 
@@ -93,7 +94,7 @@ test("init --check는 전부 채워졌으면 그렇다고 말한다", async () =
   for (const file of Object.keys(SEEDS)) writeFileSync(join(root, ".reap", file), "# 채움\n");
   const result = await run(["init", "--check"], root);
   expect(result.ok).toBe(true);
-  expect(result.message).toContain("씨앗인 채 남은 파일이 없습니다");
+  expect(result.message).toContain(t(root, "cli.no_seeds_remaining"));
 });
 
 test("--version이 package.json의 버전을 낸다 — issue를 올릴 때 쓴다", async () => {

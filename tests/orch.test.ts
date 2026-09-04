@@ -1,12 +1,16 @@
 import { afterEach, expect, test } from "bun:test";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { cleanupTempDirs, commit, initRepo, tempDir } from "./helpers.ts";
+import { cleanupTempDirs, commit, initRepo, labelPrefix, tempDir } from "./helpers.ts";
 import { run } from "../src/cli.ts";
 import { arrive, claim, orchDir, release, roster, waitBarrier } from "../src/orch.ts";
 import { paths } from "../src/store.ts";
+import { ko } from "../src/messages/ko.ts";
 
 afterEach(cleanupTempDirs);
+
+const CLAIMED_CONNECTOR = ko["orch.already_claimed"].split("{holder}")[1]!.split("{expiresAt}")[0]!;
+const TIMEOUT_WORD = ko["orch.barrier_timeout"].split("{name}")[1]!.split("{timeout}")[0]!.trim();
 
 async function project(): Promise<{ root: string; home: string }> {
   const root = tempDir();
@@ -38,7 +42,7 @@ test("claim은 O_EXCL — 둘째는 holder와 만료를 보고 실패한다, 같
   const { root, home } = await project();
   const a = claim(root, "t", "src/auth/**", 60_000, env(home, "reap-t-a"));
   expect(a.holder).toBe("reap-t-a");
-  expect(() => claim(root, "t", "src/auth/**", 60_000, env(home, "reap-t-b"))).toThrow(/holder reap-t-a.*만료/);
+  expect(() => claim(root, "t", "src/auth/**", 60_000, env(home, "reap-t-b"))).toThrow(new RegExp(`holder reap-t-a${CLAIMED_CONNECTOR}`));
   const again = claim(root, "t", "src/auth/**", 60_000, env(home, "reap-t-a"));
   expect(again.holder).toBe("reap-t-a");
 });
@@ -57,9 +61,9 @@ test("만료된 claim은 가져갈 수 있고 탈취가 로그에 남는다", as
 test("release는 holder만 할 수 있다", async () => {
   const { root, home } = await project();
   claim(root, "t", "r", 60_000, env(home, "reap-t-a"));
-  expect(() => release(root, "t", "r", env(home, "reap-t-b"))).toThrow(/남의 claim/);
+  expect(() => release(root, "t", "r", env(home, "reap-t-b"))).toThrow(labelPrefix("orch.someone_elses_claim").trim());
   release(root, "t", "r", env(home, "reap-t-a"));
-  expect(() => release(root, "t", "r", env(home, "reap-t-a"))).toThrow(/잡혀 있지 않/);
+  expect(() => release(root, "t", "r", env(home, "reap-t-a"))).toThrow(labelPrefix("orch.not_claimed").trim());
 });
 
 test("barrier — expect에 닿으면 통과, 같은 세션의 두 번째 도착은 세지 않는다", async () => {
@@ -130,7 +134,7 @@ test("CLI — barrier는 --timeout이 필수이고, status가 claims·barriers�
     expect((await run(["orch", "claim", "ms-004", "--ttl", "5m"], root)).ok).toBe(true);
     const timedOut = await run(["orch", "barrier", "x", "--expect", "2", "--timeout", "1"], root);
     expect(timedOut.ok).toBe(false);
-    expect(timedOut.message).toContain("시간 초과");
+    expect(timedOut.message).toContain(TIMEOUT_WORD);
     const s = await run(["orch", "status"], root);
     expect(s.message).toContain("ms-004  reap-main-me");
     expect(s.message).toContain("x  1/2");

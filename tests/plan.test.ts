@@ -1,9 +1,13 @@
 import { afterEach, expect, test } from "bun:test";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { cleanupTempDirs, commit, initRepo, tempDir } from "./helpers.ts";
+import { cleanupTempDirs, commit, initRepo, labelPrefix, tempDir } from "./helpers.ts";
 import { run } from "../src/cli.ts";
 import { readSources, validateRef } from "../src/plan.ts";
+import { t } from "../src/i18n.ts";
+import { ko } from "../src/messages/ko.ts";
+
+const BROKEN = new RegExp(ko["plan.sources_broken_line"].split(" — ")[0]!);
 
 afterEach(cleanupTempDirs);
 
@@ -52,9 +56,9 @@ test("쓰기→읽기 왕복이 같다", async () => {
 test("깨진 sources.yml은 한국어 에러다", async () => {
   const root = await project();
   writeFileSync(join(root, ".reap", "plan", "sources.yml"), "sources: [{id: x}]\n");
-  expect(() => readSources(root)).toThrow(/형식이 깨졌습니다/);
+  expect(() => readSources(root)).toThrow(BROKEN);
   writeFileSync(join(root, ".reap", "plan", "sources.yml"), "sources:\n  - id: ps-4f2a91\n    root: ./docs/spec\n");
-  expect(() => readSources(root)).toThrow(/형식이 깨졌습니다/);
+  expect(() => readSources(root)).toThrow(BROKEN);
 });
 
 test("sources.yml이 없으면 빈 목록이다", async () => {
@@ -118,14 +122,14 @@ test("plan sources가 등록된 소스를 내고, plan convention이 규약 본�
   expect(conv.ok).toBe(true);
   expect(conv.message).toContain("01부터 읽는다.");
   expect((await run(["plan", "convention", "ps-000000"], root)).ok).toBe(false);
-  expect((await run(["plan", "sources"], root)).message).not.toContain("없");
+  expect((await run(["plan", "sources"], root)).message).not.toContain(t(root, "plan.no_sources"));
 });
 
 test("plan sources는 소스가 없으면 그렇다고 말한다", async () => {
   const root = await project();
   const list = await run(["plan", "sources"], root);
   expect(list.ok).toBe(true);
-  expect(list.message).toContain("등록된 plan source가 없습니다");
+  expect(list.message).toContain(t(root, "plan.no_sources"));
 });
 
 test("--ref는 소스 id가 실재하고 경로가 그 소스 안에 있어야 한다 — 앵커는 안 본다", async () => {
@@ -135,8 +139,8 @@ test("--ref는 소스 id가 실재하고 경로가 그 소스 안에 있어야 �
   expect(validateRef(root, "ps-4f2a91:01-a.md#아무-앵커")).toBeNull();
   expect(validateRef(root, "ps-4f2a91:02-b.md")).toContain("02-b.md");
   expect(validateRef(root, "ps-000000:01-a.md")).toContain("ps-000000");
-  expect(validateRef(root, "ps-4f2a91")).toContain("형식");
-  expect(validateRef(root, "ps-4f2a91:../../package.json")).toContain("안에");
+  expect(validateRef(root, "ps-4f2a91")).toContain(labelPrefix("plan.ref_format").trim());
+  expect(validateRef(root, "ps-4f2a91:../../package.json")).toContain(labelPrefix("plan.ref_outside_source").trim());
 });
 
 test("make milestone과 make loop가 --ref를 검증한다", async () => {

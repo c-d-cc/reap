@@ -1,9 +1,10 @@
 import { afterEach, expect, test } from "bun:test";
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { cleanupTempDirs, commit, initRepo, tempDir } from "./helpers.ts";
+import { cleanupTempDirs, commit, initRepo, labelPrefix, tempDir } from "./helpers.ts";
 import { run } from "../src/cli.ts";
 import { Indexer } from "../src/index/indexer.ts";
+import { t } from "../src/i18n.ts";
 
 afterEach(cleanupTempDirs);
 
@@ -42,7 +43,7 @@ test("전체 인덱싱 — 심볼·CALLS·IMPORTS, 그리고 ./x.js가 x.ts로 �
   const r = await run(["index"], root);
   expect(r.ok).toBe(true);
   expect(r.message).toContain("full");
-  expect(r.message).toContain("import 해석률 2/2 (100%)");
+  expect(r.message).toContain(t(root, "index.status.rate_line", { rate: "2/2 (100%)" }));
   const ix = new Indexer(root);
   await ix.ready();
   expect(ix.search("helper").map((n) => n.id)).toEqual(["src/b.ts::helper"]);
@@ -65,11 +66,11 @@ test("질의가 스스로 갱신한다 — HEAD가 움직이면 다음 질의가
   const root = await project();
   await run(["index"], root);
   writeFileSync(join(root, "src", "d.ts"), "export function brandNew() { return 0; }\n");
-  expect((await run(["index", "search", "brandNew"], root)).message).toContain("없음");
+  expect((await run(["index", "search", "brandNew"], root)).message).toContain(labelPrefix("index.search_none").trim());
   commit(root, "d 추가");
   const r = await run(["index", "search", "brandNew"], root);
   expect(r.message).toContain("src/d.ts::brandNew");
-  expect((await run(["index", "status"], root)).message).toContain("파일 4");
+  expect((await run(["index", "status"], root)).message).toContain(`${labelPrefix("index.status.counts_line")}4`);
 });
 
 test("증분 갱신 결과 == 전체 재빌드 결과 — 파일을 고치고 지우고 이름을 바꿔도", async () => {

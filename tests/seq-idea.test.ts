@@ -1,7 +1,7 @@
 import { afterEach, expect, test } from "bun:test";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { cleanupTempDirs, commit, initRepo, tempDir } from "./helpers.ts";
+import { cleanupTempDirs, commit, initRepo, labelPrefix, tempDir } from "./helpers.ts";
 import { run } from "../src/cli.ts";
 import { assemble } from "../src/ctx.ts";
 
@@ -65,5 +65,5 @@ test("archive로 내린 idea도 id로 찾을 수 있고, init이 archive/idea/�
   await run(["mark", "idea", made.id, "--archived"], root);
   const again = await run(["mark", "idea", made.id, "--archived"], root);
   expect(again.ok).toBe(false);
-  expect(again.message).toContain("이미");
+  expect(again.message).toContain(labelPrefix("entries.idea_already_archived").trim());
 });
