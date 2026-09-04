@@ -9,7 +9,7 @@ import type { Kind } from "./id.ts";
 import { validateRef } from "./plan.ts";
 import { paths, readSession } from "./store.ts";
 import { template } from "./templates.ts";
-import { t } from "./i18n.ts";
+import { allTranslations, t } from "./i18n.ts";
 
 export type Finding = { kind: string; detail: string };
 export type Report = { defects: Finding[]; notes: Finding[] };
@@ -136,12 +136,13 @@ export function diagnose(root: string): Report {
     if (size > GUIDE.milestone) notes.push({ kind: t(root, "doctor.kind.size_guideline"), detail: t(root, "doctor.detail.milestone_size_over", { path: rel(root, e.path), size: kb(size), limit: kb(GUIDE.milestone) }) });
   }
 
-  // 7. idea — 졸업 조건, 출처. 헤딩 낱말은 프로젝트 언어(config.language)를 따른다 —
-  // 이 리포의 실물 idea는 한국어고, 새 프로젝트의 씨앗은 en이다.
-  const graduationWord = t(root, "doctor.pattern.graduation");
-  const sourcesWord = t(root, "doctor.pattern.sources");
-  const graduationHeading = new RegExp(`^#{2,3} .*${graduationWord}`, "m");
-  const sourcesHeading = new RegExp(`^#{2,3} .*${sourcesWord}`, "m");
+  // 7. idea — 졸업 조건, 출처. 헤딩 낱말은 카탈로그 전 언어의 합집합이다 —
+  // ko 프로젝트에 en 씨앗으로 만든 idea가 있어도, 그 반대여도 잡는다.
+  const escapeRegex = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const graduationWords = allTranslations("doctor.pattern.graduation").map(escapeRegex);
+  const sourcesWords = allTranslations("doctor.pattern.sources").map(escapeRegex);
+  const graduationHeading = new RegExp(`^#{2,3} .*(${graduationWords.join("|")})`, "m");
+  const sourcesHeading = new RegExp(`^#{2,3} .*(${sourcesWords.join("|")})`, "m");
   for (const e of all.idea) {
     if (e.dir.startsWith(p.archiveIdea)) continue;
     const kind = String(e.data.kind ?? "");

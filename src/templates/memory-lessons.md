@@ -1,3 +1,3 @@
 # Lessons
 
-프로젝트 전역 교훈. "이게 없으면 다음 세션이 같은 실수를 하는가"를 통과한 것만.
+Project-wide lessons. Only what passes "would the next session repeat this mistake without it".

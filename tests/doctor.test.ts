@@ -5,6 +5,9 @@ import { cleanupTempDirs, commit, initRepo, labelPrefix, tempDir } from "./helpe
 import { run } from "../src/cli.ts";
 import { diagnose } from "../src/doctor.ts";
 import { t } from "../src/i18n.ts";
+import { en } from "../src/messages/en.ts";
+import { readConfig, writeConfig } from "../src/store.ts";
+import { template } from "../src/templates.ts";
 
 afterEach(cleanupTempDirs);
 
@@ -96,6 +99,28 @@ test("안내선 — 주입되는 파일이 크면 경고하고, 졸업 조건 �
   expect(notes).toContain(sizeKind);
   expect(r.notes.find((f) => f.kind === sizeKind)!.detail).toContain("genome/application.md");
   expect(notes).toContain(t(root, "doctor.kind.idea_no_graduation"));
+});
+
+test("ko 프로젝트에 en 씨앗으로 만든 idea는 결함이 아니다 — 헤딩 낱말은 카탈로그 전 언어의 합집합", async () => {
+  const root = await project();
+  writeConfig(root, { ...readConfig(root), language: "ko" });
+  writeFileSync(
+    join(root, ".reap", "idea", "research", "idea-c2c2c2-w.md"),
+    "---\nid: idea-c2c2c2\nslug: w\nkind: research\ntitle: w\nstatus: open\n---\n\n## What's Undecided\n\n## Graduation Criteria\n\n## Sources\n\n- (primary/secondary · date verified)\n",
+  );
+  const { notes } = kinds(root);
+  expect(notes).not.toContain(t(root, "doctor.kind.idea_no_graduation"));
+  expect(notes).not.toContain(t(root, "doctor.kind.research_no_sources"));
+});
+
+test("idea 씨앗의 en 헤딩 낱말은 카탈로그 en 값과 같다", () => {
+  const root = tempDir();
+  const research = template(root, "idea-research.md");
+  const file = template(root, "idea-file.md");
+  for (const body of [research, file]) {
+    expect(body).toContain(en["doctor.pattern.graduation"]);
+    expect(body).toContain(en["doctor.pattern.sources"]);
+  }
 });
 
 test("기록 안 상대 링크가 깨지면 결함이다", async () => {

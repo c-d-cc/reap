@@ -3,91 +3,91 @@ name: complete
 description: Use when finishing work in a REAP project - verifying the commit rule, writing the outcome, updating the handoff for the next session, and closing the generation record. Trigger on "세대 닫기", "작업 마무리", "완료", or when substantive work in a repo containing .reap/ is done.
 ---
 
-# complete — 세대를 닫는다
+# complete — closes the generation
 
-## 먼저: 무엇을 닫는지 안다
+## First: know what's being closed
 
-세션이 열릴 때 주입된 것은 `genome/`과 `environment/summary.md`, 그리고 **상태 줄**뿐이다. 이 세션에서 세대를 열지 않았다면 `handoff.md`도 세대 기록도 **아직 세션에 없다.**
+What's injected when a session opens is `genome/`, `environment/summary.md`, and **the status line** — nothing else. If this session didn't open a generation, neither `handoff.md` nor the generation record is **in the session yet.**
 
-상태 줄이 알리는 **열린 세대의 기록**을 읽는다. 무엇을 하려던 세대였는지 모르면 결과를 적을 수 없다. 상태 줄이 없으면 `reap ctx`를 직접 부른다.
+Read the record of **the open generation** the status line reports. Without knowing what the generation was trying to do, the outcome can't be written. If there's no status line, call `reap ctx` directly.
 
-`handoff.md`는 **교체할 것**이므로 지금 무엇이 적혀 있는지 먼저 본다.
+`handoff.md` is going to be **replaced**, so look at what's currently written first.
 
-## 위임된 세대라면 먼저 검토한다
+## Review first if this was a delegated generation
 
-세대 기록의 Intent에 "subagent가 한다"·"위임" 같은 말이 있으면 이 세대는 [evolve의 위임 절차](../evolve/SKILL.md)로 돌았다. 이 절이 커밋 규칙 확인보다 먼저다.
+If the generation record's Intent says something like "a subagent does this" or "delegated", this generation ran through [evolve's delegation procedure](../evolve/SKILL.md). This section comes before checking the commit rule.
 
-- subagent가 적은 **Outcome**·**Dead Ends**를 읽는다
-- `git diff <startCommit>..HEAD --stat`으로 무엇이 바뀌었는지 직접 본다
-- **테스트는 주 세션이 직접 돌린다** — subagent의 보고를 그대로 믿지 않는다
-- brief의 규율을 어긴 흔적을 본다: 레지스트리에 subagent가 발급한 행이 있는가, `.session`이 subagent의 세대로 바뀌어 있는가, 세대가 이미 `closed`로 닫혀 있는가
+- Read the **Outcome** and **Dead Ends** the subagent wrote
+- Look directly at what changed with `git diff <startCommit>..HEAD --stat`
+- **The main session runs the tests itself** — don't just trust the subagent's report
+- Look for traces of the brief's discipline being broken: a row issued by the subagent in the registry, `.session` switched to the subagent's generation, the generation already closed as `closed`
 
-**어긴 흔적이 있으면 그것이 brief의 구멍이다.** subagent를 탓하지 않는다 — `delegate-brief.md` 템플릿에 그 규율이 빠졌거나 약했다는 뜻이므로 템플릿을 고친다.
+**A trace of it being broken is a hole in the brief.** Don't blame the subagent — it means the discipline was missing or weak in the `delegate-brief.md` template, so fix the template.
 
-## 그다음: 커밋 규칙을 확인한다
+## Next: check the commit rule
 
-**커밋되지 않은 상태로 세대를 닫지 않는다.** 이것이 REAP의 유일한 규칙이고, **도구는 이것을 검사하지 않는다.** 확인은 여기서 한다.
+**Don't close a generation with uncommitted state.** This is REAP's only rule, and **the tool doesn't check it.** Checking happens here.
 
 ```bash
-git status --porcelain        # 비어 있어야 한다
-git log <startCommit>..HEAD --oneline   # 새 커밋이 하나 이상 있어야 한다
+git status --porcelain        # must be empty
+git log <startCommit>..HEAD --oneline   # must have at least one new commit
 ```
 
-`startCommit`은 세대 기록의 frontmatter에 있고, 상태 줄에도 나온다.
+`startCommit` is in the generation record's frontmatter, and also shows on the status line.
 
-**커밋은 여러 개로 나눠도 된다.** 오히려 하나의 거대한 커밋보다 낫다 — 나중에 되돌릴 때 단위가 된다.
+**Commits can be split into several.** That's better than one giant commit — they become the unit for reverting later.
 
-**규칙이 안 맞으면 여기서 멈춘다.**
+**If the rule isn't met, stop here.**
 
-- 커밋 안 된 변경이 있다 → 무엇을 커밋하고 무엇을 버릴지 사람과 정리한다. 임의로 커밋하지 않는다
-- 새 커밋이 하나도 없다 → 이 세대는 아무것도 바꾸지 않았다. **닫을 게 아니라 abort할 것**인지 사람에게 확인한다
+- There's uncommitted change → sort out with the human what to commit and what to drop. Don't commit arbitrarily
+- There's not a single new commit → this generation changed nothing. Confirm with the human whether it should be **aborted instead of closed**
 
-## 기록을 마무리한다
+## Finish the record
 
-[기록 어휘](../shared/references/record-vocabulary.md)를 참고해 세대 기록의 본문을 정리한다.
+Refer to the [record vocabulary](../shared/references/record-vocabulary.md) to tidy up the generation record's body.
 
-최소한 **무엇을 했고 무엇이 남았는지**는 남긴다. 진행 중이던 계획은 지우거나 결과에 녹인다 — 끝난 세대에 살아있는 계획이 남아 있으면 다음 세션이 그것을 할 일로 읽는다.
+At minimum, leave **what was done and what's left.** Delete an in-progress plan or fold it into the outcome — a live plan left in a finished generation reads to the next session as work still to do.
 
-**접었던 접근이 있으면 적는다.** 다음 세션이 같은 길을 다시 걷지 않게 하는 것이 이 기록의 가장 큰 값이다.
+**Write down any folded approach.** The biggest value of this record is keeping the next session from walking the same path again.
 
-## handoff를 갱신한다 (milestone에 속한 세대만)
+## Update the handoff (only for a generation belonging to a milestone)
 
-**exec 세대만 milestone에 속한다.** fix 세대는 `milestone` 필드가 없으므로 갱신할 `handoff.md`도 milestone의 계획 항목도 없다 — 이 절 전체를 건너뛴다. fix가 대신 남기는 것은 세대 기록 본문(무엇을 했고 무엇이 남았는지)과, 전역 교훈이면 `vision/memory/lessons.md`다. **loop는 이 skill이 닫지 않는다** — [loop](../loop/SKILL.md)가 산출물이 자리를 찾았을 때 `mark loop --closed`로 닫는다.
+**Only exec generations belong to a milestone.** A fix generation has no `milestone` field, so there's no `handoff.md` or milestone plan item to update either — skip this whole section. What a fix leaves instead is the generation record's body (what was done, what's left) and, if it's a global lesson, `vision/memory/lessons.md`. **This skill doesn't close a loop** — [loop](../loop/SKILL.md) closes it with `mark loop --closed` once the output has found its place.
 
-exec 세대라면, `milestone/handoff.md`는 **다음 세션에 필요한 것만** 담는다. 교체하지 누적하지 않는다.
+For an exec generation, `milestone/handoff.md` holds **only what the next session needs.** Replace it, don't accumulate.
 
-- 지금 어디까지 왔는가
-- 다음에 무엇부터 보면 되는가
-- 걸려 있는 것 (미해결 질문, 사람의 답을 기다리는 것)
+- How far things have gotten
+- Where to look first next
+- What's pending (unresolved questions, things waiting on a human's answer)
 
-**필요할지 모르는 것은 여기 넣지 않는다.** 그건 `idea/freememo/`의 자리다. 이 구분이 무너지면 handoff는 아무도 안 읽는 파일이 된다.
+**Don't put in what might be needed.** That belongs to `idea/freememo/`. If this distinction breaks down, handoff becomes a file nobody reads.
 
-milestone의 계획 항목을 진행에 맞춰 갱신한다. 항목이 늘거나 쪼개지거나 없어져도 된다.
+Update the milestone's plan items to match progress. Items can grow, split, or disappear.
 
-## 이월할 것을 옮긴다
+## Move over what carries forward
 
-이 세대에서 나왔지만 지금 하지 않기로 한 것:
-- 할 일 → `backlog/`
-- 결론 안 난 조사·관찰 → `idea/`
+What came out of this generation but isn't being done now:
+- Something to do → `backlog/`
+- Investigation or observation with no conclusion → `idea/`
 
-**정한 것은 이월하지 않는다.** 이 세대가 무언가를 확정했다면 그것이 규율할 자리(plan source·`genome/`·`map.md`)에 **이미 반영되어 있어야 한다.** 안 되어 있으면 닫기 전에 반영하거나, 안 정해진 것으로 둔다. REAP에는 결정 로그가 없다 — 나중에 반영하겠다고 적어둘 곳이 없는 것이 의도다.
+**Don't carry forward what's settled.** If this generation settled something, it should **already be reflected** where it governs (a plan source, `genome/`, `map.md`). If it isn't, reflect it before closing, or leave it as undecided. REAP keeps no decision log — there's deliberately no place to note "reflect this later."
 
-## 기록을 닫는다
+## Close the record
 
-frontmatter를 갱신한다.
+Update the frontmatter.
 
 ```yaml
 status: closed
 closedAt: 2026-08-23T13:20:00Z
-endCommit: 9f8e7d6        # 현재 HEAD
+endCommit: 9f8e7d6        # current HEAD
 ```
 
-## milestone이 끝났는가
+## Has the milestone finished
 
-세대를 닫고 나서 **milestone의 종료 조건이 이제 충족됐다고 읽히면 거기서 멈춘다.** 스스로 닫지 않는다.
+After closing the generation, **if the milestone's exit criteria now read as met, stop there.** Don't close it yourself.
 
-**종료 절차는 [carve-milestone](../carve-milestone/SKILL.md)의 것이다** — fitness를 어떻게 묻고, 받은 답을 어떻게 읽고, `cleanup`과 `mark milestone --closed`를 어떤 순서로 부르는지가 거기 있다. 여기 옮겨 적지 않는다.
+**The closing procedure belongs to [carve-milestone](../carve-milestone/SKILL.md)** — how to ask fitness, how to read the answer, and in what order to call `cleanup` and `mark milestone --closed` all live there. Not copied here.
 
-## 도구가 있으면 도구로
+## Use the tool when there is one
 
-`reap` 바이너리가 있으면 frontmatter 갱신은 `reap mark generation <id> --closed`가 한다. **`mark`는 검사하지 않는다** — 커밋 확인은 위에서 이미 했다. 바이너리가 없으면 손으로 한다.
+If the `reap` binary is present, `reap mark generation <id> --closed` handles the frontmatter update. **`mark` doesn't check anything** — the commit check was already done above. Without the binary, do it by hand.

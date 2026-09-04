@@ -1,5 +1,5 @@
 # Environment Summary
 
-현재 기술 스택, 소스 구조, 빌드와 테스트 방법.
+Current tech stack, source structure, build and test commands.
 
-다음 세션이 아무것도 모르는 채로 읽어도 어디서부터 손대야 하는지 알 수 있어야 한다.
+The next session should be able to read this knowing nothing and still know where to start.

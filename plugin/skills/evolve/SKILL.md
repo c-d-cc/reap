@@ -3,187 +3,187 @@ name: evolve
 description: Use when starting new work in a REAP project - deciding whether this is a loop (making intent) or a generation (realizing or restoring it), choosing the ground, and opening a generation record. Trigger on "작업 시작", "새 세대", "다음 뭐 하지", or any request to begin substantive work in a repo containing .reap/.
 ---
 
-# evolve — 세대를 연다
+# evolve — opens a generation
 
-## 먼저: 지도를 따라 읽는다
+## First: follow the map and read
 
-세션이 열릴 때 주입된 것은 `genome/`과 `environment/summary.md`, 그리고 **상태 줄**뿐이다. `handoff.md`도 `milestone.md`도 **아직 세션에 없다.** 그것들은 상태 줄이 경로를 알려줄 뿐이고, 읽는 것은 여기서 한다.
+What's injected when a session opens is `genome/`, `environment/summary.md`, and **the status line** — nothing else. Neither `handoff.md` nor `milestone.md` is in the session **yet**. They're just paths the status line points to; reading them happens here.
 
-상태 줄이 없으면(주입이 안 됐거나 REAP 프로젝트가 아니면) `reap ctx`를 직접 부른다.
+If there's no status line (injection didn't happen, or this isn't a REAP project), call `reap ctx` directly.
 
-읽는 순서는 대개 이렇다. **전부 읽으라는 뜻이 아니다** — 무엇이 필요한지는 지금 하려는 일이 정한다.
+The usual reading order is below. **It doesn't mean read all of it** — what's actually needed is decided by the work at hand.
 
-1. **`handoff.md`** — 직전 세션이 남긴 것. 다음에 무엇부터인지가 여기 있다
-2. **`milestone.md`** — 경계와 종료 조건, 작업 갈래
-3. **`tasks/<지금 할 것>.md`** — 이번에 손댈 것 **하나만**. 끝난 task와 아직 아닌 task는 열지 않는다
-4. **열린 세대가 있으면 그 기록** — 무엇을 하려던 중이었나
+1. **`handoff.md`** — what the previous session left behind. Where to start next is here
+2. **`milestone.md`** — the boundary, exit criteria, and the branch of work
+3. **`tasks/<what to work on now>.md`** — **only** the one being touched this time. Don't open a finished task or one not yet started
+4. **The record of an already-open generation, if any** — what it was in the middle of doing
 
-**이미 정해진 것을 찾을 때는 spec을 본다.** REAP에는 결정 로그가 없다 — 정해진 것은 그것이 규율할 자리(plan source·`genome/`·`map.md`)에 반영되어 있고, 반영 안 된 것은 안 정해진 것이다.
+**To find something already decided, look at the spec.** REAP keeps no decision log — what's decided is reflected wherever it governs (a plan source, `genome/`, `map.md`), and whatever isn't reflected there isn't decided.
 
-**상태 줄에 이름이 없는 파일은 비어 있다.** 열지 않는다.
+**A file the status line doesn't name is empty.** Don't open it.
 
-## 열린 세대가 이미 있다면
+## If a generation is already open
 
-상태 줄이 열린 세대를 알리고 있으면 **새 세대를 열기 전에 멈춘다.** 세션이 중간에 끊겼거나 다른 세션이 일하는 중이다.
+If the status line reports an open generation, **stop before opening a new one.** Either the session was cut off mid-work, or another session is working on it.
 
-그 기록의 Intent를 읽고 판단한다 — 이어서 하는 것이면 새로 열지 않고 그대로 이어간다. 버려진 것이면 사람에게 확인하고 `reap mark generation <id> --aborted`로 지운 뒤 연다.
+Read that record's Intent and judge — if it's a continuation, don't open a new one, just carry on. If it's abandoned, confirm with the human, clear it with `reap mark generation <id> --aborted`, then open a new one.
 
-**반대로, 열린 세대가 있는데 상태 줄에 안 나오면** 바인딩을 잃은 것이다(abort 뒤, 다른 디렉토리에서 열었을 때). `doctor`가 "열린 채 바인딩 안 된 generation"으로 알리고, 내 것이면 `reap bind <gen-id>`로 다시 묶는다.
+**Conversely, if a generation is open but the status line doesn't show it**, its binding has been lost (after an abort, or opened from a different directory). `doctor` reports it as "generation open but unbound", and if it's mine, `reap bind <gen-id>` rebinds it.
 
-## 그다음: 세대를 열 값이 있는가
+## Next: is it worth opening a generation
 
-**축을 고르기 전에 이것부터 묻는다. 한 번의 편집과 한 번의 커밋으로 끝나는 일은 세대가 아니다** — 커밋이면 된다.
+**Ask this before picking an axis. Work that finishes in one edit and one commit isn't a generation** — a commit is enough.
 
-경계가 거기인 이유는 기록의 존재 이유에 있다. [기록 어휘](../shared/references/record-vocabulary.md)가 못 박은 대로 세대 기록이 하는 일은 **도는 동안 "무엇을 하려던 중이었나"를 붙잡는 것**이다. 세션이 중간에 죽거나 다른 세션으로 넘어갈 때 필요한 것이 정확히 그것이고, **한 번에 끝나는 일에는 도는 동안이 없다.**
+The boundary sits there because of why the record exists. As the [record vocabulary](../shared/references/record-vocabulary.md) pins down, what a generation record does is **hold onto "what was in progress" while the work is running.** That's exactly what's needed when a session dies mid-work or hands off to another session, and **work that finishes in one shot has no "while it's running".**
 
-값이 없는데 열면 비용만 남는다 — 기록 파일 하나, 레지스트리 행 하나, `mark`로 닫는 커밋 하나. 실제로 **주석 두 블록 지우는 일**에 세대를 열어 커밋이 셋이 된 적이 있다.
+Opening one with nothing at stake leaves only cost — one record file, one registry row, one commit to close it with `mark`. It's actually happened that opening a generation for **deleting two comment blocks** turned into three commits.
 
-**작아도 세대인 것 셋.**
+**Three things that are a generation even when small.**
 
-- **backlog 항목을 소비한다** — `mark backlog --consumed`가 `consumedBy`에 바인딩된 세대를 찍는다. 세대가 없으면 **누가 소비했는지가 안 남는다.** 구조가 요구하는 것이므로 크기와 무관하다
-- **접은 접근이 있다** — 커밋은 **한 것**을 담고 **안 한 것**은 안 담는다. `Dead Ends`는 세대 기록에만 산다
-- **다른 세션이 함께 돈다** — 상태 줄의 "열린 세대"가 진행 중임을 알리는 유일한 수단이다
+- **Consuming a backlog item** — `mark backlog --consumed` stamps `consumedBy` with the bound generation. Without a generation, **who consumed it doesn't get recorded.** The structure demands it regardless of size
+- **There's a folded-up approach** — a commit holds **what was done** and not **what wasn't**. `Dead Ends` lives only in the generation record
+- **Another session is running alongside** — the status line's "open generation" is the only way to signal it's in progress
 
-**세는 것은 파일 개수도 줄 수도 아니다.** 열 파일을 기계적으로 고치는 일은 한 커밋이고, 한 파일을 고치며 접근을 셋 접었으면 세대다.
+**What's counted isn't file count or line count.** Mechanically fixing ten files is one commit; fixing one file while folding up three approaches is a generation.
 
-**애매하면 열지 않는다.** 세대는 일 도중에도 열 수 있다 — 길어지면 그때 열면 되고, 이미 한 커밋은 `startCommit` 앞에 있을 뿐이다. 반대로 열어둔 것을 되돌리려면 `--aborted`로 지우거나 빈 기록을 닫아야 한다.
+**When it's ambiguous, don't open one.** A generation can be opened mid-work too — open it once it grows long, and a commit already made just sits ahead of `startCommit`. Conversely, undoing one that was opened means either clearing it with `--aborted` or closing an empty record.
 
-## 그다음: loop인가 generation인가
+## Next: loop or generation
 
-**무엇을 하려는지 먼저 정한다.** 한 갈래가 먼저 빠진다 — **새 의도를 만드는 일이면 generation이 아니라 loop다.** 기획·설계·화면·아직 자리 없는 것. 그러면 이 skill은 여기서 멈추고 [loop](../loop/SKILL.md)로 넘긴다. `make generation --plan`은 없다.
+**Decide what the work is trying to do, first.** One branch falls away first — **if it's making new intent, it's a loop, not a generation.** Planning, design, screens, anything with no home yet. Then this skill stops here and hands off to [loop](../loop/SKILL.md). There's no `make generation --plan`.
 
-| 이 일은 | 어디로 | 근거 |
+| This work | Goes to | Grounds |
 |---|---|---|
-| 새 의도를 **만드는가** | **loop** — 이 skill 밖이다 | 선택. 출처일 뿐 |
-| 새 의도를 **실현하는가** | exec generation | **필수 — milestone 또는 backlog 항목** |
-| 이미 있는 의도로 **되돌리는가** | fix generation | 없음 |
+| **Makes** new intent | **loop** — outside this skill | optional. Just a source |
+| **Realizes** new intent | exec generation | **required — a milestone or backlog item** |
+| **Restores** an existing intent | fix generation | none |
 
-**exec의 근거는 권한이다** — 무엇을 만들지 이미 누군가 정했다는 증거이므로 없으면 열 수 없다. loop는 **정하는 일 자체**라 요구할 근거가 없다.
+**exec's grounds are its authority** — it's evidence someone already decided what to build, and without it a generation can't open. loop is **the act of deciding itself**, so it has no grounds to require.
 
-**loop와 exec 사이의 기본값:** 지금 착수 가능한 근거(열린 milestone의 남은 일, 또는 backlog 항목)가 있으면 exec, 없으면 loop. 기본값이지 규칙이 아니다 — 있어도 그것이 지금 필요와 맞지 않으면 loop가 맞다. **fix는 이 기본값과 무관하다.**
+**The default between loop and exec:** if there are grounds to start right now (remaining work in an open milestone, or a backlog item), it's exec; without one, it's loop. That's a default, not a rule — even with grounds, if they don't match what's needed right now, loop is still right. **fix is unrelated to this default.**
 
-**loop로 보내야 하는 신호**
+**Signals pointing to loop**
 
-- 무엇을 만들지가 아직 서지 않았다. 요청이 "무엇을 할지"보다 "무엇이 필요한지"에 가깝다
-- 열린 milestone이 없거나, 남은 것이 지금의 필요와 맞지 않는다
-- `idea/research/`에 결론이 안 난 조사가 쌓여 방향을 막고 있다 — `idea` loop가 그 자리다
-- 직전 execute 세대가 "계획이 부족해서" 막혔다 — 그 세대를 `--from`으로 loop를 연다
-- **열린 loop가 이미 있고 이번에 그것을 밀 수 있다**
+- What to build hasn't been settled yet. The request is closer to "what's needed" than "what to do"
+- There's no open milestone, or what's left doesn't match the current need
+- `idea/research/` has unresolved investigation piling up and blocking direction — that's the `idea` loop's place
+- The prior execute generation got stuck for "lack of planning" — open a loop with that generation as `--from`
+- **A loop is already open and this can push it forward**
 
-**execute 축을 골라야 하는 신호**
+**Signals for picking the execute axis**
 
-- 착수 가능한 milestone이 있고 그 안에 남은 일이 명확하다
-- **backlog 항목 하나가 무엇을 할지를 이미 다 적고 있다**
-- 필요한 판단이 이미 spec에 반영되어 있다
+- There's a startable milestone with clear remaining work
+- **A single backlog item already fully specifies what to do**
+- The judgment needed is already reflected in the spec
 
-### exec을 골랐다면 근거를 고른다
+### If exec is chosen, pick the grounds
 
-**규칙이 요구하는 것은 milestone이 아니라 경계다.** backlog 항목도 경계다 — 하나의 항목이 하나의 일을 정의하고, 소비하면 끝난다.
+**What the rule requires isn't a milestone — it's a boundary.** A backlog item is a boundary too — one item defines one piece of work, and consuming it ends it.
 
-| 이 일은 | 근거 |
+| This work | Grounds |
 |---|---|
-| 아직 아무 데도 안 적혀 있다. 무엇이 끝인지를 지금 정해야 한다 | **milestone** |
-| backlog 항목에 이미 적혀 있다. 그 항목을 소비하면 끝난다 | **backlog** |
-| 여러 갈래로 나뉘고 세션이 여러 번 걸린다 | **milestone.** 항목 하나로는 갈래를 담지 못한다 |
-| milestone의 한 갈래인데, 그 갈래가 할 일이 backlog 항목에 적혀 있다 | **둘 다** |
+| Not written down anywhere yet. What "done" means has to be decided now | **milestone** |
+| Already written in a backlog item. Consuming that item ends it | **backlog** |
+| Splits into several branches, spans multiple sessions | **milestone.** A single item can't hold branches |
+| One branch of a milestone, and that branch's work is written in a backlog item | **both** |
 
-**근거 둘은 배타가 아니다.** `--milestone`과 `--backlog`를 함께 준다. 하나만 적으면 나머지 연결이 산문에만 남고, 산문은 검색되지 않는다.
+**The two grounds aren't exclusive.** Give both `--milestone` and `--backlog`. Writing only one leaves the other connection living only in prose, and prose isn't searchable.
 
-**항목 둘이 같은 것을 건드리면 한 세대에서 함께 소비한다.** 원칙은 항목 하나가 경계 하나지만, 두 항목이 **같은 명령이나 같은 파일**을 요구하면 나누는 순간 반쪽이 남는다 — 첫 세대가 반만 만들고 닫히면 그 사이 도구가 깨진 상태로 있다. 그때는 `--backlog`에 하나를 주고 **나머지를 기록의 Intent에 적는다.** 겹치지 않는 항목을 편의로 묶는 것과는 다르다.
+**If two items touch the same thing, consume them together in one generation.** The principle is one item, one boundary — but if two items need **the same command or the same file**, splitting them leaves a half-finished state the moment one closes. In that case, give `--backlog` one of them and **write the rest in the record's Intent.** That's different from bundling non-overlapping items for convenience.
 
-**backlog 항목을 소비하려고 milestone을 만들지는 않는다.** 그러면 경계가 두 곳에 적히고, 두 곳에 있으면 어긋난다. 열린 milestone이 있더라도 이 일이 그 milestone의 갈래가 아니면 backlog 근거만으로 연다.
+**Don't create a milestone just to consume a backlog item.** That writes the boundary in two places, and two places drift. Even with an open milestone, if this work isn't one of its branches, open with the backlog grounds alone.
 
-**이미 `consumed`인 항목은 근거가 되지 못한다.** 도구가 거부한다. 소비가 불완전했다면 **무엇이 남았는지를 담은 새 항목**을 만든다.
+**An already-`consumed` item can't be grounds.** The tool refuses it. If consumption was incomplete, make a new item **holding what's left.**
 
-**fix 축을 골라야 하는 신호**
+**Signals for picking the fix axis**
 
-- 만들어둔 것이 의도대로 돌지 않는다 — 버그, 깨진 빌드, 낡은 의존성, 오타
-- 되돌아갈 곳을 지목할 수 있다. 지목할 수 없으면 그것은 fix가 아니다. **리팩터링도 fix가 아니다** — 동작이 이미 의도대로 도는데 구조만 바꾸는 것은 되돌릴 것이 없다. 그것은 새 의도이고 exec이며, 근거가 필요하다
+- Something already built isn't running as intended — a bug, a broken build, a stale dependency, a typo
+- There's a place to point back to as what it's restoring. If nothing can be pointed to, it isn't a fix. **Refactoring isn't a fix either** — if the behavior already runs as intended and only the structure changes, there's nothing to restore. That's new intent, it's exec, and it needs grounds
 
-**세 가지 안티패턴을 경계한다.**
+**Watch for three antipatterns.**
 
-*계획이 부족한 줄 알면서 밀어붙이기* — execute 축에서 "일단 해보면 알겠지"는 대개 loop를 열어야 한다는 신호다. 잘못된 가정이 구현까지 흘러가 마지막에 발견된다.
+*Pushing ahead knowing the plan is thin* — on the execute axis, "we'll figure it out as we go" is usually a sign a loop should have opened instead. A wrong assumption flows all the way to implementation and only surfaces at the end.
 
-*plan을 핑계로 실행을 미루기* — 기획은 무한히 정교해질 수 있다. loop는 열린 채 둘 수 있지만, **milestone을 못 낳은 loop만 쌓이면** 그것이 신호다.
+*Using planning as an excuse to defer execution* — planning can be refined indefinitely. A loop can stay open, but **if loops just pile up without ever producing a milestone**, that's the signal.
 
-*작다는 이유로 새 기능을 fix로 짓기* — fix의 기준은 크기가 아니라 **되돌리는가**다. 작은 새 기능은 fix가 아니라 exec이며, 근거가 필요하다. 근거는 backlog 항목 하나면 되므로 **비싸지 않다** — 그러니 크기를 핑계로 fix에 넣을 이유가 없다. 이 구멍을 막지 않으면 fix가 경계 규율을 우회하는 뒷문이 된다.
+*Building a small new feature as a fix because it's small* — fix's criterion isn't size, it's **whether it restores something.** A small new feature is exec, not fix, and needs grounds. Grounds only cost one backlog item, so **it isn't expensive** — there's no reason to dodge into fix over size. Leave that hole open and fix becomes a back door around the boundary discipline.
 
-**애매하면 [interview](../interview/SKILL.md)를 먼저 부른다.** 축을 잘못 고르는 것은 세대 하나를 통째로 낭비하는 일이고, 그것을 막는 질문 두세 개는 싸다. 묻는 법은 거기 있다 — 여기 옮겨 적지 않는다.
+**If it's ambiguous, call [interview](../interview/SKILL.md) first.** Picking the wrong axis wastes an entire generation, and the two or three questions that prevent it are cheap. How to ask lives there — it isn't copied here.
 
-## 그다음: 무엇을 할 것인가
+## Next: what to do
 
-읽은 것과 사람의 요청을 놓고 정한다. **계획 항목은 계약이 아니다** — 순서를 바꾸거나 쪼개거나 버려도 된다.
+Decide based on what's been read and what the human asked for. **Plan items aren't a contract** — reorder, split, or drop them freely.
 
-범위가 모호하면 여기서 좁힌다. 세대는 하나의 의도를 갖는다.
+If scope is vague, narrow it here. A generation has one intent.
 
-## 세대 기록을 연다
+## Open the generation record
 
-**세대는 유형과 무관하게 한 곳에 쌓인다** → `.reap/life/generations/<gen-id>-<slug>.md`
+**Generations pile up in one place regardless of type** → `.reap/life/generations/<gen-id>-<slug>.md`
 
-milestone 소속은 디렉토리가 아니라 frontmatter의 `milestone` 필드가 말한다.
+Milestone membership is stated by the `milestone` field in frontmatter, not by directory.
 
-frontmatter는 기계적 사실만 담는다.
+Frontmatter holds only mechanical facts.
 
 ```yaml
-id: gen-0001-exec            # sequence/generation.md 의 다음 번호. 유형이 달라도 한 계열에서 센다. 발급된 번호는 재사용하지 않는다
+id: gen-0001-exec            # the next number in sequence/generation.md. one series across types. an issued number is never reused
 slug: token-rotation
 type: exec              # exec | fix
-milestone: ms-004       # exec의 근거. `backlog: bk-a1b2c3`과 함께 올 수 있다. fix는 둘 다 없다
-title: 세션 토큰 회전 구현
+milestone: ms-004       # exec's grounds. can come with `backlog: bk-a1b2c3`. fix has neither
+title: implement session token rotation
 startedAt: 2026-08-23T10:00:00Z
-startCommit: 1a2b3c4    # 현재 HEAD
+startCommit: 1a2b3c4    # current HEAD
 status: open
 ```
 
-`sequence/generation.md`에 행을 추가한다. **append-only이며 지운 번호도 되쓰지 않는다.**
+Add a row to `sequence/generation.md`. **It's append-only, and a deleted number is never reused.**
 
-**본문은 비운 채로 시작한다.** 무엇을 적을지는 [기록 어휘](../shared/references/record-vocabulary.md)가 안내한다 — 그것은 어휘지 템플릿이 아니다.
+**Start with the body empty.** What to write is guided by the [record vocabulary](../shared/references/record-vocabulary.md) — it's a vocabulary, not a template.
 
-의도를 적는다. 왜 이 세대를 여는가, 무엇이 되면 끝인가. **이것이 세대가 도는 동안 기록을 쓸모 있게 만드는 유일한 것이다** — 세션이 중간에 죽거나 다른 세션에 넘어갈 때 필요한 게 정확히 그것이다.
+Write the intent — why open this generation, what makes it done. **This is the only thing that makes the record useful while the generation is running** — exactly what's needed when a session dies mid-work or hands off to another.
 
-**fix 기록에는 하나가 더 필요하다.** frontmatter로 못 박지 않는다 — 되돌릴 대상이 항상 id를 갖지는 않기 때문이다(깨진 빌드, 낡은 의존성에는 가리킬 generation이 없다). 대신 **`References`에 무엇의 의도로 되돌리는지를 적는다** — 되돌릴 대상을 가리킬 수 없다면 그것은 애초에 fix가 아니었다는 신호다.
+**A fix record needs one more thing.** It's not pinned in frontmatter — what's being restored doesn't always have an id (a broken build or a stale dependency has no generation to point to). Instead, **write in `References` what intent is being restored** — if there's nothing to point back to, that's a sign this wasn't a fix to begin with.
 
-## 직접 할 것인가, 위임할 것인가
+## Do it yourself, or delegate
 
-**기본은 직접** — 지금 이 세션이 그대로 일한다. 아래 신호 중 하나가 있으면 위임을 검토한다.
+**The default is doing it yourself** — this same session does the work. Consider delegating if one of the signals below holds.
 
-- 이 세대가 여러 파일과 긴 탐색을 요구해 주 세션의 맥락을 채울 것 같다
-- 사람이 위임을 요청했다
-- 둘 이상을 병렬로 굴린다 — 병렬이면 worktree로 가르고 id는 주 트리가 발급한다([orchestrate](../orchestrate/SKILL.md))
+- This generation looks likely to fill the main session's context with many files and long exploration
+- A human asked for delegation
+- Two or more are running in parallel — if parallel, split by worktree and let the main tree issue ids ([orchestrate](../orchestrate/SKILL.md))
 
-위임하기로 했으면 절차는 다섯 줄이다.
+Once delegation is decided, the procedure is five lines.
 
-1. **Intent를 적는다** — 세대 기록에, 위임 전에
-2. [`references/delegate-brief.md`](references/delegate-brief.md)를 채워 subagent에게 준다
-3. subagent가 일한다 — **같은 작업 트리**에서. `.session` 바인딩은 주 세션의 것이고 subagent는 `make`·`mark`를 부르지 않으므로 충돌이 없다
-4. 주 세션이 **검토**한다 — diff를 읽고, 테스트를 직접 돌리고, subagent가 적은 Outcome을 읽는다
+1. **Write the Intent** — in the generation record, before delegating
+2. Fill in [`references/delegate-brief.md`](references/delegate-brief.md) and hand it to the subagent
+3. The subagent works — **in the same working tree.** The `.session` binding belongs to the main session, and the subagent never calls `make`/`mark`, so there's no conflict
+4. The main session **reviews** — reads the diff, runs the tests itself, reads the Outcome the subagent wrote
 5. `complete`
 
-**"REAP는 여기서부터 관여하지 않는다"는 위임 뒤에도 유지된다.** 위임은 관여가 아니라 실행 형태의 선택이다.
+**"REAP stops being involved from here" still holds after delegation.** Delegation is a choice of execution shape, not involvement.
 
-## 그리고 일한다
+## And then work
 
-REAP는 여기서부터 관여하지 않는다. 코드를 알아야 할 때 `reap index search|impact|callers|callees`가 있다 — 커밋된 것만 안다(커밋 안 된 것은 `grep`). `status`의 해석률이 낮으면 빈 결과는 "모름"이다. 탐색하고, 계획하고, 짜고, 고치고, 되돌린다. 순서도 횟수도 정해져 있지 않다.
+REAP stops being involved from here. When code knowledge is needed, there's `reap index search|impact|callers|callees` — it only knows what's committed (use `grep` for what isn't). If `status`'s resolution rate is low, an empty result means "unknown". Explore, plan, write, fix, restore. Neither the order nor the count is fixed.
 
-중간에 남길 것이 생기면:
-- 정한 것 → **그것이 규율할 자리에 반영한다** (plan source·`genome/`·`map.md`). 로그에 적어두고 나중에 반영하는 길은 없다 — 반영하지 않으면 안 정해진 것이다
-- 지금 안 할 것 → `backlog/`
-- 아직 단단하지 않은 것 → `idea/`
+If something needs to be left behind midway:
+- Something decided → **reflect it where it governs** (a plan source, `genome/`, `map.md`). There's no path of logging it now and reflecting it later — unreflected means undecided
+- Not doing it now → `backlog/`
+- Not solid yet → `idea/`
 
-닫을 때가 되면 `complete`.
+When it's time to close, `complete`.
 
-## 도구가 있으면 도구로
+## Use the tool when there is one
 
-`reap` 바이너리가 PATH에 있으면 위의 id 발급·frontmatter 스탬프·경로 배치·세션 바인딩을 도구가 대신한다.
+If the `reap` binary is on PATH, it handles the id issuance, frontmatter stamping, path placement, and session binding described above.
 
 ```bash
-reap make generation --milestone <ms-id> --title "<제목>" [--slug <slug>]   # exec — milestone이 근거
-reap make generation --backlog  <bk-id> --title "<제목>" [--slug <slug>]   # exec — backlog 항목이 근거
-reap make generation --fix  --title "<제목>" [--slug <slug>]                # fix 축
+reap make generation --milestone <ms-id> --title "<title>" [--slug <slug>]   # exec — a milestone is the grounds
+reap make generation --backlog  <bk-id> --title "<title>" [--slug <slug>]   # exec — a backlog item is the grounds
+reap make generation --fix  --title "<title>" [--slug <slug>]                # the fix axis
 ```
 
-`--fix`는 **근거 없이** 온다. exec은 `--milestone`·`--backlog` 중 **하나 이상**이면 되고 **둘을 함께 줘도 된다.** 유형도 근거도 없으면 거부한다. **`--plan`은 거부한다** — `make loop`다.
+`--fix` comes with **no grounds**. exec needs **at least one** of `--milestone`/`--backlog`, and **both together is fine too.** Without a type or grounds, it's refused. **`--plan` is refused** — that's `make loop`.
 
-`--slug`를 주지 않으면 제목에서 만든다. **본문은 비어 있고, 의도를 적는 것은 그다음 일이다.**
+Without `--slug`, it's built from the title. **The body starts empty; writing the intent comes next.**
 
-**바이너리가 없으면 손으로 한다.** 플러그인과 바이너리는 따로 설치되므로 정상적으로 발생하는 상태다. 어느 쪽이든 파일에 남는 결과는 같아야 한다.
+**Without the binary, do it by hand.** The plugin and the binary install separately, so this is a normal state to be in. Either way, what ends up in the files should be the same.

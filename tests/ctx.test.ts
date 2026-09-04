@@ -195,7 +195,7 @@ test("config.language가 있으면 응답 언어 줄이 상태 블록 첫 줄에
   const marker = `${t(root, "ctx.marker")}\n`;
   const idx = text.indexOf(marker);
   expect(idx).toBeGreaterThanOrEqual(0);
-  expect(text.slice(idx + marker.length).split("\n")[0]).toBe(t(root, "ctx.label.language", { language: "ko" }));
+  expect(text.slice(idx + marker.length).split("\n")[0]).toBe(t(root, "ctx.label.language", { language: "en" }));
 });
 
 test("config.language가 비어 있으면 응답 언어 줄이 없다", async () => {
@@ -214,7 +214,7 @@ test("--hook의 JSON 본문에도 응답 언어 줄이 실린다", async () => {
   const parsed = JSON.parse(result.message) as {
     hookSpecificOutput: { additionalContext: string };
   };
-  expect(parsed.hookSpecificOutput.additionalContext).toContain(t(root, "ctx.label.language", { language: "ko" }));
+  expect(parsed.hookSpecificOutput.additionalContext).toContain(t(root, "ctx.label.language", { language: "en" }));
 });
 
 test("REAP 디렉토리가 없으면 빈 문자열이고 던지지 않는다", () => {

@@ -3,68 +3,68 @@ name: interview
 description: Use whenever intent is ambiguous in a REAP project and a human must decide - before opening a generation, inside a loop, when carving a milestone, when approaches diverge. Owns how to ask - one question at a time, 2-4 options plus free input, recommendation only with grounds, a visible end. Other skills point here and never copy the rules. Trigger on "모호하다", "물어봐", "interview", "정해달라", or when another skill says to interview first, in a repo containing .reap/.
 ---
 
-# interview — 모호성을 제거한다
+# interview — removes ambiguity
 
-**묻는 법의 소유자는 여기 하나다.** `evolve`·`loop`·`carve-milestone`·`init`은 *"모호하면 interview"*라고 가리킬 뿐 이 규율을 옮겨 적지 않는다. 규범은 `06-agent.md`의 `interview` 절이 갖고, 여기는 그것을 절차로 옮긴 것이다.
+**How to ask has exactly one owner, and it's here.** `evolve`, `loop`, `carve-milestone`, `init` only point to *"if it's ambiguous, interview"* — they never copy this discipline. The norm lives in the `interview` section of `06-agent.md`; this is that norm turned into procedure.
 
-## 먼저: 묻지 않아도 되는 것을 걸러낸다
+## First: filter out what doesn't need asking
 
-**사람에게 갈 질문의 수를 줄이는 것이 이 skill의 절반이다.** 묻기 전에 셋을 본다.
+**Cutting the number of questions that go to a human is half of what this skill does.** Before asking, check three things.
 
-1. **코드·문서가 답하는가.** 파일이 있는지, 몇 번 쓰였는지, 테스트가 도는지 — 명령 한 줄로 확정되는 사실은 묻지 않는다. 확정한 뒤 *"X를 봤는데 Y로 가정한다"*는 **확인형**으로 제시한다. 발견형(*"X 있나요?"*)은 사람에게 탐색을 떠넘기는 것이다
-2. **이미 답했는가.** 세 곳을 본다 — spec(정해진 것은 규율할 자리에 반영돼 있다), 열린 milestone의 `handoff.md`의 *걸려 있는 것*, 그리고 **열린·최근 loop의 `Dialogue`**. 같은 것을 두 번 물으면 사람은 앞의 답이 안 읽혔다고 안다
-3. **사람의 것인가.** `genome/evolution.md`가 못 박은 넷 — 무엇을 할지 정하는 순간, 모호할 때의 답, milestone 종료 시 fitness, `invariants.md`. 그 밖은 **취향·우선순위·사업 판단**처럼 코드로 답할 수 없는 것만 사람에게 간다
+1. **Can code or docs answer it.** Whether a file exists, how many times it's used, whether tests pass — a fact settled by one command doesn't get asked. Once confirmed, present *"checked X, assuming Y"* as a **confirm-shaped** statement. A discovery-shaped one (*"is there an X?"*) offloads the exploration onto the human
+2. **Has it already been answered.** Check three places — the spec (what's decided is reflected wherever it governs), the *pending* section of an open milestone's `handoff.md`, and **the `Dialogue` of an open or recent loop.** Asking the same thing twice tells the human their earlier answer wasn't read
+3. **Is it the human's to decide.** The four things `genome/evolution.md` pins down — the moment for deciding what to do, the answer when it's ambiguous, fitness at milestone close, and `invariants.md`. Everything else that goes to a human is only things code can't answer — preference, priority, business judgment
 
-걸러낸 뒤 남은 것이 질문 목록이다. **목록을 먼저 확정하고 묻는다** — 묻다가 발견하는 식이면 아래 6번(끝이 보여야 한다)을 지킬 수 없다.
+What's left after filtering is the question list. **Finish the list before asking** — asking while still discovering breaks rule 6 below (the end has to be visible).
 
-## 묻는 형식
+## The form of asking
 
-1. **한 번에 하나.** 묶어 던지면 앞만 답하고 뒤를 흘린다. 서로 독립인 질문은 한 메시지에 여럿 둘 수 있지만 그것도 각각 하나의 물음이어야 한다
-2. **선택지 2~4개 + 자유 입력.** 다섯을 넘기면 비교 자체가 부담이다. 자유 입력은 항상 열려 있다 — 선택지는 사고를 돕는 것이지 가두는 것이 아니다
-3. **각 선택지에 "고르면 무슨 일이 생기는가" 한 줄.** 이름만으로는 비교가 안 된다. 대가를 적는다
-4. **추천은 근거가 있을 때만, 맨 앞에, 근거 한 줄과 함께.** 근거는 코드·genome·기존 결정에서 나와야 한다. **취향·우선순위를 묻는 질문에는 추천을 붙이지 않는다** — 그것은 사람이 정하는 것이고 추천은 그 결정을 대신해버린다
-5. **"모르겠다"는 막다른 골목이 아니다.** 추천안을 채택하고 그 사실을 기록한 뒤 진행한다. 되묻지 않는다
-6. **끝이 보여야 한다.** 남은 질문 수를 함께 보여준다. 언제 끝날지 모르는 질문은 사람을 이탈시킨다
+1. **One at a time.** Bundled, only the first gets answered and the rest get skipped. Independent questions can share one message, but each still has to be one question
+2. **2 to 4 options plus free input.** Past five, comparing itself becomes a burden. Free input is always open — options aid thinking, they don't cage it
+3. **One line per option on "what happens if you pick this".** A name alone doesn't support comparison. Write the cost
+4. **A recommendation only with grounds, at the top, with one line of grounds.** Grounds have to come from code, genome, or an existing decision. **Don't attach a recommendation to a question about preference or priority** — that's the human's to decide, and a recommendation makes that decision for them
+5. **"I don't know" isn't a dead end.** Adopt the recommendation, record that fact, and move on. Don't ask again
+6. **The end has to be visible.** Show how many questions remain. A question with no visible end drives the human away
 
-**클라이언트에 질문 도구가 있으면 쓴다. 없으면 번호 붙인 평문이다.** 형식은 어느 쪽이든 같아야 한다 — 선택지·대가·추천·남은 수.
+**Use the client's question tool if there is one. If not, numbered plain text.** The form has to be the same either way — options, cost, recommendation, remaining count.
 
-## 진행 규율
+## Discipline while in progress
 
-| 규율 | 무엇을 막나 |
+| Discipline | What it prevents |
 |---|---|
-| 질문 전에 기존 구조와 최근 커밋을 본다 | 발견형 질문 |
-| 모호성 대장을 병렬로 추적한다 | 한 세부 주제가 나머지를 밀어내는 것. 몇 라운드마다 재방문 |
-| 자문자답이 3회 연속되면 다음은 반드시 사람에게 | agent가 혼자 결론내는 것 |
-| 자유서술 답변은 구조화해 되읽어주고 확인받는다 | 범위·제약·결정이 담긴 답변의 오독 |
-| 접근안 2~3개와 그 대가를 제시한다 | 첫 안에 갇히는 것 |
-| YAGNI | 모든 안에서 불필요한 기능 제거 |
-| 종료 직전 한 문장으로 압축해 명시 승인 | 승인 없는 종료 |
+| Look at existing structure and recent commits before asking | Discovery-shaped questions |
+| Track the ambiguity ledger in parallel | One sub-topic crowding out the rest. Revisit every few rounds |
+| Three self-answered rounds in a row means the next one must go to the human | The agent concluding alone |
+| Restate a free-form answer structured and get it confirmed | Misreading an answer that carries scope, constraints, or a decision |
+| Present 2-3 approaches with their costs | Getting stuck on the first idea |
+| YAGNI | Removing unneeded features from every option |
+| Compress to one sentence right before ending and get explicit approval | Ending without approval |
 
-**추천의 함정.** 모든 질문에 추천이 붙으면 사람은 추천만 누르고 모호성은 그대로 남는다. **전부 추천으로 채워진 산출물은 interview가 작동하지 않았다는 신호다.**
+**The recommendation trap.** If every question carries a recommendation, the human just clicks the recommendation and the ambiguity stays. **An output filled entirely with recommendations is a sign interview didn't work.**
 
-## 답을 어디에 남기는가
+## Where the answer goes
 
-**답은 그것이 규율할 자리로 간다** — spec·`genome/`·`map.md`·milestone 본문. 기록에만 두면 안 정해진 것이다.
+**The answer goes to wherever it governs** — spec, `genome/`, `map.md`, milestone body. Leaving it only in a record means it's undecided.
 
-**갈린 지점 자체는 기록에 남긴다.** loop 안이면 그 loop의 `Dialogue`에, generation 안이면 세대 기록의 `Open Questions`가 닫힌 자리에. 남기는 것은 *무엇이 갈렸고, 선택지가 무엇이었고, 사람이 무엇을 골랐고, 추천 채택인지 다른 답인지*다. 이것이 없으면 다음 세션이 같은 것을 다시 묻거나 사람이 고른 것을 agent가 정한 것으로 읽는다.
+**The divergence point itself goes in the record.** Inside a loop, into that loop's `Dialogue`; inside a generation, into the generation record's `Open Questions`, where it's closed. What goes there is *what diverged, what the options were, what the human picked, and whether it was an adopted recommendation or a different answer*. Without this, the next session either asks the same thing again or reads what the human picked as something the agent decided.
 
-## 종료 조건
+## Exit conditions
 
-**agent가 "충분히 물었다"고 스스로 끝내지 않는다.** 아래가 서지 않으면 종료하지 않는다.
+**The agent doesn't end this by deciding on its own that "enough has been asked."** It doesn't end unless the below hold.
 
-1. 문제 진술이 **관찰 가능한 형태**인가 — 재현 조건 또는 근거
-2. **완료 판정 기준**이 있는가
-3. **범위 밖**이 명시됐는가
-4. 미결 결정이 **열린 항목으로 기록**됐는가
-5. 다음 세대가 **그대로 착수 가능한 수준**인가
+1. Is the problem statement in **observable form** — repro conditions or grounds
+2. Is there a **completion criterion**
+3. Is **out of scope** stated
+4. Are unresolved decisions **recorded as open items**
+5. Is the next generation **ready to start as-is**
 
-사용자가 "그만"이라고 하면 즉시 종료한다. 단 **미해결 모호성을 버리지 않는다** — 기록의 `Open Questions`로, 또는 `idea/research/`로 남긴다. 조용히 끝내면 추측이 다시 시작된다.
+If the user says "stop", end immediately. But **don't drop unresolved ambiguity** — leave it in the record's `Open Questions`, or in `idea/research/`. Ending quietly means the guessing starts again.
 
-## 겪은 것
+## What's been experienced
 
-이 리포에서 실제로 있었던 일이 규율의 근거다.
+What's actually happened in this repo is the grounds for this discipline.
 
-- **물어야 했는데 안 물었다** — 한 milestone은 사람이 *"왜 milestone을 만드는가"*라고 물어서야 잘못 잡은 경계가 드러났다
-- **묻지 않아도 됐는데 물을 뻔했다** — spec에 답이 이미 있는 것을. 2번(이미 답했는가)이 그 자리다
-- **써보기 전의 답이 첫 사용에서 뒤집혔다** — *"닫힌 loop는 바로 archive"*를 골랐다가 첫 loop를 닫자마자 못 찾았다. 선택지의 대가를 실물 없이 적으면 그렇게 된다. **실물로 확인할 수 있는 것은 골라달라고 하기 전에 만들어 보인다**
-- **사람이 선택지 밖의 답을 냈다** — A/B를 냈는데 셋째 길(사이클 자체를 가른다)이 답이었다. 자유 입력이 늘 열려 있어야 하는 이유
+- **Should have asked, didn't** — one milestone's wrongly drawn boundary only surfaced when a human asked *"why are we making this milestone"*
+- **Nearly asked something that didn't need asking** — the spec already had the answer. Rule 2 (has it already been answered) is that spot
+- **An answer given before trying got overturned on first use** — *"a closed loop goes straight to archive"* was picked, and the moment the first loop closed, it couldn't be found. That's what happens when an option's cost is written without the real thing. **Whatever can be confirmed with the real thing gets built and shown before asking someone to choose**
+- **A human answered outside the options** — A/B were offered, and the third path (splitting the cycle itself) was the answer. That's why free input always has to stay open

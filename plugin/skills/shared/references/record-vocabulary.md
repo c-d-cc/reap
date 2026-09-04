@@ -1,52 +1,52 @@
-# 기록 어휘
+# Record vocabulary
 
-세대 기록에 **적을 만한 항목과 그 항목이 뜻하는 바**다.
+What's worth writing in a generation record, **and what each item means**.
 
-| 항목 | 무엇을 담나 |
+| Item | What it holds |
 |---|---|
-| Intent | 왜 이 세대를 여는가, 무엇이 되면 끝인가 |
-| Working Plan | 지금 시점의 접근. 바뀌면 덮어쓴다 |
-| Tasks | 쪼갠 작업과 진행 상태. 작업이 여러 갈래거나 세션이 나뉠 때 값이 있다 |
-| References | 근거로 삼은 것 — plan 인용, 코드 위치, 외부 문서, 낳은 loop |
-| Open Questions | 아직 정하지 못한 것, 사람에게 물어야 할 것 |
-| Dead Ends | 시도했다 접은 접근과 그 이유. 다음 세션이 같은 길을 다시 걷지 않게 한다 |
-| Delegation | 위임했다면 — brief를 누구에게 줬고 무엇을 받았는지 (선택) |
-| Outcome | 무엇을 했고 무엇이 남았는가 |
-| Notes | 위 어디에도 들어가지 않는 것 |
+| Intent | Why this generation opens, what makes it done |
+| Working Plan | The current approach. Overwritten as it changes |
+| Tasks | The split-up work and its progress. Has value when work has several branches or spans sessions |
+| References | What was used as grounds — plan citations, code locations, external docs, the loop that produced this |
+| Open Questions | What's still undecided, what has to go to a human |
+| Dead Ends | Approaches tried and folded, and why. Keeps the next session from walking the same path |
+| Delegation | If delegated — who got the brief and what came back (optional) |
+| Outcome | What was done and what's left |
+| Notes | Whatever fits none of the above |
 
-## 쓰는 규칙
+## Rules for writing it
 
-**이것은 어휘지 템플릿이 아니다.** 쓸 것만 쓰고, 필요하면 여기 없는 항목을 만든다. 순서도 정해져 있지 않다.
+**This is a vocabulary, not a template.** Write only what's needed, and invent an item not listed here if needed. There's no fixed order either.
 
-**빈 항목을 남기는 것은 아무것도 적지 않는 것보다 나쁘다.** 읽는 쪽에 "여기는 확인했는데 없더라"는 잘못된 신호를 준다.
+**Leaving an empty item is worse than writing nothing.** It gives the reader the false signal "checked here, nothing was there."
 
-**로그가 아니라 현재 상태다.** 계획이 바뀌면 덮어쓴다. 이력을 남기지 않는다 — 남길 가치가 있는 결정은 **그것이 규율할 자리**(plan source·`genome/`·`map.md`)로 간다.
+**It's current state, not a log.** Overwrite it as the plan changes. Don't keep history — a decision worth keeping goes to **wherever it governs** (a plan source, `genome/`, `map.md`).
 
-**아무도 검사하지 않는다.** 무엇을 적었는지로 세대를 막지 않는다. 그럼에도 적는 이유는, 결과만 있는 기록은 닫히기 전까지 비어 있고 그것은 **세대가 도는 동안 기록이 아무 쓸모가 없다**는 뜻이기 때문이다. 세션이 중간에 죽거나 다른 세션으로 넘어갈 때 필요한 것이 정확히 "이 세대가 무엇을 하려던 중이었나"다.
+**Nobody checks it.** A generation isn't blocked by what got written. Still, it's written because a record with only an outcome stays empty until it closes, meaning **the record is useless while the generation is running.** What's needed exactly when a session dies mid-work or hands off to another is "what was this generation trying to do."
 
-## loop 기록의 어휘
+## Vocabulary for a loop record
 
-| 항목 | 무엇을 담나 |
+| Item | What it holds |
 |---|---|
-| Question | 무엇을 정하려는가. loop가 여러 세션에 걸치는 동안 기록을 쓸모 있게 만드는 것 |
-| Dialogue | 사람과 갈린 지점 — 무엇이 갈렸고, 선택지가 무엇이었고, 사람이 무엇을 골랐고, 추천 채택인지 다른 답인지. 전사가 아니다 |
-| Explored | 본 것, 대본 전제, 실제 흔적에서 확인한 것 |
-| Dead Ends | 접은 접근과 그 이유. plan arc가 뒤집히는 것을 막는 유일한 것 |
-| Outcome | plan source에 쓴 것, 자른 milestone, `idea/`로 보낸 것 |
-| Open Questions | 결론 없이 남긴 것과 그것이 간 자리 |
+| Question | What this is trying to decide. What makes the record useful while a loop spans several sessions |
+| Dialogue | Divergence points with the human — what diverged, what the options were, what the human picked, whether it adopted the recommendation or gave a different answer. Not a transcript |
+| Explored | What was looked at, the assumption checked against, what real traces confirmed |
+| Dead Ends | Folded approaches and why. The only thing that stops the plan arc from flipping |
+| Outcome | What was written to the plan source, the milestone carved, what went to `idea/` |
+| Open Questions | What was left with no conclusion, and where it went |
 
-**로그가 아니라 현재 상태다**는 loop에도 같다 — 다만 `Dialogue`는 갈린 순서대로 쌓인다. 그것은 이력이 아니라 *어느 답이 누구의 것인가*라는 사실이다.
+**It's current state, not a log** applies to a loop too — except `Dialogue` accumulates in the order things diverged. That's not history, it's the fact of *whose answer is which*.
 
-## milestone 기록의 어휘
+## Vocabulary for a milestone record
 
-| 항목 | 무엇을 담나 |
+| Item | What it holds |
 |---|---|
-| Exit Criteria | 무엇이 되면 이 milestone이 끝나는가. 검증 가능한 사실로 — 정량 지표가 아니라 사람이 판정할 수 있는 상태로 |
-| Out of Scope | 이번에 하지 않기로 한 것. 경계는 안쪽만으로 정의되지 않는다 |
-| Background | 왜 이 milestone이 필요한가. plan의 어느 대목에서 나왔는가 |
-| Plan Items | 예상되는 작업 갈래. 계획이지 계약이 아니다 |
-| Constraints | 이 milestone에만 걸리는 제약 |
-| Open Questions | 자르는 시점에 정하지 못한 것 |
-| Fitness | 종료 시 사람이 준 평가 |
+| Exit Criteria | What makes this milestone done. As verifiable facts — a state a human can judge, not a quantitative metric |
+| Out of Scope | What's decided not to do this time. A boundary isn't defined by its inside alone |
+| Background | Why this milestone is needed. Which part of the plan it came from |
+| Plan Items | The expected branches of work. A plan, not a contract |
+| Constraints | Constraints that apply only to this milestone |
+| Open Questions | What wasn't settled at carving time |
+| Fitness | The human's evaluation at close |
 
-같은 규칙이 적용된다. 어휘지 템플릿이 아니다.
+The same rules apply. A vocabulary, not a template.

@@ -31,3 +31,8 @@ export function t(root: string | null | undefined, key: MessageKey, params?: Rec
 function substitute(text: string, params: Record<string, string | number>): string {
   return text.replace(/\{(\w+)\}/g, (whole, name: string) => (name in params ? String(params[name]) : whole));
 }
+
+/** 카탈로그 전 언어에서 이 키의 값을 모아 중복 없이 낸다. */
+export function allTranslations(key: MessageKey): string[] {
+  return [...new Set(Object.values(CATALOGS).map((catalog) => catalog[key]))];
+}

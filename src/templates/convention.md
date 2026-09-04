@@ -2,12 +2,12 @@
 
 root: `{{root}}`
 
-## 어떻게 읽는가
+## How to read it
 
-어디부터 읽는가, 무엇이 authoritative이고 무엇이 참고인가, 읽다 자주 헷갈린 것.
+Where to start, what's authoritative vs. reference, what tends to trip up a reader.
 
-## 어떻게 쓰는가
+## How to write to it
 
-새 문서를 어디에 어떤 형식으로 쓰는가, 기존 문서를 고칠 때의 관례.
+Where new documents go and in what format, the convention for revising existing ones.
 
-## 하지 말 것
+## Don't

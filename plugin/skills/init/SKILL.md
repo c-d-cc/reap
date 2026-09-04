@@ -3,123 +3,123 @@ name: init
 description: Use once per project, at the very start, to set up the canonical knowledge REAP manages - in a new folder, in an existing codebase, or where .reap/ was created but left as seeds. Runs reap init, explores (brownfield), registers the plan source, fills environment/summary.md and genome/application.md·evolution.md, then hands the first milestone to carve-milestone. Owns the questionnaire; asking itself is interview's. Trigger on "reap 시작", "init", "REAP 셋업", "정본 지식 세우기", or when .reap/ is missing or its genome is still seed text.
 ---
 
-# init — 정본 지식을 세운다
+# init — establishes the canonical knowledge
 
-`reap init`(CLI)은 디렉토리와 씨앗을 놓을 뿐이고 씨앗은 **질문 문장**이다. `ctx`가 `genome/`을 매 세션 통째로 주입하므로 안 채우면 모든 세션이 빈 프롬프트를 받는다 — 그리고 자리를 만들어두면 나중에 채워진다는 가정은 이 리포에서 세 번 틀렸다. **첫날 채운다.** 규범은 `06-agent.md`의 `init` 절이 갖고, 여기는 절차다.
+`reap init` (the CLI) only lays down directories and seeds, and the seeds are **question sentences**. `ctx` injects the whole of `genome/` every session, so if it's left unfilled every session gets an empty prompt — and the assumption that leaving a placeholder gets filled in later has been wrong three times in this repo. **Fill it on day one.** The norm lives in the `init` section of `06-agent.md`; this is the procedure.
 
-**이 skill은 상태 줄이 안내하지 못하는 유일한 skill이다.** `.reap/`가 없으면 훅이 침묵한다. 사람이 부른다.
+**This is the one skill the status line can't point to.** Without `.reap/`, the hook stays silent. A human has to call it.
 
-## 이 skill이 갖는 것과 안 갖는 것
+## What this skill owns and what it doesn't
 
-- **갖는 것** — 무엇을 어느 순서로 채우는가, 코드에서 답이 나오는 것과 사람에게 가야 하는 것의 구분, 답을 어느 파일 어느 자리에 쓰는가
-- **안 갖는 것** — 묻는 법. 한 번에 하나·선택지·추천 같은 문장은 [interview](../interview/SKILL.md)의 것이다. **여기에 그런 문장을 적고 싶어지면 경계가 틀린 것이다**
+- **Owns** — what to fill in what order, the split between what code can answer and what must go to a human, which file and which spot an answer goes in
+- **Doesn't own** — how to ask. One-at-a-time, options, recommendation-shaped sentences belong to [interview](../interview/SKILL.md). **If you feel the urge to write those sentences here, the boundary is wrong**
 
-## 0. 진입 조건을 가른다
+## 0. Split the entry condition
 
 ```bash
 ls .reap 2>/dev/null && reap init --check
 ```
 
-| 상태 | 이 skill이 하는 일 |
+| State | What this skill does |
 |---|---|
-| `.reap/` 없음, 코드 없음 — **새 폴더** | `reap init` 뒤 사람에게 묻는 것이 거의 전부 |
-| `.reap/` 없음, 코드 있음 — **기존 코드베이스** | `reap init` 뒤 탐색(2)으로 초안을 쓰고 확인형으로 받는다 |
-| `.reap/` 있음, `--check`가 씨앗을 보고 — **씨앗인 채 남음** | 보고된 파일만 채운다. 사람이 한 글자라도 쓴 파일은 건드리지 않는다 |
-| `.reap/` 있음, 씨앗 없음 | 이 skill의 일이 아니다. 멈춘다 |
+| No `.reap/`, no code — **new folder** | Run `reap init`, then asking the human is almost all of it |
+| No `.reap/`, code exists — **existing codebase** | Run `reap init`, then explore (2) to draft, and get it confirmed |
+| `.reap/` exists, `--check` reports seeds — **left as seeds** | Fill only what's reported. Don't touch a file a human has typed a single character into |
+| `.reap/` exists, no seeds left | Not this skill's job. Stop |
 
-## 1. 첫 loop를 연다
+## 1. Open the first loop
 
 ```bash
-reap init                                   # 없을 때만
-reap make loop --type plan --title "정본 지식을 세운다" --slug init
+reap init                                   # only if missing
+reap make loop --type plan --title "establish the canonical knowledge" --slug init
 ```
 
-**`init`은 첫 loop다.** 정본 지식을 세우다 첫 milestone을 자르면 닫힌다. 자를 것이 아직 없으면 열린 채 남고 그것이 정상이다. 중단되면 다음 세션이 이 loop의 `Question`·`Dialogue`를 읽고 잇는다 — [loop](../loop/SKILL.md).
+**`init` is the first loop.** Establishing the canonical knowledge closes it once the first milestone is carved. If there's nothing to carve yet, it stays open, and that's normal. If it's interrupted, the next session reads this loop's `Question`/`Dialogue` and continues — see [loop](../loop/SKILL.md).
 
-## 2. 탐색한다 (기존 코드베이스일 때)
+## 2. Explore (for an existing codebase)
 
-**소스 파일은 읽지 않는다.** 코드를 읽어 아는 일은 코드 인덱스의 것이다. 읽는 것은 여섯이다.
+**Don't read the source files.** Reading code to learn it is the code index's job. What to read is six things.
 
-| 읽는 것 | 무엇을 채우나 |
+| What to read | What it fills |
 |---|---|
-| 매니페스트·락파일 (`package.json` · `pyproject.toml` · `go.mod` · `Cargo.toml` …) | 스택, 의존 |
-| 빌드·테스트 진입점 (`Makefile` · `scripts` · CI 설정) | 빌드와 테스트 방법 |
-| `README` | 무엇을 만드는가 |
-| 디렉토리 트리 1~2단계 | 소스 구조 |
-| `git log --oneline -50` | 커밋 관례, 활발한 영역 |
-| **기존 AI 지침 파일** (`CLAUDE.md` · `AGENTS.md` · `.cursorrules` · `.github/copilot-instructions.md` …) | `evolution.md`의 유일한 직접 재료 |
+| Manifests and lockfiles (`package.json` · `pyproject.toml` · `go.mod` · `Cargo.toml` …) | Stack, dependencies |
+| Build and test entry points (`Makefile` · `scripts` · CI config) | How to build and test |
+| `README` | What it builds |
+| Directory tree, one to two levels | Source structure |
+| `git log --oneline -50` | Commit conventions, active areas |
+| **Existing AI instruction files** (`CLAUDE.md` · `AGENTS.md` · `.cursorrules` · `.github/copilot-instructions.md` …) | The only direct material for `evolution.md` |
 
-**확인할 수 없는 것은 쓰지 않는다.** *"TDD를 한다"*고 쓰려면 테스트가 실재하고 돌아간다는 근거가 있어야 한다. 근거가 없으면 질문 목록으로 보낸다.
+**Don't write down what can't be confirmed.** To write *"this project does TDD"*, there has to be grounds that tests actually exist and run. Without grounds, it goes to the question list instead.
 
-**기존 AI 지침 파일은 읽되 고치지 않는다.** `genome/`은 REAP 훅이, `CLAUDE.md`는 클라이언트가 각각 주입하므로 겹치면 같은 것이 두 번 실린다. **겹친다는 사실을 사람에게 보고하고** 옮길지는 사람이 정한다 — 남의 파일을 조용히 정리하면 어느 것이 정본인지가 사라진다.
+**Read existing AI instruction files, but don't edit them.** REAP's hook injects `genome/`, and the client injects `CLAUDE.md`, separately — if they overlap, the same thing gets loaded twice. **Report the overlap to the human** and let them decide whether to move it — quietly tidying someone else's file erases which one is canonical.
 
-탐색의 산출은 둘이다 — **초안**(근거가 있어 확정한 것)과 **질문 목록**(사람에게 가야 하는 것). **목록을 다 확정한 뒤에 묻는다.** `interview`가 남은 개수를 보여주려면 개수가 먼저 있어야 한다. 새 폴더에서는 초안이 거의 비고 목록이 거의 전부다 — 같은 절차의 양 끝이다.
+Exploration produces two things — a **draft** (what's confirmed by grounds) and a **question list** (what has to go to the human). **Finish confirming the list before asking.** `interview` needs a count to show how many remain, and that count has to exist first. In a new folder the draft is nearly empty and the list is nearly everything — two ends of the same procedure.
 
-## 3. 질문지 — 순서대로
+## 3. The questionnaire — in order
 
-**정본이 어디 있는지부터 정한다.** 그래서 plan source가 genome보다 먼저다 — `application.md`는 plan source에 있는 규범을 옮겨 적지 않으므로, plan source가 있는지 모르면 무엇을 쓸지가 안 정해진다.
+**Decide where the canon lives first.** That's why plan source comes before genome — `application.md` doesn't copy norms that live in a plan source, so without knowing whether one exists, what to write isn't settled either.
 
 ### 3.1 plan source
 
-| 물음 | 코드가 답하나 | 쓰는 자리 |
+| Question | Can code answer it | Where the answer goes |
 |---|---|---|
-| 기획·설계 문서가 있는가, 어디에 | 후보는 탐색이 찾는다(`docs/` · `spec/` · `prd/` · `adr/`). **어느 것이 정본인지**는 사람 | `reap make plan-source --root <path> --role "<역할>"` |
-| 그 소스를 어디부터 읽는가, 무엇이 authoritative인가 | 일부 — `README`나 색인이 있으면 | `plan/conventions/<ps-id>-<slug>.md` |
+| Is there a planning/design document, and where | Exploration finds candidates (`docs/` · `spec/` · `prd/` · `adr/`). **Which one is canonical** is a human call | `reap make plan-source --root <path> --role "<role>"` |
+| Where to start reading that source, what's authoritative | Partly — if there's a `README` or an index | `plan/conventions/<ps-id>-<slug>.md` |
 
-없으면 등록하지 않는다. **`application.md`가 기획을 담기 시작하면 그것이 plan source가 필요하다는 신호다** — 씨앗에 적혀 있다.
+If there's none, don't register one. **If `application.md` starts holding planning, that's the signal it needs a plan source** — it's stated in the seed.
 
 ### 3.2 `environment/summary.md`
 
-| 물음 | 코드가 답하나 |
+| Question | Can code answer it |
 |---|---|
-| 스택·언어·런타임 버전 | 예 |
-| 소스 구조 — 어디에 무엇이 | 예 (트리 2단) |
-| 빌드·테스트·실행 명령 | 대개 예. 없으면 사람 |
-| 다음 세션이 아무것도 모른 채 어디서부터 손대야 하는가 | 사람 |
+| Stack, language, runtime version | Yes |
+| Source structure — what's where | Yes (two-level tree) |
+| Build, test, run commands | Usually yes. If not, a human |
+| Where the next session should start, knowing nothing | A human |
 
 ### 3.3 `genome/application.md`
 
-| 물음 | 코드가 답하나 |
+| Question | Can code answer it |
 |---|---|
-| 이 프로젝트가 무엇인가 — 한 문단 | `README`가 있으면 초안. 확인은 사람 |
-| 만드는 것이 몇 개인가 (바이너리·서비스·라이브러리…) | 대개 예 |
-| 작업 규약 — 테스트 규칙, 언어, 커밋 메시지 | 흔적이 있으면 확인형. 없으면 사람 |
-| 규범이 plan source에 있다면 **여기 옮겨 적지 않는다** | — |
+| What this project is — one paragraph | Draft from `README` if present. Confirmed by a human |
+| How many things it builds (binaries, services, libraries…) | Usually yes |
+| Working conventions — testing rules, language, commit messages | Confirm-shaped if there's a trace. Otherwise a human |
+| If the norm lives in a plan source, **don't copy it here** | — |
 
-### 3.4 `genome/evolution.md` — 마지막
+### 3.4 `genome/evolution.md` — last
 
-앞의 셋을 채우는 동안 이 프로젝트를 이미 겪은 뒤에 쓴다.
+Written after already having gone through this project while filling the previous three.
 
-| 물음 | 코드가 답하나 |
+| Question | Can code answer it |
 |---|---|
-| 기존 AI 지침 파일이 있는가 — 그 내용 중 **행동 규칙**인 것 | 예. 옮길지는 사람 |
-| 무엇을 사람에게 묻고 무엇을 스스로 정하는가 | 사람 |
-| 반복하면 안 되는 실수가 이미 알려져 있는가 | 사람 |
+| Is there an existing AI instruction file — which parts of it are **behavior rules** | Yes. Whether to move it is a human call |
+| What to ask the human versus decide alone | A human |
+| Are there known mistakes that must not repeat | A human |
 
-### 건드리지 않는 것 둘 — 이유가 다르다
+### Two things left untouched — for different reasons
 
-- **`genome/invariants.md`** — 사람만 수정한다. 영구 규칙. 후보를 제시하지도 않는다
-- **`vision/memory/lessons.md`** — 겪은 것이 없다. 이 시점의 사실이고, 첫 milestone이 닫힐 때부터 쌓인다
+- **`genome/invariants.md`** — only a human edits it. Permanent rules. Don't even propose candidates
+- **`vision/memory/lessons.md`** — nothing's been experienced yet. It's a fact of this moment, and accumulates once the first milestone closes
 
-## 4. 묻는다
+## 4. Ask
 
-질문 목록을 들고 [interview](../interview/SKILL.md)를 부른다. 답은 3의 자리에 쓰고, **갈린 지점은 이 loop의 `Dialogue`에 남긴다** — 어느 답이 사람의 것이고 어느 것이 추천 채택인지.
+Take the question list to [interview](../interview/SKILL.md). Write answers into their spot from step 3, and **leave where opinions diverged in this loop's `Dialogue`** — which answer was the human's and which was an adopted recommendation.
 
-## 5. 첫 milestone을 판단한다
+## 5. Judge the first milestone
 
-정본 지식이 섰으면 **지금 할 일이 있는가**를 본다. 있으면 [carve-milestone](../carve-milestone/SKILL.md)으로 자른다 — 이 loop가 `--from`이 된다. 자르면 loop를 닫는다:
+Once the canonical knowledge stands, check **whether there's work to do right now**. If so, carve it with [carve-milestone](../carve-milestone/SKILL.md) — this loop becomes its `--from`. Once carved, close the loop:
 
 ```bash
 reap mark loop <loop-id> --closed --milestone <ms-id>
 ```
 
-없으면 loop를 열린 채 둔다. `Outcome`에 무엇을 채웠는지, `Open Questions`에 왜 아직 자를 것이 없는지를 적는다.
+If not, leave the loop open. Write what got filled in `Outcome`, and why there's nothing to carve yet in `Open Questions`.
 
-## 끝에 확인한다
+## Confirm at the end
 
 ```bash
-reap init --check     # genome/application·evolution과 environment/summary가 보고되면 안 된다. invariants·lessons·map.md는 씨앗 그대로가 정상이다
-reap ctx              # 다음 세션이 받을 것을 직접 본다
+reap init --check     # genome/application·evolution and environment/summary must not be reported. invariants·lessons·map.md staying as seeds is normal
+reap ctx               # see directly what the next session will receive
 ```
 
-`ctx`의 출력이 질문 문장이 아니라 이 프로젝트의 사실이면 된 것이다. 커밋한다 — plan source가 별개 리포면 그쪽도.
+Done when `ctx`'s output reads as facts about this project rather than question sentences. Commit — and if the plan source is a separate repo, commit there too.

@@ -1,41 +1,41 @@
 # delegate brief — {{gen-id}}
 
-## 읽을 것 (이 순서로)
+## Read (in this order)
 
 1. `.reap/genome/*.md`
-2. `{{milestone.md 경로}}`
-3. `{{task 경로}}`
-4. `.reap/life/generations/{{gen-id}}-*.md` — 이 세대의 Intent
-5. {{그 밖에 이번 일에 필요한 것 — 경로로만}}
+2. `{{path to milestone.md}}`
+3. `{{path to task}}`
+4. `.reap/life/generations/{{gen-id}}-*.md` — this generation's Intent
+5. {{anything else this work needs — as paths only}}
 
-## 범위
+## Scope
 
-{{이 세대의 Intent 그대로. 순서를 바꾸거나 쪼개도 된다}}
+{{this generation's Intent, as written. reorder or split it freely}}
 
-## 작업 트리
+## Working tree
 
-`{{worktree 또는 리포 경로}}` (절대 경로). **이 밖은 건드리지 않는다.**
+`{{worktree or repo path}}` (absolute path). **Don't touch anything outside it.**
 
-## 규율
+## Discipline
 
-- 절대 경로를 쓴다. 이 트리 밖 디렉토리는 불가침이다
-- `reap make`·`reap mark`를 부르지 않는다 — id 발급과 세션 바인딩은 주 세션의 것이다
-- `.reap/`는 이 세대의 기록 파일과(milestone에 속하면) `handoff.md`만 건드린다. 그 밖은 불가침이다
-- 테스트를 먼저 쓴다 — 구현 전에 실패하는 테스트
-- 검증 명령은 파이프에 넣지 않는다. exit code를 직접 받는다
-- 소스를 고쳤으면 다시 빌드한다. 되돌린 뒤에도 마찬가지다
-- 주석에 "왜 이렇게 생겼는지"를 적지 않는다
-- 커밋은 의미 단위로 나눈다. 메시지는 한국어로, 무엇을 왜 바꿨는지
-- `git push`·`git rebase`·`git commit --amend`를 하지 않는다
+- Use absolute paths. Directories outside this tree are off-limits
+- Don't call `reap make`/`reap mark` — issuing ids and session binding belong to the main session
+- Inside `.reap/`, touch only this generation's record file and (if it belongs to a milestone) `handoff.md`. Everything else is off-limits
+- Write tests first — a failing test before the implementation
+- Don't pipe verification commands. Take the exit code directly
+- If you changed source, rebuild. Same after reverting
+- Don't write "why it looks this way" in comments
+- Split commits by meaning. Messages in Korean, saying what changed and why
+- Don't `git push`, `git rebase`, or `git commit --amend`
 
-## 끝나면
+## When done
 
-- 세대 기록에 `## Outcome`(무엇을 했고 무엇이 남았는지)을 적는다. 접은 접근이 있으면 `## Dead Ends`도
-- **세대를 닫지 않는다** — `mark generation --closed`를 부르지 않는다. 검토와 닫기는 주 세션의 일이다
-- `git status --porcelain`이 빈 채로 끝난다
+- Write `## Outcome` in the generation record (what was done and what's left). Add `## Dead Ends` too if any approach was folded
+- **Don't close the generation** — don't call `mark generation --closed`. Review and closing are the main session's job
+- End with `git status --porcelain` empty
 
-## 보고
+## Report
 
-- 만든 커밋 해시 목록
-- 테스트: 몇 개 통과·실패
-- 남은 것 — Intent 중 안 한 것, 다음 세션이 볼 것
+- List of commit hashes made
+- Tests: how many passed, how many failed
+- What's left — what wasn't done from the Intent, what the next session should see

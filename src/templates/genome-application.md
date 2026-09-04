@@ -1,7 +1,7 @@
 # Application
 
-이 프로젝트가 무엇인가. 무엇을 만들고, 어떤 구조를 갖고, 어떤 작업 규약을 따르는가.
+What this project is. What it builds, what structure it has, what working conventions it follows.
 
-규범이 plan source에 있다면 여기에 옮겨 적지 않는다 — 두 곳에 있으면 어긋나고, 어긋난 쪽을 다음 세대가 읽는다.
+If the norm already lives in a plan source, don't copy it here — kept in two places, they drift, and the next generation reads whichever one it finds.
 
-이 파일이 기획(무엇을 왜 만드는가의 상세)을 담기 시작하면 그것은 plan source가 필요하다는 신호다. 여기는 정체성·구조·작업 규약까지다.
+If this file starts holding planning (the detail of what to build and why), that's a sign it needs a plan source. Here goes as far as identity, structure, and working conventions.

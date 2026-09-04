@@ -3,57 +3,57 @@ name: report-issue
 description: Submit a bug report or feature request to the REAP project (c-d-cc/reap) from any project that uses REAP. Decides whether the problem is REAP's or this project's, writes an issue the REAP repo can act on (repro, expected, actual, versions, layout facts) without leaking this project's code or paths, and files it with gh - or hands the body to the human when gh is unavailable. Trigger on "REAP 버그", "reap 이슈 올려", "report-issue", "REAP에 기능 요청", or when a REAP tool or skill behaves against its spec.
 ---
 
-# report-issue — REAP에 버그·기능 요청을 올린다
+# report-issue — files a bug or feature request to REAP
 
-REAP를 쓰다 마주친 결함이 이 프로젝트의 backlog에 남거나 잊히는 길을 막는다. REAP 리포(`c-d-cc/reap`)까지 가는 통로가 이것이다.
+This is the channel that stops a defect hit while using REAP from either sitting in this project's backlog or getting forgotten — the path all the way to the REAP repo (`c-d-cc/reap`).
 
-## 먼저: 누구의 문제인가
+## First: whose problem is it
 
-**REAP의 것인 경우** — `reap` 바이너리가 spec과 다르게 돈다, 플러그인 skill이 서로 모순되거나 없는 것을 가리킨다, `ctx`가 잘못 싣거나 빠뜨린다, 훅이 세션 시작을 막는다(`invariants.md` 위반), 저장 규약이 이 프로젝트에서 성립하지 않는다, 있으면 좋을 명령·skill·규약.
+**REAP's** — the `reap` binary behaves differently from its spec, a plugin skill contradicts another or points at something that doesn't exist, `ctx` loads the wrong thing or drops something, a hook blocks session start (violating `invariants.md`), a storage convention doesn't hold in this project, a command/skill/convention that would be nice to have.
 
-**이 프로젝트의 것인 경우 — issue가 아니다.** genome·milestone·backlog에 무엇을 적을지의 판단, 이 프로젝트의 코드가 깨진 것, plan source의 내용. 그것은 `make backlog`나 loop다.
+**This project's — not an issue.** What to write in genome, a milestone, or backlog is a judgment call, this project's code being broken, the content of a plan source. That's `make backlog` or a loop.
 
-**헷갈리면 이 프로젝트의 backlog에 먼저 적고, REAP의 것이라 확신될 때 올린다.** 잘못 올린 issue는 REAP 쪽이 "재현 안 됨"으로 닫게 되고 그 왕복이 가장 비싸다.
+**When unsure, write it to this project's backlog first, and file it once it's certain to be REAP's.** A misfiled issue gets closed by the REAP side as "can't reproduce," and that round trip is the most expensive kind.
 
-## 재현부터 확정한다
+## Confirm reproduction first
 
-issue를 쓰기 전에 **명령 한 줄로 재현되는가**를 본다. 재현되면 그 명령과 출력이 issue의 본문이다. 재현이 안 되면 무엇을 봤는지만 적고 **"재현 안 됨"을 숨기지 않는다** — 검증할 수 없는 것을 검증한 척하지 않는다.
+Before writing the issue, check whether it **reproduces with one command.** If it does, that command and its output are the issue body. If it doesn't reproduce, write only what was seen and **don't hide the "doesn't reproduce"** — don't pretend to have verified something that can't be verified.
 
-기능 요청이면 **무엇이 없어서 무엇을 못 했는가**가 본문이다. 원하는 해법이 아니라 막힌 지점을 적는다.
+For a feature request, the body is **what was missing and what couldn't be done because of it.** Write the blocked point, not the desired solution.
 
-## 실을 것과 안 실을 것
+## What goes in, what doesn't
 
-**싣는다** — 전부 REAP가 소유하는 사실이다.
-
-```bash
-reap --version                                  # 바이너리
-grep version "$(ls -d ~/.claude/plugins/cache/*/reap/*/ 2>/dev/null | tail -1).claude-plugin/plugin.json"   # 플러그인 (없으면 "플러그인 없음")
-ls .reap                                        # 레이아웃 (파일 이름만)
-```
-
-여기에 재현 명령·기대·실제, 관련 spec 문서 이름(`04-commands.md` 같은), 그리고 이것이 어느 skill 안에서 일어났는가.
-
-**싣지 않는다** — 이 프로젝트의 소스 코드, 리포 밖 절대경로, genome·milestone·backlog·loop의 **본문**, plan source의 내용, 사람 이름·이메일. 파일 *이름*은 되지만 *내용*은 안 된다. REAP 이슈는 공개 리포에 남는다.
-
-## 올린다
+**Goes in** — all facts REAP itself owns.
 
 ```bash
-gh issue create --repo c-d-cc/reap --title "<한 줄>" --body-file <임시파일> [--label bug|enhancement]
+reap --version                                  # the binary
+grep version "$(ls -d ~/.claude/plugins/cache/*/reap/*/ 2>/dev/null | tail -1).claude-plugin/plugin.json"   # plugin (if none, "no plugin")
+ls .reap                                        # layout (file names only)
 ```
 
-제목은 **증상**이다 — "`mark loop --closed`가 milestones를 덮어쓴다"이지 "loop 버그"가 아니다. 본문 형식:
+Add to that the repro command, expected vs. actual, related spec document names (like `04-commands.md`), and which skill this happened inside.
+
+**Doesn't go in** — this project's source code, absolute paths outside the repo, the **body** of genome/milestone/backlog/loop, plan source content, a person's name or email. A file *name* is fine, its *content* isn't. REAP issues live in a public repo.
+
+## File it
+
+```bash
+gh issue create --repo c-d-cc/reap --title "<one line>" --body-file <temp file> [--label bug|enhancement]
+```
+
+The title is **the symptom** — "`mark loop --closed` overwrites milestones," not "loop bug." Body format:
 
 ```
-## 무엇이 (기대 / 실제)
-## 재현
-## 환경 — reap <버전> · 플러그인 <버전> · 레이아웃
-## 어디서 — 어느 skill·명령 안에서, 관련 spec
+## What (expected / actual)
+## Repro
+## Environment — reap <version> · plugin <version> · layout
+## Where — which skill/command, related spec
 ```
 
-**`gh`가 없거나 인증이 안 됐으면 본문을 그대로 사람에게 낸다** — 제목과 본문을 화면에 내고 어디로 올리면 되는지(`https://github.com/c-d-cc/reap/issues/new`)를 말한다. 조용히 실패하거나 다른 방법을 지어내지 않는다.
+**If `gh` is missing or unauthenticated, give the body to the human as is** — show the title and body on screen and say where to file it (`https://github.com/c-d-cc/reap/issues/new`). Don't fail silently or invent another way.
 
-## 남긴다
+## Leave a record
 
-올린 issue의 URL을 **이 프로젝트의 backlog 항목**으로 남긴다 — `make backlog --type reap-issue --title "<제목> (#<번호>)"`. 이유는 둘이다: REAP가 고친 뒤 이 프로젝트가 무엇을 다시 해야 하는지 붙잡아야 하고, 임시로 우회한 것이 있으면 그것을 되돌릴 자리가 필요하다. 우회를 했다면 그 항목에 적는다.
+Leave the filed issue's URL as **this project's backlog item** — `make backlog --type reap-issue --title "<title> (#<number>)"`. Two reasons: once REAP fixes it, this project needs to catch what it has to redo, and if a temporary workaround exists, there needs to be a place to revert it. If a workaround was made, note it in that item.
 
-REAP 쪽이 닫았는지는 **추적하지 않는다.** 다음에 `localUpdate`나 플러그인 갱신 뒤 그 항목을 볼 때 확인하면 된다.
+**Whether REAP closed it isn't tracked.** Check next time this item comes up, after a `localUpdate` or a plugin update.

@@ -25,7 +25,7 @@ test("init이 config.yml에 workspace-id를 채운다", async () => {
   await run(["init"], root);
   const config = readConfig(root);
   expect(config.workspaceId).toMatch(/^[0-9a-f]{12}$/);
-  expect(config.language).toBe("ko");
+  expect(config.language).toBe("en");
   expect(config.agentClient).toBe("claude-code");
 });
 
