@@ -143,6 +143,24 @@ status: open
 
 **fix 기록에는 하나가 더 필요하다.** frontmatter로 못 박지 않는다 — 되돌릴 대상이 항상 id를 갖지는 않기 때문이다(깨진 빌드, 낡은 의존성에는 가리킬 generation이 없다). 대신 **`References`에 무엇의 의도로 되돌리는지를 적는다** — 되돌릴 대상을 가리킬 수 없다면 그것은 애초에 fix가 아니었다는 신호다.
 
+## 직접 할 것인가, 위임할 것인가
+
+**기본은 직접** — 지금 이 세션이 그대로 일한다. 아래 신호 중 하나가 있으면 위임을 검토한다.
+
+- 이 세대가 여러 파일과 긴 탐색을 요구해 주 세션의 맥락을 채울 것 같다
+- 사람이 위임을 요청했다
+- 둘 이상을 병렬로 굴린다 — 병렬이면 worktree로 가르고 id는 주 트리가 발급한다([orchestrate](../orchestrate/SKILL.md))
+
+위임하기로 했으면 절차는 다섯 줄이다.
+
+1. **Intent를 적는다** — 세대 기록에, 위임 전에
+2. [`references/delegate-brief.md`](references/delegate-brief.md)를 채워 subagent에게 준다
+3. subagent가 일한다 — **같은 작업 트리**에서. `.session` 바인딩은 주 세션의 것이고 subagent는 `make`·`mark`를 부르지 않으므로 충돌이 없다
+4. 주 세션이 **검토**한다 — diff를 읽고, 테스트를 직접 돌리고, subagent가 적은 Outcome을 읽는다
+5. `complete`
+
+**"REAP는 여기서부터 관여하지 않는다"는 위임 뒤에도 유지된다.** 위임은 관여가 아니라 실행 형태의 선택이다.
+
 ## 그리고 일한다
 
 REAP는 여기서부터 관여하지 않는다. 코드를 알아야 할 때 `reap index search|impact|callers|callees`가 있다 — 커밋된 것만 안다(커밋 안 된 것은 `grep`). `status`의 해석률이 낮으면 빈 결과는 "모름"이다. 탐색하고, 계획하고, 짜고, 고치고, 되돌린다. 순서도 횟수도 정해져 있지 않다.
