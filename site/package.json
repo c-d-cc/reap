@@ -3,7 +3,9 @@
   "private": true,
   "type": "module",
   "scripts": {
+    "predev": "cp ../RELEASE_NOTES.md release-notes-content.md",
     "dev": "vitepress dev",
+    "prebuild": "cp ../RELEASE_NOTES.md release-notes-content.md",
     "build": "vitepress build",
     "preview": "vitepress preview"
   },
