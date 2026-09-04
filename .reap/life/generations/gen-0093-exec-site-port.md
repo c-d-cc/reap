@@ -6,7 +6,9 @@ milestone: ms-022
 title: 사이트 재구축 — v0.17 문서 앱 디자인 그대로, 내용만 v0.18 (ko)
 startedAt: 2026-09-04T02:04:58Z
 startCommit: 8e3c344
-status: open
+status: closed
+closedAt: 2026-09-04T02:31:31Z
+endCommit: c3320ef
 ---
 ## Intent
 

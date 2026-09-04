@@ -11,6 +11,8 @@ focus: true
 ---
 ## Background
 
+**2026-09-04 사람 검수: VitePress 사이트 기각 — 기존 reap.cc 디자인·톤 유지, 내용만 v0.18.** 아래 Exit Criteria의 VitePress 항목은 07 G10(갱신본)대로 v0.17 앱 이식으로 읽는다. gen-0093이 이식했다.
+
 사람 Q1 답(2026-09-04): 새 문서 사이트, 한국어 먼저, 검수 뒤 확장. 규범은 [07-i18n-docs-delegate.md](../../../../docs/reap-plan/reap_v_0_18_release/07-i18n-docs-delegate.md)의 G10. v0.17 사이트(`~/cdws/reap_v17/docs/`, Vite+React 24쪽×5로케일)는 참고일 뿐 되살리지 않는다.
 
 ## Exit Criteria
