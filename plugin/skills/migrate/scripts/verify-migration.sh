@@ -89,7 +89,15 @@ else
   report "ctx 상태 줄에 milestone" fail "reap ctx 출력에 '현재 milestone:'/'Milestone:' 줄이 없다"
 fi
 
-# 6) reap doctor 결함 0
+# 6) 옮긴 문서를 가리키는 옛 경로가 새 .reap·CLAUDE.md에 없다
+stale=$(cd "$root" && grep -rnE '\.reap/vision/(design|goals\.md)|vision/memory/(longterm|midterm|shortterm)|\.reap/lineage/' .reap CLAUDE.md --include='*.md' --include='CLAUDE.md' 2>/dev/null | grep -v '^\.reap/archive/migration-v0_17\.md' || true)
+if [ -z "$stale" ]; then
+  report "옛 경로 참조 없음" ok
+else
+  report "옛 경로 참조 없음" fail "$(printf '%s\n' "$stale" | grep -c '')건: $(printf '%s' "$stale" | head -3 | tr '\n' ' ')"
+fi
+
+# 7) reap doctor 결함 0
 doctor_out=$(cd "$root" && "$bin" doctor 2>&1)
 if printf '%s\n' "$doctor_out" | grep -qE '결함 0|0 defects'; then
   report "doctor 결함 0" ok
