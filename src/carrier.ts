@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
 import { isRepo } from "./git.ts";
+import { t } from "./i18n.ts";
 
 export type Site = { file: string; line: number; slug: string };
 export type Carrier = { id: string; slugs: string[]; sites: Site[] };
@@ -51,35 +52,35 @@ export function checkCarriers(root: string): Problem[] {
         const rest = m[1]!;
         if (rest === "" || rest.startsWith("<")) continue;
         const ok = /^[0-9a-f]{6}-[A-Za-z0-9][A-Za-z0-9_-]*$/.test(rest);
-        if (!ok) problems.push({ kind: "형식", detail: `${relative(root, file)}:${i + 1}  reap:carrier-${rest} — <hash6>-<slug>여야 합니다` });
+        if (!ok) problems.push({ kind: t(root, "carrier.kind.format"), detail: t(root, "carrier.detail.format", { file: relative(root, file), line: i + 1, rest }) });
       }
     });
   }
   const carriers = scanCarriers(root);
   for (const c of carriers) {
-    if (c.slugs.length > 1) problems.push({ kind: "한 해시에 slug 둘", detail: `${c.id}: ${c.slugs.join(", ")}` });
+    if (c.slugs.length > 1) problems.push({ kind: t(root, "carrier.kind.dup_slug"), detail: `${c.id}: ${c.slugs.join(", ")}` });
   }
   const bySlug = new Map<string, string[]>();
   for (const c of carriers) for (const s of c.slugs) bySlug.set(s, [...(bySlug.get(s) ?? []), c.id]);
   for (const [slug, ids] of bySlug) {
-    if (ids.length > 1) problems.push({ kind: "한 slug에 해시 둘", detail: `${slug}: ${ids.join(", ")}` });
+    if (ids.length > 1) problems.push({ kind: t(root, "carrier.kind.dup_hash"), detail: `${slug}: ${ids.join(", ")}` });
   }
   return problems;
 }
 
 export function newCarrier(root: string, slug: string): string {
-  if (!SLUG.test(slug)) throw new Error(`slug는 영문·숫자·-·_ 만 됩니다: ${slug}`);
+  if (!SLUG.test(slug)) throw new Error(t(root, "carrier.slug_invalid", { slug }));
   const existing = scanCarriers(root);
   const same = existing.find((c) => c.slugs.includes(slug));
-  if (same) throw new Error(`이미 그 slug의 표식이 있습니다: reap:${same.id}-${slug}. 같은 사실이면 그것을 쓰고, 다른 사실이면 다른 slug를 씁니다.`);
+  if (same) throw new Error(t(root, "carrier.slug_taken", { id: same.id, slug }));
   const used = new Set(existing.map((c) => c.id.slice("carrier-".length)));
   let hash = randomHash();
   while (used.has(hash)) hash = randomHash();
   return `reap:carrier-${hash}-${slug}`;
 }
 
-export function formatCarriers(carriers: Carrier[]): string {
-  if (carriers.length === 0) return "표식이 없습니다.";
+export function formatCarriers(carriers: Carrier[], root?: string | null): string {
+  if (carriers.length === 0) return t(root, "carrier.none");
   return carriers
     .map((c) => `${c.id}-${c.slugs.join("|")}\n${c.sites.map((s) => `  ${s.file}:${s.line}`).join("\n")}`)
     .join("\n");

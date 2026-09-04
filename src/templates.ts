@@ -19,6 +19,7 @@ import mapMd from "./templates/map.md" with { type: "text" };
 import memoryLessons from "./templates/memory-lessons.md" with { type: "text" };
 import milestoneMd from "./templates/milestone.md" with { type: "text" };
 import { paths } from "./store.ts";
+import { t } from "./i18n.ts";
 
 /**
  * 번들 템플릿. 텍스트 임포트라 `bun build --compile`이 바이너리에 그대로 싣는다.
@@ -50,7 +51,7 @@ export function template(root: string, name: string): string {
   const override = join(paths(root).templates, name);
   if (existsSync(override)) return readFileSync(override, "utf8");
   const bundled = BUNDLED[name];
-  if (bundled === undefined) throw new Error(`템플릿이 없습니다: ${name}`);
+  if (bundled === undefined) throw new Error(t(root, "templates.missing", { name }));
   return bundled;
 }
 

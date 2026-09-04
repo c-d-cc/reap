@@ -4,6 +4,7 @@ import { slugify } from "./doc.ts";
 import { issue } from "./id.ts";
 import { ensureDir, paths, writeFileAtomic } from "./store.ts";
 import { render, template } from "./templates.ts";
+import { t } from "./i18n.ts";
 
 export type Source = { id: string; root: string; role: string; convention: string };
 export type MakePlanSource = { root: string; role: string; slug?: string; now: string };
@@ -15,14 +16,14 @@ export type MakePlanSource = { root: string; role: string; slug?: string; now: s
 export function readSources(root: string): Source[] {
   const path = paths(root).planSources;
   if (!existsSync(path)) return [];
-  return parseSources(readFileSync(path, "utf8"));
+  return parseSources(readFileSync(path, "utf8"), root);
 }
 
-function parseSources(text: string): Source[] {
+function parseSources(text: string, root: string): Source[] {
   const trimmed = text.trim();
   if (trimmed === "" || trimmed === "sources: []") return [];
   const lines = text.split("\n");
-  if (lines[0] !== "sources:") throw new Error(`sources.yml 형식이 깨졌습니다 — 첫 줄이 "sources:"가 아닙니다: ${lines[0] ?? ""}`);
+  if (lines[0] !== "sources:") throw new Error(t(root, "plan.sources_broken_header", { line: lines[0] ?? "" }));
   const sources: Source[] = [];
   let i = 1;
   while (i < lines.length) {
@@ -32,14 +33,14 @@ function parseSources(text: string): Source[] {
       continue;
     }
     const idMatch = /^  - id: (.*)$/.exec(line);
-    if (!idMatch) throw new Error(`sources.yml 형식이 깨졌습니다 — 예상치 못한 줄입니다: ${line}`);
+    if (!idMatch) throw new Error(t(root, "plan.sources_broken_line", { line }));
     const id = idMatch[1] ?? "";
     const fields: Record<"root" | "role" | "convention", string> = { root: "", role: "", convention: "" };
     for (const key of ["root", "role", "convention"] as const) {
       i++;
       const fieldLine = lines[i];
       const fieldMatch = fieldLine === undefined ? null : new RegExp(`^    ${key}: (.*)$`).exec(fieldLine);
-      if (!fieldMatch) throw new Error(`sources.yml 형식이 깨졌습니다 — ${id}의 ${key} 줄이 없거나 형식이 다릅니다: ${fieldLine ?? "(없음)"}`);
+      if (!fieldMatch) throw new Error(t(root, "plan.sources_broken_field", { id, key, line: fieldLine ?? t(root, "cli.none") }));
       fields[key] = fieldMatch[1] ?? "";
     }
     sources.push({ id, ...fields });
@@ -72,10 +73,10 @@ export function sourceRoot(root: string, source: Source): string {
 export function makePlanSource(root: string, opts: MakePlanSource): { id: string; path: string; convention: string } {
   const dir = sourceRoot(root, { id: "", root: opts.root, role: "", convention: "" });
   if (!existsSync(dir) || !statSync(dir).isDirectory()) {
-    throw new Error(`plan source의 root가 디렉토리가 아닙니다: ${opts.root}`);
+    throw new Error(t(root, "plan.source_root_not_dir", { root: opts.root }));
   }
   const id = issue(root, "source", opts.role, opts.now.slice(0, 10));
-  const slug = opts.slug ?? slugify(basename(dir));
+  const slug = opts.slug ?? slugify(basename(dir), root);
   const convention = `conventions/${id}-${slug}.md`;
   const sources = readSources(root);
   sources.push({ id, root: opts.root, role: opts.role, convention });
@@ -97,16 +98,16 @@ export function makePlanSource(root: string, opts: MakePlanSource): { id: string
  */
 export function validateRef(root: string, ref: string): string | null {
   const at = ref.indexOf(":");
-  if (at <= 0 || at === ref.length - 1) return `--ref의 형식은 <ps-id>:<경로>[#앵커]입니다: ${ref}`;
+  if (at <= 0 || at === ref.length - 1) return t(root, "plan.ref_format", { ref });
   const id = ref.slice(0, at);
   const path = ref.slice(at + 1).split("#")[0]!;
   const source = findSource(root, id);
-  if (!source) return `등록되지 않은 plan source입니다: ${id} (reap plan sources로 확인)`;
+  if (!source) return t(root, "plan.ref_source_unregistered", { id });
   const base = sourceRoot(root, source);
   const target = resolve(base, path);
   const inside = relative(base, target);
-  if (inside.startsWith("..") || isAbsolute(inside)) return `경로가 소스 안에 있지 않습니다: ${path} (소스 root: ${source.root})`;
-  if (!existsSync(target)) return `소스 안에 그 파일이 없습니다: ${path} (소스 root: ${source.root})`;
+  if (inside.startsWith("..") || isAbsolute(inside)) return t(root, "plan.ref_outside_source", { path, root: source.root });
+  if (!existsSync(target)) return t(root, "plan.ref_file_missing", { path, root: source.root });
   return null;
 }
 
@@ -117,7 +118,7 @@ export function requireRefs(root: string, refs: string[] | undefined): void {
   }
 }
 
-export function formatSources(sources: Source[]): string {
-  if (sources.length === 0) return "등록된 plan source가 없습니다. reap make plan-source --root <path> --role \"<r>\"";
+export function formatSources(sources: Source[], root?: string | null): string {
+  if (sources.length === 0) return t(root, "plan.no_sources");
   return sources.map((s) => `${s.id}  ${s.root}\n  ${s.role}\n  ${s.convention}`).join("\n");
 }
