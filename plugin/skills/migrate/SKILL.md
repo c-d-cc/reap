@@ -66,7 +66,7 @@ Set up a new `.reap/` with `reap init`. Carry `config.yml`'s `language`·`agentC
 
 ## 6/8 — A subagent does the migration
 
-Don't fill the main session's context with old data — **the mapping table and instructions are in [migration-map.md](references/migration-map.md), and that whole document is handed to a subagent to carry out.** For mappings 1-9, the confirmed grounds are ps-4b485d's 04-migration-skill.md; for environment (10), it's 04-migrate-docs.md; for the working-state mappings 1·2·3·5·6·11·12, it's ms-024's `tasks/1-skill-revision.md` and selfview's real first-pass trace. Twelve mappings total.
+Don't fill the main session's context with old data — **the mapping table and instructions are in [migration-map.md](references/migration-map.md), and that whole document is handed to a subagent to carry out.** For mappings 1-9, the confirmed grounds are ps-4b485d's 04-migration-skill.md; for environment (10), it's 04-migrate-docs.md; for the working-state mappings 1·2·3·5·6·11·12, it's ms-024's `tasks/1-skill-revision.md` and selfview's real first-pass trace. Thirteen mappings total (#13 rewrites references to moved documents).
 
 ## 7/8 — Verification (working-state check)
 
@@ -78,7 +78,7 @@ Structure alone isn't enough — run the working-state check too, the automatabl
 bash <this skill's directory>/scripts/verify-migration.sh <project root>
 ```
 
-Every line has to read `ok:` — a single `FAIL:` line means mapping #1, #2/#11, or #12 was skipped or done wrong; go back and fix it, then run again. Don't move to step 8 until this script also exits 0. Put its full output in the record file's `## 검증`, right after the doctor output.
+Every line has to read `ok:` — a single `FAIL:` line means mapping #1, #2/#11, #12, or #13 was skipped or done wrong; go back and fix it, then run again. Don't move to step 8 until this script also exits 0. Put its full output in the record file's `## 검증`, right after the doctor output.
 
 ## 8/8 — Record and home cleanup guidance
 
