@@ -1,0 +1,221 @@
+export const en = {
+  "cli.usage": `Usage: reap <command>
+
+  --version
+  init [--force] | init --check     (--check: report only which knowledge files are still at seed)
+  make loop       --type plan|design|uiux|idea --title "<title>" [--slug <s>] [--from <id>] [--ref <ps-id>:<path>]
+  make milestone  --title "<title>" [--slug <s>] [--from <loop-id>] [--ref <ps-id>:<path>] [--focus]
+  make generation --milestone <ms-id> --title "<title>" [--slug <s>]
+  make generation --backlog <bk-id> --title "<title>" [--slug <s>]   (can combine with --milestone)
+  make generation --fix  --title "<title>" [--slug <s>]
+  make backlog    --type <t> --title "<title>" [--slug <s>] [--from <id>]
+  make plan-source --root <path> --role "<role>" [--slug <s>]
+  make idea       --kind research|freememo|file --title "<title>" [--slug <s>]
+  make hook       --event <e> --name <n> [--type md|sh] [--condition <c>] [--order <n>]
+  mark loop       <loop-id> --closed [--milestone <ms-id>]... | --aborted
+  mark generation <gen-id> --closed | --aborted | --archived
+  mark backlog    <bk-id> --consumed [--by <gen-id>] | --archived
+  mark milestone <ms-id> --focus | --closed
+  mark idea       <idea-id> --archived
+  bind <gen-id>                   (rebind this session to an open generation)
+  seq [generation|milestone|loop|source|<id>]
+  carrier new <slug> | list [--orphans|--check]
+  doctor                          (report only. exits nonzero if there are defects)
+  index [update [--full] | status | impact <file>... | search <q> | callers <id> | callees <id>]
+  orch claim <resource> [--ttl 30m] | release <resource> | barrier <name> --expect <N> --timeout <s> | roster | status   [--topic <t>]
+  plan sources | convention <ps-id>
+  ctx [--milestone <ms-id> | --hook]`,
+  "cli.unknown_command": "Unknown command: {command}",
+  "cli.bound": "Bound: {id}",
+  "cli.not_a_project": "Not a REAP project. Run reap init first.",
+  "cli.none": "(none)",
+  "cli.hook_failure": "hook failed: {file} — {reason}",
+  "cli.bind_usage": "bind <gen-id>",
+  "cli.already_initialized": "Already initialized. Use --force to fill in only what's missing.",
+  "cli.initialized": "Initialized: {root}\n  {created}",
+  "cli.nothing_missing": "Nothing missing: {root}",
+  "cli.seeds_remaining": "Files still at seed:\n  {files}",
+  "cli.no_seeds_remaining": "No files remain at seed.",
+
+  "orch.claimed": "Claimed: {resource} — {holder}, expires {expiresAt}",
+  "orch.claim_usage": "orch claim <resource> [--ttl 30m]",
+  "orch.release_usage": "orch release <resource>",
+  "orch.released": "Released: {resource}",
+  "orch.barrier_usage": "orch barrier <name> --expect <N> --timeout <seconds>",
+  "orch.expect_required": "--expect <N> is required (at least 1)",
+  "orch.timeout_required": "--timeout <seconds> is required — we do not wait indefinitely for participants who never arrive",
+  "orch.barrier_passed": "barrier {name} passed — {names}",
+  "orch.barrier_missing": "sessions that did not arrive: {names}",
+  "orch.barrier_unknown_missing": "arrived {arrived}/{expect} — roster is unknown, so who is missing is unknown",
+  "orch.barrier_timeout": "barrier {name} timed out ({timeout}s). {missing}",
+  "orch.roster_empty": "no reap-{topic}-* sessions, or claude agents could not be read",
+  "orch.status_line": "topic {topic} · me {me}",
+  "orch.claims_header": "claims:",
+  "orch.claims_none": "claims: none",
+  "orch.claim_line": "  {resource}  {holder}  expires {expiresAt}",
+  "orch.barriers_header": "barriers:",
+  "orch.barriers_none": "barriers: none",
+  "orch.barrier_line": "  {name}  {arrived}/{expect}",
+  "orch.unknown_sub": "orch is claim · release · barrier · roster · status: {sub}",
+  "orch.already_claimed": "Already claimed: {resource} — holder {holder}, expires {expiresAt}",
+  "orch.not_claimed": "Not claimed: {resource}",
+  "orch.someone_elses_claim": "Someone else's claim: {resource} — holder {holder}. Wait for expiry or talk to them",
+  "orch.ttl_format": "--ttl looks like 30m·2h·90s: {text}",
+
+  "index.update_summary": "{mode} · files {files} · {ms}ms",
+  "index.no_index": "No index.",
+  "index.impact_usage": "index impact <file>...",
+  "index.impact_summary": "direct {direct} · indirect {indirect} · symbols {symbols}",
+  "index.impact_direct_header": "direct:",
+  "index.impact_indirect_header": "indirect:",
+  "index.impact_symbols_header": "symbols:",
+  "index.low_resolution_note": "(resolution rate is low — an empty result means 'unknown')",
+  "index.search_usage": "index search <query>",
+  "index.search_none": "none (uncommitted files are not in the index)",
+  "index.symbol_usage": "index {sub} <symbolId>",
+  "index.unknown_symbol": "unknown symbol: {id} (use index search to find the id)",
+  "index.callers_none": "none",
+  "index.unknown_sub": "index is update · status · impact · search · callers · callees: {sub}",
+  "index.not_a_repo": "Not a git repository. The index is commit-scoped and requires a commit — run git init and make one commit.",
+  "index.no_commits": "No commits. The index describes a commit — make a first commit.",
+  "index.status.no_imports": "no imports to resolve",
+  "index.status.commit_line": "commit {commit} · {at}",
+  "index.status.counts_line": "files {files} · symbols {nodes} · edges {edges}",
+  "index.status.rate_line": "import resolution rate {rate}",
+  "index.status.low_rate_warning": "  warning: resolution rate is low — do not read an empty impact result as 'none'",
+  "index.status.language_failure": "  warning: could not load {lang} grammar — {why}",
+
+  "make.plan_source_needs_root": "plan-source requires --root <path>.",
+  "make.plan_source_needs_role": 'plan-source requires --role "<role>".',
+  "make.plan_source_result": "plan-source {id}\n  {path}\n  {convention}",
+  "make.title_required": "--title is required.",
+  "make.loop_needs_type": "loop requires --type: {types} (got: {got})",
+  "make.backlog_needs_type": "backlog requires --type. It is not restricted to an enum, so follow convention (e.g. design).",
+  "make.idea_needs_kind": "idea requires --kind: research · freememo · file (got: {got})",
+  "make.unknown_kind": "make creates loop · milestone · generation · backlog · idea · hook · plan-source: {kind}",
+  "make.result": "{label} {id}\n  {path}",
+
+  "mark.loop_needs_id": "the id of the loop to mark is required.",
+  "mark.need_flag_closed_aborted": "one of --closed · --aborted is required.",
+  "mark.cleared": "Cleared: {id}",
+  "mark.closed": "Closed: {id}\n  {path}",
+  "mark.gen_needs_id": "the id of the generation to mark is required.",
+  "mark.gen_closed": "Closed: {id}",
+  "mark.moved": "Moved: {id}\n  {path}",
+  "mark.need_flag_gen": "one of --closed · --aborted · --archived is required.",
+  "mark.backlog_needs_id": "the id of the backlog item to mark is required.",
+  "mark.need_flag_backlog": "one of --consumed · --archived is required.",
+  "mark.backlog_consumed": "Marked consumed: {id}",
+  "mark.idea_needs_id": "the id of the idea to mark is required.",
+  "mark.idea_only_archived": "idea only accepts --archived.",
+  "mark.milestone_needs_id": "the id of the milestone to mark is required.",
+  "mark.focused": "Focused: {id}",
+  "mark.closed_moved": "Closed and moved: {id}\n  {path}",
+  "mark.need_flag_milestone": "--focus or --closed is required.",
+  "mark.unknown_kind": "mark marks loop · generation · backlog · milestone · idea: {kind}",
+
+  "carrier.new_usage": "carrier new <slug>",
+  "carrier.no_problems": "No problems with markers.",
+  "carrier.unknown_sub": "carrier is new <slug> · list [--orphans|--check]: {sub}",
+  "carrier.slug_invalid": "slug may only contain letters, digits, -, _: {slug}",
+  "carrier.slug_taken": "A marker for that slug already exists: reap:{id}-{slug}. If it's the same fact, use it; if different, use a different slug.",
+  "carrier.none": "No markers.",
+  "carrier.kind.format": "format",
+  "carrier.detail.format": "{file}:{line}  reap:carrier-{rest} — must be <hash6>-<slug>",
+  "carrier.kind.dup_slug": "duplicate slug for one hash",
+  "carrier.kind.dup_hash": "duplicate hash for one slug",
+
+  "seq.invalid": "seq takes a family ({kinds}) or an id. Families without a registry (backlog·idea) have nothing to look up: {needle}",
+  "seq.not_found": "Not in the registry: {needle}",
+
+  "plan.convention_usage": "plan convention <ps-id>",
+  "plan.unregistered_source": "Unregistered plan source: {id}",
+  "plan.convention_missing": "Convention document is missing: {path}",
+  "plan.unknown_sub": "plan reads sources · convention <ps-id>: {sub}",
+  "plan.sources_broken_header": 'sources.yml is malformed — the first line is not "sources:": {line}',
+  "plan.sources_broken_line": "sources.yml is malformed — unexpected line: {line}",
+  "plan.sources_broken_field": "sources.yml is malformed — the {key} line for {id} is missing or malformed: {line}",
+  "plan.source_root_not_dir": "plan source root is not a directory: {root}",
+  "plan.ref_format": "--ref must be <ps-id>:<path>[#anchor]: {ref}",
+  "plan.ref_source_unregistered": "Unregistered plan source: {id} (check with reap plan sources)",
+  "plan.ref_outside_source": "Path is not inside the source: {path} (source root: {root})",
+  "plan.ref_file_missing": "That file does not exist inside the source: {path} (source root: {root})",
+  "plan.no_sources": 'No registered plan sources. reap make plan-source --root <path> --role "<r>"',
+
+  "entries.no_plan_type": "generation has no plan type. Creating new intent is a loop: reap make loop --type plan|design|uiux|idea",
+  "entries.fix_no_grounds": "--fix cannot be given together with grounds (--milestone·--backlog).",
+  "entries.gen_needs_type_or_grounds": "Opening a generation requires a type or grounds: exec needs at least one of --milestone <ms-id> or --backlog <bk-id> (both allowed), reverting work uses --fix. For creating new intent, use make loop.",
+  "entries.gen_closed_no_bind": "Not binding to a closed generation: {id}",
+  "entries.backlog_ambiguous": "backlog matches more than one: {ids}",
+  "entries.backlog_not_found": "backlog not found: {needle}",
+  "entries.milestone_ambiguous": "milestone matches more than one: {ids}",
+  "entries.milestone_not_found": "milestone not found: {needle}",
+  "entries.kind_ambiguous": "{kind} matches more than one: {ids}",
+  "entries.kind_not_found": "{kind} not found: {needle}",
+  "entries.backlog_consumed_no_ground": "A backlog item already consumed cannot be grounds: {id}. If work remains, create a new entry describing what remains.",
+  "entries.idea_ambiguous": "idea matches more than one: {ids}",
+  "entries.idea_not_found": "idea not found: {needle}",
+  "entries.idea_already_archived": "Already in archive: {id}",
+  "entries.hook_needs_event": "hook requires --event: {events} (got: {got})",
+  "entries.hook_needs_name": "hook requires --name. Only letters, digits, -, _ are allowed (got: {got})",
+  "entries.hook_type_invalid": "--type must be md or sh: {type}",
+  "entries.hook_order_invalid": "--order must be an integer: {order}",
+  "entries.hook_already_exists": "Already exists: {filename}",
+
+  "doctor.kind.id_format": "invalid id format",
+  "doctor.kind.id_duplicate": "duplicate id",
+  "doctor.kind.id_unregistered": "id missing from registry",
+  "doctor.kind.broken_ref": "broken reference",
+  "doctor.kind.gen_closed_no_commit": "generation closed without a commit",
+  "doctor.kind.gen_unbound": "generation open but unbound",
+  "doctor.kind.duplicate_focus": "duplicate focus",
+  "doctor.kind.map_diverged": "map.md differs from the seed",
+  "doctor.kind.size_guideline": "size guideline",
+  "doctor.kind.accumulation_warning": "accumulation warning",
+  "doctor.kind.idea_no_graduation": "idea missing graduation criteria",
+  "doctor.kind.research_no_sources": "research missing sources",
+  "doctor.kind.broken_link": "broken relative link",
+  "doctor.kind.carrier_orphan": "orphaned carrier",
+  "doctor.kind.hook_condition_missing": "missing hook condition script",
+  "doctor.kind.hook_unknown_event": "unknown hook event",
+  "doctor.kind.hook_filename_invalid": "hook filename off convention",
+  "doctor.detail.gen_unbound": "{id} — belongs to another session or was abandoned. If it's mine, reap bind {id}; if abandoned, mark --aborted",
+  "doctor.detail.map_diverged": "The project added to it, or REAP changed the layout. Check with diff.",
+  "doctor.detail.size_over": "{path} {size} > {limit} — injected every session",
+  "doctor.detail.injected_total": "total injected {size} > {limit}",
+  "doctor.detail.lessons_over": "lessons.md {size} · items {items} — time to graduate some",
+  "doctor.detail.milestone_size_over": "{path} {size} > {limit} — opened every generation",
+  "doctor.detail.carrier_orphan": "{id}-{slugs} — appears in only one file. Either the marker is unnecessary, or the rest aren't marked",
+  "doctor.pattern.graduation": "Graduation",
+  "doctor.pattern.sources": "Sources",
+  "doctor.report.header": "defects {defects} · notes {notes}",
+  "doctor.report.defects_header": "## Defects — definitely wrong",
+  "doctor.report.notes_header": "## Notes — for a person to look at",
+
+  "ctx.entry": "To start work, /reap:evolve; to wrap up, /reap:complete",
+  "ctx.marker": "<!-- reap status -->",
+  "ctx.label.language": "Response language: {language}",
+  "ctx.label.milestone": "Milestone: {id} {title} ({flags})",
+  "ctx.label.generation": "Open generation: {id} {title} — {path}",
+  "ctx.started_join": " started, start commit ",
+  "ctx.label.loop": "Open loop: {id} {title} — {path}",
+  "ctx.label.memory": "Memory: {list}",
+  "ctx.label.idea": "Ideas: {path}/ ({counts})",
+  "ctx.label.map": "Structure: {path}",
+
+  "hooks.condition_missing": "condition script is missing: {condition}.sh",
+  "hooks.condition_false": "condition is not true: {condition} ({failure})",
+  "hooks.timeout": "timed out",
+  "hooks.exec_failed": "execution failed: {message}",
+  "hooks.exit_code": "exit code {status}",
+
+  "id.unknown_kind": "unknown kind: {kind}",
+  "id.type_required": "{kind} id requires a type: {types}",
+  "id.registry_header": "<!-- reap:sequence({kind}) — append only. Once issued, a number is never issued again. -->",
+
+  "doc.untitled": "untitled",
+
+  "templates.missing": "template not found: {name}",
+} as const;
+
+export type MessageKey = keyof typeof en;

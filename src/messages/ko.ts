@@ -1,0 +1,221 @@
+import type { MessageKey } from "./en.ts";
+
+export const ko = {
+  "cli.usage": `사용법: reap <명령>
+
+  --version
+  init [--force] | init --check     (--check: 씨앗 그대로인 지식 파일을 보고만 한다)
+  make loop       --type plan|design|uiux|idea --title "<제목>" [--slug <s>] [--from <id>] [--ref <ps-id>:<경로>]
+  make milestone  --title "<제목>" [--slug <s>] [--from <loop-id>] [--ref <ps-id>:<경로>] [--focus]
+  make generation --milestone <ms-id> --title "<제목>" [--slug <s>]
+  make generation --backlog <bk-id> --title "<제목>" [--slug <s>]   (--milestone과 겸용 가능)
+  make generation --fix  --title "<제목>" [--slug <s>]
+  make backlog    --type <t> --title "<제목>" [--slug <s>] [--from <id>]
+  make plan-source --root <path> --role "<역할>" [--slug <s>]
+  make idea       --kind research|freememo|file --title "<제목>" [--slug <s>]
+  make hook       --event <e> --name <n> [--type md|sh] [--condition <c>] [--order <n>]
+  mark loop       <loop-id> --closed [--milestone <ms-id>]... | --aborted
+  mark generation <gen-id> --closed | --aborted | --archived
+  mark backlog    <bk-id> --consumed [--by <gen-id>] | --archived
+  mark milestone <ms-id> --focus | --closed
+  mark idea       <idea-id> --archived
+  bind <gen-id>                   (열린 세대에 이 세션을 다시 묶는다)
+  seq [generation|milestone|loop|source|<id>]
+  carrier new <slug> | list [--orphans|--check]
+  doctor                          (보고만 한다. 결함이 있으면 실패로 끝난다)
+  index [update [--full] | status | impact <file>... | search <q> | callers <id> | callees <id>]
+  orch claim <resource> [--ttl 30m] | release <resource> | barrier <name> --expect <N> --timeout <s> | roster | status   [--topic <t>]
+  plan sources | convention <ps-id>
+  ctx [--milestone <ms-id> | --hook]`,
+  "cli.unknown_command": "모르는 명령입니다: {command}",
+  "cli.bound": "묶었습니다: {id}",
+  "cli.not_a_project": "REAP 프로젝트가 아닙니다. 먼저 reap init을 실행합니다.",
+  "cli.none": "(없음)",
+  "cli.hook_failure": "hook 실패: {file} — {reason}",
+  "cli.bind_usage": "bind <gen-id>",
+  "cli.already_initialized": "이미 초기화되어 있습니다. 빠진 것만 채우려면 --force를 씁니다.",
+  "cli.initialized": "초기화했습니다: {root}\n  {created}",
+  "cli.nothing_missing": "빠진 것이 없습니다: {root}",
+  "cli.seeds_remaining": "씨앗인 채 남은 파일:\n  {files}",
+  "cli.no_seeds_remaining": "씨앗인 채 남은 파일이 없습니다.",
+
+  "orch.claimed": "잡았습니다: {resource} — {holder}, 만료 {expiresAt}",
+  "orch.claim_usage": "orch claim <resource> [--ttl 30m]",
+  "orch.release_usage": "orch release <resource>",
+  "orch.released": "놓았습니다: {resource}",
+  "orch.barrier_usage": "orch barrier <name> --expect <N> --timeout <초>",
+  "orch.expect_required": "--expect <N>이 필요합니다 (1 이상)",
+  "orch.timeout_required": "--timeout <초>는 필수입니다 — 오지 않는 참가자를 무한정 기다리지 않습니다",
+  "orch.barrier_passed": "barrier {name} 통과 — {names}",
+  "orch.barrier_missing": "오지 않은 세션: {names}",
+  "orch.barrier_unknown_missing": "도착 {arrived}/{expect} — roster를 알 수 없어 누구인지는 모른다",
+  "orch.barrier_timeout": "barrier {name} 시간 초과 ({timeout}s). {missing}",
+  "orch.roster_empty": "reap-{topic}-* 세션이 없거나 claude agents를 읽을 수 없다",
+  "orch.status_line": "topic {topic} · 나 {me}",
+  "orch.claims_header": "claims:",
+  "orch.claims_none": "claims: 없음",
+  "orch.claim_line": "  {resource}  {holder}  만료 {expiresAt}",
+  "orch.barriers_header": "barriers:",
+  "orch.barriers_none": "barriers: 없음",
+  "orch.barrier_line": "  {name}  {arrived}/{expect}",
+  "orch.unknown_sub": "orch는 claim · release · barrier · roster · status입니다: {sub}",
+  "orch.already_claimed": "이미 잡혀 있습니다: {resource} — holder {holder}, 만료 {expiresAt}",
+  "orch.not_claimed": "잡혀 있지 않습니다: {resource}",
+  "orch.someone_elses_claim": "남의 claim입니다: {resource} — holder {holder}. 만료를 기다리거나 그쪽에 말합니다",
+  "orch.ttl_format": "--ttl은 30m·2h·90s 꼴입니다: {text}",
+
+  "index.update_summary": "{mode} · 파일 {files} · {ms}ms",
+  "index.no_index": "인덱스가 없습니다.",
+  "index.impact_usage": "index impact <file>...",
+  "index.impact_summary": "직접 {direct} · 간접 {indirect} · 심볼 {symbols}",
+  "index.impact_direct_header": "직접:",
+  "index.impact_indirect_header": "간접:",
+  "index.impact_symbols_header": "심볼:",
+  "index.low_resolution_note": "(해석률이 낮다 — 빈 결과는 '모름'이다)",
+  "index.search_usage": "index search <query>",
+  "index.search_none": "없음 (커밋 안 된 것은 인덱스에 없다)",
+  "index.symbol_usage": "index {sub} <symbolId>",
+  "index.unknown_symbol": "모르는 심볼입니다: {id} (index search로 id를 찾습니다)",
+  "index.callers_none": "없음",
+  "index.unknown_sub": "index는 update · status · impact · search · callers · callees입니다: {sub}",
+  "index.not_a_repo": "git 저장소가 아닙니다. 인덱스는 커밋 단위라 커밋이 있어야 합니다 — git init 뒤 커밋을 하나 만듭니다.",
+  "index.no_commits": "커밋이 없습니다. 인덱스는 커밋을 서술합니다 — 첫 커밋을 만듭니다.",
+  "index.status.no_imports": "해석할 import 없음",
+  "index.status.commit_line": "커밋 {commit} · {at}",
+  "index.status.counts_line": "파일 {files} · 심볼 {nodes} · 간선 {edges}",
+  "index.status.rate_line": "import 해석률 {rate}",
+  "index.status.low_rate_warning": "  경고: 해석률이 낮다 — impact의 빈 결과를 '없음'으로 읽으면 안 된다",
+  "index.status.language_failure": "  경고: {lang} 문법을 못 실었다 — {why}",
+
+  "make.plan_source_needs_root": "plan-source에는 --root <path>가 필요합니다.",
+  "make.plan_source_needs_role": 'plan-source에는 --role "<역할>"이 필요합니다.',
+  "make.plan_source_result": "plan-source {id}\n  {path}\n  {convention}",
+  "make.title_required": "--title이 필요합니다.",
+  "make.loop_needs_type": "loop에는 --type이 필요합니다: {types} (받은 값: {got})",
+  "make.backlog_needs_type": "backlog에는 --type이 필요합니다. 열거로 막지 않으므로 관례를 따릅니다(예: design).",
+  "make.idea_needs_kind": "idea에는 --kind가 필요합니다: research · freememo · file (받은 값: {got})",
+  "make.unknown_kind": "make는 loop · milestone · generation · backlog · idea · hook · plan-source를 만듭니다: {kind}",
+  "make.result": "{label} {id}\n  {path}",
+
+  "mark.loop_needs_id": "표시할 loop의 id가 필요합니다.",
+  "mark.need_flag_closed_aborted": "--closed · --aborted 중 하나가 필요합니다.",
+  "mark.cleared": "기록을 지웠습니다: {id}",
+  "mark.closed": "닫았습니다: {id}\n  {path}",
+  "mark.gen_needs_id": "표시할 generation의 id가 필요합니다.",
+  "mark.gen_closed": "닫았습니다: {id}",
+  "mark.moved": "옮겼습니다: {id}\n  {path}",
+  "mark.need_flag_gen": "--closed · --aborted · --archived 중 하나가 필요합니다.",
+  "mark.backlog_needs_id": "표시할 backlog의 id가 필요합니다.",
+  "mark.need_flag_backlog": "--consumed · --archived 중 하나가 필요합니다.",
+  "mark.backlog_consumed": "소비 표시했습니다: {id}",
+  "mark.idea_needs_id": "표시할 idea의 id가 필요합니다.",
+  "mark.idea_only_archived": "idea는 --archived만 받습니다.",
+  "mark.milestone_needs_id": "표시할 milestone의 id가 필요합니다.",
+  "mark.focused": "초점을 맞췄습니다: {id}",
+  "mark.closed_moved": "닫고 옮겼습니다: {id}\n  {path}",
+  "mark.need_flag_milestone": "--focus 또는 --closed가 필요합니다.",
+  "mark.unknown_kind": "mark는 loop · generation · backlog · milestone · idea를 표시합니다: {kind}",
+
+  "carrier.new_usage": "carrier new <slug>",
+  "carrier.no_problems": "표식에 문제가 없습니다.",
+  "carrier.unknown_sub": "carrier는 new <slug> · list [--orphans|--check]입니다: {sub}",
+  "carrier.slug_invalid": "slug는 영문·숫자·-·_ 만 됩니다: {slug}",
+  "carrier.slug_taken": "이미 그 slug의 표식이 있습니다: reap:{id}-{slug}. 같은 사실이면 그것을 쓰고, 다른 사실이면 다른 slug를 씁니다.",
+  "carrier.none": "표식이 없습니다.",
+  "carrier.kind.format": "형식",
+  "carrier.detail.format": "{file}:{line}  reap:carrier-{rest} — <hash6>-<slug>여야 합니다",
+  "carrier.kind.dup_slug": "한 해시에 slug 둘",
+  "carrier.kind.dup_hash": "한 slug에 해시 둘",
+
+  "seq.invalid": "seq는 계열({kinds}) 또는 id를 받습니다. 레지스트리가 없는 계열(backlog·idea)은 조회할 것이 없습니다: {needle}",
+  "seq.not_found": "레지스트리에 없습니다: {needle}",
+
+  "plan.convention_usage": "plan convention <ps-id>",
+  "plan.unregistered_source": "등록되지 않은 plan source입니다: {id}",
+  "plan.convention_missing": "규약 문서가 없습니다: {path}",
+  "plan.unknown_sub": "plan은 sources · convention <ps-id>를 읽습니다: {sub}",
+  "plan.sources_broken_header": 'sources.yml 형식이 깨졌습니다 — 첫 줄이 "sources:"가 아닙니다: {line}',
+  "plan.sources_broken_line": "sources.yml 형식이 깨졌습니다 — 예상치 못한 줄입니다: {line}",
+  "plan.sources_broken_field": "sources.yml 형식이 깨졌습니다 — {id}의 {key} 줄이 없거나 형식이 다릅니다: {line}",
+  "plan.source_root_not_dir": "plan source의 root가 디렉토리가 아닙니다: {root}",
+  "plan.ref_format": "--ref의 형식은 <ps-id>:<경로>[#앵커]입니다: {ref}",
+  "plan.ref_source_unregistered": "등록되지 않은 plan source입니다: {id} (reap plan sources로 확인)",
+  "plan.ref_outside_source": "경로가 소스 안에 있지 않습니다: {path} (소스 root: {root})",
+  "plan.ref_file_missing": "소스 안에 그 파일이 없습니다: {path} (소스 root: {root})",
+  "plan.no_sources": '등록된 plan source가 없습니다. reap make plan-source --root <path> --role "<r>"',
+
+  "entries.no_plan_type": "generation에는 plan 유형이 없습니다. 새 의도를 만드는 일은 loop입니다: reap make loop --type plan|design|uiux|idea",
+  "entries.fix_no_grounds": "--fix는 근거(--milestone·--backlog)와 함께 줄 수 없습니다.",
+  "entries.gen_needs_type_or_grounds": "generation을 열려면 유형이나 근거가 필요합니다: exec은 --milestone <ms-id>와 --backlog <bk-id> 중 하나 이상(둘 다 가능), 되돌리는 일은 --fix. 새 의도를 만드는 일이면 make loop.",
+  "entries.gen_closed_no_bind": "닫힌 세대에는 묶지 않습니다: {id}",
+  "entries.backlog_ambiguous": "backlog가 여럿에 걸립니다: {ids}",
+  "entries.backlog_not_found": "backlog를 찾지 못했습니다: {needle}",
+  "entries.milestone_ambiguous": "milestone이 여럿에 걸립니다: {ids}",
+  "entries.milestone_not_found": "milestone을 찾지 못했습니다: {needle}",
+  "entries.kind_ambiguous": "{kind}이 여럿에 걸립니다: {ids}",
+  "entries.kind_not_found": "{kind}을 찾지 못했습니다: {needle}",
+  "entries.backlog_consumed_no_ground": "이미 consumed인 backlog는 근거가 되지 못합니다: {id}. 남은 일이 있다면 무엇이 남았는지를 담은 새 항목을 만듭니다.",
+  "entries.idea_ambiguous": "idea가 여럿에 걸립니다: {ids}",
+  "entries.idea_not_found": "idea를 찾지 못했습니다: {needle}",
+  "entries.idea_already_archived": "이미 archive에 있습니다: {id}",
+  "entries.hook_needs_event": "hook에는 --event가 필요합니다: {events} (받은 값: {got})",
+  "entries.hook_needs_name": "hook에는 --name이 필요합니다. 영문자·숫자·-·_만 씁니다 (받은 값: {got})",
+  "entries.hook_type_invalid": "--type은 md 또는 sh입니다: {type}",
+  "entries.hook_order_invalid": "--order는 정수입니다: {order}",
+  "entries.hook_already_exists": "이미 있습니다: {filename}",
+
+  "doctor.kind.id_format": "id 형식",
+  "doctor.kind.id_duplicate": "id 중복",
+  "doctor.kind.id_unregistered": "레지스트리에 없는 id",
+  "doctor.kind.broken_ref": "끊긴 참조",
+  "doctor.kind.gen_closed_no_commit": "커밋 없이 닫힌 generation",
+  "doctor.kind.gen_unbound": "열린 채 바인딩 안 된 generation",
+  "doctor.kind.duplicate_focus": "focus가 둘",
+  "doctor.kind.map_diverged": "map.md가 씨앗과 다르다",
+  "doctor.kind.size_guideline": "크기 안내선",
+  "doctor.kind.accumulation_warning": "누적 경고",
+  "doctor.kind.idea_no_graduation": "졸업 조건이 없는 idea",
+  "doctor.kind.research_no_sources": "출처가 없는 research",
+  "doctor.kind.broken_link": "깨진 상대 링크",
+  "doctor.kind.carrier_orphan": "carrier 고아",
+  "doctor.kind.hook_condition_missing": "훅 조건 스크립트 없음",
+  "doctor.kind.hook_unknown_event": "모르는 훅 이벤트",
+  "doctor.kind.hook_filename_invalid": "훅 파일명 규약 밖",
+  "doctor.detail.gen_unbound": "{id} — 다른 세션의 것이거나 버려진 것. 내 것이면 reap bind {id}, 버려진 것이면 mark --aborted",
+  "doctor.detail.map_diverged": "프로젝트가 덧붙였거나 REAP가 레이아웃을 바꿨다. diff로 확인한다",
+  "doctor.detail.size_over": "{path} {size} > {limit} — 매 세션 주입된다",
+  "doctor.detail.injected_total": "주입 합계 {size} > {limit}",
+  "doctor.detail.lessons_over": "lessons.md {size} · 항목 {items} — 졸업시킬 때다",
+  "doctor.detail.milestone_size_over": "{path} {size} > {limit} — 세대마다 열린다",
+  "doctor.detail.carrier_orphan": "{id}-{slugs} — 한 파일에만 있다. 표식이 불필요하거나 나머지가 표식되지 않았다",
+  "doctor.pattern.graduation": "졸업",
+  "doctor.pattern.sources": "출처",
+  "doctor.report.header": "결함 {defects} · 참고 {notes}",
+  "doctor.report.defects_header": "## 결함 — 확정적으로 틀린 것",
+  "doctor.report.notes_header": "## 참고 — 사람이 볼 것",
+
+  "ctx.entry": "작업을 시작하면 /reap:evolve, 마무리하면 /reap:complete",
+  "ctx.marker": "<!-- reap 상태 -->",
+  "ctx.label.language": "응답 언어: {language}",
+  "ctx.label.milestone": "현재 milestone: {id} {title} ({flags})",
+  "ctx.label.generation": "열린 세대: {id} {title} — {path}",
+  "ctx.started_join": " 시작, 시작 커밋 ",
+  "ctx.label.loop": "열린 loop: {id} {title} — {path}",
+  "ctx.label.memory": "기억: {list}",
+  "ctx.label.idea": "덜 단단한 것: {path}/ ({counts})",
+  "ctx.label.map": "구조: {path}",
+
+  "hooks.condition_missing": "조건 스크립트가 없습니다: {condition}.sh",
+  "hooks.condition_false": "조건이 참이 아닙니다: {condition} ({failure})",
+  "hooks.timeout": "시간 초과",
+  "hooks.exec_failed": "실행 실패: {message}",
+  "hooks.exit_code": "종료 코드 {status}",
+
+  "id.unknown_kind": "모르는 종류입니다: {kind}",
+  "id.type_required": "{kind} id에는 유형이 필요합니다: {types}",
+  "id.registry_header": "<!-- reap:sequence({kind}) — append only. 발급된 번호는 다시 발급되지 않는다. -->",
+
+  "doc.untitled": "무제",
+
+  "templates.missing": "템플릿이 없습니다: {name}",
+} satisfies Record<MessageKey, string>;
