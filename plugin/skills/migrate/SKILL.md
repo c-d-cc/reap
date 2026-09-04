@@ -47,6 +47,8 @@ Three things to show before getting consent:
 Don't move to step 4 without explicit consent.
 
 ## 4/8 — Isolation: rename to cut off conflicts at the source
+**Before moving, `.reap-v0_17/` must not exist.** A leftover from an earlier attempt (ignored files such as `.index/` survive `git checkout`) makes `git mv` nest the store as `.reap-v0_17/.reap/`. If it exists, stop and tell the user: remove it (`rm -rf .reap-v0_17`) only if it is a leftover, never if it holds the real original.
+
 
 ```bash
 git mv .reap .reap-v0_17    # if git-tracked. otherwise: mv .reap .reap-v0_17
