@@ -5,12 +5,12 @@ import { cleanupTempDirs, commit, initRepo, labelPrefix, tempDir } from "./helpe
 import { run } from "../src/cli.ts";
 import { arrive, claim, orchDir, release, roster, waitBarrier } from "../src/orch.ts";
 import { paths } from "../src/store.ts";
-import { ko } from "../src/messages/ko.ts";
+import { en } from "../src/messages/en.ts";
 
 afterEach(cleanupTempDirs);
 
-const CLAIMED_CONNECTOR = ko["orch.already_claimed"].split("{holder}")[1]!.split("{expiresAt}")[0]!;
-const TIMEOUT_WORD = ko["orch.barrier_timeout"].split("{name}")[1]!.split("{timeout}")[0]!.trim();
+const CLAIMED_CONNECTOR = en["orch.already_claimed"].split("{holder}")[1]!.split("{expiresAt}")[0]!;
+const TIMEOUT_WORD = en["orch.barrier_timeout"].split("{name}")[1]!.split("{timeout}")[0]!.trim();
 
 async function project(): Promise<{ root: string; home: string }> {
   const root = tempDir();

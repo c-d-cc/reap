@@ -1,9 +1,9 @@
 # Evolution
 
-이 프로젝트에서 AI가 따르는 행동 규칙.
+The behavior rules AI follows on this project.
 
-무엇을 사람에게 묻고 무엇을 스스로 정하는가, 어떤 실수를 반복하지 않아야 하는가.
+What to ask a human versus decide alone, which mistakes must not repeat.
 
-## 결정을 남기는 법
+## How to record a decision
 
-**다시 할 결정이 아니면 결정 문서를 따로 만들지 않는다.** 그 결정이 규율할 문서(기획·설계·이 genome·`map.md`)를 **최종 결론으로 갱신한다.** 결정 로그를 두면 로그와 문서가 어긋나고, 어긋난 쪽을 다음 세션이 읽는다. 왜 그렇게 정했는지는 세대·loop 기록의 `Dead Ends`·`Dialogue`에 남긴다 — 규범은 한 곳, 경위는 기록.
+**If it's not a decision you'll make again, don't write a separate decision document.** Update the document the decision governs (planning, design, this genome, `map.md`) with the final conclusion. A decision log drifts from the document, and the next session reads whichever one it finds. Why the decision was made goes in `Dead Ends`/`Dialogue` in the generation or loop record — the norm lives in one place, the story lives in the record.

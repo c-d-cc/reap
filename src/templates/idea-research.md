@@ -1,10 +1,10 @@
 ---
 ---
 
-## 무엇이 미정인가
+## What's Undecided
 
-## 무엇이 정해지면 졸업하는가
+## Graduation Criteria
 
-## 출처
+## Sources
 
-- (1차/2차 · 확인 날짜)
+- (primary/secondary · date verified)

@@ -1,5 +1,5 @@
 # Invariants
 
-절대 제약. **사람만 수정한다.**
+Absolute constraints. **Only a human edits this.**
 
-어겼을 때 되돌릴 수 없는 것만 여기 적는다. 취향은 여기가 아니다.
+Write down only what's irreversible if broken. Preferences don't belong here.

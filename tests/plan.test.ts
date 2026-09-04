@@ -5,9 +5,9 @@ import { cleanupTempDirs, commit, initRepo, labelPrefix, tempDir } from "./helpe
 import { run } from "../src/cli.ts";
 import { readSources, validateRef } from "../src/plan.ts";
 import { t } from "../src/i18n.ts";
-import { ko } from "../src/messages/ko.ts";
+import { en } from "../src/messages/en.ts";
 
-const BROKEN = new RegExp(ko["plan.sources_broken_line"].split(" — ")[0]!);
+const BROKEN = new RegExp(en["plan.sources_broken_line"].split(" — ")[0]!);
 
 afterEach(cleanupTempDirs);
 
@@ -53,7 +53,7 @@ test("쓰기→읽기 왕복이 같다", async () => {
   expect(readSources(root)).toEqual(before);
 });
 
-test("깨진 sources.yml은 한국어 에러다", async () => {
+test("깨진 sources.yml은 카탈로그 에러다", async () => {
   const root = await project();
   writeFileSync(join(root, ".reap", "plan", "sources.yml"), "sources: [{id: x}]\n");
   expect(() => readSources(root)).toThrow(BROKEN);
@@ -84,7 +84,7 @@ test("make plan-source가 손으로 쓴 것과 같은 모양을 만든다", asyn
   const convention = readFileSync(join(root, ".reap", "plan", src.convention), "utf8");
   expect(convention.startsWith(`# ${src.id} — spec`)).toBe(true);
   expect(convention).toContain("root: `./docs/spec`");
-  expect(convention).toContain("## 어떻게 읽는가");
+  expect(convention).toContain("## How to read it");
   // 레지스트리
   const registry = readFileSync(join(root, ".reap", "sequence", "source.md"), "utf8");
   expect(registry).toContain(`| ${src.id} | 설계 — 무엇이 참이어야 하는가 |`);
