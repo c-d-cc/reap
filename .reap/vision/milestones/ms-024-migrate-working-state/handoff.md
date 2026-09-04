@@ -24,3 +24,7 @@ gen-0100-exec가 task 1(migration-map·SKILL 개정)을 끝냈다. task 2는 sel
 2. `## 다음 세션이 볼 것`(ctx 상태 줄)을 사람에게 보여주고 "지워도 되는가" 판정을 구한다.
 3. 만족 못 하면 migration-map·SKILL로 돌아가 고치고(1↔2 반복) — 이번 task 1 개정이 실물과 안 맞는 대목이 나오면 그 자리에서 고친다.
 4. 끝나면 milestone을 닫기 전 "이 milestone이 끝나면 물어볼 것" 두 질문(`.reap-v0_17` 삭제 여부, 다음 evolve가 안 묻고 다음 task로 갔는가)에 답한다.
+
+## 2차 재이주 결과 (2026-09-05, 주 세션)
+
+selfview 브랜치 `reap-v018-migration` 커밋 f0be4ac: verify 7/7 ok, doctor 0, 원본 무손상. 상태 줄에 `ms-001 팀 모드(B2B) 구현 (focus)` + task 3, plan `ps-64b338`(docs/plan, 문서 13), backlog 4, idea 7(research 1). 2차 subagent가 찾은 skill 결함 다섯을 전부 반영: #3 폐기된 설계 대조, #11 `--ref` 경로 형식, #13 옛 경로 재작성(신설, verify 검사 7), 4/8 `.reap-v0_17` 잔존 검사, 기록 형식의 스크립트 경로. **사람 판정 대기** — "지워도 된다"면 ms-024를 닫고, 아니면 tasks/1로.
