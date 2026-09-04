@@ -1037,7 +1037,7 @@ commit:  1a2b3c4`,
     versions: [
       {
         version: "0.17.8",
-        notes: "**v0.18 ist da, auf dem npm-Tag `next`** — es erreicht Sie nicht über Auto-Update. `reap update` installiert einen geführten Upgrade-Agenten, der Sie durch die Installation von v0.18 und die Migration Ihres Projekts führt. **v0.18 ist nur auf Koreanisch** — bleiben Sie bei 0.17, wenn Sie in einer anderen Sprache arbeiten. Versionsprüfungen laufen jetzt höchstens einmal täglich, wodurch Sitzungen schneller starten.",
+        notes: "**v0.18 ist da, auf dem npm-Tag `next`** — es erreicht Sie nicht über Auto-Update. `reap update` installiert einen geführten Upgrade-Agenten, der Sie durch die Installation von v0.18 und die Migration Ihres Projekts führt. **v0.18 spricht standardmäßig Englisch** — setzen Sie `language: ko` in `.reap/config.yml` für Koreanisch. Versionsprüfungen laufen jetzt höchstens einmal täglich, wodurch Sitzungen schneller starten.",
       },
       {
         version: "0.17.7",
