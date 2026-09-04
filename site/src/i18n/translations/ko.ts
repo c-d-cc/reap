@@ -366,7 +366,7 @@ export const ko: Translations = {
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
     title: "REAP",
-    description: "AI와 사람이 협업하여 loop, milestone, generation으로 이어지는 작업 흐름을 통해 소프트웨어를 진화시키는 규약과 도구입니다. 세션 간 컨텍스트가 유지되고, 개발은 Claude Code plugin의 skill을 따르며, 설계 문서가 코드와 함께 진화합니다.",
+    description: "AI와 사람이 협업하여 재귀적인 작업 흐름을 통해 소프트웨어를 진화시키는 규약과 도구입니다. 세션 간 컨텍스트가 유지되고, 개발은 Claude Code plugin의 skill을 따르며, 설계 문서가 코드와 함께 진화합니다.",
     getStarted: "시작하기 →",
     breakingBand: {
       text: "v0.18.0은 이전 버전과 호환되지 않습니다. 저장 구조, 명령, 플러그인이 모두 바뀌었습니다.",
@@ -445,7 +445,7 @@ export const ko: Translations = {
   intro: {
     title: "소개",
     breadcrumb: "시작하기",
-    description: "REAP(Recursive Evolutionary Autonomous Pipeline)는 AI와 사람이 협업하여 loop, milestone, generation으로 이어지는 작업 흐름을 통해 소프트웨어를 진화시키는 규약과 도구입니다. 흐름을 스크립트가 강제하지 않고, agent가 skill을 읽어 그때그때 판단합니다.",
+    description: "REAP(Recursive Evolutionary Autonomous Pipeline)는 AI와 사람이 협업하여 재귀적인 작업 흐름을 통해 소프트웨어를 진화시키는 규약과 도구입니다. 흐름을 스크립트가 강제하지 않고, agent가 skill을 읽어 그때그때 판단합니다.",
     whatBuilds: "REAP가 만드는 것은 둘입니다. TypeScript·Bun으로 만든 CLI 바이너리 reap와, skill과 SessionStart 훅을 담은 Claude Code 플러그인입니다. 둘은 따로 설치되고 따로 갱신됩니다 — 한쪽만 있는 상태도 정상입니다.",
     whyReapTitle: "왜 REAP인가?",
     problemHeader: "문제",
