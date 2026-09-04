@@ -6,7 +6,9 @@ milestone: ms-021
 title: 메시지 카탈로그와 CLI en 전환 — src 문자열 전수, 테스트 en
 startedAt: 2026-09-04T00:13:39Z
 startCommit: 0606374
-status: open
+status: closed
+closedAt: 2026-09-04T00:51:06Z
+endCommit: 7412377
 ---
 ## Intent
 

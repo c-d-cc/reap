@@ -90,3 +90,4 @@
 | gen-0086-exec | reap-test v0.18 브랜치와 dispatch 워크플로 | 2026-09-04 |
 | gen-0087-exec | 메시지 카탈로그와 CLI en 전환 — src 문자열 전수, 테스트 en | 2026-09-04 |
 | gen-0088-exec | 사이트 레퍼런스 일곱 쪽 — skill·CLI·hooks·index·orchestrate·이주·릴리스 노트 | 2026-09-04 |
+| gen-0089-exec | skill 10종·어휘·템플릿·씨앗 en, doctor 판정어 합집합 | 2026-09-04 |
