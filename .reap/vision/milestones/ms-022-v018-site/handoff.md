@@ -1,5 +1,35 @@
 # Handoff — ms-022 문서 사이트
 
+## 검수 대기: 홈+시작하기 4쪽 / 다음 task 4
+
+gen-0096-exec가 task 3(목차 골격 30라우트, 홈 복원, 시작하기 4쪽)을 전부 마쳤다.
+`git log --oneline -4`: 골격(라우트·사이드바·nav·placeholder) → 홈(구조 6장,
+작업 흐름 표) → 시작하기 4쪽(소개·첫 사용·자율 진화 흐름·v018change 톤) 세 커밋.
+세대는 닫지 않았다 — 사람 검수 대기.
+
+**검수할 것**
+- 홈 — `bun run --cwd site dev`(5174)로 `/` 확인. 구조 6장(Knowledge·Plan·
+  Vision·Life·Archive·Civilization), 작업 흐름 표(단계·수행 내용·산출물).
+- 소개(`/docs/introduction`) — 정의 문단·왜 REAP인가 표·구조 개요·프로젝트
+  구조 트리·다음 쪽 링크.
+- 첫 사용(`/docs/quick-start`) — 전제 조건 표·두 단계 설치(install 흡수)·
+  init/evolve/complete 세 skill·실물 상태 줄 예시.
+- 자율 진화 흐름(`/docs/autonomous-evolution`, 신설) — SessionStart 주입·
+  실물 상태 줄·evolve의 세 판단·자율 구간·complete 커밋 규칙·milestone fitness.
+- 목차 전체 — 사이드바 8묶음 30라우트가 `docs/reap-plan/reap_v_0_18_release/
+  07-i18n-docs-delegate.md`의 G10 표와 맞는지. placeholder 18쪽은 "이 문서는
+  준비 중입니다." 한 줄만 낸다 — 정상이다.
+
+세부는 `.reap/life/generations/gen-0096-exec-site-toc-start.md`의 Outcome에.
+
+## 다음 task 4 — 핵심 개념 + Plan 축
+
+8쪽: two-axes·three-layers·storage·loop·plan-source·idea·carve-milestone
+(+ carve-milestone은 Plan 축 소속이므로 4묶음 아님, tasks/4 문서로 범위 확정
+필요). `concepts.tsx`가 이번에 지워졌지만 git 이력(커밋 `02d7457` 이전)에
+layersTitle·unitsTitle·splitHeaders·storageTree 등 재사용 가능한 초안이
+남아 있다 — 옮겨 적지 말고 근거로만 쓴다.
+
 ## 사람 검수 대기(디자인 비교·내용) → en 확장
 
 첫 시도(VitePress 새 사이트, gen-0085·0088)는 사람 검수(2026-09-04)에서 기각됐다 —
@@ -14,36 +44,16 @@
 - 내용이 맞는가 — 열두 쪽의 문구는 `site/*.md`(gen-0085·0088이 쓴 한국어 본문, 이번에
   옮기며 지웠다)와 `RELEASE_NOTES.md`가 원천
 
-## 라우트 열셋
+## 라우트 (지난 상태, gen-0096으로 대체됨)
 
-gen-0094-exec에서 홈 breaking change 띠와 `/docs/v018change`(소개 다음)를 더했다.
+아래 열세 라우트 표는 task 3 이전 상태다 — 지금은 30라우트다. 현재 표는
+`site/src/routes.ts`와 `docs/reap-plan/reap_v_0_18_release/07-i18n-docs-delegate.md`의
+G10 목차 표를 본다. 이 절은 기록으로만 남긴다.
 
-| 경로 | 페이지 | 분류 |
-|---|---|---|
-| `/` | Hero | 시작하기 |
-| `/docs/introduction` | 소개 | 시작하기 |
-| `/docs/v018change` | v0.18에서 바뀐 것 | 시작하기 |
-| `/docs/install` | 설치 | 시작하기 |
-| `/docs/quick-start` | 첫 사용 | 시작하기 |
-| `/docs/concepts` | 개념 | 시작하기 |
-| `/docs/skills` | skill 10종 | 레퍼런스 |
-| `/docs/cli` | CLI 레퍼런스 | 레퍼런스 |
-| `/docs/hooks` | hooks | 레퍼런스 |
-| `/docs/code-index` | 코드 인덱스 | 레퍼런스 |
-| `/docs/orchestrate` | orchestrate | 레퍼런스 |
-| `/docs/migration` | v0.17에서 이주 | 기타 |
-| `/docs/release-notes` | 릴리스 노트 | 기타 |
+## 검증됨 (지난 상태)
 
-## 검증됨
-
-- `bun run site:build`(client + SSR + prerender)가 `site/dist/public/<route>/index.html`
-  열두 개를 낸다
-- `bash scripts/check-docs-prerender.sh` 통과 — canonical·hreflang·sitemap·404·
-  meta description 전부 값으로 검사(개수만 세지 않는다)
-- `./dist/reap doctor` 결함 0
-- `bun run site:dev`로 띄운 뒤 `/`·`/docs/quick-start`에 curl, 200 확인. dev는
-  client-rendered SPA라 curl 본문엔 셸만 실린다 — 한국어 내용 확인은 prerender
-  산출물(`site/dist/public/`)에서 했다
+이 절도 task 3 이전(13라우트) 검증이다. 지금 검증은 위 "검수 대기" 절의
+gen-0096-exec Outcome에 있다.
 
 ## en을 더하는 절차 (검수 뒤)
 
