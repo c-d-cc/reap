@@ -33,6 +33,7 @@ focus: true
 2. v0.17 표본 이주 왕복 (tasks/2)
 3. 0.17.8 준비 + upgrade agent URL (tasks/3)
 4. 마켓플레이스 준비 + 최종 체크 (tasks/4)
+5. 최종 재검증 — ms-021·022·023 뒤 (tasks/5)
 
 ## 이 milestone이 끝나면 물어볼 것
 
