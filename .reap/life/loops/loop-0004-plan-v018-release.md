@@ -50,3 +50,4 @@ ps-4b485d(귀환 작전)는 "배포 전까지"에서 끝났다. 이 loop는 그 
 - 열린 것: **ms-022**(사이트 ko 열두 쪽 — 사람 검수 → en 확장). 발행은 사람 지시 — 절차는 `archive/milestones/ms-019-v018-verify-release/handoff.md`
 - 이 loop는 ms-022가 닫힐 때 닫는다. ps-5e948f는 0.18.0 발행 뒤 소비 완료
 | 문서 사이트 도구 (사람 검수, 2026-09-04) | VitePress 새 사이트(agent 결정) / 기존 디자인 유지 | **기존 reap.cc 디자인·톤을 그대로 유지하고 내용만 v0.18로** — VitePress는 기각 | 사람이 agent 결정을 뒤집음. "새 사이트"는 새 도구가 아니라 새 내용이었다 |
+| lineage 승계 (사람 검수, 2026-09-05) | 비승계(gen-0070 위임 판정 — 원본이 이력) / archive로 승계 | **archive/generations로 승계, 번호 이어감** — `.reap-v0_17`을 지우면 이력이 사라진다 | 사람이 agent 판정을 뒤집음. ms-024 gen-0101 |
