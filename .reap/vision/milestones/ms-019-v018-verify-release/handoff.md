@@ -24,3 +24,7 @@ gen-0082가 task 1·2(왕복 검증)를 끝냈다. task 3·4는 아직 손대지
 
 - 왕복 1: `/private/tmp/claude-501/-Users-hichoi-cdws-reap/914296f2-726f-4898-a743-f0894f15c233/scratchpad/roundtrip/proj` (+ `prefix/`, `pack/`)
 - 왕복 2: `/private/tmp/claude-501/-Users-hichoi-cdws-reap/914296f2-726f-4898-a743-f0894f15c233/scratchpad/roundtrip/migrate-sample`
+
+## task 4 — 마켓플레이스 준비 (2026-09-04, Q5 답 A)
+
+`~/cdws/ctod-plugins`에 로컬 커밋 0cde4bb: submodule `plugins/reap2` 제거, `plugins/reap`(https://github.com/c-d-cc/reap.git, branch v0.18) 추가, marketplace.json 항목 `reap`. `validate_marketplace.py` 통과. **포인터는 origin/v0.18(71d5681)** — reap v0.18을 push한 뒤 `git -C plugins/reap pull origin v0.18 && git add plugins/reap`으로 올린다. push·reap2 리포 archive는 사람.
