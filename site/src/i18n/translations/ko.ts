@@ -453,6 +453,7 @@ export const ko: Translations = {
     solutionHeader: "REAP 솔루션",
     problems: [
       ["컨텍스트 손실 — agent가 매 세션마다 프로젝트 컨텍스트를 잊습니다", "SessionStart 훅이 genome, environment 요약, 상태 줄을 매 세션 자동으로 주입합니다"],
+      ["한 번 쓰고 잊히는 기획 — 계획 문서가 코드와 따로 늙어 갑니다", "loop가 plan을 계속 다듬고, milestone으로 잘라 실행과 이어 줍니다. 기획도 코드처럼 진화합니다"],
       ["산발적 개발 — 목표 없이 코드 변경이 흩어집니다", "milestone이 경계와 종료 조건을 가진 실행 단위로 자르고, generation이 그 안에서 하나의 의도에 집중합니다"],
       ["설계-코드 괴리 — 문서가 코드에서 벗어납니다", "구현 중 발견된 간극은 backlog로 기록되고 다음 generation이 반영합니다"],
       ["잊혀진 교훈 — 과거 작업의 인사이트가 사라집니다", "vision/memory/lessons.md에 교훈이 쌓이고, 참고 가치가 다한 세대는 archive에 보존됩니다"],
