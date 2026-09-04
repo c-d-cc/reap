@@ -28,6 +28,9 @@ import GenerationPage from "@/pages/GenerationPage";
 import DelegationPage from "@/pages/DelegationPage";
 import BacklogPage from "@/pages/BacklogPage";
 import ClosingMilestonePage from "@/pages/ClosingMilestonePage";
+import GenomePage from "@/pages/GenomePage";
+import EnvironmentPage from "@/pages/EnvironmentPage";
+import VisionMemoryPage from "@/pages/VisionMemoryPage";
 import { makePlaceholderPage } from "@/pages/PlaceholderPage";
 
 export const SITE_NAME = "REAP";
@@ -150,18 +153,18 @@ export const ROUTES: RouteDef[] = [
   // 지식
   {
     path: "/docs/genome",
-    component: makePlaceholderPage("genome"),
-    meta: placeholderMeta("genome"),
+    component: GenomePage,
+    meta: (t) => ({ title: page(t.genomePage.title), description: t.genomePage.description }),
   },
   {
     path: "/docs/environment",
-    component: makePlaceholderPage("environment"),
-    meta: placeholderMeta("environment"),
+    component: EnvironmentPage,
+    meta: (t) => ({ title: page(t.environmentPage.title), description: t.environmentPage.description }),
   },
   {
     path: "/docs/vision-memory",
-    component: makePlaceholderPage("visionMemory"),
-    meta: placeholderMeta("visionMemory"),
+    component: VisionMemoryPage,
+    meta: (t) => ({ title: page(t.visionMemoryPage.title), description: t.visionMemoryPage.description }),
   },
   {
     path: "/docs/code-intelligence",
