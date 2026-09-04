@@ -95,19 +95,53 @@ export function HeroPage() {
           </div>
         </Section>
 
-        {/* Three Layers */}
-        <Section title={h.threeLayer}>
+        {/* Structure */}
+        <Section title={h.structureTitle}>
           <p className="text-sm text-muted-foreground mb-4 leading-relaxed">
-            {h.threeLayerDesc}
+            {h.structureDesc}
           </p>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 mb-4">
-            {h.layers.map((item) => (
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 mb-4">
+            {h.structureItems.map((item) => (
               <div key={item.label} className="border border-border rounded-md p-3 bg-card">
                 <div className="font-semibold text-foreground text-sm">{item.label}</div>
                 <div className="text-xs text-primary mt-0.5 mb-1">{item.sub}</div>
                 <div className="text-xs text-muted-foreground leading-relaxed">{item.desc}</div>
               </div>
             ))}
+          </div>
+        </Section>
+
+        {/* Work Flow */}
+        <Section title={h.flowTitle}>
+          <p className="text-sm text-muted-foreground mb-4">
+            {h.flowDesc}
+          </p>
+          <div className="flex items-center gap-1.5 flex-wrap mb-5">
+            {h.flowSteps.map((s, i) =>
+              s === "→"
+                ? <span key={i} className="text-xs text-muted-foreground">{s}</span>
+                : <span key={i} className="text-xs font-mono bg-muted text-foreground border border-border rounded px-2 py-0.5">{s}</span>
+            )}
+          </div>
+          <div className="border border-border rounded-md overflow-x-auto text-sm">
+            <table className="w-full min-w-[600px]">
+              <thead>
+                <tr className="border-b border-border bg-muted/30">
+                  {h.flowHeaders.map((header) => (
+                    <th key={header} className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground">{header}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border">
+                {h.flowRows.map(([unit, what, skill]) => (
+                  <tr key={unit}>
+                    <td className="px-3 py-2 font-mono text-xs text-primary">{unit}</td>
+                    <td className="px-3 py-2 text-xs text-muted-foreground">{what}</td>
+                    <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{skill}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </Section>
 
@@ -131,7 +165,7 @@ export function HeroPage() {
           </p>
         </Section>
 
-        {/* Key Principles */}
+        {/* Key Concepts */}
         <Section title={h.keyConcepts}>
           <div className="space-y-3">
             {h.concepts.map((item) => (

@@ -36,6 +36,21 @@ v0.17 `/reap.evolve`의 값 — 주 세션의 컨텍스트를 보호하고 세�
 - 배포: v0.17 `docs.yml`(typecheck·build·prerender 검사·Pages) 승계, `main`에서만. CNAME `reap.cc`
 - 규범을 옮겨 적지 않는다 — spec 문장 복제 금지. 한 페이지가 화면 두 장을 넘으면 옮겨 적고 있는 것이다
 
+**목차 (사람 확정, 2026-09-04)** — v0.17(23쪽, 실행 파이프라인 중심)을 참고하되 **Plan과 Execution을 대등한 축**으로, **agent의 자율 evolve**를 앞세운다. 핵심 개념(Genome·Environment·Vision·Backlog·Hooks·Code Intelligence·협업·레퍼런스)은 자리를 바꿔 유지. 8묶음 28쪽:
+
+| 묶음 | 쪽 |
+|---|---|
+| 시작하기 | 소개 · 빠른 시작 · **자율 진화 흐름**(세션이 열리면 무슨 일이 일어나는가) · v0.18에서 바뀐 것 |
+| 핵심 개념 | 두 축 · 판단·확정·사실 · 저장 구조 |
+| Plan 축 | Loop · Plan Source · Idea와 Research · Milestone 자르기 |
+| Execution 축 | Generation · 위임 모드 · Backlog · Milestone 닫기와 Fitness |
+| 지식 | Genome · Environment · Vision과 Memory · Code Intelligence |
+| 협업 | Orchestrate · Claim과 Barrier · Hooks |
+| 레퍼런스 | Skill 레퍼런스 · CLI 레퍼런스 · 설정 · Doctor |
+| 기타 | 비교 · v0.17에서 이주 · 릴리즈 노트 |
+
+**문체·홈**: 사용자 문서는 reap.cc/ko 톤(합니다체·완결 문장·사용자 관점·영문 고유명사). 홈은 v0.17 홈의 구성과 메시지 그대로(tagline "Recursive Evolutionary Autonomous Pipeline", 왜 REAP인가 5쌍, 구조, 작업 흐름, 설치, 핵심 개념, 문서 링크)에서 v0.18 사실만 교체. spec 문장을 제품 키워드로 쓰지 않는다. 쓰는 순서: 홈+시작하기 → 핵심 개념+Plan 축 → Execution 축+지식 → 협업+레퍼런스+기타, 묶음마다 사람 검수.
+
 ## G11 — 테스트 비공개 (ms-023)
 
 - `c-d-cc/reap-test`에 `v0.18` 브랜치: 이 리포 `tests/`의 내용을 그대로. 리포의 `tests/`는 submodule로 교체(`.gitmodules` url `https://github.com/c-d-cc/reap-test.git`, branch `v0.18`)
