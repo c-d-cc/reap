@@ -1,22 +1,29 @@
-# Handoff — task 2 (submodule 전환)로
+# Handoff — ms-023 완료 대조와 사람이 할 것
 
-task 1(gen-0086-exec)에서 만든 것:
+gen-0091-exec가 task 2를 worktree `../reap-wt-tests`(브랜치 `ms-023-tests`)에서 끝냈다. 세대는 닫지 않았다 — merge·push는 사람의 결정.
 
-- reap-test 클론: `/private/tmp/claude-501/-Users-hichoi-cdws-reap/914296f2-726f-4898-a743-f0894f15c233/scratchpad/reap-test`
-  (scratchpad라 이 세션이 끝나면 사라질 수 있다 — task 2 세션에서 없으면 `https://github.com/c-d-cc/reap-test.git`를 다시 clone해 `git log`로 아래 커밋이 있는지 확인. 없으면 push가 아직 안 된 것)
-- 브랜치 `v0.18`, 커밋 `2f84fc8dbece924d553bcea52ba175604abb5fed` (origin/main에서 분기, **push 안 됨** — 사람이 push해야 이 SHA가 GitHub에 존재한다)
-- `.gitmodules`에 넣을 값:
-  ```
-  [submodule "tests"]
-  	path = tests
-  	url = https://github.com/c-d-cc/reap-test.git
-  	branch = v0.18
-  ```
-- reap-test v0.18 브랜치 루트 구조: `*.test.ts`(15개) + `helpers.ts` + `hook.test.sh` + `.github/workflows/dispatch.yml` + `README.md`. v0.17 시절의 `unit/`·`e2e/`·`scenario/`·`helpers/`는 이 브랜치에 없음(main 브랜치에만 남아있음)
-- `dispatch.yml`은 `repository_dispatch: types: [reap-push]`를 받아 `client_payload.reap_sha`·`client_payload.tests_sha`로 reap 리포와 자기 자신을 조립한다 — task 2가 `ci.yml`에 추가할 dispatch 잡은 v0.17 `ci.yml`의 `dispatch-tests` 잡(TEST_DISPATCH_TOKEN, `curl -X POST .../dispatches`, event_type `reap-push`, payload `{reap_sha, tests_sha}`)을 그대로 참고하면 된다(`/Users/hichoi/cdws/reap_v17/.github/workflows/ci.yml` 참조)
-- **submodule 포인터는 push된 커밋만 가리킬 수 있다** — 이 리포에서 `git submodule add`/`.gitmodules` 설정, `git -C tests checkout v0.18`까지는 로컬에서 되지만, 사람이 reap-test를 push하기 전까지 그 포인터는 GitHub 상에서 깨진 링크다. milestone.md에 이미 명시됨
-- 검증 결과: worktree를 로컬 clone한 `<scratch>/verify-repo`에서 `tests/`를 v0.18 클론 내용으로 교체 후 `bun install`·`bun run build`·`bun run typecheck`·`bun test`(214 pass / 0 fail) · `bash tests/hook.test.sh`(전부 통과) 확인. `verify-repo`는 삭제함 — task 2가 재검증하려면 같은 방식으로 다시 clone
+## Exit Criteria 대조표
 
-## 순서 결정 (2026-09-04, 주 세션)
+| # | 기준 | 상태 | 근거 |
+|---|---|---|---|
+| 1 | reap-test 로컬 클론에 v0.18 브랜치: `tests/` 전부 + `.github/workflows/` + README 한 줄, 커밋됨(push는 사람) | 완료 | `<scratchpad>/reap-test`, 커밋 `2f84fc8`(task 1) → `4a5006e`(ms-021 en 반영 재동기, 이 세대). **push 안 됨** |
+| 2 | 이 리포 `tests/`가 submodule(url reap-test, branch v0.18), 로컬 `bun test` 그대로 | 완료 | `.gitmodules`에 url `https://github.com/c-d-cc/reap-test.git`·`branch = v0.18`. 포인터는 `4a5006e`. `bun test` 227 통과, `bash tests/hook.test.sh` 통과. worktree 커밋 `b8014f2` |
+| 3 | `ci.yml`·`release.yml` dispatch로 교체, typecheck·build·verify는 남김. 06-release에 그 사실 | 완료 | `ci.yml`: build(typecheck·build·verify-package) + `dispatch-tests`(v0.17 승계, 브랜치 v0.18·main). `release.yml`: 테스트 단계 제거, `npm publish --tag next` 그대로. 커밋 `7fa57f6`. `06-release.md`에 반영(아래) |
+| 4 | `complete/SKILL.md` 한 줄, `environment/summary.md` 테스트 절 갱신 | 완료 | 커밋 `d89e4e3` |
+| 5 | `TEST_DISPATCH_TOKEN` 시크릿 필요성·만드는 법을 06-release 발행 준비물에 | 완료 | `06-release.md`의 "v0.18 브랜치가 갖춰야 하는 것" 절에 항목 추가(커밋 `d89e4e3`) |
 
-task 2(submodule 전환)는 **ms-021(en 전환) 뒤**에 한다 — ms-021 task 1이 `tests/*.ts`의 한국어 단언을 전부 고치는 중이라, 지금 submodule로 바꾸면 그 수정이 두 리포로 갈린다. ms-021이 merge되면 scratchpad 클론의 v0.18 브랜치에 `tests/`를 다시 복사해 커밋한 뒤 task 2를 한다.
+Out of Scope(계획대로 손 안 댐): reap-test push·시크릿 등록, v0.17-bridge 브랜치.
+
+## 사람이 할 것
+
+**순서가 중요하다 — reap-test push가 이 리포 v0.18 push보다 먼저.**
+
+1. **reap-test push.** 클론이 scratchpad(세션 종료 시 사라질 수 있음)에 있다 — 없으면 `https://github.com/c-d-cc/reap-test.git`를 다시 clone해 `git log`로 커밋 `2f84fc8`·`4a5006e`가 있는지 확인(없으면 이 handoff의 클론이 유실된 것 — task 2를 다시 하거나 이 세션의 diff를 복원해야 한다).
+   ```bash
+   cd <scratchpad>/reap-test   # 또는 새로 clone한 경로
+   git push -u origin v0.18
+   ```
+2. **`TEST_DISPATCH_TOKEN` 시크릿.** GitHub에서 fine-grained PAT 발급 — 대상 리포 `c-d-cc/reap-test` 하나만, 권한 `Contents: Read and write`. `c-d-cc/reap` 리포의 Settings → Secrets and variables → Actions에 이름 `TEST_DISPATCH_TOKEN`으로 등록.
+3. **이 worktree를 검토하고 v0.18에 merge.** worktree `/Users/hichoi/cdws/reap-wt-tests`(브랜치 `ms-023-tests`), 커밋 4개(A는 클론 쪽이라 이 리포 로그엔 없음 — B `b8014f2`·C `7fa57f6`·D `d89e4e3`·기록 갱신). merge 뒤 `push`.
+4. **push 뒤 확인.** v0.18 push가 `ci.yml`의 `dispatch-tests` 잡을 돌린다 — GitHub Actions에서 그 잡과, dispatch를 받은 `c-d-cc/reap-test`의 워크플로 둘 다 초록인지 확인. 1번을 안 했거나 2번의 토큰이 없으면 `dispatch-tests`가 `::error`로 실패한다(의도된 동작).
+5. **gen-0091을 닫는다.** `complete` skill로 — 이 handoff은 그때 다시 교체된다.
