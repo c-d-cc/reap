@@ -90,7 +90,7 @@ else
 fi
 
 # 6) 옮긴 문서를 가리키는 옛 경로가 새 .reap·CLAUDE.md에 없다
-stale=$(cd "$root" && grep -rnE '\.reap/vision/(design|goals\.md)|vision/memory/(longterm|midterm|shortterm)|\.reap/lineage/' .reap CLAUDE.md --include='*.md' --include='CLAUDE.md' 2>/dev/null | grep -v '^\.reap/archive/migration-v0_17\.md' || true)
+stale=$(cd "$root" && grep -rnE '\.reap/vision/(design|goals\.md)|vision/memory/(longterm|midterm|shortterm)|\.reap/lineage/' .reap CLAUDE.md --include='*.md' --include='CLAUDE.md' 2>/dev/null | grep -v '^\.reap/archive/migration-v0_17\.md' | grep -v '^\.reap/archive/generations/' || true)
 if [ -z "$stale" ]; then
   report "옛 경로 참조 없음" ok
 else
@@ -103,6 +103,36 @@ if printf '%s\n' "$doctor_out" | grep -qE '결함 0|0 defects'; then
   report "doctor 결함 0" ok
 else
   report "doctor 결함 0" fail "$doctor_out"
+fi
+
+# 8) 원본 lineage 세대 수 = archive/generations의 migratedFrom 파일 수 (gen-0101, mapping #8)
+if [ -d "$old/lineage" ]; then
+  orig_count=$(find "$old/lineage" -mindepth 1 -maxdepth 1 \( -type d -o -type f \) -name 'gen-[0-9][0-9][0-9]-*' 2>/dev/null | wc -l | tr -d ' ')
+  [ -f "$old/lineage/pre-reap-history.md" ] && orig_count=$((orig_count + 1))
+  migrated_count=$(grep -l '^migratedFrom: \.reap-v0_17/lineage/' "$new"/archive/generations/*.md 2>/dev/null | wc -l | tr -d ' ')
+  if [ "${migrated_count:-0}" = "$orig_count" ]; then
+    report "lineage 세대 수 = archive/generations migratedFrom 수" ok "${orig_count}건"
+  else
+    report "lineage 세대 수 = archive/generations migratedFrom 수" fail "원본 ${orig_count}건, archive에서 migratedFrom 있는 파일 ${migrated_count:-0}건"
+  fi
+else
+  report "lineage 세대 수 = archive/generations migratedFrom 수" ok "원본에 lineage 없음"
+fi
+
+# 9) sequence/generation.md의 마지막 번호가 원본 lineage 마지막 번호 이상이다 (gen-0101, mapping #8)
+if [ -d "$old/lineage" ]; then
+  orig_last_raw=$(find "$old/lineage" -mindepth 1 -maxdepth 1 \( -type d -o -type f \) -name 'gen-[0-9][0-9][0-9]-*' 2>/dev/null \
+    | sed -E 's#.*/gen-([0-9]{3})-.*#\1#' | sort -n | tail -1)
+  orig_last=$((10#${orig_last_raw:-0}))
+  new_last_raw=$(grep -oE '^\| gen-[0-9]{4}-(plan|exec|fix) ' "$new/sequence/generation.md" 2>/dev/null | grep -oE '[0-9]{4}' | sort -n | tail -1)
+  new_last=$((10#${new_last_raw:-0}))
+  if [ "$new_last" -ge "$orig_last" ]; then
+    report "sequence/generation.md 마지막 번호 ≥ 원본" ok "원본 ${orig_last} ≤ 새 ${new_last}"
+  else
+    report "sequence/generation.md 마지막 번호 ≥ 원본" fail "원본 lineage 마지막 gen-${orig_last}, 새 레지스트리 마지막 ${new_last}"
+  fi
+else
+  report "sequence/generation.md 마지막 번호 ≥ 원본" ok "원본에 lineage 없음"
 fi
 
 exit $fail

@@ -157,7 +157,10 @@ export function diagnose(root: string): Report {
     const text = readFileSync(file, "utf8");
     for (const m of text.matchAll(/\]\(([^)\s#]+)(?:#[^)]*)?\)/g)) {
       const target = m[1]!;
-      if (/^[a-z]+:/i.test(target) || target.startsWith("/")) continue;
+      // 링크가 아니라 마크다운 문법 예시(`![...](...)`) 같은 순수 구두점은 경로일 수 없다 — 글자·숫자가
+      // 하나도 없는 target은 링크로 세지 않는다 (gen-0101, archive/generations로 승계된 v0.17 lineage
+      // 본문 실물에서 나온 오탐: "이미지 마크다운(`![...](...)`)"이라는 설명 문장을 링크로 오인했다).
+      if (/^[a-z]+:/i.test(target) || target.startsWith("/") || !/[A-Za-z0-9]/.test(target)) continue;
       if (!existsSync(resolve(dirname(file), target))) {
         defects.push({ kind: t(root, "doctor.kind.broken_link"), detail: `${rel(root, file)} → ${target}` });
       }

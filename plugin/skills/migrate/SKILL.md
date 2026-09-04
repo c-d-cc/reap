@@ -68,6 +68,8 @@ Set up a new `.reap/` with `reap init`. Carry `config.yml`'s `language`·`agentC
 
 Don't fill the main session's context with old data — **the mapping table and instructions are in [migration-map.md](references/migration-map.md), and that whole document is handed to a subagent to carry out.** For mappings 1-9, the confirmed grounds are ps-4b485d's 04-migration-skill.md; for environment (10), it's 04-migrate-docs.md; for the working-state mappings 1·2·3·5·6·11·12, it's ms-024's `tasks/1-skill-revision.md` and selfview's real first-pass trace. Thirteen mappings total (#13 rewrites references to moved documents).
 
+**#8은 스크립트가 한다** — `node <this skill's directory>/scripts/migrate-lineage.mjs <project-root>`. subagent가 손으로 lineage를 옮기지 않는다, 변환이 결정적이라서다.
+
 ## 7/8 — Verification (working-state check)
 
 `reap doctor` has to come back at **zero defects.** If defects show up, fix them and run again — don't move to step 8 until it passes. Also check that `.reap-v0_17/` is untouched (`git status` should show no changes inside it).
