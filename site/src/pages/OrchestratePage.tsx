@@ -1,3 +1,4 @@
+import { Link } from "wouter";
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { CodeBlock } from "@/components/CodeBlock";
@@ -15,22 +16,17 @@ export default function OrchestratePage() {
         <h2 className="text-base font-semibold text-foreground mb-2">{o.worktreeTitle}</h2>
         <CodeBlock language="bash">{o.worktreeCode}</CodeBlock>
         <p className="text-sm text-muted-foreground mt-2 mb-2 leading-relaxed">{o.worktreeDesc}</p>
-        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{o.sameDirNote}</p>
+        <p className="text-sm text-muted-foreground mb-2 leading-relaxed">{o.sameDirNote}</p>
+        <p className="text-xs text-muted-foreground mb-6 leading-relaxed">{o.submoduleNote}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{o.idTitle}</h2>
         <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{o.idDesc}</p>
 
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{o.claimTitle}</h2>
-        <CodeBlock language="bash">{o.claimCode}</CodeBlock>
-        <p className="text-sm text-muted-foreground mt-2 mb-6 leading-relaxed">{o.claimDesc}</p>
-
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{o.barrierTitle}</h2>
-        <CodeBlock language="bash">{o.barrierCode}</CodeBlock>
-        <p className="text-sm text-muted-foreground mt-2 mb-6 leading-relaxed">{o.barrierDesc}</p>
-
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{o.rosterTitle}</h2>
-        <CodeBlock language="bash">{o.rosterCode}</CodeBlock>
-        <p className="text-sm text-muted-foreground mt-2 mb-6 leading-relaxed">{o.rosterDesc}</p>
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{o.collabTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-2 leading-relaxed">{o.collabDesc}</p>
+        <p className="text-sm text-muted-foreground mb-6">
+          <Link href="/docs/claim-barrier" className="text-primary hover:underline">{o.collabLinkText}</Link>
+        </p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{o.kindTitle}</h2>
         <div className="border border-border rounded-md overflow-hidden text-sm mb-3">

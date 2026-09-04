@@ -30,6 +30,16 @@ export default function MigrationPage() {
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{m.preservedDesc}</p>
         <CodeBlock language="bash">{m.rollbackCode}</CodeBlock>
 
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{m.recordExampleTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{m.recordExampleDesc}</p>
+        <CodeBlock language="text">{m.recordExampleCode}</CodeBlock>
+
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{m.backlogJudgeTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{m.backlogJudgeDesc}</p>
+
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{m.designLinksTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{m.designLinksDesc}</p>
+
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{m.lostTitle}</h2>
         <ul className="space-y-2 mb-2 list-none p-0">
           {m.lostItems.map(([title, desc]) => (

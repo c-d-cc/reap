@@ -1755,7 +1755,7 @@ workspaceId: ba44307f94a6`,
       {
         name: "evolve",
         when: "세대를 열 때, 새 작업을 시작할 때.",
-        what: "상태 줄과 handoff.md·milestone.md·task를 읽고 새 의도를 만드는 일(loop)인지 실현·되돌리는 일(generation)인지 정한 뒤 연다.",
+        what: "상태 줄과 handoff.md·milestone.md·task를 읽고 새 의도를 만드는 일(loop)인지 실현·되돌리는 일(generation)인지 정한 뒤 연다. 열고 나서는 직접 할지 subagent에 위임할지도 판단한다 — 여러 파일·긴 탐색이 예상되거나 병렬로 둘 이상 돌릴 때 위임한다.",
         notCalled: "이미 열린 세대가 있으면(내 것이면 이어가고 남의 것이면 새로 열지 않는다), 한 번의 편집·커밋으로 끝나는 일이면(세대를 열 값이 없다).",
       },
       {
@@ -1839,7 +1839,7 @@ workspaceId: ba44307f94a6`,
   index [update [--full] | status | impact <file>... | search <q> | callers <id> | callees <id>]
   orch claim <resource> [--ttl 30m] | release <resource> | barrier <name> --expect <N> --timeout <s> | roster | status   [--topic <t>]
   plan sources | convention <ps-id>
-  ctx [--milestone <ms-id>] [--hook]`,
+  ctx [--milestone <ms-id> | --hook]`,
     usageNote: "명령은 대부분 make(만든다)·mark(상태를 바꾼다) 짝이고, 나머지는 조회·조율용 단독 명령이다.",
     commandHeaders: ["명령", "설명"],
     commands: [
@@ -1926,19 +1926,12 @@ reap index callees <symbolId> # 이것이 무엇을 부르는가`,
     worktreeCode: "claude -n reap-<topic>-<role> -w <worktree>      # 예: reap-auth-writer, reap-auth-tester",
     worktreeDesc: "세션 이름이 곧 주소이고, <topic>이 공유 상태의 방(~/.reap/orch/<workspace-id>/<topic>/)을 정한다. workspace-id는 같은 리포의 worktree 간에 수렴한다.",
     sameDirNote: "같은 디렉토리에서 세션 둘은 안 된다. '.reap/.session'(세대 바인딩)이 파일 하나라 나중 세션이 앞의 바인딩을 덮는다. worktree마다 '.reap/'가 별개이므로 worktree로 가르면 이 문제가 사라진다.",
+    submoduleNote: "리포에 submodule(tests/ 등)이 worktree에 체크아웃돼 있으면 git worktree remove가 \"working trees containing submodules cannot be moved or removed\"로 실패한다 — git worktree remove --force를 쓴다.",
     idTitle: "id는 조율자가 발급한다",
     idDesc: "worktree마다 '.reap/'가 사본이라, 두 worktree에서 각각 make generation을 부르면 같은 번호가 두 번 나올 수 있다. 그래서 id 발급은 주 트리의 조율자가 한다 — 조율자가 세대를 열어 커밋한 뒤 worktree를 만들고, worktree의 세션은 reap bind <gen-id>로 그 세대에 묶이기만 한다.",
-    claimTitle: "claim — 손대기 전에 잡는다",
-    claimCode: `reap orch claim <resource> [--ttl 30m] [--topic <t>]
-reap orch release <resource>`,
-    claimDesc: "resource는 자유 문자열이다 — milestone 갈래는 id(ms-004), 파일 영역은 경로 glob(src/auth/**)이 기본 관례다. TTL은 세션이 죽었을 때를 위한 것으로, 만료되면 다른 세션이 가져갈 수 있고 탈취는 로그에 남는다. 거부당하면 holder에게 메시지로 묻거나 기다린다.",
-    barrierTitle: "barrier — 합쳐야 하는 곳에 둔다",
-    barrierCode: "reap orch barrier <name> --expect <N> --timeout <초>",
-    barrierDesc: "--timeout은 필수다. 만료되면 누가 오지 않았는지를 낸다. 테스트 전, 통합 커밋 전, milestone 닫기 전처럼 뒤 작업이 앞 작업 전부를 전제하는 지점에 둔다. 자주 두면 병렬이 직렬이 된다.",
-    rosterTitle: "roster·status로 본다",
-    rosterCode: `reap orch roster [--topic <t>]     # claude agents --json 에서 reap-<topic>-* 만
-reap orch status [--topic <t>]     # claims · barriers`,
-    rosterDesc: "roster는 claude agents --json에서 이름이 reap-<topic>-로 시작하는 세션만 추린다. 별도 참가 등록 절차는 없다 — 이름이 곧 참가이고, 세션이 죽으면 목록에서 저절로 사라진다.",
+    collabTitle: "claim과 barrier로 조율한다",
+    collabDesc: "손대기 전에 자원을 잡고(claim), 합쳐야 하는 지점에서 서로를 기다린다(barrier). 자원은 자유 문자열이고 TTL이 지나면 다른 세션이 가져갈 수 있으며 그 탈취는 로그에 남는다. roster·status로 지금 누가 무엇을 잡고 있는지 본다. 명령과 실물 출력은 별도 문서에 있다.",
+    collabLinkText: "Claim과 Barrier →",
     kindTitle: "메시지 kind 관례",
     kindHeaders: ["kind", "뜻"],
     kinds: [
@@ -2014,6 +2007,25 @@ reap orch status [--topic <t>]`,
     preservedTitle: "원본은 보존된다",
     preservedDesc: "원본 비파괴가 불변식이다. 어느 단계도 구 데이터를 수정하지 않는다 — .reap-v0_17/로 자리만 옮겨 통째로 남는다. 되돌리기는 한 줄이다.",
     rollbackCode: "rm -rf .reap && mv .reap-v0_17 .reap",
+    recordExampleTitle: "기록 파일 실례",
+    recordExampleDesc: "8/8이 남기는 archive/migration-v0_17.md는 옮긴 것·안 옮긴 것·필요한 갱신·검증(doctor 전문)을 담는다. selfview 실물 이주(2026-09-05)에서 나온 한 조각:",
+    recordExampleCode: `## 옮기지 않은 것
+
+**#3 backlog — 8건 전부 재발급하지 않음.** 재검토 결과 8건 모두 이미 해소된 상태였다:
+- admin-article-generate-share-safety-gates — gen-037 완료(제목 정확히 일치, fitnessFeedback 확인).
+  frontmatter는 status: pending으로 남아있었으나 갱신 안 된 흔적
+- team-mode-p0c-account-auth — frontmatter status: consumed, consumedBy: gen-047-be537d
+
+## 검증
+
+결함 0 · 참고 3
+
+## 참고 — 사람이 볼 것
+- [크기 안내선] .reap/genome/evolution.md 8.1KB > 6.0KB — 매 세션 주입된다`,
+    backlogJudgeTitle: "backlog는 frontmatter를 믿지 않는다",
+    backlogJudgeDesc: "옛 backlog 항목의 status: pending을 그대로 믿고 재발급하면 이미 끝난 일이 다시 열린다. selfview 실물에서는 8건 전부가 실제로는 이미 소비돼 있었다 — lineage(옛 generation 기록)와 현재 코드를 대조해 이미 해소된 항목은 재발급하지 않는다. midterm.md 같은 옛 메모가 pending이라고 적어 놓았어도 그 메모 자체가 낡았을 수 있다.",
+    designLinksTitle: "design 하위 문서군은 묶음을 남긴다",
+    designLinksDesc: "vision/design/team-mode/처럼 문서 여러 개가 상대 링크로 서로를 참조하는 디렉토리는 문서 단위로 idea를 발급하면 그 링크가 깨진다. 발급한 뒤 상호 링크를 새 idea 파일명으로 고쳐 쓴다 — doctor의 깨진 상대 링크 검사가 손대지 않고 남은 것을 잡아낸다.",
     lostTitle: "무엇을 잃는가",
     lostItems: [
       ["5단계 lifecycle과 그 흐름 명령", "run start/next/back/abort/early-close, /reap.* 7종. 흐름은 이제 evolve·complete skill의 판단이다"],
