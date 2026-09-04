@@ -140,3 +140,11 @@ worktree마다 `.reap/`가 사본이라 `make generation`을 두 곳에서 부�
 ## v0.17 바이너리는 첫 실행에 홈으로 자기를 설치한다
 
 `~/cdws/reap_v17`에서 테스트·빌드를 돌린 subagent가 v0.17 `reap`를 실행했고, v0.17.5의 "첫 실행 시 자체 통합 설치"가 `~/.claude/commands/reap.*.md` 19개·agent 2개·SessionStart 훅 2개·`~/.reap/reap-guide.md`를 놓았다. v0.18 개발 세션에 v0.17 slash command가 함께 보이게 된다. **v0.17 리포에서 무엇이든 실행하는 agent에게는 `HOME`을 임시 디렉토리로 바꿔 주거나, 끝난 뒤 v0.17 `reap uninstall`의 allowlist로 걷어낸다.** 자동 모드는 `~/.claude/settings.json` 편집을 막으므로 걷어내는 것은 사람의 손이다.
+
+## subagent의 백그라운드 작업 완료 알림은 오지 않을 수 있다
+
+두 세대(gen-0081·gen-0092)에서 subagent가 `bun test`·`claude -p`를 백그라운드로 돌리고 완료 알림을 기다리다 20~40분 멈췄다. 프로세스는 이미 끝나 있었다. **검증은 포그라운드에서 exit code를 직접 받는다.** 오래 걸리는 것은 `perl -e 'alarm 300; exec @ARGV' -- <명령>`으로 상한을 건다(macOS에 `timeout`이 없다). 주 세션은 보고가 늦으면 프로세스 부재(`ps`)를 보고 재촉한다 — 알림을 믿지 않는다.
+
+## `claude -p`의 "그대로 출력하라"는 증거가 아니다
+
+세션의 응답 언어 지시가 상태 줄을 번역하거나 줄을 빼먹는다. 주입 내용을 검증하려면 `reap ctx --hook`을 파일로 리다이렉트해 그것을 본다. `claude -p`는 "skill이 보이는가"만 답할 수 있다.

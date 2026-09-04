@@ -5,9 +5,9 @@ title: 왕복 검증과 발행 준비 — tarball 설치·이주 실물·0.17.8�
 from: loop-0004-plan
 refs:
   - ps-5e948f:06-release.md
-status: open
+status: closed
 openedAt: 2026-09-03T14:40:21Z
-focus: true
+closedAt: 2026-09-04T01:59:47Z
 ---
 ## Background
 
@@ -39,3 +39,9 @@ focus: true
 
 - 사람이 06-release의 순서대로 발행할 때 문서 밖의 지식이 필요했는가
 - 왕복에서 발견한 마찰 중 코드로 못 막은 것은 무엇인가
+
+## Fitness (2026-09-04, 사람의 전체 위임 하 agent 판정)
+
+- **06-release 순서대로 발행할 때 문서 밖 지식이 필요했는가** — handoff의 "사람이 할 것"이 명령까지 담는다. 문서 밖에 남는 것은 시크릿 값과 GitHub 설정(reap2 archive)뿐
+- **왕복에서 발견한 마찰 중 코드로 못 막은 것** — `claude -p`의 verbatim 출력은 증거가 못 된다(세션의 언어 지시가 번역한다) → `ctx --hook` 직접 캡처가 증거. 백그라운드 `claude -p`·`bun test`의 완료 알림이 오지 않는다 → 포그라운드 + alarm. 둘 다 lessons로
+- 어긋남 1건(site/migration.md의 "한국어 전용")은 이 세대가 고쳤다

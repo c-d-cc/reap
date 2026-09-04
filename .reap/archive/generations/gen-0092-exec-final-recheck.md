@@ -6,7 +6,9 @@ milestone: ms-019
 title: 최종 재검증 — en/ko 왕복 둘·발행 직전 체크·문서 정합
 startedAt: 2026-09-04T01:33:58Z
 startCommit: c396352
-status: open
+status: closed
+closedAt: 2026-09-04T01:59:47Z
+endCommit: 72d9d8e
 ---
 ## Intent
 

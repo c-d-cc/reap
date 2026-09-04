@@ -81,3 +81,7 @@ release-policy.md 참고 — 이 milestone의 범위 밖.
 
 - **loop-0004 닫기**: 05-open의 미답을 `idea/research/`로 옮긴 뒤 milestone 종료 절차(cleanup skill)를 밟을 것
 - gen-0092가 찾은 마찰(en 왕복에서 `claude -p`의 "verbatim" 답을 못 믿고 `reap ctx --hook` 직접 캡처로만 검증할 수 있었던 것, 백그라운드 `claude -p`가 20분 넘게 멈추는 것)은 gen-0092 기록의 Dead Ends에 있다 — 코드로 못 막은 마찰로 다음 사람이 볼 것
+
+## cleanup (닫을 때)
+
+archive로 내림: gen-0091·0092 — 산출물이 리포·handoff에 있다. 이 handoff의 "사람이 할 것"이 발행 절차의 정본이다(archive에서 읽는다).
