@@ -6,7 +6,9 @@ milestone: ms-023
 title: reap-test v0.18 브랜치와 dispatch 워크플로
 startedAt: 2026-09-04T00:07:05Z
 startCommit: 142c11e
-status: open
+status: closed
+closedAt: 2026-09-04T00:14:33Z
+endCommit: 172b11d
 ---
 ## Intent
 
