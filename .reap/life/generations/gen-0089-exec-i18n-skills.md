@@ -6,7 +6,9 @@ milestone: ms-021
 title: skill 10종·어휘·템플릿·씨앗 en, doctor 판정어 합집합
 startedAt: 2026-09-04T00:51:06Z
 startCommit: 7412377
-status: open
+status: closed
+closedAt: 2026-09-04T01:14:06Z
+endCommit: 1cf8939
 ---
 ## Intent
 
