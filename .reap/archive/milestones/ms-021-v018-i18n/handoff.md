@@ -21,3 +21,7 @@
 - Out of Scope로 명시된 ja·zh-CN·de 확장은 ms-022(문서 사이트)와 함께
 - `plugin/` 10종 SKILL.md frontmatter `description`의 한국어 trigger 예시(`"reap 시작"` 등)를 en으로 옮길지, 이중 언어로 둘지는 gen-0089가 사람 판단으로 넘겼다 — 그대로 둔 채 이 milestone을 끝낸다
 - milestone 종료 시 물어볼 것(milestone.md): ko 사용자가 en 전환을 느꼈는가, skill 본문 en이 agent의 한국어 답에 영향을 줬는가
+
+## cleanup (닫을 때)
+
+archive로 내림: gen-0081~0090 전부 — 산출물이 코드·skill·README·사이트·reap_v17 커밋에 반영됨. gen-0086(reap-test 브랜치)의 클론 경로는 ms-023 handoff에 있다.

@@ -5,8 +5,9 @@ title: en 전환 — CLI 메시지 카탈로그, skill·템플릿 en, README en/
 from: loop-0004-plan
 refs:
   - ps-5e948f:07-i18n-docs-delegate.md
-status: open
+status: closed
 openedAt: 2026-09-04T00:04:12Z
+closedAt: 2026-09-04T01:24:31Z
 ---
 ## Background
 
@@ -43,3 +44,9 @@ openedAt: 2026-09-04T00:04:12Z
 
 - ko 사용자가 en 전환을 느꼈는가 (ctx 언어 줄과 카탈로그가 그것을 막았는가)
 - skill 본문 en이 agent의 한국어 답에 영향을 줬는가
+
+## Fitness (2026-09-04, 사람의 전체 위임 하 agent 판정)
+
+- **ko 사용자가 en 전환을 느꼈는가** — 이 리포(`language: ko`)의 `reap ctx`·usage·doctor는 그대로 한국어다. 카탈로그가 막았다. skill 본문은 en이 됐고 agent의 답은 `응답 언어: ko` 줄을 따른다 — 실제 체감은 사람 검수(ms-022)에서
+- **skill 본문 en이 agent의 한국어 답에 영향을 줬는가** — 유보. `--plugin-dir` 세션 확인은 en 프로젝트에서만 했다. ko 프로젝트에서의 한 세션은 ms-019 task 5가 본다
+- 남긴 것: skill description의 한국어 트리거 예시는 이중 언어로 유지(한국어 사용자의 진입 문구). ja·zh-CN·de는 사이트 확장과 함께

@@ -6,7 +6,9 @@ milestone: ms-021
 title: README en/ko·RELEASE_NOTES en·genome 규칙·0.17.8 노트 정정·왕복 재검증
 startedAt: 2026-09-04T01:14:06Z
 startCommit: 1cf8939
-status: open
+status: closed
+closedAt: 2026-09-04T01:24:30Z
+endCommit: 47ebe04
 ---
 ## Intent
 
