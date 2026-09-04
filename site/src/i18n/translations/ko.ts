@@ -3,20 +3,42 @@ export interface Translations {
     getStarted: string;
     groups: {
       gettingStarted: string;
+      coreConcepts: string;
+      planAxis: string;
+      execAxis: string;
+      knowledge: string;
+      collaboration: string;
       reference: string;
       other: string;
     };
     items: {
       introduction: string;
-      v018change: string;
-      install: string;
       quickStart: string;
-      concepts: string;
-      skills: string;
-      cli: string;
-      hooks: string;
-      codeIndex: string;
+      autonomousEvolution: string;
+      v018change: string;
+      twoAxes: string;
+      threeLayers: string;
+      storage: string;
+      loop: string;
+      planSource: string;
+      idea: string;
+      carveMilestone: string;
+      generation: string;
+      delegation: string;
+      backlog: string;
+      closingMilestone: string;
+      genome: string;
+      environment: string;
+      visionMemory: string;
+      codeIntelligence: string;
       orchestrate: string;
+      claimBarrier: string;
+      hooks: string;
+      skillReference: string;
+      cliReference: string;
+      configuration: string;
+      doctor: string;
+      comparison: string;
       migration: string;
       releaseNotes: string;
     };
@@ -59,18 +81,17 @@ export interface Translations {
     breadcrumb: string;
     description: string;
     whatBuilds: string;
-    changedTitle: string;
-    changedIntro: string;
-    changedItems: string[];
-    conceptsLinkText: string;
-    principlesTitle: string;
-    principles: { title: string; desc: string }[];
-    principlesNote: string;
-    principlesLinkText: string;
-    principlesLinkHref: string;
-    principlesNoteAfter: string;
+    whyReapTitle: string;
+    problemHeader: string;
+    solutionHeader: string;
+    problems: [string, string][];
+    structureTitle: string;
+    structureDesc: string;
+    structureItems: { label: string; sub: string; path: string; desc: string }[];
+    projectStructureTitle: string;
+    projectStructureTree: string;
     nextText: string;
-    installLinkText: string;
+    quickStartLinkText: string;
   };
 
   v018change: {
@@ -89,34 +110,22 @@ export interface Translations {
     migrateLinkText: string;
   };
 
-  install: {
-    title: string;
-    breadcrumb: string;
-    description: string;
-    cliTitle: string;
-    cliCode: string;
-    cliNote: string;
-    pluginTitle: string;
-    pluginCode: string;
-    verifyTitle: string;
-    verifyCode: string;
-    verifyNote: string;
-    uninstallTitle: string;
-    uninstallCode: string;
-    removeProjectNote: string;
-    removeProjectCode: string;
-    fromV017Title: string;
-    fromV017Desc: string;
-    migrationLinkText: string;
-    nextText: string;
-    quickStartLinkText: string;
-  };
-
   quickstart: {
     title: string;
     breadcrumb: string;
     description: string;
     intro: string;
+    prerequisitesTitle: string;
+    prerequisiteHeaders: string[];
+    prerequisites: { name: string; desc: string; required: boolean }[];
+    requiredLabel: string;
+    optionalLabel: string;
+    installTitle: string;
+    installStep1: string;
+    installCliCode: string;
+    installStep2: string;
+    installPluginCode: string;
+    installVerifyNote: string;
     steps: { title: string; command: string; desc: string }[];
     statusLineTitle: string;
     statusLineDesc1: string;
@@ -125,31 +134,55 @@ export interface Translations {
     statusLineNote: string;
     conceptsLinkText: string;
     statusLineNoteAfter: string;
+    nextTitle: string;
+    nextLinks: { href: string; title: string; desc: string }[];
   };
 
-  concepts: {
+  autonomousEvolution: {
     title: string;
     breadcrumb: string;
     description: string;
     intro: string;
-    layersTitle: string;
-    layersHeaders: string[];
-    layers: [string, string, string][];
-    layersNote: string;
-    unitsTitle: string;
-    units: { name: string; desc: string }[];
-    splitHeaders: string[];
-    splitRows: [string, string, string][];
-    splitNote: string;
-    storageTitle: string;
-    storageTree: string;
-    storageNote: string;
-    topLevelItems: { name: string; desc: string }[];
+    sessionStartTitle: string;
+    sessionStartDesc: string;
+    injectedItems: { label: string; desc: string }[];
     statusLineTitle: string;
-    statusLineDesc1: string;
-    statusLineDesc2: string;
-    backLinkPrefix: string;
-    backLinkText: string;
+    statusLineDesc: string;
+    statusLineExample: string;
+    judgmentsTitle: string;
+    judgmentsDesc: string;
+    judgments: { title: string; desc: string }[];
+    autonomousTitle: string;
+    autonomousDesc: string;
+    commitRuleTitle: string;
+    commitRuleDesc: string;
+    commitRuleCode: string;
+    fitnessTitle: string;
+    fitnessDesc: string;
+  };
+
+  placeholder: {
+    notice: string;
+    pages: {
+      twoAxes: { title: string; breadcrumb: string; description: string };
+      threeLayers: { title: string; breadcrumb: string; description: string };
+      storage: { title: string; breadcrumb: string; description: string };
+      loop: { title: string; breadcrumb: string; description: string };
+      planSource: { title: string; breadcrumb: string; description: string };
+      idea: { title: string; breadcrumb: string; description: string };
+      carveMilestone: { title: string; breadcrumb: string; description: string };
+      generation: { title: string; breadcrumb: string; description: string };
+      delegation: { title: string; breadcrumb: string; description: string };
+      backlog: { title: string; breadcrumb: string; description: string };
+      closingMilestone: { title: string; breadcrumb: string; description: string };
+      genome: { title: string; breadcrumb: string; description: string };
+      environment: { title: string; breadcrumb: string; description: string };
+      visionMemory: { title: string; breadcrumb: string; description: string };
+      claimBarrier: { title: string; breadcrumb: string; description: string };
+      configuration: { title: string; breadcrumb: string; description: string };
+      doctor: { title: string; breadcrumb: string; description: string };
+      comparison: { title: string; breadcrumb: string; description: string };
+    };
   };
 
   skills: {
@@ -290,20 +323,42 @@ export const ko: Translations = {
     getStarted: "시작하기",
     groups: {
       gettingStarted: "시작하기",
+      coreConcepts: "핵심 개념",
+      planAxis: "Plan 축",
+      execAxis: "Execution 축",
+      knowledge: "지식",
+      collaboration: "협업",
       reference: "레퍼런스",
       other: "기타",
     },
     items: {
       introduction: "소개",
-      v018change: "v0.18에서 바뀐 것",
-      install: "설치",
       quickStart: "첫 사용",
-      concepts: "개념",
-      skills: "skill 10종",
-      cli: "CLI 레퍼런스",
-      hooks: "hooks",
-      codeIndex: "코드 인덱스",
+      autonomousEvolution: "자율 진화 흐름",
+      v018change: "v0.18에서 바뀐 것",
+      twoAxes: "두 축",
+      threeLayers: "판단·확정·사실",
+      storage: "저장 구조",
+      loop: "Loop",
+      planSource: "Plan Source",
+      idea: "Idea와 Research",
+      carveMilestone: "Milestone 자르기",
+      generation: "Generation",
+      delegation: "위임 모드",
+      backlog: "Backlog",
+      closingMilestone: "Milestone 닫기와 Fitness",
+      genome: "Genome",
+      environment: "Environment",
+      visionMemory: "Vision과 Memory",
+      codeIntelligence: "코드 인덱스",
       orchestrate: "orchestrate",
+      claimBarrier: "Claim과 Barrier",
+      hooks: "hooks",
+      skillReference: "skill 10종",
+      cliReference: "CLI 레퍼런스",
+      configuration: "설정",
+      doctor: "Doctor",
+      comparison: "비교",
       migration: "v0.17에서 이주",
       releaseNotes: "릴리스 노트",
     },
@@ -329,22 +384,24 @@ export const ko: Translations = {
       { problem: "협업 혼란", solution: "orchestrate skill이 claim과 barrier로 여러 세션의 작업을 조율합니다" },
     ],
     structureTitle: "구조",
-    structureDesc: "REAP가 하는 일은 .reap/ 아래 네 자리에 담깁니다.",
+    structureDesc: "REAP가 하는 일은 .reap/ 아래 여섯 자리에 담깁니다.",
     structureItems: [
-      { label: "genome, environment", sub: ".reap/genome/ + .reap/environment/", desc: "genome은 규범(제품 정체성, AI 행동 규칙, 절대 제약), environment는 서술(기술 스택, 소스 구조)입니다. 모든 작업의 기반입니다." },
-      { label: "vision", sub: ".reap/vision/", desc: "하려는 것입니다. 기억(memory/)과 loop에서 잘라낸 실행 단위(milestones/)가 여기 쌓입니다." },
-      { label: "life", sub: ".reap/life/", desc: "지금 살아 있는 것입니다. generations/, backlog/, loops/가 여기 있습니다." },
-      { label: "archive", sub: ".reap/archive/", desc: "더는 참고하지 않는 것입니다. milestone이 닫힐 때 cleanup skill이 여기로 내립니다." },
+      { label: "Knowledge", sub: "genome + environment", desc: "genome은 규범(제품 정체성, AI 행동 규칙, 절대 제약), environment는 서술(기술 스택, 소스 구조)입니다. 모든 작업의 기반입니다." },
+      { label: "Plan", sub: "plan source + loop", desc: "제품을 만들기 위한 모든 생각입니다. 리포 밖일 수 있는 plan source에 loop가 씁니다." },
+      { label: "Vision", sub: "milestone + memory", desc: "하려는 것입니다. loop에서 잘라낸 milestone과 쌓인 교훈이 여기 있습니다." },
+      { label: "Life", sub: "generation + backlog", desc: "지금 살아 있는 것입니다. 진행 중이거나 아직 참고할 값이 있는 세대와 이월 항목이 여기 있습니다." },
+      { label: "Archive", sub: "닫힌 milestone, generation, loop", desc: "더는 참고하지 않는 것입니다. milestone이 닫힐 때 cleanup skill이 여기로 내립니다." },
+      { label: "Civilization", sub: "소스 코드", desc: ".reap/ 밖의 모든 것입니다. generation이 진화시키는 대상입니다." },
     ],
     flowTitle: "작업 흐름",
     flowDesc: "새 의도를 만드는 일에서 세대를 닫는 일까지, 네 단위가 이어집니다.",
     flowSteps: ["loop", "→", "milestone", "→", "generation", "→", "complete"],
-    flowHeaders: ["단위", "무엇을 하는가", "관련 skill"],
+    flowHeaders: ["단계", "수행 내용", "산출물"],
     flowRows: [
-      ["loop", "새 의도를 만듭니다. 기획, 설계, 화면, 아직 자리 없는 아이디어를 다룹니다.", "loop"],
-      ["milestone", "loop에서 실행 가능한 단위로 자릅니다. 경계와 종료 조건을 정합니다.", "carve-milestone"],
-      ["generation", "milestone을 실현하거나(exec) 이미 있는 의도로 되돌립니다(fix). 실제로 코드를 진화시킵니다.", "evolve"],
-      ["complete", "커밋 규칙을 확인하고 기록을 정리해 세대를 닫습니다.", "complete"],
+      ["loop", "새 의도를 만듭니다. 기획, 설계, 화면, 아직 자리 없는 아이디어를 다룹니다.", "life/loops/<loop-id>.md"],
+      ["milestone", "loop에서 실행 가능한 단위로 자릅니다. 경계와 종료 조건을 정합니다.", "vision/milestones/<ms-id>/"],
+      ["generation", "milestone을 실현하거나(exec) 이미 있는 의도로 되돌립니다(fix). 실제로 코드를 진화시킵니다.", "life/generations/<gen-id>.md"],
+      ["complete", "커밋 규칙을 확인하고 기록을 정리해 세대를 닫습니다.", "닫힌 세대 기록 + handoff.md"],
     ],
     installation: "설치",
     installStep1: "1. CLI 전역 설치",
@@ -362,58 +419,87 @@ export const ko: Translations = {
     ],
     documentation: "문서",
     docLinks: [
-      { href: "/docs/introduction", title: "소개", desc: "REAP란 무엇인가, 무엇이 달라졌나, 일곱 원칙." },
-      { href: "/docs/v018change", title: "v0.18에서 바뀐 것", desc: "v0.17 대응표, 사라진 것, 그대로인 것." },
-      { href: "/docs/install", title: "설치", desc: "CLI와 Claude Code 플러그인을 따로 설치합니다." },
+      { href: "/docs/introduction", title: "소개", desc: "REAP란 무엇인가, 왜 사용하는가, 여섯 자리 구조." },
       { href: "/docs/quick-start", title: "첫 사용", desc: "init, evolve, complete 세 skill로 시작합니다." },
-      { href: "/docs/concepts", title: "개념", desc: "세 개의 층, 작업 단위, 3단 저장소, 상태 줄." },
-      { href: "/docs/skills", title: "skill 10종", desc: "agent가 REAP를 다루는 통로. 언제, 무엇을, 부르지 않는 경우를 정리합니다." },
-      { href: "/docs/cli", title: "CLI 레퍼런스", desc: "reap 명령 전체. make, mark, doctor, index, orch, ctx를 다룹니다." },
+      { href: "/docs/autonomous-evolution", title: "자율 진화 흐름", desc: "세션이 열리면 무슨 일이 일어나는가." },
+      { href: "/docs/v018change", title: "v0.18에서 바뀐 것", desc: "v0.17 대응표, 사라진 것, 그대로인 것." },
+      { href: "/docs/skill-reference", title: "skill 10종", desc: "agent가 REAP를 다루는 통로. 언제, 무엇을, 부르지 않는 경우를 정리합니다." },
+      { href: "/docs/cli-reference", title: "CLI 레퍼런스", desc: "reap 명령 전체. make, mark, doctor, index, orch, ctx를 다룹니다." },
       { href: "/docs/hooks", title: "hooks", desc: "여섯 이벤트에 거는 .md, .sh 훅과 조건, 순서." },
-      { href: "/docs/code-index", title: "코드 인덱스", desc: "커밋 단위로 갱신되는 코드 인덱스. 15개 언어." },
+      { href: "/docs/code-intelligence", title: "코드 인덱스", desc: "커밋 단위로 갱신되는 코드 인덱스. 15개 언어." },
       { href: "/docs/orchestrate", title: "orchestrate", desc: "두 세션 이상이 동시에 작업할 때 쓰는 claim과 barrier." },
       { href: "/docs/migration", title: "v0.17에서 이주", desc: "8단계로 이주합니다. 원본은 .reap-v0_17/에 그대로 보존됩니다." },
-      { href: "/docs/release-notes", title: "릴리스 노트", desc: "v0.18.0에서 무엇이 바뀌고 무엇이 사라졌는가." },
     ],
   },
 
   intro: {
     title: "소개",
     breadcrumb: "시작하기",
-    description: "REAP는 AI와 사람이 소프트웨어를 함께 진화시키기 위한 규약과 도구의 집합이다. 작업의 모양을 결정하지 않고, 작업이 쓸 수 있는 도구와 저장 규약을 제공한다.",
-    whatBuilds: "만드는 것은 둘이다. TypeScript·Bun으로 만든 CLI 바이너리 reap와, skill과 SessionStart 훅을 담은 Claude Code 플러그인이다. 둘은 따로 설치되고 따로 갱신된다 — 한쪽만 있는 상태를 정상으로 전제한다.",
-    changedTitle: "무엇이 달라졌나",
-    changedIntro: "전작은 5단계 lifecycle을 강제하는 파이프라인 실행기였다. 그 경직성을 유지하려고 스크립트와 서명 잠금을 계속 늘려야 했다. REAP는 그 반대로 간다.",
-    changedItems: [
-      "흐름은 CLI가 아니라 skill이 판단한다. 통과·차단하는 게이트가 없다",
-      "작업 단위가 하나(generation)에서 셋(loop·milestone·generation)으로 나뉜다 — 기획과 실행이 서로 다른 사이클로 돈다",
-      "사람의 평가는 매 세대가 아니라 milestone이 끝날 때 받는다",
-      "기획 산출물은 REAP 소유물이 아니라 리포 안팎 어디든 있을 수 있는 등록된 plan source다",
+    description: "REAP(Recursive Evolutionary Autonomous Pipeline)는 AI와 사람이 협업하여 loop, milestone, generation으로 이어지는 작업 흐름을 통해 소프트웨어를 진화시키는 규약과 도구입니다. 흐름을 스크립트가 강제하지 않고, agent가 skill을 읽어 그때그때 판단합니다.",
+    whatBuilds: "REAP가 만드는 것은 둘입니다. TypeScript·Bun으로 만든 CLI 바이너리 reap와, skill과 SessionStart 훅을 담은 Claude Code 플러그인입니다. 둘은 따로 설치되고 따로 갱신됩니다 — 한쪽만 있는 상태도 정상입니다.",
+    whyReapTitle: "왜 REAP인가?",
+    problemHeader: "문제",
+    solutionHeader: "REAP 솔루션",
+    problems: [
+      ["컨텍스트 손실 — agent가 매 세션마다 프로젝트 컨텍스트를 잊습니다", "SessionStart 훅이 genome, environment 요약, 상태 줄을 매 세션 자동으로 주입합니다"],
+      ["산발적 개발 — 목표 없이 코드 변경이 흩어집니다", "milestone이 경계와 종료 조건을 가진 실행 단위로 자르고, generation이 그 안에서 하나의 의도에 집중합니다"],
+      ["설계-코드 괴리 — 문서가 코드에서 벗어납니다", "구현 중 발견된 간극은 backlog로 기록되고 다음 generation이 반영합니다"],
+      ["잊혀진 교훈 — 과거 작업의 인사이트가 사라집니다", "vision/memory/lessons.md에 교훈이 쌓이고, 참고 가치가 다한 세대는 archive에 보존됩니다"],
+      ["협업 혼란 — 병렬 작업이 충돌하는 변경으로 이어집니다", "orchestrate skill이 claim과 barrier로 여러 세션의 작업을 조율합니다"],
     ],
-    conceptsLinkText: "무엇이 바뀌었는지 더 자세히는 개념에서 다룬다.",
-    principlesTitle: "일곱 원칙",
-    principles: [
-      { title: "REAP는 흐름을 제어하지 않는다", desc: "세대 내부의 순서도, 언제 열고 닫을지도 skill이 기술하고 agent가 판단한다" },
-      { title: "확률에 의존하면 안 되는 것만 스크립트가 소유한다", desc: "id 발급, frontmatter, 세션 바인딩, 원자적 선점. 나머지는 판단이다" },
-      { title: "커밋 없이 generation을 닫지 않는다", desc: "게이트가 아니라 agent가 직접 확인하는 규칙이다" },
-      { title: "공유 맥락은 milestone에 쌓인다", desc: "generation은 맥락을 소비하고 갱신하되 소유하지 않는다" },
-      { title: "도구는 흐름을 막는 대신 사후에 검증한다", desc: "reap doctor가 확정적으로 검사 가능한 것을 보고만 한다" },
-      { title: "검증할 수 없는 것을 검증한 척하지 않는다", desc: "못 하는 검사를 하는 척하는 것이 조용히 통과시키는 것보다 나쁘다" },
-      { title: "사람이 적합도를 판정한다", desc: "정량 지표는 없다. milestone이 끝날 때 사람의 자연어 피드백이 유일한 신호다" },
+    structureTitle: "구조",
+    structureDesc: "REAP는 여섯 개의 자리로 구성됩니다:",
+    structureItems: [
+      { label: "Knowledge", sub: "genome + environment", path: ".reap/genome/ + .reap/environment/", desc: "genome(규범 — 제품 정체성, AI 행동 규칙, 절대 제약)과 environment(서술 — 기술 스택, 소스 구조). 모든 작업의 기반입니다." },
+      { label: "Plan", sub: "plan source + loop", path: ".reap/plan/ + .reap/life/loops/", desc: "제품을 만들기 위한 모든 생각입니다. 리포 밖일 수 있는 plan source에 loop가 씁니다." },
+      { label: "Vision", sub: "milestone + memory", path: ".reap/vision/", desc: "하려는 것입니다. loop에서 잘라낸 milestone과 쌓인 교훈이 여기 있습니다." },
+      { label: "Life", sub: "generation + backlog", path: ".reap/life/", desc: "지금 살아 있는 것입니다. 진행 중이거나 아직 참고할 값이 있는 세대와 이월 항목이 여기 있습니다." },
+      { label: "Archive", sub: "닫힌 milestone, generation, loop", path: ".reap/archive/", desc: "더는 참고하지 않는 것입니다. milestone이 닫힐 때 cleanup skill이 여기로 내립니다." },
+      { label: "Civilization", sub: "소스 코드", path: ".reap/ 밖", desc: "generation이 진화시키는 대상입니다. 교훈이 다시 Knowledge로 피드백됩니다." },
     ],
-    principlesNote: "원칙의 근거와 전작과의 대조표는 REAP의 plan source인",
-    principlesLinkText: "01-concepts.md",
-    principlesLinkHref: "https://github.com/c-d-cc/reap/blob/main/docs/superpowers/specs/reap/01-concepts.md",
-    principlesNoteAfter: "에 있다.",
+    projectStructureTitle: "프로젝트 구조",
+    projectStructureTree: `my-project/
+├── src/                          # Civilization — 당신의 코드
+└── .reap/
+    ├── config.yml                 # 언어, agentClient, workspace-id
+    ├── map.md                     # 이 디렉토리가 무엇을 두는지 (씨앗)
+    ├── plan/
+    │   ├── sources.yml             # 등록된 plan source
+    │   └── conventions/            # <ps-id>-<slug>.md — 읽고 쓰는 법
+    ├── vision/                    # 하려는 것
+    │   ├── memory/
+    │   │   └── lessons.md          # 프로젝트 전역 교훈
+    │   └── milestones/
+    │       └── <ms-id>-<slug>/
+    │           ├── milestone.md
+    │           ├── handoff.md
+    │           └── tasks/
+    ├── life/                      # 지금 살아 있는 것
+    │   ├── generations/
+    │   ├── backlog/
+    │   └── loops/
+    ├── archive/                   # 더는 참고하지 않는 것
+    │   ├── generations/ · milestones/ · backlog/ · loops/ · idea/
+    ├── genome/
+    │   ├── application.md          # 제품 정체성, 아키텍처
+    │   ├── evolution.md            # AI 행동 규칙
+    │   └── invariants.md           # 절대 제약 (사람만 수정)
+    ├── environment/
+    │   ├── summary.md               # 기술 스택, 소스 구조, 빌드, 테스트
+    │   └── resources/
+    ├── idea/
+    │   ├── research/ · freememo/ · files/
+    ├── sequence/                  # id 레지스트리
+    └── hooks/                     # {event}.{name}.{md|sh}`,
     nextText: "시작하려면",
-    installLinkText: "설치로.",
+    quickStartLinkText: "첫 사용으로.",
   },
 
   v018change: {
     title: "v0.18에서 바뀐 것",
     breadcrumb: "시작하기",
     description: "v0.18에서 무엇이 바뀌었는지 — v0.17 대응표, 사라진 것, 그대로인 것.",
-    intro: "REAP는 5단계 lifecycle을 강제하는 파이프라인 실행기에서, agent가 판단을 위해 부르는 규약과 도구의 집합으로 다시 만들어졌다. 흐름을 스크립트가 정하지 않고, skill이 상황을 읽어 판단한다.",
+    intro: "REAP는 5단계 lifecycle을 강제하는 파이프라인 실행기에서, agent가 판단을 위해 부르는 규약과 도구의 집합으로 다시 만들어졌습니다. 흐름을 스크립트가 정하지 않고, skill이 상황을 읽어 판단합니다.",
     tableTitle: "v0.17 → v0.18 대응",
     tableHeaders: ["v0.17", "v0.18"],
     table: [
@@ -445,61 +531,52 @@ export const ko: Translations = {
       ["index search --kind", "index search <q> (kind 없음, 출력에 이미 있다)"],
     ],
     sameTitle: "그대로인 것",
-    sameDesc: "genome 3종(application·evolution·invariants)·environment/·backlog·코드 인덱스·hooks 자리는 이번에도 그대로다.",
+    sameDesc: "genome 3종(application·evolution·invariants)·environment/·backlog·코드 인덱스·hooks 자리는 이번에도 그대로입니다.",
     migrateNote: "v0.17에서 실제로 옮기려면",
     migrateLinkText: "이주 가이드 →",
-  },
-
-  install: {
-    title: "설치",
-    breadcrumb: "시작하기",
-    description: "REAP는 두 가지를 따로 설치한다 — CLI 바이너리와 Claude Code 플러그인. 둘 중 하나만 있어도 정상 상태다.",
-    cliTitle: "CLI",
-    cliCode: "npm i -g @c-d-cc/reap@next",
-    cliNote: "npm next 태그로 나간다. latest가 아니므로 @next를 붙여야 한다.",
-    pluginTitle: "Claude Code 플러그인",
-    pluginCode: `claude plugin marketplace add c-d-cc/plugins
-claude plugin install reap@ctod-plugins`,
-    verifyTitle: "확인",
-    verifyCode: "reap --version",
-    verifyNote: "새 Claude Code 세션을 열면 /reap: skill 10종이 보이고, 세션 시작 시 상태 줄이 뜬다. 둘 다 안 보이면 플러그인 설치가 안 된 것이다.",
-    uninstallTitle: "제거",
-    uninstallCode: `claude plugin uninstall reap@ctod-plugins
-npm rm -g @c-d-cc/reap`,
-    removeProjectNote: "프로젝트에서 REAP를 걷어내려면:",
-    removeProjectCode: "rm -rf .reap",
-    fromV017Title: "v0.17에서 왔다면",
-    fromV017Desc: "v0.17.7 이하는 세션 시작 시 자동 갱신으로 0.17.8이 된다. 0.17.8에서 reap update를 치면 upgrade agent가 설치되고, 그 agent가 v0.18 CLI와 플러그인을 설치한 뒤 /reap:migrate로 넘긴다. migrate skill이 데이터를 옮기고, 원본은 .reap-v0_17/에 그대로 보존한다 — 되돌릴 수 있다. 전체 단계는",
-    migrationLinkText: "이주 가이드",
-    nextText: "다음은",
-    quickStartLinkText: "첫 사용으로.",
   },
 
   quickstart: {
     title: "첫 사용",
     breadcrumb: "시작하기",
-    description: "프로젝트에서 세 skill만 있으면 REAP를 쓸 수 있다.",
-    intro: "프로젝트에서 (신규 폴더든 기존 코드베이스든) 세 skill만 있으면 된다.",
+    description: "REAP 설치부터 첫 loop·generation까지 — 사전 준비물, 두 단계 설치, 세 skill로 도는 첫 바퀴.",
+    intro: "프로젝트에서 (신규 폴더든 기존 코드베이스든) 세 skill만 있으면 됩니다.",
+    prerequisitesTitle: "사전 요구 사항",
+    prerequisiteHeaders: ["항목", "설명"],
+    prerequisites: [
+      { name: "Node.js", desc: "v20 이상", required: true },
+      { name: "Claude Code", desc: "AI 에이전트 CLI. skill과 SessionStart 훅을 이 위에서 씁니다", required: true },
+      { name: "git", desc: "커밋 규칙과 workspace-id 계산에 씁니다", required: true },
+    ],
+    requiredLabel: "필수",
+    optionalLabel: "선택",
+    installTitle: "설치",
+    installStep1: "1. CLI를 전역 설치합니다",
+    installCliCode: "npm i -g @c-d-cc/reap@next",
+    installStep2: "2. Claude Code 플러그인을 설치합니다",
+    installPluginCode: `claude plugin marketplace add c-d-cc/plugins
+claude plugin install reap@ctod-plugins`,
+    installVerifyNote: "둘 중 하나만 있어도 정상 상태입니다. 새 Claude Code 세션을 열면 /reap: skill 10종이 보이고, 세션 시작 시 상태 줄이 뜹니다 — 둘 다 안 보이면 플러그인 설치가 안 된 것입니다.",
     steps: [
       {
         title: "처음 한 번",
         command: "/reap:init",
-        desc: "정본 지식을 세운다 — plan source 등록, .reap/environment/summary.md, .reap/genome/. 프로젝트당 딱 한 번이다. 이 skill만 상태 줄이 안내하지 못한다 — .reap/가 없으면 SessionStart 훅이 침묵하므로 사람이 직접 불러야 한다.",
+        desc: "정본 지식을 세웁니다 — plan source 등록, .reap/environment/summary.md, .reap/genome/. 프로젝트당 딱 한 번입니다. 이 skill만 상태 줄이 안내하지 못합니다 — .reap/가 없으면 SessionStart 훅이 침묵하므로 사람이 직접 불러야 합니다.",
       },
       {
-        title: "세대를 연다",
+        title: "세대를 엽니다",
         command: "/reap:evolve",
-        desc: "새 의도를 만드는 일인지(loop), 만들어둔 의도를 실현하는 일인지(exec generation), 이미 있는 의도로 되돌리는 일인지(fix generation)를 판단하고 연다. 그다음은 자율 구간이다 — 탐색하고 짜고 고친다. 순서도 횟수도 REAP가 정하지 않는다.",
+        desc: "새 의도를 만드는 일인지(loop), 만들어둔 의도를 실현하는 일인지(exec generation), 이미 있는 의도로 되돌리는 일인지(fix generation)를 판단하고 엽니다. 그다음은 자율 구간입니다 — 탐색하고 짜고 고칩니다. 순서도 횟수도 REAP가 정하지 않습니다.",
       },
       {
-        title: "세대를 닫는다",
+        title: "세대를 닫습니다",
         command: "/reap:complete",
-        desc: "커밋 규칙(git status --porcelain이 비어 있고, 시작 커밋 이후 새 커밋이 있는가)을 확인하고, 기록과 handoff.md를 정리한 뒤 세대를 닫는다.",
+        desc: "커밋 규칙(git status --porcelain이 비어 있고, 시작 커밋 이후 새 커밋이 있는가)을 확인하고, 기록과 handoff.md를 정리한 뒤 세대를 닫습니다.",
       },
     ],
-    statusLineTitle: "상태 줄이 지도다",
-    statusLineDesc1: "세션이 열릴 때마다 SessionStart 훅이 reap ctx를 불러 맥락을 주입한다. genome 본문과 environment 요약, 그리고 상태 줄 — 지금 무엇이 열려 있고 무엇을 더 읽어야 하는지 경로로 가리키는 한 뭉치다.",
-    statusLineDesc2: "아래는 빈 프로젝트에서 reap init 뒤 reap make loop·reap make milestone --focus·reap make generation을 차례로 거친 뒤 실제로 찍은 reap ctx 출력이다 (genome·environment 본문은 초기 씨앗 그대로다 — 채워 넣는 절차는 /reap:init이 한다):",
+    statusLineTitle: "상태 줄이 지도입니다",
+    statusLineDesc1: "세션이 열릴 때마다 SessionStart 훅이 reap ctx를 불러 맥락을 주입합니다. genome 본문과 environment 요약, 그리고 상태 줄 — 지금 무엇이 열려 있고 무엇을 더 읽어야 하는지 경로로 가리키는 한 뭉치입니다.",
+    statusLineDesc2: "아래는 빈 프로젝트에서 reap init 뒤 reap make loop·reap make milestone --focus·reap make generation을 차례로 거친 뒤 실제로 찍은 reap ctx 출력입니다 (genome·environment 본문은 초기 씨앗 그대로입니다 — 채워 넣는 절차는 /reap:init이 합니다):",
     statusLineExample: `<!-- reap 상태 -->
 응답 언어: ko
 현재 milestone: ms-001 로그인 붙이기 (focus, open)
@@ -511,52 +588,80 @@ npm rm -g @c-d-cc/reap`,
 기억: .reap/vision/memory/lessons.md
 구조: .reap/map.md
 작업을 시작하면 /reap:evolve, 마무리하면 /reap:complete`,
-    statusLineNote: "milestone.md도 handoff.md도 본문이 이 안에 실려 있지 않다 — 상태 줄은 경로와 이름만 알리고, 그 경로를 열지 말지는 agent가 판단한다. 이 판단 순서와 저장 구조 전체는",
-    conceptsLinkText: "개념",
-    statusLineNoteAfter: "에서 다룬다.",
+    statusLineNote: "milestone.md도 handoff.md도 본문이 이 안에 실려 있지 않습니다 — 상태 줄은 경로와 이름만 알리고, 그 경로를 열지 말지는 agent가 판단합니다. 세션이 열린 뒤 무슨 일이 일어나는지는",
+    conceptsLinkText: "자율 진화 흐름",
+    statusLineNoteAfter: "에서 자세히 다룹니다.",
+    nextTitle: "다음 단계",
+    nextLinks: [
+      { href: "/docs/autonomous-evolution", title: "자율 진화 흐름", desc: "세션이 열리면 무슨 일이 일어나는가." },
+      { href: "/docs/introduction", title: "소개", desc: "REAP란 무엇인가, 여섯 자리 구조." },
+    ],
   },
 
-  concepts: {
-    title: "개념",
+  autonomousEvolution: {
+    title: "자율 진화 흐름",
     breadcrumb: "시작하기",
-    description: "REAP가 하는 일 전부를 요약한다 — 세 개의 층, 작업 단위, 3단 저장소, 상태 줄.",
-    intro: "REAP가 하는 일 전부는 이 문서 하나로 요약된다. 근거와 전문은 REAP의 plan source(docs/superpowers/specs/reap/)에 있다 — 여기는 그것을 옮겨 적지 않고, 실제로 REAP를 쓸 때 무엇을 어디서 찾는지만 정리한다.",
-    layersTitle: "세 개의 층",
-    layersHeaders: ["층", "누가", "무엇을"],
-    layers: [
-      ["판단", "skill을 읽는 agent", "무엇을 할지, 언제 할지, 됐는지"],
-      ["확정", "reap CLI", "확률에 맡길 수 없는 사실을 못 박는다 — id 발급, frontmatter, 원자적 선점"],
-      ["사실", "git, 파일시스템", "실제로 무슨 일이 있었는가 — 커밋 유무, 작업 트리 상태"],
+    description: "세션이 열리면 무슨 일이 일어나는가 — SessionStart 훅의 주입, evolve의 세 판단, 자율 구간, complete의 커밋 규칙, milestone의 fitness.",
+    intro: "REAP는 흐름을 제어하지 않습니다. 세션이 열릴 때 무엇이 자동으로 일어나고, 그다음부터 어디까지가 agent의 판단이고 어디부터가 사람의 몫인지를 순서대로 봅니다.",
+    sessionStartTitle: "세션이 열릴 때",
+    sessionStartDesc: "Claude Code에서 REAP 프로젝트를 열면 SessionStart 훅이 reap ctx를 불러 맥락을 주입합니다. 매 세션 실리는 것은 이 셋뿐입니다.",
+    injectedItems: [
+      { label: "genome/ 본문", desc: "application.md·evolution.md·invariants.md — 제품 정체성, AI 행동 규칙, 절대 제약." },
+      { label: "environment/summary.md 본문", desc: "현재 기술 스택, 소스 구조, 빌드·테스트 방법." },
+      { label: "상태 줄", desc: "열린 milestone·generation·loop의 경로와 이름. milestone.md도 handoff.md도 본문은 실리지 않습니다 — 그 경로를 열지 말지는 agent가 그때그때 판단합니다." },
     ],
-    layersNote: "agent는 판단하고, CLI에게 확정을 요청하고, 사실은 git에게 직접 묻는다. CLI가 사실을 감싸지 않는 이유는 agent가 이미 git status를 쓸 수 있기 때문이다.",
-    unitsTitle: "작업 단위 — loop·milestone·generation",
-    units: [
-      { name: "loop", desc: "새 의도를 만든다. 유형은 plan·design·uiux·idea 넷. 여러 세션에 걸치는 것이 정상이고, 여럿이 나란히 열릴 수 있다. 산출물이 자리를 찾으면(milestone을 낳거나, plan source에 쓰거나) 닫힌다" },
-      { name: "milestone", desc: "loop에서 잘라낸 실행 가능한 단위. 경계와 종료 조건을 가지며, 공유 context가 쌓이는 자리이자 사람의 fitness 평가를 받는 단위다" },
-      { name: "generation", desc: "소스코드를 진화시키는 작업 사이클. 세션에 바인딩되고 하나만 열린다" },
+    statusLineTitle: "실물 예시",
+    statusLineDesc: "아래는 빈 프로젝트에서 reap init 뒤 reap make loop·reap make milestone --focus·reap make generation을 차례로 거친 뒤 실제로 찍은 reap ctx의 상태 줄입니다.",
+    statusLineExample: `<!-- reap 상태 -->
+응답 언어: ko
+현재 milestone: ms-001 로그인 붙이기 (focus, open)
+  .reap/vision/milestones/ms-001-login/
+    milestone.md
+열린 세대: gen-0001-exec 로그인 폼과 세션 발급 — .reap/life/generations/gen-0001-exec-login-form.md
+  2026-09-04T14:28:50Z 시작, 시작 커밋 a40f09d
+열린 loop: loop-0001-plan 인증 붙이기 — .reap/life/loops/loop-0001-plan-auth.md
+기억: .reap/vision/memory/lessons.md
+구조: .reap/map.md
+작업을 시작하면 /reap:evolve, 마무리하면 /reap:complete`,
+    judgmentsTitle: "evolve의 세 판단",
+    judgmentsDesc: "사람이 무언가를 하자고 하면 /reap:evolve가 열립니다. 이 skill은 세 가지를 차례로 판단합니다.",
+    judgments: [
+      { title: "세대를 열 값이 있는가", desc: "한 번의 편집과 한 번의 커밋으로 끝나는 일에는 세대를 열지 않습니다. 세대 기록이 필요한 것은 작업이 진행 중인 동안 무엇을 하는 중이었는지를 붙잡아 둘 때뿐입니다." },
+      { title: "loop인가, generation인가", desc: "새 의도를 만드는 일이면 loop입니다 — 기획, 설계, 화면, 아직 자리 없는 아이디어. 이미 정해진 의도를 실현하거나(exec) 되돌리는 일이면(fix) generation입니다." },
+      { title: "직접 하는가, 위임하는가", desc: "기본은 같은 세션이 직접 합니다. 여러 파일과 긴 탐색으로 주 세션의 컨텍스트를 채울 것 같거나, 사람이 위임을 요청했거나, 병렬로 둘 이상을 굴릴 때는 subagent에게 brief를 주고 맡깁니다." },
     ],
-    splitHeaders: ["유형", "무엇을", "milestone 소속"],
-    splitRows: [
-      ["exec", "새 의도를 실현한다", "반드시 소속 — 근거는 milestone 또는 backlog 항목"],
-      ["fix", "이미 있는 의도로 되돌린다 (버그, 깨진 빌드, 낡은 의존성)", "무소속"],
-    ],
-    splitNote: "fix가 milestone을 갖지 않는 이유는 작아서가 아니다. milestone은 새 의도에 경계를 주는 장치인데, 되돌리는 일은 새 의도를 만들지 않는다 — 되돌아갈 곳 자체가 이미 경계다. 크기는 축을 가르는 기준이 아니다: 작은 새 기능도 fix가 아니라 exec이다.",
-    storageTitle: "3단 저장소",
-    storageTree: `vision/    하려는 것 — 기억(memory/), 잘라낸 실행 단위(milestones/)
-life/      지금 살아 있는 것 — generations/, backlog/, loops/
-archive/   더는 참고하지 않는 것`,
-    storageNote: "life/는 \"열려 있는 것\"이 아니라 \"아직 참고할 값이 있는 것\"이 쌓이는 곳이다. 닫힌 generation도 참고할 값이 남아 있으면 거기 있다 — 닫힘은 상태이고 archive는 위치이며, 둘은 다른 질문에 답한다. milestone이 닫힐 때 cleanup skill이 life/generations/를 훑어 참고 가치가 다한 것을 archive/로 내린다. 이 3단과 나란히, 시간축에 얹히지 않는 넷이 최상위에 선다.",
-    topLevelItems: [
-      { name: "plan/", desc: "리포 밖일 수 있는 plan source의 등록부(sources.yml)와 그것을 읽고 쓰는 법(conventions/)" },
-      { name: "genome/", desc: "application.md(제품 정체성) · evolution.md(AI 행동 규칙) · invariants.md(절대 제약, 사람만 수정)" },
-      { name: "environment/", desc: "현재 기술 스택, 소스 구조, 빌드·테스트 방법" },
-      { name: "idea/", desc: "아직 단단하지 않은 지식 — research/(결론 없는 조사) · freememo/(자유 메모) · files/(외부 참고자료)" },
-    ],
-    statusLineTitle: "상태 줄이 지도다",
-    statusLineDesc1: "세션이 열릴 때 매번 실리는 것은 genome/과 environment/summary.md의 본문, 그리고 상태 줄뿐이다. milestone.md도 handoff.md도 세대 기록 본문도 그 안에 실리지 않는다 — 상태 줄은 열린 milestone·generation·loop의 경로와 이름만 알리고, 그것을 열지 말지는 agent가 그때그때 판단한다.",
-    statusLineDesc2: "전체 배치를 이름만으로는 읽을 수 없다. 그래서 각 프로젝트는 .reap/map.md를 갖는다 — 이 디렉토리가 무엇을 어디에 두는지 설명하는 지도다. init이 한 번 놓고, 매 세션 주입되지는 않는다. 상태 줄이 구조: .reap/map.md로 자리만 알리면, 필요한 agent가 그때 연다.",
-    backLinkPrefix: "찍은 상태 줄 예시는",
-    backLinkText: "첫 사용",
+    autonomousTitle: "자율 구간",
+    autonomousDesc: "세대가 열리면 그다음은 REAP가 관여하지 않습니다. 탐색하고, 계획하고, 짜고, 고치고, 되돌립니다 — 순서도 횟수도 정해져 있지 않습니다. 지금 안 할 일은 reap make backlog로, 아직 단단하지 않은 것은 reap make idea로 적어 두고, 커밋은 원하는 만큼 나눠서 합니다.",
+    commitRuleTitle: "complete의 커밋 규칙",
+    commitRuleDesc: "일을 마치면 /reap:complete가 세대를 닫기 전에 커밋 규칙을 확인합니다. REAP의 유일한 규칙이고, 도구가 아니라 agent가 git에게 직접 물어 확인합니다.",
+    commitRuleCode: `git status --porcelain        # 비어 있어야 한다
+git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
+    fitnessTitle: "milestone이 끝나면 사람의 fitness",
+    fitnessDesc: "generation마다가 아니라 milestone이 끝날 때 사람이 자연어로 fitness를 평가합니다. 정량 지표는 두지 않습니다 — 매 세대 사람이 막아서는 마찰이 자율성과 충돌하기 때문입니다. fitness가 확인되면 cleanup이 참고 가치가 다한 세대를 archive로 내리고, milestone 디렉토리가 닫힙니다.",
+  },
+
+  placeholder: {
+    notice: "이 문서는 준비 중입니다.",
+    pages: {
+      twoAxes: { title: "두 축", breadcrumb: "핵심 개념", description: "Plan 축과 Execution 축이 milestone에서 만나는 지점." },
+      threeLayers: { title: "판단·확정·사실", breadcrumb: "핵심 개념", description: "무엇이 skill의 판단이고 무엇이 CLI의 확정이고 무엇이 git의 사실인가." },
+      storage: { title: "저장 구조", breadcrumb: "핵심 개념", description: "vision·life·archive 3단과 id 체계." },
+      loop: { title: "Loop", breadcrumb: "Plan 축", description: "새 의도를 만드는 plan 축의 사이클." },
+      planSource: { title: "Plan Source", breadcrumb: "Plan 축", description: "리포 밖일 수 있는 기획 문서의 등록부." },
+      idea: { title: "Idea와 Research", breadcrumb: "Plan 축", description: "아직 단단하지 않은 지식을 두는 자리." },
+      carveMilestone: { title: "Milestone 자르기", breadcrumb: "Plan 축", description: "plan을 실행 가능한 단위로 자르는 절차." },
+      generation: { title: "Generation", breadcrumb: "Execution 축", description: "exec와 fix, 소스코드를 진화시키는 작업 사이클." },
+      delegation: { title: "위임 모드", breadcrumb: "Execution 축", description: "generation을 subagent에 위임하는 절차." },
+      backlog: { title: "Backlog", breadcrumb: "Execution 축", description: "지연되거나 발견된 이슈를 다음 generation으로 넘기는 자리." },
+      closingMilestone: { title: "Milestone 닫기와 Fitness", breadcrumb: "Execution 축", description: "사람의 fitness 평가와 cleanup·mark 순서." },
+      genome: { title: "Genome", breadcrumb: "지식", description: "제품 정체성, 행동 규칙, 절대 제약." },
+      environment: { title: "Environment", breadcrumb: "지식", description: "현재 기술 스택, 소스 구조, 빌드·테스트 방법." },
+      visionMemory: { title: "Vision과 Memory", breadcrumb: "지식", description: "milestone과 교훈이 쌓이는 자리." },
+      claimBarrier: { title: "Claim과 Barrier", breadcrumb: "협업", description: "두 세션 이상이 동시에 작업할 때의 자원 선점과 합류 지점." },
+      configuration: { title: "설정", breadcrumb: "레퍼런스", description: ".reap/config.yml의 필드." },
+      doctor: { title: "Doctor", breadcrumb: "레퍼런스", description: "확정적으로 검사 가능한 것만 보고하는 점검 도구." },
+      comparison: { title: "비교", breadcrumb: "기타", description: "REAP가 기존 스펙 기반 개발 도구와 어떻게 다른가." },
+    },
   },
 
   skills: {
@@ -697,7 +802,7 @@ archive/   더는 참고하지 않는 것`,
 
   hooks: {
     title: "hooks",
-    breadcrumb: "레퍼런스",
+    breadcrumb: "협업",
     description: "여섯 이벤트에 거는 .md/.sh 훅과 조건·순서.",
     intro: "REAP가 직접 매개하는 지점(make·mark·orchestrate의 원자적 연산)에 이벤트 훅을 걸 수 있다. 메시지 송수신처럼 REAP가 관측할 수 없는 지점에는 훅이 없다.",
     eventsTitle: "여섯 이벤트",
@@ -729,7 +834,7 @@ archive/   더는 참고하지 않는 것`,
 
   codeIndex: {
     title: "코드 인덱스",
-    breadcrumb: "레퍼런스",
+    breadcrumb: "지식",
     description: "커밋 단위로 갱신되는 코드 인덱스. 15개 언어, 설치할 것 없음.",
     intro: "reap index는 커밋 단위로 자동 갱신되는 코드 인덱스를 질의한다. 상주 프로세스도 백그라운드 감시자도 없다 — 질의가 스스로 HEAD와 인덱스를 비교해 필요하면 먼저 올린 뒤 답한다.",
     subcommandsTitle: "하위 명령",
@@ -754,7 +859,7 @@ reap index callees <symbolId> # 이것이 무엇을 부르는가`,
 
   orchestrate: {
     title: "orchestrate",
-    breadcrumb: "레퍼런스",
+    breadcrumb: "협업",
     description: "두 세션 이상이 동시에 작업할 때 — claim과 barrier.",
     intro: "두 세션 이상이 같은 REAP 프로젝트에서 동시에 작업할 때 쓴다. REAP가 주는 것은 만남의 장소뿐이다 — 자원 선점(claim)과 종료 대기(barrier). 메시지 전달 자체는 Claude Code의 SendMessage/ListAgents가 하고 REAP는 그 위에 mailbox를 만들지 않는다.",
     aloneNote: "혼자 일할 때는 이 skill이 없는 것과 같다. 상태 줄에도 doctor에도 아무것도 안 나온다.",

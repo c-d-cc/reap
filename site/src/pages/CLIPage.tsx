@@ -37,7 +37,7 @@ export default function CLIPage() {
         </div>
 
         <p className="text-xs text-muted-foreground">
-          <Link href="/docs/code-index" className="text-primary hover:underline">{c.indexLinkText}</Link>{" · "}
+          <Link href="/docs/code-intelligence" className="text-primary hover:underline">{c.indexLinkText}</Link>{" · "}
           <Link href="/docs/orchestrate" className="text-primary hover:underline">{c.orchLinkText}</Link>
         </p>
       </DocPage>

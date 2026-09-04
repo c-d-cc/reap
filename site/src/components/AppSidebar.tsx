@@ -9,25 +9,67 @@ export function useNavGroups() {
       label: t.nav.groups.gettingStarted,
       items: [
         { title: t.nav.items.introduction, href: "/docs/introduction" },
-        { title: t.nav.items.v018change, href: "/docs/v018change" },
-        { title: t.nav.items.install, href: "/docs/install" },
         { title: t.nav.items.quickStart, href: "/docs/quick-start" },
-        { title: t.nav.items.concepts, href: "/docs/concepts" },
+        { title: t.nav.items.autonomousEvolution, href: "/docs/autonomous-evolution" },
+        { title: t.nav.items.v018change, href: "/docs/v018change" },
+      ]
+    },
+    {
+      label: t.nav.groups.coreConcepts,
+      items: [
+        { title: t.nav.items.twoAxes, href: "/docs/two-axes" },
+        { title: t.nav.items.threeLayers, href: "/docs/three-layers" },
+        { title: t.nav.items.storage, href: "/docs/storage" },
+      ]
+    },
+    {
+      label: t.nav.groups.planAxis,
+      items: [
+        { title: t.nav.items.loop, href: "/docs/loop" },
+        { title: t.nav.items.planSource, href: "/docs/plan-source" },
+        { title: t.nav.items.idea, href: "/docs/idea" },
+        { title: t.nav.items.carveMilestone, href: "/docs/carve-milestone" },
+      ]
+    },
+    {
+      label: t.nav.groups.execAxis,
+      items: [
+        { title: t.nav.items.generation, href: "/docs/generation" },
+        { title: t.nav.items.delegation, href: "/docs/delegation" },
+        { title: t.nav.items.backlog, href: "/docs/backlog" },
+        { title: t.nav.items.closingMilestone, href: "/docs/closing-milestone" },
+      ]
+    },
+    {
+      label: t.nav.groups.knowledge,
+      items: [
+        { title: t.nav.items.genome, href: "/docs/genome" },
+        { title: t.nav.items.environment, href: "/docs/environment" },
+        { title: t.nav.items.visionMemory, href: "/docs/vision-memory" },
+        { title: t.nav.items.codeIntelligence, href: "/docs/code-intelligence" },
+      ]
+    },
+    {
+      label: t.nav.groups.collaboration,
+      items: [
+        { title: t.nav.items.orchestrate, href: "/docs/orchestrate" },
+        { title: t.nav.items.claimBarrier, href: "/docs/claim-barrier" },
+        { title: t.nav.items.hooks, href: "/docs/hooks" },
       ]
     },
     {
       label: t.nav.groups.reference,
       items: [
-        { title: t.nav.items.skills, href: "/docs/skills" },
-        { title: t.nav.items.cli, href: "/docs/cli" },
-        { title: t.nav.items.hooks, href: "/docs/hooks" },
-        { title: t.nav.items.codeIndex, href: "/docs/code-index" },
-        { title: t.nav.items.orchestrate, href: "/docs/orchestrate" },
+        { title: t.nav.items.skillReference, href: "/docs/skill-reference" },
+        { title: t.nav.items.cliReference, href: "/docs/cli-reference" },
+        { title: t.nav.items.configuration, href: "/docs/configuration" },
+        { title: t.nav.items.doctor, href: "/docs/doctor" },
       ]
     },
     {
       label: t.nav.groups.other,
       items: [
+        { title: t.nav.items.comparison, href: "/docs/comparison" },
         { title: t.nav.items.migration, href: "/docs/migration" },
         { title: t.nav.items.releaseNotes, href: "/docs/release-notes" },
       ]
