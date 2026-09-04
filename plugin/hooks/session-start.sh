@@ -2,17 +2,21 @@
 # REAP SessionStart hook.
 #
 # **This script never blocks session start, for any reason** (.reap/genome/invariants.md).
-# So it doesn't turn on set -e — if a reap call fails, the whole hook would die,
-# and the user wouldn't even know REAP was the cause.
+# So no `set -e` — if the reap call fails the hook would die with it, and the user
+# would not even know REAP was the cause.
 #
-# Emit nothing and nothing gets injected. That's how every failure is handled.
+# Emitting nothing injects nothing. That is how every failure is handled — except one:
+# a missing `reap` binary is reported, because the plugin is installed and the user
+# has no other way to learn why nothing shows up.
 #
-# Hanging isn't guarded against here — Claude Code owns execution, and
-# hooks.json declares the timeout. A script timing itself would need a
-# background job and a kill, and that complexity would break this script's
-# one virtue (doing nothing).
+# Hanging is not handled here — Claude Code owns execution and hooks.json declares
+# the timeout. Timing ourselves would need a background job and a kill, and that
+# complexity would break this script's only virtue (doing nothing).
 
-command -v reap >/dev/null 2>&1 || exit 0
+if ! command -v reap >/dev/null 2>&1; then
+  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"<!-- reap status -->\nREAP plugin is installed but the `reap` CLI is not on PATH, so nothing was injected. Install it: `npm i -g @c-d-cc/reap@next` (or put the built binary on PATH), then open a new session."}}'
+  exit 0
+fi
 
 output=$(reap ctx --hook 2>/dev/null) || exit 0
 [ -n "$output" ] || exit 0

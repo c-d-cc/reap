@@ -24,11 +24,21 @@ REAP는 따로 설치되고 따로 낡는 표면이 **둘**이다.
 
 ```bash
 cd "$(git rev-parse --show-toplevel)"
-bun run build
+bun run build          # dist/reap — 컴파일 바이너리 (tests/hook.test.sh가 쓴다)
+bun run build:node     # dist/node/reap.js — 사용자가 npm으로 받는 것과 같은 번들
 claude plugin marketplace update reap-dev
 claude plugin uninstall reap@reap-dev
 claude plugin install reap@reap-dev -y
 ```
+
+**처음 한 번은 `npm link`** — `package.json`의 `bin`(`dist/node/reap.js`)을 npm 전역 bin에 심링크한다. 그 뒤로는 `build:node`만 하면 PATH의 `reap`가 곧 이 작업 트리다. PATH 편집이 필요 없고 새 셸에서도 잡힌다. 사용자 설치와 같은 산출물로 개발한다.
+
+```bash
+npm link                      # 한 번. 풀 때는 npm unlink -g @c-d-cc/reap
+readlink -f "$(command -v reap)"   # 이 리포의 dist/node/reap.js 여야 한다
+```
+
+**PATH에 다른 `reap`가 앞서 있으면 그것이 이긴다.** `command -v reap`가 이 리포 밖을 가리키면 그 항목을 PATH에서 빼야 한다 — 훅은 PATH의 `reap`를 부른다.
 
 **커밋하지 않아도 된다.** 설치는 git HEAD가 아니라 **작업 트리**를 복사한다. `installed_plugins.json`의 `gitCommitSha`는 기록일 뿐 복사 기준이 아니다.
 
@@ -59,8 +69,13 @@ probe로 확인한 것이다. 다음에 이 절차를 줄이려는 사람이 같
 ## 반영됐는지 확인한다
 
 ```bash
-# 1) 바이너리가 src보다 새것인가 — 0이어야 한다
+# 1) 바이너리·번들이 src보다 새것인가 — 둘 다 0이어야 한다
 find src -type f -newer dist/reap | wc -l
+find src -type f -newer dist/node/reap.js | wc -l
+
+# 1') PATH의 reap가 이 리포인가
+readlink -f "$(command -v reap)"
+reap --version
 
 # 2) 캐시본이 리포와 같은가 — 차이가 없어야 한다
 V=$(python3 -c 'import json;print(json.load(open("plugin/.claude-plugin/plugin.json"))["version"])')
