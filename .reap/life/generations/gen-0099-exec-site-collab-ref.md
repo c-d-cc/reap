@@ -6,7 +6,9 @@ milestone: ms-022
 title: 문서 협업 3쪽·레퍼런스 4쪽·기타 3쪽
 startedAt: 2026-09-04T15:52:02Z
 startCommit: 0a68afb
-status: open
+status: closed
+closedAt: 2026-09-04T16:14:34Z
+endCommit: 09c8b4a
 ---
 ## Intent
 
