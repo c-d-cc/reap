@@ -95,3 +95,4 @@
 | gen-0091-exec | tests submodule 전환 — reap-test v0.18 재동기, ci/release dispatch, skill·문서 | 2026-09-04 |
 | gen-0092-exec | 최종 재검증 — en/ko 왕복 둘·발행 직전 체크·문서 정합 | 2026-09-04 |
 | gen-0093-exec | 사이트 재구축 — v0.17 문서 앱 디자인 그대로, 내용만 v0.18 (ko) | 2026-09-04 |
+| gen-0094-exec | 홈 breaking change 띠와 /docs/v018change 페이지 | 2026-09-04 |
