@@ -161,7 +161,7 @@ export function HeroPage() {
           </div>
           <p className="text-xs text-muted-foreground mt-2">
             {h.installNote}{" "}
-            <Link href="/docs/install" className="text-primary hover:underline">{h.installLinkText}</Link>
+            <Link href="/docs/quick-start" className="text-primary hover:underline">{h.installLinkText}</Link>
           </p>
         </Section>
 
