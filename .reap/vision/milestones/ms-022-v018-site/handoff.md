@@ -14,12 +14,15 @@
 - 내용이 맞는가 — 열두 쪽의 문구는 `site/*.md`(gen-0085·0088이 쓴 한국어 본문, 이번에
   옮기며 지웠다)와 `RELEASE_NOTES.md`가 원천
 
-## 라우트 열둘
+## 라우트 열셋
+
+gen-0094-exec에서 홈 breaking change 띠와 `/docs/v018change`(소개 다음)를 더했다.
 
 | 경로 | 페이지 | 분류 |
 |---|---|---|
 | `/` | Hero | 시작하기 |
 | `/docs/introduction` | 소개 | 시작하기 |
+| `/docs/v018change` | v0.18에서 바뀐 것 | 시작하기 |
 | `/docs/install` | 설치 | 시작하기 |
 | `/docs/quick-start` | 첫 사용 | 시작하기 |
 | `/docs/concepts` | 개념 | 시작하기 |
