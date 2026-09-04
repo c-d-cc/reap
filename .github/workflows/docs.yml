@@ -6,7 +6,14 @@ on:
     branches: [main]
     paths:
       - 'site/**'
+      - 'README*.md'
       - '.github/workflows/docs.yml'
+      # The gate below lives outside site/ and nothing else runs it — not
+      # ci.yml, not release.yml. Without these two lines, editing the gate does
+      # not run the gate, and a change to it would first execute whenever
+      # someone happened to touch a documentation page.
+      - 'scripts/check-docs-prerender.sh'
+      - 'scripts/check-docs-prerender.mjs'
 
 permissions:
   contents: read
@@ -28,12 +35,30 @@ jobs:
       - name: Install site dependencies
         run: bun install --cwd site --frozen-lockfile
 
+      # `vite build` runs esbuild, which strips types without checking them, and
+      # the root tsconfig includes `src/**` only — so this is the only place
+      # `site/` gets typechecked. Placed before the build so a failure stops
+      # the deploy rather than shipping past it.
+      - name: Typecheck site
+        run: bunx --cwd site tsc --noEmit -p tsconfig.json
+
+      # `bun run site:build`, not `vite build` directly. The build is three
+      # steps — the client bundle, an SSR bundle of `src/entry-server.tsx`,
+      # and the prerender pass that renders all twelve routes into
+      # `dist/public/<route>/index.html`. Calling vite directly would run only
+      # the first of the three and deploy the shell.
       - name: Build site
         run: bun run site:build
 
+      # Layer 1: the files landed, with the right contents. Placed before the
+      # upload so a shell-only build stops the deploy instead of replacing a
+      # working site with one.
+      - name: Check prerendered output
+        run: bash scripts/check-docs-prerender.sh
+
       - uses: actions/upload-pages-artifact@v3
         with:
-          path: site/.vitepress/dist
+          path: site/dist/public
 
   deploy:
     needs: build
