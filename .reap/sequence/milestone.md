@@ -24,3 +24,4 @@
 | ms-021 | en 전환 — CLI 메시지 카탈로그, skill·템플릿 en, README en/ko | 2026-09-04 |
 | ms-022 | 문서 사이트 — VitePress, 한국어 먼저 | 2026-09-04 |
 | ms-023 | 테스트 비공개 — reap-test v0.18 submodule과 CI dispatch | 2026-09-04 |
+| ms-024 | migrate 2차 — 작업 상태 복원: milestone·backlog·plan 재구성, genome·CLAUDE.md 갱신 | 2026-09-04 |

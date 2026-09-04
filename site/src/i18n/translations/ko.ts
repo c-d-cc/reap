@@ -475,14 +475,53 @@ export interface Translations {
     notInjectedNote: string;
   };
 
-  placeholder: {
-    notice: string;
-    pages: {
-      claimBarrier: { title: string; breadcrumb: string; description: string };
-      configuration: { title: string; breadcrumb: string; description: string };
-      doctor: { title: string; breadcrumb: string; description: string };
-      comparison: { title: string; breadcrumb: string; description: string };
-    };
+  configurationPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    yamlTitle: string;
+    yamlCode: string;
+    fieldsTitle: string;
+    fieldHeaders: string[];
+    fields: [string, string][];
+    langTitle: string;
+    langDesc: string;
+    overrideTitle: string;
+    overrideDesc: string;
+    gitignoreTitle: string;
+    gitignoreDesc: string;
+  };
+
+  doctorPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    splitTitle: string;
+    splitDesc: string;
+    noFixDesc: string;
+    defectsTitle: string;
+    defectHeaders: string[];
+    defects: [string, string][];
+    notesTitle: string;
+    noteHeaders: string[];
+    notes: [string, string][];
+    guideTitle: string;
+    guideDesc: string;
+    guideHeaders: string[];
+    guides: [string, string][];
+    exampleTitle: string;
+    exampleDesc: string;
+    exampleCode: string;
+  };
+
+  comparisonPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    items: { title: string; desc: string }[];
   };
 
   skills: {
@@ -567,21 +606,39 @@ export interface Translations {
     worktreeCode: string;
     worktreeDesc: string;
     sameDirNote: string;
+    submoduleNote: string;
     idTitle: string;
     idDesc: string;
-    claimTitle: string;
-    claimCode: string;
-    claimDesc: string;
-    barrierTitle: string;
-    barrierCode: string;
-    barrierDesc: string;
-    rosterTitle: string;
-    rosterCode: string;
-    rosterDesc: string;
+    collabTitle: string;
+    collabDesc: string;
+    collabLinkText: string;
     kindTitle: string;
     kindHeaders: string[];
     kinds: [string, string][];
     coordinatorNote: string;
+  };
+
+  claimBarrierPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    sharedStateTitle: string;
+    sharedStateDesc: string;
+    claimTitle: string;
+    claimCode: string;
+    claimDesc: string;
+    claimExampleTitle: string;
+    claimExampleCode: string;
+    barrierTitle: string;
+    barrierCode: string;
+    barrierDesc: string;
+    barrierExampleTitle: string;
+    barrierExampleCode: string;
+    rosterStatusTitle: string;
+    rosterStatusCode: string;
+    rosterStatusDesc: string;
+    backLinkText: string;
   };
 
   migration: {
@@ -596,6 +653,13 @@ export interface Translations {
     preservedTitle: string;
     preservedDesc: string;
     rollbackCode: string;
+    recordExampleTitle: string;
+    recordExampleDesc: string;
+    recordExampleCode: string;
+    backlogJudgeTitle: string;
+    backlogJudgeDesc: string;
+    designLinksTitle: string;
+    designLinksDesc: string;
     lostTitle: string;
     lostItems: [string, string][];
   };
