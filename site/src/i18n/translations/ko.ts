@@ -374,9 +374,10 @@ export const ko: Translations = {
       migrationLinkText: "v0.17에서 이주 →",
     },
     whyReap: "왜 REAP인가?",
-    whyReapDesc: "AI 에이전트는 강력하지만, 구조 없이는 개발이 혼란스러워집니다. 매 세션마다 컨텍스트가 초기화됩니다. 코드 변경이 목적 없이 흩어집니다. 설계 문서가 현실에서 벗어납니다. 과거 작업에서 얻은 교훈이 사라집니다.",
+    whyReapDesc: "AI 에이전트는 강력하지만, 구조 없이는 개발이 혼란스러워집니다. 매 세션마다 컨텍스트가 초기화됩니다. 기획은 한 번 쓰고 잊힙니다. 코드 변경이 목적 없이 흩어집니다. 설계 문서가 현실에서 벗어납니다. 과거 작업에서 얻은 교훈이 사라집니다.",
     problems: [
       { problem: "컨텍스트 손실", solution: "SessionStart 훅이 세션마다 genome, environment 요약, 상태 줄을 자동으로 주입합니다" },
+      { problem: "한 번 쓰고 잊히는 기획", solution: "loop가 plan source를 계속 다듬고, 그 계획을 milestone으로 잘라 실행과 이어 줍니다. 기획도 코드처럼 진화합니다" },
       { problem: "산발적 개발", solution: "milestone과 generation이 경계를 가진 작업 단위로 나뉘어 하나의 목표에 집중합니다" },
       { problem: "설계-코드 괴리", solution: "plan source에 쓴 기획과 구현 사이의 간극은 backlog로 기록되고 다음 generation에서 반영됩니다" },
       { problem: "잊혀진 교훈", solution: "lessons.md에 교훈이 쌓이고, 참고 가치가 다한 세대는 archive에 보존됩니다" },
