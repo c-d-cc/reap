@@ -6,7 +6,9 @@ milestone: ms-023
 title: tests submodule 전환 — reap-test v0.18 재동기, ci/release dispatch, skill·문서
 startedAt: 2026-09-04T01:24:31Z
 startCommit: 47ebe04
-status: open
+status: closed
+closedAt: 2026-09-04T01:33:32Z
+endCommit: 0b65247
 ---
 ## Intent
 
