@@ -17,6 +17,9 @@ import CodeIndexPage from "@/pages/CodeIndexPage";
 import OrchestratePage from "@/pages/OrchestratePage";
 import MigrationPage from "@/pages/MigrationPage";
 import ReleaseNotesPage from "@/pages/ReleaseNotesPage";
+import TwoAxesPage from "@/pages/TwoAxesPage";
+import ThreeLayersPage from "@/pages/ThreeLayersPage";
+import StoragePage from "@/pages/StoragePage";
 import { makePlaceholderPage } from "@/pages/PlaceholderPage";
 
 export const SITE_NAME = "REAP";
@@ -78,18 +81,18 @@ export const ROUTES: RouteDef[] = [
   // 핵심 개념
   {
     path: "/docs/two-axes",
-    component: makePlaceholderPage("twoAxes"),
-    meta: placeholderMeta("twoAxes"),
+    component: TwoAxesPage,
+    meta: (t) => ({ title: page(t.twoAxesPage.title), description: t.twoAxesPage.description }),
   },
   {
     path: "/docs/three-layers",
-    component: makePlaceholderPage("threeLayers"),
-    meta: placeholderMeta("threeLayers"),
+    component: ThreeLayersPage,
+    meta: (t) => ({ title: page(t.threeLayersPage.title), description: t.threeLayersPage.description }),
   },
   {
     path: "/docs/storage",
-    component: makePlaceholderPage("storage"),
-    meta: placeholderMeta("storage"),
+    component: StoragePage,
+    meta: (t) => ({ title: page(t.storagePage.title), description: t.storagePage.description }),
   },
 
   // Plan 축

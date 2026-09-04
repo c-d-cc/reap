@@ -160,12 +160,68 @@ export interface Translations {
     fitnessDesc: string;
   };
 
+  twoAxesPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    cycleTitle: string;
+    cycleDesc: string;
+    cycleHeaders: string[];
+    cycleRows: [string, string, string][];
+    meetTitle: string;
+    meetDesc: string;
+    meetDiagram: string;
+    meetNote: string;
+    shapeTitle: string;
+    shapeDesc: string;
+  };
+
+  threeLayersPage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    layersTitle: string;
+    layersDesc: string;
+    layerHeaders: string[];
+    layers: [string, string, string, string][];
+    noGateTitle: string;
+    noGateDesc: string;
+    doctorTitle: string;
+    doctorDesc: string;
+    doctorCode: string;
+    doctorSplitTitle: string;
+    doctorSplitDesc: string;
+    defectTitle: string;
+    defectItems: string[];
+    referenceTitle: string;
+    referenceItems: string[];
+  };
+
+  storagePage: {
+    title: string;
+    breadcrumb: string;
+    description: string;
+    intro: string;
+    treeTitle: string;
+    tree: string;
+    treeDesc: string;
+    tierTitle: string;
+    tierDesc: string;
+    tierHeaders: string[];
+    tiers: [string, string][];
+    outsideTitle: string;
+    outsideDesc: string;
+    mapTitle: string;
+    mapDesc: string;
+    sessionTitle: string;
+    sessionDesc: string;
+  };
+
   placeholder: {
     notice: string;
     pages: {
-      twoAxes: { title: string; breadcrumb: string; description: string };
-      threeLayers: { title: string; breadcrumb: string; description: string };
-      storage: { title: string; breadcrumb: string; description: string };
       loop: { title: string; breadcrumb: string; description: string };
       planSource: { title: string; breadcrumb: string; description: string };
       idea: { title: string; breadcrumb: string; description: string };
@@ -652,12 +708,160 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
     fitnessDesc: "generation마다가 아니라 milestone이 끝날 때 사람이 자연어로 fitness를 평가합니다. 정량 지표는 두지 않습니다 — 매 세대 사람이 막아서는 마찰이 자율성과 충돌하기 때문입니다. fitness가 확인되면 cleanup이 참고 가치가 다한 세대를 archive로 내리고, milestone 디렉토리가 닫힙니다.",
   },
 
+  twoAxesPage: {
+    title: "두 축",
+    breadcrumb: "핵심 개념",
+    description: "Plan 축과 Execution 축이 왜 대등하고, 어떻게 다른 리듬으로 돌다가 milestone에서 만나는가.",
+    intro: "REAP의 작업은 하나의 파이프라인이 아니라 두 개의 축 위에서 진행됩니다. Plan 축에서는 loop가 계획을 다듬고, Execution 축에서는 milestone으로 잘린 계획을 generation이 실행합니다. 두 축은 대등하고, 서로 다른 리듬으로 돕니다.",
+    cycleTitle: "두 축이 도는 방식",
+    cycleDesc: "같은 '작업 사이클'이라는 말이 축마다 다른 것을 가리킵니다. loop와 generation을 나란히 놓으면 차이가 분명해집니다.",
+    cycleHeaders: ["", "Plan 축 — loop", "Execution 축 — generation"],
+    cycleRows: [
+      ["세션 바인딩", "바인딩되지 않습니다. 세션이 바뀌어도 이어집니다", "세션에 바인딩됩니다 — reap make generation이 .session에 씁니다"],
+      ["동시에 열리는 수", "여럿이 나란히 열릴 수 있습니다", "세션마다 하나입니다"],
+      ["보통 걸리는 시간", "여러 세션에 걸치는 것이 정상입니다", "대개 한 세션 안에 닫힙니다"],
+      ["닫히는 조건", "산출물이 자리를 찾으면 닫힙니다 — plan source에 쓰거나 milestone을 낳습니다", "커밋이 있고 완료로 판단되면 닫힙니다"],
+      ["근거", "선택입니다 — 있으면 --from에 적습니다", "exec는 milestone 또는 backlog 항목이 필수입니다. fix는 근거가 없습니다"],
+    ],
+    meetTitle: "두 축이 만나는 곳",
+    meetDesc: "loop가 plan source에 쓴 계획을 실행 가능한 단위로 자르는 일이 두 축의 접점입니다. 이 지점을 carve-milestone이 맡습니다.",
+    meetDiagram: `plan source (등록된 곳, 리포 밖일 수 있다)
+      |
+      | loop가 쓴다
+      v
+   loop  ------ carve-milestone ------>  milestone
+ (life/loops/)                          (vision/milestones/)
+                                              |
+                                    +---------+---------+
+                                    |                   |
+                               exec generation     exec generation
+                                    |                   |
+                                    +---------+---------+
+                                              v
+                                        civilization (소스 코드)
+
+                               backlog 항목 -- exec generation --> civilization
+                               fix generation (근거 없음) --------> civilization`,
+    meetNote: "loop는 exec의 경계 안에 있지 않고, exec generation은 반드시 근거(milestone 또는 backlog 항목)를 갖습니다. fix generation만 예외입니다 — 새 의도를 만들지 않고 이미 있는 의도로 되돌리므로 근거를 요구하지 않습니다.",
+    shapeTitle: "선형이 아니라 두 축입니다",
+    shapeDesc: "loop → milestone → generation → complete를 한 줄로 그리면 complete가 전체 흐름의 마지막 단계처럼 보이지만, 실제로는 하나의 generation 안에서 일어나는 일입니다. milestone 하나가 여러 generation을 거치며 열려 있는 동안 다른 loop들이 다음 계획을 다듬습니다. 큰 그림은 두 축이 나란히 돌다가 carve에서 만나는 그림입니다.",
+  },
+
+  threeLayersPage: {
+    title: "판단·확정·사실",
+    breadcrumb: "핵심 개념",
+    description: "무엇이 skill의 판단이고 무엇이 CLI의 확정이고 무엇이 git의 사실인가, 그리고 doctor가 사후에 보는 것.",
+    intro: "REAP에서 일어나는 모든 동작은 판단·확정·사실 셋 중 하나에 속합니다. 어떤 동작이 어느 층에 속하는지 헷갈리면 그 동작은 설계가 잘못된 것입니다.",
+    layersTitle: "세 층",
+    layersDesc: "agent는 판단하고, CLI에게 확정을 요청하고, 사실은 git에게 직접 묻습니다.",
+    layerHeaders: ["층", "누가", "무엇을", "예"],
+    layers: [
+      ["판단", "skill을 읽는 agent", "무엇을 할지, 언제 할지, 끝났는지를 정합니다", "축(loop인지 generation인지)을 고른다, 닫을 준비가 됐는지 본다, 맥락에 무엇을 남길지 정한다"],
+      ["확정", "reap CLI", "확률에 맡기면 안 되는 사실을 못박습니다", "id를 발급한다, frontmatter를 찍는다, 세션을 바인딩한다, 파일을 조립한다"],
+      ["사실", "git과 파일시스템", "실제로 무슨 일이 있었는가", "커밋이 있는가, 작업 트리가 깨끗한가, 어떤 파일이 있는가"],
+    ],
+    noGateTitle: "CLI가 흐름을 막지 않는 이유",
+    noGateDesc: "make와 mark는 메타데이터만 건드립니다 — id 발급, frontmatter 갱신, 파일 이동과 조립. 세대를 열지 닫을지, 무엇을 어떤 순서로 할지는 CLI가 정하지 않고 skill이 판단합니다. mark generation --closed조차 커밋이 있는지 확인하지 않습니다 — 확인은 complete skill이 git에게 직접 물어서 합니다. agent가 이미 git을 쓸 수 있는데 CLI가 그것을 다시 감싸면 중복이고, 중복은 언젠가 어긋납니다.",
+    doctorTitle: "doctor는 사후에 봅니다",
+    doctorDesc: "흐름을 막는 대신, 확정적으로 검사할 수 있는 것을 나중에 전부 검사합니다. 보고만 하고 고치지 않습니다 — 기록은 사람과 agent가 쓴 것이고, 도구가 다시 쓰면 무엇이 사라졌는지 아무도 모릅니다.",
+    doctorCode: `$ reap doctor
+결함 0 · 참고 0`,
+    doctorSplitTitle: "결함과 참고",
+    doctorSplitDesc: "보고는 둘로 갈립니다. 결함은 확정적으로 틀린 것이라 doctor가 실패로 끝나고, 참고는 사람이 볼 것일 뿐 실패로 이어지지 않습니다.",
+    defectTitle: "결함",
+    defectItems: [
+      "frontmatter 필수 필드가 비어 있거나 형식이 틀렸을 때",
+      "id가 레지스트리와 어긋나거나, 살아 있는 항목끼리 중복될 때",
+      "from·refs·milestone이 가리키는 대상이 실재하지 않을 때",
+      "status: closed인데 startCommit과 endCommit이 같은 generation — 커밋 없이 닫힌 것",
+      "focus: true를 가진 milestone이 둘 이상일 때",
+      "carrier 표식의 형식이 틀리거나, 같은 slug에 해시가 둘이거나 같은 해시에 slug가 둘일 때",
+    ],
+    referenceTitle: "참고",
+    referenceItems: [
+      "genome과 environment/summary.md가 크기 안내선을 넘었을 때 — 매 세션 주입되므로 커지면 다른 지식의 자리를 밀어냅니다",
+      "map.md가 번들 템플릿과 어긋났을 때 — 씨앗이라 REAP가 레이아웃을 바꿔도 저절로 갱신되지 않습니다",
+      "idea 문서 중 졸업 조건이 비어 있거나 출처·확인 날짜가 없는 것",
+      "열린 채 오래 방치된 generation, 세션에 바인딩되지 않은 열린 generation",
+      "carrier 고아 — 한 파일에만 있는 표식. 실패가 아니라 표식이 불필요하거나 짝이 아직 표식되지 않았다는 신호입니다",
+    ],
+  },
+
+  storagePage: {
+    title: "저장 구조",
+    breadcrumb: "핵심 개념",
+    description: "vision·life·archive 3단을 가르는 것은 시간이고, plan·genome·environment·idea는 그 밖에 있습니다.",
+    intro: "저장 구조를 나누는 기준은 유형이 아니라 시간입니다. 무엇을 하려는지, 지금 무엇이 살아 있는지, 더는 참고하지 않는 것은 무엇인지 — 이 세 시점이 vision·life·archive를 가릅니다.",
+    treeTitle: "구조",
+    tree: `.reap/
+  config.yml                 언어, agentClient
+  map.md                     이 디렉토리를 설명하는 씨앗
+  plan/                      plan source 등록부 (3단 밖)
+    sources.yml
+    conventions/
+      ps-4f2a91-reap.md
+  vision/                    하려는 것
+    memory/
+      lessons.md
+    milestones/
+      ms-022-v018-site/
+        milestone.md
+        handoff.md
+        tasks/
+          4-concepts-plan.md
+  life/                      지금 살아 있는 것
+    generations/
+      gen-0097-exec-site-concepts-plan.md
+    backlog/
+      bk-a4d829-migrate-판정을-스크립트로…
+    loops/
+      loop-0004-plan-v018-release.md
+  archive/                   더는 참고하지 않는 것
+    generations/
+      gen-0092-exec-final-recheck.md
+    milestones/
+      ms-021-v018-i18n/
+    backlog/
+      bk-c3321b-frontmatter-시간-형식.md
+    loops/
+  genome/
+    application.md
+    evolution.md
+    invariants.md
+  environment/
+    summary.md
+  idea/
+    research/
+      idea-c43368-loop-실사용-fitness.md
+    files/
+      idea-dc2e56-제품-기획-방법론.md
+  sequence/
+    generation.md
+    loop.md
+    milestone.md
+    source.md
+  .session                   현재 세션 바인딩 (gitignored)
+  .index/                    코드 인덱스 (gitignored)`,
+    treeDesc: "이 문서를 쓰고 있는 세대(gen-0097-exec-site-concepts-plan)가 열려 있는 시점에 이 리포의 .reap/를 그대로 옮긴 것입니다. milestone은 ms-022 하나가 진행 중이고, 지난 세대와 닫힌 milestone은 archive에 쌓여 있습니다.",
+    tierTitle: "최상위를 가르는 것은 유형이 아니라 시간입니다",
+    tierDesc: "세 단계입니다.",
+    tierHeaders: ["단계", "뜻"],
+    tiers: [
+      ["vision/", "하려는 것 — 쌓인 교훈(memory/)과 잘라낸 실행 단위(milestones/)"],
+      ["life/", "지금 살아 있는 것 — 아직 참고할 값이 있는 generation·backlog·loop. 닫힌 것도 참고 가치가 남아 있으면 여기 있습니다"],
+      ["archive/", "더는 참고하지 않는 것 — milestone이 닫힐 때 cleanup이 골라 여기로 내립니다"],
+    ],
+    outsideTitle: "3단 밖에 있는 것들",
+    outsideDesc: "plan/·genome/·environment/·idea/는 vision·life·archive 어디에도 속하지 않고 최상위에 나란히 섭니다. plan source는 리포 밖을 가리키는 등록부라 '하려는 것 / 사는 것 / 끝난 것'이라는 시간축에 얹히지 않습니다 — 등록된 소스는 그냥 거기 있습니다. genome은 규범, environment는 서술, idea는 아직 단단하지 않은 지식이라 같은 이유로 시간축 밖입니다. loop만은 예외로 life/loops/에 있습니다 — loop는 열리고 닫히고 archive로 가므로 시간축에 얹히기 때문입니다.",
+    mapTitle: "map.md — 구조가 스스로를 설명합니다",
+    mapDesc: "각 디렉토리가 무엇을 담는지 map.md가 안내합니다. init이 없을 때만 놓는 씨앗이라 프로젝트가 자기 사정을 덧붙일 수 있고, REAP가 레이아웃을 바꿔도 저절로 갱신되지 않습니다. 매 세션 주입되지 않습니다 — 상태 줄이 경로만 알리고, 필요한 agent가 엽니다.",
+    sessionTitle: ".session과 .index — gitignore됩니다",
+    sessionDesc: ".session은 현재 세션에 바인딩된 generation id와 milestone id를 담습니다. worktree마다 별개 사본이므로 커밋하면 세션마다 값이 어긋납니다. .index/는 코드 인덱스입니다 — 크기 때문이 아니라, 커밋하면 그 커밋 자체를 다시 인덱싱해야 해서 gitignore됩니다. 둘 다 지워도 안전하고, 다음 동작이 다시 만듭니다.",
+  },
+
   placeholder: {
     notice: "이 문서는 준비 중입니다.",
     pages: {
-      twoAxes: { title: "두 축", breadcrumb: "핵심 개념", description: "Plan 축과 Execution 축이 milestone에서 만나는 지점." },
-      threeLayers: { title: "판단·확정·사실", breadcrumb: "핵심 개념", description: "무엇이 skill의 판단이고 무엇이 CLI의 확정이고 무엇이 git의 사실인가." },
-      storage: { title: "저장 구조", breadcrumb: "핵심 개념", description: "vision·life·archive 3단과 id 체계." },
       loop: { title: "Loop", breadcrumb: "Plan 축", description: "새 의도를 만드는 plan 축의 사이클." },
       planSource: { title: "Plan Source", breadcrumb: "Plan 축", description: "리포 밖일 수 있는 기획 문서의 등록부." },
       idea: { title: "Idea와 Research", breadcrumb: "Plan 축", description: "아직 단단하지 않은 지식을 두는 자리." },
