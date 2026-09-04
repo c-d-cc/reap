@@ -28,11 +28,13 @@ v0.17 `/reap.evolve`의 값 — 주 세션의 컨텍스트를 보호하고 세�
 
 ## G10 — 문서 사이트 (ms-022)
 
-- 자리: 리포의 `site/`. v0.17의 `docs/`(Vite+React 자체 prerender)를 되살리지 않는다 — v0.18 `docs/`는 spec·plan의 자리다
-- 도구: **VitePress** — 마크다운 그대로, i18n 내장, 정적 출력. 배포는 `.github/workflows/docs.yml`이 GitHub Pages로(reap.cc CNAME은 v0.17 `docs/public/CNAME`의 값을 승계). **배포 워크플로는 main에서만 돈다** — v0.18이 main에 merge되기 전에는 reap.cc가 v0.17 사이트를 계속 보여준다
-- 내용(한국어 먼저): 소개(한 문장·일곱 원칙 요약) · 설치 · 첫 사용(init→evolve→complete, 상태 줄) · 개념(세 층, loop·milestone·generation, 3단 저장소, map) · skill 10종(각 한 쪽 — SKILL.md를 옮겨 적지 않고 "언제·무엇을"과 링크) · CLI 레퍼런스(usage 그대로) · hooks · 코드 인덱스 · orchestrate · v0.17에서 이주 · 릴리스 노트(RELEASE_NOTES.md를 그대로 싣는다). 열두 쪽 안팎
-- **사람 검수 뒤** en(그리고 ja·zh-CN·de)로 확장 — 그 확장은 이 milestone 밖이다. ms-021(en 전환) 뒤에 en 문서가 나와야 CLI 출력 예시가 맞는다
-- 규범을 옮겨 적지 않는다 — spec 문장을 복제하면 어긋난다. 사이트는 "쓰는 법"이고 spec은 "무엇이 참인가"다
+**사람 검수(2026-09-04): 기존 reap.cc의 디자인·톤을 그대로 유지하고 내용만 v0.18로 바꾼다.** 첫 시도(VitePress 새 사이트, gen-0085·0088)는 기각됐다 — "새 사이트"는 새 도구가 아니라 새 내용이었다.
+
+- 자리: 리포의 `site/`. v0.17 `docs/` 앱(Vite+React+Tailwind, `components/`·`DocLayout`·`DocPage`·`AppSidebar`·`HeroPage`·i18n 5로케일·`scripts/prerender.mjs`·`docs.yml`)을 **그대로 옮기고** 페이지 세트와 번역 내용만 v0.18로. 디자인 토큰·컴포넌트·CSS는 손대지 않는다
+- 페이지: 홈(Hero) · 소개 · 설치 · 첫 사용 · 개념 · skill · CLI · hooks · 코드 인덱스 · orchestrate · v0.17에서 이주 · 릴리스 노트 — 열둘. v0.17 전용 페이지(lifecycle·lineage·merge·cruise·vision 등)는 지운다
+- 번역 구조는 v0.17과 같이 `translations/<locale>.ts`. **ko 먼저** — 검수 전까지 로케일 목록을 ko 하나로 두고 prerender도 ko만. 검수 뒤 en → ja·zh-CN·de
+- 배포: v0.17 `docs.yml`(typecheck·build·prerender 검사·Pages) 승계, `main`에서만. CNAME `reap.cc`
+- 규범을 옮겨 적지 않는다 — spec 문장 복제 금지. 한 페이지가 화면 두 장을 넘으면 옮겨 적고 있는 것이다
 
 ## G11 — 테스트 비공개 (ms-023)
 
