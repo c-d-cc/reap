@@ -4,8 +4,8 @@ slug: migrate-working-state
 title: "migrate 2차 — 작업 상태 복원: milestone·backlog·plan 재구성, genome·CLAUDE.md 갱신"
 from: loop-0004-plan
 status: open
-focus: true
 openedAt: 2026-09-04T15:59:41Z
+focus: true
 ---
 ## Background
 
