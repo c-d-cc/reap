@@ -93,3 +93,4 @@
 | gen-0089-exec | skill 10종·어휘·템플릿·씨앗 en, doctor 판정어 합집합 | 2026-09-04 |
 | gen-0090-exec | README en/ko·RELEASE_NOTES en·genome 규칙·0.17.8 노트 정정·왕복 재검증 | 2026-09-04 |
 | gen-0091-exec | tests submodule 전환 — reap-test v0.18 재동기, ci/release dispatch, skill·문서 | 2026-09-04 |
+| gen-0092-exec | 최종 재검증 — en/ko 왕복 둘·발행 직전 체크·문서 정합 | 2026-09-04 |

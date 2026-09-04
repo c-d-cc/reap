@@ -5,8 +5,9 @@ title: 테스트 비공개 — reap-test v0.18 submodule과 CI dispatch
 from: loop-0004-plan
 refs:
   - ps-5e948f:07-i18n-docs-delegate.md
-status: open
+status: closed
 openedAt: 2026-09-04T00:04:12Z
+closedAt: 2026-09-04T01:33:58Z
 ---
 ## Background
 
@@ -33,3 +34,8 @@ openedAt: 2026-09-04T00:04:12Z
 ## Constraints
 
 - submodule url은 https(v0.17과 같이). 로컬 체크아웃은 `~/cdws/reap_v17/tests` 클론에서 `git worktree`나 별도 clone으로 — reap_v17의 서브모듈 체크아웃(v0.17-bridge)을 움직이지 않는다
+
+## Fitness (2026-09-04, 사람의 전체 위임 하 agent 판정)
+
+- Exit Criteria 5개 전부 handoff 대조표에 근거. push·시크릿 등록은 사람 — reap-test v0.18(4a5006e)이 push되기 전까지 `.gitmodules`의 GitHub URL은 남에게 죽은 포인터다. 주 트리는 `.git/config`의 로컬 경로 override로 체크아웃했다(`git config submodule.tests.url`) — push 뒤 그 override를 지운다
+- 개발 마찰: worktree에 submodule이 있으면 `git worktree remove`가 `--force`를 요구한다. 위임 모드의 worktree 흐름에 한 줄 필요 → lessons가 아니라 orchestrate skill 산문(다음 세대)
