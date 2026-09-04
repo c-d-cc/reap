@@ -6,7 +6,9 @@ milestone: ms-022
 title: 문서 핵심 개념 3쪽·Plan 축 4쪽
 startedAt: 2026-09-04T15:16:19Z
 startCommit: 6842be6
-status: open
+status: closed
+closedAt: 2026-09-04T15:35:39Z
+endCommit: 9c4295c
 ---
 ## Intent
 
