@@ -60,11 +60,10 @@ export interface Translations {
     structureTitle: string;
     structureDesc: string;
     structureItems: { label: string; sub: string; desc: string }[];
-    flowTitle: string;
-    flowDesc: string;
-    flowSteps: string[];
-    flowHeaders: string[];
-    flowRows: [string, string, string][];
+    axesTitle: string;
+    axesDesc: string;
+    axes: { label: string; sub: string; items: { unit: string; what: string; where: string }[] }[];
+    axesJoin: string;
     installation: string;
     installStep1: string;
     installStep2: string;
@@ -393,16 +392,27 @@ export const ko: Translations = {
       { label: "Archive", sub: "닫힌 milestone, generation, loop", desc: "더는 참고하지 않는 것입니다. milestone이 닫힐 때 cleanup skill이 여기로 내립니다." },
       { label: "Civilization", sub: "소스 코드", desc: ".reap/ 밖의 모든 것입니다. generation이 진화시키는 대상입니다." },
     ],
-    flowTitle: "작업 흐름",
-    flowDesc: "새 의도를 만드는 일에서 세대를 닫는 일까지, 네 단위가 이어집니다.",
-    flowSteps: ["loop", "→", "milestone", "→", "generation", "→", "complete"],
-    flowHeaders: ["단계", "수행 내용", "산출물"],
-    flowRows: [
-      ["loop", "새 의도를 만듭니다. 기획, 설계, 화면, 아직 자리 없는 아이디어를 다룹니다.", "life/loops/<loop-id>.md"],
-      ["milestone", "loop에서 실행 가능한 단위로 자릅니다. 경계와 종료 조건을 정합니다.", "vision/milestones/<ms-id>/"],
-      ["generation", "milestone을 실현하거나(exec) 이미 있는 의도로 되돌립니다(fix). 실제로 코드를 진화시킵니다.", "life/generations/<gen-id>.md"],
-      ["complete", "커밋 규칙을 확인하고 기록을 정리해 세대를 닫습니다.", "닫힌 세대 기록 + handoff.md"],
+    axesTitle: "두 개의 축",
+    axesDesc: "REAP의 작업은 두 축 위에서 진행됩니다. Plan 축에서는 loop가 계획을 다듬고, Execution 축에서는 그 계획을 실행 가능한 단위인 milestone으로 나누어 generation으로 진행합니다. 두 축은 계획을 milestone으로 자르는 지점에서 만납니다.",
+    axes: [
+      {
+        label: "Plan 축",
+        sub: "계획을 만들고 개선합니다",
+        items: [
+          { unit: "loop", what: "새 의도를 만듭니다. 기획, 설계, 화면, 아직 자리가 없는 아이디어를 다루며 여러 세션에 걸쳐 열려 있을 수 있습니다.", where: "life/loops/" },
+          { unit: "plan source", what: "리포 안팎 어디에 있든 기획 문서를 등록하고, 규약에 따라 읽고 씁니다. loop의 산출물이 여기에 쌓입니다.", where: "plan/sources.yml" },
+        ],
+      },
+      {
+        label: "Execution 축",
+        sub: "계획을 실행합니다",
+        items: [
+          { unit: "milestone", what: "계획을 실행 가능한 단위로 자릅니다. 경계와 종료 조건을 가지며, 끝날 때 사람의 fitness 평가를 받습니다.", where: "vision/milestones/" },
+          { unit: "generation", what: "milestone을 실현하거나(exec) 이미 있는 의도로 되돌립니다(fix). 실제로 코드를 진화시키는 단위입니다.", where: "life/generations/" },
+        ],
+      },
     ],
+    axesJoin: "두 축이 만나는 곳: 계획을 milestone으로 자르는 일 (/reap:carve-milestone)",
     installation: "설치",
     installStep1: "1. CLI 전역 설치",
     installStep2: "2. Claude Code를 열어 초기화하고 첫 세대를 엽니다",

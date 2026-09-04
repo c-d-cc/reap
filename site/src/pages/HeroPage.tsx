@@ -111,37 +111,32 @@ export function HeroPage() {
           </div>
         </Section>
 
-        {/* Work Flow */}
-        <Section title={h.flowTitle}>
+        {/* Two Axes */}
+        <Section title={h.axesTitle}>
           <p className="text-sm text-muted-foreground mb-4">
-            {h.flowDesc}
+            {h.axesDesc}
           </p>
-          <div className="flex items-center gap-1.5 flex-wrap mb-5">
-            {h.flowSteps.map((s, i) =>
-              s === "→"
-                ? <span key={i} className="text-xs text-muted-foreground">{s}</span>
-                : <span key={i} className="text-xs font-mono bg-muted text-foreground border border-border rounded px-2 py-0.5">{s}</span>
-            )}
-          </div>
-          <div className="border border-border rounded-md overflow-x-auto text-sm">
-            <table className="w-full min-w-[600px]">
-              <thead>
-                <tr className="border-b border-border bg-muted/30">
-                  {h.flowHeaders.map((header) => (
-                    <th key={header} className="text-left px-3 py-2 text-xs font-semibold text-muted-foreground">{header}</th>
+          <div className="grid md:grid-cols-2 gap-4">
+            {h.axes.map((axis) => (
+              <div key={axis.label} className="border border-border rounded-md p-4">
+                <div className="text-sm font-semibold text-foreground">{axis.label}</div>
+                <div className="text-xs text-muted-foreground mb-3">{axis.sub}</div>
+                <div className="space-y-3">
+                  {axis.items.map((item) => (
+                    <div key={item.unit}>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="text-xs font-mono bg-muted text-primary border border-border rounded px-2 py-0.5">{item.unit}</span>
+                        <span className="font-mono text-[10px] text-muted-foreground">{item.where}</span>
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">{item.what}</p>
+                    </div>
                   ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border">
-                {h.flowRows.map(([unit, what, skill]) => (
-                  <tr key={unit}>
-                    <td className="px-3 py-2 font-mono text-xs text-primary">{unit}</td>
-                    <td className="px-3 py-2 text-xs text-muted-foreground">{what}</td>
-                    <td className="px-3 py-2 font-mono text-xs text-muted-foreground">{skill}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="border-l-2 border-primary pl-4 py-2 mt-4">
+            <p className="text-xs text-muted-foreground">{h.axesJoin}</p>
           </div>
         </Section>
 
