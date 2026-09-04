@@ -42,3 +42,4 @@ ps-4b485d(귀환 작전)는 "배포 전까지"에서 끝났다. 이 loop는 그 
 - plan source **ps-5e948f** (`docs/reap-plan/reap_v_0_18_release/`, README + 01~06)
 - **ms-016**(배포 패키지, focus) · **ms-017**(hooks) · **ms-018**(이주 보강·문서) · **ms-019**(왕복 검증·발행 준비) 잘림. 016·017 병렬
 | 방향 질문 5건 답 (사람, 2026-09-04) | 05-open 각 2~3안 | **Q1 새 사이트(ko 먼저, 검수 뒤 확장) · Q2 B(en 기본, ko 층) · Q3 B(reap-test submodule) · Q4 B(evolve 위임 모드) · Q5 A(마켓플레이스 reap, reap2 archive)** | Q1·Q2·Q3는 추천과 다른 답, Q4·Q5는 추천 밖/채택. 발행은 추후 지시 |
+- **2026-09-04 진행**: ms-016·017·018·020·021 닫힘. ms-019는 task 1~4 완료, task 5(최종 재검증) 남음. ms-022(사이트 ko 열두 쪽)는 사람 검수 대기, ms-023(tests submodule)은 task 2 진행 중. 발행은 사람 지시 대기. 위임 모드(brief 템플릿)로 gen-0087~0091이 돌았다

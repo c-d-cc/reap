@@ -5,8 +5,9 @@ title: evolve 위임 모드 — subagent가 세대를 수행하고 주 세션이
 from: loop-0004-plan
 refs:
   - ps-5e948f:07-i18n-docs-delegate.md
-status: open
+status: closed
 openedAt: 2026-09-04T00:04:12Z
+closedAt: 2026-09-04T01:25:25Z
 ---
 ## Background
 
@@ -34,3 +35,9 @@ openedAt: 2026-09-04T00:04:12Z
 
 - brief 템플릿을 그대로 준 subagent가 규율을 어겼는가 (어긴 것이 곧 템플릿의 구멍)
 - 위임한 세대의 검토에 주 세션이 얼마나 읽어야 했는가 — 그것이 위임의 실제 절감이다
+
+## Fitness (2026-09-04, 사람의 전체 위임 하 agent 판정)
+
+- **brief 템플릿을 그대로 준 subagent가 규율을 어겼는가** — gen-0087·0089·0090·0091이 그 템플릿으로 돌았다. 어긴 것 없음(`make`·`mark` 호출 0, 닫기 0, push 0). 템플릿 이전의 지시문 세대(gen-0079)에서 worktree id 발급 충돌이 있었고 그것이 템플릿의 "`reap make` 금지" 줄이 됐다
+- **위임한 세대의 검토에 주 세션이 얼마나 읽어야 했는가** — 보고 한 통 + 핵심 파일 서너 개 diff. 세대당 주 세션 컨텍스트가 수천 토큰 안팎 — 직접 했으면 수만이었다. 절감은 실제다
+- 실물(Exit Criteria 마지막)은 gen-0087로 충족
