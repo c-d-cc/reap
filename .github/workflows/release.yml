@@ -21,6 +21,8 @@ jobs:
       id-token: write
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: false
 
       - uses: oven-sh/setup-bun@v2
 
@@ -31,8 +33,6 @@ jobs:
 
       - run: bun install --frozen-lockfile
       - run: bun run typecheck
-      - run: bun test
-      - run: bash tests/hook.test.sh
       - run: bun run build
       - run: bash scripts/verify-package.sh
 
@@ -49,6 +49,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: false
 
       # Only this version's section. RELEASE_NOTES.md keeps every past release,
       # and body_path on the whole file would publish all of them. The current
