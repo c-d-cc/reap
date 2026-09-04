@@ -26,6 +26,11 @@ export interface Translations {
     title: string;
     description: string;
     getStarted: string;
+    breakingBand: {
+      text: string;
+      changeLinkText: string;
+      migrationLinkText: string;
+    };
     whyReap: string;
     whyReapDesc: string;
     problems: { problem: string; solution: string }[];
@@ -286,6 +291,11 @@ export const ko: Translations = {
     title: "REAP",
     description: "AI와 사람이 소프트웨어를 함께 진화시키기 위한 규약과 도구의 집합. 작업의 모양을 결정하지 않고, 작업이 쓸 수 있는 도구와 저장 규약을 제공한다.",
     getStarted: "시작하기 →",
+    breakingBand: {
+      text: "v0.18.0 — breaking change. 저장 구조·명령·플러그인이 전부 바뀌었다.",
+      changeLinkText: "무엇이 바뀌었나 →",
+      migrationLinkText: "v0.17에서 이주 →",
+    },
     whyReap: "무엇이 달라졌나",
     whyReapDesc: "전작은 5단계 lifecycle을 강제하는 파이프라인 실행기였다. 그 경직성을 유지하려고 스크립트와 서명 잠금을 계속 늘려야 했다. REAP는 그 반대로 간다.",
     problems: [

@@ -22,14 +22,36 @@ function Section({ title, children }: { title?: string; children: React.ReactNod
   );
 }
 
+function BreakingChangeBand() {
+  const t = useT();
+  const b = t.hero.breakingBand;
+  return (
+    <div className="w-full border-b border-orange-500/30 bg-orange-500/10 shrink-0">
+      <div className="max-w-5xl mx-auto px-4 md:px-8 py-2.5 min-h-[50px] flex flex-wrap items-center justify-center gap-x-3 gap-y-1 text-center">
+        <span className="text-xs text-orange-400 leading-relaxed">{b.text}</span>
+        <span className="flex items-center gap-3">
+          <Link href="/docs/v018change" className="text-xs text-orange-300 hover:text-orange-200 hover:underline whitespace-nowrap">
+            {b.changeLinkText}
+          </Link>
+          <Link href="/docs/migration" className="text-xs text-orange-300 hover:text-orange-200 hover:underline whitespace-nowrap">
+            {b.migrationLinkText}
+          </Link>
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export function HeroPage() {
   const t = useT();
   const h = t.hero;
   return (
     <div className="h-screen bg-background flex flex-col overflow-hidden">
       <AppNavbar showGetStarted />
-      <main className="flex-1 pt-11 md:pt-14 overflow-hidden flex justify-center">
-        <div className="w-full max-w-5xl overflow-y-auto flex flex-col">
+      <main className="flex-1 pt-11 md:pt-14 overflow-hidden flex flex-col">
+        <BreakingChangeBand />
+        <div className="flex-1 overflow-y-auto flex justify-center">
+        <div className="w-full max-w-5xl flex flex-col">
 
         {/* Header */}
         <section className="border-b border-border px-6 py-10 md:px-8">
@@ -143,6 +165,7 @@ export function HeroPage() {
         </section>
 
         <Footer />
+        </div>
         </div>
       </main>
     </div>
