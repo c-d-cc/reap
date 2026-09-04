@@ -6,7 +6,9 @@ milestone: ms-022
 title: 사이트 레퍼런스 일곱 쪽 — skill·CLI·hooks·index·orchestrate·이주·릴리스 노트
 startedAt: 2026-09-04T00:17:08Z
 startCommit: 9c5c6a0
-status: open
+status: closed
+closedAt: 2026-09-04T00:25:16Z
+endCommit: 2649cf4
 ---
 ## Intent
 
