@@ -95,7 +95,7 @@ from: v0.17 (.reap-v0_17/)
 ## Moved            # by mapping #, original→destination and count — including the environment section (summary, resources, domain/docs move), the milestone/backlog from #11, and the CLAUDE.md span from #12
 ## Not moved      # what, and why — including the list of dropped config fields and #3's resolved-not-reissued backlog items with their grounds
 ## Needs updating      # #1's genome before→after term replacements, and #10's list of v0.17-assuming phrasing in environment
-## 검증               # full doctor output, then the full output of scripts/verify-migration.sh
+## 검증               # full doctor output, then the full output of the skill's scripts/verify-migration.sh
 ## Home cleanup            # if done, list of what was removed; if not, "not done"
 ## 다음 세션이 볼 것    # reap ctx's full status line block (from <!-- reap 상태 --> to the end), verbatim
 ```
