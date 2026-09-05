@@ -707,7 +707,7 @@ export const ko: Translations = {
       configuration: "설정",
       doctor: "Doctor",
       comparison: "비교",
-      migration: "v0.17에서 Migration 하기",
+      migration: "v0.17에서 Migration",
       releaseNotes: "릴리스 노트",
     },
   },
@@ -720,7 +720,7 @@ export const ko: Translations = {
     breakingBand: {
       text: "v0.18.0은 이전 버전과 호환되지 않습니다. 저장 구조, 명령, 플러그인이 모두 바뀌었습니다.",
       changeLinkText: "무엇이 바뀌었나 →",
-      migrationLinkText: "v0.17에서 Migration 하기 →",
+      migrationLinkText: "v0.17에서 Migration →",
     },
     whyReap: "왜 REAP인가?",
     whyReapDesc: "AI 에이전트는 강력하지만, 구조 없이는 개발이 혼란스러워집니다. 매 세션마다 컨텍스트가 초기화됩니다. 기획은 한 번 쓰고 잊힙니다. 코드 변경이 목적 없이 흩어집니다. 설계 문서가 현실에서 벗어납니다. 과거 작업에서 얻은 교훈이 사라집니다.",
@@ -788,7 +788,7 @@ export const ko: Translations = {
       { href: "/docs/hooks", title: "hooks", desc: "여섯 이벤트에 거는 .md, .sh 훅과 조건, 순서." },
       { href: "/docs/code-intelligence", title: "코드 인덱스", desc: "커밋 단위로 갱신되는 코드 인덱스. 15개 언어." },
       { href: "/docs/orchestrate", title: "orchestrate", desc: "두 세션 이상이 동시에 작업할 때 쓰는 claim과 barrier." },
-      { href: "/docs/migration", title: "v0.17에서 Migration 하기", desc: "8단계로 옮깁니다. 원본은 .reap-v0_17/에 그대로 보존됩니다." },
+      { href: "/docs/migration", title: "v0.17에서 Migration", desc: "8단계로 옮깁니다. 원본은 .reap-v0_17/에 그대로 보존됩니다." },
     ],
   },
 
@@ -1974,7 +1974,7 @@ reap orch status [--topic <t>]`,
   },
 
   migration: {
-    title: "v0.17에서 Migration 하기",
+    title: "v0.17에서 Migration",
     breadcrumb: "기타",
     description: "8단계 migration. 원본은 .reap-v0_17/에 그대로 보존된다.",
     intro: "v0.17.7 이하에서는 세션 시작 시 버전 검사가 0.18을 보고 자동 갱신 대신 설치 명령을 안내한다. 거기서부터 사람이 손대는 지점은 셋이다.",
