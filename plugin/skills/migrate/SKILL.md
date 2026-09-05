@@ -34,13 +34,26 @@ The first line is the verdict, the next lines are the grounds (the list of marke
 ## 2/8 — Pre-block: don't proceed if either one hits
 
 - **Block if there's an uncommitted change.** `git status --porcelain` has to be empty. Don't do an irreversible move on a dirty tree — tell them to commit or stash and call again, then stop. If it's not a git repo, say so, and proceed **only with the human's explicit approval** (there's no safety net besides reverting the isolation)
+- **Block if `reap` isn't on PATH.** `command -v reap` has to succeed and `reap --version` has to be 0.18 or later — 5/8 (`init`) and 6/8 (`make`) both call it, and finding that out after 4/8 has already moved the store is the worst place (real trace: selfview 2026-09-05, stopped at 5/8 after `git mv`). If it's missing, print the install line and stop:
+
+  ```
+  npm i -g @c-d-cc/reap@next
+  ```
+
+  A binary that isn't on PATH but exists at a known path (a dev build) is fine — export `REAP_BIN=<path>` and use it for every `reap` call below, including inside the scripts
 - **Block if there's an open generation.** If `life/current.yml` exists and its stage is in progress, either close it with the old reap (`reap run abort` or completion), or if that's not possible, proceed only after getting the human's confirmation that they're aware. Don't swap out the store on top of a half-run generation — same principle as uncommitted state
 
 ## 3/8 — Notice and consent: say everything before starting
 
 Three things to show before getting consent:
 
-- **The list of steps** (the eight above) and how much each will handle in this project (memory file sizes, lineage count, backlog count, environment file count, **design document count** — `find vision/design -type f | wc -l`, files not directories — **the last lineage generation's id**, and **whether `CLAUDE.md` has a `## REAP` section** — measured at the level of `ls | wc -l`)
+- **The list of steps** (the eight above) and how much each will handle in this project. **A script measures it** — don't count by eye (real trace: the agent counted `vision/backlog` and told the human "0 items" when `life/backlog/` held 8):
+
+  ```bash
+  bash <this skill's directory>/scripts/measure.sh <project root>
+  ```
+
+  Show its output verbatim — memory sizes, live goals lines, lineage count and last id, `life/backlog/` count, open milestones, design files, environment files, hook files, config language·agentClient, whether `life/current.yml` exists, and whether `CLAUDE.md` has a `## REAP` section. Each line maps to a step or a mapping number, so the human sees what each step will touch
 - **Token notice**: migration reads and sorts through all of memory and the records, so **token usage can be very large**
 - **The non-destruction promise**: the original stays entirely, just renamed to `.reap-v0_17/`, and reverting is one `mv`
 
@@ -64,6 +77,8 @@ Set up a new `.reap/` with `reap init`. Carry `config.yml`'s `language`·`agentC
 
 **`language`'s format differs** — v0.17 uses a word (`korean`), v0.18 uses an ISO code. Convert: korean→ko · english→en · japanese→ja · chinese→zh-cn · spanish→es · french→fr · german→de · portuguese→pt. If it's not in the table, leave it as is and note it in the record file. (Friction caught by real-world verification gen-0073)
 
+**`init` also appends two lines to the project's `.gitignore`** — `.reap/.session` and `.reap/.index/` (it prints that it did). This is normal and belongs in the migration commit; don't treat it as an unexplained change in 6/8's review, and don't revert it.
+
 ## 6/8 — A subagent does the migration
 
 Don't fill the main session's context with old data — **the mapping table and instructions are in [migration-map.md](references/migration-map.md), and that whole document is handed to a subagent to carry out.** For mappings 1-9, the confirmed grounds are ps-4b485d's 04-migration-skill.md; for environment (10), it's 04-migrate-docs.md; for the working-state mappings 1·2·3·5·6·11·12, it's ms-024's `tasks/1-skill-revision.md` and selfview's real first-pass trace. Thirteen mappings total (#13 rewrites references to moved documents).
@@ -77,10 +92,10 @@ Don't fill the main session's context with old data — **the mapping table and 
 Structure alone isn't enough — run the working-state check too, the automatable half of "would the next session know how to continue if the original were deleted":
 
 ```bash
-bash <this skill's directory>/scripts/verify-migration.sh <project root>
+REAP_BIN=<path to the reap binary> bash <this skill's directory>/scripts/verify-migration.sh <project root>
 ```
 
-Every line has to read `ok:` — a single `FAIL:` line means mapping #1, #2/#11, #12, or #13 was skipped or done wrong; go back and fix it, then run again. Don't move to step 8 until this script also exits 0. Put its full output in the record file's `## 검증`, right after the doctor output.
+`REAP_BIN` is the binary the script calls for `plan sources`·`ctx`·`doctor`; it defaults to `reap` on PATH, so pass it only when 2/8 set it (a dev build). Every line has to read `ok:` — a single `FAIL:` line means mapping #1, #2/#11, #12, or #13 was skipped or done wrong; go back and fix it, then run again. Don't move to step 8 until this script also exits 0. Put its full output in the record file's `## 검증`, right after the doctor output.
 
 ## 8/8 — Record and home cleanup guidance
 

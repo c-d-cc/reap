@@ -4,7 +4,7 @@
 
 ## To the subagent (6/8)
 
-The main session doesn't read the migration data — carrying out the below is Task's (subagent's) job. At the start of each mapping, the subagent prints "migration N/12: <target>", and returns a draft record file at the end.
+The main session doesn't read the migration data — carrying out the below is Task's (subagent's) job. At the start of each mapping, the subagent prints "migration N/13: <target>", and returns a draft record file at the end.
 
 **Shared rules**
 - **Run every `reap` command at the target project's root.** reap searches upward through parent directories for `.reap/`, so running it inside another repo **writes into that other store.** Right after the first `make`, check that the output file's path is under the target project, and if not, stop immediately
@@ -18,14 +18,14 @@ Mappings #1·#2·#3·#5·#6 redefined and #11·#12 added by gen-0100-exec (ms-02
 
 | # | Original (`.reap-v0_17/`) | Where, and how |
 |---|---|---|
-| 1 | the 3 `genome/` files | **Copy as is, then rewrite in place** — mechanical term replacement only, everything else untouched. Detail below the table |
+| 1 | the 3 `genome/` files | **Copy as is, then rewrite in place** — term replacement sentence by sentence, plus **one section replacement** (the memory-tier description, which no term swap can fix). Everything else untouched. `invariants.md` is never edited — its v0.17 hits go to the record as "사람이 지울 것". Detail below the table |
 | 2 | `vision/memory/` longterm·midterm·shortterm | **Curate** into `vision/memory/lessons.md` only. Passing bar unchanged: a lesson that reads as a conclusion from its title alone, passing "would the next session repeat the same mistake without this." **shortterm's in-progress-work/다음 세대 후보 section and midterm's living (non-완료) track sections are not lessons material** — don't curate them here and don't drop them either. They are the sole input to mapping #11, nowhere else. Everything else (midterm's finished tracks, shortterm's session logistics) is dropped as before |
 | 3 | `life/backlog/` | **Check against real traces before reissuing anything.** For each item, grep its title/keyword across every `.reap-v0_17/lineage/*/05-completion.md` (`Summary` and `## Lessons Learned` sections) and against the code it describes. **Trust neither the item's own frontmatter `status` nor a memory file's claim about it — both go stale** (real trace: `shortterm.md` called 7 items "still pending" that lineage showed resolved months earlier because a stale `status: pending` was copied forward). If resolved, **don't reissue as a live backlog item — archive it instead**, `## Not moved`에 `<old id> — resolved by <gen-id or code location found>`를 적고 Detail below the table의 절차로 `archive/backlog/`에 consumed 상태로 옮긴다. Before reissuing, also check the item isn't **superseded**: read the plan documents the live track points at (roadmap, latest authoritative design) — if a later document replaced the design the item assumes (real trace: `team-mode-p0c-account-auth` assumed separate accounts after `account-model.md` had pivoted to unified identity), reissue with a warning at the top of the body naming the superseding document, or don't reissue and record why. Only reissue what's still open (as a live backlog item, in `life/backlog/`): `reap make backlog --type <old type convention> --title <title>`, body carried over, `original: <old filename>` appended |
 | 4 | **open** `vision/milestones/` | Recreate with `reap make milestone --title ...`, porting the body (Exit Criteria/Out of Scope equivalents) into v0.18 vocabulary. Don't move closed ones (the original is history) |
 | 5 | `vision/goals.md` | **Register now — don't defer to the human.** Deleting is cheaper than a half-registered plan source nobody points at, so this mapping decides, it doesn't ask. Steps: (1) copy the still-live (non-`[x]`) goal lines into `docs/plan/goals.md` — check first whether the project already has a planning directory (`docs/plan/`, `docs/design/`, etc.) and use that instead of creating a new one; (2) `reap make plan-source --root docs/plan --role "<one-line role>"`; (3) write `plan/conventions/<ps-id>-<slug>.md` stating "goals.md는 목표 목록, 트랙별 설계는 하위 디렉토리로 온다"; (4) record the registered id in the record file |
-| 6 | `vision/design/` | **Decide 채택·실행 중 by reference, not by guess.** Referenced whole directories move to `docs/plan/`, unreferenced documents become idea files. Detail below the table |
+| 6 | `vision/design/` | **Decide 채택·실행 중 by reference, not by guess.** A reference is a path, an H1 title, or a filename stem named by a live line — and a document named by an already-referenced document counts too. Referenced whole directories move to `docs/plan/`, unreferenced documents become idea files, and borderline cases go to `docs/plan/` **and** the record's `## 사람 판단`. Detail below the table |
 | 7 | `config.yml` | The new config was already set up in 5/8 (language·agentClient carried over). Leave the **list of dropped fields** (autoSubagent, autoUpdate, strictEdit, strictMerge, evaluator, cruiseCount, autoIssueReport, lastMigratedVersion, etc.) in the record file — a setting shouldn't quietly vanish |
-| 8 | `lineage/` · `sequence/` · `reap-guide.md` | **`lineage/`는 승계한다 — 번호를 이어간다(사람 지적, gen-0101, ms-024 이전엔 매핑 #8이 "승계 안 함"이었으나 뒤집혔다: `.reap-v0_17/`을 지우면 세대들의 회고·결정·힌트가 작업 트리에서 사라진다).** `scripts/migrate-lineage.mjs <project-root>`가 `lineage/`의 각 항목(단일 파일·디렉토리 두 형식 모두, `pre-reap-history.md` 포함)을 `archive/generations/gen-0NNN-exec-<slug>.md`로 옮기고 `sequence/generation.md`에 행을 붙인다. 이후 `make generation`이 발급하는 다음 세대 번호는 스크립트가 등록한 마지막 번호 다음부터다 — v0.18 세대가 1부터 다시 시작하지 않는다. **`sequence/`(원본 레지스트리 자체)·`reap-guide.md`는 승계하지 않는다** — `reap-guide.md`는 v0.17이 번들한 안내문(5단계 생애주기 전체를 설명)이고 v0.18 자신의 안내로 대체된다. Detail below the table |
+| 8 | `lineage/` · `sequence/` (if present) | **`lineage/`는 승계한다 — 번호를 이어간다(사람 지적, gen-0101, ms-024 이전엔 매핑 #8이 "승계 안 함"이었으나 뒤집혔다: `.reap-v0_17/`을 지우면 세대들의 회고·결정·힌트가 작업 트리에서 사라진다).** `scripts/migrate-lineage.mjs <project-root>`가 `lineage/`의 각 항목(단일 파일·디렉토리 두 형식 모두, `pre-reap-history.md` 포함)을 `archive/generations/gen-0NNN-exec-<slug>.md`로 옮기고 `sequence/generation.md`에 행을 붙인다. 이후 `make generation`이 발급하는 다음 세대 번호는 스크립트가 등록한 마지막 번호 다음부터다 — v0.18 세대가 1부터 다시 시작하지 않는다. **`sequence/`(원본 레지스트리 자체, 있으면)는 승계하지 않는다** — 새 레지스트리는 스크립트가 쓴다. `reap-guide.md`는 store가 아니라 홈(`~/.reap/`) 자산이라 여기 원본에 없다 — 8/8 홈 정리 표에서만 다룬다. Detail below the table |
 | 9 | `hooks/` · `migration-state.yml` · `.session-state.md` · `.index/` | **Only move hooks that have a matching event** — `onLifeStarted.<name>.{sh,md}`→`.reap/hooks/gen.made.<name>.{sh,md}`, `onLifeCompleted.<name>.*`→`gen.closed.<name>.*` (rename only, keep body and metadata as is; `.sh` keeps its execute bit). The remaining 12 events (`onLifeLearned`·`onLifePlanned`·`onLifeImplemented`·`onLifeValidated`·`onLifeTransited`·8 kinds of `onMerge*`) and `*.example` files aren't moved — note each as "no matching event" in the record file. Copy `conditions/` whole (v0.18 `init`'s placed `always.sh` can be overwritten by the original — same behavior. The original may have one extra comment line, which is harmless). `migration-state.yml`·`.session-state.md`·`.index/` are **dropped** — the mechanism they served is gone. One line each in the record file |
 | 10 | `environment/summary.md`·`source-map.md`·`resources/`·`domain/`·`docs/` | `summary.md`→`.reap/environment/summary.md` **as is** — overwriting the seed `init` placed (a seed isn't user knowledge). `source-map.md`→as is (if present). `resources/`→as is. `domain/`·`docs/` have no place in v0.18 — move them to `.reap/environment/resources/domain/`·`resources/docs/` and note it in the record file (don't edit the content). Phrasing assuming v0.17's structure (5-stage lifecycle, etc.) is "needs updating," same as genome |
 | 11 | the last lineage generation's `05-completion.md` (`## Next Generation Hints`) + shortterm's "다음 세대 후보" section + midterm's living (non-완료) track sections | **Build one focus milestone for the highest-priority track, backlog for the rest.** Detail below the table |
@@ -33,7 +33,7 @@ Mappings #1·#2·#3·#5·#6 redefined and #11·#12 added by gen-0100-exec (ms-02
 
 ## Detail — mapping #1 (genome rewrite)
 
-First run `grep -niE 'embryo|normal genome|adapt phase|reflect phase|completion artifact|autoSubagent|cruise|lifecycle stage|lineage' .reap-v0_17/genome/*.md` to find every hit before touching anything — don't rely on skimming. Then replace only these terms, sentence by sentence, leaving everything else (coding conventions, test policy, product identity, project-specific invariants) untouched:
+First run `grep -niE 'embryo|normal genome|adapt phase|reflect phase|completion artifact|autoSubagent|cruise|lifecycle stage|lineage|shortterm|midterm|longterm' .reap-v0_17/genome/*.md` to find every hit before touching anything — don't rely on skimming. Then replace only these terms, sentence by sentence, leaving everything else (coding conventions, test policy, product identity, project-specific invariants) untouched:
 
 | v0.17 term | replace with |
 |---|---|
@@ -44,6 +44,23 @@ First run `grep -niE 'embryo|normal genome|adapt phase|reflect phase|completion 
 | "environment refreshed at completion" | "`complete` updates `environment/summary.md`" |
 | `autoSubagent` · `cruise` · `evaluator` | delete the sentence containing it |
 | `lineage` | `archive/` and `vision/memory/lessons.md` |
+| the memory-tier description (`shortterm`·`midterm`·`longterm`, "3계층"/"three tiers", or any section explaining how memory files are promoted between them) | **replace the whole section** — heading through the line before the next heading of the same or higher level — with the v0.18 paragraph below, verbatim. A term swap can't do this: the sentences describe a mechanism that no longer exists, and left in place they make the next session create `shortterm.md` |
+
+The v0.18 memory paragraph (use the one in the genome's language; if the section had its own heading text, keep that heading and replace only the body):
+
+```markdown
+## 기억
+
+세대 사이의 기억은 두 곳에 있다. 교훈은 `vision/memory/lessons.md`에 — 제목만으로 결론이 읽히고 "이것이 없으면 다음 세션이 같은 실수를 반복하는가"를 통과하는 것만 적는다. 진행 중인 작업 상태는 focus milestone의 `handoff.md`에 — 다음 세션이 어디서 시작할지를 `/reap:complete`가 갱신한다. shortterm·midterm·longterm 파일은 없고 승격도 없다. 세대 기록은 `life/generations/`에 열리고, 닫히면 `archive/generations/`로 간다.
+```
+
+```markdown
+## Memory
+
+Memory between generations lives in two places. Lessons go to `vision/memory/lessons.md` — only what reads as a conclusion from its title alone and passes "would the next session repeat the mistake without this". In-progress state goes to the focus milestone's `handoff.md` — `/reap:complete` updates where the next session starts. There are no shortterm·midterm·longterm files and no promotion between tiers. Generation records open in `life/generations/` and move to `archive/generations/` when closed.
+```
+
+**`invariants.md` is the exception — don't edit it.** Only a human edits that file (init skill). Run the same grep on it, and if it hits (real trace: "라이프사이클 단계"·"nonce 토큰" rules), list each hit under the record's `## Needs updating` as `invariants.md — 사람이 지울 것: <line>`. The verify script reports those hits as a note, not a failure.
 
 Record every changed sentence as before→after under the record file's `## Needs updating` — that's the diff a human reviews.
 
@@ -62,7 +79,9 @@ reap mark backlog <bk-id> --archived
 
 ## Detail — mapping #6 (design directory vs. idea files)
 
-A document counts as referenced if a **live** goals.md line names its path, or a **living** midterm track (per mapping #2's definition — not marked 완료) or shortterm's in-progress-work section names it. Record the grounds either way — the exact referencing line, or "no reference found."
+A document counts as referenced if a **live** goals.md line, a **living** midterm track (per mapping #2's definition — not marked 완료), or shortterm's in-progress-work section names it — by **path, by H1 title, or by filename stem** (real trace: the goals line "프롬프트 동적 구성 전환 (… Meta Prompt 기반 동적 생성)" named `dynamic-prompt-architecture.md` by its title, and the path-only rule sent an in-progress design to idea). A document named the same way by a document already judged referenced (a roadmap calling `existing-schema-naming-cleanup.md` an "독립 트랙") is referenced too — repeat until no new document is added. Record the grounds either way — the exact referencing line, or "no reference found."
+
+**Borderline** — no path, title, or stem is named, but a live line's subject is plainly this document's topic (the words of the line and the H1 overlap, or the line describes what only this document designs). Don't settle it here. Move it with the referenced set (a plan→idea demotion later is one `make idea --kind file`; the reverse is a hand move) and list it under the record's `## 사람 판단` with the line and the document, so the human decides once, with the evidence in front of them.
 
 - **Referenced** → move the whole containing directory as-is into `docs/plan/<track-slug>/` (a lone file with no sibling directory just moves itself). A whole-directory move keeps every relative link between its documents intact — don't edit them.
 - **Not referenced** → `reap make idea --kind file --title <title>` **per document**, not per directory (`idea/files/` has no subdirectory concept). If several unreferenced documents came from one source subdirectory and cross-link each other (bk-d0eef8's case — 10 team-mode docs, 18 links), still issue them **per document**, but: (a) put `원본 묶음: <원본 디렉토리 상대경로>` as the first line under each one's frontmatter; (b) before finishing, build a table of `원본 파일명 → 새 idea 파일명`, and mechanically rewrite every markdown link between them (`[text](other.md)` → `[text](<new-idea-filename>.md)`) using that table — a plain-prose mention of a filename ("`org-infra.md`의 계정 서술") is not a link, leave it alone. `reap doctor` surfaces any link you missed as a defect — run it before calling this mapping done.
@@ -85,7 +104,7 @@ Every hit is a link that will break the moment `.reap-v0_17/` is deleted. Rewrit
 node <this skill's directory>/scripts/migrate-lineage.mjs <project-root>
 ```
 
-의존 없는 node 스크립트다. `.reap-v0_17/lineage/`의 두 형식(초기 압축 단일 파일 `gen-NNN-<hash>-<slug>.md`, 후기 디렉토리 `meta.yml`+`01-learning.md`…`05-completion.md`[+`backlog/`])을 모두 읽어 `.reap/archive/generations/gen-0NNN-exec-<slug>.md`를 쓰고(v0.17의 세 자리 번호를 네 자리로만 바꾼다 — 재발급하지 않는다), `pre-reap-history.md`는 `gen-0000-exec-pre-reap-history.md`로, `sequence/generation.md`에 행을 append한다. **`startCommit`·`endCommit`은 쓰지 않는다** — v0.17이 커밋 해시를 남기지 않았으므로 지어내지 않는다(doctor는 이 필드가 없는 닫힌 세대를 결함으로 보지 않는다 — "커밋 없이 닫힌 것" 검사는 `startCommit`과 `endCommit`이 **둘 다 있고 같을 때만** 걸린다). **재실행 안전** — 레지스트리에 이미 있는 id는 건너뛴다. 표준 출력에 옮긴 개수·건너뛴 개수·다음 세대 번호·경고(제목이나 날짜를 못 찾은 항목)를 낸다. 스크립트가 못 옮긴 것은 없다고 보고하지 말고 경고를 그대로 기록 파일에 옮긴다.
+의존 없는 node 스크립트다. `.reap-v0_17/lineage/`의 두 형식(초기 압축 단일 파일 `gen-NNN-<hash>-<slug>.md`, 후기 디렉토리 `meta.yml`+`01-learning.md`…`05-completion.md`[+`backlog/`])을 모두 읽어 `.reap/archive/generations/gen-0NNN-exec-<slug>.md`를 쓰고(v0.17의 세 자리 번호를 네 자리로만 바꾼다 — 재발급하지 않는다), `pre-reap-history.md`는 `gen-0000-exec-pre-reap-history.md`로, `sequence/generation.md`에 행을 append한다. **`startCommit`·`endCommit`은 쓰지 않는다** — v0.17이 커밋 해시를 남기지 않았으므로 지어내지 않는다(doctor는 이 필드가 없는 닫힌 세대를 결함으로 보지 않는다 — "커밋 없이 닫힌 것" 검사는 `startCommit`과 `endCommit`이 **둘 다 있고 같을 때만** 걸린다). **재실행 안전** — 레지스트리에 이미 있는 id는 건너뛴다. 표준 출력에 옮긴 개수·건너뛴 개수·다음 세대 번호·참고(단일 파일 형식은 `startedAt`이 원래 없다 — 정상이라 경고가 아니고, `gen-001~gen-026 (26건)`처럼 한 줄로 접힌다)·경고(제목이나 날짜를 못 찾은 항목, 같은 원인이라도 항목마다 한 줄)를 낸다. 스크립트가 못 옮긴 것은 없다고 보고하지 말고 참고 줄과 경고를 그대로 기록 파일에 옮긴다.
 
 ## Detail — mapping #11 (working-state candidates → milestone + backlog)
 
@@ -127,7 +146,8 @@ from: v0.17 (.reap-v0_17/)
 ---
 ## Moved            # by mapping #, original→destination and count — including the environment section (summary, resources, domain/docs move), the milestone/backlog from #11, and the CLAUDE.md span from #12
 ## Not moved      # what, and why — including the list of dropped config fields and #3's resolved-not-reissued backlog items with their grounds
-## Needs updating      # #1's genome before→after term replacements, and #10's list of v0.17-assuming phrasing in environment
+## Needs updating      # #1's genome before→after term replacements (+ invariants.md hits as "사람이 지울 것"), and #10's list of v0.17-assuming phrasing in environment
+## 사람 판단           # #6's borderline documents — the live line and the document it seems to name; moved to docs/plan/ pending the human's call. Omit the section if empty
 ## 검증               # full doctor output, then the full output of the skill's scripts/verify-migration.sh
 ## Home cleanup            # if done, list of what was removed; if not, "not done"
 ## 다음 세션이 볼 것    # reap ctx's full status line block (from <!-- reap 상태 --> to the end), verbatim

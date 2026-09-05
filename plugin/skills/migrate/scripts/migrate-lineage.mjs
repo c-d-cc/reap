@@ -184,6 +184,22 @@ function collectSourceEntries() {
 }
 
 const warnings = [];
+const noDateSingle = []; // 단일 파일 형식에서 startedAt이 없는 세대 번호 — 같은 원인이라 접어서 한 줄로 낸다
+
+// [1,2,3,7,9,10] → "gen-001~gen-003, gen-007, gen-009~gen-010"
+function foldRanges(nums) {
+  const sorted = [...new Set(nums)].sort((a, b) => a - b);
+  const out = [];
+  let start = null, prev = null;
+  const pad = (n) => `gen-${String(n).padStart(3, "0")}`;
+  const flush = () => { if (start !== null) out.push(start === prev ? pad(start) : `${pad(start)}~${pad(prev)}`); };
+  for (const n of sorted) {
+    if (prev !== null && n === prev + 1) { prev = n; continue; }
+    flush(); start = n; prev = n;
+  }
+  flush();
+  return out.join(", ");
+}
 
 function buildSingleFileEntry(entry) {
   const raw = readFileSync(entry.full, "utf8");
@@ -199,7 +215,7 @@ function buildSingleFileEntry(entry) {
     warnings.push(`${entry.name}: 제목을 못 찾음 — slug로 대체`);
   }
   const startedAt = firstBodyDate(raw);
-  if (!startedAt) warnings.push(`${entry.name}: startedAt을 찾지 못함 — 생략`);
+  if (!startedAt) noDateSingle.push(entry.num); // 단일 파일 형식은 날짜가 원래 없다 — 경고가 아니라 참고
   return { title, startedAt, closedAt: null, body: demotedBody.replace(/^\n+/, "") };
 }
 
@@ -346,6 +362,9 @@ const nextId = `gen-${String(maxNum + 1).padStart(4, "0")}`;
 console.log(`옮긴 개수: ${moved}`);
 console.log(`건너뛴 개수(이미 레지스트리에 있음): ${skipped}`);
 console.log(`다음 세대 번호: ${nextId}`);
+if (noDateSingle.length > 0) {
+  console.log(`참고: startedAt 없음(단일 파일 형식, 정상): ${foldRanges(noDateSingle)} (${noDateSingle.length}건)`);
+}
 if (warnings.length > 0) {
   console.log(`경고 ${warnings.length}건:`);
   for (const w of warnings) console.log(`  - ${w}`);

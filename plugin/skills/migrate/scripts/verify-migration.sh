@@ -42,18 +42,24 @@ else
   report "진행 중 트랙 → focus milestone" ok "원본에 진행 중 트랙 없음"
 fi
 
-# 2) genome 3종에 v0.17 절차 어휘가 없다
-v17_words='embryo|adapt phase|reflect phase|completion artifact|autoSubagent|cruise|lifecycle stage'
-hits=0
+# 2) genome에 v0.17 절차 어휘가 없다 — invariants.md는 사람만 고치므로 FAIL이 아니라 참고로 센다
+v17_words='embryo|adapt phase|reflect phase|completion artifact|autoSubagent|cruise|lifecycle stage|shortterm|midterm|longterm'
+hits=0; inv_hits=0
 for f in "$new"/genome/*.md; do
   [ -f "$f" ] || continue
   c=$(grep -ciE "$v17_words" "$f" 2>/dev/null)
-  hits=$((hits + ${c:-0}))
+  if [ "$(basename "$f")" = "invariants.md" ]; then
+    inv_hits=$((inv_hits + ${c:-0}))
+  else
+    hits=$((hits + ${c:-0}))
+  fi
 done
+inv_note=""
+[ "$inv_hits" != "0" ] && inv_note="invariants.md에 ${inv_hits}건 — 사람이 지울 것(기록 파일 Needs updating)"
 if [ "$hits" = "0" ]; then
-  report "genome에 v0.17 어휘 없음" ok
+  report "genome에 v0.17 어휘 없음" ok "$inv_note"
 else
-  report "genome에 v0.17 어휘 없음" fail "${hits}건 — grep -ciE '$v17_words' $new/genome/*.md"
+  report "genome에 v0.17 어휘 없음" fail "${hits}건 — grep -ciE '$v17_words' $new/genome/*.md${inv_note:+; $inv_note}"
 fi
 
 # 3) CLAUDE.md의 REAP 절이 v0.18 것이다 (파일 있으면)

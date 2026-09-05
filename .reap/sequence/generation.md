@@ -103,3 +103,4 @@
 | gen-0099-exec | 문서 협업 3쪽·레퍼런스 4쪽·기타 3쪽 | 2026-09-04 |
 | gen-0100-exec | migration-map·SKILL 개정 — 작업 상태 복원 매핑과 검증 스크립트 | 2026-09-04 |
 | gen-0101-exec | lineage → archive/generations 승계 스크립트, 해소된 backlog → archive/backlog, 번호 이어가기 | 2026-09-04 |
+| gen-0102-exec | resolve #25 #30: migrate 스킬 절차 마찰 5건·판단 규칙 2건 | 2026-09-05 |
