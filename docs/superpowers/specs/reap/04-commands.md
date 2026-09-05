@@ -54,7 +54,7 @@ reap make plan-source --root <path> --role "<r>" [--slug <s>]
 reap mark generation <gen-id> --closed      # closedAt, endCommit(현재 HEAD), status
 reap mark generation <gen-id> --aborted     # 기록 삭제
 reap mark generation <gen-id> --archived    # archive/generations/로 이동 (status는 건드리지 않는다)
-reap mark loop <loop-id> --closed [--milestone <ms-id>]...  # closedAt, milestones, status. 닫힌 loop가 10개를 넘으면 오래된 것부터 archive/loops/로
+reap mark loop <loop-id> --closed [--milestone <ms-id>]...  # closedAt, milestones, status. 닫으면서 archive/loops/로 옮긴다
 reap mark loop <loop-id> --aborted     # 기록 삭제
 reap mark milestone <ms-id> --focus
 reap mark milestone <ms-id> --closed        # closedAt, status; archive/milestones/로 이동
@@ -197,7 +197,7 @@ generation 기록과 같은 규칙이다. frontmatter는 `make`와 `mark`가, �
 
 `make milestone`은 plan generation의 산출이 일반적인 경로지만 강제되지 않는다. 급한 수정은 milestone을 직접 만들어 시작할 수 있고, 이때 `refs`는 비어 있어도 된다.
 
-**종료에는 사람의 fitness 피드백이 필요하다.** 이것도 게이트가 아니다 — `mark milestone --closed`는 피드백 존재를 검사하지 않는다. `complete` skill이 사람에게 묻고, 받은 피드백을 milestone 본문에 남긴다. **그다음 `mark`를 호출하기 전에 `cleanup` skill을 먼저 부른다** — `cleanup`이 `life/generations/`에서 참고 가치가 다한 세대를 `archive/generations/`로 내리고 그 목록을 `handoff.md`에 남긴 뒤에야 `mark milestone --closed`를 호출한다. 순서가 반대이면 `handoff.md`가 이미 옮겨진 뒤라 `cleanup`이 남긴 기록을 다음 세션이 못 찾는다. `mark`가 닫은 milestone은 `archive/milestones/<ms-id>-<slug>/`로 옮겨지며 `milestone.md`·`handoff.md`·`tasks/`가 함께 보존된다. **세대는 따라가지 않는다** — 그것은 `cleanup`이 이미 참고 가치를 보고 따로 내린 뒤다.
+**종료에는 사람의 fitness 피드백이 필요하다.** 이것도 게이트가 아니다 — `mark milestone --closed`는 피드백 존재를 검사하지 않는다. `carve-milestone` skill이 사람에게 묻고, 받은 피드백을 milestone 본문에 남긴 뒤 `mark milestone --closed`를 호출한다. 닫은 milestone은 `archive/milestones/<ms-id>-<slug>/`로 옮겨지며 `milestone.md`·`handoff.md`·`tasks/`가 함께 보존된다. **세대는 따라가지 않는다** — 세대는 각자 닫힐 때 이미 `archive/generations/`로 갔다(2026-09-05 이전에는 `cleanup` skill이 이 시점에 참고 가치를 판단해 내렸다. 판단이 서지 않아 폐기).
 
 `focus`는 제한이 아니라 초점이다. 초점이 아닌 열린 milestone에서도 generation을 시작할 수 있다. `.session`에 milestone이 바인딩되어 있으면 그것이 `focus`보다 우선한다 — 병렬 세션이 각자 다른 milestone에서 일할 수 있어야 한다.
 

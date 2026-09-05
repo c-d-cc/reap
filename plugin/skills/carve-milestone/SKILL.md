@@ -1,6 +1,6 @@
 ---
 name: carve-milestone
-description: Use when turning plan into an executable milestone in a REAP project, or when closing one - deciding the boundary, exit criteria, and out-of-scope, writing tasks, and running the fitness / cleanup / mark closing sequence. Trigger on "milestone 자르기", "증분을 자른다", "milestone 만들기", "milestone 닫기", or when a loop is about to produce a milestone in a repo containing .reap/.
+description: Use when turning plan into an executable milestone in a REAP project, or when closing one - deciding the boundary, exit criteria, and out-of-scope, writing tasks, and running the fitness / mark closing sequence. Trigger on "milestone 자르기", "증분을 자른다", "milestone 만들기", "milestone 닫기", or when a loop is about to produce a milestone in a repo containing .reap/.
 user-invocable: false
 ---
 
@@ -87,7 +87,8 @@ Leaving it in the roadmap **puts the same thing in two places.** Delete the carv
 There's a fixed order.
 
 1. **Get the fitness answer and record it in `milestone.md`.** Write not just the answer but **how it was read** — a deferred answer ("still don't know") has to be asked again by the next milestone, so **move it to `idea/research/`** (`make idea --kind research`). That's exactly the place that keeps it from being searched for again without a conclusion — write down what would let it graduate, too
-2. **Call [cleanup](../cleanup/SKILL.md).** `mark milestone --closed` moves the whole milestone directory, so if the order is reversed the next session can't find what `cleanup` left behind
-3. **`reap mark milestone <ms-id> --closed`**
+2. **`reap mark milestone <ms-id> --closed`** — moves the whole directory (`milestone.md`·`handoff.md`·`tasks/`) to `archive/milestones/`
+
+That's the whole sequence. The generations aren't part of it — each one went to `archive/generations/` the moment it closed, so there's nothing left in `life/` to sort through. (There used to be a `cleanup` step here that judged which closed generations still had "reference value"; the judgment never held up, and what the next session needs is in `handoff.md`, not in old records.)
 
 Before closing, **check that everything this milestone settled has been reflected.** What isn't reflected goes down to archive along with `handoff.md`, and becomes undecided.

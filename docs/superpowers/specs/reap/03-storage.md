@@ -28,7 +28,7 @@
     backlog/
       <bk-id>-<slug>.md  이월 항목
     loops/
-      <loop-id>-<slug>.md  예: loop-0001-plan-plan-loop.md — 열린 것과 최근 닫힌 10개
+      <loop-id>-<slug>.md  예: loop-0001-plan-plan-loop.md — 열린 것만
   archive/              끝난 것
     generations/
       <gen-id>-<slug>.md
@@ -37,7 +37,7 @@
     backlog/
       <bk-id>-<slug>.md
     loops/
-      <loop-id>-<slug>.md  닫힌 loop가 10개를 넘으면 오래된 것부터
+      <loop-id>-<slug>.md  닫힌 loop 전부
     idea/
       research/ · freememo/ · files/   cleanup이 내린 것
   genome/
@@ -67,33 +67,24 @@
 
 **`plan/`은 이 3단 밖이다.** `genome/`·`environment/`·`idea/`처럼 최상위에 나란히 선다. plan source는 **리포 밖을 가리키는 등록부**라 "하려는 것 / 사는 것 / 끝난 것"이라는 시간축에 얹히지 않기 때문이다 — 등록된 소스는 하려는 것도 사는 것도 끝난 것도 아니고, 그냥 **거기 있다.**
 
-**`life/loops/`가 기획 축의 사이클이 사는 자리다.** 처음엔 `plan/loops/`였는데 `gen-0052`가 옮겼다 — `plan/`을 3단 밖에 둔 논거(리포 밖을 가리키는 등록부라 시간축에 안 얹힌다)는 `sources.yml`·`conventions/`의 것이지 loop의 것이 아니다. **loop는 열리고 닫히고 archive로 가므로 시간축에 얹히고**, `life/`의 정의("아직 참고할 값이 있는 것")에 그대로 맞으며 `archive/loops/`와 짝이 맞는다. generation과는 다른 사이클이므로 `life/generations/`에 섞지 않고 `life/loops/`다. 열린 loop와 최근에 닫힌 loop가 여기 있고, **닫힌 것이 10개를 넘으면 오래된 것부터 `archive/loops/`로 간다.** generation과 달리 `cleanup`의 판단을 거치지 않는다 — 개수는 기계적이라 `mark loop --closed`가 한다.
+**`life/loops/`가 기획 축의 사이클이 사는 자리다.** 처음엔 `plan/loops/`였는데 `gen-0052`가 옮겼다 — `plan/`을 3단 밖에 둔 논거(리포 밖을 가리키는 등록부라 시간축에 안 얹힌다)는 `sources.yml`·`conventions/`의 것이지 loop의 것이 아니다. **loop는 열리고 닫히고 archive로 가므로 시간축에 얹히고**, `life/`의 정의("아직 참고할 값이 있는 것")에 그대로 맞으며 `archive/loops/`와 짝이 맞는다. generation과는 다른 사이클이므로 `life/generations/`에 섞지 않고 `life/loops/`다. 열린 loop만 여기 있고, 닫히면 `archive/loops/`로 간다.
 
-**`life/`는 "열려 있는 것"이 아니라 "아직 참고할 값이 있는 것"이다.** 닫힌 세대도 거기 남는다 — 닫힘은 *상태*이고 archive는 *위치*이며, 둘은 다른 질문에 답한다. 닫혔는가는 "이 작업이 끝났는가"이고, archive인가는 **"앞으로 이것을 볼 일이 있는가"**다.
+**`life/`는 열려 있는 것이다.** 닫힘·소비는 상태이고 archive는 위치이지만, v0.18에서는 둘이 같은 순간에 일어난다 — `mark generation --closed`·`mark loop --closed`·`mark backlog --consumed`가 표시와 함께 `archive/`로 옮긴다(사람 결정 2026-09-05). `life/`를 보면 지금 열린 것이 전부 보이고, 그 밖의 것은 없다.
 
 **generation을 유형별 폴더로 가르지 않는다.** 유형이 늘 때마다 최상위가 늘고, 세대는 유형과 무관하게 시간순으로 하나의 흐름을 이룬다. 전부 `life/generations/` 하나에 쌓이고 유형은 **id 안에** 있다.
 
 **archive는 milestone에 매달리지 않는다.** `archive/`의 넷은 나란히 있고 서로를 담지 않는다. milestone 아래에 그 세대를 넣으면 닫을 때마다 "이 milestone에 속한 세대"를 계산해야 하고, milestone이 없는 fix 세대는 그 계산에서 매번 예외가 된다. **소속은 frontmatter가 이미 말하므로 디렉토리가 다시 말할 이유가 없다.**
 
-### `life/`는 작업 세트다
+### 닫히면 바로 archive다
 
-**이것이 `life/`와 `archive/`를 가르는 이유 전부다.**
+한동안 `life/`를 "아직 참고할 값이 있는 것"의 작업 세트로 정의하고, 닫힌 세대를 남겼다가 milestone이 닫힐 때 `cleanup` skill이 "앞으로 이것을 볼 일이 있는가"를 판단해 내리게 했다. 두 가지가 그것을 뒤집었다.
 
-milestone을 진행하는 agent는 지난 세대를 참고한다 — 무엇을 왜 그렇게 정했는지, 어떤 길이 막혔는지. 그런데 세대는 프로젝트가 사는 동안 계속 는다. 수백 개가 한 곳에 있으면 **참고할 수 있다는 것이 참고할 수 없다는 뜻이 된다.**
+- **판단이 서지 않았다.** `cleanup` skill 본문 스스로 "근거 없이 남겼다"는 실패를 적었고, 실제로 닫힌 세대를 다시 읽은 경우는 전부 `handoff.md`를 거쳤다. 다음 세션에 필요한 것이 `handoff.md`에 있어야 한다는 규칙과 "세대 기록을 뒤지라"는 작업 세트는 서로를 약하게 만든다
+- **위치 이동은 판단이 아니다.** 결정적으로 할 수 있는 일을 skill의 판단에 맡길 이유가 없다 — 원칙 2의 반대편이다
 
-그래서 `life/generations/`에는 **지금 일에 참고할 값이 남은 세대만** 둔다. 열려 있는 것과, 닫혔지만 아직 읽을 이유가 있는 것. agent는 이 디렉토리만 보면 되고 `archive/generations/`는 특정한 것을 찾을 때만 연다.
+그래서 세 종류가 같은 규칙이다. `life/generations/`·`life/loops/`·`life/backlog/`에는 열린 것만 있고, 닫히거나 소비되는 순간 CLI가 `archive/`로 옮긴다. 기록은 id로 찾으며 조회는 두 곳을 다 본다 — 필요한 것은 언제든 열린다. `--archived` 플래그는 옛 규칙으로 `life/`에 남은 것을 내리는 용도로만 남는다.
 
-**`life/backlog/`도 같다.** 소비된 항목이라도 무엇을 물었고 답이 어떻게 뒤집혔는지가 아직 읽을 값을 가질 수 있으므로, `status: consumed`는 내릴 후보일 뿐 판단이 아니다. 이 규범이 늦게 선 탓에 backlog는 한동안 **나가는 문 없이** 쌓였다 — `cleanup`이 milestone 종료 절차에서 태어나 milestone에 매달린 것만 보게 설계됐기 때문이다.
-
-**옮기는 시점은 milestone이 닫힐 때다.** 그때 `cleanup` skill이 `life/generations/`를 훑어 무엇을 내릴지 정한다. 세대를 닫을 때가 아닌 이유는, 세대가 닫히는 순간에는 그것을 다시 볼지 아직 모르기 때문이다 — **milestone이 끝나야 그 답이 나온다.**
-
-**`cleanup`은 `mark milestone --closed`보다 먼저 돈다.** `mark milestone --closed`는 milestone 디렉토리를 통째로 `archive/milestones/`로 옮기고, 그 안의 `handoff.md`는 옮긴 뒤에는 `ctx`의 milestone 선택이 건너뛰므로 다음 세션이 읽지 못한다. `cleanup`이 먼저 돌아 옮긴 세대 목록을 `handoff.md`에 남기고, 그다음에 milestone을 닫아야 그 기록이 살아서 archive로 함께 간다. 종료 순서는 **사람의 fitness → `cleanup` → `mark milestone --closed`**다.
-
-**기준은 소속이 아니라 참고 가치다.** "이 세대를 앞으로 볼 일이 있는가." plan 세대는 그 plan이 실제로 반영됐으면 끝난 것이니 내린다. exec 세대는 그 일이 milestone과 함께 끝났으면 내린다. 아직 살아 있는 결정이나 막다른 길을 담고 있으면 남긴다.
-
-**이것은 frontmatter로 답할 수 없다.** "이 plan이 반영됐는가"도 "이것을 다시 볼 일이 있는가"도 파일 안 어느 필드에도 없다. 그래서 판단이고, 판단은 skill의 것이다. CLI는 `mark generation --archived`로 **이동만** 한다.
-
-milestone 디렉토리는 별도로 `mark milestone --closed`가 `archive/milestones/`로 옮긴다.
+**milestone 종료 순서는 둘이다** — 사람의 fitness → `mark milestone --closed`. milestone 디렉토리(`milestone.md`·`handoff.md`·`tasks/`)가 통째로 `archive/milestones/`로 가고, 세대는 이미 거기 있다.
 
 ### `map.md` — 구조가 스스로를 설명한다
 

@@ -114,7 +114,6 @@ milestone이 없으면 그 묶음을 내지 않고, 열린 세대가 없으면 �
 | `loop` | 새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것 | **loop를 열고 닫는다**(`make loop` · `mark loop --closed`). 유형을 정하고, 열린 loop 중 이어갈 것이 있는지 보고, plan source에 **쓴다** — 아래 **loop** 절의 여섯 판단. 산출물이 자리를 찾았는지 판단해 `carve-milestone`을 부르고 닫는다. `Dialogue`를 기록에 남긴다 |
 | `carve-milestone` | loop 안에서, 그리고 milestone을 닫을 때 | plan source를 읽고 실행 가능한 milestone으로 자른다. **자르기 전에 그 계획의 전제를 실제 흔적에 대보는 것**이 첫 동작이다. 크기 기준, 경계·종료조건·범위밖을 정하는 법, plan 인용법, fitness 질문을 자를 때 미리 쓰는 것. 그리고 **종료 절차 전체** — fitness → `cleanup` → `mark milestone --closed`. `complete`는 이 절차를 옮겨 적지 않고 가리키기만 한다 |
 | `orchestrate` | 병렬 작업 시 | 역할 명명, 메시지 kind 관례, 언제 claim을 잡는지, barrier 배치, 조율자 패턴 |
-| `cleanup` | 사람의 fitness로 milestone을 닫기로 한 뒤, `mark milestone --closed`를 부르기 전 | `life/generations/`를 훑어 **참고 가치가 다한 세대**를 `archive/generations/`로 내린다. 기준은 milestone 소속이 아니라 "앞으로 이것을 볼 일이 있는가"이며, 그 답은 frontmatter에 없으므로 판단이다. CLI(`mark generation --archived`)는 이동만 한다. `mark milestone --closed`보다 먼저 도는 이유는 그것이 milestone 디렉토리(와 `handoff.md`)를 archive로 옮기기 때문이다 |
 | `interview` | 의도가 모호할 때, 언제든 | 모호한 요구를 질문으로 구체화한다. 아래 **interview** 절 |
 | `init` | **프로젝트당 한 번, 맨 처음** — 새 폴더든 기존 코드베이스든 `.reap/`가 씨앗인 채 남았든 | `reap init`을 부르고 **정본 지식을 세운다** — plan source 등록, `environment/summary.md`, `genome/application.md`·`evolution.md`. 질문지를 갖되 묻는 법은 `interview`를 가리킨다. 아래 **init** 절 |
 | `report-issue` | REAP 자체의 결함이나 빠진 기능을 만났을 때 | 누구의 문제인지 가르고(REAP의 것만), 재현을 확정하고, REAP가 소유하는 사실만 실어(`--version`·플러그인 버전·레이아웃 이름) `c-d-cc/reap`에 issue를 올린다. `gh`가 없으면 본문을 사람에게 낸다. 이 프로젝트의 코드·경로·기록 본문은 싣지 않는다 — 공개 리포다. URL은 이 프로젝트의 backlog에 남긴다 |
@@ -169,7 +168,7 @@ REAP는 기획을 쓴다. 쓰는 단위가 loop이고(`02-flow.md`의 `plan 축�
 
 **0. 새 loop인가 이어갈 loop인가.** 여럿이 열려 있으므로 먼저 `life/loops/`를 본다. 같은 물음을 다루는 loop가 열려 있으면 거기 잇는다 — 새로 열면 논의가 두 기록으로 갈라진다. 유형은 산출물이 갈 자리로 정한다.
 
-**0'. 닫을 때가 됐는가.** 산출물이 자리를 찾았는가 — plan source에 썼거나, milestone을 잘랐거나, `idea/`에 남겼거나. 그러면 `mark loop --closed`. 닫힌 loop는 `life/loops/`에 남아 그 milestone을 실행하는 세대가 읽는다(10개 초과분만 도구가 archive로 내린다). 못 찾았으면 열린 채 두고 `Dialogue`·`Dead Ends`를 적어둔다.
+**0'. 닫을 때가 됐는가.** 산출물이 자리를 찾았는가 — plan source에 썼거나, milestone을 잘랐거나, `idea/`에 남겼거나. 그러면 `mark loop --closed` — 닫히면서 `archive/loops/`로 간다. 그 milestone을 실행하는 세대는 `from:`의 id로 찾아 읽는다. 못 찾았으면 열린 채 두고 `Dialogue`·`Dead Ends`를 적어둔다.
 
 **1. 어느 소스에 쓸 것인가 — 그리고 그 소스가 살아 있는가.** 규약의 `수명` 절이 소비 완료를 말하는 소스에는 쓰지 않는다. 확장이냐 신설이냐가 애매하면 사람에게 묻는다 — 문서 체계는 사업 판단이다. 소스가 소비 완료가 되면 규약의 `수명` 절을 갱신하는 것이 마지막 milestone을 닫는 쪽의 일이다. 여러 소스가 role을 달리해 등록돼 있다. 잘못 고르면 같은 주제의 자료가 두 곳으로 흩어지고, 흩어진 자료는 어느 쪽도 완전하지 않다.
 

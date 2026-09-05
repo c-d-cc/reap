@@ -223,5 +223,5 @@ export function claudeCodeCommandsDir(...) { ... }
 
 **산문 속 언급은 표식이 아니다.** 규약을 설명하는 글은 `reap:carrier-<hash6>-<slug>`처럼 꺾쇠를 쓰고, `<`·`>`·공백이 든 것은 세지 않는다.
 
-**backlog** — 이월 항목. 지금 하지 않기로 한 것을 기록한다. REAP처럼 특정 단계에서 소비되도록 강제되지 않는다. `type`은 관례이며 `mark backlog --consumed`는 표시만 하고 소비 시점을 정하지 않는다. **나가는 문은 `cleanup`이 연다** — `life/backlog/`도 작업 세트이므로 참고 가치가 다한 항목은 `archive/backlog/`로 내려간다. 상태와 위치는 다른 질문이다. 그리고 **backlog 항목은 exec generation의 근거가 된다**(`02-flow.md`) — 항목 하나가 경계 하나다.
+**backlog** — 이월 항목. 지금 하지 않기로 한 것을 기록한다. REAP처럼 특정 단계에서 소비되도록 강제되지 않는다. `type`은 관례이며 `mark backlog --consumed`는 소비 시점을 정하지 않는다 — 표시하면서 `archive/backlog/`로 옮긴다. `life/backlog/`에는 열린 항목만 있다. 소비된 항목의 물음과 답은 그것을 소비한 세대의 기록이 갖고, 항목 자체는 id로 언제든 찾는다. 그리고 **backlog 항목은 exec generation의 근거가 된다**(`02-flow.md`) — 항목 하나가 경계 하나다.
 

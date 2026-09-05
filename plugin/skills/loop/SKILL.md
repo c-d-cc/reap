@@ -13,7 +13,7 @@ A loop is a **different cycle** from a generation. It isn't bound to a session, 
 
 ## First: look at open loops
 
-The status line lists `Open loop:` one per line. If not, look at `.reap/life/loops/` directly — closed ones stay there too, up to the 10 most recent.
+The status line lists `Open loop:` one per line. If not, look at `.reap/life/loops/` directly — only open loops live there; closed ones are in `archive/loops/`, found by id.
 
 **If a loop already open covers the same question, continue there.** Opening a new one splits the discussion into two records. Read that record's `Question` and `Dialogue`, learn how far it's gotten, then continue.
 
@@ -56,7 +56,7 @@ reap mark loop <loop-id> --closed [--milestone <ms-id>]...
 
 Write the milestone this loop produced under `--milestone`. The milestone's `from:` has to point back to this loop too — `carve-milestone` writes it via `--from <loop-id>`. If the output was a backlog item instead, close with no `--milestone` and name the item in `Outcome` — its `from:` already points here.
 
-**Before closing, write `Dead Ends` and `Outcome` faithfully.** A closed loop stays in `life/loops/` for the generation executing that milestone to read. Past 10, the tool sends the oldest down to archive — nothing to decide here.
+**Before closing, write `Dead Ends` and `Outcome` faithfully.** `mark loop --closed` moves the record to `archive/loops/` in the same step. The generation executing the milestone this loop produced reaches it by id (the milestone's `from:`), so the record doesn't need to stay in `life/` — but it does need to be complete before it goes.
 
 **If it hasn't found its place, leave it open.** That's normal. The next session reads `Question` and `Dialogue` and continues. If the direction itself has died, clear it with `--aborted`, but send why it was folded to `idea/research/` — a cleared record can't be read by anyone.
 

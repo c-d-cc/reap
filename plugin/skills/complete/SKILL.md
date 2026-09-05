@@ -107,12 +107,14 @@ closedAt: 2026-08-23T13:20:00Z
 endCommit: 9f8e7d6        # current HEAD
 ```
 
+**Closing moves the record.** `mark generation --closed` stamps these and moves the file from `life/generations/` to `archive/generations/` in the same step — `life/` holds only what's open. So finish the record **before** closing, and make the closing commit after (it carries the rename). Anything the next session needs is in `handoff.md`, never "in the last generation's record" — that record is findable by id, but nobody is pointed at it.
+
 ## Has the milestone finished
 
 After closing the generation, **if the milestone's exit criteria now read as met, stop there.** Don't close it yourself.
 
-**The closing procedure belongs to [carve-milestone](../carve-milestone/SKILL.md)** — how to ask fitness, how to read the answer, and in what order to call `cleanup` and `mark milestone --closed` all live there. Not copied here.
+**The closing procedure belongs to [carve-milestone](../carve-milestone/SKILL.md)** — how to ask fitness, how to read the answer, and then `mark milestone --closed`. Not copied here.
 
 ## Use the tool when there is one
 
-If the `reap` binary is present, `reap mark generation <id> --closed` handles the frontmatter update. **`mark` doesn't check anything** — the commit check was already done above. Without the binary, do it by hand.
+If the `reap` binary is present, `reap mark generation <id> --closed` handles the frontmatter update and the move to `archive/generations/`. **`mark` doesn't check anything** — the commit check was already done above. Without the binary, do both by hand.

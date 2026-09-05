@@ -38,7 +38,7 @@ Rules for the list:
 | `report-issue` | a defect or missing feature in REAP itself |
 | `help` | this |
 
-Render it as this table, translated. **Don't list `complete`, `carve-milestone`, or `cleanup`** — they're the agent's and don't appear in the `/` menu. One sentence under the table is enough: closing a generation or a milestone is something the agent does when the person says the work is done.
+Render it as this table, translated. **Don't list `complete` or `carve-milestone`** — they're the agent's and don't appear in the `/` menu. One sentence under the table is enough: closing a generation or a milestone is something the agent does when the person says the work is done.
 
 ## 3. Next — one suggestion, read off the state
 

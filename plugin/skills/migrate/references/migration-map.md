@@ -71,11 +71,10 @@ For every item mapping #3 judges **resolved** (found already done by a real trac
 ```bash
 reap make backlog --type <old type convention> --title "<title>"   # id 발급
 # 본문을 원본 그대로 채운다(요약하지 않는다) + 맨 끝에 `original: <old filename>`
-reap mark backlog <bk-id> --consumed --by <해소한 gen-0NNN-exec>
-reap mark backlog <bk-id> --archived
+reap mark backlog <bk-id> --consumed --by <해소한 gen-0NNN-exec>   # 표시와 함께 archive/backlog/로 옮겨진다
 ```
 
-`--by`는 그 항목을 실제로 해소한 세대의 v0.18 archive id다(매핑 #8로 lineage를 승계했다면 `gen-0NNN-exec` 꼴). 세 명령 순서를 지킨다 — `--consumed`가 먼저라야 `consumedBy`가 archive로 옮겨지기 전에 찍힌다. 결과는 `archive/backlog/`에 `status: consumed`로 남고 `## Not moved`의 한 줄과 이 항목이 서로를 가리킨다.
+`--by`는 그 항목을 실제로 해소한 세대의 v0.18 archive id다(매핑 #8로 lineage를 승계했다면 `gen-0NNN-exec` 꼴). `--consumed`가 위치 이동까지 한다 — `--archived`를 따로 부르지 않는다. 결과는 `archive/backlog/`에 `status: consumed`로 남고 `## Not moved`의 한 줄과 이 항목이 서로를 가리킨다.
 
 ## Detail — mapping #6 (design directory vs. idea files)
 

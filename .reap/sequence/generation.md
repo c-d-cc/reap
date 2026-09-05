@@ -111,3 +111,4 @@
 | gen-0107-exec | help skill·complete의 environment 갱신·독립 검증·문서 정합 | 2026-09-05 |
 | gen-0108-exec | milestone 과잉 분할을 제품에서 막는다 — evolve·carve-milestone·loop 본문, doctor 참고 | 2026-09-05 |
 | gen-0109-exec | CLI — closed·consumed가 곧 archive 이동, loop overflow 삭제 | 2026-09-05 |
+| gen-0110-exec | skill·spec·map.md — cleanup 은퇴, 종료 순서 둘, life는 열린 것만 | 2026-09-05 |

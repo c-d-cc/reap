@@ -35,7 +35,6 @@ plugin/
     complete/SKILL.md
     carve-milestone/SKILL.md
     orchestrate/SKILL.md
-    cleanup/SKILL.md
     interview/SKILL.md
     init/SKILL.md
     report-issue/SKILL.md

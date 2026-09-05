@@ -80,7 +80,7 @@ agent는 판단하고, CLI에게 확정을 요청하고, 사실은 git에게 직
 |---|---|---|---|
 | 정본 지식 세우기 (처음 한 번) | `init` + `interview` | `reap init` · `make loop` · `make plan-source` | 씨앗 대신 채워진 `genome/`·`environment/summary.md`·`plan/`, 첫 loop |
 | loop 열기 | `loop` | `make loop` | `life/loops/`의 기록, 레지스트리 행 |
-| loop 닫기 | `loop` | `mark loop --closed` | plan source에 쓴 것, 낳은 milestone. 닫힌 loop가 10개를 넘으면 오래된 것이 `archive/loops/`로 |
+| loop 닫기 | `loop` | `mark loop --closed` | plan source에 쓴 것, 낳은 milestone. 닫히면서 `archive/loops/`로 |
 | 세션 시작 | — | `reap ctx` | (없음. 읽기만) |
 | 축 고르기 (exec·fix) | `evolve` | — | 기록의 의도 |
 | 세대 열기 | `evolve` | `make generation` | 기록 파일, 레지스트리 행, 세션 바인딩 |
@@ -88,7 +88,6 @@ agent는 판단하고, CLI에게 확정을 요청하고, 사실은 git에게 직
 | 미확정 지식 | agent | `make idea` | `idea/` 항목 |
 | 세대 닫기 | `complete` | `mark generation --closed` | 커밋, 마무리된 기록, `handoff.md` |
 | milestone 자르기 | `carve-milestone` | `make milestone` | milestone 디렉토리 |
-| 정리 | `cleanup` | `mark generation --archived` | 참고 가치가 다한 세대가 `archive/generations/`로 이동 |
 | milestone 닫기 | `carve-milestone` + **사람** | `mark milestone --closed` | `archive/milestones/`로 이동, fitness 기록 |
 | 점검 | — | `doctor` | (없음. 보고만) |
 
@@ -114,8 +113,7 @@ plan source (여러 곳, 리포 밖 가능)  <-- reap make plan-source 로 등�
    +-- loop --------------------------+   근거는 선택: plan source · generation · 앞 loop
    |
    |  산출물이 자리를 찾으면 닫힌다 — milestone을 자르거나(carve-milestone),
-   |  plan source에 쓰거나, idea/ 에 남기거나. 닫힌 loop는 life/loops/ 에 남고
-   |  닫힌 것이 10개를 넘으면 오래된 것부터 archive/loops/ 로
+   |  plan source에 쓰거나, idea/ 에 남기거나. 닫히면서 archive/loops/ 로 간다
    v
 milestone  ---- reap make milestone ---> from: loop-NNNN, refs: <ps-id>:<경로>
    |
@@ -142,7 +140,7 @@ plan 축과 execute 축은 **milestone에서 만난다.** loop는 exec의 경계
 
 **generation과 다른 사이클이다.** generation은 세션에 바인딩되고 대개 한 세션에 닫히며 하나만 열린다. loop는 **여러 세션에 걸치는 것이 정상**이고 **여럿이 나란히 열리며** 세션에 바인딩되지 않는다 — 사람이 말한 *"복합적인 관점, 다양한 탐색, 사고실험과 취소"*가 loop 하나의 안쪽에서 일어난다. milestone을 아직 못 낳은 loop는 **열린 채 둔다**; 방향 자체가 죽었으면 `--aborted`로 지운다.
 
-**닫힌 loop는 `life/loops/`에 남는다.** 방금 닫힌 loop가 가장 자주 읽히는 loop다 — 그것이 낳은 milestone을 실행하는 세대가 `Dialogue`와 `Dead Ends`를 본다. 처음에는 닫히면 바로 archive로 보내기로 했는데 첫 loop를 닫자마자 찾기 어려워졌다(`loop-0001`). 그래서 **닫힌 loop가 10개를 넘으면 오래된 것부터** `archive/loops/`로 내린다. 판단이 아니라 개수이므로 `mark loop --closed`가 닫는 김에 한다 — generation의 `cleanup`과 다른 점이다. 열린 loop는 개수와 무관하게 옮기지 않는다.
+**닫힌 loop는 `archive/loops/`로 간다** (사람 결정 2026-09-05 — 세 종류 모두 닫는 즉시 archive). 그것이 낳은 milestone을 실행하는 세대는 milestone의 `from:`이 가리키는 id로 loop를 찾아 `Dialogue`와 `Dead Ends`를 읽는다 — 조회는 `life/`와 `archive/`를 함께 보므로 위치는 문제가 아니다. 한때 "방금 닫힌 loop가 가장 자주 읽힌다"는 이유로 닫힌 것 10개를 `life/loops/`에 남겼는데, 찾기 어려웠던 것은 위치가 아니라 id를 모른 탓이었다. `life/loops/`에는 열린 loop만 있고, 상태 줄이 세는 것도 그것뿐이다.
 
 **같은 자리를 세 번 잘못 채웠다.** `gen-0040`은 `track`(milestone을 plan 축에 복사한 *묶음*)으로, `ms-005`는 `author-plan`(generation 안의 skill)으로, `gen-0045`는 `reap-plan`(플러그인 경계 밖으로 내보냄)으로. 셋 다 같은 오독이다 — 빈칸은 *"plan을 누가·어떻게 묶는가"*가 아니라 **"plan을 만드는 일이 어떤 사이클로 도는가"**였고, 답은 generation과 다른 사이클을 하나 더 두는 것이었다. **loop는 묶음이 아니다** — track이 틀린 이유가 여기 걸리지 않는다. loop는 generation과 같은 급의 기록 단위이고, 묶는 것이 아니라 도는 것이다.
 

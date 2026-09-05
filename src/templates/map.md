@@ -6,13 +6,13 @@ For anyone, human or agent, seeing REAP for the first time. This is where you le
 
 ```
 vision/    what we intend — what we know (memory), the units we've carved (milestones)
-life/      what's alive right now — generations, backlog, loops
-archive/   what's no longer referenced — generations, milestones, backlog, loops, idea
+life/      what's open right now — generations, backlog, loops
+archive/   what's closed — generations, milestones, backlog, loops, idea
 ```
 
 **`plan/` stands at the top level outside this three-tier split** — a plan source is a registry pointing outside the repo, so it doesn't sit on the "intend / live / done" time axis. It sits alongside `genome/`, `environment/`, `idea/`. **`loop` is not here — it's `life/loops/`** — a loop opens, closes, and moves to archive, so it does sit on the time axis. It isn't a registry.
 
-`vision/` stays referenced indefinitely unless it changes. `life/` isn't "what's open" — it's where **"what still has reference value"** accumulates: a closed generation stays there as long as it's still worth referencing. Closed is a *status*, archive is a *location*, and the two answer different questions. When a milestone closes, its whole directory moves to `archive/milestones/`, and that's when the `cleanup` skill sweeps `life/generations/` and sends the generations that have lost reference value down to `archive/generations/` separately — **the two archive directories don't contain each other.**
+`vision/` stays referenced indefinitely unless it changes. `life/` is **what's open** — a generation, loop, or backlog item moves to `archive/` the moment it closes or is consumed (`mark` does the move). Records are found by id in either place. When a milestone closes, its whole directory moves to `archive/milestones/`; its generations are already in `archive/generations/` — **the two archive directories don't contain each other.**
 
 ## Generations pile up in one place regardless of type
 
@@ -31,10 +31,10 @@ Just `life/generations/` (and `archive/generations/` once done). Not split into 
 
 - `vision/memory/` — just `lessons.md` (project-wide lessons). **A question closes, a lesson accumulates** — mixing them in one file keeps neither clean. Unresolved questions belong to `idea/research/`
 - `plan/` — `sources.yml` (registered plan sources), `conventions/<ps-id>-<slug>.md` (how to read and write to that source)
-- `life/loops/` — open loops and the 10 most recently closed ones (`Question`·`Dialogue`·`Dead Ends`·`Outcome`). Once it overflows, `mark loop --closed` sends the oldest to `archive/loops/`
+- `life/loops/` — open loops (`Question`·`Dialogue`·`Dead Ends`·`Outcome`). `mark loop --closed` moves a loop to `archive/loops/`
 - `vision/milestones/<ms-id>-<slug>/` — `milestone.md` (boundary and exit criteria), `handoff.md` (handoff to the next session), `tasks/<n>-<slug>.md` (task detail)
-- `life/generations/` — generation records that still have reference value (open ones, and closed ones still worth reading). `cleanup` filters these when a milestone closes
-- `life/backlog/` — items that still have reference value (undone ones, and consumed ones still worth reading). `cleanup` filters these down to `archive/backlog/`
+- `life/generations/` — open generation records. `mark generation --closed` moves a record to `archive/generations/`
+- `life/backlog/` — open items. `mark backlog --consumed` moves an item to `archive/backlog/`
 - `genome/` — `application.md` (product identity and architecture), `evolution.md` (AI behavior rules), `invariants.md` (absolute constraints, human-edited only)
 - `environment/` — `summary.md` (current tech stack, build, test), `source-map.md` (optional, code structure), `resources/` (adopted external specs)
 - `idea/` — knowledge that isn't solid yet. `research/` (investigation, no conclusion) · `freememo/` (free notes) · `files/` (external reference material)
