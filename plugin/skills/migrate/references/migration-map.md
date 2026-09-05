@@ -149,21 +149,28 @@ from: v0.17 (.reap-v0_17/)
 ## Needs updating      # #1's genome before→after term replacements (+ invariants.md hits as "사람이 지울 것"), and #10's list of v0.17-assuming phrasing in environment
 ## 사람 판단           # #6's borderline documents — the live line and the document it seems to name; moved to docs/plan/ pending the human's call. Omit the section if empty
 ## 검증               # full doctor output, then the full output of the skill's scripts/verify-migration.sh
-## Home cleanup            # if done, list of what was removed; if not, "not done"
+## Home cleanup            # cleanup-home.mjs output (the --apply run if done, the list run if declined); if not run at all, "not done"
 ## 다음 세션이 볼 것    # reap ctx's full status line block (from <!-- reap 상태 --> to the end), verbatim
 ```
 
 **This isn't complete until 7/8's zero-defect doctor run and a passing `verify-migration.sh` are both in this file.** Put the one-line revert command (`rm -rf .reap && mv .reap-v0_17 .reap`) at the top of the file too.
 
-## Home asset cleanup (8/8) — only after showing the list and getting consent
+## Home asset cleanup (8/8) — a script lists, the human approves, the script applies
 
-This carries forward the principle from gen-088's `reap uninstall`: **delete only what's on the allowlist. Never touch anything the user owns under `~/.reap/`** (a private key has actually been found there before).
+This carries forward gen-088's `reap uninstall`: **delete only what's on the allowlist. Never touch anything the user owns under `~/.reap/`** (a private key has actually been found there). The allowlist lives in one place — `scripts/cleanup-home.mjs` — and this table only describes it:
 
-| Asset | What |
+| Asset | What the script removes |
 |---|---|
-| `~/.claude/commands/reap.*.md` | the 19 old slash commands |
-| `~/.claude/agents/reap-*.md` | the 2 old agents, plus `reap-upgrade.md` itself once migration is done |
-| `~/.claude/settings.json` | only the reap entries in SessionStart (check-version, load-context) and in the marketplace/plugin keys. **Validate-then-write** — if a single value is wrong the client ignores the whole file, so check the edited version by parsing it as JSON and swap it in atomically through a temp file |
-| `~/.reap/` | only what reap wrote: `reap-guide.md` · `version-check.json` · `daemon/`. Leave the rest |
+| `~/.claude/commands/reap.*.md` | the 19 old slash commands (`reapdev.*` is not matched) |
+| `~/.claude/agents/reap-*.md` | the 2 old agents, and `reap-upgrade.md` itself now that migration is done |
+| `~/.claude/settings.json` | **only** `hooks.SessionStart` entries whose command contains `reap check-version` or `reap load-context`. Nothing else in the file — `enabledPlugins`·`extraKnownMarketplaces` are the **v0.18 plugin's own registration** and removing them uninstalls what was just installed. Validated as JSON before the write, written through a temp file and renamed |
+| `~/.reap/` | only what v0.17 wrote: `reap-guide.md` · `.install-stamp` · `version-check.json` · `daemon/`. Everything else is listed as kept; the directory itself is never removed |
+
+```bash
+node <this skill's directory>/scripts/cleanup-home.mjs            # list — changes nothing
+node <this skill's directory>/scripts/cleanup-home.mjs --apply    # after the human said yes to that exact list
+```
+
+Show the list output verbatim and get consent. If the human declines, run nothing more. Put whichever output was the last one (the list, or the apply) in the record's `## Home cleanup`.
 
 Migration is complete even if cleanup is skipped — just note in the record that the user accepts the old slash commands showing up duplicated alongside the new plugin.

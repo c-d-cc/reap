@@ -99,6 +99,15 @@ REAP_BIN=<path to the reap binary> bash <this skill's directory>/scripts/verify-
 
 ## 8/8 — Record and home cleanup guidance
 
-The format for the record file (`archive/migration-v0_17.md`) and the allowlist for home asset cleanup are in the back half of [migration-map.md](references/migration-map.md) — the `doctor` and `verify-migration.sh` outputs both have to be in the record for this to be complete, and home cleanup happens only after the list is approved.
+The format for the record file (`archive/migration-v0_17.md`) and the home-asset allowlist are in the back half of [migration-map.md](references/migration-map.md) — the `doctor` and `verify-migration.sh` outputs both have to be in the record for this to be complete.
+
+**Home cleanup is a script, in two calls.** The old v0.17 assets (19 slash commands, 2 agents plus `reap-upgrade.md`, two SessionStart entries, four files under `~/.reap/`) are not removed by installing v0.18 — nothing else ever removes them, and until this runs every session shows the old `/reap.*` commands next to the new `/reap:*` skills.
+
+```bash
+node <this skill's directory>/scripts/cleanup-home.mjs            # 1) list — changes nothing. Show it verbatim, ask
+node <this skill's directory>/scripts/cleanup-home.mjs --apply    # 2) only after the human approved that exact list
+```
+
+Don't delete by hand and don't edit `settings.json` by hand — the script removes only the allowlist and leaves the v0.18 plugin's registration keys alone. If the human declines, skip step 2 and say so in the record.
 
 **Add a `## 다음 세션이 볼 것` section** — the full text of `reap ctx`'s status line block (everything from `<!-- reap 상태 -->` to the end of its output), pasted verbatim. This is the literal answer to "does the next session know how to continue if `.reap-v0_17/` is deleted" — show it to the human alongside the record file.
