@@ -8,7 +8,7 @@ startedAt: 2026-09-05T00:51:26Z
 startCommit: f697c3b
 status: closed
 closedAt: 2026-09-05T00:52:22Z
-endCommit: 444526d
+endCommit: 9f6bb19
 ---
 
 ## Intent
@@ -29,7 +29,7 @@ endCommit: 444526d
 
 ## Outcome
 
-commit 444526d(주 트리)·tests submodule f62a5ba. `tests/migrate-scripts.test.sh` 71 PASS(cleanup 18 추가), doctor 결함 0, 플러그인 재설치(캐시 = 작업 트리).
+commit 9f6bb19(주 트리)·tests submodule f62a5ba. `tests/migrate-scripts.test.sh` 71 PASS(cleanup 18 추가), doctor 결함 0, 플러그인 재설치(캐시 = 작업 트리).
 
 - `plugin/skills/migrate/scripts/cleanup-home.mjs [--apply] [--home <dir>]` — 기본 목록만, `--apply`가 allowlist만 제거. settings.json은 `hooks.SessionStart` 중 command에 `reap check-version`/`reap load-context`가 든 항목만 빼고 JSON 검증 뒤 temp→rename. 깨진 JSON이면 손대지 않고 말한다. `~/.reap/`의 사용자 파일은 kept로 보고
 - migration-map 8/8 표를 allowlist 실물로 정정(`.install-stamp` 추가, marketplace 키 삭제 지시 제거 + "v0.18 등록 키는 건드리지 않는다" 명시). 기록 파일 `## Home cleanup`은 스크립트 출력
