@@ -1,14 +1,15 @@
-# Handoff — tasks/1 끝, tasks/2·3 남음
+# Handoff — tasks/1·2·3 끝. Exit Criteria 충족 여부는 사람 판정 대기
 
 ## 어디까지
 
-- gen-0104: `reap setup`·v0.17 명령 shim·doctor/init 안내 완료. 실물 확인됨(이 머신)
-- 남은 것: tasks/2(release.yml `--tag next` 제거, release-policy·06-release 재작성), tasks/3(README·사이트·RELEASE_NOTES·훅·migrate 2/8·genome이 경로 하나만 말하기, `@next` 0건)
+- gen-0104: `reap setup`·v0.17 명령 shim·doctor/init 안내. gen-0105: release.yml latest 직접·정책·발행 순서·README·사이트·릴리스 노트·훅·migrate·genome
+- Exit Criteria 다섯 줄 중 넷은 게이트로 확인됨. 마지막(문서가 경로 하나만 말하는가)의 사이트 쪽은 ms-022 검수와 겹친다 — gen-0105 Outcome에 바꾼 줄 번호가 있다
+- `@next`는 계획 기록 세 곳에만 남는다(이력)
 
 ## 다음에 먼저 볼 것
 
-- tasks/2부터. 06-release.md의 발행 순서에서 0.17.8 단계를 지우고 "0.17 사용자의 길"(blocked 메시지 → `npm i -g` → 옛 훅이 부른 `reap load-context`가 안내 → `reap setup` → 새 세션 → `/reap:migrate`)을 적는다
-- tasks/3의 사이트 문구는 사람 검수 중인 ms-022와 같은 파일(`ko.ts`)이다 — 바꾼 자리를 보고에 명시
+- 사람의 fitness. 물어볼 것 둘(milestone.md)은 첫 실물 보고 전이라 답할 수 없다 — 닫을 때 idea/research로
+- 발행 순서는 `docs/reap-plan/reap_v_0_18_release/06-release.md`가 정본. reap_v17의 0.17.8 커밋은 그대로 두고 발행하지 않는다
 
 ## 미결
 
