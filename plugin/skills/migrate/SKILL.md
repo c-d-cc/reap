@@ -1,6 +1,6 @@
 ---
 name: migrate
-description: Use when a project carries v0.17-era REAP data - a .reap/ with the old 5-stage pipeline layout (memory tiers, lineage/, current.yml) - and it must move to the v0.18 layout. Detects the old structure, blocks on uncommitted changes or an open generation, isolates the original as .reap-v0_17/, migrates data via a subagent, verifies with doctor, and leaves a written record. Trigger on "migration", "v0.17에서 왔다", "구 reap 프로젝트", "이주", or when the reap-upgrade agent hands over after installing v0.18, in a repo whose .reap/ shows the old structure.
+description: Use when a project carries v0.17-era REAP data - a .reap/ with the old 5-stage pipeline layout (memory tiers, lineage/, current.yml) - and it must move to the v0.18 layout. Detects the old structure, blocks on uncommitted changes or an open generation, isolates the original as .reap-v0_17/, migrates data via a subagent, verifies with doctor, and leaves a written record. Trigger on "migration", "v0.17에서 왔다", "구 reap 프로젝트", "이주", or right after v0.18 was installed over a v0.17 setup (the CLI's own hint after `reap setup` points here), in a repo whose .reap/ shows the old structure.
 ---
 
 # migrate — moves v0.17 to v0.18
@@ -37,7 +37,7 @@ The first line is the verdict, the next lines are the grounds (the list of marke
 - **Block if `reap` isn't on PATH.** `command -v reap` has to succeed and `reap --version` has to be 0.18 or later — 5/8 (`init`) and 6/8 (`make`) both call it, and finding that out after 4/8 has already moved the store is the worst place (real trace: selfview 2026-09-05, stopped at 5/8 after `git mv`). If it's missing, print the install line and stop:
 
   ```
-  npm i -g @c-d-cc/reap@next
+  npm i -g @c-d-cc/reap && reap setup
   ```
 
   A binary that isn't on PATH but exists at a known path (a dev build) is fine — export `REAP_BIN=<path>` and use it for every `reap` call below, including inside the scripts

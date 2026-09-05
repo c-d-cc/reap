@@ -4,7 +4,7 @@ REAP is remade from a pipeline runner into a protocol and tool provider.
 
 **Changed**
 
-- Splits into two artifacts — the npm CLI `@c-d-cc/reap` and a Claude Code plugin. The plugin installs and updates separately, through the marketplace
+- Splits into two artifacts — the npm CLI `@c-d-cc/reap` and a Claude Code plugin. `reap setup` installs the plugin through the marketplace, which keeps it updated from then on
 - Storage is three-tiered — `vision/` (what you intend), `life/` (what's alive now), `archive/` (what's no longer referenced)
 - Work splits into three units — `loop` (creates a new intent), `milestone` (a plan cut into an executable unit), `generation` (exec/fix — actually evolves the code)
 - `reap doctor` checks and reports what it can determine deterministically. It doesn't fix anything
@@ -21,9 +21,9 @@ REAP is remade from a pipeline runner into a protocol and tool provider.
 
 ### Coming from v0.17
 
-v0.17.7 and below auto-upgrade to 0.17.8 at session start. The upgrade agent that `reap update` installs on 0.17.8 installs the v0.18 CLI and plugin, then hands off to `/reap:migrate`. Original data stays intact under `.reap-v0_17/`.
+On v0.17.7 and below, the session-start version check prints `npm i -g @c-d-cc/reap` instead of upgrading by itself. Run it, then `reap setup`, open a new session, and call `/reap:migrate` in each project. Original data stays intact under `.reap-v0_17/`.
 
 ### Good to know
 
-- Ships on the npm `next` tag — not `latest`, so it doesn't reach existing users automatically. For a fresh install: `npm i -g @c-d-cc/reap@next`
+- One install path: `npm i -g @c-d-cc/reap`, then `reap setup` for the plugin. Users on 0.17 aren't upgraded automatically — the session-start check prints the command instead
 - English by default; set `config.language: ko` in `.reap/config.yml` to switch CLI output to Korean

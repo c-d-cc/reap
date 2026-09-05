@@ -145,7 +145,8 @@ export function HeroPage() {
           <div className="space-y-3">
             <div>
               <div className="text-xs text-muted-foreground mb-1">{h.installStep1}</div>
-              <CodeBlock language="bash">{`npm i -g @c-d-cc/reap@next`}</CodeBlock>
+              <CodeBlock language="bash">{`npm i -g @c-d-cc/reap
+reap setup`}</CodeBlock>
             </div>
             <div>
               <div className="text-xs text-muted-foreground mb-1">{h.installStep2}</div>

@@ -43,9 +43,10 @@ jobs:
       # Trusted publishing needs npm 11.5.1 or later and Node 22 ships npm 10.
       - run: npm i -g npm@latest
 
-      # No token: the OIDC credential is exchanged at publish time. --tag next
-      # keeps 0.18 off the latest dist-tag — see docs/release-policy.md.
-      - run: npm publish --tag next --access public
+      # No token: the OIDC credential is exchanged at publish time. Publishes to
+      # latest — 0.17 users are protected by reap.autoUpdateMinVersion, not by a
+      # dist-tag (docs/release-policy.md).
+      - run: npm publish --access public
 
   github-release:
     if: startsWith(github.ref, 'refs/tags/v0.18.')

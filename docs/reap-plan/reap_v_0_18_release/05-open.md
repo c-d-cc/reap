@@ -62,3 +62,12 @@
 |---|---|
 | A. **마켓플레이스 항목을 `reap`(submodule `plugins/reap` → c-d-cc/reap)으로 교체하고 reap2 항목은 지운다. reap2 리포는 archive** (추천) | `reap2`를 설치한 사람이 있다면 그쪽은 갱신이 끊긴다 — 사내 마켓플레이스라 영향 범위를 사람이 안다 |
 | B. 둘 다 둔다 | 같은 플러그인이 두 이름으로 보인다 — 08-delivery가 정확히 막으려 한 상태 |
+
+## Q6. 설치 경로와 latest (2026-09-05, 사람 답)
+
+문제: 문서가 `npm i -g @c-d-cc/reap@next`와 `claude plugin install`을 나란히 보여 줬고, `next`는 latest를 0.17.8에 두려던 장치였다.
+
+**답: 설치 경로는 npm 하나. 0.18.0은 `next` 없이 latest로 직접 발행.** 
+- `reap setup`이 마켓플레이스 등록과 플러그인 설치를 `claude` CLI로 대신한다(gen-0104). `init`은 설치하지 않고 안내만(테스트가 홈을 건드리지 않게)
+- floor(`autoUpdateMinVersion`)가 0.17 사용자의 자동 설치를 막는다. 0.17.8 다리는 은퇴
+- 기각: 플러그인이 node 번들을 싣는 안(빌드 산출물 커밋), npm postinstall(CI·sandbox에서 홈을 건드림)

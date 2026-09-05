@@ -40,4 +40,4 @@ ps-4f2a91 `08-delivery.md`는 단일 바이너리(brew/curl)를 배포 형태로
 ## 남은 위험 (이 milestone 밖)
 
 - wasm 27MB가 항상 실린다. 언어별 지연 로드는 별도 설계 — 필요 신호가 오면 backlog
-- `plugin/`은 npm에 싣지 않는다 — npm install로 플러그인이 설치되는 효과가 없다(판단, 실행 검증 없음)
+- `plugin/`은 npm에 싣지 않는다 — 플러그인은 `reap setup`이 `claude` CLI로 설치한다(Q6, gen-0104). postinstall은 쓰지 않는다

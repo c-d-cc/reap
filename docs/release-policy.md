@@ -1,31 +1,29 @@
 # v0.18 배포 정책
 
-발행 자체는 이 계획(ps-4b485d)의 범위 밖이다 — 이 문서는 발행 세대가 읽을 정책을 코드보다 먼저 적어둔다.
+## 0.18은 npm latest로 나간다 (사람 결정, 2026-09-05)
 
-## 0.18은 npm latest로 올리지 않는다
+설치 경로는 하나다 — `npm i -g @c-d-cc/reap` → `reap setup`. 태그 없이 설치되려면 latest여야 하고, latest에 0.18을 두어도 0.17 사용자가 깨지지 않게 하는 장치는 dist-tag가 아니라 **floor**다.
 
-0.17 이하의 `check-version`은 SessionStart마다 **dist-tag `latest`**의 버전과 `reap.autoUpdateMinVersion`(floor)을 읽고, 조건이 서면 `npm install -g @latest`를 실행한다. 따라서:
+## `package.json`의 `reap.autoUpdateMinVersion: "0.18.0"` — 지우지 않는다
 
-- **0.18은 `next` 태그로 발행한다.** latest가 아니므로 어떤 0.17 사용자도 자동으로 도달하지 않는다 — 차단의 원천
-- **latest는 0.17.8(이행 다리)에 둔다.** 0.17.7 이하 사용자는 언제 켜든 0.17.8로 자동 상승하고, 0.17.8이 "0.18이 `next`에 있다"를 안내한다
-- **latest 승격은 별도 결정이다.** 대가: 승격 전까지 `npm i -g @c-d-cc/reap`는 신규 사용자에게도 0.17.8을 준다 (승계 문서 §9의 유일한 어색한 지점)
+0.17 이하의 `check-version`은 SessionStart마다 latest의 버전과 그 package.json의 `reap.autoUpdateMinVersion`을 읽는다. 설치된 버전이 floor보다 낮으면 자동 설치 대신 **"Breaking change detected: v0.17.x → v0.18.0. Run: npm i -g @c-d-cc/reap"** 를 찍고 멈춘다(v0.17.7 `check-version.ts` 5번 guard). **v0.18 코드가 읽는 값이 아니다** — 소비자는 0.17 사용자의 check-version이고, 이것을 지우면 0.17 사용자가 세션을 열 때마다 0.18을 자동으로 받아 v0.17 저장 구조 위에서 깨진다.
 
-## `package.json`의 `reap.autoUpdateMinVersion: "0.18.0"`
+## 0.17 사용자의 길
 
-**v0.18 코드가 읽는 값이 아니다** — 소비자는 0.17 사용자의 check-version이다. 0.18이 사고로 latest가 되어도 0.17.x는 floor 미달로 `blocked`가 되어 자동 설치 대신 경고만 받는다. v0.18 쪽에 소비자가 없다고 지우면 이 안전장치가 사라진다.
+1. 세션 시작 시 위 blocked 메시지를 본다 → 명령을 실행한다(`npm i -g @c-d-cc/reap`). 이제 `reap`는 0.18이다
+2. v0.17이 설치해 둔 SessionStart 훅이 `reap check-version`·`reap load-context`를 부른다 → 0.18이 v0.17 명령 이름을 알아보고 **다음 셋을 안내**한다(`cli.legacy_command`, exit 0): `reap setup` → 새 세션 → `/reap:migrate`
+3. `reap setup`이 마켓플레이스 `c-d-cc/plugins` 등록과 `reap@ctod-plugins` 설치를 대신한다
+4. 새 세션에서 `/reap:migrate` — 원본은 `.reap-v0_17/`에 보존, 8/8이 옛 홈 자산(slash command·agent·훅·`~/.reap/`)을 목록→동의→삭제
 
-## 발행 시 함께 할 것 (발행 세대의 체크리스트)
+## 0.17.8 이행 다리는 발행하지 않는다
 
-- `version`을 0.18.0으로 bump — 지금의 `0.1.0`은 개발 리포의 것이다. floor(0.18.0)보다 낮은 버전을 발행하면 자기 자신을 막는 모순이 된다
-- migration note와 upgrade agent 본문 (M3 산출물) 준비 확인
-- 0.17.8이 **먼저** latest에 있어야 한다 — 순서가 바뀌면 floor가 0.17.7 사용자의 0.17.8행까지 막는다
-
-근거: `docs/inherited/plugin-distribution.md` §9 · `docs/reap-plan/reap_v_0_18_migration/01-situation.md`(차단 이중화 결정, 사람 2026-08-31)
+`~/cdws/reap_v17` v0.17 브랜치의 0.17.8(일일 캐시·`next` 안내·upgrade agent)은 latest를 0.17 라인에 두는 전제에서만 뜻이 있었다. latest 직접 발행이면 아무에게도 닿지 않으므로 은퇴한다. 코드는 남기고 태그·publish·main merge를 하지 않는다. `docs/upgrade-agent/reap-upgrade.md`도 같은 이유로 쓰이지 않는다.
 
 ## 브랜치 흐름 (2026-09-01, 사람 결정)
 
-**main은 v0.17.7(b4d3ae1)에 머문다.** 발행된 마지막 상태가 main이다 — 트랙 작업을 main에 직접 커밋했던 것이 이 흐름을 만든 실수였다.
+**main은 발행된 마지막 상태(v0.17.7, b4d3ae1)에 머문다.** 트랙은 완성됐을 때 main으로 merge한다. main에 직접 커밋하지 않는다.
 
-- **v0.17 브랜치** — 0.17 유지보수 라인(0.17.8 이행 다리). b4d3ae1에서 분기, tests 서브모듈은 reap-test의 `v0.17-bridge`를 가리킨다
-- **v0.18 브랜치** — 차세대 구현. 조상에 옛 main의 v0.18 트랙 커밋(9f13220~75d626d)을 보존한다
-- 각 트랙은 **완성됐을 때 main으로 merge**한다. main에 직접 커밋하지 않는다
+- **v0.18 브랜치** — 차세대 구현. 발행 = 이 브랜치의 태그 `v0.18.0` push(release.yml은 태그에서 돈다) → main merge
+- **v0.17 브랜치** — 0.17 유지보수 라인. 0.17.8 은퇴로 당장 할 일 없음
+
+근거: `docs/reap-plan/reap_v_0_18_release/05-open.md` Q6 · `06-release.md`

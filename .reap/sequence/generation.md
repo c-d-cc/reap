@@ -106,3 +106,4 @@
 | gen-0102-exec | resolve #25 #30: migrate 스킬 절차 마찰 5건·판단 규칙 2건 | 2026-09-05 |
 | gen-0103-exec | migrate 8/8 홈 자산 정리를 스크립트로 | 2026-09-05 |
 | gen-0104-exec | reap setup — 플러그인 설치를 CLI가 대신한다, init 연동, doctor 참고, v0.17 명령 shim | 2026-09-05 |
+| gen-0105-exec | 배포 정책·문서를 설치 경로 하나(npm → reap setup)와 latest 직접 발행으로 | 2026-09-05 |

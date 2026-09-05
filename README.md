@@ -9,23 +9,17 @@ Two things get built: a TypeScript/Bun CLI binary, `reap`, and a Claude Code plu
 ## Install
 
 ```bash
-npm i -g @c-d-cc/reap@next
+npm i -g @c-d-cc/reap
+reap setup
 ```
 
-Claude Code plugin:
-
-```bash
-claude plugin marketplace add c-d-cc/plugins
-claude plugin install reap@ctod-plugins
-```
-
-Check:
+That's the whole install. `reap setup` registers the plugin marketplace and installs the Claude Code plugin through the `claude` CLI — run it again any time; it only does what's missing. Check:
 
 ```bash
 reap --version
 ```
 
-Open a new Claude Code session and the 10 `/reap:` skills show up, along with a status line at session start. If neither appears, the plugin didn't install.
+Open a new Claude Code session and the 10 `/reap:` skills show up, along with a status line at session start. If neither appears, run `reap setup` again and read what it reports.
 
 ## First use
 
@@ -51,7 +45,7 @@ closes it. The status line injected at the start of every session shows the curr
 
 ## Coming from v0.17
 
-v0.17.7 and below auto-upgrade to 0.17.8 at session start. Running `reap update` on 0.17.8 installs an upgrade agent, which installs the v0.18 CLI and plugin, then hands off to `/reap:migrate`. The migrate skill moves your data over in eight steps and keeps the original intact under `.reap-v0_17/` — reversible at every point.
+On v0.17.7 and below, the session-start version check sees 0.18 and prints `Breaking change detected … Run: npm i -g @c-d-cc/reap` instead of upgrading by itself. Run that command, then `reap setup`, open a new Claude Code session, and call `/reap:migrate` in each project — the old session hooks now reach the v0.18 CLI, which answers them with those same three steps. The migrate skill moves your data over in eight steps and keeps the original intact under `.reap-v0_17/` — reversible at every point.
 
 ### Language
 

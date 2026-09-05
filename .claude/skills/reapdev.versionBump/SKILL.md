@@ -63,7 +63,7 @@ awk -v d="$(git log -1 --format=%cs <tag>)" -F'|' '{c=$4; gsub(/ /,"",c)} c > d'
 
 **REAP를 쓰는 사람에게 실제로 의미 있는 것만 쓴다.** 기준은 하나다: *"이 사람이 이걸 읽고 무언가를 하거나, 하지 않던 것을 할 수 있게 되는가?"* — 아니면 뺀다.
 
-**쓴다**: 새 명령·플래그·설정·skill·이벤트 / 동작이 달라진 것 / 사용자가 해야 할 일(`npm i -g @c-d-cc/reap@next`, 플러그인 갱신, `/reap:migrate`) / breaking change / 조용히 망가져 있던 것이 이제 동작한다는 사실.
+**쓴다**: 새 명령·플래그·설정·skill·이벤트 / 동작이 달라진 것 / 사용자가 해야 할 일(`npm i -g @c-d-cc/reap`, `reap setup`, `/reap:migrate`) / breaking change / 조용히 망가져 있던 것이 이제 동작한다는 사실.
 
 **쓰지 않는다**: 문서 사이트 내부(라우팅·prerender·로케일) / 왜 망가졌는지의 서사 — 고쳐졌다는 사실만 / 게이트·테스트·CI·리팩토링 / 세대 번호와 그 세대가 겪은 것 / issue 번호 나열(링크 하나면 된다).
 
@@ -105,8 +105,8 @@ yes면:
 git tag v<new> && git push origin <branch> v<new>
 ```
 
-`release.yml`은 `v0.18.*` 태그에서 돈다 — 브랜치는 상관없다. npm은 **`--tag next`**로 나간다(latest 승격은 별도 결정). 그 뒤 마켓플레이스: `~/cdws/ctod-plugins`에서 `plugins/reap` submodule 포인터를 그 태그로 옮기고 `python3 tools/validate_marketplace.py` 뒤 커밋·push — 이것도 사람 확인이다.
+`release.yml`은 `v0.18.*` 태그에서 돈다 — 브랜치는 상관없다. npm은 **latest**로 나간다(`next` 없음 — 사람 결정 2026-09-05, 0.17 사용자는 floor가 지킨다). 그 뒤 마켓플레이스: `~/cdws/ctod-plugins`에서 `plugins/reap` submodule 포인터를 그 태그로 옮기고 `python3 tools/validate_marketplace.py` 뒤 커밋·push — 이것도 사람 확인이다.
 
-**v0.18.0 첫 발행은 순서가 있다.** 0.17.8이 먼저 latest에 있어야 한다. 절차는 `.reap/archive/milestones/ms-019-v018-verify-release/handoff.md`에 있다 — 이 스킬은 그 순서를 대신하지 않는다.
+**v0.18.0 첫 발행의 순서**(reap-test push → 시크릿 → v0.18 push → 태그 → 마켓플레이스 → main merge)는 `docs/reap-plan/reap_v_0_18_release/06-release.md`가 정본이다 — 이 스킬은 그 순서를 대신하지 않는다.
 
 no면: "태그를 건너뜁니다. 나중에: `git tag v<new> && git push origin <branch> v<new>`"라고 남기고 끝.

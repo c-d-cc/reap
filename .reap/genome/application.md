@@ -13,7 +13,7 @@ REAP는 AI와 사람이 소프트웨어를 함께 진화시키기 위한 **규�
 - **바이너리** `reap` — TypeScript, Bun, `bun build --compile`. brew/curl로 배포
 - **플러그인** `plugin/` — skill과 SessionStart 훅. 클라이언트가 설치
 
-둘은 따로 설치되고 따로 갱신된다. **한쪽만 있는 상태를 정상으로 전제한다.**
+설치 경로는 npm 하나다 — `npm i -g @c-d-cc/reap` 뒤 `reap setup`이 플러그인을 `claude` CLI로 설치한다(사람 결정 2026-09-05). 갱신은 따로다(npm·마켓플레이스). **한쪽만 있는 상태는 정상으로 전제하되 알린다** — 훅은 CLI 부재를, doctor·init은 플러그인 부재를.
 
 ## 작업 규약
 

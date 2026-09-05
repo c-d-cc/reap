@@ -14,7 +14,7 @@
 # complexity would break this script's only virtue (doing nothing).
 
 if ! command -v reap >/dev/null 2>&1; then
-  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"<!-- reap status -->\nREAP plugin is installed but the `reap` CLI is not on PATH, so nothing was injected. Install it: `npm i -g @c-d-cc/reap@next` (or put the built binary on PATH), then open a new session."}}'
+  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext":"<!-- reap status -->\nREAP plugin is installed but the `reap` CLI is not on PATH, so nothing was injected. Install it: `npm i -g @c-d-cc/reap` (or put the built binary on PATH), then open a new session."}}'
   exit 0
 fi
 

@@ -24,9 +24,9 @@ ps-4b485d `04-migration-skill.md`의 매핑 아홉에 **`environment/`가 없다
 `README.md`(한국어) 하나. 영어 병기는 [05-open.md](05-open.md) Q2의 답을 따른다. 담는 것:
 
 1. 한 문단 — REAP가 무엇인가 (ps-4f2a91 README의 한 문장)
-2. 설치 — `npm i -g @c-d-cc/reap@next` · 플러그인 `claude plugin marketplace add c-d-cc/plugins` → `claude plugin install reap@ctod-plugins` · 확인(`reap --version`, 새 세션에 `/reap:` skill)
+2. 설치 — `npm i -g @c-d-cc/reap` → `reap setup`(플러그인은 CLI가 대신 설치, Q6) · 확인(`reap --version`, 새 세션에 `/reap:` skill)
 3. 첫 사용 — `/reap:init` → `/reap:evolve` → `/reap:complete`. 상태 줄이 무엇을 보여주는지
-4. v0.17에서 왔다면 — `reap update`(0.17.8) → upgrade agent → `/reap:migrate`. 잃는 것(G1 표의 "만들지 않는다" 요약 — 특히 자율 실행 subagent, merge lifecycle, 다국어)
+4. v0.17에서 왔다면 — 세션 시작 시 blocked 안내의 `npm i -g @c-d-cc/reap` → `reap setup` → 새 세션 → `/reap:migrate` (Q6, 0.17.8 다리 없음). 잃는 것(G1 표의 "만들지 않는다" 요약 — 특히 자율 실행 subagent, merge lifecycle, 다국어)
 5. 명령 표면 한 표 — `reap` usage와 같은 내용을 옮겨 적지 않고 `reap`을 치라고 한다. skill 10종 한 줄씩
 6. 제거 — `claude plugin uninstall reap@ctod-plugins` · `npm rm -g @c-d-cc/reap` · 프로젝트는 `rm -rf .reap`
 7. 개발 — `bun test` · `bun run build` · `--plugin-dir ./plugin`

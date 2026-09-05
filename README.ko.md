@@ -9,23 +9,17 @@ REAP는 AI와 사람이 소프트웨어를 함께 진화시키기 위한 **규�
 ## 설치
 
 ```bash
-npm i -g @c-d-cc/reap@next
+npm i -g @c-d-cc/reap
+reap setup
 ```
 
-Claude Code 플러그인:
-
-```bash
-claude plugin marketplace add c-d-cc/plugins
-claude plugin install reap@ctod-plugins
-```
-
-확인:
+설치는 이것이 전부다. `reap setup`이 `claude` CLI로 플러그인 마켓플레이스를 등록하고 Claude Code 플러그인을 설치한다 — 몇 번을 다시 쳐도 빠진 것만 한다. 확인:
 
 ```bash
 reap --version
 ```
 
-새 Claude Code 세션을 열면 `/reap:` skill 10종이 보이고, 세션 시작 시 상태 줄이 뜬다. 둘 다 안 보이면 플러그인 설치가 안 된 것이다.
+새 Claude Code 세션을 열면 `/reap:` skill 10종이 보이고, 세션 시작 시 상태 줄이 뜬다. 둘 다 안 보이면 `reap setup`을 다시 치고 그 출력을 읽는다.
 
 ## 첫 사용
 
@@ -51,7 +45,7 @@ reap --version
 
 ## v0.17에서 왔다면
 
-v0.17.7 이하는 세션 시작 시 자동 갱신으로 0.17.8이 된다. 0.17.8에서 `reap update`를 치면 upgrade agent가 설치되고, 그 agent가 v0.18 CLI와 플러그인을 설치한 뒤 `/reap:migrate`로 넘긴다. `migrate` skill이 8단계로 데이터를 옮기고, 원본은 `.reap-v0_17/`에 그대로 보존한다 — 되돌릴 수 있다.
+v0.17.7 이하에서는 세션 시작 시 버전 검사가 0.18을 보고 자동 갱신 대신 `Breaking change detected … Run: npm i -g @c-d-cc/reap`를 찍는다. 그 명령을 실행하고 `reap setup`을 친 뒤 새 Claude Code 세션을 열어 프로젝트마다 `/reap:migrate`를 부른다 — 옛 세션 훅은 이제 v0.18 CLI를 부르게 되는데, CLI가 같은 세 단계를 안내로 답한다. `migrate` skill이 8단계로 데이터를 옮기고, 원본은 `.reap-v0_17/`에 그대로 보존한다 — 되돌릴 수 있다.
 
 ### 언어
 
