@@ -150,7 +150,7 @@ from: v0.17 (.reap-v0_17/)
 ## 사람 판단           # #6's borderline documents — the live line and the document it seems to name; moved to docs/plan/ pending the human's call. Omit the section if empty
 ## 검증               # full doctor output, then the full output of the skill's scripts/verify-migration.sh
 ## Home cleanup            # cleanup-home.mjs output (the --apply run if done, the list run if declined); if not run at all, "not done"
-## 다음 세션이 볼 것    # reap ctx's full status line block (from <!-- reap 상태 --> to the end), verbatim
+## 다음 세션이 볼 것    # reap ctx's full status line block (from <!-- reap 상태 --> to the end), verbatim — followed by the id of the `.reap-v0_17/` deletion backlog item (SKILL 8/8) and the one-line revert
 ```
 
 **This isn't complete until 7/8's zero-defect doctor run and a passing `verify-migration.sh` are both in this file.** Put the one-line revert command (`rm -rf .reap && mv .reap-v0_17 .reap`) at the top of the file too.

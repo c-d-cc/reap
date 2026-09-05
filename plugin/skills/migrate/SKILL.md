@@ -110,4 +110,12 @@ node <this skill's directory>/scripts/cleanup-home.mjs --apply    # 2) only afte
 
 Don't delete by hand and don't edit `settings.json` by hand — the script removes only the allowlist and leaves the v0.18 plugin's registration keys alone. If the human declines, skip step 2 and say so in the record.
 
+**Leave the `.reap-v0_17/` decision where the next session will see it.** Deleting the original is the human's call and it usually isn't made on migration day — so don't ask once and lose it. Do both:
+
+```bash
+reap make backlog --type migrate --title "\`.reap-v0_17/\` 삭제 판단 — 이주 검증 뒤 원본을 지울지 사람이 정한다" --slug delete-v017-original
+```
+
+and, if mapping #11 created a focus milestone, add to its `handoff.md` a `## 미결` line: "`.reap-v0_17/` 삭제 여부 — 사람 판단 대기 (bk-xxxxxx). 되돌리기: `rm -rf .reap && mv .reap-v0_17 .reap`". The backlog item is consumed by whichever generation carries out the decision (delete, or keep and say so); the handoff line is what the next session actually reads.
+
 **Add a `## 다음 세션이 볼 것` section** — the full text of `reap ctx`'s status line block (everything from `<!-- reap 상태 -->` to the end of its output), pasted verbatim. This is the literal answer to "does the next session know how to continue if `.reap-v0_17/` is deleted" — show it to the human alongside the record file.
