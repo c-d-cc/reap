@@ -3,8 +3,9 @@ id: ms-027
 slug: revive-three
 title: v0.17에서 빠진 셋 복원 — help skill, environment 갱신 절, 닫기 전 독립 검증
 from: loop-0004-plan
-status: open
+status: closed
 openedAt: 2026-09-05T02:04:22Z
+closedAt: 2026-09-05T02:40:12Z
 ---
 ## Background
 
@@ -32,3 +33,9 @@ openedAt: 2026-09-05T02:04:22Z
 
 - `/reap:help`를 실제로 불러 보니 다음 행동 제안이 맞았는가
 - 독립 검증이 실제 세대에서 잡아낸 것이 있었는가 — 없다면 비용만 든 것
+
+## Fitness (사람, 2026-09-05)
+
+"닫자." — `/reap:help`를 두 번 실제로 불러 출력 형식을 고쳤고(9e2ed86), 제안이 맞는 것을 사람이 확인. 물어볼 것 둘째("독립 검증이 실제 세대에서 잡아낸 것이 있었는가")는 아직 동작을 바꾼 세대의 complete가 돌지 않아 답 없음 → `idea/research/`가 아니라 다음 코드 변경 세대의 Outcome이 답한다. 그때까지 열어 둘 질문이 아니다.
+
+크기 소급: 세대 하나(gen-0107). backlog 항목이면 충분했다.

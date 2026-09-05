@@ -5,9 +5,10 @@ title: 설치 경로 단일화 — npm 하나, reap setup이 플러그인을 설
 from: loop-0004-plan
 refs:
   - ps-5e948f:02-distribution.md
-status: open
+status: closed
 focus: true
 openedAt: 2026-09-05T01:09:31Z
+closedAt: 2026-09-05T02:40:12Z
 ---
 ## Background
 
@@ -38,3 +39,9 @@ openedAt: 2026-09-05T01:09:31Z
 
 - 0.17 사용자가 안내 없이도 `npm i -g` → `reap setup` → `/reap:migrate`까지 도달했는가(첫 실물 보고)
 - 문서에서 "플러그인"이라는 말이 설치 지시 없이 개념으로만 남았는가
+
+## Fitness (사람, 2026-09-05)
+
+"ms-025·026·027 닫자." — 설치 경로 단일화 완료로 판정. 물어볼 것 둘은 첫 실물 보고(0.17 사용자의 안내 없는 도달, 문서에서 '플러그인'이 개념으로만 남았는가) 전이라 답할 수 없다 → 발행 뒤 첫 사용자 보고가 오면 그때 본다. idea로 두지 않는다 — 발행 자체가 그 관찰 지점이다.
+
+크기 소급: 세대 둘(gen-0104·0105). carve-milestone의 하한에 걸리는 크기였다 — backlog 항목 둘이면 충분했다(gen-0108이 규칙을 제품에 옮겼다).

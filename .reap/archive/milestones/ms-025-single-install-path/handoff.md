@@ -14,3 +14,7 @@
 ## 미결
 
 - 없음
+
+## cleanup (닫을 때, 2026-09-05)
+
+이 milestone의 세대는 전부 skill·문서·코드에 반영됐고 열린 세대는 없다. gen-0104~0108을 archive로 내린다(gen-0108은 milestone 밖의 backlog 세대지만 같은 이유).

@@ -3,8 +3,9 @@ id: ms-026
 slug: skill-visibility
 title: skill 노출 — 사람이 부르는 7종만 메뉴에, 나머지 3종은 agent 전용
 from: loop-0004-plan
-status: open
+status: closed
 openedAt: 2026-09-05T01:49:59Z
+closedAt: 2026-09-05T02:40:12Z
 ---
 ## Background
 
@@ -29,3 +30,9 @@ openedAt: 2026-09-05T01:49:59Z
 ## 이 milestone이 끝나면 물어볼 것
 
 - 새 세션의 `/` 메뉴에 reap 항목이 일곱만 보이고 agent가 complete를 여전히 부르는가(실물)
+
+## Fitness (사람, 2026-09-05)
+
+"닫자." — `/` 메뉴에 reap 항목이 사람용만 보이고, `/reap:help`(ms-027)가 agent 전용 셋을 빼고 답하는 것을 사람이 확인. 물어볼 것("agent가 complete를 여전히 부르는가")은 이 세션의 gen-0104~0108 다섯 세대가 전부 complete 절차로 닫혔으므로 답이 "그렇다". Exit Criteria의 "7종"은 ms-027이 help를 더해 8종이 됐다.
+
+크기 소급: 세대 하나(gen-0106). backlog 항목이면 충분했다.
