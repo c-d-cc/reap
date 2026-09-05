@@ -37,10 +37,7 @@ export default function TwoAxesPage() {
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{a.meetTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{a.meetDesc}</p>
         <CodeBlock language="text">{a.meetDiagram}</CodeBlock>
-        <p className="text-xs text-muted-foreground mt-2 mb-6 leading-relaxed">{a.meetNote}</p>
-
-        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{a.shapeTitle}</h2>
-        <p className="text-sm text-muted-foreground leading-relaxed">{a.shapeDesc}</p>
+        <p className="text-xs text-muted-foreground mt-2 leading-relaxed">{a.meetNote}</p>
       </DocPage>
     </DocLayout>
   );

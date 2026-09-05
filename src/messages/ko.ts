@@ -174,7 +174,7 @@ export const ko = {
   "setup.plugin_present": "플러그인 {name}: 이미 설치됨",
   "setup.plugin_installed": "플러그인 reap@ctod-plugins: 설치함",
   "setup.plugin_failed": "플러그인 reap@ctod-plugins: 실패 — {detail}\n  수동: claude plugin install reap@ctod-plugins",
-  "setup.done": "새 Claude Code 세션을 여세요 — /reap: skill 10개와 상태 줄이 거기서 보입니다.",
+  "setup.done": "새 Claude Code 세션을 여세요 — / 메뉴의 /reap: skill 7개와 상태 줄이 거기서 보입니다.",
   "doctor.kind.plugin_missing": "reap 플러그인 미설치",
   "doctor.detail.plugin_missing": "~/.claude/settings.json enabledPlugins에 reap@… 항목이 없다 — skill과 상태 줄이 그것에 기댄다. reap setup을 실행",
   "doctor.kind.id_format": "id 형식",

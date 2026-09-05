@@ -26,3 +26,4 @@
 | ms-023 | 테스트 비공개 — reap-test v0.18 submodule과 CI dispatch | 2026-09-04 |
 | ms-024 | migrate 2차 — 작업 상태 복원: milestone·backlog·plan 재구성, genome·CLAUDE.md 갱신 | 2026-09-04 |
 | ms-025 | 설치 경로 단일화 — npm 하나, reap setup이 플러그인을 설치, latest 직접 발행 | 2026-09-05 |
+| ms-026 | skill 노출 — 사용자가 부르는 6종만 메뉴에, 나머지 4종은 agent 전용 | 2026-09-05 |

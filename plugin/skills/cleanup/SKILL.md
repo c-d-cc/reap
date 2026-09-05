@@ -1,6 +1,7 @@
 ---
 name: cleanup
 description: Use right after a human confirms fitness to close a milestone in a REAP project, before calling mark milestone --closed - deciding which generations in life/generations/ have lost their reference value and moving those to archive. Trigger on "정리", "cleanup", "archive로 옮겨", or right after the human confirms fitness for a milestone in a repo containing .reap/.
+user-invocable: false
 ---
 
 # cleanup — sends generations that have lost reference value down to archive

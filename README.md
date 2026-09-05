@@ -19,7 +19,7 @@ That's the whole install. `reap setup` registers the plugin marketplace and inst
 reap --version
 ```
 
-Open a new Claude Code session and the 10 `/reap:` skills show up, along with a status line at session start. If neither appears, run `reap setup` again and read what it reports.
+Open a new Claude Code session and seven `/reap:` skills show up in the `/` menu, along with a status line at session start. If neither appears, run `reap setup` again and read what it reports.
 
 ## First use
 
@@ -35,13 +35,7 @@ This sets up canonical knowledge: registering the plan source, `environment/summ
 /reap:evolve
 ```
 
-opens a generation, and when the work is done:
-
-```
-/reap:complete
-```
-
-closes it. The status line injected at the start of every session shows the current milestone, the open generation, where memory and ideas live, and where things sit on the storage map (`.reap/map.md`) — the agent decides what else to read from that map.
+opens a generation. When the work is done, the agent closes it — you don't call anything. The status line injected at the start of every session shows the current milestone, the open generation, where memory and ideas live, and where things sit on the storage map (`.reap/map.md`) — the agent decides what else to read from that map.
 
 ## Coming from v0.17
 
@@ -63,20 +57,20 @@ Full comparison: [docs/reap-plan/reap_v_0_18_release/01-gap.md](docs/reap-plan/r
 
 ## Command surface
 
-Skills are how an agent works with REAP. The plugin ships 10:
+Skills are how an agent works with REAP. The plugin ships 10 — seven you can call from the `/` menu, three only the agent calls (hidden from the menu with `user-invocable: false`):
 
-| skill | when |
-|---|---|
-| [`init`](plugin/skills/init/SKILL.md) | Once per project, at the very start — sets up canonical knowledge |
-| [`evolve`](plugin/skills/evolve/SKILL.md) | To open a generation — decides loop, exec, or fix |
-| [`complete`](plugin/skills/complete/SKILL.md) | To close a generation |
-| [`loop`](plugin/skills/loop/SKILL.md) | To create a new intent — planning, design, screens, anything without a place yet |
-| [`carve-milestone`](plugin/skills/carve-milestone/SKILL.md) | To cut a plan into an executable milestone, and to close one |
-| [`interview`](plugin/skills/interview/SKILL.md) | When intent is ambiguous enough that a person has to decide |
-| [`orchestrate`](plugin/skills/orchestrate/SKILL.md) | When two or more sessions work on the same project at once |
-| [`cleanup`](plugin/skills/cleanup/SKILL.md) | Right after a person decides to close a milestone on fitness |
-| [`migrate`](plugin/skills/migrate/SKILL.md) | To move v0.17 data into the v0.18 structure |
-| [`report-issue`](plugin/skills/report-issue/SKILL.md) | When you hit a defect or missing feature in REAP itself |
+| skill | who calls it | when |
+|---|---|---|
+| [`init`](plugin/skills/init/SKILL.md) | you | Once per project, at the very start — sets up canonical knowledge |
+| [`evolve`](plugin/skills/evolve/SKILL.md) | you | To open a generation — decides loop, exec, or fix |
+| [`complete`](plugin/skills/complete/SKILL.md) | agent | To close a generation |
+| [`loop`](plugin/skills/loop/SKILL.md) | you | To create a new intent — planning, design, screens, anything without a place yet |
+| [`carve-milestone`](plugin/skills/carve-milestone/SKILL.md) | agent | To cut a plan into an executable milestone, and to close one |
+| [`interview`](plugin/skills/interview/SKILL.md) | you | When intent is ambiguous enough that a person has to decide |
+| [`orchestrate`](plugin/skills/orchestrate/SKILL.md) | you | When two or more sessions work on the same project at once |
+| [`cleanup`](plugin/skills/cleanup/SKILL.md) | agent | Right after a person decides to close a milestone on fitness |
+| [`migrate`](plugin/skills/migrate/SKILL.md) | you | To move v0.17 data into the v0.18 structure |
+| [`report-issue`](plugin/skills/report-issue/SKILL.md) | you | When you hit a defect or missing feature in REAP itself |
 
 The CLI command surface isn't transcribed here — run `reap` with no arguments for usage.
 

@@ -19,7 +19,7 @@ reap setup
 reap --version
 ```
 
-새 Claude Code 세션을 열면 `/reap:` skill 10종이 보이고, 세션 시작 시 상태 줄이 뜬다. 둘 다 안 보이면 `reap setup`을 다시 치고 그 출력을 읽는다.
+새 Claude Code 세션을 열면 `/` 메뉴에 `/reap:` skill 7종이 보이고, 세션 시작 시 상태 줄이 뜬다. 둘 다 안 보이면 `reap setup`을 다시 치고 그 출력을 읽는다.
 
 ## 첫 사용
 
@@ -35,13 +35,7 @@ reap --version
 /reap:evolve
 ```
 
-로 세대를 열고, 작업이 끝나면
-
-```
-/reap:complete
-```
-
-로 닫는다. 매 세션 시작 시 주입되는 상태 줄이 현재 milestone, 열린 세대, 기억과 idea가 있는 자리, 저장 구조 지도(`.reap/map.md`)의 위치를 보여준다 — 무엇을 더 읽을지는 그 지도를 보고 agent가 정한다.
+로 세대를 연다. 작업이 끝나면 agent가 세대를 닫는다 — 사람이 부를 것은 없다. 매 세션 시작 시 주입되는 상태 줄이 현재 milestone, 열린 세대, 기억과 idea가 있는 자리, 저장 구조 지도(`.reap/map.md`)의 위치를 보여준다 — 무엇을 더 읽을지는 그 지도를 보고 agent가 정한다.
 
 ## v0.17에서 왔다면
 
@@ -63,20 +57,20 @@ v0.18에서 잃는 것:
 
 ## 명령 표면
 
-agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포하는 10종:
+agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포하는 10종 — 일곱은 사람이 `/` 메뉴에서 부를 수 있고, 셋은 agent만 부른다(`user-invocable: false`로 메뉴에서 숨김):
 
-| skill | 언제 |
-|---|---|
-| [`init`](plugin/skills/init/SKILL.md) | 프로젝트당 한 번, 맨 처음 — 정본 지식을 세운다 |
-| [`evolve`](plugin/skills/evolve/SKILL.md) | 세대를 열 때 — loop·exec·fix 중 무엇인지 정한다 |
-| [`complete`](plugin/skills/complete/SKILL.md) | 세대를 닫을 때 |
-| [`loop`](plugin/skills/loop/SKILL.md) | 새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것 |
-| [`carve-milestone`](plugin/skills/carve-milestone/SKILL.md) | plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때 |
-| [`interview`](plugin/skills/interview/SKILL.md) | 의도가 모호해 사람이 결정해야 할 때 |
-| [`orchestrate`](plugin/skills/orchestrate/SKILL.md) | 두 세션 이상이 같은 프로젝트에서 동시에 작업할 때 |
-| [`cleanup`](plugin/skills/cleanup/SKILL.md) | 사람이 fitness로 milestone을 닫기로 한 직후 |
-| [`migrate`](plugin/skills/migrate/SKILL.md) | v0.17 데이터를 v0.18 구조로 옮길 때 |
-| [`report-issue`](plugin/skills/report-issue/SKILL.md) | REAP 자체의 결함이나 빠진 기능을 만났을 때 |
+| skill | 누가 | 언제 |
+|---|---|---|
+| [`init`](plugin/skills/init/SKILL.md) | 사람 | 프로젝트당 한 번, 맨 처음 — 정본 지식을 세운다 |
+| [`evolve`](plugin/skills/evolve/SKILL.md) | 사람 | 세대를 열 때 — loop·exec·fix 중 무엇인지 정한다 |
+| [`complete`](plugin/skills/complete/SKILL.md) | agent | 세대를 닫을 때 |
+| [`loop`](plugin/skills/loop/SKILL.md) | 사람 | 새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것 |
+| [`carve-milestone`](plugin/skills/carve-milestone/SKILL.md) | agent | plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때 |
+| [`interview`](plugin/skills/interview/SKILL.md) | 사람 | 의도가 모호해 사람이 결정해야 할 때 |
+| [`orchestrate`](plugin/skills/orchestrate/SKILL.md) | 사람 | 두 세션 이상이 같은 프로젝트에서 동시에 작업할 때 |
+| [`cleanup`](plugin/skills/cleanup/SKILL.md) | agent | 사람이 fitness로 milestone을 닫기로 한 직후 |
+| [`migrate`](plugin/skills/migrate/SKILL.md) | 사람 | v0.17 데이터를 v0.18 구조로 옮길 때 |
+| [`report-issue`](plugin/skills/report-issue/SKILL.md) | 사람 | REAP 자체의 결함이나 빠진 기능을 만났을 때 |
 
 CLI 명령 표면은 옮겨 적지 않는다 — `reap`을 인자 없이 치면 usage가 나온다.
 

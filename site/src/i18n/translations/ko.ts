@@ -17,7 +17,6 @@ export interface Translations {
       autonomousEvolution: string;
       v018change: string;
       twoAxes: string;
-      threeLayers: string;
       storage: string;
       loop: string;
       planSource: string;
@@ -173,31 +172,8 @@ export interface Translations {
     meetDesc: string;
     meetDiagram: string;
     meetNote: string;
-    shapeTitle: string;
-    shapeDesc: string;
   };
 
-  threeLayersPage: {
-    title: string;
-    breadcrumb: string;
-    description: string;
-    intro: string;
-    layersTitle: string;
-    layersDesc: string;
-    layerHeaders: string[];
-    layers: [string, string, string, string][];
-    noGateTitle: string;
-    noGateDesc: string;
-    doctorTitle: string;
-    doctorDesc: string;
-    doctorCode: string;
-    doctorSplitTitle: string;
-    doctorSplitDesc: string;
-    defectTitle: string;
-    defectItems: string[];
-    referenceTitle: string;
-    referenceItems: string[];
-  };
 
   storagePage: {
     title: string;
@@ -530,7 +506,7 @@ export interface Translations {
     description: string;
     intro: string;
     tableHeaders: string[];
-    table: [string, string][];
+    table: [string, string, string][];
     tableNote: string;
     whenLabel: string;
     whatLabel: string;
@@ -701,7 +677,6 @@ export const ko: Translations = {
       autonomousEvolution: "자율 진화 흐름",
       v018change: "v0.18에서 바뀐 것",
       twoAxes: "두 축",
-      threeLayers: "판단·확정·사실",
       storage: "저장 구조",
       loop: "Loop",
       planSource: "Plan",
@@ -932,7 +907,7 @@ export const ko: Translations = {
     installCliCode: "npm i -g @c-d-cc/reap",
     installStep2: "2. 플러그인을 설치합니다 — CLI가 마켓플레이스 등록과 설치를 대신합니다",
     installPluginCode: `reap setup`,
-    installVerifyNote: "설치는 이것이 전부입니다. 새 Claude Code 세션을 열면 /reap: skill 10종이 보이고, 세션 시작 시 상태 줄이 뜹니다 — 둘 다 안 보이면 reap setup을 다시 실행하고 그 출력을 읽습니다.",
+    installVerifyNote: "설치는 이것이 전부입니다. 새 Claude Code 세션을 열면 / 메뉴에 /reap: skill 7종이 보이고, 세션 시작 시 상태 줄이 뜹니다 — 둘 다 안 보이면 reap setup을 다시 실행하고 그 출력을 읽습니다.",
     steps: [
       {
         title: "처음 한 번",
@@ -942,12 +917,7 @@ export const ko: Translations = {
       {
         title: "세대를 엽니다",
         command: "/reap:evolve",
-        desc: "새 의도를 만드는 일인지(loop), 만들어둔 의도를 실현하는 일인지(exec generation), 이미 있는 의도로 되돌리는 일인지(fix generation)를 판단하고 엽니다. 그다음은 자율 구간입니다 — 탐색하고 짜고 고칩니다. 순서도 횟수도 REAP가 정하지 않습니다.",
-      },
-      {
-        title: "세대를 닫습니다",
-        command: "/reap:complete",
-        desc: "커밋 규칙(git status --porcelain이 비어 있고, 시작 커밋 이후 새 커밋이 있는가)을 확인하고, 기록과 handoff.md를 정리한 뒤 세대를 닫습니다.",
+        desc: "새 의도를 만드는 일인지(loop), 만들어둔 의도를 실현하는 일인지(exec generation), 이미 있는 의도로 되돌리는 일인지(fix generation)를 판단하고 엽니다. 그다음은 자율 구간입니다 — 탐색하고 짜고 고칩니다. 순서도 횟수도 REAP가 정하지 않고, 일이 끝나면 agent가 세대를 닫습니다.",
       },
     ],
     statusLineTitle: "상태 줄이 지도입니다",
@@ -1051,48 +1021,6 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
                                backlog 항목 -- exec generation --> civilization
                                fix generation (근거 없음) --------> civilization`,
     meetNote: "loop는 exec의 경계 안에 있지 않고, exec generation은 반드시 근거(milestone 또는 backlog 항목)를 갖습니다. fix generation만 예외입니다 — 새 의도를 만들지 않고 이미 있는 의도로 되돌리므로 근거를 요구하지 않습니다.",
-    shapeTitle: "선형이 아니라 두 축입니다",
-    shapeDesc: "loop → milestone → generation → complete를 한 줄로 그리면 complete가 전체 흐름의 마지막 단계처럼 보이지만, 실제로는 하나의 generation 안에서 일어나는 일입니다. milestone 하나가 여러 generation을 거치며 열려 있는 동안 다른 loop들이 다음 계획을 다듬습니다. 큰 그림은 두 축이 나란히 돌다가 carve에서 만나는 그림입니다.",
-  },
-
-  threeLayersPage: {
-    title: "판단·확정·사실",
-    breadcrumb: "핵심 개념",
-    description: "무엇이 skill의 판단이고 무엇이 CLI의 확정이고 무엇이 git의 사실인가, 그리고 doctor가 사후에 보는 것.",
-    intro: "REAP에서 일어나는 모든 동작은 판단·확정·사실 셋 중 하나에 속합니다. 어떤 동작이 어느 층에 속하는지 헷갈리면 그 동작은 설계가 잘못된 것입니다.",
-    layersTitle: "세 층",
-    layersDesc: "agent는 판단하고, CLI에게 확정을 요청하고, 사실은 git에게 직접 묻습니다.",
-    layerHeaders: ["층", "누가", "무엇을", "예"],
-    layers: [
-      ["판단", "skill을 읽는 agent", "무엇을 할지, 언제 할지, 끝났는지를 정합니다", "축(loop인지 generation인지)을 고른다, 닫을 준비가 됐는지 본다, 맥락에 무엇을 남길지 정한다"],
-      ["확정", "reap CLI", "확률에 맡기면 안 되는 사실을 못박습니다", "id를 발급한다, frontmatter를 찍는다, 세션을 바인딩한다, 파일을 조립한다"],
-      ["사실", "git과 파일시스템", "실제로 무슨 일이 있었는가", "커밋이 있는가, 작업 트리가 깨끗한가, 어떤 파일이 있는가"],
-    ],
-    noGateTitle: "CLI가 흐름을 막지 않는 이유",
-    noGateDesc: "make와 mark는 메타데이터만 건드립니다 — id 발급, frontmatter 갱신, 파일 이동과 조립. 세대를 열지 닫을지, 무엇을 어떤 순서로 할지는 CLI가 정하지 않고 skill이 판단합니다. mark generation --closed조차 커밋이 있는지 확인하지 않습니다 — 확인은 complete skill이 git에게 직접 물어서 합니다. agent가 이미 git을 쓸 수 있는데 CLI가 그것을 다시 감싸면 중복이고, 중복은 언젠가 어긋납니다.",
-    doctorTitle: "doctor는 사후에 봅니다",
-    doctorDesc: "흐름을 막는 대신, 확정적으로 검사할 수 있는 것을 나중에 전부 검사합니다. 보고만 하고 고치지 않습니다 — 기록은 사람과 agent가 쓴 것이고, 도구가 다시 쓰면 무엇이 사라졌는지 아무도 모릅니다.",
-    doctorCode: `$ reap doctor
-결함 0 · 참고 0`,
-    doctorSplitTitle: "결함과 참고",
-    doctorSplitDesc: "보고는 둘로 갈립니다. 결함은 확정적으로 틀린 것이라 doctor가 실패로 끝나고, 참고는 사람이 볼 것일 뿐 실패로 이어지지 않습니다.",
-    defectTitle: "결함",
-    defectItems: [
-      "frontmatter 필수 필드가 비어 있거나 형식이 틀렸을 때",
-      "id가 레지스트리와 어긋나거나, 살아 있는 항목끼리 중복될 때",
-      "from·refs·milestone이 가리키는 대상이 실재하지 않을 때",
-      "status: closed인데 startCommit과 endCommit이 같은 generation — 커밋 없이 닫힌 것",
-      "focus: true를 가진 milestone이 둘 이상일 때",
-      "carrier 표식의 형식이 틀리거나, 같은 slug에 해시가 둘이거나 같은 해시에 slug가 둘일 때",
-    ],
-    referenceTitle: "참고",
-    referenceItems: [
-      "genome과 environment/summary.md가 크기 안내선을 넘었을 때 — 매 세션 주입되므로 커지면 다른 지식의 자리를 밀어냅니다",
-      "map.md가 번들 템플릿과 어긋났을 때 — 씨앗이라 REAP가 레이아웃을 바꿔도 저절로 갱신되지 않습니다",
-      "idea 문서 중 졸업 조건이 비어 있거나 출처·확인 날짜가 없는 것",
-      "열린 채 오래 방치된 generation, 세션에 바인딩되지 않은 열린 generation",
-      "carrier 고아 — 한 파일에만 있는 표식. 실패가 아니라 표식이 불필요하거나 짝이 아직 표식되지 않았다는 신호입니다",
-    ],
   },
 
   storagePage: {
@@ -1726,19 +1654,19 @@ workspaceId: ba44307f94a6`,
     title: "skill 10종",
     breadcrumb: "레퍼런스",
     description: "agent가 REAP를 다루는 통로. 플러그인이 배포하는 skill 열 종.",
-    intro: "agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포한다. 각 skill의 전문은 plugin/skills/<이름>/SKILL.md에 있다. 아래는 언제·무엇을·부르지 않는 경우만 요약한다.",
-    tableHeaders: ["skill", "언제"],
+    intro: "agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포한다. 일곱은 사람이 / 메뉴에서 부를 수 있고, 셋(complete·carve-milestone·cleanup)은 작업 흐름 안에서 agent만 부른다 — 메뉴에는 나오지 않는다. 각 skill의 전문은 plugin/skills/<이름>/SKILL.md에 있다. 아래는 누가·언제·무엇을·부르지 않는 경우만 요약한다.",
+    tableHeaders: ["skill", "누가", "언제"],
     table: [
-      ["init", "프로젝트당 한 번, 맨 처음 — 정본 지식을 세운다"],
-      ["evolve", "세대를 열 때 — loop·exec·fix 중 무엇인지 정한다"],
-      ["complete", "세대를 닫을 때"],
-      ["loop", "새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것"],
-      ["carve-milestone", "plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때"],
-      ["interview", "의도가 모호해 사람이 결정해야 할 때"],
-      ["orchestrate", "두 세션 이상이 같은 프로젝트에서 동시에 작업할 때"],
-      ["cleanup", "사람이 fitness로 milestone을 닫기로 한 직후"],
-      ["migrate", "v0.17 데이터를 v0.18 구조로 옮길 때"],
-      ["report-issue", "REAP 자체의 결함이나 빠진 기능을 만났을 때"],
+      ["init", "사람", "프로젝트당 한 번, 맨 처음 — 정본 지식을 세운다"],
+      ["evolve", "사람", "세대를 열 때 — loop·exec·fix 중 무엇인지 정한다"],
+      ["complete", "agent", "세대를 닫을 때"],
+      ["loop", "사람", "새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것"],
+      ["carve-milestone", "agent", "plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때"],
+      ["interview", "사람", "의도가 모호해 사람이 결정해야 할 때"],
+      ["orchestrate", "사람", "두 세션 이상이 같은 프로젝트에서 동시에 작업할 때"],
+      ["cleanup", "agent", "사람이 fitness로 milestone을 닫기로 한 직후"],
+      ["migrate", "사람", "v0.17 데이터를 v0.18 구조로 옮길 때"],
+      ["report-issue", "사람", "REAP 자체의 결함이나 빠진 기능을 만났을 때"],
     ],
     tableNote: "",
     whenLabel: "언제 —",

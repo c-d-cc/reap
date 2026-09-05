@@ -1,6 +1,7 @@
 ---
 name: carve-milestone
 description: Use when turning plan into an executable milestone in a REAP project, or when closing one - deciding the boundary, exit criteria, and out-of-scope, writing tasks, and running the fitness / cleanup / mark closing sequence. Trigger on "milestone 자르기", "증분을 자른다", "milestone 만들기", "milestone 닫기", or when a loop is about to produce a milestone in a repo containing .reap/.
+user-invocable: false
 ---
 
 # carve-milestone — carves plan into executable units

@@ -172,7 +172,7 @@ export const en = {
   "setup.plugin_present": "plugin {name}: already installed",
   "setup.plugin_installed": "plugin reap@ctod-plugins: installed",
   "setup.plugin_failed": "plugin reap@ctod-plugins: failed — {detail}\n  Manual: claude plugin install reap@ctod-plugins",
-  "setup.done": "Open a new Claude Code session — the 10 /reap: skills and the status line appear there.",
+  "setup.done": "Open a new Claude Code session — seven /reap: skills in the / menu and the status line appear there.",
   "doctor.kind.plugin_missing": "reap plugin not installed",
   "doctor.detail.plugin_missing": "no reap@… entry in ~/.claude/settings.json enabledPlugins — the skills and the status line need it. Run reap setup",
   "doctor.kind.id_format": "invalid id format",

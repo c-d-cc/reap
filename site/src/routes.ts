@@ -22,7 +22,6 @@ import ComparisonPage from "@/pages/ComparisonPage";
 import MigrationPage from "@/pages/MigrationPage";
 import ReleaseNotesPage from "@/pages/ReleaseNotesPage";
 import TwoAxesPage from "@/pages/TwoAxesPage";
-import ThreeLayersPage from "@/pages/ThreeLayersPage";
 import StoragePage from "@/pages/StoragePage";
 import LoopPage from "@/pages/LoopPage";
 import PlanPage from "@/pages/PlanPage";
@@ -89,11 +88,6 @@ export const ROUTES: RouteDef[] = [
     path: "/docs/two-axes",
     component: TwoAxesPage,
     meta: (t) => ({ title: page(t.twoAxesPage.title), description: t.twoAxesPage.description }),
-  },
-  {
-    path: "/docs/three-layers",
-    component: ThreeLayersPage,
-    meta: (t) => ({ title: page(t.threeLayersPage.title), description: t.threeLayersPage.description }),
   },
   {
     path: "/docs/storage",

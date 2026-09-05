@@ -18,7 +18,6 @@ export function useNavGroups() {
       label: t.nav.groups.coreConcepts,
       items: [
         { title: t.nav.items.twoAxes, href: "/docs/two-axes" },
-        { title: t.nav.items.threeLayers, href: "/docs/three-layers" },
         { title: t.nav.items.storage, href: "/docs/storage" },
       ]
     },

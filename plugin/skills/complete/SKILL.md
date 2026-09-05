@@ -1,6 +1,7 @@
 ---
 name: complete
 description: Use when finishing work in a REAP project - verifying the commit rule, writing the outcome, updating the handoff for the next session, and closing the generation record. Trigger on "세대 닫기", "작업 마무리", "완료", or when substantive work in a repo containing .reap/ is done.
+user-invocable: false
 ---
 
 # complete — closes the generation
