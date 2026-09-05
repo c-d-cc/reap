@@ -45,6 +45,28 @@ If `tests/` is a submodule, stage its pointer too (`git add tests`) before check
 - There's uncommitted change → sort out with the human what to commit and what to drop. Don't commit arbitrarily
 - There's not a single new commit → this generation changed nothing. Confirm with the human whether it should be **aborted instead of closed**
 
+## Before closing: does `environment/summary.md` still describe the code?
+
+`summary.md` is injected every session, so a stale one misleads every session until someone notices. Closing is the moment to check, because this generation is what could have made it stale. Go through the table — **any "yes" means rewrite that part now**, in this generation.
+
+| Did this generation… | Where in summary.md |
+|---|---|
+| add, remove, or rename a top-level directory or module | source structure |
+| add or remove a dependency, or bump one across a major version | stack |
+| change how to build, test, or run | commands |
+| move the entry point, change the runtime, or split a package | stack · structure |
+| make the "where to start, knowing nothing" pointer wrong | the start pointer |
+
+How to write each part is [init §3.2](../init/SKILL.md) — the same table that filled it the first time. Rewrite only the part that went stale; don't retouch the rest. A cosmetic change (formatting, a comment, a test-only edit) isn't a trigger. Put one line in the Outcome either way — "summary.md: 갱신 (structure)" or "summary.md: 해당 없음".
+
+## Before closing: independent verification
+
+A generation that **changed behavior** — source, plugin skills, scripts, anything the next session will run — gets a second pair of eyes before it closes. The author of a change is the worst judge of what it missed; that's what v0.17's evaluator agent was for, and this is its place in v0.18.
+
+Spawn a **fresh** subagent with [`references/verify-brief.md`](references/verify-brief.md) filled in. It reads the Intent and the diff, runs the tests, and reports — **it doesn't edit.** Then decide, per finding: fix now (inside this generation), `make backlog`, or accept with a reason. Write the verdict and what you did with it in the Outcome.
+
+**Skip it, and say so,** when the generation touched only docs, records, or `.reap/` files, or when the whole diff is a few lines you can hold in your head — "검증 생략 — 문서만" in the Outcome is enough. The cost is one subagent run; the failure it prevents is a closed generation the next session has to reopen.
+
 ## Finish the record
 
 Refer to the [record vocabulary](../shared/references/record-vocabulary.md) to tidy up the generation record's body.

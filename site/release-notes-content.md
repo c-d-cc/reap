@@ -16,7 +16,7 @@ REAP is remade from a pipeline runner into a protocol and tool provider.
 - The five-stage lifecycle enforcement and its flow commands (`run start/next/back/abort/early-close`, the seven `/reap.*` commands)
 - `/reap.evolve`'s autonomous subagent delegation — v0.18's `evolve` works directly in the main session
 - The `merge`/`pull`/`push` lifecycle
-- The `reap-evaluate` evaluator agent
+- The `reap-evaluate` evaluator agent — independent verification before a generation closes is now a step in the `complete` skill
 - The `status`/`config`/`check-version`/`uninstall` commands
 
 ### Coming from v0.17

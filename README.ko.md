@@ -19,7 +19,7 @@ reap setup
 reap --version
 ```
 
-새 Claude Code 세션을 열면 `/` 메뉴에 `/reap:` skill 7종이 보이고, 세션 시작 시 상태 줄이 뜬다. 둘 다 안 보이면 `reap setup`을 다시 치고 그 출력을 읽는다.
+새 Claude Code 세션을 열면 `/` 메뉴에 `/reap:` skill 8종이 보이고, 세션 시작 시 상태 줄이 뜬다. 둘 다 안 보이면 `reap setup`을 다시 치고 그 출력을 읽는다.
 
 ## 첫 사용
 
@@ -50,14 +50,14 @@ v0.18에서 잃는 것:
 - 5단계 lifecycle 강제와 그 흐름 명령(`run start/next/back/abort/early-close`, `/reap.*` 7종) — 흐름은 이제 skill의 판단이다
 - `/reap.evolve`가 세대 전체를 subagent에 위임해 자율 실행하던 것 — v0.18의 `evolve`는 주 세션이 직접 일한다
 - `merge`/`pull`/`push` lifecycle과 그 슬래시 명령 3종 — `orchestrate` skill과 git 직접 사용으로 대체
-- `reap-evaluate` evaluator agent
+- `reap-evaluate` evaluator agent — 세대를 닫기 전 독립된 눈으로 보는 역할은 `complete` skill 안의 절이 됐다
 - `status`·`config`·`check-version`·`uninstall` 명령 — `ctx` 상태 줄·`doctor`·config 직접 편집·플러그인 제거로 대체
 
 자세한 대조는 [docs/reap-plan/reap_v_0_18_release/01-gap.md](docs/reap-plan/reap_v_0_18_release/01-gap.md)에 있다.
 
 ## 명령 표면
 
-agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포하는 10종 — 일곱은 사람이 `/` 메뉴에서 부를 수 있고, 셋은 agent만 부른다(`user-invocable: false`로 메뉴에서 숨김):
+agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포하는 10종 — 여덟은 사람이 `/` 메뉴에서 부를 수 있고, 셋은 agent만 부른다(`user-invocable: false`로 메뉴에서 숨김):
 
 | skill | 누가 | 언제 |
 |---|---|---|
@@ -71,6 +71,7 @@ agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포하는 1
 | [`cleanup`](plugin/skills/cleanup/SKILL.md) | agent | 사람이 fitness로 milestone을 닫기로 한 직후 |
 | [`migrate`](plugin/skills/migrate/SKILL.md) | 사람 | v0.17 데이터를 v0.18 구조로 옮길 때 |
 | [`report-issue`](plugin/skills/report-issue/SKILL.md) | 사람 | REAP 자체의 결함이나 빠진 기능을 만났을 때 |
+| [`help`](plugin/skills/help/SKILL.md) | 사람 | 지금 어디인지, 무엇을 부를 수 있는지, 다음에 뭘 할지 — 상태 줄을 다시 보여 주고 행동 하나를 제안한다 |
 
 CLI 명령 표면은 옮겨 적지 않는다 — `reap`을 인자 없이 치면 usage가 나온다.
 

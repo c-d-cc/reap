@@ -19,7 +19,7 @@ That's the whole install. `reap setup` registers the plugin marketplace and inst
 reap --version
 ```
 
-Open a new Claude Code session and seven `/reap:` skills show up in the `/` menu, along with a status line at session start. If neither appears, run `reap setup` again and read what it reports.
+Open a new Claude Code session and eight `/reap:` skills show up in the `/` menu, along with a status line at session start. If neither appears, run `reap setup` again and read what it reports.
 
 ## First use
 
@@ -50,14 +50,14 @@ What v0.18 drops:
 - The five-stage lifecycle enforcement and its flow commands (`run start/next/back/abort/early-close`, the seven `/reap.*` commands) — flow is now a judgment call the skill makes
 - `/reap.evolve` delegating an entire generation to an autonomous subagent — v0.18's `evolve` works directly in the main session
 - The `merge`/`pull`/`push` lifecycle and its three slash commands — replaced by the `orchestrate` skill and direct git use
-- The `reap-evaluate` evaluator agent
+- The `reap-evaluate` evaluator agent — its role, a second pair of eyes before a generation closes, is now a step inside the `complete` skill
 - The `status`/`config`/`check-version`/`uninstall` commands — replaced by the `ctx` status line, `doctor`, editing config directly, and removing the plugin
 
 Full comparison: [docs/reap-plan/reap_v_0_18_release/01-gap.md](docs/reap-plan/reap_v_0_18_release/01-gap.md).
 
 ## Command surface
 
-Skills are how an agent works with REAP. The plugin ships 10 — seven you can call from the `/` menu, three only the agent calls (hidden from the menu with `user-invocable: false`):
+Skills are how an agent works with REAP. The plugin ships 11 — eight you can call from the `/` menu, three only the agent calls (hidden from the menu with `user-invocable: false`):
 
 | skill | who calls it | when |
 |---|---|---|
@@ -71,6 +71,7 @@ Skills are how an agent works with REAP. The plugin ships 10 — seven you can c
 | [`cleanup`](plugin/skills/cleanup/SKILL.md) | agent | Right after a person decides to close a milestone on fitness |
 | [`migrate`](plugin/skills/migrate/SKILL.md) | you | To move v0.17 data into the v0.18 structure |
 | [`report-issue`](plugin/skills/report-issue/SKILL.md) | you | When you hit a defect or missing feature in REAP itself |
+| [`help`](plugin/skills/help/SKILL.md) | you | Where are we, what can I call, what next — re-shows the status line and suggests one action |
 
 The CLI command surface isn't transcribed here — run `reap` with no arguments for usage.
 

@@ -26,13 +26,13 @@
 | `run start/next/back/abort/early-close/evolve` · `/reap.*` 흐름 명령 7종 | `evolve`·`complete` skill (흐름은 판단) | 08-delivery 폐기 표 |
 | `cruise` · `cruiseCount` | 없음 | 08-delivery |
 | `merge/pull/push` lifecycle · `/reap.merge` 등 3종 | `orchestrate` skill + git 직접 | 08-delivery |
-| `reap-evaluate` agent · `evaluator` | orchestrate의 한 사용 사례 | 08-delivery. 단 subagent 실행자 모델은 방향 질문 ([05-open.md](05-open.md)) |
+| `reap-evaluate` agent · `evaluator` | **`complete`의 독립 검증 절**(2026-09-05, ms-027 — 사람: 삭제가 잘못됐다) | 08-delivery의 "orchestrate의 한 사용 사례"는 자리만 있고 절차가 없었다 |
 | `status` · `config` · `check-version` · `uninstall` | `ctx` 상태 줄·`doctor`·config 직접 편집·플러그인 제거 | gen-0066 |
 | `update` · migration instruction layer · `lastMigratedVersion` | `migrate` skill(0.17→0.18 한 번) · 이후는 `doctor`·`init --check` | 08-delivery. 0.18.x 사이 구조 변경이 실제로 생기면 그때 |
 | `fix --check` · `clean` · `destroy` | `doctor` · `cleanup` skill · `rm -rf .reap` + 플러그인 제거 | 상당물. README에 제거 절차만 적는다 |
 | `install-skills` · `load-context` · `dump-state` · opencode/codex adapter | 플러그인 설치 · `ctx --hook` · 없음 | 08-delivery |
-| `/reap.knowledge` · `/reap.sync` · `/reap.refreshKnowledge` | `init` skill + genome 직접 편집 | deprecated 2종은 v0.16부터 이미 안내만 |
-| `/reap.help` 16주제 · `reap help` 4개 언어 | README + skill 본문 | G2가 담는다 |
+| `/reap.knowledge` · `/reap.sync` · `/reap.refreshKnowledge` | `init` skill + **`complete`의 summary 갱신 절**(ms-027) + genome 직접 편집 | deprecated 2종은 v0.16부터 이미 안내만. "다시 쓰는 판단"이 없었다 |
+| `/reap.help` 16주제 · `reap help` 4개 언어 | **`help` skill**(ms-027 — 상태·skill 지도·다음 행동) + 문서 사이트 | G2는 문서만 담았고 세션 안의 통로가 없었다 |
 | `/reap.report` · `autoIssueReport` | `report-issue` skill | 상당물 |
 | `vision/goals.md` · `lineage/` · `memory/` 3단 · `current.yml` | plan source · 비승계 · `lessons.md` 선별 · `.session` | ps-4b485d 04 매핑 |
 | `~/.reap/reap-guide.md` + CLAUDE.md `@` import | `ctx`가 genome을 훅으로 주입 | 06-agent |
