@@ -93,7 +93,7 @@ diff -r plugin ~/.claude/plugins/cache/reap-dev/reap/"$V"
 ## 막히면
 
 - `claude plugin list`에 `reap@reap-dev`가 없다 → 개발 마켓플레이스가 등록돼 있지 않다. 아래 `개발 마켓플레이스를 잃었다면`을 본다
-- **개발 마켓플레이스를 잃었다면** (새 머신, 설정 초기화) 다시 만든다:
+- **개발 마켓플레이스를 잃었다면** (새 머신, 설정 초기화) `bash scripts/local-install.sh`가 전부 다시 만든다([localInstall](../reapdev.localInstall/SKILL.md)). 손으로 하려면:
 
   ```bash
   D=~/.claude/dev-marketplaces/reap-dev
