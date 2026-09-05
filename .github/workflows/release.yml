@@ -36,6 +36,10 @@ jobs:
       - run: bun run build
       - run: bash scripts/verify-package.sh
 
+      # Every version statement must agree before anything leaves — the release
+      # body comes from RELEASE_NOTES.md's first block, the plugin from plugin.json.
+      - run: bash scripts/check-release-version.sh
+
       # Trusted publishing needs npm 11.5.1 or later and Node 22 ships npm 10.
       - run: npm i -g npm@latest
 

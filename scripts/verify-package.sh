@@ -54,7 +54,8 @@ run_reap() {
 
 echo "== every command =="
 VERSION_OUT="$(run_reap --version)"
-[ "$VERSION_OUT" = "reap 0.18.0" ] || { echo "version mismatch: $VERSION_OUT" >&2; exit 1; }
+PKG_VERSION="$(node -p 'require("./package.json").version')"
+[ "$VERSION_OUT" = "reap $PKG_VERSION" ] || { echo "version mismatch: $VERSION_OUT (package.json $PKG_VERSION)" >&2; exit 1; }
 echo "PASS --version: $VERSION_OUT"
 
 (cd "$REPO_DIR" && run_reap init) && echo "PASS init"
