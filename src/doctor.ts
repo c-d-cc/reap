@@ -10,6 +10,7 @@ import { validateRef } from "./plan.ts";
 import { paths, readSession } from "./store.ts";
 import { template } from "./templates.ts";
 import { allTranslations, t } from "./i18n.ts";
+import { pluginInstalled } from "./setup.ts";
 
 export type Finding = { kind: string; detail: string };
 export type Report = { defects: Finding[]; notes: Finding[] };
@@ -105,6 +106,9 @@ export function diagnose(root: string): Report {
   // 4. milestone — focus 둘
   const focused = all.milestone.filter((e) => e.data.status !== "closed" && String(e.data.focus) === "true");
   if (focused.length > 1) defects.push({ kind: t(root, "doctor.kind.duplicate_focus"), detail: focused.map((e) => e.id).join(", ") });
+
+  // 4b. 플러그인 — skill과 상태 줄이 그것에 기댄다. settings.json이 없으면(모르면) 말하지 않는다
+  if (pluginInstalled() === false) notes.push({ kind: t(root, "doctor.kind.plugin_missing"), detail: t(root, "doctor.detail.plugin_missing") });
 
   // 5. map.md 씨앗
   if (existsSync(p.map) && readFileSync(p.map, "utf8") !== template(root, "map.md")) {

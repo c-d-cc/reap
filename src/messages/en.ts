@@ -20,6 +20,7 @@ export const en = {
   bind <gen-id>                   (rebind this session to an open generation)
   seq [generation|milestone|loop|source|<id>]
   carrier new <slug> | list [--orphans|--check]
+  setup                           (registers the plugin marketplace and installs the reap plugin through the claude CLI. Run once after npm i -g)
   doctor                          (report only. exits nonzero if there are defects)
   index [update [--full] | status | impact <file>... | search <q> | callers <id> | callees <id>]
   orch claim <resource> [--ttl 30m] | release <resource> | barrier <name> --expect <N> --timeout <s> | roster | status   [--topic <t>]
@@ -162,6 +163,18 @@ export const en = {
   "entries.hook_order_invalid": "--order must be an integer: {order}",
   "entries.hook_already_exists": "Already exists: {filename}",
 
+  "cli.legacy_command": "`reap {command}` was a v0.17 command — this is REAP v{version}, which works differently. Next: run `reap setup` (installs the v0.18 plugin), open a new Claude Code session, then call /reap:migrate in each project that has a v0.17 .reap/. The original data is kept.",
+  "cli.setup_hint": "Plugin not detected — run `reap setup` (registers the marketplace and installs the reap plugin), then open a new Claude Code session.",
+  "setup.claude_missing": "Claude Code CLI (`claude`) not found on PATH. Install Claude Code, then run `reap setup` again.",
+  "setup.marketplace_present": "marketplace ctod-plugins: already registered",
+  "setup.marketplace_added": "marketplace ctod-plugins: registered (c-d-cc/plugins)",
+  "setup.marketplace_failed": "marketplace ctod-plugins: failed — {detail}\n  Manual: claude plugin marketplace add c-d-cc/plugins",
+  "setup.plugin_present": "plugin {name}: already installed",
+  "setup.plugin_installed": "plugin reap@ctod-plugins: installed",
+  "setup.plugin_failed": "plugin reap@ctod-plugins: failed — {detail}\n  Manual: claude plugin install reap@ctod-plugins",
+  "setup.done": "Open a new Claude Code session — the 10 /reap: skills and the status line appear there.",
+  "doctor.kind.plugin_missing": "reap plugin not installed",
+  "doctor.detail.plugin_missing": "no reap@… entry in ~/.claude/settings.json enabledPlugins — the skills and the status line need it. Run reap setup",
   "doctor.kind.id_format": "invalid id format",
   "doctor.kind.id_duplicate": "duplicate id",
   "doctor.kind.id_unregistered": "id missing from registry",

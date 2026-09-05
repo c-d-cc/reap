@@ -35,6 +35,7 @@ import {
 } from "./store.ts";
 import { render, template } from "./templates.ts";
 import { t } from "./i18n.ts";
+import { formatSetup, isLegacyCommand, pluginInstalled, setup } from "./setup.ts";
 import pkg from "../package.json" with { type: "json" };
 
 export type Result = { ok: boolean; message: string; data?: unknown; stderr?: string };
@@ -81,7 +82,14 @@ export async function run(argv: string[], cwd: string): Promise<Result> {
         const report = diagnose(r);
         return { ok: report.defects.length === 0, message: formatReport(report, r), data: report };
       });
+    case "setup":
+      return attempt(() => {
+        const result = setup();
+        return { ok: result.ok, message: formatSetup(root, result), data: result };
+      });
     default:
+      // v0.17 명령이면 모른다고 하지 않는다 — 0.17 사용자가 0.18을 손으로 설치한 직후 옛 훅이 이 이름들을 부른다
+      if (isLegacyCommand(command)) return { ok: true, message: t(root, "cli.legacy_command", { command, version: pkg.version }) };
       return { ok: false, message: `${t(root, "cli.unknown_command", { command: command! })}\n\n${t(root, "cli.usage")}` };
   }
 }
@@ -527,11 +535,13 @@ function init(cwd: string, force: boolean): Result {
   }
   if (ignoreLocal(root)) created.push(".gitignore");
 
+  // 설치는 여기서 하지 않는다 — init은 프로젝트의 일이고 플러그인은 홈의 일이다. 없으면 `setup`을 가리킬 뿐이다
+  const hint = pluginInstalled() === false ? `\n${t(root, "cli.setup_hint")}` : "";
   return {
     ok: true,
-    message: created.length > 0
+    message: (created.length > 0
       ? t(root, "cli.initialized", { root, created: created.join("\n  ") })
-      : t(root, "cli.nothing_missing", { root }),
+      : t(root, "cli.nothing_missing", { root })) + hint,
     data: { root, created },
   };
 }

@@ -22,6 +22,7 @@ export const ko = {
   bind <gen-id>                   (열린 세대에 이 세션을 다시 묶는다)
   seq [generation|milestone|loop|source|<id>]
   carrier new <slug> | list [--orphans|--check]
+  setup                           (claude CLI로 플러그인 마켓플레이스를 등록하고 reap 플러그인을 설치한다. npm i -g 뒤 한 번)
   doctor                          (보고만 한다. 결함이 있으면 실패로 끝난다)
   index [update [--full] | status | impact <file>... | search <q> | callers <id> | callees <id>]
   orch claim <resource> [--ttl 30m] | release <resource> | barrier <name> --expect <N> --timeout <s> | roster | status   [--topic <t>]
@@ -164,6 +165,18 @@ export const ko = {
   "entries.hook_order_invalid": "--order는 정수입니다: {order}",
   "entries.hook_already_exists": "이미 있습니다: {filename}",
 
+  "cli.legacy_command": "`reap {command}`는 v0.17 명령입니다 — 지금 설치된 것은 REAP v{version}이고 동작 방식이 다릅니다. 다음: `reap setup`(v0.18 플러그인 설치) → 새 Claude Code 세션 → v0.17 .reap/이 있는 프로젝트마다 /reap:migrate. 원본 데이터는 보존됩니다.",
+  "cli.setup_hint": "플러그인이 감지되지 않습니다 — `reap setup`(마켓플레이스 등록과 reap 플러그인 설치)을 실행한 뒤 새 Claude Code 세션을 여세요.",
+  "setup.claude_missing": "Claude Code CLI(`claude`)가 PATH에 없습니다. Claude Code를 설치한 뒤 `reap setup`을 다시 실행하세요.",
+  "setup.marketplace_present": "마켓플레이스 ctod-plugins: 이미 등록됨",
+  "setup.marketplace_added": "마켓플레이스 ctod-plugins: 등록함 (c-d-cc/plugins)",
+  "setup.marketplace_failed": "마켓플레이스 ctod-plugins: 실패 — {detail}\n  수동: claude plugin marketplace add c-d-cc/plugins",
+  "setup.plugin_present": "플러그인 {name}: 이미 설치됨",
+  "setup.plugin_installed": "플러그인 reap@ctod-plugins: 설치함",
+  "setup.plugin_failed": "플러그인 reap@ctod-plugins: 실패 — {detail}\n  수동: claude plugin install reap@ctod-plugins",
+  "setup.done": "새 Claude Code 세션을 여세요 — /reap: skill 10개와 상태 줄이 거기서 보입니다.",
+  "doctor.kind.plugin_missing": "reap 플러그인 미설치",
+  "doctor.detail.plugin_missing": "~/.claude/settings.json enabledPlugins에 reap@… 항목이 없다 — skill과 상태 줄이 그것에 기댄다. reap setup을 실행",
   "doctor.kind.id_format": "id 형식",
   "doctor.kind.id_duplicate": "id 중복",
   "doctor.kind.id_unregistered": "레지스트리에 없는 id",
