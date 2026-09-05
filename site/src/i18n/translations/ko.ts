@@ -707,7 +707,7 @@ export const ko: Translations = {
       configuration: "설정",
       doctor: "Doctor",
       comparison: "비교",
-      migration: "v0.17에서 이주",
+      migration: "v0.17에서 Migration 하기",
       releaseNotes: "릴리스 노트",
     },
   },
@@ -720,7 +720,7 @@ export const ko: Translations = {
     breakingBand: {
       text: "v0.18.0은 이전 버전과 호환되지 않습니다. 저장 구조, 명령, 플러그인이 모두 바뀌었습니다.",
       changeLinkText: "무엇이 바뀌었나 →",
-      migrationLinkText: "v0.17에서 이주 →",
+      migrationLinkText: "v0.17에서 Migration 하기 →",
     },
     whyReap: "왜 REAP인가?",
     whyReapDesc: "AI 에이전트는 강력하지만, 구조 없이는 개발이 혼란스러워집니다. 매 세션마다 컨텍스트가 초기화됩니다. 기획은 한 번 쓰고 잊힙니다. 코드 변경이 목적 없이 흩어집니다. 설계 문서가 현실에서 벗어납니다. 과거 작업에서 얻은 교훈이 사라집니다.",
@@ -788,7 +788,7 @@ export const ko: Translations = {
       { href: "/docs/hooks", title: "hooks", desc: "여섯 이벤트에 거는 .md, .sh 훅과 조건, 순서." },
       { href: "/docs/code-intelligence", title: "코드 인덱스", desc: "커밋 단위로 갱신되는 코드 인덱스. 15개 언어." },
       { href: "/docs/orchestrate", title: "orchestrate", desc: "두 세션 이상이 동시에 작업할 때 쓰는 claim과 barrier." },
-      { href: "/docs/migration", title: "v0.17에서 이주", desc: "8단계로 이주합니다. 원본은 .reap-v0_17/에 그대로 보존됩니다." },
+      { href: "/docs/migration", title: "v0.17에서 Migration 하기", desc: "8단계로 옮깁니다. 원본은 .reap-v0_17/에 그대로 보존됩니다." },
     ],
   },
 
@@ -922,7 +922,7 @@ export const ko: Translations = {
       ["merge/pull/push lifecycle과 /reap.merge 등 3종", "orchestrate skill + git 직접"],
       ["reap-evaluate evaluator agent", "complete skill의 독립 검증 절"],
       ["status·config·check-version·uninstall", "ctx 상태 줄·doctor·config 직접 편집·플러그인 제거"],
-      ["update·이주 안내 레이어·lastMigratedVersion", "migrate skill 1회 + 이후 doctor·init --check"],
+      ["update·migration 안내 레이어·lastMigratedVersion", "migrate skill 1회 + 이후 doctor·init --check"],
       ["fix --check·clean·destroy", "doctor·cleanup skill·rm -rf .reap + 플러그인 제거"],
       ["install-skills·load-context·dump-state, opencode/codex adapter", "플러그인 설치·ctx --hook"],
       ["/reap.knowledge·/reap.sync·/reap.refreshKnowledge", "init skill + complete의 summary 갱신 절 + genome 직접 편집"],
@@ -934,7 +934,7 @@ export const ko: Translations = {
     sameTitle: "그대로인 것",
     sameDesc: "genome 3종(application·evolution·invariants)·environment/·backlog·코드 인덱스·hooks 자리는 이번에도 그대로입니다.",
     migrateNote: "v0.17에서 실제로 옮기려면",
-    migrateLinkText: "이주 가이드 →",
+    migrateLinkText: "Migration 가이드 →",
   },
 
   quickstart: {
@@ -1761,8 +1761,8 @@ workspaceId: ba44307f94a6`,
       {
         name: "migrate",
         when: "프로젝트가 v0.17 시대 REAP 데이터(구 5단계 파이프라인 레이아웃)를 갖고 있을 때, 또는 v0.17 위에 v0.18을 막 설치했을 때.",
-        what: "판정 → 사전 차단 → 고지·동의 → 격리 → 새 구조 → 이주(subagent) → 검증 → 기록의 8단계로 옮긴다. 원본은 .reap-v0_17/에 그대로 보존한다.",
-        notCalled: "uncommitted 변경이나 열린 generation이 있으면 정리한 뒤 부른다. 판정이 v018이면 이미 이주할 것이 없다.",
+        what: "판정 → 사전 차단 → 고지·동의 → 격리 → 새 구조 → migration(subagent) → 검증 → 기록의 8단계로 옮긴다. 원본은 .reap-v0_17/에 그대로 보존한다.",
+        notCalled: "uncommitted 변경이나 열린 generation이 있으면 정리한 뒤 부른다. 판정이 v018이면 이미 옮길 것이 없다.",
       },
       {
         name: "report-issue",
@@ -1974,9 +1974,9 @@ reap orch status [--topic <t>]`,
   },
 
   migration: {
-    title: "v0.17에서 이주",
+    title: "v0.17에서 Migration 하기",
     breadcrumb: "기타",
-    description: "8단계 이주. 원본은 .reap-v0_17/에 그대로 보존된다.",
+    description: "8단계 migration. 원본은 .reap-v0_17/에 그대로 보존된다.",
     intro: "v0.17.7 이하에서는 세션 시작 시 버전 검사가 0.18을 보고 자동 갱신 대신 설치 명령을 안내한다. 거기서부터 사람이 손대는 지점은 셋이다.",
     updateCode: `npm i -g @c-d-cc/reap   # 안내받은 명령 — v0.18 CLI
 reap setup              # 플러그인 마켓플레이스 등록과 설치
@@ -1989,7 +1989,7 @@ reap setup              # 플러그인 마켓플레이스 등록과 설치
       { title: "고지와 동의", desc: "단계별 분량 실측, 토큰 사용량이 클 수 있다는 고지, 비파괴 약속을 보여주고 명시적 동의를 받는다" },
       { title: "격리", desc: ".reap를 .reap-v0_17로 이름만 바꾼다" },
       { title: "새 구조", desc: "reap init으로 새 .reap/를 세우고, config.yml의 language·agentClient만 구 값을 이어받는다" },
-      { title: "이주", desc: "subagent가 매핑 표(migration-map.md)를 따라 데이터를 옮긴다. 주 세션의 컨텍스트는 구 데이터로 채우지 않는다" },
+      { title: "Migration", desc: "subagent가 매핑 표(migration-map.md)를 따라 데이터를 옮긴다. 주 세션의 컨텍스트는 구 데이터로 채우지 않는다" },
       { title: "검증", desc: "reap doctor가 결함 0이어야 다음으로 간다. .reap-v0_17/이 무손상인지도 확인한다" },
       { title: "기록과 홈 정리 안내", desc: "archive/migration-v0_17.md에 기록을 남기고, 홈 디렉토리 정리 목록을 사람 동의 후에만 실행한다" },
     ],
@@ -1997,7 +1997,7 @@ reap setup              # 플러그인 마켓플레이스 등록과 설치
     preservedDesc: "원본 비파괴가 불변식이다. 어느 단계도 구 데이터를 수정하지 않는다 — .reap-v0_17/로 자리만 옮겨 통째로 남는다. 되돌리기는 한 줄이다.",
     rollbackCode: "rm -rf .reap && mv .reap-v0_17 .reap",
     recordExampleTitle: "기록 파일 실례",
-    recordExampleDesc: "8/8이 남기는 archive/migration-v0_17.md는 옮긴 것·안 옮긴 것·필요한 갱신·검증(doctor 전문)을 담는다. selfview 실물 이주(2026-09-05)에서 나온 한 조각:",
+    recordExampleDesc: "8/8이 남기는 archive/migration-v0_17.md는 옮긴 것·안 옮긴 것·필요한 갱신·검증(doctor 전문)을 담는다. selfview 실물 migration(2026-09-05)에서 나온 한 조각:",
     recordExampleCode: `## 옮기지 않은 것
 
 **#3 backlog — 8건 전부 재발급하지 않음.** 재검토 결과 8건 모두 이미 해소된 상태였다:
@@ -2022,7 +2022,7 @@ reap setup              # 플러그인 마켓플레이스 등록과 설치
       ["merge/pull/push lifecycle", "orchestrate skill과 git 직접 사용으로 대체"],
       ["reap-evaluate evaluator agent", "세대를 닫기 전 독립 검증 — complete skill의 절로"],
       ["status·config·check-version·uninstall 명령", "ctx 상태 줄·doctor·config 직접 편집·플러그인 제거로 대체"],
-      ["update·이주 안내 레이어", "migrate skill이 0.17→0.18 이주를 한 번만 처리하고, 그 뒤는 doctor·init --check가 맡는다"],
+      ["update·migration 안내 레이어", "migrate skill이 0.17→0.18 migration을 한 번만 처리하고, 그 뒤는 doctor·init --check가 맡는다"],
       ["fix --check·clean·destroy", "doctor·cleanup skill·rm -rf .reap + 플러그인 제거로 대체"],
       ["install-skills·load-context·dump-state, opencode/codex adapter", "플러그인 설치·ctx --hook으로 대체, 나머지는 없음"],
       ["/reap.help 16주제, 다국어 reap help", "help skill로 — 상태 줄·skill 지도·다음 행동 제안"],
