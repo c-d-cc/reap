@@ -109,3 +109,4 @@
 | gen-0105-exec | 배포 정책·문서를 설치 경로 하나(npm → reap setup)와 latest 직접 발행으로 | 2026-09-05 |
 | gen-0106-exec | skill 노출 6/4 — user-invocable, 문서 표, 시작하기·두 축·판단확정사실 정리 | 2026-09-05 |
 | gen-0107-exec | help skill·complete의 environment 갱신·독립 검증·문서 정합 | 2026-09-05 |
+| gen-0108-exec | milestone 과잉 분할을 제품에서 막는다 — evolve·carve-milestone·loop 본문, doctor 참고 | 2026-09-05 |

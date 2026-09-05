@@ -110,6 +110,16 @@ export function diagnose(root: string): Report {
   // 4b. 플러그인 — skill과 상태 줄이 그것에 기댄다. settings.json이 없으면(모르면) 말하지 않는다
   if (pluginInstalled() === false) notes.push({ kind: t(root, "doctor.kind.plugin_missing"), detail: t(root, "doctor.detail.plugin_missing") });
 
+  // 4c. 닫힌 milestone에 세대가 하나뿐 — backlog 항목이면 충분했을 일. 사후에 보고만 한다(참고)
+  const genCount = new Map<string, number>();
+  for (const e of all.generation) {
+    const ms = e.data.milestone ? String(e.data.milestone) : "";
+    if (ms) genCount.set(ms, (genCount.get(ms) ?? 0) + 1);
+  }
+  // 한 줄로 모은다 — 닫힌 milestone은 archive에 영원히 남으므로 하나씩 내면 doctor가 이력만큼 길어진다
+  const small = all.milestone.filter((e) => e.data.status === "closed" && (genCount.get(e.id) ?? 0) <= 1).map((e) => `${e.id}(${genCount.get(e.id) ?? 0})`);
+  if (small.length > 0) notes.push({ kind: t(root, "doctor.kind.milestone_single_generation"), detail: t(root, "doctor.detail.milestone_single_generation", { count: small.length, ids: small.join(", ") }) });
+
   // 5. map.md 씨앗
   if (existsSync(p.map) && readFileSync(p.map, "utf8") !== template(root, "map.md")) {
     notes.push({ kind: t(root, "doctor.kind.map_diverged"), detail: t(root, "doctor.detail.map_diverged") });

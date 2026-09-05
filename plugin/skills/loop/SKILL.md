@@ -47,14 +47,14 @@ REAP stops being involved from here. Explore, run thought experiments, stand up 
 
 | Type | Finding its place means |
 |---|---|
-| `plan` · `design` · `uiux` | Written to the plan source, and carved with [carve-milestone](../carve-milestone/SKILL.md) if there's something to execute |
+| `plan` · `design` · `uiux` | Written to the plan source. If there's something to execute: **several generations' worth → carved with [carve-milestone](../carve-milestone/SKILL.md); one generation's worth → a backlog item** (`reap make backlog --type <t> --from <loop-id>`). A loop that settled a small change doesn't need a milestone to leave one item behind |
 | `idea` | Left in `idea/research/`, or graduated into a loop of another type |
 
 ```bash
 reap mark loop <loop-id> --closed [--milestone <ms-id>]...
 ```
 
-Write the milestone this loop produced under `--milestone`. The milestone's `from:` has to point back to this loop too — `carve-milestone` writes it via `--from <loop-id>`.
+Write the milestone this loop produced under `--milestone`. The milestone's `from:` has to point back to this loop too — `carve-milestone` writes it via `--from <loop-id>`. If the output was a backlog item instead, close with no `--milestone` and name the item in `Outcome` — its `from:` already points here.
 
 **Before closing, write `Dead Ends` and `Outcome` faithfully.** A closed loop stays in `life/loops/` for the generation executing that milestone to read. Past 10, the tool sends the oldest down to archive — nothing to decide here.
 

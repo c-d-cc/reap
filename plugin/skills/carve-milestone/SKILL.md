@@ -13,6 +13,7 @@ user-invocable: false
 **When not to call it matters more.**
 
 - **If a single backlog item is enough, don't carve one.** The item already holds the boundary, so making a milestone **writes the boundary in two places, and two places drift.** The criterion for picking grounds is in [evolve](../evolve/SKILL.md)
+- **If the only reason is that a person has to review the direction, don't carve one.** A review point isn't a boundary. Show the person the generation's Outcome and get the answer there; write the decision where it governs (the plan source). Three one-generation milestones were carved in this repo on that reason alone
 - **If what to build hasn't been settled yet, don't carve one.** Carving splits an already-settled plan into executable units — it isn't planning itself. If the boundary, exit criteria, or out-of-scope diverge, call [interview](../interview/SKILL.md) first — how to ask lives there
 
 ## First: check what's being carved against real traces
@@ -34,6 +35,8 @@ At the end of three milestones the human gave the same answer: **keep it around 
 **The lower bound isn't a signal, it's a rule. Work that finishes in a single generation isn't a milestone.** One generation is enough for a single backlog item, and making a milestone writes the boundary in two places. **Answer "how many generations is this" before carving** — if the answer is one, make an item with `reap make backlog` and open with the `--backlog` grounds.
 
 This rule exists because **making this very skill broke it.** A milestone was carved for something that would finish in one generation, and that milestone's one task was "build this skill." It surfaced only when a human pointed it out, and the numbering had to be pulled back to correct it (`sequence/milestone.md`). **The rule was broken while applying the size criterion itself, so leaving it as a mere signal means breaking it again.**
+
+**A decision that needs a person doesn't change the count.** Fitness and "questions to ask when this milestone ends" are for a milestone that exists for other reasons — they aren't a reason to make one. If the honest answer to "how many generations" is one and the only thing left is a person's yes or no, that's a backlog item plus the Outcome shown to the person.
 
 **One task targets about one generation's worth of work.** A task spanning multiple generations leaves the task file with no record of how far it got when a session is cut off.
 

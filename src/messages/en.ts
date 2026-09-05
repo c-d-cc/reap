@@ -192,6 +192,8 @@ export const en = {
   "doctor.kind.hook_condition_missing": "missing hook condition script",
   "doctor.kind.hook_unknown_event": "unknown hook event",
   "doctor.kind.hook_filename_invalid": "hook filename off convention",
+  "doctor.kind.milestone_single_generation": "milestone closed with one generation",
+  "doctor.detail.milestone_single_generation": "{count} — {ids}. A single generation's worth of work is a backlog item, not a milestone (carve-milestone: size). Nothing to fix here; the next carve is where it matters",
   "doctor.detail.gen_unbound": "{id} — belongs to another session or was abandoned. If it's mine, reap bind {id}; if abandoned, mark --aborted",
   "doctor.detail.map_diverged": "The project added to it, or REAP changed the layout. Check with diff.",
   "doctor.detail.size_over": "{path} {size} > {limit} — injected every session",

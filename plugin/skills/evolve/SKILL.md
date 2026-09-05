@@ -80,9 +80,12 @@ Opening one with nothing at stake leaves only cost — one record file, one regi
 
 **What the rule requires isn't a milestone — it's a boundary.** A backlog item is a boundary too — one item defines one piece of work, and consuming it ends it.
 
+**Answer "how many generations is this" before anything else.** One (or two) → a backlog item, written now if it doesn't exist yet. Several branches, several sessions → a milestone. **Two things that feel like reasons for a milestone aren't:** *"it isn't written down yet"* — writing it down is `make backlog`, one command, not a carve; and *"a person has to review this direction"* — the review happens on the generation's Outcome and the person's answer, and the decision itself is recorded in the plan source. Neither adds a branch, so neither adds a milestone. (This repo carved three one-generation milestones in a row on exactly those two feelings before a person pointed it out.)
+
 | This work | Grounds |
 |---|---|
-| Not written down anywhere yet. What "done" means has to be decided now | **milestone** |
+| Not written down anywhere yet, and it's one generation's worth | **backlog** — `make backlog` now, then open on it |
+| Not written down anywhere yet, and it branches into several generations | **milestone** |
 | Already written in a backlog item. Consuming that item ends it | **backlog** |
 | Splits into several branches, spans multiple sessions | **milestone.** A single item can't hold branches |
 | One branch of a milestone, and that branch's work is written in a backlog item | **both** |
