@@ -97,7 +97,16 @@ export interface Translations {
     breadcrumb: string;
     description: string;
     intro: string;
+    limitsTitle: string;
+    limits: { title: string; body: string }[];
+    whyTitle: string;
+    whyIntro: string;
+    why: { title: string; body: string }[];
+    discussionNote: string;
+    discussionLinkText: string;
+    discussionUrl: string;
     tableTitle: string;
+    tableDesc: string;
     tableHeaders: string[];
     table: [string, string][];
     goneTitle: string;
@@ -854,8 +863,71 @@ export const ko: Translations = {
     title: "v0.18에서 바뀐 것",
     breadcrumb: "시작하기",
     description: "v0.18에서 무엇이 바뀌었는지 — v0.17 대응표, 사라진 것, 그대로인 것.",
-    intro: "REAP는 5단계 lifecycle을 강제하는 파이프라인 실행기에서, agent가 판단을 위해 부르는 규약과 도구의 집합으로 다시 만들어졌습니다. 흐름을 스크립트가 정하지 않고, skill이 상황을 읽어 판단합니다.",
+    intro: "v0.18은 REAP가 지금까지 겪은 가장 큰 변화입니다. 5단계 lifecycle을 강제하던 파이프라인 실행기에서, agent가 판단할 때 부르는 규약과 도구의 집합으로 다시 만들어졌습니다. 무엇이 바뀌었는지보다 왜 바뀌었는지가 먼저입니다 — v0.17을 쓰면서 부딪힌 한계가 이 구조를 만들었습니다.",
+    limitsTitle: "v0.17에서 부딪힌 한계",
+    limits: [
+      {
+        title: "흐름을 스크립트로 강제하다 스크립트에 갇혔습니다",
+        body: "v0.17의 중심은 학습·계획·구현·검증·완료의 5단계 lifecycle이었고, 그 순서를 지키게 하려고 단계마다 서명 잠금과 게이트를 두었습니다. 그런데 실제 작업은 그 순서를 따르지 않습니다. 구현하다 계획으로 돌아가고, 검증 중에 새 학습이 생깁니다. 그래서 back·early-close·abort 같은 되돌리는 명령이 하나씩 늘었고, 늘어난 스크립트가 다시 경직성이 됐습니다. 흐름을 지키는 비용이 흐름의 가치를 넘어섰습니다.",
+      },
+      {
+        title: "무엇을 만들기로 했는지를 둘 곳이 없었습니다",
+        body: "REAP에는 어떻게 만드는가(genome), 지금 무엇이 있는가(environment), 어디로 가는가(vision)의 세 축이 있었지만, '무엇을 만들기로 결정했는가'의 자리가 없었습니다. 기획이 있는 프로젝트는 그것을 REAP 밖에 두어야 했고, agent는 완성된 spec이 옆에 있는데도 세대마다 사람의 머리에서 목표를 새로 받았습니다. 제품 기획은 REAP의 소유물이 아니라서 .reap/ 안에 넣을 수도 없었습니다.",
+      },
+      {
+        title: "세대 사이를 잇는 단위가 없었습니다",
+        body: "작업 단위가 generation 하나뿐이라 세대가 끝나면 맥락도 끝났습니다. 다음 세대는 lineage와 memory를 뒤져 맥락을 다시 쌓았고, 여러 세대에 걸치는 큰 일은 한 세대에 쑤셔 넣어져 부풀거나 여러 세대로 흩어져 진행 상태를 아무도 몰랐습니다. '이 일이 어디까지 왔고 언제 끝나는가'를 담을 자리가 필요했습니다.",
+      },
+      {
+        title: "사람이 매 세대 막아서거나, 아예 손을 떼거나 둘 중 하나였습니다",
+        body: "세대마다 사람이 fitness를 평가하는 구조는 자율성과 충돌했습니다. 그래서 반대편 극단으로 cruise와 autoSubagent가 생겼고, 세대 N개를 미리 승인하는 방식은 '자율을 미리 결재한다'는 어색한 모양이 됐습니다. 사람이 개입할 지점은 세대보다 큰 단위에 있어야 했습니다.",
+      },
+      {
+        title: "아직 확정되지 않은 지식은 어디에도 못 들어갔습니다",
+        body: "genome·environment·vision은 전부 확정된 지식을 전제합니다. 조사 중인 것, 결론 없는 메모, 폐기했지만 이유는 남겨야 하는 것은 갈 곳이 없어 memory에 섞이거나 사라졌습니다. 한 줄 요청을 agent가 추측으로 부풀리는 것도 같은 문제였습니다 — 모호함을 사람에게 되묻는 절차가 따로 없었습니다.",
+      },
+      {
+        title: "병렬 협업의 실제 문제는 브랜치 병합이 아니었습니다",
+        body: "merge/pull/push lifecycle은 같은 리포의 브랜치가 갈라졌다 합쳐지는 것을 다뤘습니다. 그런데 실제로 부딪힌 것은 두 세션이 같은 파일을 동시에 건드리는 일, 한쪽이 끝나기를 기다려야 하는 일이었습니다. git이 이미 잘하는 병합을 REAP가 다시 감쌌고, 정작 세션 간 조율은 비어 있었습니다.",
+      },
+      {
+        title: "설치 자체가 짐이었습니다",
+        body: "npm 설치 스크립트가 홈 디렉토리에 slash command와 훅을 복사했고, npm이 설치 스크립트를 막기 시작하자 매 명령마다 설치 상태를 확인해 다시 까는 로직을 유지해야 했습니다. 도구의 갱신과 프로젝트의 갱신이 뒤섞였습니다.",
+      },
+    ],
+    whyTitle: "그래서 이런 구조가 됐습니다",
+    whyIntro: "v0.18은 위의 한계를 하나씩 뒤집은 결과입니다. 한 문장으로는 이렇습니다 — REAP는 작업의 모양을 결정하지 않고, 작업이 쓸 수 있는 도구와 무엇을 어디에 저장할지의 규약을 제공합니다.",
+    why: [
+      {
+        title: "흐름은 skill이 판단하고, 도구는 사후에 검증합니다",
+        body: "5단계와 게이트가 사라졌습니다. 언제 열고 언제 닫을지, 그 안에서 무엇을 어떤 순서로 할지는 skill이 기술하고 agent가 판단합니다. 스크립트가 소유하는 것은 확률에 맡기면 안 되는 것뿐입니다 — id 발급, frontmatter, 세션 바인딩, 파일 조립. 대신 reap doctor가 확정적으로 검사할 수 있는 것을 나중에 검사해 보고합니다. 막지 않고, 고치지도 않습니다.",
+      },
+      {
+        title: "plan이 넷째 축이 됐습니다",
+        body: "기획·설계·아이디어를 소스 코드에 준하는 1급 산출물로 다룹니다. REAP 디렉토리 안에 강제하지 않고, 리포 밖의 여러 곳일 수 있습니다. REAP가 기억하는 것은 각 plan을 어떻게 읽고 쓰는지의 규약입니다. 그래서 두 축이 생겼습니다 — loop가 plan을 진화시키는 Plan 축과, plan을 잘라 실행하는 Execution 축입니다.",
+      },
+      {
+        title: "milestone이 맥락과 평가의 단위가 됐습니다",
+        body: "plan에서 잘라낸 실행 가능한 단위로, 경계와 종료 조건을 가집니다. 여러 세대가 같은 milestone의 handoff를 읽고 쓰므로 맥락이 세대마다 다시 쌓이지 않습니다. 사람의 fitness 평가도 세대가 아니라 milestone이 끝날 때 한 번입니다 — 세대 안은 자율 구간이고, 사람이 서는 지점은 그 바깥입니다.",
+      },
+      {
+        title: "새 의도를 만드는 일과 실현하는 일을 갈랐습니다",
+        body: "loop는 새 의도를 만들고, exec generation은 그것을 실현하고, fix generation은 이미 있는 의도로 되돌립니다. exec는 반드시 milestone이나 backlog 항목이라는 근거를 갖습니다. 어떤 일인지 모호하면 interview가 사람에게 되묻습니다 — 추측으로 부풀리지 않도록.",
+      },
+      {
+        title: "확정되지 않은 것의 자리가 생겼습니다",
+        body: "idea는 조사 중인 것, 결론 없는 메모, 폐기했지만 이유를 남길 것을 담습니다. 졸업 조건을 적어 두고, 확정되면 plan이나 genome으로 올라갑니다. 저장소도 3단이 됐습니다 — 하려는 것(vision), 지금 살아 있는 것(life), 더는 참고하지 않는 것(archive).",
+      },
+      {
+        title: "협업은 조율이고, 설치는 플러그인입니다",
+        body: "merge lifecycle 대신 orchestrate가 세션 사이의 claim과 barrier를 맡고, 병합은 git에 돌려줬습니다. 배포는 npm CLI와 Claude Code 플러그인 둘로 나뉘어 각자의 갱신 기제를 씁니다 — 설치는 npm i -g 한 줄이고, 플러그인은 reap setup이 대신 넣습니다.",
+      },
+    ],
+    discussionNote: "이 방향은 v0.18 개발 전에 공개적으로 논의했습니다.",
+    discussionLinkText: "Preparing v0.18 — GitHub Discussions #23",
+    discussionUrl: "https://github.com/c-d-cc/reap/discussions/23",
     tableTitle: "v0.17 → v0.18 대응",
+    tableDesc: "여기서부터는 자잘한 대응입니다. 위의 이유를 알면 표는 따라옵니다.",
     tableHeaders: ["v0.17", "v0.18"],
     table: [
       ["5단계 lifecycle", "evolve·complete 판단"],

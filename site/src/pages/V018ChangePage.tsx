@@ -11,7 +11,33 @@ export default function V018ChangePage() {
       <DocPage title={v.title} breadcrumb={v.breadcrumb}>
         <p className="text-sm text-muted-foreground leading-relaxed mb-6">{v.intro}</p>
 
+        <h2 className="text-base font-semibold text-foreground mb-3">{v.limitsTitle}</h2>
+        <div className="space-y-4 mb-8">
+          {v.limits.map((item) => (
+            <div key={item.title}>
+              <h3 className="text-sm font-semibold text-foreground mb-1">{item.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{item.body}</p>
+            </div>
+          ))}
+        </div>
+
+        <h2 className="text-base font-semibold text-foreground mb-2">{v.whyTitle}</h2>
+        <p className="text-sm text-muted-foreground leading-relaxed mb-4">{v.whyIntro}</p>
+        <div className="space-y-4 mb-6">
+          {v.why.map((item) => (
+            <div key={item.title}>
+              <h3 className="text-sm font-semibold text-foreground mb-1">{item.title}</h3>
+              <p className="text-sm text-muted-foreground leading-relaxed">{item.body}</p>
+            </div>
+          ))}
+        </div>
+        <p className="text-xs text-muted-foreground mb-8">
+          {v.discussionNote}{" "}
+          <a href={v.discussionUrl} className="text-primary hover:underline" target="_blank" rel="noreferrer">{v.discussionLinkText}</a>
+        </p>
+
         <h2 className="text-base font-semibold text-foreground mb-2">{v.tableTitle}</h2>
+        <p className="text-sm text-muted-foreground leading-relaxed mb-3">{v.tableDesc}</p>
         <div className="border border-border rounded-md overflow-hidden text-sm mb-6">
           <table className="w-full">
             <thead>
