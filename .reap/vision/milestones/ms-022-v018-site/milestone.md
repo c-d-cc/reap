@@ -7,6 +7,7 @@ refs:
   - ps-5e948f:07-i18n-docs-delegate.md
 status: open
 openedAt: 2026-09-04T00:04:12Z
+focus: true
 ---
 ## Background
 

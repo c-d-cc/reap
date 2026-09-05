@@ -6,7 +6,6 @@ from: loop-0004-plan
 refs:
   - ps-5e948f:02-distribution.md
 status: closed
-focus: true
 openedAt: 2026-09-05T01:09:31Z
 closedAt: 2026-09-05T02:40:12Z
 ---
