@@ -1,30 +1,16 @@
-# Handoff — task 2 (selfview 재이주)로
+# Handoff — 사람 판정 대기 (gen-0102 이후)
 
-gen-0100-exec가 task 1(migration-map·SKILL 개정)을 끝냈다. task 2는 selfview를 **처음부터 다시** 이주하고 milestone의 Exit Criteria를 전부 만족하는지 대조하는 것.
+## 어디까지 왔나
 
-## 시작 전에
+- gen-0100(매핑 재정의·verify)·gen-0101(lineage 승계)·**gen-0102(issue #25·#30 해소)** 로 tasks/1이 세 번 개정됐다. 마지막 개정은 사람이 selfview 실물 이주(2026-09-05)에서 올린 issue 일곱 건(#25에 #26~29, #30에 #31 합침)을 전부 반영한 것이다
+- 스킬 표면: 8단계 + `scripts/{detect-version,measure,verify-migration}.sh` + `migrate-lineage.mjs`, 매핑 13, 기록 파일에 `## 사람 판단`·`## 다음 세션이 볼 것`
+- selfview는 사람이 직접 `/reap:migrate`를 돌린 결과가 `dev`에 미커밋으로 있다(verify 9/9·doctor 0). **selfview는 사람이 별도 세션에서 다룬다 — 이 리포 세션은 손대지 않는다**
 
-- selfview는 이미 한 번 이주됐다(`/Users/hichoi/cdws/selfview/.reap/`가 1차 결과, `.reap-v0_17/`이 원본). **1차 결과를 지우고 원본에서 처음부터 다시** 돌려야 tasks/2의 뜻대로다 — 1차 결과 위에 이어 붙이면 #6(디렉토리 이동 vs idea)·#11(milestone)이 이미 잘못 자리 잡은 것과 충돌한다.
-- `git -C /Users/hichoi/cdws/selfview status`로 1차 이주 커밋 여부 확인 후, 되돌리는 방법(`rm -rf .reap && mv .reap-v0_17 .reap`가 SKILL 4/8이 보장하는 그 한 줄) 적용.
+## 다음에 먼저 볼 것
 
-## 갱신된 문서
+- 사람의 판정. "지워도 된다"면 tasks/2 끝 → milestone 종료 절차([carve-milestone]). 아니면 지적을 tasks/1로 되돌린다 — 새 issue가 올라오면 `/reapdev.resolveIssue`로 받는다
+- 개정된 스킬(#25·#30 반영)은 아직 실물 이주에 한 번도 쓰이지 않았다. selfview 재이주가 그 첫 검증이다
 
-- `plugin/skills/migrate/SKILL.md` — 1/8 표 문구 정합, 3/8 측정 추가, 6/8 "매핑 열둘", 7/8에 `verify-migration.sh` 게이트, 8/8에 `## 다음 세션이 볼 것` 절 신설.
-- `plugin/skills/migrate/references/migration-map.md` — #1·#2·#3·#5·#6 재정의, #11·#12 신설. #1·#6·#11·#12의 실행 절차는 표 아래 `## Detail — mapping #N` 절에.
-- `plugin/skills/migrate/scripts/verify-migration.sh` — 신설. `REAP_BIN=<dist/reap 경로> bash .../verify-migration.sh <project-root>`로 호출, 여섯 줄 전부 `ok:`가 나와야 통과.
+## 미결
 
-## 확인이 필요한 것
-
-- **`tests/migrate-scripts.test.sh`가 커밋되지 않았다.** `tests/` submodule이 이번 delegate 범위에서 불가침이라 판단해 작업 트리에만 파일을 남겼다(`bash tests/migrate-scripts.test.sh`로 로컬 실행, 10개 PASS 확인됨). `tests-submodule` agent가 있으면 그쪽에 맡기거나, 주 세션이 직접 submodule 커밋 여부를 판단할 것.
-- **`ci.yml`·`release.yml`에 `hook.test.sh` 줄이 원래 없다** — 둘 다 테스트를 이 리포에서 안 돌리고 private `reap-test`로 dispatch만 한다. brief의 "hook.test.sh 줄 옆에 한 줄 추가" 전제가 실물과 안 맞아 워크플로 파일은 안 건드렸다. 이 판단이 맞는지 재확인 필요하면 `.github/workflows/ci.yml`·`release.yml`을 직접 보라.
-
-## task 2가 할 일 (milestone.md Exit Criteria 그대로)
-
-1. selfview를 원본부터 다시 이주(SKILL 1/8~8/8, 8/8에서 `verify-migration.sh`까지).
-2. `## 다음 세션이 볼 것`(ctx 상태 줄)을 사람에게 보여주고 "지워도 되는가" 판정을 구한다.
-3. 만족 못 하면 migration-map·SKILL로 돌아가 고치고(1↔2 반복) — 이번 task 1 개정이 실물과 안 맞는 대목이 나오면 그 자리에서 고친다.
-4. 끝나면 milestone을 닫기 전 "이 milestone이 끝나면 물어볼 것" 두 질문(`.reap-v0_17` 삭제 여부, 다음 evolve가 안 묻고 다음 task로 갔는가)에 답한다.
-
-## 2차 재이주 결과 (2026-09-05, 주 세션)
-
-selfview 브랜치 `reap-v018-migration` 커밋 f0be4ac: verify 7/7 ok, doctor 0, 원본 무손상. 상태 줄에 `ms-001 팀 모드(B2B) 구현 (focus)` + task 3, plan `ps-64b338`(docs/plan, 문서 13), backlog 4, idea 7(research 1). 2차 subagent가 찾은 skill 결함 다섯을 전부 반영: #3 폐기된 설계 대조, #11 `--ref` 경로 형식, #13 옛 경로 재작성(신설, verify 검사 7), 4/8 `.reap-v0_17` 잔존 검사, 기록 형식의 스크립트 경로. **사람 판정 대기** — "지워도 된다"면 ms-024를 닫고, 아니면 tasks/1로.
+- milestone.md "끝나면 물어볼 것" 두 질문: `.reap-v0_17` 삭제 여부, 첫 evolve가 안 묻고 다음 task로 갔는가 — 둘 다 사람 답 대기
