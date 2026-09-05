@@ -396,9 +396,6 @@ export interface Translations {
     orderTitle: string;
     orderDesc: string;
     orderSteps: { title: string; desc: string }[];
-    cleanupTitle: string;
-    cleanupDesc: string;
-    cleanupTestNote: string;
     handoffTitle: string;
     handoffDesc: string;
     lessonsTitle: string;
@@ -702,7 +699,7 @@ export const ko: Translations = {
       orchestrate: "orchestrate",
       claimBarrier: "Claim과 Barrier",
       hooks: "hooks",
-      skillReference: "skill 11종",
+      skillReference: "skill 10종",
       cliReference: "CLI 레퍼런스",
       configuration: "설정",
       doctor: "Doctor",
@@ -729,7 +726,7 @@ export const ko: Translations = {
       { problem: "한 번 쓰고 잊히는 기획", solution: "loop가 plan을 계속 다듬고, 그 계획을 milestone으로 잘라 실행과 이어 줍니다. 기획도 코드처럼 진화합니다" },
       { problem: "산발적 개발", solution: "milestone과 generation이 경계를 가진 작업 단위로 나뉘어 하나의 목표에 집중합니다" },
       { problem: "설계-코드 괴리", solution: "plan과 구현 사이의 간극은 backlog로 기록되고 다음 generation에서 반영됩니다" },
-      { problem: "잊혀진 교훈", solution: "lessons.md에 교훈이 쌓이고, 참고 가치가 다한 세대는 archive에 보존됩니다" },
+      { problem: "잊혀진 교훈", solution: "lessons.md에 교훈이 쌓이고, 닫힌 세대는 archive에 보존됩니다" },
       { problem: "협업 혼란", solution: "orchestrate skill이 claim과 barrier로 여러 세션의 작업을 조율합니다" },
     ],
     structureTitle: "구조",
@@ -738,8 +735,8 @@ export const ko: Translations = {
       { label: "Knowledge", sub: "genome + environment", desc: "genome은 규범(제품 정체성, AI 행동 규칙, 절대 제약), environment는 서술(기술 스택, 소스 구조)입니다. 모든 작업의 기반입니다." },
       { label: "Plan", sub: "plan + loop", desc: "제품을 만들기 위한 모든 생각입니다. plan 문서는 리포 밖에 있어도 되며, loop가 그것을 다듬습니다." },
       { label: "Vision", sub: "milestone + memory", desc: "하려는 것입니다. loop에서 잘라낸 milestone과 쌓인 교훈이 여기 있습니다." },
-      { label: "Life", sub: "generation + backlog", desc: "지금 살아 있는 것입니다. 진행 중이거나 아직 참고할 값이 있는 세대와 이월 항목이 여기 있습니다." },
-      { label: "Archive", sub: "닫힌 milestone, generation, loop", desc: "더는 참고하지 않는 것입니다. milestone이 닫힐 때 cleanup skill이 여기로 내립니다." },
+      { label: "Life", sub: "generation + backlog + loop", desc: "지금 열려 있는 것입니다. 진행 중인 세대·loop와 아직 소비되지 않은 이월 항목이 여기 있습니다." },
+      { label: "Archive", sub: "닫힌 milestone, generation, loop, backlog", desc: "닫힌 것입니다. 세대·loop·이월 항목은 닫히거나 소비되는 순간 여기로 옮겨집니다." },
       { label: "Civilization", sub: "소스 코드", desc: ".reap/ 밖의 모든 것입니다. generation이 진화시키는 대상입니다." },
     ],
     axesTitle: "두 개의 축",
@@ -774,7 +771,7 @@ export const ko: Translations = {
       { label: "Backlog", desc: "지연되거나 발견된 이슈를 기록하는 자리입니다. 다음 generation이 이어받습니다." },
       { label: "Milestone과 fitness", desc: "milestone이 끝날 때 사람이 자연어로 fitness를 평가합니다. 정량 지표는 두지 않습니다." },
       { label: "Loop", desc: "새 의도를 만드는 작업입니다. 기획, 설계, 화면, 아직 자리 없는 아이디어를 다룹니다." },
-      { label: "Archive", desc: "완료된 generation과 milestone이 쌓이는 곳입니다. 참고 가치가 다하면 여기로 내려갑니다." },
+      { label: "Archive", desc: "닫힌 generation과 milestone이 쌓이는 곳입니다. 닫히는 순간 여기로 옮겨집니다." },
       { label: "Orchestrate", desc: "두 세션 이상이 동시에 작업할 때 claim과 barrier로 조율합니다." },
     ],
     documentation: "문서",
@@ -783,7 +780,7 @@ export const ko: Translations = {
       { href: "/docs/quick-start", title: "첫 사용", desc: "init, evolve, complete 세 skill로 시작합니다." },
       { href: "/docs/autonomous-evolution", title: "자율 진화 흐름", desc: "세션이 열리면 무슨 일이 일어나는가." },
       { href: "/docs/v018change", title: "v0.18에서 바뀐 것", desc: "v0.17 대응표, 사라진 것, 그대로인 것." },
-      { href: "/docs/skill-reference", title: "skill 11종", desc: "agent가 REAP를 다루는 통로. 언제, 무엇을, 부르지 않는 경우를 정리합니다." },
+      { href: "/docs/skill-reference", title: "skill 10종", desc: "agent가 REAP를 다루는 통로. 언제, 무엇을, 부르지 않는 경우를 정리합니다." },
       { href: "/docs/cli-reference", title: "CLI 레퍼런스", desc: "reap 명령 전체. make, mark, doctor, index, orch, ctx를 다룹니다." },
       { href: "/docs/hooks", title: "hooks", desc: "여섯 이벤트에 거는 .md, .sh 훅과 조건, 순서." },
       { href: "/docs/code-intelligence", title: "코드 인덱스", desc: "커밋 단위로 갱신되는 코드 인덱스. 15개 언어." },
@@ -805,7 +802,7 @@ export const ko: Translations = {
       ["한 번 쓰고 잊히는 기획 — 계획 문서가 코드와 따로 늙어 갑니다", "loop가 plan을 계속 다듬고, milestone으로 잘라 실행과 이어 줍니다. 기획도 코드처럼 진화합니다"],
       ["산발적 개발 — 목표 없이 코드 변경이 흩어집니다", "milestone이 경계와 종료 조건을 가진 실행 단위로 자르고, generation이 그 안에서 하나의 의도에 집중합니다"],
       ["설계-코드 괴리 — 문서가 코드에서 벗어납니다", "구현 중 발견된 간극은 backlog로 기록되고 다음 generation이 반영합니다"],
-      ["잊혀진 교훈 — 과거 작업의 인사이트가 사라집니다", "vision/memory/lessons.md에 교훈이 쌓이고, 참고 가치가 다한 세대는 archive에 보존됩니다"],
+      ["잊혀진 교훈 — 과거 작업의 인사이트가 사라집니다", "vision/memory/lessons.md에 교훈이 쌓이고, 닫힌 세대는 archive에 보존됩니다"],
       ["협업 혼란 — 병렬 작업이 충돌하는 변경으로 이어집니다", "orchestrate skill이 claim과 barrier로 여러 세션의 작업을 조율합니다"],
     ],
     structureTitle: "구조",
@@ -814,8 +811,8 @@ export const ko: Translations = {
       { label: "Knowledge", sub: "genome + environment", path: ".reap/genome/ + .reap/environment/", desc: "genome(규범 — 제품 정체성, AI 행동 규칙, 절대 제약)과 environment(서술 — 기술 스택, 소스 구조). 모든 작업의 기반입니다." },
       { label: "Plan", sub: "plan + loop", path: ".reap/plan/ + .reap/life/loops/", desc: "제품을 만들기 위한 모든 생각입니다. plan 문서는 리포 밖에 있어도 되며, loop가 그것을 다듬습니다." },
       { label: "Vision", sub: "milestone + memory", path: ".reap/vision/", desc: "하려는 것입니다. loop에서 잘라낸 milestone과 쌓인 교훈이 여기 있습니다." },
-      { label: "Life", sub: "generation + backlog", path: ".reap/life/", desc: "지금 살아 있는 것입니다. 진행 중이거나 아직 참고할 값이 있는 세대와 이월 항목이 여기 있습니다." },
-      { label: "Archive", sub: "닫힌 milestone, generation, loop", path: ".reap/archive/", desc: "더는 참고하지 않는 것입니다. milestone이 닫힐 때 cleanup skill이 여기로 내립니다." },
+      { label: "Life", sub: "generation + backlog + loop", path: ".reap/life/", desc: "지금 열려 있는 것입니다. 진행 중인 세대·loop와 아직 소비되지 않은 이월 항목이 여기 있습니다." },
+      { label: "Archive", sub: "닫힌 milestone, generation, loop, backlog", path: ".reap/archive/", desc: "닫힌 것입니다. 세대·loop·이월 항목은 닫히거나 소비되는 순간 여기로 옮겨집니다." },
       { label: "Civilization", sub: "소스 코드", path: ".reap/ 밖", desc: "generation이 진화시키는 대상입니다. 교훈이 다시 Knowledge로 피드백됩니다." },
     ],
     projectStructureTitle: "프로젝트 구조",
@@ -835,11 +832,11 @@ export const ko: Translations = {
     │           ├── milestone.md
     │           ├── handoff.md
     │           └── tasks/
-    ├── life/                      # 지금 살아 있는 것
+    ├── life/                      # 지금 열려 있는 것
     │   ├── generations/
     │   ├── backlog/
     │   └── loops/
-    ├── archive/                   # 더는 참고하지 않는 것
+    ├── archive/                   # 닫힌 것
     │   ├── generations/ · milestones/ · backlog/ · loops/ · idea/
     ├── genome/
     │   ├── application.md          # 제품 정체성, 아키텍처
@@ -905,7 +902,7 @@ export const ko: Translations = {
     tableHeaders: ["v0.17", "v0.18"],
     table: [
       ["5단계 lifecycle", "evolve·complete 판단"],
-      ["/reap.* 19종", "/reap: skill 11종"],
+      ["/reap.* 19종", "/reap: skill 10종"],
       [".reap/ 단일 상태·lineage", "3단 저장소 vision·life·archive"],
       ["current.yml", "세션 바인딩"],
       ["memory 3단", "lessons·idea"],
@@ -923,7 +920,7 @@ export const ko: Translations = {
       ["reap-evaluate evaluator agent", "complete skill의 독립 검증 절"],
       ["status·config·check-version·uninstall", "ctx 상태 줄·doctor·config 직접 편집·플러그인 제거"],
       ["update·migration 안내 레이어·lastMigratedVersion", "migrate skill 1회 + 이후 doctor·init --check"],
-      ["fix --check·clean·destroy", "doctor·cleanup skill·rm -rf .reap + 플러그인 제거"],
+      ["fix --check·clean·destroy", "doctor·rm -rf .reap + 플러그인 제거"],
       ["install-skills·load-context·dump-state, opencode/codex adapter", "플러그인 설치·ctx --hook"],
       ["/reap.knowledge·/reap.sync·/reap.refreshKnowledge", "init skill + complete의 summary 갱신 절 + genome 직접 편집"],
       ["/reap.help 16주제·reap help 다국어", "help skill(상태·skill 지도·다음 행동) + 문서 사이트"],
@@ -1032,7 +1029,7 @@ export const ko: Translations = {
     commitRuleCode: `git status --porcelain        # 비어 있어야 한다
 git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
     fitnessTitle: "milestone이 끝나면 사람의 fitness",
-    fitnessDesc: "generation마다가 아니라 milestone이 끝날 때 사람이 자연어로 fitness를 평가합니다. 정량 지표는 두지 않습니다 — 매 세대 사람이 막아서는 마찰이 자율성과 충돌하기 때문입니다. fitness가 확인되면 cleanup이 참고 가치가 다한 세대를 archive로 내리고, milestone 디렉토리가 닫힙니다.",
+    fitnessDesc: "generation마다가 아니라 milestone이 끝날 때 사람이 자연어로 fitness를 평가합니다. 정량 지표는 두지 않습니다 — 매 세대 사람이 막아서는 마찰이 자율성과 충돌하기 때문입니다. fitness가 확인되면 milestone 디렉토리가 archive로 옮겨집니다 — 세대들은 각자 닫힐 때 이미 거기 가 있습니다.",
   },
 
   twoAxesPage: {
@@ -1076,7 +1073,7 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
     title: "저장 구조",
     breadcrumb: "핵심 개념",
     description: "vision·life·archive 3단을 가르는 것은 시간이고, plan·genome·environment·idea는 그 밖에 있습니다.",
-    intro: "저장 구조를 나누는 기준은 유형이 아니라 시간입니다. 무엇을 하려는지, 지금 무엇이 살아 있는지, 더는 참고하지 않는 것은 무엇인지 — 이 세 시점이 vision·life·archive를 가릅니다.",
+    intro: "저장 구조를 나누는 기준은 유형이 아니라 시간입니다. 무엇을 하려는지, 지금 무엇이 열려 있는지, 무엇이 닫혔는지 — 이 세 시점이 vision·life·archive를 가릅니다.",
     treeTitle: "구조",
     tree: `.reap/
   config.yml                 언어, agentClient
@@ -1094,14 +1091,14 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
         handoff.md
         tasks/
           4-concepts-plan.md
-  life/                      지금 살아 있는 것
+  life/                      지금 열려 있는 것
     generations/
       gen-0097-exec-site-concepts-plan.md
     backlog/
       bk-a4d829-migrate-판정을-스크립트로…
     loops/
       loop-0004-plan-v018-release.md
-  archive/                   더는 참고하지 않는 것
+  archive/                   닫힌 것
     generations/
       gen-0092-exec-final-recheck.md
     milestones/
@@ -1133,8 +1130,8 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
     tierHeaders: ["단계", "뜻"],
     tiers: [
       ["vision/", "하려는 것 — 쌓인 교훈(memory/)과 잘라낸 실행 단위(milestones/)"],
-      ["life/", "지금 살아 있는 것 — 아직 참고할 값이 있는 generation·backlog·loop. 닫힌 것도 참고 가치가 남아 있으면 여기 있습니다"],
-      ["archive/", "더는 참고하지 않는 것 — milestone이 닫힐 때 cleanup이 골라 여기로 내립니다"],
+      ["life/", "지금 열려 있는 것 — 열린 generation·loop와 소비되지 않은 backlog 항목. 닫히거나 소비되는 순간 archive로 옮겨집니다"],
+      ["archive/", "닫힌 것 — mark가 닫거나 소비하는 순간 여기로 옮깁니다. 기록은 id로 언제든 찾습니다"],
     ],
     outsideTitle: "3단 밖에 있는 것들",
     outsideDesc: "plan/·genome/·environment/·idea/는 vision·life·archive 어디에도 속하지 않고 최상위에 나란히 섭니다. plan source는 리포 밖을 가리키는 등록부라 '하려는 것 / 사는 것 / 끝난 것'이라는 시간축에 얹히지 않습니다 — 등록된 소스는 그냥 거기 있습니다. genome은 규범, environment는 서술, idea는 아직 단단하지 않은 지식이라 같은 이유로 시간축 밖입니다. loop만은 예외로 life/loops/에 있습니다 — loop는 열리고 닫히고 archive로 가므로 시간축에 얹히기 때문입니다.",
@@ -1177,7 +1174,7 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
     closeCode: `reap mark loop <loop-id> --closed [--milestone <ms-id>]...`,
     closeDesc: "plan·design·uiux는 plan source에 쓰고, 실행할 것이 있으면 milestone까지 잘라야 닫힙니다. idea는 idea/research/에 남기거나 다른 유형의 loop로 졸업하면 닫힙니다. 이 loop가 낳은 milestone의 id를 --milestone에 적습니다 — milestone 쪽 from도 이 loop를 가리켜야 하고, carve-milestone이 --from <loop-id>로 씁니다.",
     stayOpenTitle: "열린 채 두는 것이 정상입니다",
-    stayOpenDesc: "아직 자리를 못 찾았으면 다음 세션이 Question과 Dialogue를 읽고 잇습니다. 방향 자체가 죽었을 때만 --aborted로 지우고, 접은 이유는 idea/research/로 보냅니다 — 지워진 기록은 아무도 못 읽습니다. loop는 세션에 바인딩되지 않고 여럿이 나란히 열립니다. 닫힌 loop는 life/loops/에 남고, 방금 닫힌 것이 가장 자주 읽힙니다 — 그 milestone을 실행하는 세대가 Dialogue와 Dead Ends를 봅니다. 닫힌 것이 10개를 넘으면 오래된 것부터 archive/loops/로 내려가고, 이것은 판단이 아니라 개수라 mark loop --closed가 닫는 김에 합니다.",
+    stayOpenDesc: "아직 자리를 못 찾았으면 다음 세션이 Question과 Dialogue를 읽고 잇습니다. 방향 자체가 죽었을 때만 --aborted로 지우고, 접은 이유는 idea/research/로 보냅니다 — 지워진 기록은 아무도 못 읽습니다. loop는 세션에 바인딩되지 않고 여럿이 나란히 열립니다. 닫힌 loop는 archive/loops/로 가고, 그것이 낳은 milestone의 from이 가리키는 id로 언제든 찾습니다.",
     exampleTitle: "실물",
     exampleDesc: "인증을 붙이자는 loop를 열고, 로그인 붙이기 milestone을 잘라 닫은 예입니다.",
     exampleCode: `$ reap make loop --type plan --title "인증 붙이기"
@@ -1324,8 +1321,7 @@ status: open
     closeDesc: "스스로 닫지 않습니다. 종료 조건이 충족된 것 같으면 사람에게 알리고, 자르는 시점에 적어 둔 질문으로 fitness를 묻습니다. 정량 지표가 없으므로 사람의 자연어 평가가 유일한 fitness 신호입니다. 순서가 고정돼 있습니다.",
     closeSteps: [
       { title: "1. fitness를 받아 milestone.md에 적습니다", desc: "답만이 아니라 어떻게 읽었는지도 적습니다 — 유보된 답('아직 모른다')은 idea/research/로 보내 다음 milestone이 다시 묻게 합니다" },
-      { title: "2. cleanup을 부릅니다", desc: "mark milestone --closed는 milestone 디렉토리를 통째로 옮기므로, 순서가 바뀌면 cleanup이 남긴 기록을 다음 세션이 못 찾습니다" },
-      { title: "3. reap mark milestone <ms-id> --closed", desc: "archive/milestones/로 옮겨지고 milestone.md·handoff.md·tasks/가 함께 보존됩니다. 세대는 따라가지 않습니다 — cleanup이 참고 가치를 보고 이미 따로 내린 뒤입니다" },
+      { title: "2. reap mark milestone <ms-id> --closed", desc: "archive/milestones/로 옮겨지고 milestone.md·handoff.md·tasks/가 함께 보존됩니다. 세대는 따라가지 않습니다 — 각자 닫힐 때 이미 archive/generations/에 가 있습니다" },
     ],
     exampleTitle: "실물",
     exampleDesc: "로그인 붙이기 milestone을 자르고, 한 세대로 실현한 뒤 닫은 예입니다.",
@@ -1393,7 +1389,7 @@ reap make generation --fix  --title "<제목>" [--slug <s>]`,
     commitDesc: "게이트가 아닙니다 — mark는 검사하지 않고 complete skill이 확인합니다. 어긋난 기록은 doctor가 사후에 잡습니다.",
     closeTitle: "닫습니다",
     closeCode: "reap mark generation <gen-id> --closed | --aborted | --archived",
-    closeDesc: "--closed는 closedAt과 현재 HEAD를 endCommit에 찍습니다. --aborted는 기록을 지웁니다. --archived는 archive/generations/로 옮길 뿐 status는 건드리지 않습니다 — 그 판단은 cleanup의 몫입니다.",
+    closeDesc: "--closed는 closedAt과 현재 HEAD를 endCommit에 찍고 기록을 archive/generations/로 옮깁니다. --aborted는 기록을 지웁니다. --archived는 옛 규칙으로 life에 남은 기록을 옮기기만 합니다.",
     exampleTitle: "실물",
     exampleDesc: "backlog 항목 하나를 근거로 세대를 열고 실현한 뒤 닫은 예입니다.",
     exampleCode: `$ reap make generation --backlog bk-1eb33a --title "로그인 폼 에러 메시지 다국어화"
@@ -1471,7 +1467,7 @@ $ reap mark generation gen-0003-exec --closed
     consumeCode: `reap mark backlog <bk-id> --consumed [--by <gen-id>]`,
     consumeDesc: "소비 표시만 하고 위치는 그대로입니다 — 상태와 위치는 다른 질문입니다. 이미 consumed인 항목은 근거가 되지 못합니다. 소비가 불완전했다면 무엇이 남았는지 담은 새 항목을 만듭니다.",
     lifeTitle: "life에 남는 이유와 archive",
-    lifeDesc: "life/backlog/는 열린 항목만 두는 자리가 아니라 지금 참고할 값이 있는 항목의 작업 세트입니다. consumed라도 무엇을 물었고 답이 어떻게 뒤집혔는지가 읽을 값을 가질 수 있어, archive로 내리는 것은 판단입니다. 그 판단은 milestone을 닫을 때 cleanup이 하고, reap mark backlog <bk-id> --archived는 옮기기만 합니다.",
+    lifeDesc: "life/backlog/에는 열린 항목만 있습니다. reap mark backlog <bk-id> --consumed가 소비 표시와 함께 archive/backlog/로 옮기고, 항목이 물었던 것과 답은 그것을 소비한 세대의 기록이 갖습니다. 옮겨진 항목도 id로 찾을 수 있습니다.",
     overlapTitle: "두 항목이 겹칠 때",
     overlapDesc: "원칙은 항목 하나에 경계 하나지만, 두 항목이 같은 명령이나 같은 파일을 다뤄야 한다면 나눠서 소비하는 순간 절반만 끝난 상태가 남습니다. 그럴 때는 하나에만 --backlog를 주고 나머지는 세대 기록의 Intent에 적습니다. 우연히 겹치는 무관한 항목을 편의로 묶는 것과는 다릅니다.",
     exampleTitle: "실물",
@@ -1488,7 +1484,7 @@ generation gen-0003-exec
   closingMilestonePage: {
     title: "Milestone 닫기와 Fitness",
     breadcrumb: "Execution 축",
-    description: "종료 조건을 사람이 판정하는 절차, fitness 질문, cleanup과 mark의 순서.",
+    description: "종료 조건을 사람이 판정하는 절차, fitness 질문, 그리고 mark.",
     intro: "milestone을 자를 때 종료 조건을 적어 두더라도, 그것이 충족됐는지는 도구가 판정하지 않습니다. REAP는 milestone 본문에 고정 제목을 두지 않으므로 검사할 수단이 아예 없고, 그래서 판정은 사람의 몫입니다.",
     judgeTitle: "종료 조건 판정은 사람",
     judgeDesc: "정량 지표는 없습니다 — 만들어내는 순간 그 지표를 맞추는 일이 목적을 대신하게 됩니다. exit criteria가 사람이 판정할 수 있는 상태로 쓰여 있다면, 남는 일은 그 상태가 실제로 됐는지 사람에게 확인받는 것뿐입니다.",
@@ -1498,14 +1494,10 @@ generation gen-0003-exec
     orderDesc: "고정돼 있고, 뒤바꾸면 다음 세션이 기록을 잃습니다.",
     orderSteps: [
       { title: "1. fitness를 받아 milestone.md에 적습니다", desc: "답만이 아니라 어떻게 읽었는지도 적습니다. 유보된 답은 idea/research/로 보내 다음 milestone이 다시 묻게 합니다" },
-      { title: "2. cleanup을 부릅니다", desc: "life/generations/를 훑어 참고 가치가 다한 세대를 archive로 내리고, 옮긴 목록을 handoff.md에 남깁니다" },
-      { title: "3. reap mark milestone <ms-id> --closed", desc: "milestone 디렉토리 전체를 archive/milestones/로 옮깁니다. handoff.md도 함께 옮겨지므로, cleanup이 먼저 돌아야 그 기록이 살아서 archive로 갑니다" },
+      { title: "2. reap mark milestone <ms-id> --closed", desc: "milestone 디렉토리 전체(milestone.md·handoff.md·tasks/)를 archive/milestones/로 옮깁니다. 세대는 따라가지 않습니다 — 각자 닫힐 때 이미 archive/generations/에 가 있습니다" },
     ],
-    cleanupTitle: "cleanup의 기준 — 참고 가치",
-    cleanupDesc: "life/generations/에 남길지 archive로 내릴지를 가르는 것은 milestone 소속이 아니라 '앞으로 이것을 볼 일이 있는가' 하나입니다. 열린 세대는 옮기지 않습니다 — 상태 줄에서 사라지면 세션이 죽은 것처럼 보여 evolve가 그 위에 새 세대를 엽니다.",
-    cleanupTestNote: "애매하면 남깁니다. 다만 '남긴다'가 이유를 지어내도 된다는 뜻은 아닙니다 — 어느 세션이 무엇을 하려고 이 파일을 다시 열지를 한 문장으로 쓸 수 없다면, 그건 애매한 게 아니라 옮길 차례입니다.",
     handoffTitle: "handoff에 남길 것",
-    handoffDesc: "cleanup이 옮긴 세대와 backlog 목록, 그리고 판단이 갈렸던 것 — 참고 가치가 있어 보였는데 남긴 이유. 이것들이 handoff.md에 쓰여야 milestone이 archive로 옮겨진 뒤에도 다음 세션이 무엇이 어디로 갔는지 압니다.",
+    handoffDesc: "이 milestone이 정한 것 가운데 아직 어디에도 반영되지 않은 것, 그리고 다음 세션이 이어받을 것. handoff.md는 milestone과 함께 archive로 가므로, 반영할 것은 닫기 전에 plan이나 genome에 옮겨 둡니다.",
     lessonsTitle: "lessons로 올릴 것",
     lessonsDesc: "milestone 하나를 넘어 프로젝트 전체가 반복해서 겪은 것이라면 vision/memory/lessons.md로 올립니다. 한 번 겪은 것은 관찰이고 여러 번 겪은 것은 규칙입니다 — 반복 확인된 교훈은 다시 genome/evolution.md의 규칙으로 졸업하고 lessons에서는 지웁니다.",
     exampleTitle: "실물",
@@ -1701,10 +1693,10 @@ workspaceId: ba44307f94a6`,
   },
 
   skills: {
-    title: "skill 11종",
+    title: "skill 10종",
     breadcrumb: "레퍼런스",
-    description: "agent가 REAP를 다루는 통로. 플러그인이 배포하는 skill 열한 종.",
-    intro: "agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포한다. 여덟은 사람이 / 메뉴에서 부를 수 있고, 셋은 작업 흐름 안에서 agent만 부른다. 각 skill의 전문은 plugin/skills/<이름>/SKILL.md에 있다. 아래는 언제·무엇을·부르지 않는 경우만 요약한다.",
+    description: "agent가 REAP를 다루는 통로. 플러그인이 배포하는 skill 열 종.",
+    intro: "agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포한다. 여덟은 사람이 / 메뉴에서 부를 수 있고, 둘은 작업 흐름 안에서 agent만 부른다. 각 skill의 전문은 plugin/skills/<이름>/SKILL.md에 있다. 아래는 언제·무엇을·부르지 않는 경우만 요약한다.",
     tableHeaders: ["skill", "언제", "무엇을"],
     table: [
       ["init", "프로젝트당 한 번, 맨 처음 — 정본 지식을 세운다", "reap init 뒤 plan 문서를 등록하고 environment·genome을 채운 뒤 첫 milestone으로 넘긴다"],
@@ -1721,7 +1713,6 @@ workspaceId: ba44307f94a6`,
     agentTable: [
       ["complete", "세대를 닫을 때", "커밋 규칙을 확인하고 기록과 handoff.md를 정리해 세대를 닫는다"],
       ["carve-milestone", "plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때", "plan을 실제 흔적에 대조해 경계·종료 조건·task를 적어 milestone으로 자르거나, fitness 뒤 닫는다"],
-      ["cleanup", "사람이 fitness로 milestone을 닫기로 한 직후", "참조 가치를 잃은 세대를 life에서 archive로 내린다"],
     ],
     tableNote: "",
     whenLabel: "언제 —",
@@ -1785,14 +1776,8 @@ workspaceId: ba44307f94a6`,
       {
         name: "carve-milestone",
         when: "loop 안에서 plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때.",
-        what: "자르려는 전제를 실제 흔적에 대조한 뒤 경계·종료 조건·범위 밖과 task를 적어 자르거나, fitness·cleanup·mark 순서로 닫는다.",
+        what: "자르려는 전제를 실제 흔적에 대조한 뒤 경계·종료 조건·범위 밖과 task를 적어 자르거나, fitness를 받아 적고 mark로 닫는다.",
         notCalled: "backlog 항목 하나로 충분하면(경계가 두 곳에 적힌다), 무엇을 만들지 아직 안 섰으면(그건 interview·loop의 일), 한 세대로 끝날 일이면 backlog 항목으로 충분하다.",
-      },
-      {
-        name: "cleanup",
-        when: "사람이 fitness로 milestone을 닫기로 확인한 직후, mark milestone --closed를 부르기 전.",
-        what: "life/generations/를 훑어 참고 가치가 다한 세대를 archive/generations/로 내린다.",
-        notCalled: "열린 세대는 옮기지 않는다. 애매하면 남긴다 — 남길 이유를 억지로 만들지 않는다.",
       },
     ],
   },
@@ -2023,7 +2008,7 @@ reap setup              # 플러그인 마켓플레이스 등록과 설치
       ["reap-evaluate evaluator agent", "세대를 닫기 전 독립 검증 — complete skill의 절로"],
       ["status·config·check-version·uninstall 명령", "ctx 상태 줄·doctor·config 직접 편집·플러그인 제거로 대체"],
       ["update·migration 안내 레이어", "migrate skill이 0.17→0.18 migration을 한 번만 처리하고, 그 뒤는 doctor·init --check가 맡는다"],
-      ["fix --check·clean·destroy", "doctor·cleanup skill·rm -rf .reap + 플러그인 제거로 대체"],
+      ["fix --check·clean·destroy", "doctor·rm -rf .reap + 플러그인 제거로 대체"],
       ["install-skills·load-context·dump-state, opencode/codex adapter", "플러그인 설치·ctx --hook으로 대체, 나머지는 없음"],
       ["/reap.help 16주제, 다국어 reap help", "help skill로 — 상태 줄·skill 지도·다음 행동 제안"],
       ["vision/goals.md·lineage/·3단 memory·current.yml", "plan 등록·lessons.md 선별·.session으로 대체. 승계되지 않는 것도 있다"],
@@ -2040,7 +2025,7 @@ reap setup              # 플러그인 마켓플레이스 등록과 설치
     changedTitle: "변경",
     changed: [
       "두 산출물로 나뉜다 — npm CLI @c-d-cc/reap와 Claude Code 플러그인. 플러그인은 reap setup이 마켓플레이스를 통해 설치하고, 갱신은 마켓플레이스가 맡는다",
-      "저장소가 3단이다 — vision/(하려는 것) · life/(지금 살아 있는 것) · archive/(더는 참고하지 않는 것)",
+      "저장소가 3단이다 — vision/(하려는 것) · life/(지금 열려 있는 것) · archive/(닫힌 것)",
       "작업이 세 단위로 갈린다 — loop(새 의도를 만든다) · milestone(실행 가능한 단위로 자른 계획) · generation(exec/fix — 실제로 코드를 진화시킨다)",
       "reap doctor가 확정적으로 검사 가능한 것만 검사해 보고한다. 고치지 않는다",
       "코드 인덱스(reap index)는 계속된다 — 15개 언어, 설치할 것 없음, 백그라운드 프로세스 없음",

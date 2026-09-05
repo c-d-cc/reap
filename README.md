@@ -57,7 +57,7 @@ Full comparison: [docs/reap-plan/reap_v_0_18_release/01-gap.md](docs/reap-plan/r
 
 ## Command surface
 
-Skills are how an agent works with REAP. The plugin ships 11 — eight you can call from the `/` menu, three only the agent calls (hidden from the menu with `user-invocable: false`):
+Skills are how an agent works with REAP. The plugin ships 10 — eight you can call from the `/` menu, two only the agent calls (hidden from the menu with `user-invocable: false`):
 
 | skill | who calls it | when |
 |---|---|---|
@@ -68,7 +68,6 @@ Skills are how an agent works with REAP. The plugin ships 11 — eight you can c
 | [`carve-milestone`](plugin/skills/carve-milestone/SKILL.md) | agent | To cut a plan into an executable milestone, and to close one |
 | [`interview`](plugin/skills/interview/SKILL.md) | you | When intent is ambiguous enough that a person has to decide |
 | [`orchestrate`](plugin/skills/orchestrate/SKILL.md) | you | When two or more sessions work on the same project at once |
-| [`cleanup`](plugin/skills/cleanup/SKILL.md) | agent | Right after a person decides to close a milestone on fitness |
 | [`migrate`](plugin/skills/migrate/SKILL.md) | you | To move v0.17 data into the v0.18 structure |
 | [`report-issue`](plugin/skills/report-issue/SKILL.md) | you | When you hit a defect or missing feature in REAP itself |
 | [`help`](plugin/skills/help/SKILL.md) | you | Where are we, what can I call, what next — re-shows the status line and suggests one action |

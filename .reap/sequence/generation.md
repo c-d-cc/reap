@@ -112,3 +112,4 @@
 | gen-0108-exec | milestone 과잉 분할을 제품에서 막는다 — evolve·carve-milestone·loop 본문, doctor 참고 | 2026-09-05 |
 | gen-0109-exec | CLI — closed·consumed가 곧 archive 이동, loop overflow 삭제 | 2026-09-05 |
 | gen-0110-exec | skill·spec·map.md — cleanup 은퇴, 종료 순서 둘, life는 열린 것만 | 2026-09-05 |
+| gen-0111-exec | 문서·사이트가 '닫히면 바로 archive'를 말한다; 이 리포 life의 옛 잔여 정리 | 2026-09-05 |

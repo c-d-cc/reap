@@ -68,7 +68,6 @@ agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포하는 1
 | [`carve-milestone`](plugin/skills/carve-milestone/SKILL.md) | agent | plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때 |
 | [`interview`](plugin/skills/interview/SKILL.md) | 사람 | 의도가 모호해 사람이 결정해야 할 때 |
 | [`orchestrate`](plugin/skills/orchestrate/SKILL.md) | 사람 | 두 세션 이상이 같은 프로젝트에서 동시에 작업할 때 |
-| [`cleanup`](plugin/skills/cleanup/SKILL.md) | agent | 사람이 fitness로 milestone을 닫기로 한 직후 |
 | [`migrate`](plugin/skills/migrate/SKILL.md) | 사람 | v0.17 데이터를 v0.18 구조로 옮길 때 |
 | [`report-issue`](plugin/skills/report-issue/SKILL.md) | 사람 | REAP 자체의 결함이나 빠진 기능을 만났을 때 |
 | [`help`](plugin/skills/help/SKILL.md) | 사람 | 지금 어디인지, 무엇을 부를 수 있는지, 다음에 뭘 할지 — 상태 줄을 다시 보여 주고 행동 하나를 제안한다 |
