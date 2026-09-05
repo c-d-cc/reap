@@ -506,7 +506,7 @@ export interface Translations {
     description: string;
     intro: string;
     tableHeaders: string[];
-    table: [string, string, string][];
+    table: [string, string, string, string][];
     tableNote: string;
     whenLabel: string;
     whatLabel: string;
@@ -1655,18 +1655,18 @@ workspaceId: ba44307f94a6`,
     breadcrumb: "레퍼런스",
     description: "agent가 REAP를 다루는 통로. 플러그인이 배포하는 skill 열 종.",
     intro: "agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포한다. 일곱은 사람이 / 메뉴에서 부를 수 있고, 셋(complete·carve-milestone·cleanup)은 작업 흐름 안에서 agent만 부른다 — 메뉴에는 나오지 않는다. 각 skill의 전문은 plugin/skills/<이름>/SKILL.md에 있다. 아래는 누가·언제·무엇을·부르지 않는 경우만 요약한다.",
-    tableHeaders: ["skill", "누가", "언제"],
+    tableHeaders: ["skill", "누가", "언제", "무엇을"],
     table: [
-      ["init", "사람", "프로젝트당 한 번, 맨 처음 — 정본 지식을 세운다"],
-      ["evolve", "사람", "세대를 열 때 — loop·exec·fix 중 무엇인지 정한다"],
-      ["complete", "agent", "세대를 닫을 때"],
-      ["loop", "사람", "새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것"],
-      ["carve-milestone", "agent", "plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때"],
-      ["interview", "사람", "의도가 모호해 사람이 결정해야 할 때"],
-      ["orchestrate", "사람", "두 세션 이상이 같은 프로젝트에서 동시에 작업할 때"],
-      ["cleanup", "agent", "사람이 fitness로 milestone을 닫기로 한 직후"],
-      ["migrate", "사람", "v0.17 데이터를 v0.18 구조로 옮길 때"],
-      ["report-issue", "사람", "REAP 자체의 결함이나 빠진 기능을 만났을 때"],
+      ["init", "사람", "프로젝트당 한 번, 맨 처음 — 정본 지식을 세운다", "reap init 뒤 plan 문서를 등록하고 environment·genome을 채운 뒤 첫 milestone으로 넘긴다"],
+      ["evolve", "사람", "세대를 열 때 — loop·exec·fix 중 무엇인지 정한다", "상태 줄과 handoff를 읽고 loop·exec·fix 중 무엇인지 정해 세대를 연다"],
+      ["complete", "agent", "세대를 닫을 때", "커밋 규칙을 확인하고 기록과 handoff.md를 정리해 세대를 닫는다"],
+      ["loop", "사람", "새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것", "loop를 열어 plan에 쓰고, 자를 것이 정해지면 carve-milestone으로 넘긴다"],
+      ["carve-milestone", "agent", "plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때", "plan을 실제 흔적에 대조해 경계·종료 조건·task를 적어 milestone으로 자르거나, fitness 뒤 닫는다"],
+      ["interview", "사람", "의도가 모호해 사람이 결정해야 할 때", "코드·spec으로 답이 나오는 질문을 걸러낸 뒤 사람에게 한 번에 하나씩 묻는다"],
+      ["orchestrate", "사람", "두 세션 이상이 같은 프로젝트에서 동시에 작업할 때", "worktree로 역할을 가르고 claim·barrier·메시지로 세션들을 조율한다"],
+      ["cleanup", "agent", "사람이 fitness로 milestone을 닫기로 한 직후", "참조 가치를 잃은 세대를 life에서 archive로 내린다"],
+      ["migrate", "사람", "v0.17 데이터를 v0.18 구조로 옮길 때", "원본을 .reap-v0_17/로 격리한 뒤 8단계로 옮기고 검증해 기록을 남긴다"],
+      ["report-issue", "사람", "REAP 자체의 결함이나 빠진 기능을 만났을 때", "재현·환경·기대를 갖춘 issue를 c-d-cc/reap에 올린다"],
     ],
     tableNote: "",
     whenLabel: "언제 —",

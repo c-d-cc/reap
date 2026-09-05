@@ -20,10 +20,12 @@ export default function SkillsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-border">
-              {s.table.map(([name, when]) => (
+              {s.table.map(([name, who, when, what]) => (
                 <tr key={name}>
                   <td className="px-4 py-2 font-mono text-xs text-primary whitespace-nowrap align-top">{name}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground">{when}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground whitespace-nowrap align-top">{who}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground align-top">{when}</td>
+                  <td className="px-4 py-2 text-xs text-muted-foreground align-top">{what}</td>
                 </tr>
               ))}
             </tbody>
