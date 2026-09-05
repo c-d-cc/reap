@@ -2004,7 +2004,7 @@ reap setup              # 플러그인 마켓플레이스 등록과 설치
 ## 참고 — 사람이 볼 것
 - [크기 안내선] .reap/genome/evolution.md 8.1KB > 6.0KB — 매 세션 주입된다`,
     backlogJudgeTitle: "backlog 항목의 판단 기준",
-    backlogJudgeDesc: "옛 backlog 항목의 status: pending을 그대로 믿고 재발급하면 이미 끝난 일이 다시 열린다. selfview 실물에서는 8건 전부가 실제로는 이미 소비돼 있었다 — lineage(옛 generation 기록)와 현재 코드를 대조해 이미 해소된 항목은 재발급하지 않는다. midterm.md 같은 옛 메모가 pending이라고 적어 놓았어도 그 메모 자체가 낡았을 수 있다.",
+    backlogJudgeDesc: "옛 backlog 항목의 status: pending을 그대로 믿고 재발급하면 이미 끝난 일이 다시 열린다. selfview에서는 8건 전부가 실제로는 이미 소비돼 있었다 — lineage(옛 generation 기록)와 현재 코드를 대조해 이미 해소된 항목은 재발급하지 않는다. midterm.md 같은 옛 메모가 pending이라고 적어 놓았어도 그 메모 자체가 낡았을 수 있다.",
     designLinksTitle: "design 문서군의 링크 처리",
     designLinksDesc: "vision/design/team-mode/처럼 문서 여러 개가 상대 링크로 서로를 참조하는 디렉토리는 문서 단위로 idea를 발급하면 그 링크가 깨진다. 발급한 뒤 상호 링크를 새 idea 파일명으로 고쳐 쓴다 — doctor의 깨진 상대 링크 검사가 손대지 않고 남은 것을 잡아낸다.",
     lostTitle: "옮겨지지 않는 것",
