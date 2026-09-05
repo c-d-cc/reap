@@ -627,18 +627,16 @@ export interface Translations {
     intro: string;
     updateCode: string;
     handoffDesc: string;
-    stepsTitle: string;
-    steps: { title: string; desc: string }[];
+    processTitle: string;
+    processDesc1: string;
+    processDesc2: string;
+    processDesc3: string;
     preservedTitle: string;
     preservedDesc: string;
     rollbackCode: string;
-    recordExampleTitle: string;
-    recordExampleDesc: string;
-    recordExampleCode: string;
-    backlogJudgeTitle: string;
-    backlogJudgeDesc: string;
-    designLinksTitle: string;
-    designLinksDesc: string;
+    afterTitle: string;
+    afterDesc1: string;
+    afterDesc2: string;
     lostTitle: string;
     lostItems: [string, string][];
   };
@@ -1968,45 +1966,22 @@ reap orch status [--topic <t>]`,
   migration: {
     title: "v0.17에서 Migration",
     breadcrumb: "기타",
-    description: "8단계 migration. 원본은 .reap-v0_17/에 그대로 보존된다.",
-    intro: "v0.17.7 이하에서는 세션 시작 시 버전 검사가 0.18을 보고 자동 갱신 대신 설치 명령을 안내한다. 거기서부터 사람이 손대는 지점은 셋이다.",
+    description: "v0.17 프로젝트를 v0.18 구조로 옮깁니다. 원본은 .reap-v0_17/에 그대로 보존됩니다.",
+    intro: "v0.17.7 이하에서는 세션 시작 시 버전 검사가 0.18을 보고 자동 갱신 대신 설치 명령을 안내합니다. 거기서부터 사람이 할 일은 셋입니다.",
     updateCode: `npm i -g @c-d-cc/reap   # 안내받은 명령 — v0.18 CLI
 reap setup              # 플러그인 마켓플레이스 등록과 설치
 /reap:migrate           # 새 Claude Code 세션에서, 프로젝트마다`,
-    handoffDesc: "옛 세션 훅은 이제 v0.18 CLI를 부르게 되는데, CLI가 같은 세 단계를 안내로 답한다. 그 뒤는 migrate skill이 여덟 단계로 진행한다 — 각 단계 시작마다 \"단계 N/8: <이름>\"이 사용자에게 보인다.",
-    stepsTitle: "8단계",
-    steps: [
-      { title: "판정", desc: "스크립트가 v0.17/v0.18/none/mixed/unknown 중 무엇인지 표지 파일로 가른다. 아직 아무것도 옮기기 전이다" },
-      { title: "사전 차단", desc: "uncommitted 변경이나 열린 generation이 있으면 여기서 멈춘다" },
-      { title: "고지와 동의", desc: "단계별 분량 실측, 토큰 사용량이 클 수 있다는 고지, 비파괴 약속을 보여주고 명시적 동의를 받는다" },
-      { title: "격리", desc: ".reap를 .reap-v0_17로 이름만 바꾼다" },
-      { title: "새 구조", desc: "reap init으로 새 .reap/를 세우고, config.yml의 language·agentClient만 구 값을 이어받는다" },
-      { title: "Migration", desc: "subagent가 매핑 표(migration-map.md)를 따라 데이터를 옮긴다. 주 세션의 컨텍스트는 구 데이터로 채우지 않는다" },
-      { title: "검증", desc: "reap doctor가 결함 0이어야 다음으로 간다. .reap-v0_17/이 무손상인지도 확인한다" },
-      { title: "기록과 홈 정리 안내", desc: "archive/migration-v0_17.md에 기록을 남기고, 홈 디렉토리 정리 목록을 사람 동의 후에만 실행한다" },
-    ],
+    handoffDesc: "옛 세션 훅은 이제 v0.18 CLI를 부르게 되는데, CLI가 같은 세 단계를 안내로 답합니다. 그 뒤는 migrate skill이 진행하고, 사람은 동의를 묻는 지점에서만 답하면 됩니다.",
+    processTitle: "시작하면 일어나는 일",
+    processDesc1: "먼저 이 프로젝트가 정말 v0.17 구조인지 표지 파일로 판정하고, 커밋되지 않은 변경이나 열린 generation이 있으면 거기서 멈춥니다. 그다음 옮길 분량(memory·lineage·backlog·설계 문서의 수)과 토큰 사용량이 클 수 있다는 점, 원본을 건드리지 않는다는 약속을 보여 주고 명시적인 동의를 받습니다.",
+    processDesc2: "동의하면 원본 .reap/를 .reap-v0_17/로 이름만 바꿔 두고, 새 .reap/를 세운 뒤 subagent가 데이터를 옮깁니다. 언어 설정 같은 config 값은 이어받고, 옛 memory에서 교훈을 골라 lessons에, 진행 중이던 작업은 milestone과 backlog로, 기획 문서는 plan으로 등록합니다. 이 과정에서 agent가 알아서 판단하는 것이 몇 가지 있습니다 — 이미 끝난 backlog 항목은 다시 열지 않고, 서로를 링크하는 설계 문서군은 링크가 깨지지 않게 옮기고, genome에 남은 v0.17 절차 어휘는 v0.18 것으로 바꿉니다.",
+    processDesc3: "끝으로 doctor와 작업 상태 검사를 돌려 결함이 없고 다음 세션이 이어서 일할 수 있는 상태인지 확인한 뒤, 무엇을 옮겼고 무엇을 옮기지 않았는지를 archive/migration-v0_17.md에 남깁니다.",
     preservedTitle: "원본은 보존됩니다",
-    preservedDesc: "원본 비파괴가 불변식이다. 어느 단계도 구 데이터를 수정하지 않는다 — .reap-v0_17/로 자리만 옮겨 통째로 남는다. 되돌리기는 한 줄이다.",
+    preservedDesc: "원본 비파괴가 불변식입니다. 어느 단계도 구 데이터를 수정하지 않습니다 — .reap-v0_17/로 자리만 옮겨 통째로 남습니다. 되돌리기는 한 줄입니다.",
     rollbackCode: "rm -rf .reap && mv .reap-v0_17 .reap",
-    recordExampleTitle: "기록 파일 실례",
-    recordExampleDesc: "8/8이 남기는 archive/migration-v0_17.md는 옮긴 것·안 옮긴 것·필요한 갱신·검증(doctor 전문)을 담는다. selfview에서 실제로 migration한(2026-09-05) 기록 한 조각:",
-    recordExampleCode: `## 옮기지 않은 것
-
-**#3 backlog — 8건 전부 재발급하지 않음.** 재검토 결과 8건 모두 이미 해소된 상태였다:
-- admin-article-generate-share-safety-gates — gen-037 완료(제목 정확히 일치, fitnessFeedback 확인).
-  frontmatter는 status: pending으로 남아있었으나 갱신 안 된 흔적
-- team-mode-p0c-account-auth — frontmatter status: consumed, consumedBy: gen-047-be537d
-
-## 검증
-
-결함 0 · 참고 3
-
-## 참고 — 사람이 볼 것
-- [크기 안내선] .reap/genome/evolution.md 8.1KB > 6.0KB — 매 세션 주입된다`,
-    backlogJudgeTitle: "backlog 항목의 판단 기준",
-    backlogJudgeDesc: "옛 backlog 항목의 status: pending을 그대로 믿고 재발급하면 이미 끝난 일이 다시 열린다. selfview에서는 8건 전부가 실제로는 이미 소비돼 있었다 — lineage(옛 generation 기록)와 현재 코드를 대조해 이미 해소된 항목은 재발급하지 않는다. midterm.md 같은 옛 메모가 pending이라고 적어 놓았어도 그 메모 자체가 낡았을 수 있다.",
-    designLinksTitle: "design 문서군의 링크 처리",
-    designLinksDesc: "vision/design/team-mode/처럼 문서 여러 개가 상대 링크로 서로를 참조하는 디렉토리는 문서 단위로 idea를 발급하면 그 링크가 깨진다. 발급한 뒤 상호 링크를 새 idea 파일명으로 고쳐 쓴다 — doctor의 깨진 상대 링크 검사가 손대지 않고 남은 것을 잡아낸다.",
+    afterTitle: "끝나면 달라지는 것",
+    afterDesc1: "새 세션을 열면 상태 줄이 옛 작업을 이어서 보여 줍니다 — 진행 중이던 트랙이 focus milestone으로, 남은 일이 backlog로 와 있습니다. .reap-v0_17/을 지울지는 사람이 정하고, 그 판단은 backlog 항목으로 남아 있어 잊히지 않습니다.",
+    afterDesc2: "v0.17이 홈 디렉토리에 깔아 둔 옛 slash command와 agent, 세션 훅은 v0.18 설치가 지우지 않습니다. migrate가 마지막에 지울 목록을 보여 주고, 동의하면 그 목록만 지웁니다 — 사용자가 직접 둔 파일은 건드리지 않습니다.",
     lostTitle: "옮겨지지 않는 것",
     lostItems: [
       ["5단계 lifecycle과 그 흐름 명령", "run start/next/back/abort/early-close, /reap.* 7종. 흐름은 이제 evolve·complete skill의 판단이다"],
