@@ -23,7 +23,7 @@ export default function V018ChangePage() {
 
         <h2 className="text-base font-semibold text-foreground mb-2">{v.whyTitle}</h2>
         <p className="text-sm text-muted-foreground leading-relaxed mb-4">{v.whyIntro}</p>
-        <div className="space-y-4 mb-6">
+        <div className="space-y-4 mb-8">
           {v.why.map((item) => (
             <div key={item.title}>
               <h3 className="text-sm font-semibold text-foreground mb-1">{item.title}</h3>
@@ -31,10 +31,6 @@ export default function V018ChangePage() {
             </div>
           ))}
         </div>
-        <p className="text-xs text-muted-foreground mb-8">
-          {v.discussionNote}{" "}
-          <a href={v.discussionUrl} className="text-primary hover:underline" target="_blank" rel="noreferrer">{v.discussionLinkText}</a>
-        </p>
 
         <h2 className="text-base font-semibold text-foreground mb-2">{v.tableTitle}</h2>
         <p className="text-sm text-muted-foreground leading-relaxed mb-3">{v.tableDesc}</p>

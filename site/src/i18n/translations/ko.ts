@@ -102,9 +102,6 @@ export interface Translations {
     whyTitle: string;
     whyIntro: string;
     why: { title: string; body: string }[];
-    discussionNote: string;
-    discussionLinkText: string;
-    discussionUrl: string;
     tableTitle: string;
     tableDesc: string;
     tableHeaders: string[];
@@ -903,9 +900,6 @@ export const ko: Translations = {
         body: "loop는 새 의도를 만들고, exec generation은 그것을 실현하고, fix generation은 이미 있는 의도로 되돌립니다. exec는 반드시 milestone이나 backlog 항목이라는 근거를 갖습니다. 어떤 일인지 모호하면 interview가 사람에게 되묻고, 아직 확정되지 않은 것은 idea에 둡니다 — 추측으로 부풀리지 않도록.",
       },
     ],
-    discussionNote: "이 방향은 v0.18 개발 전에 공개적으로 논의했습니다.",
-    discussionLinkText: "Preparing v0.18 — GitHub Discussions #23",
-    discussionUrl: "https://github.com/c-d-cc/reap/discussions/23",
     tableTitle: "v0.17 → v0.18 대응",
     tableDesc: "여기서부터는 자잘한 대응입니다. 위의 이유를 알면 표는 따라옵니다.",
     tableHeaders: ["v0.17", "v0.18"],
