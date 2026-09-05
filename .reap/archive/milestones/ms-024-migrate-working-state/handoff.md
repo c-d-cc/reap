@@ -14,3 +14,7 @@
 ## 미결
 
 - milestone.md "끝나면 물어볼 것" 두 질문: `.reap-v0_17` 삭제 여부, 첫 evolve가 안 묻고 다음 task로 갔는가 — 둘 다 사람 답 대기
+
+## cleanup (닫을 때, 2026-09-05)
+
+archive로 내린 세대: gen-0100·0101·0102·0103 — 매핑·스크립트·검사가 전부 `plugin/skills/migrate/`에 반영됐고, 남은 판단(경계 사례의 plan 우선, invariants.md 참고 처리, 정리 시점 8/8)은 각 기록의 Dead Ends와 migration-map 본문에 있다. 열린 세대 없음.

@@ -3,9 +3,10 @@ id: ms-024
 slug: migrate-working-state
 title: "migrate 2차 — 작업 상태 복원: milestone·backlog·plan 재구성, genome·CLAUDE.md 갱신"
 from: loop-0004-plan
-status: open
+status: closed
 openedAt: 2026-09-04T15:59:41Z
 focus: true
+closedAt: 2026-09-05T01:04:47Z
 ---
 ## Background
 
@@ -34,3 +35,11 @@ selfview 실물 이주(2026-09-05)를 사람이 검수: "폴더·파일 구조�
 
 - 사람이 `.reap-v0_17`을 지우겠다고 했는가
 - 첫 세션의 evolve가 묻지 않고 milestone의 다음 task로 갔는가
+
+## Fitness (사람, 2026-09-05)
+
+"ms-024는 완료했어." — selfview 재이주 결과를 사람이 직접 검수하고 만족으로 판정. 이주 후 개정(issue #25·#30, 홈 정리 스크립트)까지 이 milestone에 실렸다.
+
+물어볼 것 두 질문의 읽기:
+- `.reap-v0_17`을 지우겠다고 했는가 — **답 대신 기제로**: 사람이 "이 판단을 물을 수 있게 migrate 완료 후 적어 두자"고 해서, 8/8이 focus milestone의 handoff `## 미결`과 backlog 항목으로 남기게 했다(다음 세대)
+- 첫 세션의 evolve가 묻지 않고 다음 task로 갔는가 — **아직 모름**. selfview에서 이주 뒤 첫 evolve가 아직 돌지 않았다 → `idea/research/`로
