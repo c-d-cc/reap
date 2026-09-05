@@ -1,6 +1,7 @@
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { CodeBlock } from "@/components/CodeBlock";
+import { CliSection } from "@/components/CliSection";
 import { useT } from "@/i18n";
 
 export default function GenerationPage() {
@@ -42,13 +43,10 @@ export default function GenerationPage() {
         </ul>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{g.openTitle}</h2>
-        <CodeBlock language="bash">{g.openCode}</CodeBlock>
         <p className="text-sm text-muted-foreground mt-2 mb-6 leading-relaxed">{g.openDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{g.bindingTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{g.bindingDesc}</p>
-        <CodeBlock language="bash">{g.bindCode}</CodeBlock>
-        <p className="text-sm text-muted-foreground mt-2 mb-6 leading-relaxed">{g.bindDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{g.vocabTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{g.vocabDesc}</p>
@@ -81,12 +79,12 @@ export default function GenerationPage() {
         <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{g.commitDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{g.closeTitle}</h2>
-        <CodeBlock language="bash">{g.closeCode}</CodeBlock>
         <p className="text-sm text-muted-foreground mt-2 mb-6 leading-relaxed">{g.closeDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{g.exampleTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{g.exampleDesc}</p>
         <CodeBlock language="text">{g.exampleCode}</CodeBlock>
+        <CliSection code={g.cliCode} />
       </DocPage>
     </DocLayout>
   );

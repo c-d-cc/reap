@@ -1,6 +1,7 @@
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { CodeBlock } from "@/components/CodeBlock";
+import { CliSection } from "@/components/CliSection";
 import { useT } from "@/i18n";
 
 export default function CarveMilestonePage() {
@@ -46,7 +47,6 @@ export default function CarveMilestonePage() {
         <p className="text-sm text-muted-foreground mb-6 leading-relaxed">{c.fitnessQuestionsDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{c.carveTitle}</h2>
-        <CodeBlock language="bash">{c.carveCode}</CodeBlock>
         <p className="text-sm text-muted-foreground mt-2 mb-6 leading-relaxed">{c.carveDesc}</p>
 
         <h3 className="text-sm font-semibold text-foreground mb-2 mt-6">{c.focusTitle}</h3>
@@ -69,6 +69,7 @@ export default function CarveMilestonePage() {
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{c.exampleTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{c.exampleDesc}</p>
         <CodeBlock language="text">{c.exampleCode}</CodeBlock>
+        <CliSection code={c.cliCode} />
       </DocPage>
     </DocLayout>
   );

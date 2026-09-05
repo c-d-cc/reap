@@ -1,7 +1,7 @@
 import { Link } from "wouter";
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
-import { CodeBlock } from "@/components/CodeBlock";
+import { CliSection } from "@/components/CliSection";
 import { useT } from "@/i18n";
 
 export default function OrchestratePage() {
@@ -14,7 +14,6 @@ export default function OrchestratePage() {
         <p className="text-sm text-muted-foreground leading-relaxed mb-6">{o.aloneNote}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2">{o.worktreeTitle}</h2>
-        <CodeBlock language="bash">{o.worktreeCode}</CodeBlock>
         <p className="text-sm text-muted-foreground mt-2 mb-2 leading-relaxed">{o.worktreeDesc}</p>
         <p className="text-sm text-muted-foreground mb-2 leading-relaxed">{o.sameDirNote}</p>
         <p className="text-xs text-muted-foreground mb-6 leading-relaxed">{o.submoduleNote}</p>
@@ -49,6 +48,7 @@ export default function OrchestratePage() {
           </table>
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">{o.coordinatorNote}</p>
+        <CliSection code={o.cliCode} />
       </DocPage>
     </DocLayout>
   );

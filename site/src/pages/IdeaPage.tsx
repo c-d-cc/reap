@@ -1,6 +1,7 @@
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { CodeBlock } from "@/components/CodeBlock";
+import { CliSection } from "@/components/CliSection";
 import { useT } from "@/i18n";
 
 export default function IdeaPage() {
@@ -33,7 +34,6 @@ export default function IdeaPage() {
         </div>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{i.makeTitle}</h2>
-        <CodeBlock language="bash">{i.makeCode}</CodeBlock>
         <p className="text-sm text-muted-foreground mt-2 mb-6 leading-relaxed">{i.makeDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{i.exampleTitle}</h2>
@@ -52,7 +52,7 @@ export default function IdeaPage() {
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{i.archiveTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{i.archiveDesc}</p>
-        <CodeBlock language="bash">{i.archiveCode}</CodeBlock>
+        <CliSection code={i.cliCode} />
       </DocPage>
     </DocLayout>
   );

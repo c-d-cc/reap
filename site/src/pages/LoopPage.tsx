@@ -1,6 +1,7 @@
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { CodeBlock } from "@/components/CodeBlock";
+import { CliSection } from "@/components/CliSection";
 import { useT } from "@/i18n";
 
 export default function LoopPage() {
@@ -33,7 +34,6 @@ export default function LoopPage() {
         </div>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{l.openTitle}</h2>
-        <CodeBlock language="bash">{l.openCode}</CodeBlock>
         <p className="text-sm text-muted-foreground mt-2 mb-6 leading-relaxed">{l.openDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{l.continueTitle}</h2>
@@ -62,7 +62,6 @@ export default function LoopPage() {
         </div>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{l.closeTitle}</h2>
-        <CodeBlock language="bash">{l.closeCode}</CodeBlock>
         <p className="text-sm text-muted-foreground mt-2 mb-6 leading-relaxed">{l.closeDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{l.stayOpenTitle}</h2>
@@ -71,6 +70,7 @@ export default function LoopPage() {
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{l.exampleTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{l.exampleDesc}</p>
         <CodeBlock language="text">{l.exampleCode}</CodeBlock>
+        <CliSection code={l.cliCode} />
       </DocPage>
     </DocLayout>
   );

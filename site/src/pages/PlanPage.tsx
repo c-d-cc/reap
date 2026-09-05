@@ -1,6 +1,7 @@
 import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { CodeBlock } from "@/components/CodeBlock";
+import { CliSection } from "@/components/CliSection";
 import { useT } from "@/i18n";
 
 export default function PlanPage() {
@@ -12,7 +13,6 @@ export default function PlanPage() {
         <p className="text-sm text-muted-foreground leading-relaxed mb-6">{p.intro}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2">{p.registerTitle}</h2>
-        <CodeBlock language="bash">{p.registerCode}</CodeBlock>
         <p className="text-sm text-muted-foreground mt-2 mb-6 leading-relaxed">{p.registerDesc}</p>
 
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{p.registryTitle}</h2>
@@ -38,6 +38,7 @@ export default function PlanPage() {
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{p.lifespanTitle}</h2>
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{p.lifespanDesc}</p>
         <CodeBlock language="markdown">{p.lifespanCode}</CodeBlock>
+        <CliSection code={p.cliCode} />
       </DocPage>
     </DocLayout>
   );
