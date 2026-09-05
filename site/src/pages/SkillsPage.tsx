@@ -2,6 +2,31 @@ import { DocLayout } from "@/components/DocLayout";
 import { DocPage } from "@/components/DocPage";
 import { useT } from "@/i18n";
 
+function SkillTable({ headers, rows }: { headers: string[]; rows: [string, string, string][] }) {
+  return (
+    <div className="border border-border rounded-md overflow-hidden text-sm mb-3">
+      <table className="w-full">
+        <thead>
+          <tr className="border-b border-border bg-muted/30">
+            {headers.map((h) => (
+              <th key={h} className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border">
+          {rows.map(([name, when, what]) => (
+            <tr key={name}>
+              <td className="px-4 py-2 font-mono text-xs text-primary whitespace-nowrap align-top">{name}</td>
+              <td className="px-4 py-2 text-xs text-muted-foreground align-top">{when}</td>
+              <td className="px-4 py-2 text-xs text-muted-foreground align-top">{what}</td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function SkillsPage() {
   const t = useT();
   const s = t.skills;
@@ -10,27 +35,11 @@ export default function SkillsPage() {
       <DocPage title={s.title} breadcrumb={s.breadcrumb}>
         <p className="text-sm text-muted-foreground leading-relaxed mb-3">{s.intro}</p>
 
-        <div className="border border-border rounded-md overflow-hidden text-sm mb-3">
-          <table className="w-full">
-            <thead>
-              <tr className="border-b border-border bg-muted/30">
-                {s.tableHeaders.map((h) => (
-                  <th key={h} className="text-left px-4 py-2 text-xs font-semibold text-muted-foreground">{h}</th>
-                ))}
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {s.table.map(([name, who, when, what]) => (
-                <tr key={name}>
-                  <td className="px-4 py-2 font-mono text-xs text-primary whitespace-nowrap align-top">{name}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground whitespace-nowrap align-top">{who}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground align-top">{when}</td>
-                  <td className="px-4 py-2 text-xs text-muted-foreground align-top">{what}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        <SkillTable headers={s.tableHeaders} rows={s.table} />
+
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-8">{s.agentTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{s.agentNote}</p>
+        <SkillTable headers={s.tableHeaders} rows={s.agentTable} />
         <p className="text-xs text-muted-foreground mb-8 leading-relaxed">{s.tableNote}</p>
 
         <div className="space-y-6">
