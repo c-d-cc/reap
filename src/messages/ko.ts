@@ -159,6 +159,7 @@ export const ko = {
   "entries.idea_ambiguous": "idea가 여럿에 걸립니다: {ids}",
   "entries.idea_not_found": "idea를 찾지 못했습니다: {needle}",
   "entries.idea_already_archived": "이미 archive에 있습니다: {id}",
+  "entries.already_archived": "이미 archive에 있습니다: {id}",
   "entries.hook_needs_event": "hook에는 --event가 필요합니다: {events} (받은 값: {got})",
   "entries.hook_needs_name": "hook에는 --name이 필요합니다. 영문자·숫자·-·_만 씁니다 (받은 값: {got})",
   "entries.hook_type_invalid": "--type은 md 또는 sh입니다: {type}",

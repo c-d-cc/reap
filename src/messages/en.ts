@@ -157,6 +157,7 @@ export const en = {
   "entries.idea_ambiguous": "idea matches more than one: {ids}",
   "entries.idea_not_found": "idea not found: {needle}",
   "entries.idea_already_archived": "Already in archive: {id}",
+  "entries.already_archived": "Already in archive: {id}",
   "entries.hook_needs_event": "hook requires --event: {events} (got: {got})",
   "entries.hook_needs_name": "hook requires --name. Only letters, digits, -, _ are allowed (got: {got})",
   "entries.hook_type_invalid": "--type must be md or sh: {type}",

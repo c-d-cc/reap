@@ -17,8 +17,13 @@ export type MakeIdea = { title: string; slug?: string; kind: IdeaKind; now: stri
 
 export type MakeLoop = { title: string; slug?: string; type: LoopType; from?: string; refs?: string[]; now: string };
 
-/** 닫힌 loop를 `life/loops/`에 이만큼 남긴다. 넘치면 오래된 것부터 archive로. */
-export const CLOSED_LOOPS_KEPT = 10;
+/** 닫힌 것은 `archive/`로 간다 — 위치 이동은 판단이 아니라 도구의 일이다 (사람 결정 2026-09-05). */
+function moveToArchive(path: string, archiveDir: string): string {
+  const dest = join(archiveDir, basename(path));
+  ensureDir(archiveDir);
+  renameSync(path, dest);
+  return dest;
+}
 
 export type MakeHook = { event: string; name: string; type?: string; condition?: string; order?: string };
 
@@ -126,9 +131,8 @@ export function makeLoop(root: string, opts: MakeLoop): Made {
 }
 
 /**
- * `--closed`는 상태를 찍고 파일을 **`life/loops/`에 남긴다** — 방금 닫힌 loop가 가장 자주 읽힌다.
- * 닫힌 것이 `CLOSED_LOOPS_KEPT`를 넘으면 오래된 것부터 archive로 내린다. 개수는 판단이 아니라서
- * 도구가 한다 — generation의 `cleanup`과 다른 점이다. 열린 loop는 개수와 무관하게 옮기지 않는다.
+ * `--closed`는 상태를 찍고 **`archive/loops/`로 옮긴다.** 닫힌 loop를 읽는 쪽(그 milestone의 세대)은 id로 찾으므로
+ * 위치가 바뀌어도 닿는다. 열린 loop만 `life/loops/`에 있고, 그것이 상태 줄이 세는 전부다.
  */
 export function markLoop(root: string, needle: string, flag: "closed" | "aborted", now: string, milestones: string[] = []): Made {
   const entry = resolveByKind(root, "loop", needle);
@@ -139,21 +143,8 @@ export function markLoop(root: string, needle: string, flag: "closed" | "aborted
   const fields: Record<string, unknown> = { status: "closed", closedAt: now };
   if (milestones.length > 0) fields.milestones = milestones;
   patch(entry.path, fields);
-  archiveOverflowLoops(root);
-  return { id: entry.id, path: existsSync(entry.path) ? entry.path : join(paths(root).archiveLoops, basename(entry.path)) };
-}
-
-function archiveOverflowLoops(root: string): void {
-  const p = paths(root);
-  const closed = listEntries(root, "loop")
-    .filter((e) => e.dir === p.loops && e.data.status === "closed")
-    .sort((a, b) => String(a.data.closedAt ?? "").localeCompare(String(b.data.closedAt ?? "")));
-  const overflow = closed.length - CLOSED_LOOPS_KEPT;
-  if (overflow <= 0) return;
-  ensureDir(p.archiveLoops);
-  for (const entry of closed.slice(0, overflow)) {
-    renameSync(entry.path, join(p.archiveLoops, basename(entry.path)));
-  }
+  const dest = entry.path.startsWith(paths(root).archiveLoops) ? entry.path : moveToArchive(entry.path, paths(root).archiveLoops);
+  return { id: entry.id, path: dest };
 }
 
 /**
@@ -181,23 +172,23 @@ export function markGeneration(
     if (readSession(root).generation === entry.id) unbindSession(root);
     return { id: entry.id, path: entry.path };
   }
+  const archiveDir = paths(root).archiveGenerations;
   if (flag === "archived") {
-    // 위치만 옮긴다. status는 건드리지 않는다 — archive는 상태가 아니라 위치다.
-    const dest = join(paths(root).archiveGenerations, basename(entry.path));
-    ensureDir(paths(root).archiveGenerations);
-    renameSync(entry.path, dest);
-    return { id: entry.id, path: dest };
+    // 옛 규칙(닫힌 세대가 life에 남던 시절)으로 남은 것을 내리는 용도. status는 건드리지 않는다
+    if (entry.path.startsWith(archiveDir)) throw new Error(t(root, "entries.already_archived", { id: entry.id }));
+    return { id: entry.id, path: moveToArchive(entry.path, archiveDir) };
   }
   const endCommit = head(root);
   patch(entry.path, { status: "closed", closedAt: now, endCommit: endCommit ?? null });
   const hooks = runHooks(root, "gen.closed", { id: entry.id });
-  return { id: entry.id, path: entry.path, hooks };
+  // 닫힘과 함께 archive로 — 다음 세션이 읽을 것은 handoff.md에 있어야 하고, 기록은 id로 언제든 찾는다
+  const dest = entry.path.startsWith(archiveDir) ? entry.path : moveToArchive(entry.path, archiveDir);
+  return { id: entry.id, path: dest, hooks };
 }
 
 /**
- * `--consumed`는 표시만 하고 `--archived`는 이동만 한다. **상태와 위치는 다른 질문이다** —
- * 소비된 항목이라도 무엇을 물었고 답이 어떻게 뒤집혔는지가 아직 읽을 값을 가질 수 있다.
- * 무엇을 내릴지는 `cleanup`의 판단이고 CLI는 계산하지 않는다.
+ * `--consumed`는 표시하고 **`archive/backlog/`로 옮긴다.** `--archived`는 옛 규칙으로 life에 남은 것을 내리는 용도.
+ * 소비된 항목의 물음과 답은 그것을 소비한 세대의 기록이 갖고, 항목 자체는 id로 언제든 찾는다.
  */
 export function markBacklog(root: string, needle: string, flag: "consumed" | "archived", by?: string): Made {
   const found = findEntry(root, "backlog", needle);
@@ -207,16 +198,16 @@ export function markBacklog(root: string, needle: string, flag: "consumed" | "ar
   if (!("entry" in found)) throw new Error(t(root, "entries.backlog_not_found", { needle }));
   const entry = found.entry;
 
+  const archiveDir = paths(root).archiveBacklog;
   if (flag === "archived") {
-    const dest = join(paths(root).archiveBacklog, basename(entry.path));
-    ensureDir(paths(root).archiveBacklog);
-    renameSync(entry.path, dest);
-    return { id: entry.id, path: dest };
+    if (entry.path.startsWith(archiveDir)) throw new Error(t(root, "entries.already_archived", { id: entry.id }));
+    return { id: entry.id, path: moveToArchive(entry.path, archiveDir) };
   }
 
   const consumedBy = by ?? readSession(root).generation;
   patch(entry.path, { status: "consumed", consumedBy: consumedBy ?? null });
-  return { id: entry.id, path: entry.path };
+  const dest = entry.path.startsWith(archiveDir) ? entry.path : moveToArchive(entry.path, archiveDir);
+  return { id: entry.id, path: dest };
 }
 
 /**
