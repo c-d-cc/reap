@@ -56,7 +56,7 @@ export function patch(path: string, fields: Data): void {
 
 /** 리눅스 NAME_MAX는 255바이트다. 한글은 글자당 3바이트라 제목 80자 안팎이면 넘는다. */
 export const SLUG_MAX_BYTES = 80;
-/** `--slug`로 준 것의 상한. id 접두어(최대 15바이트)와 `.md`를 더해도 NAME_MAX_BYTES 안이다. */
+/** `--slug`로 준 것의 상한. id 접두어(최대 16바이트 `loop-0000-design`)·`-`·`.md`를 더하면 꼭 NAME_MAX_BYTES다. */
 export const SLUG_LIMIT_BYTES = 180;
 export const NAME_MAX_BYTES = 200;
 
@@ -85,11 +85,17 @@ function truncateBytes(slug: string, max: number): string {
     out = next;
   }
   if (out !== "") return out;
-  for (const ch of slug) {
-    if (byteLength(out + ch) > max) break;
-    out += ch;
+  for (const { segment } of new Intl.Segmenter(undefined, { granularity: "grapheme" }).segment(slug)) {
+    if (byteLength(out + segment) > max) break;
+    out += segment;
   }
   return out;
+}
+
+/** id 발급 전에 본다 — 발급 뒤 거부하면 레지스트리에 파일 없는 id가 남는다. */
+export function requireSlug(root: string, slug: string): void {
+  const bytes = byteLength(slug);
+  if (bytes > SLUG_LIMIT_BYTES) throw new Error(t(root, "entries.slug_too_long", { bytes, limit: SLUG_LIMIT_BYTES }));
 }
 
 export function listEntries(root: string, kind: Kind): Entry[] {

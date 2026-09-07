@@ -1,6 +1,6 @@
 import { existsSync, readFileSync, statSync } from "node:fs";
 import { basename, isAbsolute, join, relative, resolve } from "node:path";
-import { slugify } from "./doc.ts";
+import { requireSlug, slugify } from "./doc.ts";
 import { issue } from "./id.ts";
 import { ensureDir, paths, writeFileAtomic } from "./store.ts";
 import { render, template } from "./templates.ts";
@@ -75,8 +75,9 @@ export function makePlanSource(root: string, opts: MakePlanSource): { id: string
   if (!existsSync(dir) || !statSync(dir).isDirectory()) {
     throw new Error(t(root, "plan.source_root_not_dir", { root: opts.root }));
   }
-  const id = issue(root, "source", opts.role, opts.now.slice(0, 10));
   const slug = opts.slug ?? slugify(basename(dir), root);
+  requireSlug(root, slug);
+  const id = issue(root, "source", opts.role, opts.now.slice(0, 10));
   const convention = `conventions/${id}-${slug}.md`;
   const sources = readSources(root);
   sources.push({ id, root: opts.root, role: opts.role, convention });

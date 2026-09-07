@@ -1,6 +1,6 @@
 import { chmodSync, existsSync, renameSync, rmSync } from "node:fs";
 import { basename, join } from "node:path";
-import { SLUG_LIMIT_BYTES, byteLength, findEntry, formatDoc, listEntries, parseDoc, patch, slugify } from "./doc.ts";
+import { findEntry, formatDoc, listEntries, parseDoc, patch, requireSlug, slugify } from "./doc.ts";
 import type { Entry } from "./doc.ts";
 import { head } from "./git.ts";
 import { HOOK_EVENTS, isHookEvent, runHooks } from "./hooks.ts";
@@ -38,12 +38,6 @@ export type MakeGeneration = {
   now: string;
 };
 export type Made = { id: string; path: string; hooks?: RunHooksResult };
-
-/** id 발급 전에 본다 — 발급 뒤 거부하면 레지스트리에 파일 없는 id가 남는다. */
-function requireSlug(root: string, slug: string): void {
-  const bytes = byteLength(slug);
-  if (bytes > SLUG_LIMIT_BYTES) throw new Error(t(root, "entries.slug_too_long", { bytes, limit: SLUG_LIMIT_BYTES }));
-}
 
 export function makeMilestone(root: string, opts: MakeMilestone): Made {
   // 인용은 확정 가능한 것만 검사한다 — 소스가 등록돼 있고 파일이 그 안에 있는가. id 발급 전에 본다
