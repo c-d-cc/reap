@@ -114,3 +114,4 @@
 | gen-0110-exec | skill·spec·map.md — cleanup 은퇴, 종료 순서 둘, life는 열린 것만 | 2026-09-05 |
 | gen-0111-exec | 문서·사이트가 '닫히면 바로 archive'를 말한다; 이 리포 life의 옛 잔여 정리 | 2026-09-05 |
 | gen-0112-exec | 개념 페이지 — 명령 블록을 끝의 'CLI 명령' 절로, 절 제목을 자연스러운 한국어로 | 2026-09-05 |
+| gen-0113-fix | resolve #32: slugify에 바이트 상한 — 기록 파일 basename이 NAME_MAX를 넘지 않게 | 2026-09-07 |

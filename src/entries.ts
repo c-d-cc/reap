@@ -1,6 +1,6 @@
 import { chmodSync, existsSync, renameSync, rmSync } from "node:fs";
 import { basename, join } from "node:path";
-import { findEntry, formatDoc, listEntries, parseDoc, patch, slugify } from "./doc.ts";
+import { SLUG_LIMIT_BYTES, byteLength, findEntry, formatDoc, listEntries, parseDoc, patch, slugify } from "./doc.ts";
 import type { Entry } from "./doc.ts";
 import { head } from "./git.ts";
 import { HOOK_EVENTS, isHookEvent, runHooks } from "./hooks.ts";
@@ -39,11 +39,18 @@ export type MakeGeneration = {
 };
 export type Made = { id: string; path: string; hooks?: RunHooksResult };
 
+/** id 발급 전에 본다 — 발급 뒤 거부하면 레지스트리에 파일 없는 id가 남는다. */
+function requireSlug(root: string, slug: string): void {
+  const bytes = byteLength(slug);
+  if (bytes > SLUG_LIMIT_BYTES) throw new Error(t(root, "entries.slug_too_long", { bytes, limit: SLUG_LIMIT_BYTES }));
+}
+
 export function makeMilestone(root: string, opts: MakeMilestone): Made {
   // 인용은 확정 가능한 것만 검사한다 — 소스가 등록돼 있고 파일이 그 안에 있는가. id 발급 전에 본다
   requireRefs(root, opts.refs);
-  const id = issue(root, "milestone", opts.title, registryDate(opts.now));
   const slug = opts.slug ?? slugify(opts.title, root);
+  requireSlug(root, slug);
+  const id = issue(root, "milestone", opts.title, registryDate(opts.now));
   const dir = join(paths(root).milestones, `${id}-${slug}`);
   ensureDir(dir);
 
@@ -90,8 +97,9 @@ export function makeGeneration(root: string, opts: MakeGeneration): Made {
   const type: GenerationType = opts.fix ? "fix" : "exec";
   const milestone = opts.milestone !== undefined ? resolveMilestone(root, opts.milestone) : null;
   const backlog = opts.backlog !== undefined ? resolveBacklog(root, opts.backlog) : null;
-  const id = issue(root, "generation", opts.title, registryDate(opts.now), type);
   const slug = opts.slug ?? slugify(opts.title, root);
+  requireSlug(root, slug);
+  const id = issue(root, "generation", opts.title, registryDate(opts.now), type);
 
   const data: Record<string, unknown> = { id, slug, type };
   if (milestone) data.milestone = milestone.id;
@@ -117,8 +125,9 @@ export function makeGeneration(root: string, opts: MakeGeneration): Made {
  */
 export function makeLoop(root: string, opts: MakeLoop): Made {
   requireRefs(root, opts.refs);
-  const id = issue(root, "loop", opts.title, registryDate(opts.now), opts.type);
   const slug = opts.slug ?? slugify(opts.title, root);
+  requireSlug(root, slug);
+  const id = issue(root, "loop", opts.title, registryDate(opts.now), opts.type);
   const data: Record<string, unknown> = { id, slug, type: opts.type, title: opts.title };
   if (opts.from) data.from = opts.from;
   if (opts.refs && opts.refs.length > 0) data.refs = opts.refs;
@@ -315,8 +324,9 @@ export function isIdeaKind(value: string): value is IdeaKind {
  * **본문은 비운다.** 무엇을 적을지는 agent가 정한다 — `make generation`과 같다.
  */
 export function makeBacklog(root: string, opts: MakeBacklog): Made {
-  const id = issue(root, "backlog", opts.title, registryDate(opts.now));
   const slug = opts.slug ?? slugify(opts.title, root);
+  requireSlug(root, slug);
+  const id = issue(root, "backlog", opts.title, registryDate(opts.now));
   const data: Record<string, unknown> = { id, slug, type: opts.type, title: opts.title };
   if (opts.from) data.from = opts.from;
   data.createdAt = opts.now;
@@ -341,8 +351,9 @@ export function markIdea(root: string, needle: string, flag: "archived"): Made {
 }
 
 export function makeIdea(root: string, opts: MakeIdea): Made {
-  const id = issue(root, "idea", opts.title, registryDate(opts.now));
   const slug = opts.slug ?? slugify(opts.title, root);
+  requireSlug(root, slug);
+  const id = issue(root, "idea", opts.title, registryDate(opts.now));
   const data: Record<string, unknown> = { id, slug, kind: opts.kind, title: opts.title };
   data.createdAt = opts.now;
   data.status = "open";

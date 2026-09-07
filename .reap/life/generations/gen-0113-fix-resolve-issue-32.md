@@ -1,0 +1,26 @@
+---
+id: gen-0113-fix
+slug: resolve-issue-32
+type: fix
+title: "resolve #32: slugify에 바이트 상한 — 기록 파일 basename이 NAME_MAX를 넘지 않게"
+startedAt: 2026-09-07T15:28:04Z
+startCommit: c5fa243
+status: open
+---
+
+## Intent
+
+GitHub issue #32를 해소한다. `slugify`가 제목 전체를 슬러그로 써서 한글 제목 80자 안팎이면 basename이 리눅스 NAME_MAX(255바이트)를 넘고, macOS에서 만든 파일이 리눅스 컨테이너에서 풀리지 않는다. slug가 사람이 읽는 한글 이름표라는 설계는 그대로 두고 길이만 잡는다.
+
+끝나는 조건(issue의 expected):
+- `reap make backlog|idea|loop|generation|milestone --title "<긴 한글 제목>"`이 만든 기록 파일의 basename이 NAME_MAX 안에 있다 — `slugify`가 UTF-8 80바이트 상한을 `-` 경계에서 자른다
+- `--slug`로 넘긴 이름이 접두어 포함 200바이트를 넘으면 `make`가 거부하고 짧은 `--slug`를 권한다
+- `doctor`가 `.reap/` 안의 basename 200바이트 초과 항목을 결함으로 보고한다 — 이미 만들어진 저장소를 구제한다
+
+## References
+
+- https://github.com/c-d-cc/reap/issues/32 — "slugify가 길이 제한 없이 제목 전체를 파일명으로 써서 basename이 255바이트를 넘음 — Railway 빌드가 오류 없이 멈추는 원인이 됨" (bug, 작성자 casamia918)
+- `src/doc.ts` `slugify()` · `src/entries.ts` make 5종 `opts.slug ?? slugify(opts.title)` · `src/doctor.ts`
+
+## Outcome
+

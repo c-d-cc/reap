@@ -10,6 +10,7 @@ REAP is remade from a pipeline runner into a protocol and tool provider.
 - `reap doctor` checks and reports what it can determine deterministically. It doesn't fix anything
 - The code index (`reap index`) continues — 15 languages, nothing to install, no background process
 - Six event hooks (`gen.made`, `gen.closed`, `milestone.made`, `milestone.closed`, `orch.claimed`, `orch.barrier.released`) plus `make hook`
+- Record file names stay within Linux NAME_MAX — slugs are capped at 80 UTF-8 bytes, a `--slug` over 180 bytes is refused, and `doctor` reports any name in `.reap/` over 200 bytes (#32)
 
 **Removed**
 

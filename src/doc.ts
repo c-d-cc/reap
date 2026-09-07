@@ -54,13 +54,42 @@ export function patch(path: string, fields: Data): void {
   writeFileAtomic(path, formatDoc(data, body));
 }
 
-/** slug는 사람이 읽기 위한 이름표다. 한글을 로마자로 바꾸지 않는다. */
+/** 리눅스 NAME_MAX는 255바이트다. 한글은 글자당 3바이트라 제목 80자 안팎이면 넘는다. */
+export const SLUG_MAX_BYTES = 80;
+/** `--slug`로 준 것의 상한. id 접두어(최대 15바이트)와 `.md`를 더해도 NAME_MAX_BYTES 안이다. */
+export const SLUG_LIMIT_BYTES = 180;
+export const NAME_MAX_BYTES = 200;
+
+export function byteLength(s: string): number {
+  return Buffer.byteLength(s, "utf8");
+}
+
+/** slug는 사람이 읽기 위한 이름표다. 한글을 로마자로 바꾸지 않는다. UTF-8 80바이트를 넘으면 `-` 경계에서 자른다. */
 export function slugify(title: string, root?: string | null): string {
-  const slug = title
-    .toLowerCase()
-    .replace(/[^\p{L}\p{N}]+/gu, "-")
-    .replace(/^-+|-+$/g, "");
+  const slug = truncateBytes(
+    title
+      .toLowerCase()
+      .replace(/[^\p{L}\p{N}]+/gu, "-")
+      .replace(/^-+|-+$/g, ""),
+    SLUG_MAX_BYTES,
+  );
   return slug === "" ? t(root, "doc.untitled") : slug;
+}
+
+function truncateBytes(slug: string, max: number): string {
+  if (byteLength(slug) <= max) return slug;
+  let out = "";
+  for (const piece of slug.split("-")) {
+    const next = out === "" ? piece : `${out}-${piece}`;
+    if (byteLength(next) > max) break;
+    out = next;
+  }
+  if (out !== "") return out;
+  for (const ch of slug) {
+    if (byteLength(out + ch) > max) break;
+    out += ch;
+  }
+  return out;
 }
 
 export function listEntries(root: string, kind: Kind): Entry[] {

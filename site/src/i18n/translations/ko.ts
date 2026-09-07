@@ -2012,6 +2012,7 @@ reap setup              # 플러그인 마켓플레이스 등록과 설치
       "reap doctor가 확정적으로 검사 가능한 것만 검사해 보고한다. 고치지 않는다",
       "코드 인덱스(reap index)는 계속된다 — 15개 언어, 설치할 것 없음, 백그라운드 프로세스 없음",
       "여섯 이벤트 훅(gen.made·gen.closed·milestone.made·milestone.closed·orch.claimed·orch.barrier.released)과 make hook",
+      "기록 파일 이름이 리눅스 NAME_MAX 안에 머뭅니다. slug는 UTF-8 80바이트에서 잘리고, 180바이트를 넘는 --slug는 거부되며, doctor가 .reap/ 안의 200바이트 넘는 이름을 결함으로 보고합니다 (#32)",
     ],
     removedTitle: "제거",
     removed: [

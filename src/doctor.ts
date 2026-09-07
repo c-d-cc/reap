@@ -1,7 +1,7 @@
 import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
-import { dirname, join, relative, resolve } from "node:path";
+import { basename, dirname, join, relative, resolve } from "node:path";
 import { checkCarriers, orphans, scanCarriers } from "./carrier.ts";
-import { listEntries } from "./doc.ts";
+import { NAME_MAX_BYTES, byteLength, listEntries } from "./doc.ts";
 import type { Entry } from "./doc.ts";
 import { HOOK_EVENTS, listHooks } from "./hooks.ts";
 import { isValid, kindOf, readRegistry, isRegistered } from "./id.ts";
@@ -181,6 +181,14 @@ export function diagnose(root: string): Report {
     }
   }
 
+  // 8b. 이름 길이 — 리눅스는 NAME_MAX(255바이트)를 넘는 이름을 체크아웃하지 못한다
+  for (const path of walkNames(p.reap)) {
+    const bytes = byteLength(basename(path));
+    if (bytes > NAME_MAX_BYTES) {
+      defects.push({ kind: t(root, "doctor.kind.name_too_long"), detail: t(root, "doctor.detail.name_too_long", { path: rel(root, path), bytes, limit: NAME_MAX_BYTES }) });
+    }
+  }
+
   // 9. carrier
   for (const problem of checkCarriers(root)) defects.push({ kind: "carrier", detail: `${problem.kind}: ${problem.detail}` });
   for (const c of orphans(scanCarriers(root))) {
@@ -255,6 +263,19 @@ function markdown(dir: string): string[] {
   } catch {
     return [];
   }
+}
+function walkNames(dir: string): string[] {
+  const acc: string[] = [];
+  const walk = (d: string) => {
+    for (const name of readdirSync(d)) {
+      if (name.startsWith(".")) continue;
+      const path = join(d, name);
+      acc.push(path);
+      if (statSync(path).isDirectory()) walk(path);
+    }
+  };
+  walk(dir);
+  return acc;
 }
 function walkMarkdown(dir: string): string[] {
   const acc: string[] = [];
