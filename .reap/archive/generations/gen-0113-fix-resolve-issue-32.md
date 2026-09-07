@@ -5,7 +5,9 @@ type: fix
 title: "resolve #32: slugify에 바이트 상한 — 기록 파일 basename이 NAME_MAX를 넘지 않게"
 startedAt: 2026-09-07T15:28:04Z
 startCommit: c5fa243
-status: open
+status: closed
+closedAt: 2026-09-07T15:40:28Z
+endCommit: c15daf0
 ---
 
 ## Intent
