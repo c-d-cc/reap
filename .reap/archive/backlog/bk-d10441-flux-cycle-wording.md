@@ -4,7 +4,8 @@ slug: flux-cycle-wording
 type: research
 title: flux를 여전히 '사이클'·'돈다'로 설명하는 것이 개명 이유와 부딪히는가
 createdAt: 2026-09-11T21:49:09Z
-status: open
+status: consumed
+consumedBy: gen-0117-exec
 ---
 
 개명의 근거는 *"`loop`은 순환을 뜻하는데 이 단위가 하는 일은 기획을 증진하는 것"*이다. 그런데 주변 산문은 flux를 여전히 **도는 것**으로 설명한다.

@@ -6,7 +6,9 @@ backlog: bk-d10441
 title: flux 설명을 의미로 훑는다 — 사이클·돈다를 자리마다 판단
 startedAt: 2026-09-11T22:00:38Z
 startCommit: 3e69cc6
-status: open
+status: closed
+closedAt: 2026-09-11T22:04:01Z
+endCommit: ed2b669
 ---
 
 ## Intent
