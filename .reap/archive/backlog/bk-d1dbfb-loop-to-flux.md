@@ -4,7 +4,8 @@ slug: loop-to-flux
 type: breaking
 title: loop을 flux로 바꾼다 — 이름이 순환을 뜻해 기획이라는 실제 일과 어긋난다
 createdAt: 2026-09-11T21:27:30Z
-status: open
+status: consumed
+consumedBy: gen-0115-exec
 ---
 
 ## 왜
