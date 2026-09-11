@@ -6,7 +6,9 @@ backlog: bk-d1dbfb
 title: loop을 flux로 — id·저장·명령·skill·spec·문서·데이터 전부
 startedAt: 2026-09-11T21:28:38Z
 startCommit: 64d66b7
-status: open
+status: closed
+closedAt: 2026-09-11T21:51:31Z
+endCommit: cbcbbe1
 ---
 
 ## Intent
