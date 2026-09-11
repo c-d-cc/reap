@@ -63,7 +63,7 @@ How to write each part is [init §3.2](../init/SKILL.md) — the same table that
 
 `genome/` is injected every session too, and stale genome is worse than a stale `summary.md`. `summary.md` says where things are; `genome/` says **how to behave here**. A session that starts from a wrong premise has no way to notice it's wrong.
 
-The judgment is one question, and `evolution.md` already owns it: **would a fresh agent next session do the work right without knowing this change?** If no, the genome went stale. Same rule as the table above — **any "yes" means rewrite that part now**, in this generation.
+The judgment is one question: **would a fresh agent next session do the work right without knowing this change?** If no, the genome went stale. Same rule as the table above — **any "yes" means rewrite that part now**, in this generation.
 
 | Did this generation… | Where in genome |
 |---|---|
@@ -78,6 +78,8 @@ How to write each part is [init §3.3·§3.4](../init/SKILL.md) — the same sec
 **`invariants.md` is the human's, always.** Don't edit it, don't propose edits inside the record. If this generation turned up something that should be an invariant, say it to the human and leave it there.
 
 **This is where `--type genome` backlog gets consumed.** A genome finding that comes up mid-generation isn't applied on the spot — it goes to `make backlog --type genome` so genome doesn't shift under running work. Closing is when it lands: reflect the open ones now, then `reap mark backlog <id> --consumed`. **Nothing else consumes that type** — left alone it just accumulates, which is the failure this step exists to stop.
+
+A genome item **isn't this generation's ground.** Consuming one here doesn't make it so — `consumedBy` only records which close applied it. This is the one place a backlog item is consumed by a generation it didn't ground.
 
 Put one line in the Outcome either way — "genome: 갱신 (application)" or "genome: 해당 없음".
 

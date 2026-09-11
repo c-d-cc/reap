@@ -762,7 +762,7 @@ export const ko: Translations = {
     installLinkText: "설치 가이드",
     keyConcepts: "핵심 개념",
     concepts: [
-      { label: "Genome 불변성", desc: "genome은 generation 중에 수정되지 않습니다. 변경은 backlog를 거쳐 다음 generation에서 반영됩니다." },
+      { label: "Genome 불변성", desc: "genome은 일이 도는 중에는 바뀌지 않습니다. 도중에 발견한 것은 backlog로 가고, 세대를 닫을 때 complete가 반영합니다." },
       { label: "Backlog", desc: "지연되거나 발견된 이슈를 기록하는 자리입니다. 다음 generation이 이어받습니다." },
       { label: "Milestone과 fitness", desc: "milestone이 끝날 때 사람이 자연어로 fitness를 평가합니다. 정량 지표는 두지 않습니다." },
       { label: "Loop", desc: "새 의도를 만드는 작업입니다. 기획, 설계, 화면, 아직 자리 없는 아이디어를 다룹니다." },
@@ -917,7 +917,7 @@ export const ko: Translations = {
       ["update·migration 안내 레이어·lastMigratedVersion", "migrate skill 1회 + 이후 doctor·init --check"],
       ["fix --check·clean·destroy", "doctor·rm -rf .reap + 플러그인 제거"],
       ["install-skills·load-context·dump-state, opencode/codex adapter", "플러그인 설치·ctx --hook"],
-      ["/reap.knowledge·/reap.sync·/reap.refreshKnowledge", "init skill + complete의 summary 갱신 절 + genome 직접 편집"],
+      ["/reap.knowledge·/reap.sync·/reap.refreshKnowledge", "init skill + complete의 summary·genome 갱신 절"],
       ["/reap.help 16주제·reap help 다국어", "help skill(상태·skill 지도·다음 행동) + 문서 사이트"],
       ["/reap.report·autoIssueReport", "report-issue skill"],
       ["autoSubagent·strictEdit·strictMerge·autoUpdate config", "없음 — 판단을 config로 빼지 않는다"],
@@ -2013,6 +2013,7 @@ reap setup              # 플러그인 마켓플레이스 등록과 설치
       "코드 인덱스(reap index)는 계속된다 — 15개 언어, 설치할 것 없음, 백그라운드 프로세스 없음",
       "여섯 이벤트 훅(gen.made·gen.closed·milestone.made·milestone.closed·orch.claimed·orch.barrier.released)과 make hook",
       "기록 파일 이름이 리눅스 NAME_MAX 안에 머뭅니다. slug는 UTF-8 80바이트에서 잘리고, 180바이트를 넘는 --slug는 거부되며, doctor가 .reap/ 안의 200바이트 넘는 이름을 결함으로 보고합니다 (#32)",
+      "세대를 닫을 때 environment/summary.md와 같은 방식으로 genome 낡음도 점검하고, --type genome backlog를 그 자리에서 소비합니다. milestone을 닫을 때는 세대 하나가 아니라 milestone 전체에 대고 genome을 한 번 더 훑습니다 (#33)",
     ],
     removedTitle: "제거",
     removed: [
