@@ -118,3 +118,4 @@
 | gen-0114-exec | resolve #33: complete에 genome 갱신 절차 추가 | 2026-09-11 |
 | gen-0115-exec | loop을 flux로 — id·저장·명령·skill·spec·문서·데이터 전부 | 2026-09-11 |
 | gen-0116-exec | VitePress 캐시 14개를 추적에서 뺀다 | 2026-09-11 |
+| gen-0117-exec | flux 설명을 의미로 훑는다 — 사이클·돈다를 자리마다 판단 | 2026-09-11 |

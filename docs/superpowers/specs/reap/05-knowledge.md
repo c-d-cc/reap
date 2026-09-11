@@ -2,7 +2,7 @@
 
 ## plan source
 
-**REAP는 기획을 쓴다.** 쓰는 자리가 plan source이고, 쓰는 사이클이 flux다(`02-flow.md`의 `plan 축의 단위는 flux다`). 프로토콜은 넷이다.
+**REAP는 기획을 쓴다.** 쓰는 자리가 plan source이고, 그것을 쓰는 단위가 flux다(`02-flow.md`의 `plan 축의 단위는 flux다`). 프로토콜은 넷이다.
 
 | | 무엇 | 어디 |
 |---|---|---|

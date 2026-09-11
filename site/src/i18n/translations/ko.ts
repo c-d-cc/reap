@@ -1139,8 +1139,8 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
   fluxPage: {
     title: "Flux",
     breadcrumb: "Plan 축",
-    description: "새 의도를 만드는 Plan 축의 사이클 — 네 가지 유형, 열고 잇고 닫는 흐름.",
-    intro: "새 의도를 만드는 일은 generation이 아니라 flux입니다. 기획, 설계, 화면과 흐름, 아직 자리가 없는 아이디어 — 이 넷을 flux가 다루고, generation과는 다른 사이클로 돕니다.",
+    description: "새 의도를 만드는 Plan 축의 단위 — 네 가지 유형, 열고 잇고 닫는 흐름.",
+    intro: "새 의도를 만드는 일은 generation이 아니라 flux입니다. 기획, 설계, 화면과 흐름, 아직 자리가 없는 아이디어 — 이 넷을 flux가 다루고, generation과는 다른 사이클을 갖습니다.",
     typesTitle: "네 가지 유형",
     typeHeaders: ["유형", "산출물이 찾는 자리"],
     types: [

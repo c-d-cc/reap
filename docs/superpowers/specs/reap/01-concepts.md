@@ -33,7 +33,7 @@ plan sources (외부, 여러 곳)
       ^
       | evolve
       |
-  flux  (plan 축의 사이클 — generation이 아니다)
+  flux  (plan 축의 단위 — generation이 아니다)
       |
       | carve out
       v

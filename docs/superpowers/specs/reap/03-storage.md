@@ -67,7 +67,7 @@
 
 **`plan/`은 이 3단 밖이다.** `genome/`·`environment/`·`idea/`처럼 최상위에 나란히 선다. plan source는 **리포 밖을 가리키는 등록부**라 "하려는 것 / 사는 것 / 끝난 것"이라는 시간축에 얹히지 않기 때문이다 — 등록된 소스는 하려는 것도 사는 것도 끝난 것도 아니고, 그냥 **거기 있다.**
 
-**`life/flux/`가 기획 축의 사이클이 사는 자리다.** 처음엔 `plan/flux/`였는데 `gen-0052`가 옮겼다 — `plan/`을 3단 밖에 둔 논거(리포 밖을 가리키는 등록부라 시간축에 안 얹힌다)는 `sources.yml`·`conventions/`의 것이지 flux의 것이 아니다. **flux는 열리고 닫히고 archive로 가므로 시간축에 얹히고**, `life/`의 정의("아직 참고할 값이 있는 것")에 그대로 맞으며 `archive/flux/`와 짝이 맞는다. generation과는 다른 사이클이므로 `life/generations/`에 섞지 않고 `life/flux/`다. 열린 flux만 여기 있고, 닫히면 `archive/flux/`로 간다.
+**`life/flux/`가 기획 축의 기록이 사는 자리다.** 처음엔 `plan/flux/`였는데 `gen-0052`가 옮겼다 — `plan/`을 3단 밖에 둔 논거(리포 밖을 가리키는 등록부라 시간축에 안 얹힌다)는 `sources.yml`·`conventions/`의 것이지 flux의 것이 아니다. **flux는 열리고 닫히고 archive로 가므로 시간축에 얹히고**, `life/`의 정의("아직 참고할 값이 있는 것")에 그대로 맞으며 `archive/flux/`와 짝이 맞는다. generation과는 다른 사이클이므로 `life/generations/`에 섞지 않고 `life/flux/`다. 열린 flux만 여기 있고, 닫히면 `archive/flux/`로 간다.
 
 **`life/`는 열려 있는 것이다.** 닫힘·소비는 상태이고 archive는 위치이지만, v0.18에서는 둘이 같은 순간에 일어난다 — `mark generation --closed`·`mark flux --closed`·`mark backlog --consumed`가 표시와 함께 `archive/`로 옮긴다(사람 결정 2026-09-05). `life/`를 보면 지금 열린 것이 전부 보이고, 그 밖의 것은 없다.
 
