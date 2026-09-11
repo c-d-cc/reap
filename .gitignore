@@ -9,3 +9,6 @@ dist/
 
 site/node_modules
 site/dist
+
+# 기각된 도구가 남기는 것 — 사이트는 Vite로 빌드하고 site/dist/public을 배포한다
+site/.vitepress/

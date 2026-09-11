@@ -16,7 +16,7 @@ allow_path() {
   case "$1" in
     .claude/skills/loop-to-flux/*) return 0 ;;   # 옛 이름을 부르는 것이 그 스킬의 일이다
     *loop-to-flux*)                return 0 ;;   # 개명 자체를 기록한 backlog·세대 기록
-    site/.vitepress/cache/*)       return 0 ;;   # 벤더 번들. bk-0ec03e가 이것을 다룬다
+    *preflux-layout*)              return 0 ;;   # 내린 항목. 사람의 판정을 그대로 인용한다
     scripts/check-freed-words.sh)  return 0 ;;   # 이 파일
     *) return 1 ;;
   esac
