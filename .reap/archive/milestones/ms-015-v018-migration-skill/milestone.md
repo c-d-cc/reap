@@ -12,7 +12,7 @@ closedAt: 2026-08-31T14:28:10Z
 
 ## Background
 
-loop-0003의 M3. 근거는 `ps-4b485d:04-migration-skill.md`(요구 8건 — 판정·차단·고지·격리 `.reap-v0_17/`·subagent 강제·진행 표시와 기록·doctor 검증). 전제 실측: 실물 v0.17 데이터는 reap 리포 main의 `.reap/`(lineage 40+·memory 3단·goals.md·design/·backlogs)이고, v0.17 config.yml 지문은 `autoSubagent`·`agentClient`·`autoUpdate`·`lastMigratedVersion` 등의 필드다(v0.18 config와 형태가 다르다). ms-014가 만든 upgrade agent stub(main `docs/upgrade-agent/reap-upgrade.md`)의 본문이 이 milestone의 산출물을 부른다.
+flux-0003의 M3. 근거는 `ps-4b485d:04-migration-skill.md`(요구 8건 — 판정·차단·고지·격리 `.reap-v0_17/`·subagent 강제·진행 표시와 기록·doctor 검증). 전제 실측: 실물 v0.17 데이터는 reap 리포 main의 `.reap/`(lineage 40+·memory 3단·goals.md·design/·backlogs)이고, v0.17 config.yml 지문은 `autoSubagent`·`agentClient`·`autoUpdate`·`lastMigratedVersion` 등의 필드다(v0.18 config와 형태가 다르다). ms-014가 만든 upgrade agent stub(main `docs/upgrade-agent/reap-upgrade.md`)의 본문이 이 milestone의 산출물을 부른다.
 
 ## Exit Criteria
 

@@ -11,7 +11,7 @@ v0.17 `/reap.evolve`의 값 — 주 세션의 컨텍스트를 보호하고 세�
 - 주 세션이 결과를 **검토**(diff·테스트 실행)한 뒤 `complete`로 닫는다. subagent가 닫지 않는다 — 커밋 규칙 확인은 주 세션의 판단이다
 - spec 06-agent의 evolve 절에 "위임"이 판단 항목으로 들어간다. "REAP는 여기서부터 관여하지 않는다"는 유지된다 — 위임은 관여가 아니라 실행 형태의 선택이다
 
-이 loop 자체가 이 모드로 돌았다(gen-0076~0082 전부 subagent 수행, 주 세션 검토·merge·닫기). brief 템플릿은 그 지시문에서 추린다.
+이 flux 자체가 이 모드로 돌았다(gen-0076~0082 전부 subagent 수행, 주 세션 검토·merge·닫기). brief 템플릿은 그 지시문에서 추린다.
 
 ## G9 — en 기본, ko 번역 층 (ms-021)
 
@@ -42,14 +42,14 @@ v0.17 `/reap.evolve`의 값 — 주 세션의 컨텍스트를 보호하고 세�
 |---|---|
 | 시작하기 | 소개 · 빠른 시작 · **자율 진화 흐름**(세션이 열리면 무슨 일이 일어나는가) · v0.18에서 바뀐 것 |
 | 핵심 개념 | 두 축 · 판단·확정·사실 · 저장 구조 |
-| Plan 축 | Loop · Plan Source · Idea와 Research · Milestone 자르기 |
+| Plan 축 | Flux · Plan Source · Idea와 Research · Milestone 자르기 |
 | Execution 축 | Generation · 위임 모드 · Backlog · Milestone 닫기와 Fitness |
 | 지식 | Genome · Environment · Vision과 Memory · Code Intelligence |
 | 협업 | Orchestrate · Claim과 Barrier · Hooks |
 | 레퍼런스 | Skill 레퍼런스 · CLI 레퍼런스 · 설정 · Doctor |
 | 기타 | 비교 · v0.17에서 이주 · 릴리즈 노트 |
 
-**문체·홈**: 사용자 문서는 reap.cc/ko 톤(합니다체·완결 문장·사용자 관점·영문 고유명사). 홈은 v0.17 홈의 구성과 메시지 그대로(tagline "Recursive Evolutionary Autonomous Pipeline", 왜 REAP인가 5쌍, 구조, 작업 흐름, 설치, 핵심 개념, 문서 링크)에서 v0.18 사실만 교체. spec 문장을 제품 키워드로 쓰지 않는다. **큰 그림은 두 축이다** — Plan 축(loop가 plan을 개선)과 Execution 축(plan을 milestone으로 쪼개 generation으로 진행), 만나는 지점은 carve. 선형 `loop→milestone→generation→complete`로 그리지 않는다(complete는 세대 안의 일). 사용자 문구는 "plan source"가 아니라 "plan" — 등록부 용어는 CLI 레퍼런스·Plan Source 페이지에서만. 쓰는 순서: 홈+시작하기 → 핵심 개념+Plan 축 → Execution 축+지식 → 협업+레퍼런스+기타, 묶음마다 사람 검수.
+**문체·홈**: 사용자 문서는 reap.cc/ko 톤(합니다체·완결 문장·사용자 관점·영문 고유명사). 홈은 v0.17 홈의 구성과 메시지 그대로(tagline "Recursive Evolutionary Autonomous Pipeline", 왜 REAP인가 5쌍, 구조, 작업 흐름, 설치, 핵심 개념, 문서 링크)에서 v0.18 사실만 교체. spec 문장을 제품 키워드로 쓰지 않는다. **큰 그림은 두 축이다** — Plan 축(flux가 plan을 개선)과 Execution 축(plan을 milestone으로 쪼개 generation으로 진행), 만나는 지점은 carve. 선형 `flux→milestone→generation→complete`로 그리지 않는다(complete는 세대 안의 일). 사용자 문구는 "plan source"가 아니라 "plan" — 등록부 용어는 CLI 레퍼런스·Plan Source 페이지에서만. 쓰는 순서: 홈+시작하기 → 핵심 개념+Plan 축 → Execution 축+지식 → 협업+레퍼런스+기타, 묶음마다 사람 검수.
 
 ## G11 — 테스트 비공개 (ms-023)
 

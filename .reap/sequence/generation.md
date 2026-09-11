@@ -48,11 +48,11 @@
 | gen-0045-plan | 기획을 별도 플러그인으로 내보낸다 | 2026-08-23 |
 | gen-0046-plan | init과 interview — 정본 지식을 세우는 절차 | 2026-08-30 |
 | gen-0047-exec | make flux · mark flux · --plan 거부 | 2026-08-30 |
-| gen-0048-exec | loop skill · 어휘 · 기존 skill 정리 | 2026-08-30 |
+| gen-0048-exec | flux skill · 어휘 · 기존 skill 정리 | 2026-08-30 |
 | gen-0049-exec | sources.yml 파싱과 plan sources&#124;convention | 2026-08-30 |
 | gen-0050-exec | interview skill과 부르는 지점 | 2026-08-30 |
 | gen-0051-exec | init skill — 정본 지식을 세우는 절차 | 2026-08-30 |
-| gen-0052-exec | plan/loops를 life/loops로 | 2026-08-30 |
+| gen-0052-exec | plan/flux를 life/flux로 | 2026-08-30 |
 | gen-0053-exec | evolution 씨앗에 결정을 남기는 법 | 2026-08-30 |
 | gen-0054-exec | report-issue skill | 2026-08-30 |
 | gen-0055-exec | seq와 idea가 내려갈 길 | 2026-08-30 |
@@ -84,7 +84,7 @@
 | gen-0081-exec | 0.17.8 준비 — bump·릴리스 노트·upgrade agent URL·전 스위트 | 2026-09-03 |
 | gen-0080-fix | 훅확인 | 2026-09-03 |
 | gen-0082-exec | 왕복 검증 — tarball 설치 새 프로젝트, v0.17 표본 upgrade agent 경로 이주 | 2026-09-03 |
-| gen-0083-exec | loop skill — plan source 소비 완료 판정과 확장/신설 질문 | 2026-09-03 |
+| gen-0083-exec | flux skill — plan source 소비 완료 판정과 확장/신설 질문 | 2026-09-03 |
 | gen-0084-exec | evolve 위임 모드 — 판단 절·brief 템플릿·complete 검토·spec 06 | 2026-09-04 |
 | gen-0085-exec | 문서 사이트 골격과 앞쪽 네 쪽 — VitePress·docs.yml·소개·설치·첫 사용·개념 | 2026-09-04 |
 | gen-0086-exec | reap-test v0.18 브랜치와 dispatch 워크플로 | 2026-09-04 |
@@ -109,8 +109,8 @@
 | gen-0105-exec | 배포 정책·문서를 설치 경로 하나(npm → reap setup)와 latest 직접 발행으로 | 2026-09-05 |
 | gen-0106-exec | skill 노출 6/4 — user-invocable, 문서 표, 시작하기·두 축·판단확정사실 정리 | 2026-09-05 |
 | gen-0107-exec | help skill·complete의 environment 갱신·독립 검증·문서 정합 | 2026-09-05 |
-| gen-0108-exec | milestone 과잉 분할을 제품에서 막는다 — evolve·carve-milestone·loop 본문, doctor 참고 | 2026-09-05 |
-| gen-0109-exec | CLI — closed·consumed가 곧 archive 이동, loop overflow 삭제 | 2026-09-05 |
+| gen-0108-exec | milestone 과잉 분할을 제품에서 막는다 — evolve·carve-milestone·flux 본문, doctor 참고 | 2026-09-05 |
+| gen-0109-exec | CLI — closed·consumed가 곧 archive 이동, flux overflow 삭제 | 2026-09-05 |
 | gen-0110-exec | skill·spec·map.md — cleanup 은퇴, 종료 순서 둘, life는 열린 것만 | 2026-09-05 |
 | gen-0111-exec | 문서·사이트가 '닫히면 바로 archive'를 말한다; 이 리포 life의 옛 잔여 정리 | 2026-09-05 |
 | gen-0112-exec | 개념 페이지 — 명령 블록을 끝의 'CLI 명령' 절로, 절 제목을 자연스러운 한국어로 | 2026-09-05 |

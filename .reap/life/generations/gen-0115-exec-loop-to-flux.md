@@ -36,4 +36,4 @@ status: open
 
 ## Open Questions
 
-- `life/flux/` → `life/flux/`인가 `life/fluxes/`인가. 이웃은 `generations`·`milestones`(복수)와 `backlog`(불가산)다. **`flux`는 불가산으로 읽어 `backlog`를 따른다**로 정하고 시작한다 — 어긋나면 되돌린다
+- `life/loops/` → `life/flux/`인가 `life/fluxes/`인가. 이웃은 `generations`·`milestones`(복수)와 `backlog`(불가산)다. **`flux`는 불가산으로 읽어 `backlog`를 따른다**로 정하고 시작한다 — 어긋나면 되돌린다

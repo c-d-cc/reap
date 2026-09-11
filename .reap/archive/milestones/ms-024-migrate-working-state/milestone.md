@@ -9,7 +9,7 @@ closedAt: 2026-09-05T01:04:47Z
 ---
 ## Background
 
-selfview 실물 이주(2026-09-05)를 사람이 검수: "폴더·파일 구조만 맞춘 것 아닌가. `.reap-v0_17`을 지우면 프로젝트를 무리 없이 이어갈 수 있는가." 대조 결과 — 새 `.reap`에 milestone·loop·backlog가 없고(원본 shortterm·gen-046 completion에 다음 세대 후보 4개가 구체적으로 있었다), 실행 중 설계(team-mode 10문서)가 idea로 갔고, goals가 등록 안 됐고, genome이 v0.17 절차를 명령하고, CLAUDE.md가 지워진 reap-guide·agent를 가리킨다. 구조 이주는 됐지만 **작업 상태 이주**가 없다.
+selfview 실물 이주(2026-09-05)를 사람이 검수: "폴더·파일 구조만 맞춘 것 아닌가. `.reap-v0_17`을 지우면 프로젝트를 무리 없이 이어갈 수 있는가." 대조 결과 — 새 `.reap`에 milestone·flux·backlog가 없고(원본 shortterm·gen-046 completion에 다음 세대 후보 4개가 구체적으로 있었다), 실행 중 설계(team-mode 10문서)가 idea로 갔고, goals가 등록 안 됐고, genome이 v0.17 절차를 명령하고, CLAUDE.md가 지워진 reap-guide·agent를 가리킨다. 구조 이주는 됐지만 **작업 상태 이주**가 없다.
 
 ## Exit Criteria — "원본을 지워도 다음 세션이 이어서 일한다"
 

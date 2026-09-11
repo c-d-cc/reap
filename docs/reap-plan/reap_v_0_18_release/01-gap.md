@@ -12,7 +12,7 @@
 | G4 | `environment/` summary·source-map·domain·resources·docs | 이주 매핑 9종에 **environment/가 없다** | **migrate 매핑 보강** — environment/ 이주, hooks 이주(G3 뒤), README 경로 정합 | 사용자가 쓴 지식이 조용히 `.reap-v0_17/`에만 남는다 — 매핑 공통 규칙 "조용히 안 버림" 위반 |
 | G5 | SessionStart가 `config.language`로 "이 언어로 답하라"를 주입 | `ctx`가 language를 읽지 않는다 | **ctx 언어 줄** | 파일 세 줄. 이주 시 language를 승계하면서 아무 데도 안 쓰면 승계가 무의미하다 |
 | G6 | RELEASE_NOTES · GitHub Release · CI(ci/docs/release.yml) | `.github/` 없음(apocalypse) | **release 준비물** — 0.18.0 노트, v0.18용 ci.yml·release.yml(`--tag next`), 0.17.8 bump·노트(reap_v17), 마켓플레이스 `reap2→reap` 준비 | v0.17 release.yml은 태그 push로 `npm publish`(태그 없음 = latest)한다. **그대로 두면 0.18 태그가 latest가 된다** — 차단의 원천이 무너진다 |
-| G7 | — | bk-bb11a1 열림 | **loop skill에 plan source 소비 완료 판정 step** | 이 loop 자체가 그 판정을 손으로 했다 |
+| G7 | — | bk-bb11a1 열림 | **flux skill에 plan source 소비 완료 판정 step** | 이 flux 자체가 그 판정을 손으로 했다 |
 | G8 | — | 실물 검증은 migrate 1회(gen-0073) | **왕복 검증** — tarball 설치 → 새 프로젝트 init → 플러그인 로드 → v0.17 표본을 upgrade agent 경로로 이주 → doctor 0 | 발행 전 유일한 end-to-end |
 | G9 | CLI 4개 언어 · README 5로케일 | 한국어 전용 | **en 기본 + ko 번역 층** — CLI 메시지 카탈로그(`config.language`가 고른다), skill 본문 en(agent는 `응답 언어` 줄로 사용자 언어로 답한다), README en + README.ko | 사람 Q2 답 B (2026-09-04). genome의 문자열 규칙이 바뀐다 |
 | G10 | reap.cc 사이트 24쪽 × 5로케일 | 없음 | **새 문서 사이트** — 한국어 먼저, 사람 검수 뒤 확장 | 사람 Q1 답 (2026-09-04) |

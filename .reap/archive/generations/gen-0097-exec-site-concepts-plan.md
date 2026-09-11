@@ -12,7 +12,7 @@ endCommit: 9c4295c
 ---
 ## Intent
 
-ms-022 task 4 — tasks/4-concepts-plan.md의 일곱 쪽(두 축·판단확정사실·저장 구조 / Loop·Plan·Idea와 Research·Milestone 자르기). 자리 표시를 실제 내용으로. 끝은 build·prerender 통과, 사람 검수 대기.
+ms-022 task 4 — tasks/4-concepts-plan.md의 일곱 쪽(두 축·판단확정사실·저장 구조 / Flux·Plan·Idea와 Research·Milestone 자르기). 자리 표시를 실제 내용으로. 끝은 build·prerender 통과, 사람 검수 대기.
 
 ## Delegation
 
@@ -21,8 +21,8 @@ brief로 subagent에게 — 주 트리(dev 서버 5174 유지). `make`·`mark` �
 ## Outcome
 
 일곱 쪽 전부 실제 내용으로 채웠다. 예시는 `/private/tmp/.../scratchpad/site-examples/`
-임시 리포에서 `dist/reap`로 실제로 찍은 loop·milestone·generation 열고 닫는 한
-줄기(인증 붙이기 → 로그인 붙이기 → 로그인 폼과 세션 발급)를 Loop·Milestone 자르기
+임시 리포에서 `dist/reap`로 실제로 찍은 flux·milestone·generation 열고 닫는 한
+줄기(인증 붙이기 → 로그인 붙이기 → 로그인 폼과 세션 발급)를 Flux·Milestone 자르기
 쪽에서 공유하고, Plan 쪽은 이 리포 자신의 `plan/sources.yml`·milestone(`ms-022`)을
 실물로 쓴다.
 
@@ -35,10 +35,10 @@ brief로 subagent에게 — 주 트리(dev 서버 5174 유지). `make`·`mark` �
 - `storage` (`StoragePage.tsx`, 51줄) — 이 세대가 열린 시점의 이 리포
   `.reap/` 실물 트리(gen-0097·ms-022 포함), 3단을 가르는 것은 시간, 3단 밖
   자리들, map.md·`.session`/`.index`
-- `loop` (`LoopPage.tsx`, 77줄) — 유형 넷 표, 여는/잇는/닫는 절차, 어휘 표,
+- `flux` (`FluxPage.tsx`, 77줄) — 유형 넷 표, 여는/잇는/닫는 절차, 어휘 표,
   열린 채 두는 것이 정상이라는 절, 실물 예시
 - `plan-source` (`PlanPage.tsx`, 44줄, 제목 "Plan") — 등록(`make plan-source`),
-  이 리포의 실제 `sources.yml` 셋, 규약을 쓸 때 loop가 내리는 판단 여섯,
+  이 리포의 실제 `sources.yml` 셋, 규약을 쓸 때 flux가 내리는 판단 여섯,
   `--ref` 인용(`ms-022`가 `ps-5e948f:07-i18n-docs-delegate.md`를 인용하는
   실례), 소비 완료 표시(`ps-4b485d`의 실제 Lifespan 절)
 - `idea` (`IdeaPage.tsx`, 59줄) — research·freememo·files 표, `make idea`

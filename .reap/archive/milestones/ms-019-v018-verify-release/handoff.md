@@ -14,7 +14,7 @@ gen-0092가 task 5(최종 재검증)를 끝냈다. gen-0092는 milestone을 닫�
 | upgrade agent URL 결정·문서화 | 완료 | `docs/release-policy.md`·`06-release.md` 둘 다 "main 유지" 결정과 근거를 담고 있다. `curl -f`로 지금 404 확인(main merge 전이라 정상 — 아래 발행 순서 1·2 참고) |
 | `ctod-plugins`: `reap` 항목 로컬 커밋 | 완료(로컬만) | `ctod-plugins` 커밋 `0cde4bb`. submodule 포인터는 `71d5681`(오늘 기준 이미 `origin/v0.18`에 존재 — `git branch -r --contains 71d5681`로 확인). **push 뒤 반드시 `git -C plugins/reap pull origin v0.18 && git add plugins/reap`로 최신 커밋까지 올릴 것** — v0.18을 push하면 이 리포의 HEAD가 71d5681보다 앞서 있으므로(gen-0092의 커밋 포함) 포인터를 다시 갱신해야 한다 |
 | `release-policy.md`·`06-release.md` 순서 일치, 발행 직전 체크 명령이 실제로 돈다 | 완료 | gen-0092에서 D 대조(전부 일치, `site/migration.md` 어긋남 1건 발견·수정) + C에서 06-release 코드 블록 5개 명령 전부 실행, 출력은 gen-0092 기록의 Outcome 참고 |
-| loop-0004를 닫을 수 있다 | **사람 판단** | 05-open의 미답은 `idea/research/`로 옮기는 것이 조건 — 이 세대에서 손대지 않음 |
+| flux-0004를 닫을 수 있다 | **사람 판단** | 05-open의 미답은 `idea/research/`로 옮기는 것이 조건 — 이 세대에서 손대지 않음 |
 
 ## 발행 시 사람이 할 것 (순서대로, 06-release.md 기준)
 
@@ -79,7 +79,7 @@ release-policy.md 참고 — 이 milestone의 범위 밖.
 
 ## 그 밖에 사람이 볼 것
 
-- **loop-0004 닫기**: 05-open의 미답을 `idea/research/`로 옮긴 뒤 milestone 종료 절차(cleanup skill)를 밟을 것
+- **flux-0004 닫기**: 05-open의 미답을 `idea/research/`로 옮긴 뒤 milestone 종료 절차(cleanup skill)를 밟을 것
 - gen-0092가 찾은 마찰(en 왕복에서 `claude -p`의 "verbatim" 답을 못 믿고 `reap ctx --hook` 직접 캡처로만 검증할 수 있었던 것, 백그라운드 `claude -p`가 20분 넘게 멈추는 것)은 gen-0092 기록의 Dead Ends에 있다 — 코드로 못 막은 마찰로 다음 사람이 볼 것
 
 ## cleanup (닫을 때)

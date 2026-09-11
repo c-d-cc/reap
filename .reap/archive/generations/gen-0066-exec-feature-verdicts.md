@@ -16,4 +16,4 @@ ms-014 task 1 — 03-compat.md의 미결 6건을 위임 하에 근거와 함께 
 
 ## Outcome
 
-6건 전부 판정 — 03-compat.md의 미결 표를 판정 표로 교체, 04-migration-skill.md의 goals.md 행을 확정(plan source로 이주), loop-0003 Dialogue에 위임 판정 기록. 새 backlog는 만들지 않았다 — "필요 신호가 오면"은 지금 항목을 만들 근거가 아니다.
+6건 전부 판정 — 03-compat.md의 미결 표를 판정 표로 교체, 04-migration-skill.md의 goals.md 행을 확정(plan source로 이주), flux-0003 Dialogue에 위임 판정 기록. 새 backlog는 만들지 않았다 — "필요 신호가 오면"은 지금 항목을 만들 근거가 아니다.

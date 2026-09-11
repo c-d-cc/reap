@@ -20,7 +20,7 @@ closedAt: 2026-09-04T01:59:47Z
 - upgrade agent URL의 실재 경로가 06-release 2번대로 결정되고 문서에 적혀 있다
 - `~/cdws/ctod-plugins`: `reap` 항목(submodule `plugins/reap` → c-d-cc/reap)으로 교체한 커밋이 **로컬에** 있다 (Q5의 답 뒤. 답 전이면 준비만 하고 커밋하지 않는다)
 - `docs/release-policy.md`와 06-release의 순서가 같고, 발행 직전 체크 명령이 실제로 도는 것으로 확인됐다
-- loop-0004를 닫을 수 있다 — 05-open의 미답은 `idea/research/`로
+- flux-0004를 닫을 수 있다 — 05-open의 미답은 `idea/research/`로
 
 ## Out of Scope
 

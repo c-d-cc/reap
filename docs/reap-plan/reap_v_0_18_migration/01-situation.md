@@ -20,7 +20,7 @@ reap 리포에는 reap 이전에 세운 v0.18 기획이 있다. reap가 그 목�
 | ms-001의 **0.17.8 이행 다리** 설계 | **승계** | 0.17 사용자에게 안내를 전달할 통로. "0.18보다 먼저 발행"이라는 순서 제약 포함 |
 | `reap uninstall` (gen-088) | **승계** | 홈 자산·settings 키를 제거하는 유일한 완전 제거 경로. migration skill이 재사용 |
 
-## 확정된 결정 (loop-0003 Dialogue, 2026-08-31)
+## 확정된 결정 (flux-0003 Dialogue, 2026-08-31)
 
 1. **이름은 reap으로 완전 통일한다.** CLI `reap` · 플러그인 `reap` · skill `/reap:*` · 저장소 **`.reap/`**. reap라는 이름은 개발 리포에만 남는다. 같은 `.reap/` 자리를 신구 버전이 공유하므로 이름 충돌 처리는 migration skill의 책임이 된다 ([04-migration-skill.md](04-migration-skill.md))
 2. **자동 업데이트 차단은 이중이다.** ①0.18을 npm **latest로 올리지 않는다**(차단의 원천 — auto-update는 latest만 본다) ②0.18의 package.json `reap.autoUpdateMinVersion`을 0.18.0으로 상향한다(사고로 latest가 되어도 자동 설치 대신 blocked 경고). 안내 전달은 0.17.8 다리의 몫이다

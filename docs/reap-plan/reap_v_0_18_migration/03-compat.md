@@ -12,7 +12,7 @@
 
 reap에 상당물이 이미 있는 것: `fix --check`→`doctor`, `load-context`→`ctx`, `sequence`→`seq`, 자동 이슈 보고→`report-issue` skill, `install-skills`→플러그인 설치로 대체.
 
-**판정 완료 (2026-08-31, gen-0066 — 사람의 전체 위임 하에 agent가 판정, loop-0003 Dialogue 기록):**
+**판정 완료 (2026-08-31, gen-0066 — 사람의 전체 위임 하에 agent가 판정, flux-0003 Dialogue 기록):**
 
 | reap 기능 | 판정 | 근거 |
 |---|---|---|

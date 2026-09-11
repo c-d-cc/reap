@@ -20,7 +20,7 @@ reap를 reap(~/cdws/reap)의 v0.18로 되돌려 넣는 길을 정한다. 배포 
 ① reap 리포에 v0.18 브랜치를 어떻게 세우는가(자동 업데이트 차단 포함),
 ② 기존 reap 기능을 대조해 무엇을 가져가고 무엇을 버리는가,
 ③ v0.17 사용자를 위한 migration skill은 무엇을 하는가.
-배포 자체는 이 loop의 범위 밖이다.
+배포 자체는 이 flux의 범위 밖이다.
 
 ## Explored
 
@@ -40,12 +40,12 @@ reap를 reap(~/cdws/reap)의 v0.18로 되돌려 넣는 길을 정한다. 배포 
 | v0.18 이름 | reap 유지 / reap 개명 / reap+.reap 완전 통일 (추천 없음 — 사업 판단) | **reap·.reap/ 완전 통일.** migration skill이 기존 .reap/의 0.17 판정 → 디렉토리 리네임(충돌 대비) → 이주까지 전부 책임 | — |
 | migration skill 세부 (되읽기 확인에 얹은 지시) | — | 리네임은 `.reap-v0_17/`(dot 회피). 진행 단계를 유저에게 표시하고 기록을 남긴다. 토큰 사용량이 클 수 있음을 고지한다. subagent 수행을 강제한다. 사용자 리포에 uncommitted change가 있으면 **block** | 사람 추가 지시 |
 | 계획을 어디에 쓰나 | ps-4f2a91 확장(암묵) / 별도 문서 세트 | **별도 plan document set** — `docs/reap-plan/reap_v_0_18_migration/`을 새 plan source로 등록. ps-4f2a91은 소비 완료로 판정 | 사람이 선택지 밖 답 |
-| 파생 backlog | — | "만료된 plan source를 확장할지, 만료 후 새 문서 세트로 갈지 유저에게 묻는 step"을 loop 절차에 추가 | 사람 추가 지시 |
+| 파생 backlog | — | "만료된 plan source를 확장할지, 만료 후 새 문서 세트로 갈지 유저에게 묻는 step"을 flux 절차에 추가 | 사람 추가 지시 |
 
 ## Open Questions
 
 - 0.17.8 다리의 **코드 작성**이 이번 범위인가 (발행은 범위 밖 확정) — milestone 자를 때
-- `.reap/` 세대·loop 기록을 v0.18 브랜치로 가져가는가, reap 리포에 남기는가 — 스냅샷 선택의 후속
+- `.reap/` 세대·flux 기록을 v0.18 브랜치로 가져가는가, reap 리포에 남기는가 — 스냅샷 선택의 후속
 - 이주 매핑 세부: goals.md·vision/design·lineage/sequence의 거취, 열린 generation이 있는 프로젝트 처리 — M3 자를 때
 - 기능 잔여 판단 6건(03-compat.md의 미결 표) — M2에서
 | 브랜치 첫 커밋 구조 | — | **apocalypse commit**(구 소스 전부 삭제) 후 **snapshot commit**(reap 적재) — 두 커밋으로 가른다 | 사람 추가 지시 |
@@ -55,10 +55,10 @@ reap를 reap(~/cdws/reap)의 v0.18로 되돌려 넣는 길을 정한다. 배포 
 - plan source **ps-4b485d** 신설 (`docs/reap-plan/reap_v_0_18_migration/` — README + 01~04)
 - **ms-013** (v0.18 브랜치 신설과 귀환, focus) 잘림 — task 넷
 - backlog **bk-bb11a1** (plan source 만료 분기 절차)
-- M2(호환)·M3(migration skill)는 **아직 안 잘랐다** — M1 종료 후 이 loop를 이어 자른다. 그래서 loop는 열린 채다
+- M2(호환)·M3(migration skill)는 **아직 안 잘랐다** — M1 종료 후 이 flux를 이어 자른다. 그래서 flux는 열린 채다
 | ms-013 fitness 중 방향 전환 | 개명 범위: 코드·플러그인만(기록·spec은 역사로 보존) vs 전면 | **전면** — 대소문자만 구분해 과감하게, 기록·히스토리도 싹다. v0.18 커밋 트리에 reap 문자열을 아예 남기지 않는다. 절차: reap 리포 안에서 replace를 먼저 완수 → v0.18을 apocalypse 시점으로 되돌려 재적재 | **사람이 agent의 보수적 범위를 기각** |
 
-- **ms-013 닫힘 (2026-08-31)** — reap 리포 `v0.18` 브랜치: 1d1429b(apocalypse) · f164a05(snapshot, 출처 1a0b8fe) · 9993230(승계물). 트리·신규 커밋 메시지에 옛 이름 0건. main 55c020d(구 기획 정리), gen-101은 legacy/v017-plugin-distribution 보존. **다음: 이 loop를 이어 M2(호환)를 자른다**
+- **ms-013 닫힘 (2026-08-31)** — reap 리포 `v0.18` 브랜치: 1d1429b(apocalypse) · f164a05(snapshot, 출처 1a0b8fe) · 9993230(승계물). 트리·신규 커밋 메시지에 옛 이름 0건. main 55c020d(구 기획 정리), gen-101은 legacy/v017-plugin-distribution 보존. **다음: 이 flux를 이어 M2(호환)를 자른다**
 | 기능 대조 6건 (ms-014 task 1) | 각각 만든다/안 만든다 | **전부 안 만든다/안 가져온다** — check-version(대상 없음)·uninstall(spec 유지, 구 자산은 M3)·config·status(YAGNI)·goal(plan source가 대체)·notice(배포 단계) | 위임 하 agent 판정 (gen-0066) |
 - **ms-014 닫힘 (2026-08-31)** — v0.18: floor 0.18.0 + docs/release-policy.md(latest 금지·next 태그). 기능 6건 전부 안 만듦 확정. main 363e6e3(tests 4b29014): 0.17.8 다리 — upgrade-bridge 모듈(일일 캐시·next 안내)·installUpgradeAgent·agent stub(docs/upgrade-agent/). 전 스위트 통과(unit 829·e2e 391·scenario 62). **다음: M3(migration skill)를 자른다**
 | 이주 매핑 미결 3건 (ms-015 task 1) | 각 2안 | 열린 generation은 **block**(동일 원칙) · design/은 **idea/files/**(승격은 안내만) · lineage/sequence는 **비승계**(원본 보존이 이력) | 위임 하 agent 판정 (gen-0070) |

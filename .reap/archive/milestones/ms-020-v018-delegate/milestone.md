@@ -11,7 +11,7 @@ closedAt: 2026-09-04T01:25:25Z
 ---
 ## Background
 
-사람 Q4 답 B(2026-09-04). v0.17 `/reap.evolve`의 값(주 세션 컨텍스트 보호)을 `evolve`의 선택지로. 규범은 [07-i18n-docs-delegate.md](../../../../docs/reap-plan/reap_v_0_18_release/07-i18n-docs-delegate.md)의 G12. loop-0004 자체가 이 모드로 돌았다 — gen-0076~0082의 subagent 지시문이 brief의 원형이다.
+사람 Q4 답 B(2026-09-04). v0.17 `/reap.evolve`의 값(주 세션 컨텍스트 보호)을 `evolve`의 선택지로. 규범은 [07-i18n-docs-delegate.md](../../../../docs/reap-plan/reap_v_0_18_release/07-i18n-docs-delegate.md)의 G12. flux-0004 자체가 이 모드로 돌았다 — gen-0076~0082의 subagent 지시문이 brief의 원형이다.
 
 ## Exit Criteria
 

@@ -35,4 +35,4 @@ ps-4b485d `04-migration-skill.md`의 매핑 아홉에 **`environment/`가 없다
 
 ## 릴리스 노트
 
-`RELEASE_NOTES.md`를 v0.17 형식(첫 `## ` 블록이 현재 버전, release.yml이 그 블록만 GitHub Release 본문으로 뽑는다)으로 둔다. 0.18.0 절은 사용자에게 의미 있는 것만 — 무엇이 바뀌었나(플러그인 배포·3단 저장소·loop/milestone/generation·doctor·index 유지), 무엇이 사라졌나(01-gap의 "만들지 않는다"), 어떻게 오나(다리·migrate).
+`RELEASE_NOTES.md`를 v0.17 형식(첫 `## ` 블록이 현재 버전, release.yml이 그 블록만 GitHub Release 본문으로 뽑는다)으로 둔다. 0.18.0 절은 사용자에게 의미 있는 것만 — 무엇이 바뀌었나(플러그인 배포·3단 저장소·flux/milestone/generation·doctor·index 유지), 무엇이 사라졌나(01-gap의 "만들지 않는다"), 어떻게 오나(다리·migrate).

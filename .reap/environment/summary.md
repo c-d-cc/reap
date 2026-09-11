@@ -5,12 +5,12 @@
 ```
 .reap/                 REAP가 자기 자신에게 쓰는 저장소
   map.md                이 디렉토리가 무엇을 어디에 두는지 (씨앗)
-  plan/                 sources.yml · conventions/ · loops/ (기획 축의 사이클, 3단 밖)
+  plan/                 sources.yml · conventions/ (plan source 등록부, 3단 밖)
   vision/               하려는 것 — memory · milestones
-  life/                 하는 중 — generations · backlog · loops
-  archive/              끝난 것 — generations · milestones · backlog · loops · idea
+  life/                 하는 중 — generations · backlog · flux
+  archive/              끝난 것 — generations · milestones · backlog · flux · idea
 docs/superpowers/specs/reap/   plan source ps-4f2a91 (설계 문서 10개)
-plugin/                 skill 10종(evolve·carve-milestone·complete·loop·interview·init·report-issue·orchestrate·help·migrate) + shared 어휘 문서 + SessionStart 훅
+plugin/                 skill 10종(evolve·carve-milestone·complete·flux·interview·init·report-issue·orchestrate·help·migrate) + shared 어휘 문서 + SessionStart 훅
 src/
   cli.ts        엔트리, 인자 파싱, 디스패치, 출력 규약 (--version · init[--check] · make · mark · bind · ctx · plan · seq · carrier · doctor · index · orch)
   store.ts      .reap/ 레이아웃 — 루트 탐색, 경로, config, 세션, workspace-id.
@@ -37,7 +37,7 @@ tests/          <module>.test.ts · helpers.ts · hook.test.sh (셸) — submodu
 - 저장 레이아웃 3단 · 세대 id 한 계열(`gen-NNNN-<type>`) · `fix` 유형 · `cleanup` skill
 - **milestone 디렉토리에는 `milestone.md`·`handoff.md`·`tasks/`뿐이다.** `context.md`는 21세대 동안 0바이트여서, `decisions.md`는 spec 밖에 규범이 사는 둘째 자리를 만들어서 내렸다. 규범은 `05-knowledge.md`의 "결정 로그를 두지 않는다" 절
 - **frontmatter의 시간은 종류를 가리지 않고 초 단위 ISO다.** 예외는 sequence 레지스트리의 `createdAt` 칸 하나(날짜)
-- 명령은 `init` · `make`(loop·milestone·generation·backlog·idea·plan-source·hook) · `mark`(loop·generation·backlog·milestone·idea) · `ctx` · `plan sources|convention` · `seq` · `carrier new|list` · `doctor`. spec이 약속한 `decide`는 **만들지 않기로 했고**, spec의 명령이 전부 있다. `index`는 이 리포에서 파일 26·심볼 173·해석률 99%
+- 명령은 `init` · `make`(flux·milestone·generation·backlog·idea·plan-source·hook) · `mark`(flux·generation·backlog·milestone·idea) · `ctx` · `plan sources|convention` · `seq` · `carrier new|list` · `doctor`. spec이 약속한 `decide`는 **만들지 않기로 했고**, spec의 명령이 전부 있다. `index`는 이 리포에서 파일 26·심볼 173·해석률 99%
 - **YAML 파서는 들이지 않는다.** `sources.yml`은 `Bun.YAML.parse`로 읽는다(Bun 1.3 내장). 쓰기는 손 형식이다 — `Bun.YAML.stringify`는 흐름 형식으로 내서 손으로 쓴 파일과 모양이 달라진다
 
 ## 빌드와 테스트

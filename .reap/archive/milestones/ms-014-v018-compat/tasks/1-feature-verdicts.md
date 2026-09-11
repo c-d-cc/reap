@@ -14,4 +14,4 @@
 ## 완료 판정
 
 - 6건 전부 판정 + 근거가 ps-4b485d(03-compat)에 반영, 미결 표 소멸
-- 새 할 일이 생긴 판정은 backlog 항목으로. loop-0003 Dialogue에 위임 판정 기록
+- 새 할 일이 생긴 판정은 backlog 항목으로. flux-0003 Dialogue에 위임 판정 기록

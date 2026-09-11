@@ -16,6 +16,6 @@ endCommit: 2a78357
 
 ## Outcome
 
-- `reap seq [계열|id]` — 레지스트리 넷(milestone·generation·loop·source)을 이스케이프를 되돌려 낸다. backlog·idea는 레지스트리가 없다고 말한다
+- `reap seq [계열|id]` — 레지스트리 넷(milestone·generation·flux·source)을 이스케이프를 되돌려 낸다. backlog·idea는 레지스트리가 없다고 말한다
 - `mark idea --archived` → `archive/idea/<kind>/`. status는 그대로(backlog와 같은 모양). `listEntries("idea")`가 archive도 본다. `init`이 `archive/idea/`를 만든다
 - `cleanup`에 idea 절, spec `03`·`04`, `map.md`+템플릿, `summary.md`. 143 통과

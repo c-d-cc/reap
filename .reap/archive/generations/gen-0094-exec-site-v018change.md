@@ -12,7 +12,7 @@ endCommit: c87f5a0
 ---
 ## Intent
 
-사람 요청(2026-09-04): 홈 상단 헤더바 바로 아래에 약 50px 높이의 breaking change(v0.18.0) 띠 — `/docs/v018change`·`/docs/migration` 링크. 그리고 `/docs/v018change` 페이지 신설: 무엇이 바뀌었는가(두 산출물·3단 저장소·loop/milestone/generation·skill 10종·hooks·en 기본·ko 카탈로그, 사라진 것, 오는 법). 사이드바·라우트·prerender 목록에 추가.
+사람 요청(2026-09-04): 홈 상단 헤더바 바로 아래에 약 50px 높이의 breaking change(v0.18.0) 띠 — `/docs/v018change`·`/docs/migration` 링크. 그리고 `/docs/v018change` 페이지 신설: 무엇이 바뀌었는가(두 산출물·3단 저장소·flux/milestone/generation·skill 10종·hooks·en 기본·ko 카탈로그, 사라진 것, 오는 법). 사이드바·라우트·prerender 목록에 추가.
 
 ## Delegation
 

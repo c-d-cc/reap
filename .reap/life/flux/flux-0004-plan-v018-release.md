@@ -11,7 +11,7 @@ milestones: []
 ---
 ## Question
 
-ps-4b485d(귀환 작전)는 "배포 전까지"에서 끝났다. 이 loop는 그 다음 — **v0.18을 완성해 내보내는 길**을 정한다. 사람은 2026-09-03에 개발 완료 판단까지의 결정을 전부 agent에게 위임했다(승인 생략). 답할 것 넷:
+ps-4b485d(귀환 작전)는 "배포 전까지"에서 끝났다. 이 flux는 그 다음 — **v0.18을 완성해 내보내는 길**을 정한다. 사람은 2026-09-03에 개발 완료 판단까지의 결정을 전부 agent에게 위임했다(승인 생략). 답할 것 넷:
 
 ① **v0.17 대조** — 0.17 사용자가 일상적으로 쓰던 것 중 v0.18에 자리가 없는 것은 무엇이고, 그중 무엇을 만들고 무엇을 "안 만든다"로 확정하는가. 08-delivery의 폐기 표와 gen-0066 판정 6건은 유지한다.
 ② **이주 후 사용성** — 이주한 프로젝트가 v0.18에서 실제로 돌아가는가(migrate skill 재검증 + upgrade agent 왕복).
@@ -25,7 +25,7 @@ ps-4b485d(귀환 작전)는 "배포 전까지"에서 끝났다. 이 loop는 그 
 - **0.17.8 다리** (`~/cdws/reap_v17`, 브랜치 v0.17, origin과 동기): 일일 캐시·`next` 안내·`reap update`가 upgrade agent를 `raw.githubusercontent.com/c-d-cc/reap/main/docs/upgrade-agent/reap-upgrade.md`에서 받아 `~/.claude/agents/`에 설치. **아직 0.17.8로 bump 안 됨**(package.json 0.17.7). upgrade agent 본문은 "npm i -g @next → 플러그인 설치(README 따라) → /reap:migrate"
 - **npm 현재**: latest 0.17.7, alpha 0.16.0-alpha, `next` 없음
 - **마켓플레이스**: `c-d-cc/plugins`(~/cdws/ctod-plugins)는 submodule `plugins/reap2`(c-d-cc/reap2)를 `reap2` 이름으로 싣고 있다. v0.18 plugin.json의 name은 `reap`. 개발 마켓플레이스 `reap2-dev`는 `~/cdws/reap2/plugin`(구 개발 리포)을 가리킨다 — reap 리포의 `plugin/`을 가리키지 않는다
-- **개발 리포 reap2**: src·plugin이 이 브랜치와 동일(migrate skill만 여기에만 있음). 68커밋 미푸시. PATH의 `reap`는 reap2/dist/reap이다. **이 loop부터는 reap 리포 v0.18이 정본이고 reap2는 더 갱신하지 않는다**
+- **개발 리포 reap2**: src·plugin이 이 브랜치와 동일(migrate skill만 여기에만 있음). 68커밋 미푸시. PATH의 `reap`는 reap2/dist/reap이다. **이 flux부터는 reap 리포 v0.18이 정본이고 reap2는 더 갱신하지 않는다**
 - **v0.18 hooks**: `.reap/hooks/`는 init이 만들지만 비어 있고 `make hook`도 이벤트 발화도 없다(07-orchestrate "아직 아니다"). v0.17은 hooks 기제가 있었다 — 대조 항목
 
 ## Dialogue
@@ -48,6 +48,6 @@ ps-4b485d(귀환 작전)는 "배포 전까지"에서 끝났다. 이 loop는 그 
 
 - 닫힌 milestone: ms-016(npm 패키지·워크플로) · ms-017(hooks) · ms-018(이주 보강·문서) · ms-019(왕복 검증·0.17.8·마켓플레이스·최종 재검증) · ms-020(evolve 위임 모드) · ms-021(en 전환·ko 카탈로그) · ms-023(tests submodule). 세대 gen-0076~0092
 - 열린 것: **ms-022**(사이트 ko 열두 쪽 — 사람 검수 → en 확장). 발행은 사람 지시 — 절차는 `archive/milestones/ms-019-v018-verify-release/handoff.md`
-- 이 loop는 ms-022가 닫힐 때 닫는다. ps-5e948f는 0.18.0 발행 뒤 소비 완료
+- 이 flux는 ms-022가 닫힐 때 닫는다. ps-5e948f는 0.18.0 발행 뒤 소비 완료
 | 문서 사이트 도구 (사람 검수, 2026-09-04) | VitePress 새 사이트(agent 결정) / 기존 디자인 유지 | **기존 reap.cc 디자인·톤을 그대로 유지하고 내용만 v0.18로** — VitePress는 기각 | 사람이 agent 결정을 뒤집음. "새 사이트"는 새 도구가 아니라 새 내용이었다 |
 | lineage 승계 (사람 검수, 2026-09-05) | 비승계(gen-0070 위임 판정 — 원본이 이력) / archive로 승계 | **archive/generations로 승계, 번호 이어감** — `.reap-v0_17`을 지우면 이력이 사라진다 | 사람이 agent 판정을 뒤집음. ms-024 gen-0101 |

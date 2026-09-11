@@ -15,7 +15,7 @@ endCommit: c15daf0
 GitHub issue #32를 해소한다. `slugify`가 제목 전체를 슬러그로 써서 한글 제목 80자 안팎이면 basename이 리눅스 NAME_MAX(255바이트)를 넘고, macOS에서 만든 파일이 리눅스 컨테이너에서 풀리지 않는다. slug가 사람이 읽는 한글 이름표라는 설계는 그대로 두고 길이만 잡는다.
 
 끝나는 조건(issue의 expected):
-- `reap make backlog|idea|loop|generation|milestone --title "<긴 한글 제목>"`이 만든 기록 파일의 basename이 NAME_MAX 안에 있다 — `slugify`가 UTF-8 80바이트 상한을 `-` 경계에서 자른다
+- `reap make backlog|idea|flux|generation|milestone --title "<긴 한글 제목>"`이 만든 기록 파일의 basename이 NAME_MAX 안에 있다 — `slugify`가 UTF-8 80바이트 상한을 `-` 경계에서 자른다
 - `--slug`로 넘긴 이름이 접두어 포함 200바이트를 넘으면 `make`가 거부하고 짧은 `--slug`를 권한다
 - `doctor`가 `.reap/` 안의 basename 200바이트 초과 항목을 결함으로 보고한다 — 이미 만들어진 저장소를 구제한다
 

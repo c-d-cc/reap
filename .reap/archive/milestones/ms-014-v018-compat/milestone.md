@@ -12,7 +12,7 @@ closedAt: 2026-08-31T14:06:16Z
 
 ## Background
 
-loop-0003의 M2. 근거는 `ps-4b485d:03-compat.md`와 v0.18 브랜치 `docs/inherited/plugin-distribution.md` §9(0.17.8 다리 설계 — latest를 0.17.8에 두고 0.18은 `next` 태그, floor는 승격 대비 안전장치, upgrade agent가 이행 수행). 전제 확인: §9 설계가 사람의 "둘 다" 결정(latest 회피 + floor)과 정합. main의 check-version 코드는 온전(55c020d 기준). 발행은 전 구간 범위 밖.
+flux-0003의 M2. 근거는 `ps-4b485d:03-compat.md`와 v0.18 브랜치 `docs/inherited/plugin-distribution.md` §9(0.17.8 다리 설계 — latest를 0.17.8에 두고 0.18은 `next` 태그, floor는 승격 대비 안전장치, upgrade agent가 이행 수행). 전제 확인: §9 설계가 사람의 "둘 다" 결정(latest 회피 + floor)과 정합. main의 check-version 코드는 온전(55c020d 기준). 발행은 전 구간 범위 밖.
 
 ## Exit Criteria
 

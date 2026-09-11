@@ -18,7 +18,7 @@ root: `./docs/superpowers/specs/reap`
 
 ## 도구가 이 소스를 어떻게 다루는가
 
-`sources.yml`의 이 행을 `reap plan sources`가 읽고, milestone·loop의 `--ref ps-4f2a91:<파일>`을 `make`가 검증한다 — 파일이 이 root 안에 실재해야 한다(앵커는 안 본다). 문서 파일명을 바꾸면 그것을 인용한 열린 milestone의 `refs`가 깨진다. **바꾸기 전에 `grep -rn "ps-4f2a91:<옛이름>" .reap/vision`으로 인용을 찾는다.**
+`sources.yml`의 이 행을 `reap plan sources`가 읽고, milestone·flux의 `--ref ps-4f2a91:<파일>`을 `make`가 검증한다 — 파일이 이 root 안에 실재해야 한다(앵커는 안 본다). 문서 파일명을 바꾸면 그것을 인용한 열린 milestone의 `refs`가 깨진다. **바꾸기 전에 `grep -rn "ps-4f2a91:<옛이름>" .reap/vision`으로 인용을 찾는다.**
 
 ## 하지 말 것
 

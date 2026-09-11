@@ -9,7 +9,7 @@ closedAt: 2026-09-05T02:40:12Z
 ---
 ## Background
 
-사람 질문(2026-09-05): "`/reap:complete`를 사용자가 실행하는 스킬로 유지하는 게 맞나." 스킬 10종이 전부 `/` 메뉴에 나오지만 실제로 사람이 부르는 것은 시작을 지시하거나 사람이 개입하는 일곱(init·evolve·loop·interview·orchestrate·migrate·report-issue)이고, 나머지 셋(complete·carve-milestone·cleanup)은 작업 흐름 안에서 agent가 판단해 부른다. Claude Code 스킬 frontmatter `user-invocable: false`가 메뉴에서 숨기되 agent의 Skill 호출은 그대로 둔다(code.claude.com/docs/en/skills.md "Control who invokes a skill"). 사람 답: 이 방향으로, 단 interview는 사람도 부를 수 있게. 그리고 시작하기 페이지에서 complete 설명 자체를 뺀다.
+사람 질문(2026-09-05): "`/reap:complete`를 사용자가 실행하는 스킬로 유지하는 게 맞나." 스킬 10종이 전부 `/` 메뉴에 나오지만 실제로 사람이 부르는 것은 시작을 지시하거나 사람이 개입하는 일곱(init·evolve·flux·interview·orchestrate·migrate·report-issue)이고, 나머지 셋(complete·carve-milestone·cleanup)은 작업 흐름 안에서 agent가 판단해 부른다. Claude Code 스킬 frontmatter `user-invocable: false`가 메뉴에서 숨기되 agent의 Skill 호출은 그대로 둔다(code.claude.com/docs/en/skills.md "Control who invokes a skill"). 사람 답: 이 방향으로, 단 interview는 사람도 부를 수 있게. 그리고 시작하기 페이지에서 complete 설명 자체를 뺀다.
 
 ## Exit Criteria
 

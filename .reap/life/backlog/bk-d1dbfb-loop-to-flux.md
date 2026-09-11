@@ -21,20 +21,20 @@ status: open
 
 | 층 | 무엇 |
 |---|---|
-| id | `loop-NNNN-<type>` → `flux-NNNN-<type>`. `Kind`의 `"loop"` → `"flux"`, 레지스트리 `sequence/flux.md` → `sequence/flux.md` |
-| 저장 | `life/flux/` → `life/flux/`, `archive/flux/` → `archive/flux/` |
-| 명령 | `make flux` → `make flux`, `mark flux` → `mark flux`. 유형 `plan\|design\|uiux\|idea`는 그대로 |
+| id | `loop-NNNN-<type>` → `flux-NNNN-<type>`. `Kind`의 `"loop"` → `"flux"`, 레지스트리 `sequence/loop.md` → `sequence/flux.md` |
+| 저장 | `life/loops/` → `life/flux/`, `archive/loops/` → `archive/flux/` |
+| 명령 | `make loop` → `make flux`, `mark loop` → `mark flux`. 유형 `plan\|design\|uiux\|idea`는 그대로 |
 | 코드 | `id.ts`(24) · `entries.ts`(20) · `cli.ts`(15) · `store.ts`(10) · `ctx.ts`(10) · `doc.ts`(6) · `doctor.ts`(3) · `templates.ts`(4) · 메시지 en·ko(32) |
 | skill | `plugin/skills/loop/` → `plugin/skills/flux/`. 참조하는 skill 일곱 — evolve(18)·init(12)·help(8)·carve-milestone(8)·interview(7)·report-issue(4)·complete(4)·record-vocabulary(4) |
 | spec | `ps-4f2a91` 여섯 문서 — 02-flow(41)·06-agent(40)·03-storage(20)·04-commands(15)·05-knowledge(10)·09-roadmap(5) |
 | 문서 | 사이트 ko(142) · README 둘 |
 | 검사 | `tests/loop.test.ts`(102) → `flux.test.ts` · doctor·plan 테스트 |
-| 이 리포의 데이터 | 기록 셋(`loop-0001`·`0003`·`0004`), 레지스트리 5행(`flux-0002-idea` 포함), `from:`으로 가리키는 milestone 10여 개 |
+| 이 리포의 데이터 | 기록 셋(`loop-0001`·`0003`·`0004`), 레지스트리 5행(`loop-0002-idea` 포함), `from:`으로 가리키는 milestone 10여 개 |
 
 ## 다른 프로젝트를 위한 일회용 스킬
 
 **내부 프로젝트 하나가 0.18을 미리 쓰고 있다.** 거기 이미 만들어진 loop artifact를 flux로 옮길 **일회용 스킬 `loop-to-flux`**를 만든다.
 
 - **배포하지 않는다** — 마켓플레이스에도 `plugin/skills/`에도 올리지 않는다. 사람이 직접 스킬을 지정해 그 프로젝트에서 한 번 돌린다
-- 옮기는 것: `life/flux/`·`archive/flux/` 디렉토리와 파일 이름, 기록의 `id:` frontmatter, `sequence/flux.md`, 그것을 `from:`으로 가리키는 milestone·backlog·generation
+- 옮기는 것: `life/loops/`·`archive/loops/` 디렉토리와 파일 이름, 기록의 `id:` frontmatter, `sequence/loop.md`, 그것을 `from:`으로 가리키는 milestone·backlog·generation
 - 되돌릴 수 없는 일이므로 **먼저 무엇을 바꿀지 보이고 사람의 동의를 받은 뒤** 적용한다. `scripts/cleanup-home.mjs`가 쓰는 모양(목록 → 동의 → `--apply`)이 선례다

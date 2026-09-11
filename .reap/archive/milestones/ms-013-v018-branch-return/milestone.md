@@ -12,7 +12,7 @@ closedAt: 2026-08-30T23:53:06Z
 
 ## Background
 
-loop-0003이 낳았다. 근거는 `ps-4b485d:02-branch-return.md`. 자르기 전 전제 확인 (2026-08-31 실측):
+flux-0003이 낳았다. 근거는 `ps-4b485d:02-branch-return.md`. 자르기 전 전제 확인 (2026-08-31 실측):
 
 - reap 트리는 건강하다 — `bun test` 172 전체 통과
 - reap 리포에 `v0.18` 브랜치는 없다

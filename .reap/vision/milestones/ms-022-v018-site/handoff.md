@@ -84,7 +84,7 @@ release-notes는 이미 실제 페이지다 — 범위에서 제외인지 확인
 
 gen-0097-exec가 task 4(핵심 개념 세 쪽 + Plan 축 네 쪽)를 전부 마쳤다.
 `git log --oneline -2`: 핵심 개념 3(두 축·판단확정사실·저장 구조) →
-Plan 축 4(Loop·Plan·Idea와 Research·Milestone 자르기) 두 커밋. 세대는
+Plan 축 4(Flux·Plan·Idea와 Research·Milestone 자르기) 두 커밋. 세대는
 닫지 않았다 — 사람 검수 대기.
 
 **검수할 것**
@@ -94,7 +94,7 @@ Plan 축 4(Loop·Plan·Idea와 Research·Milestone 자르기) 두 커밋. 세대
   출력과 결함/참고 분류가 `04-commands.md`의 doctor 절과 어긋나지 않는지
 - 저장 구조(`/docs/storage`) — 트리가 지금 리포 `.reap/`와 맞는지(세대가
   더 진행되면 gen 번호가 낡는다 — 정상. 구조 자체가 맞는지가 중요)
-- Loop(`/docs/loop`) — 유형 넷 표, 실물 예시(flux-0001-plan-auth)
+- Flux(`/docs/flux`) — 유형 넷 표, 실물 예시(flux-0001-plan-auth)
 - Plan(`/docs/plan-source`, 제목 "Plan") — 등록부·규약·인용·소비 완료
   네 절이 tasks/4의 요구를 다 담는지, `sources.yml` 실물이 최신인지
 - Idea와 Research(`/docs/idea`) — 실물 예시(idea-67a149)와 졸업 조건
@@ -138,7 +138,7 @@ gen-0096-exec가 task 3(목차 골격 30라우트, 홈 복원, 시작하기 4쪽
 
 ## 다음 task 4 — 핵심 개념 + Plan 축
 
-8쪽: two-axes·three-layers·storage·loop·plan-source·idea·carve-milestone
+8쪽: two-axes·three-layers·storage·flux·plan-source·idea·carve-milestone
 (+ carve-milestone은 Plan 축 소속이므로 4묶음 아님, tasks/4 문서로 범위 확정
 필요). `concepts.tsx`가 이번에 지워졌지만 git 이력(커밋 `02d7457` 이전)에
 layersTitle·unitsTitle·splitHeaders·storageTree 등 재사용 가능한 초안이

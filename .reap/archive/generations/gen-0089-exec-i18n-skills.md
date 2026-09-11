@@ -26,7 +26,7 @@ brief로 subagent에게. worktree `../reap-wt-i18n`(브랜치 `ms-021-i18n`, v0.
 |---|---|
 | evolve/SKILL.md | 11=11 |
 | evolve/references/delegate-brief.md | 7=7 |
-| loop/SKILL.md | 7=7 |
+| flux/SKILL.md | 7=7 |
 | interview/SKILL.md | 7=7 |
 | carve-milestone/SKILL.md | 9=9 |
 | cleanup/SKILL.md | 10=10 |
@@ -52,7 +52,7 @@ brief로 subagent에게. worktree `../reap-wt-i18n`(브랜치 `ms-021-i18n`, v0.
 - `./dist/reap doctor` — 결함 0 · 참고 1(`map.md가 씨앗과 다르다` — 이 리포의 실물 `.reap/map.md`는 한국어라 en 씨앗과 항상 다르다. 불가침이므로 그대로 둔다. 정상)
 - `/private/tmp/.../scratchpad/i18n-skills/verify-repo`에서 `dist/reap init` 뒤 `claude --plugin-dir <이 worktree>/plugin -p "Print the injected reap status block verbatim and list every /reap: skill name"` 1회 — 상태 블록이 `Response language: en`·`Memory:`·`Structure:`·`To start work, /reap:evolve; to wrap up, /reap:complete`로(handoff 대응표와 일치), skill 10종 전부 `reap:<name>`으로 나열됨을 확인
 
-**커밋.** `a293da1`(evolve·loop·interview) · `7ac3d48`(carve-milestone·cleanup·complete·init) · `1411e29`(migrate·orchestrate·report-issue·어휘·훅 주석·plugin.json) · `cb0a008`(템플릿 en + 파급 테스트 수정) · `afb9151`(doctor 판정어 합집합 + 신규 테스트)
+**커밋.** `a293da1`(evolve·flux·interview) · `7ac3d48`(carve-milestone·cleanup·complete·init) · `1411e29`(migrate·orchestrate·report-issue·어휘·훅 주석·plugin.json) · `cb0a008`(템플릿 en + 파급 테스트 수정) · `afb9151`(doctor 판정어 합집합 + 신규 테스트)
 
 ## Dead Ends
 
