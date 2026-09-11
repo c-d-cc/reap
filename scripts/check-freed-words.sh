@@ -25,7 +25,7 @@ allow_path() {
 # 문장 단위 예외. 개명 이유를 설명하는 자리와 진짜 프로그래밍 루프
 allow_line() {
   printf '%s' "$1" | grep -qiE \
-    'loop-to-flux|개명|loop을 flux로|A loop means|named .flux., not .loop.|word .loop. is left|loop에서 flux로|loop.{0,4}이었다가|ralph loop|무한 루프|개발 루프|확인 루프|both loops are empty|this loop still examine|for \(|while \('
+    'loop-to-flux|개명|loop을 flux로|life/loops|archive/loops|sequence/loop\.md|옛 이름|이주 전|A loop means|named .flux., not .loop.|word .loop. is left|loop에서 flux로|loop.{0,4}이었다가|ralph loop|무한 루프|개발 루프|확인 루프|both loops are empty|this loop still examine|for \(|while \('
 }
 
 while IFS= read -r -d '' f; do
@@ -37,7 +37,7 @@ while IFS= read -r -d '' f; do
     printf '  FAIL %s:%s  %s\n' "$f" "$n" "$(printf '%s' "$line" | cut -c1-90)"
     fail=1
   done < <(grep -in "loop" "$f" 2>/dev/null)
-done < <(git ls-files -z)
+done < <(git ls-files -z --cached --others --exclude-standard)
 
 if [ $fail -eq 0 ]; then
   echo "ok: the freed word 'loop' appears only where it is allowed"
