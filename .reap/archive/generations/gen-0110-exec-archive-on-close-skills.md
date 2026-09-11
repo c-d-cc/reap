@@ -24,7 +24,7 @@ ms-028 tasks/2. `cleanup` skill 삭제, carve-milestone 종료 순서를 fitness
 commit 915e9ca(주 트리)·tests ff56696. plugin-skills·docs-surface ok, bun test 238, doctor 결함 0, 플러그인 재설치.
 
 - `plugin/skills/cleanup/` 삭제. carve-milestone 종료 순서 둘(fitness → mark), 그 자리에 cleanup이 왜 없어졌는지 한 문단. complete: "닫힘이 곧 이동 — 기록을 먼저 끝내고 닫는 커밋이 rename을 싣는다". help 표 문구, loop 두 문장, migration-map #3에서 `--archived` 줄 제거
-- spec: 03-storage "life는 작업 세트다" → "닫히면 바로 archive다"(뒤집은 이유 둘), 02-flow 표·도식·loop 절, 04-commands mark loop·milestone 종료, 05-knowledge backlog, 06-agent cleanup 행 삭제·loop 닫기, 08-delivery skill 목록
+- spec: 03-storage "life는 작업 세트다" → "닫히면 바로 archive다"(뒤집은 이유 둘), 02-flow 표·도식·loop 절, 04-commands mark flux·milestone 종료, 05-knowledge backlog, 06-agent cleanup 행 삭제·loop 닫기, 08-delivery skill 목록
 - map.md 템플릿(en)과 이 리포의 `.reap/map.md`(ko) 여섯 줄 동기화
 - summary.md: 해당 없음. 독립 검증: 생략 — skill·spec 본문
 

@@ -16,8 +16,8 @@ export type Paths = {
   plan: string;
   planSources: string;
   planConventions: string;
-  loops: string;
-  archiveLoops: string;
+  flux: string;
+  archiveFlux: string;
   archiveIdea: string;
   milestones: string;
   memory: string;
@@ -46,8 +46,8 @@ export type Paths = {
  *
  * **최상위를 가르는 것은 유형이 아니라 시간이다.** vision(하려는 것) · life(하는 중) · archive(끝난 것).
  * **`plan/`은 그 3단 밖이다** — plan source는 리포 밖을 가리키는 등록부라
- * "하려는 것 / 사는 것 / 끝난 것"이라는 시간축에 얹히지 않는다. loop는 시간축에
- * 얹히므로(열리고 닫히고 archive로 간다) `life/loops/`다 — 등록부가 아니다.
+ * "하려는 것 / 사는 것 / 끝난 것"이라는 시간축에 얹히지 않는다. flux는 시간축에
+ * 얹히므로(열리고 닫히고 archive로 간다) `life/flux/`다 — 등록부가 아니다.
  */
 export const DIRS = [
   "templates",
@@ -59,12 +59,12 @@ export const DIRS = [
   "life",
   "life/generations",
   "life/backlog",
-  "life/loops",
+  "life/flux",
   "archive",
   "archive/milestones",
   "archive/generations",
   "archive/backlog",
-  "archive/loops",
+  "archive/flux",
   "archive/idea",
   "genome",
   "environment",
@@ -103,8 +103,8 @@ export function paths(root: string): Paths {
     plan: join(reap, "plan"),
     planSources: join(reap, "plan", "sources.yml"),
     planConventions: join(reap, "plan", "conventions"),
-    loops: join(life, "loops"),
-    archiveLoops: join(archive, "loops"),
+    flux: join(life, "flux"),
+    archiveFlux: join(archive, "flux"),
     archiveIdea: join(archive, "idea"),
     milestones: join(vision, "milestones"),
     memory: join(vision, "memory"),

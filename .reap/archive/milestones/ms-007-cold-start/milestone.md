@@ -31,7 +31,7 @@ closedAt: 2026-08-30T14:48:38Z
 2. **`init` skill이 있다.** 질문지와 순서, 답을 쓰는 자리를 갖는다. **묻는 규율 문장은 한 줄도 갖지 않는다** — 있으면 경계가 틀린 것이다
 3. **진입 조건 셋이 각각 다뤄진다** — 새 폴더 · 기존 코드베이스 · 씨앗인 채 남은 `.reap/`. 씨앗 판정은 번들 템플릿과의 비교
 4. **`evolve`·`carve-milestone`이 `interview`를, `init`이 `interview`와 `carve-milestone`을 가리킨다** — 호출 지시만, 규율 본문 없이
-5. **`init`이 첫 loop로 열린다** — `make loop --type plan`. 재개는 `loop` skill이 열린 loop를 보는 것. `ms-012`(loop 도구)가 먼저 있어야 한다
+5. **`init`이 첫 loop로 열린다** — `make flux --type plan`. 재개는 `loop` skill이 열린 loop를 보는 것. `ms-012`(loop 도구)가 먼저 있어야 한다
 6. `environment/summary.md`·`08-delivery.md`의 skill 목록이 일곱을 말한다
 7. `bun test` · `typecheck` 0 · `hook.test.sh` · `localUpdate` 후 **새 세션에서 두 skill 확인**
 
@@ -46,7 +46,7 @@ closedAt: 2026-08-30T14:48:38Z
 - **`invariants.md`·`lessons.md` 채우기** — 전자는 사람만, 후자는 겪은 게 없다
 - **`.reap/`가 없는 곳에서 훅이 안내하는 것** — 아래 Open Questions
 - **`make plan-source`** — `ms-011`의 것. 없으면 `init`은 손으로 등록하는 법을 안내한다
-- **`make loop`·`loop` skill** — `ms-012`의 것. `init`은 그것을 부른다
+- **`make flux`·`loop` skill** — `ms-012`의 것. `init`은 그것을 부른다
 
 ## Plan Items
 

@@ -7,7 +7,7 @@ What's worth writing in a generation record, **and what each item means**.
 | Intent | Why this generation opens, what makes it done |
 | Working Plan | The current approach. Overwritten as it changes |
 | Tasks | The split-up work and its progress. Has value when work has several branches or spans sessions |
-| References | What was used as grounds — plan citations, code locations, external docs, the loop that produced this |
+| References | What was used as grounds — plan citations, code locations, external docs, the flux that produced this |
 | Open Questions | What's still undecided, what has to go to a human |
 | Dead Ends | Approaches tried and folded, and why. Keeps the next session from walking the same path |
 | Delegation | If delegated — who got the brief and what came back (optional) |
@@ -24,18 +24,18 @@ What's worth writing in a generation record, **and what each item means**.
 
 **Nobody checks it.** A generation isn't blocked by what got written. Still, it's written because a record with only an outcome stays empty until it closes, meaning **the record is useless while the generation is running.** What's needed exactly when a session dies mid-work or hands off to another is "what was this generation trying to do."
 
-## Vocabulary for a loop record
+## Vocabulary for a flux record
 
 | Item | What it holds |
 |---|---|
-| Question | What this is trying to decide. What makes the record useful while a loop spans several sessions |
+| Question | What this is trying to decide. What makes the record useful while a flux spans several sessions |
 | Dialogue | Divergence points with the human — what diverged, what the options were, what the human picked, whether it adopted the recommendation or gave a different answer. Not a transcript |
 | Explored | What was looked at, the assumption checked against, what real traces confirmed |
 | Dead Ends | Folded approaches and why. The only thing that stops the plan arc from flipping |
 | Outcome | What was written to the plan source, the milestone carved, what went to `idea/` |
 | Open Questions | What was left with no conclusion, and where it went |
 
-**It's current state, not a log** applies to a loop too — except `Dialogue` accumulates in the order things diverged. That's not history, it's the fact of *whose answer is which*.
+**It's current state, not a log** applies to a flux too — except `Dialogue` accumulates in the order things diverged. That's not history, it's the fact of *whose answer is which*.
 
 ## Vocabulary for a milestone record
 

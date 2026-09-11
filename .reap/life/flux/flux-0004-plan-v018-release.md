@@ -1,5 +1,5 @@
 ---
-id: loop-0004-plan
+id: flux-0004-plan
 slug: v018-release
 type: plan
 title: v0.18 완성과 출시 — v0.17 대조·공백 보충·이주·배포

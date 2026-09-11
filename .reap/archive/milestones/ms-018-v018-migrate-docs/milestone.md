@@ -2,7 +2,7 @@
 id: ms-018
 slug: v018-migrate-docs
 title: 이주 보강과 사용자 문서 — environment·hooks 매핑, ctx 언어, README, 릴리스 노트
-from: loop-0004-plan
+from: flux-0004-plan
 refs:
   - ps-5e948f:04-migrate-docs.md
 status: closed

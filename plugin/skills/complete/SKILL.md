@@ -101,7 +101,7 @@ At minimum, leave **what was done and what's left.** Delete an in-progress plan 
 
 ## Update the handoff (only for a generation belonging to a milestone)
 
-**Only exec generations belong to a milestone.** A fix generation has no `milestone` field, so there's no `handoff.md` or milestone plan item to update either — skip this whole section. What a fix leaves instead is the generation record's body (what was done, what's left) and, if it's a global lesson, `vision/memory/lessons.md`. **This skill doesn't close a loop** — [loop](../loop/SKILL.md) closes it with `mark loop --closed` once the output has found its place.
+**Only exec generations belong to a milestone.** A fix generation has no `milestone` field, so there's no `handoff.md` or milestone plan item to update either — skip this whole section. What a fix leaves instead is the generation record's body (what was done, what's left) and, if it's a global lesson, `vision/memory/lessons.md`. **This skill doesn't close a flux** — [flux](../flux/SKILL.md) closes it with `mark flux --closed` once the output has found its place.
 
 For an exec generation, `milestone/handoff.md` holds **only what the next session needs.** Replace it, don't accumulate.
 

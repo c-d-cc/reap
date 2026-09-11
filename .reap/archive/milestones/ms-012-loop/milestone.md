@@ -2,7 +2,7 @@
 id: ms-012
 slug: loop
 title: loop — plan 축의 사이클을 짓는다
-from: loop-0001-plan
+from: flux-0001-plan
 refs:
   - ps-4f2a91:02-flow.md
   - ps-4f2a91:04-commands.md
@@ -19,11 +19,11 @@ closedAt: 2026-08-30T14:34:46Z
 
 ## Exit Criteria
 
-1. **`reap make loop --type <plan|design|uiux|idea> --title "<t>"`가 `plan/loops/<loop-id>-<slug>.md`를 놓는다.** `sequence/loop.md`에 행, frontmatter에 `type`·`from`(선택)·`refs`(선택)·`startedAt`·`startCommit`·`status`·`milestones: []`. **세션에 바인딩하지 않는다.** 유형이 없으면 거부
-2. **`reap mark loop <id> --closed [--milestone <ms-id>]...`가 `closedAt`·`milestones`·`status`를 찍는다.** 파일은 `plan/loops/`에 남고, **닫힌 loop가 10개를 넘으면 오래된 것(`closedAt` 순)부터 `archive/loops/`로 옮긴다.** 열린 loop는 옮기지 않는다. `--aborted`는 지운다
-3. **`make generation --plan`이 거부된다** — 메시지가 `make loop`를 가리킨다. 기존 `gen-NNNN-plan` 파일은 `doc.ts`가 계속 읽는다
+1. **`reap make flux --type <plan|design|uiux|idea> --title "<t>"`가 `plan/loops/<loop-id>-<slug>.md`를 놓는다.** `sequence/flux.md`에 행, frontmatter에 `type`·`from`(선택)·`refs`(선택)·`startedAt`·`startCommit`·`status`·`milestones: []`. **세션에 바인딩하지 않는다.** 유형이 없으면 거부
+2. **`reap mark flux <id> --closed [--milestone <ms-id>]...`가 `closedAt`·`milestones`·`status`를 찍는다.** 파일은 `plan/loops/`에 남고, **닫힌 loop가 10개를 넘으면 오래된 것(`closedAt` 순)부터 `archive/flux/`로 옮긴다.** 열린 loop는 옮기지 않는다. `--aborted`는 지운다
+3. **`make generation --plan`이 거부된다** — 메시지가 `make flux`를 가리킨다. 기존 `gen-NNNN-plan` 파일은 `doc.ts`가 계속 읽는다
 4. **`make milestone --from`이 loop id를 받는다** (이미 받는다 — 검증 없이. 그대로 두되 테스트로 못 박는다)
-5. **`ctx`의 상태 줄이 열린 loop를 낸다** — `열린 loop: loop-0001-plan <제목> — <경로>` 한 줄씩. 닫힌 것은 archive라 안 나온다
+5. **`ctx`의 상태 줄이 열린 loop를 낸다** — `열린 loop: flux-0001-plan <제목> — <경로>` 한 줄씩. 닫힌 것은 archive라 안 나온다
 6. **`loop` skill이 있다.** `06-agent.md`의 여덟 판단·`Dialogue`. `evolve`가 "새 의도를 만드는 일이면 `loop`로"를 가리키고 plan 축 안내를 뺀다. `complete`가 plan 세대 언급을 뺀다. `carve-milestone`이 `--from`을 loop로 적는다
 7. **템플릿 `loop.md`** — `Question`·`Dialogue`·`Explored`·`Dead Ends`·`Outcome`·`Open Questions`를 어휘로. `record-vocabulary.md`에 loop 어휘
 8. `map.md` 씨앗 템플릿이 이미 `loop`를 말한다 — `src/templates/map.md`를 `.reap/map.md`와 맞춘다
@@ -31,7 +31,7 @@ closedAt: 2026-08-30T14:34:46Z
 
 ## Out of Scope
 
-- `interview`·`init` — `ms-007`. 단 `init`이 `make loop`를 부르므로 이것이 먼저다
+- `interview`·`init` — `ms-007`. 단 `init`이 `make flux`를 부르므로 이것이 먼저다
 - `make plan-source`·`plan sources` — `ms-011`
 - loop 안에서 plan source에 **쓰는** 실제 동작의 검증 — skill이 안내하고 실사용이 검증한다
 - `cleanup`이 loop를 다루는 것 — 개수 규칙을 `mark`가 하므로 판단이 없다
@@ -41,7 +41,7 @@ closedAt: 2026-08-30T14:34:46Z
 
 | | 갈래 | 무엇이 참이어야 하는가 |
 |---|---|---|
-| 12.1 | `id.ts`·`store.ts`·`entries.ts`·`cli.ts` — `make loop`·`mark loop`·`--plan` 거부 | 손으로 만든 `loop-0001`과 같은 모양. `sequence/loop.md` 헤더도 같아야 한다 |
+| 12.1 | `id.ts`·`store.ts`·`entries.ts`·`cli.ts` — `make flux`·`mark flux`·`--plan` 거부 | 손으로 만든 `loop-0001`과 같은 모양. `sequence/flux.md` 헤더도 같아야 한다 |
 | 12.2 | `ctx` 상태 줄 | 열린 loop 목록. 여럿일 수 있다 |
 | 12.3 | `loop` skill · 템플릿 · 어휘 | 규율은 `06-agent.md`에 있고 skill은 그것을 절차로 옮긴다. `evolve`·`complete`·`carve-milestone` 정리 |
 
@@ -69,4 +69,4 @@ closedAt: 2026-08-30T14:34:46Z
 
 ## Fitness
 
-**닫는다 — 실사용 뒤 다시 본다** (사람, 2026-08-30). 질문 1(두 번째 loop를 도구로)은 검증용 `loop-0002-idea`로 한 바퀴 돌았고 손으로 한 것과 같은 모양이었다 — 빈 목록 왕복 하나가 달라 고쳤다. 질문 2·3·4는 실사용 뒤에만 답이 나오므로 `idea/research/`로 넘긴다.
+**닫는다 — 실사용 뒤 다시 본다** (사람, 2026-08-30). 질문 1(두 번째 loop를 도구로)은 검증용 `flux-0002-idea`로 한 바퀴 돌았고 손으로 한 것과 같은 모양이었다 — 빈 목록 왕복 하나가 달라 고쳤다. 질문 2·3·4는 실사용 뒤에만 답이 나오므로 `idea/research/`로 넘긴다.

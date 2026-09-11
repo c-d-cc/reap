@@ -2,7 +2,7 @@
 id: ms-015
 slug: v018-migration-skill
 title: migration skill — v0.17을 v0.18로 옮긴다
-from: loop-0003-plan
+from: flux-0003-plan
 refs:
   - ps-4b485d:04-migration-skill.md
 status: closed

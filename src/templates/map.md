@@ -6,24 +6,24 @@ For anyone, human or agent, seeing REAP for the first time. This is where you le
 
 ```
 vision/    what we intend — what we know (memory), the units we've carved (milestones)
-life/      what's open right now — generations, backlog, loops
-archive/   what's closed — generations, milestones, backlog, loops, idea
+life/      what's open right now — generations, backlog, flux
+archive/   what's closed — generations, milestones, backlog, flux, idea
 ```
 
-**`plan/` stands at the top level outside this three-tier split** — a plan source is a registry pointing outside the repo, so it doesn't sit on the "intend / live / done" time axis. It sits alongside `genome/`, `environment/`, `idea/`. **`loop` is not here — it's `life/loops/`** — a loop opens, closes, and moves to archive, so it does sit on the time axis. It isn't a registry.
+**`plan/` stands at the top level outside this three-tier split** — a plan source is a registry pointing outside the repo, so it doesn't sit on the "intend / live / done" time axis. It sits alongside `genome/`, `environment/`, `idea/`. **`flux` is not here — it's `life/flux/`** — a flux opens, closes, and moves to archive, so it does sit on the time axis. It isn't a registry.
 
-`vision/` stays referenced indefinitely unless it changes. `life/` is **what's open** — a generation, loop, or backlog item moves to `archive/` the moment it closes or is consumed (`mark` does the move). Records are found by id in either place. When a milestone closes, its whole directory moves to `archive/milestones/`; its generations are already in `archive/generations/` — **the two archive directories don't contain each other.**
+`vision/` stays referenced indefinitely unless it changes. `life/` is **what's open** — a generation, flux, or backlog item moves to `archive/` the moment it closes or is consumed (`mark` does the move). Records are found by id in either place. When a milestone closes, its whole directory moves to `archive/milestones/`; its generations are already in `archive/generations/` — **the two archive directories don't contain each other.**
 
 ## Generations pile up in one place regardless of type
 
 Just `life/generations/` (and `archive/generations/` once done). Not split into per-type folders — that would grow the top level every time a type is added. Instead:
 
-- **Type lives inside the id** — `gen-<sequence>-<exec|fix>`. The sequence is one series regardless of type, so sorting by name is sorting by time. `gen-NNNN-plan` is history from before `loop-0001` — no more are issued
+- **Type lives inside the id** — `gen-<sequence>-<exec|fix>`. The sequence is one series regardless of type, so sorting by name is sorting by time. `gen-NNNN-plan` is history from before `flux-0001` — no more are issued
 - **Milestone membership is the `milestone` field in frontmatter.** Only exec has this field. fix belongs to none
 
 | Unit | What it does | Grounds |
 |---|---|---|
-| loop (`life/loops/`) | makes new intent — type `plan\|design\|uiux\|idea` | optional |
+| flux (`life/flux/`) | makes new intent — type `plan\|design\|uiux\|idea` | optional |
 | exec generation | realizes an intent | milestone or backlog required |
 | fix generation | restores an existing intent | none |
 
@@ -31,7 +31,7 @@ Just `life/generations/` (and `archive/generations/` once done). Not split into 
 
 - `vision/memory/` — just `lessons.md` (project-wide lessons). **A question closes, a lesson accumulates** — mixing them in one file keeps neither clean. Unresolved questions belong to `idea/research/`
 - `plan/` — `sources.yml` (registered plan sources), `conventions/<ps-id>-<slug>.md` (how to read and write to that source)
-- `life/loops/` — open loops (`Question`·`Dialogue`·`Dead Ends`·`Outcome`). `mark loop --closed` moves a loop to `archive/loops/`
+- `life/flux/` — open flux (`Question`·`Dialogue`·`Dead Ends`·`Outcome`). `mark flux --closed` moves a flux to `archive/flux/`
 - `vision/milestones/<ms-id>-<slug>/` — `milestone.md` (boundary and exit criteria), `handoff.md` (handoff to the next session), `tasks/<n>-<slug>.md` (task detail)
 - `life/generations/` — open generation records. `mark generation --closed` moves a record to `archive/generations/`
 - `life/backlog/` — open items. `mark backlog --consumed` moves an item to `archive/backlog/`
@@ -49,7 +49,7 @@ Everything with an id is `<id>-<slug>` (no exceptions). The id itself:
 | Kind | Format | Example |
 |---|---|---|
 | milestone | `ms-<sequence>` | `ms-004-auth-session/` |
-| loop | `loop-<sequence>-<plan\|design\|uiux\|idea>` | `loop-0001-plan-plan-loop.md` |
+| flux | `flux-<sequence>-<plan\|design\|uiux\|idea>` | `flux-0001-plan-plan-flux.md` |
 | generation | `gen-<sequence>-<exec\|fix>` | `gen-0002-exec-token-rotation.md` |
 | backlog | `bk-<hash>` | `bk-a3f8c2-token-rotation-retry.md` |
 | idea | `idea-<hash>` | `idea-a3f8c2-oauth-device-flow.md` |

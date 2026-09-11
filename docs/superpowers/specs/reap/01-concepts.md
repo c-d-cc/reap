@@ -33,7 +33,7 @@ plan sources (외부, 여러 곳)
       ^
       | evolve
       |
-  loop  (plan 축의 사이클 — generation이 아니다)
+  flux  (plan 축의 사이클 — generation이 아니다)
       |
       | carve out
       v
@@ -52,7 +52,7 @@ plan sources (외부, 여러 곳)
 
 | | 무엇을 | milestone |
 |---|---|---|
-| **loop** | 새 의도를 만든다 — plan source를 진화시킨다. 산출물이 자리를 찾으면 닫힌다(milestone을 낳는 것이 보통) | generation이 아니다. `life/loops/` |
+| **flux** | 새 의도를 만든다 — plan source를 진화시킨다. 산출물이 자리를 찾으면 닫힌다(milestone을 낳는 것이 보통) | generation이 아니다. `life/flux/` |
 | **exec generation** | 새 의도를 실현한다 — 소스코드를 진화시킨다 | **반드시 소속** |
 | **fix generation** | 이미 있는 의도로 되돌린다 — 버그, 깨진 빌드, 낡은 의존성, 오타 | 무소속 |
 

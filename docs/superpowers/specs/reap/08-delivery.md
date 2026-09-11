@@ -38,7 +38,7 @@ plugin/
     interview/SKILL.md
     init/SKILL.md
     report-issue/SKILL.md
-    loop/SKILL.md
+    flux/SKILL.md
     shared/references/
       record-vocabulary.md      세대 어휘와 milestone 어휘를 한 파일에
   hooks/hooks.json                SessionStart -> reap ctx --hook
@@ -48,7 +48,7 @@ plugin/
 
 **플러그인 레포에 `marketplace.json`을 두지 않는다.** 마켓플레이스는 `c-d-cc/plugins`(`ctod-plugins`) 하나이고, 이 리포는 거기에 **submodule로 물린다**(`plugins/reap`, `source: ./plugins/reap/plugin`). 양쪽에 manifest가 있으면 같은 플러그인이 두 마켓플레이스에서 보이고 사용자가 어느 쪽을 설치했는지 알 수 없다.
 
-**기획 플러그인은 따로 없다.** 한때 `reap-plan`을 형제로 두려 했으나(`gen-0045`) `loop-0001`이 되돌렸다 — 기획은 REAP의 `loop` skill이 쓴다.
+**기획 플러그인은 따로 없다.** 한때 `reap-plan`을 형제로 두려 했으나(`gen-0045`) `flux-0001`이 되돌렸다 — 기획은 REAP의 `flux` skill이 쓴다.
 
 **submodule은 push된 커밋을 싣는다.** 그래서 개발 루프에는 못 쓰고, 작업 트리를 그대로 싣는 로컬 마켓플레이스가 따로 필요하다. 마켓플레이스 항목의 `source`는 **그 마켓플레이스 디렉토리 안쪽만** 가리킬 수 있으므로(절대경로·`../` 둘 다 거부된다) 로컬 쪽은 심링크를 쓴다.
 

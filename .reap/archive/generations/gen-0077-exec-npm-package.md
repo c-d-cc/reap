@@ -25,7 +25,7 @@ task 1·2·3 전부 됐다. 커밋 넷:
 - `e2c2292` 패키지 모양 — `package.json`을 발행 모양으로(`@c-d-cc/reap` 0.18.0 · `bin: dist/node/reap.js` · `files` · `engines` · `build:node`/`prepublishOnly`), `web-tree-sitter`는 번들에 인라인되므로 `dependencies`에서 `devDependencies`로, `plugin.json` 버전, `environment/summary.md` 빌드 절, `scripts/verify-package.sh`
 - `3dcd60f` `.github/workflows/ci.yml`·`release.yml`
 
-**실측**(`bash scripts/verify-package.sh`, 이 리포에서 직접 돌려 통과): `build:node` → `npm pack`(임시 디렉토리) → 임시 prefix에 `npm i -g` → PATH에서 `~/.bun/bin`을 뺀 채(`hash -r`로 bash의 명령 해시 캐시를 지워야 `command -v bun`이 실제로 빠졌는지 본다 — 안 지우면 이전에 부른 `bun`이 캐시로 남아 거짓으로 "있다"고 나온다) 임시 git 리포에서 `--version`(`reap 0.18.0`)·`init`·`make loop`·`make milestone`·`make generation`·`mark generation --aborted`·`ctx --hook`(JSON)·`doctor`·`plan sources`·`index update/status`·`orch claim/release` 전부 성공. `npm pack --dry-run` 18파일 · tarball 2.7MB · unpacked 28.3MB, `src/`·`tests/`·`plugin/`·`.reap/` 없음.
+**실측**(`bash scripts/verify-package.sh`, 이 리포에서 직접 돌려 통과): `build:node` → `npm pack`(임시 디렉토리) → 임시 prefix에 `npm i -g` → PATH에서 `~/.bun/bin`을 뺀 채(`hash -r`로 bash의 명령 해시 캐시를 지워야 `command -v bun`이 실제로 빠졌는지 본다 — 안 지우면 이전에 부른 `bun`이 캐시로 남아 거짓으로 "있다"고 나온다) 임시 git 리포에서 `--version`(`reap 0.18.0`)·`init`·`make flux`·`make milestone`·`make generation`·`mark generation --aborted`·`ctx --hook`(JSON)·`doctor`·`plan sources`·`index update/status`·`orch claim/release` 전부 성공. `npm pack --dry-run` 18파일 · tarball 2.7MB · unpacked 28.3MB, `src/`·`tests/`·`plugin/`·`.reap/` 없음.
 
 Bun 쪽: `bun test` 177 통과 · `bun run typecheck` 0 · `bun run build`(컴파일, 89.5MB) · `tests/hook.test.sh` 통과. `bun src/cli.ts --version`도 그대로 된다.
 

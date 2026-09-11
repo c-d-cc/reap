@@ -16,7 +16,7 @@ endCommit: 687bd87
 
 ## Outcome
 
-- **`plugin/skills/loop/SKILL.md`** — 언제(새 의도면 전부) · 열린 loop를 먼저 본다 · `make loop` · 논의하며 `Dialogue` · plan source에 쓴다(여섯 판단은 spec을 가리킴) · 유형별 닫힘 · `mark loop --closed --milestone` · 손으로 하는 법. **묻는 법은 한 줄도 없다** — `interview`를 가리킨다(아직 없다, `ms-007`)
+- **`plugin/skills/loop/SKILL.md`** — 언제(새 의도면 전부) · 열린 loop를 먼저 본다 · `make flux` · 논의하며 `Dialogue` · plan source에 쓴다(여섯 판단은 spec을 가리킴) · 유형별 닫힘 · `mark flux --closed --milestone` · 손으로 하는 법. **묻는 법은 한 줄도 없다** — `interview`를 가리킨다(아직 없다, `ms-007`)
 - `record-vocabulary.md`에 loop 어휘 절(Question·Dialogue·Explored·Dead Ends·Outcome·Open Questions)
 - `evolve` — 첫 물음이 "loop인가 generation인가". plan 축 절과 `--plan` 삭제, `loop`로 넘긴다
 - `complete` — plan 세대 언급 삭제, loop는 `loop` skill이 닫는다고 가리킴

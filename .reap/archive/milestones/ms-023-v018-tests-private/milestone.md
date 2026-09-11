@@ -2,7 +2,7 @@
 id: ms-023
 slug: v018-tests-private
 title: 테스트 비공개 — reap-test v0.18 submodule과 CI dispatch
-from: loop-0004-plan
+from: flux-0004-plan
 refs:
   - ps-5e948f:07-i18n-docs-delegate.md
 status: closed

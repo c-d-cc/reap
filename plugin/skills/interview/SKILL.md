@@ -1,18 +1,18 @@
 ---
 name: interview
-description: Use whenever intent is ambiguous in a REAP project and a human must decide - before opening a generation, inside a loop, when carving a milestone, when approaches diverge. Owns how to ask - one question at a time, 2-4 options plus free input, recommendation only with grounds, a visible end. Other skills point here and never copy the rules. Trigger on "모호하다", "물어봐", "interview", "정해달라", or when another skill says to interview first, in a repo containing .reap/.
+description: Use whenever intent is ambiguous in a REAP project and a human must decide - before opening a generation, inside a flux, when carving a milestone, when approaches diverge. Owns how to ask - one question at a time, 2-4 options plus free input, recommendation only with grounds, a visible end. Other skills point here and never copy the rules. Trigger on "모호하다", "물어봐", "interview", "정해달라", or when another skill says to interview first, in a repo containing .reap/.
 ---
 
 # interview — removes ambiguity
 
-**How to ask has exactly one owner, and it's here.** `evolve`, `loop`, `carve-milestone`, `init` only point to *"if it's ambiguous, interview"* — they never copy this discipline. The norm lives in the `interview` section of `06-agent.md`; this is that norm turned into procedure.
+**How to ask has exactly one owner, and it's here.** `evolve`, `flux`, `carve-milestone`, `init` only point to *"if it's ambiguous, interview"* — they never copy this discipline. The norm lives in the `interview` section of `06-agent.md`; this is that norm turned into procedure.
 
 ## First: filter out what doesn't need asking
 
 **Cutting the number of questions that go to a human is half of what this skill does.** Before asking, check three things.
 
 1. **Can code or docs answer it.** Whether a file exists, how many times it's used, whether tests pass — a fact settled by one command doesn't get asked. Once confirmed, present *"checked X, assuming Y"* as a **confirm-shaped** statement. A discovery-shaped one (*"is there an X?"*) offloads the exploration onto the human
-2. **Has it already been answered.** Check three places — the spec (what's decided is reflected wherever it governs), the *pending* section of an open milestone's `handoff.md`, and **the `Dialogue` of an open or recent loop.** Asking the same thing twice tells the human their earlier answer wasn't read
+2. **Has it already been answered.** Check three places — the spec (what's decided is reflected wherever it governs), the *pending* section of an open milestone's `handoff.md`, and **the `Dialogue` of an open or recent flux.** Asking the same thing twice tells the human their earlier answer wasn't read
 3. **Is it the human's to decide.** The four things `genome/evolution.md` pins down — the moment for deciding what to do, the answer when it's ambiguous, fitness at milestone close, and `invariants.md`. Everything else that goes to a human is only things code can't answer — preference, priority, business judgment
 
 What's left after filtering is the question list. **Finish the list before asking** — asking while still discovering breaks rule 6 below (the end has to be visible).
@@ -46,7 +46,7 @@ What's left after filtering is the question list. **Finish the list before askin
 
 **The answer goes to wherever it governs** — spec, `genome/`, `map.md`, milestone body. Leaving it only in a record means it's undecided.
 
-**The divergence point itself goes in the record.** Inside a loop, into that loop's `Dialogue`; inside a generation, into the generation record's `Open Questions`, where it's closed. What goes there is *what diverged, what the options were, what the human picked, and whether it was an adopted recommendation or a different answer*. Without this, the next session either asks the same thing again or reads what the human picked as something the agent decided.
+**The divergence point itself goes in the record.** Inside a flux, into that flux's `Dialogue`; inside a generation, into the generation record's `Open Questions`, where it's closed. What goes there is *what diverged, what the options were, what the human picked, and whether it was an adopted recommendation or a different answer*. Without this, the next session either asks the same thing again or reads what the human picked as something the agent decided.
 
 ## Exit conditions
 
@@ -66,5 +66,5 @@ What's actually happened in this repo is the grounds for this discipline.
 
 - **Should have asked, didn't** — one milestone's wrongly drawn boundary only surfaced when a human asked *"why are we making this milestone"*
 - **Nearly asked something that didn't need asking** — the spec already had the answer. Rule 2 (has it already been answered) is that spot
-- **An answer given before trying got overturned on first use** — *"a closed loop goes straight to archive"* was picked, and the moment the first loop closed, it couldn't be found. That's what happens when an option's cost is written without the real thing. **Whatever can be confirmed with the real thing gets built and shown before asking someone to choose**
+- **An answer given before trying got overturned on first use** — *"a closed flux goes straight to archive"* was picked, and the moment the first flux closed, it couldn't be found. That's what happens when an option's cost is written without the real thing. **Whatever can be confirmed with the real thing gets built and shown before asking someone to choose**
 - **A human answered outside the options** — A/B were offered, and the third path (splitting the cycle itself) was the answer. That's why free input always has to stay open

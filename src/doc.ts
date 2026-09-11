@@ -56,7 +56,7 @@ export function patch(path: string, fields: Data): void {
 
 /** 리눅스 NAME_MAX는 255바이트다. 한글은 글자당 3바이트라 제목 80자 안팎이면 넘는다. */
 export const SLUG_MAX_BYTES = 80;
-/** `--slug`로 준 것의 상한. id 접두어(최대 16바이트 `loop-0000-design`)·`-`·`.md`를 더하면 꼭 NAME_MAX_BYTES다. */
+/** `--slug`로 준 것의 상한. id 접두어(최대 16바이트 `flux-0000-design`)·`-`·`.md`를 더하면 꼭 NAME_MAX_BYTES다. */
 export const SLUG_LIMIT_BYTES = 180;
 export const NAME_MAX_BYTES = 200;
 
@@ -111,9 +111,9 @@ export function listEntries(root: string, kind: Kind): Entry[] {
         .flatMap(markdown)
         .map((path) => entryAt(path, kind))
         .filter(present);
-    // 닫힌 loop는 life/loops/에 남고 넘친 것만 archive로 간다. 조회는 두 곳을 다 본다.
-    case "loop":
-      return [p.loops, p.archiveLoops]
+    // 닫힌 flux는 life/flux/에 남고 넘친 것만 archive로 간다. 조회는 두 곳을 다 본다.
+    case "flux":
+      return [p.flux, p.archiveFlux]
         .flatMap(markdown)
         .map((path) => entryAt(path, kind))
         .filter(present);

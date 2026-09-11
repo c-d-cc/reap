@@ -3,8 +3,8 @@ export const en = {
 
   --version
   init [--force] | init --check     (--check: report only which knowledge files are still at seed)
-  make loop       --type plan|design|uiux|idea --title "<title>" [--slug <s>] [--from <id>] [--ref <ps-id>:<path>]
-  make milestone  --title "<title>" [--slug <s>] [--from <loop-id>] [--ref <ps-id>:<path>] [--focus]
+  make flux       --type plan|design|uiux|idea --title "<title>" [--slug <s>] [--from <id>] [--ref <ps-id>:<path>]
+  make milestone  --title "<title>" [--slug <s>] [--from <flux-id>] [--ref <ps-id>:<path>] [--focus]
   make generation --milestone <ms-id> --title "<title>" [--slug <s>]
   make generation --backlog <bk-id> --title "<title>" [--slug <s>]   (can combine with --milestone)
   make generation --fix  --title "<title>" [--slug <s>]
@@ -12,13 +12,13 @@ export const en = {
   make plan-source --root <path> --role "<role>" [--slug <s>]
   make idea       --kind research|freememo|file --title "<title>" [--slug <s>]
   make hook       --event <e> --name <n> [--type md|sh] [--condition <c>] [--order <n>]
-  mark loop       <loop-id> --closed [--milestone <ms-id>]... | --aborted
+  mark flux       <flux-id> --closed [--milestone <ms-id>]... | --aborted
   mark generation <gen-id> --closed | --aborted | --archived
   mark backlog    <bk-id> --consumed [--by <gen-id>] | --archived
   mark milestone <ms-id> --focus | --closed
   mark idea       <idea-id> --archived
   bind <gen-id>                   (rebind this session to an open generation)
-  seq [generation|milestone|loop|source|<id>]
+  seq [generation|milestone|flux|source|<id>]
   carrier new <slug> | list [--orphans|--check]
   setup                           (registers the plugin marketplace and installs the reap plugin through the claude CLI. Run once after npm i -g)
   doctor                          (report only. exits nonzero if there are defects)
@@ -90,13 +90,13 @@ export const en = {
   "make.plan_source_needs_role": 'plan-source requires --role "<role>".',
   "make.plan_source_result": "plan-source {id}\n  {path}\n  {convention}",
   "make.title_required": "--title is required.",
-  "make.loop_needs_type": "loop requires --type: {types} (got: {got})",
+  "make.flux_needs_type": "flux requires --type: {types} (got: {got})",
   "make.backlog_needs_type": "backlog requires --type. It is not restricted to an enum, so follow convention (e.g. design).",
   "make.idea_needs_kind": "idea requires --kind: research · freememo · file (got: {got})",
-  "make.unknown_kind": "make creates loop · milestone · generation · backlog · idea · hook · plan-source: {kind}",
+  "make.unknown_kind": "make creates flux · milestone · generation · backlog · idea · hook · plan-source: {kind}",
   "make.result": "{label} {id}\n  {path}",
 
-  "mark.loop_needs_id": "the id of the loop to mark is required.",
+  "mark.flux_needs_id": "the id of the flux to mark is required.",
   "mark.need_flag_closed_aborted": "one of --closed · --aborted is required.",
   "mark.cleared": "Cleared: {id}",
   "mark.closed": "Closed: {id}\n  {path}",
@@ -113,7 +113,7 @@ export const en = {
   "mark.focused": "Focused: {id}",
   "mark.closed_moved": "Closed and moved: {id}\n  {path}",
   "mark.need_flag_milestone": "--focus or --closed is required.",
-  "mark.unknown_kind": "mark marks loop · generation · backlog · milestone · idea: {kind}",
+  "mark.unknown_kind": "mark marks flux · generation · backlog · milestone · idea: {kind}",
 
   "carrier.new_usage": "carrier new <slug>",
   "carrier.no_problems": "No problems with markers.",
@@ -143,9 +143,9 @@ export const en = {
   "plan.ref_file_missing": "That file does not exist inside the source: {path} (source root: {root})",
   "plan.no_sources": 'No registered plan sources. reap make plan-source --root <path> --role "<r>"',
 
-  "entries.no_plan_type": "generation has no plan type. Creating new intent is a loop: reap make loop --type plan|design|uiux|idea",
+  "entries.no_plan_type": "generation has no plan type. Creating new intent is a flux: reap make flux --type plan|design|uiux|idea",
   "entries.fix_no_grounds": "--fix cannot be given together with grounds (--milestone·--backlog).",
-  "entries.gen_needs_type_or_grounds": "Opening a generation requires a type or grounds: exec needs at least one of --milestone <ms-id> or --backlog <bk-id> (both allowed), reverting work uses --fix. For creating new intent, use make loop.",
+  "entries.gen_needs_type_or_grounds": "Opening a generation requires a type or grounds: exec needs at least one of --milestone <ms-id> or --backlog <bk-id> (both allowed), reverting work uses --fix. For creating new intent, use make flux.",
   "entries.gen_closed_no_bind": "Not binding to a closed generation: {id}",
   "entries.backlog_ambiguous": "backlog matches more than one: {ids}",
   "entries.backlog_not_found": "backlog not found: {needle}",
@@ -217,7 +217,7 @@ export const en = {
   "ctx.label.milestone": "Milestone: {id} {title} ({flags})",
   "ctx.label.generation": "Open generation: {id} {title} — {path}",
   "ctx.started_join": " started, start commit ",
-  "ctx.label.loop": "Open loop: {id} {title} — {path}",
+  "ctx.label.flux": "Open flux: {id} {title} — {path}",
   "ctx.label.memory": "Memory: {list}",
   "ctx.label.idea": "Ideas: {path}/ ({counts})",
   "ctx.label.map": "Structure: {path}",

@@ -1,5 +1,5 @@
 ---
-id: loop-0003-plan
+id: flux-0003-plan
 slug: reap-v018-귀환
 type: plan
 title: reap v0.18 — reap의 제자리 찾기

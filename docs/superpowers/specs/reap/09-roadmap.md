@@ -47,4 +47,4 @@
 
 **다음에 이 문서에 새 증분을 더할 때는** 잘린 milestone들의 fitness가 입력이다. 상상으로 칸을 만들면 그 칸의 전제가 틀린 채로 잘리게 된다 — 이 문서가 두 번 그렇게 고쳐졌다.
 
-**기획이 돌아왔다 — 그리고 사이클이 갈라졌다.** `loop-0001`(첫 loop, 손으로 열었다)에서 사람이 `gen-0045`를 되돌렸다. `reap-plan`은 없고 REAP가 기획을 쓴다. 다만 generation 안에서가 아니라 **별도 사이클 `loop`**로 — `life/loops/`에 살고 유형(`plan|design|uiux|idea`)을 갖고 산출물이 자리를 찾으면 닫힌다. `make issue`는 함께 사라졌고 `ms-011`이 그만큼 줄었다. loop 도구와 skill은 `ms-012`다.
+**기획이 돌아왔다 — 그리고 사이클이 갈라졌다.** `flux-0001`(첫 flux, 손으로 열었다)에서 사람이 `gen-0045`를 되돌렸다. `reap-plan`은 없고 REAP가 기획을 쓴다. 다만 generation 안에서가 아니라 **별도 사이클 `flux`**로 — `life/flux/`에 살고 유형(`plan|design|uiux|idea`)을 갖고 산출물이 자리를 찾으면 닫힌다. `make issue`는 함께 사라졌고 `ms-011`이 그만큼 줄었다. flux 도구와 skill은 `ms-012`다.

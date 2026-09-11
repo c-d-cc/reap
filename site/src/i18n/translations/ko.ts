@@ -18,7 +18,7 @@ export interface Translations {
       v018change: string;
       twoAxes: string;
       storage: string;
-      loop: string;
+      flux: string;
       planSource: string;
       idea: string;
       carveMilestone: string;
@@ -201,7 +201,7 @@ export interface Translations {
     sessionDesc: string;
   };
 
-  loopPage: {
+  fluxPage: {
     title: string;
     breadcrumb: string;
     description: string;
@@ -679,7 +679,7 @@ export const ko: Translations = {
       v018change: "v0.18에서 바뀐 것",
       twoAxes: "두 축",
       storage: "저장 구조",
-      loop: "Loop",
+      flux: "Flux",
       planSource: "Plan",
       idea: "Idea와 Research",
       carveMilestone: "Milestone 자르기",
@@ -707,7 +707,7 @@ export const ko: Translations = {
   hero: {
     tagline: "Recursive Evolutionary Autonomous Pipeline",
     title: "REAP",
-    description: "AI와 사람이 협업하여 재귀적인 작업 흐름을 통해 소프트웨어를 진화시키는 규약과 도구입니다. 세션 간 컨텍스트가 유지되고, 구조화된 generation을 통해 코드가 진화하며, loop를 거치며 설계와 기획이 함께 진화합니다.",
+    description: "AI와 사람이 협업하여 재귀적인 작업 흐름을 통해 소프트웨어를 진화시키는 규약과 도구입니다. 세션 간 컨텍스트가 유지되고, 구조화된 generation을 통해 코드가 진화하며, flux를 거치며 설계와 기획이 함께 진화합니다.",
     getStarted: "시작하기 →",
     breakingBand: {
       text: "v0.18.0은 이전 버전과 호환되지 않습니다. 저장 구조, 명령, 플러그인이 모두 바뀌었습니다.",
@@ -718,7 +718,7 @@ export const ko: Translations = {
     whyReapDesc: "AI 에이전트는 강력하지만, 구조 없이는 개발이 혼란스러워집니다. 매 세션마다 컨텍스트가 초기화됩니다. 기획은 한 번 쓰고 잊힙니다. 코드 변경이 목적 없이 흩어집니다. 설계 문서가 현실에서 벗어납니다. 과거 작업에서 얻은 교훈이 사라집니다.",
     problems: [
       { problem: "컨텍스트 손실", solution: "SessionStart 훅이 세션마다 genome, environment 요약, 상태 줄을 자동으로 주입합니다" },
-      { problem: "한 번 쓰고 잊히는 기획", solution: "loop가 plan을 계속 다듬고, 그 계획을 milestone으로 잘라 실행과 이어 줍니다. 기획도 코드처럼 진화합니다" },
+      { problem: "한 번 쓰고 잊히는 기획", solution: "flux가 plan을 계속 다듬고, 그 계획을 milestone으로 잘라 실행과 이어 줍니다. 기획도 코드처럼 진화합니다" },
       { problem: "산발적 개발", solution: "milestone과 generation이 경계를 가진 작업 단위로 나뉘어 하나의 목표에 집중합니다" },
       { problem: "설계-코드 괴리", solution: "plan과 구현 사이의 간극은 backlog로 기록되고 다음 generation에서 반영됩니다" },
       { problem: "잊혀진 교훈", solution: "lessons.md에 교훈이 쌓이고, 닫힌 세대는 archive에 보존됩니다" },
@@ -728,21 +728,21 @@ export const ko: Translations = {
     structureDesc: "REAP가 하는 일은 .reap/ 아래 여섯 자리에 담깁니다.",
     structureItems: [
       { label: "Knowledge", sub: "genome + environment", desc: "genome은 규범(제품 정체성, AI 행동 규칙, 절대 제약), environment는 서술(기술 스택, 소스 구조)입니다. 모든 작업의 기반입니다." },
-      { label: "Plan", sub: "plan + loop", desc: "제품을 만들기 위한 모든 생각입니다. plan 문서는 리포 밖에 있어도 되며, loop가 그것을 다듬습니다." },
-      { label: "Vision", sub: "milestone + memory", desc: "하려는 것입니다. loop에서 잘라낸 milestone과 쌓인 교훈이 여기 있습니다." },
-      { label: "Life", sub: "generation + backlog + loop", desc: "지금 열려 있는 것입니다. 진행 중인 세대·loop와 아직 소비되지 않은 이월 항목이 여기 있습니다." },
-      { label: "Archive", sub: "닫힌 milestone, generation, loop, backlog", desc: "닫힌 것입니다. 세대·loop·이월 항목은 닫히거나 소비되는 순간 여기로 옮겨집니다." },
+      { label: "Plan", sub: "plan + flux", desc: "제품을 만들기 위한 모든 생각입니다. plan 문서는 리포 밖에 있어도 되며, flux가 그것을 다듬습니다." },
+      { label: "Vision", sub: "milestone + memory", desc: "하려는 것입니다. flux에서 잘라낸 milestone과 쌓인 교훈이 여기 있습니다." },
+      { label: "Life", sub: "generation + backlog + flux", desc: "지금 열려 있는 것입니다. 진행 중인 세대·flux와 아직 소비되지 않은 이월 항목이 여기 있습니다." },
+      { label: "Archive", sub: "닫힌 milestone, generation, flux, backlog", desc: "닫힌 것입니다. 세대·flux·이월 항목은 닫히거나 소비되는 순간 여기로 옮겨집니다." },
       { label: "Civilization", sub: "소스 코드", desc: ".reap/ 밖의 모든 것입니다. generation이 진화시키는 대상입니다." },
     ],
     axesTitle: "두 개의 축",
-    axesDesc: "REAP의 작업은 두 축 위에서 진행됩니다. Plan 축에서는 loop가 계획을 다듬고, Execution 축에서는 그 계획을 실행 가능한 단위인 milestone으로 나누어 generation으로 진행합니다. 두 축은 계획을 milestone으로 자르는 지점에서 만납니다.",
+    axesDesc: "REAP의 작업은 두 축 위에서 진행됩니다. Plan 축에서는 flux가 계획을 다듬고, Execution 축에서는 그 계획을 실행 가능한 단위인 milestone으로 나누어 generation으로 진행합니다. 두 축은 계획을 milestone으로 자르는 지점에서 만납니다.",
     axes: [
       {
         label: "Plan 축",
         sub: "계획을 만들고 개선합니다",
         items: [
-          { unit: "loop", what: "새 의도를 만듭니다. 기획, 설계, 화면, 아직 자리가 없는 아이디어를 다루며 여러 세션에 걸쳐 열려 있을 수 있습니다.", where: "life/loops/" },
-          { unit: "plan", what: "기획 문서입니다. 리포 안팎 어디에 있든 등록해 두면 loop가 규약에 따라 읽고 씁니다. loop의 산출물이 여기에 쌓입니다.", where: "plan/sources.yml" },
+          { unit: "flux", what: "새 의도를 만듭니다. 기획, 설계, 화면, 아직 자리가 없는 아이디어를 다루며 여러 세션에 걸쳐 열려 있을 수 있습니다.", where: "life/flux/" },
+          { unit: "plan", what: "기획 문서입니다. 리포 안팎 어디에 있든 등록해 두면 flux가 규약에 따라 읽고 씁니다. flux의 산출물이 여기에 쌓입니다.", where: "plan/sources.yml" },
         ],
       },
       {
@@ -765,7 +765,7 @@ export const ko: Translations = {
       { label: "Genome 불변성", desc: "genome은 일이 도는 중에는 바뀌지 않습니다. 도중에 발견한 것은 backlog로 가고, 세대를 닫을 때 complete가 반영합니다." },
       { label: "Backlog", desc: "지연되거나 발견된 이슈를 기록하는 자리입니다. 다음 generation이 이어받습니다." },
       { label: "Milestone과 fitness", desc: "milestone이 끝날 때 사람이 자연어로 fitness를 평가합니다. 정량 지표는 두지 않습니다." },
-      { label: "Loop", desc: "새 의도를 만드는 작업입니다. 기획, 설계, 화면, 아직 자리 없는 아이디어를 다룹니다." },
+      { label: "Flux", desc: "새 의도를 만드는 작업입니다. 기획, 설계, 화면, 아직 자리 없는 아이디어를 다룹니다." },
       { label: "Archive", desc: "닫힌 generation과 milestone이 쌓이는 곳입니다. 닫히는 순간 여기로 옮겨집니다." },
       { label: "Orchestrate", desc: "두 세션 이상이 동시에 작업할 때 claim과 barrier로 조율합니다." },
     ],
@@ -794,7 +794,7 @@ export const ko: Translations = {
     solutionHeader: "REAP 솔루션",
     problems: [
       ["컨텍스트 손실 — agent가 매 세션마다 프로젝트 컨텍스트를 잊습니다", "SessionStart 훅이 genome, environment 요약, 상태 줄을 매 세션 자동으로 주입합니다"],
-      ["한 번 쓰고 잊히는 기획 — 계획 문서가 코드와 따로 늙어 갑니다", "loop가 plan을 계속 다듬고, milestone으로 잘라 실행과 이어 줍니다. 기획도 코드처럼 진화합니다"],
+      ["한 번 쓰고 잊히는 기획 — 계획 문서가 코드와 따로 늙어 갑니다", "flux가 plan을 계속 다듬고, milestone으로 잘라 실행과 이어 줍니다. 기획도 코드처럼 진화합니다"],
       ["산발적 개발 — 목표 없이 코드 변경이 흩어집니다", "milestone이 경계와 종료 조건을 가진 실행 단위로 자르고, generation이 그 안에서 하나의 의도에 집중합니다"],
       ["설계-코드 괴리 — 문서가 코드에서 벗어납니다", "구현 중 발견된 간극은 backlog로 기록되고 다음 generation이 반영합니다"],
       ["잊혀진 교훈 — 과거 작업의 인사이트가 사라집니다", "vision/memory/lessons.md에 교훈이 쌓이고, 닫힌 세대는 archive에 보존됩니다"],
@@ -804,10 +804,10 @@ export const ko: Translations = {
     structureDesc: "REAP는 여섯 개의 자리로 구성됩니다:",
     structureItems: [
       { label: "Knowledge", sub: "genome + environment", path: ".reap/genome/ + .reap/environment/", desc: "genome(규범 — 제품 정체성, AI 행동 규칙, 절대 제약)과 environment(서술 — 기술 스택, 소스 구조). 모든 작업의 기반입니다." },
-      { label: "Plan", sub: "plan + loop", path: ".reap/plan/ + .reap/life/loops/", desc: "제품을 만들기 위한 모든 생각입니다. plan 문서는 리포 밖에 있어도 되며, loop가 그것을 다듬습니다." },
-      { label: "Vision", sub: "milestone + memory", path: ".reap/vision/", desc: "하려는 것입니다. loop에서 잘라낸 milestone과 쌓인 교훈이 여기 있습니다." },
-      { label: "Life", sub: "generation + backlog + loop", path: ".reap/life/", desc: "지금 열려 있는 것입니다. 진행 중인 세대·loop와 아직 소비되지 않은 이월 항목이 여기 있습니다." },
-      { label: "Archive", sub: "닫힌 milestone, generation, loop, backlog", path: ".reap/archive/", desc: "닫힌 것입니다. 세대·loop·이월 항목은 닫히거나 소비되는 순간 여기로 옮겨집니다." },
+      { label: "Plan", sub: "plan + flux", path: ".reap/plan/ + .reap/life/flux/", desc: "제품을 만들기 위한 모든 생각입니다. plan 문서는 리포 밖에 있어도 되며, flux가 그것을 다듬습니다." },
+      { label: "Vision", sub: "milestone + memory", path: ".reap/vision/", desc: "하려는 것입니다. flux에서 잘라낸 milestone과 쌓인 교훈이 여기 있습니다." },
+      { label: "Life", sub: "generation + backlog + flux", path: ".reap/life/", desc: "지금 열려 있는 것입니다. 진행 중인 세대·flux와 아직 소비되지 않은 이월 항목이 여기 있습니다." },
+      { label: "Archive", sub: "닫힌 milestone, generation, flux, backlog", path: ".reap/archive/", desc: "닫힌 것입니다. 세대·flux·이월 항목은 닫히거나 소비되는 순간 여기로 옮겨집니다." },
       { label: "Civilization", sub: "소스 코드", path: ".reap/ 밖", desc: "generation이 진화시키는 대상입니다. 교훈이 다시 Knowledge로 피드백됩니다." },
     ],
     projectStructureTitle: "프로젝트 구조",
@@ -830,9 +830,9 @@ export const ko: Translations = {
     ├── life/                      # 지금 열려 있는 것
     │   ├── generations/
     │   ├── backlog/
-    │   └── loops/
+    │   └── flux/
     ├── archive/                   # 닫힌 것
-    │   ├── generations/ · milestones/ · backlog/ · loops/ · idea/
+    │   ├── generations/ · milestones/ · backlog/ · flux/ · idea/
     ├── genome/
     │   ├── application.md          # 제품 정체성, 아키텍처
     │   ├── evolution.md            # AI 행동 규칙
@@ -881,7 +881,7 @@ export const ko: Translations = {
       },
       {
         title: "plan이 넷째 축이 됐습니다",
-        body: "기획·설계·아이디어를 소스 코드에 준하는 1급 산출물로 다룹니다. REAP 디렉토리 안에 강제하지 않고, 리포 밖의 여러 곳일 수 있습니다. REAP가 기억하는 것은 각 plan을 어떻게 읽고 쓰는지의 규약입니다. 그래서 두 축이 생겼습니다 — loop가 plan을 진화시키는 Plan 축과, plan을 잘라 실행하는 Execution 축입니다.",
+        body: "기획·설계·아이디어를 소스 코드에 준하는 1급 산출물로 다룹니다. REAP 디렉토리 안에 강제하지 않고, 리포 밖의 여러 곳일 수 있습니다. REAP가 기억하는 것은 각 plan을 어떻게 읽고 쓰는지의 규약입니다. 그래서 두 축이 생겼습니다 — flux가 plan을 진화시키는 Plan 축과, plan을 잘라 실행하는 Execution 축입니다.",
       },
       {
         title: "milestone이 맥락과 평가의 단위가 됐습니다",
@@ -889,7 +889,7 @@ export const ko: Translations = {
       },
       {
         title: "새 의도를 만드는 일과 실현하는 일을 갈랐습니다",
-        body: "loop는 새 의도를 만들고, exec generation은 그것을 실현하고, fix generation은 이미 있는 의도로 되돌립니다. exec는 반드시 milestone이나 backlog 항목이라는 근거를 갖습니다. 어떤 일인지 모호하면 interview가 사람에게 되묻고, 아직 확정되지 않은 것은 idea에 둡니다 — 추측으로 부풀리지 않도록.",
+        body: "flux는 새 의도를 만들고, exec generation은 그것을 실현하고, fix generation은 이미 있는 의도로 되돌립니다. exec는 반드시 milestone이나 backlog 항목이라는 근거를 갖습니다. 어떤 일인지 모호하면 interview가 사람에게 되묻고, 아직 확정되지 않은 것은 idea에 둡니다 — 추측으로 부풀리지 않도록.",
       },
     ],
     tableTitle: "v0.17 → v0.18 대응",
@@ -932,7 +932,7 @@ export const ko: Translations = {
   quickstart: {
     title: "첫 사용",
     breadcrumb: "시작하기",
-    description: "REAP 설치부터 첫 loop·generation까지 — 사전 준비물, 두 단계 설치, 세 skill로 도는 첫 바퀴.",
+    description: "REAP 설치부터 첫 flux·generation까지 — 사전 준비물, 두 단계 설치, 세 skill로 도는 첫 바퀴.",
     intro: "프로젝트에서 (신규 폴더든 기존 코드베이스든) 세 skill만 있으면 됩니다.",
     prerequisitesTitle: "사전 요구 사항",
     prerequisiteHeaders: ["항목", "설명"],
@@ -958,12 +958,12 @@ export const ko: Translations = {
       {
         title: "세대를 엽니다",
         command: "/reap:evolve",
-        desc: "새 의도를 만드는 일인지(loop), 만들어둔 의도를 실현하는 일인지(exec generation), 이미 있는 의도로 되돌리는 일인지(fix generation)를 판단하고 엽니다. 그다음은 자율 구간입니다 — 탐색하고 짜고 고칩니다. 순서도 횟수도 REAP가 정하지 않고, 일이 끝나면 agent가 세대를 닫습니다.",
+        desc: "새 의도를 만드는 일인지(flux), 만들어둔 의도를 실현하는 일인지(exec generation), 이미 있는 의도로 되돌리는 일인지(fix generation)를 판단하고 엽니다. 그다음은 자율 구간입니다 — 탐색하고 짜고 고칩니다. 순서도 횟수도 REAP가 정하지 않고, 일이 끝나면 agent가 세대를 닫습니다.",
       },
     ],
     statusLineTitle: "상태 줄이 지도입니다",
     statusLineDesc1: "세션이 열릴 때마다 SessionStart 훅이 reap ctx를 불러 맥락을 주입합니다. genome 본문과 environment 요약, 그리고 상태 줄 — 지금 무엇이 열려 있고 무엇을 더 읽어야 하는지 경로로 가리키는 한 뭉치입니다.",
-    statusLineDesc2: "아래는 빈 프로젝트에서 reap init 뒤 reap make loop·reap make milestone --focus·reap make generation을 차례로 거친 뒤 실제로 찍은 reap ctx 출력입니다 (genome·environment 본문은 초기 씨앗 그대로입니다 — 채워 넣는 절차는 /reap:init이 합니다):",
+    statusLineDesc2: "아래는 빈 프로젝트에서 reap init 뒤 reap make flux·reap make milestone --focus·reap make generation을 차례로 거친 뒤 실제로 찍은 reap ctx 출력입니다 (genome·environment 본문은 초기 씨앗 그대로입니다 — 채워 넣는 절차는 /reap:init이 합니다):",
     statusLineExample: `<!-- reap 상태 -->
 응답 언어: ko
 현재 milestone: ms-001 로그인 붙이기 (focus, open)
@@ -971,7 +971,7 @@ export const ko: Translations = {
     milestone.md
 열린 세대: gen-0001-exec 로그인 폼과 세션 발급 — .reap/life/generations/gen-0001-exec-login-form.md
   2026-09-04T00:09:22Z 시작, 시작 커밋 c5c3264
-열린 loop: loop-0001-plan 인증 붙이기 — .reap/life/loops/loop-0001-plan-auth.md
+열린 flux: flux-0001-plan 인증 붙이기 — .reap/life/flux/flux-0001-plan-auth.md
 기억: .reap/vision/memory/lessons.md
 구조: .reap/map.md
 작업을 시작하면 /reap:evolve, 마무리하면 /reap:complete`,
@@ -995,10 +995,10 @@ export const ko: Translations = {
     injectedItems: [
       { label: "genome/ 본문", desc: "application.md·evolution.md·invariants.md — 제품 정체성, AI 행동 규칙, 절대 제약." },
       { label: "environment/summary.md 본문", desc: "현재 기술 스택, 소스 구조, 빌드·테스트 방법." },
-      { label: "상태 줄", desc: "열린 milestone·generation·loop의 경로와 이름. milestone.md도 handoff.md도 본문은 실리지 않습니다 — 그 경로를 열지 말지는 agent가 그때그때 판단합니다." },
+      { label: "상태 줄", desc: "열린 milestone·generation·flux의 경로와 이름. milestone.md도 handoff.md도 본문은 실리지 않습니다 — 그 경로를 열지 말지는 agent가 그때그때 판단합니다." },
     ],
     statusLineTitle: "실제 예시",
-    statusLineDesc: "아래는 빈 프로젝트에서 reap init 뒤 reap make loop·reap make milestone --focus·reap make generation을 차례로 거친 뒤 실제로 찍은 reap ctx의 상태 줄입니다.",
+    statusLineDesc: "아래는 빈 프로젝트에서 reap init 뒤 reap make flux·reap make milestone --focus·reap make generation을 차례로 거친 뒤 실제로 찍은 reap ctx의 상태 줄입니다.",
     statusLineExample: `<!-- reap 상태 -->
 응답 언어: ko
 현재 milestone: ms-001 로그인 붙이기 (focus, open)
@@ -1006,7 +1006,7 @@ export const ko: Translations = {
     milestone.md
 열린 세대: gen-0001-exec 로그인 폼과 세션 발급 — .reap/life/generations/gen-0001-exec-login-form.md
   2026-09-04T14:28:50Z 시작, 시작 커밋 a40f09d
-열린 loop: loop-0001-plan 인증 붙이기 — .reap/life/loops/loop-0001-plan-auth.md
+열린 flux: flux-0001-plan 인증 붙이기 — .reap/life/flux/flux-0001-plan-auth.md
 기억: .reap/vision/memory/lessons.md
 구조: .reap/map.md
 작업을 시작하면 /reap:evolve, 마무리하면 /reap:complete`,
@@ -1014,7 +1014,7 @@ export const ko: Translations = {
     judgmentsDesc: "사람이 무언가를 하자고 하면 /reap:evolve가 열립니다. 이 skill은 세 가지를 차례로 판단합니다.",
     judgments: [
       { title: "세대를 열 값이 있는가", desc: "한 번의 편집과 한 번의 커밋으로 끝나는 일에는 세대를 열지 않습니다. 세대 기록이 필요한 것은 작업이 진행 중인 동안 무엇을 하는 중이었는지를 붙잡아 둘 때뿐입니다." },
-      { title: "loop인가, generation인가", desc: "새 의도를 만드는 일이면 loop입니다 — 기획, 설계, 화면, 아직 자리 없는 아이디어. 이미 정해진 의도를 실현하거나(exec) 되돌리는 일이면(fix) generation입니다." },
+      { title: "flux인가, generation인가", desc: "새 의도를 만드는 일이면 flux입니다 — 기획, 설계, 화면, 아직 자리 없는 아이디어. 이미 정해진 의도를 실현하거나(exec) 되돌리는 일이면(fix) generation입니다." },
       { title: "직접 하는가, 위임하는가", desc: "기본은 같은 세션이 직접 합니다. 여러 파일과 긴 탐색으로 주 세션의 컨텍스트를 채울 것 같거나, 사람이 위임을 요청했거나, 병렬로 둘 이상을 굴릴 때는 subagent에게 brief를 주고 맡깁니다." },
     ],
     autonomousTitle: "자율 구간",
@@ -1031,10 +1031,10 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
     title: "두 축",
     breadcrumb: "핵심 개념",
     description: "Plan 축과 Execution 축이 왜 대등하고, 어떻게 다른 리듬으로 돌다가 milestone에서 만나는가.",
-    intro: "REAP의 작업은 하나의 파이프라인이 아니라 두 개의 축 위에서 진행됩니다. Plan 축에서는 loop가 계획을 다듬고, Execution 축에서는 milestone으로 잘린 계획을 generation이 실행합니다. 두 축은 대등하고, 서로 다른 리듬으로 돕니다.",
+    intro: "REAP의 작업은 하나의 파이프라인이 아니라 두 개의 축 위에서 진행됩니다. Plan 축에서는 flux가 계획을 다듬고, Execution 축에서는 milestone으로 잘린 계획을 generation이 실행합니다. 두 축은 대등하고, 서로 다른 리듬으로 돕니다.",
     cycleTitle: "두 축이 도는 방식",
-    cycleDesc: "같은 '작업 사이클'이라는 말이 축마다 다른 것을 가리킵니다. loop와 generation을 나란히 놓으면 차이가 분명해집니다.",
-    cycleHeaders: ["", "Plan 축 — loop", "Execution 축 — generation"],
+    cycleDesc: "같은 '작업 사이클'이라는 말이 축마다 다른 것을 가리킵니다. flux와 generation을 나란히 놓으면 차이가 분명해집니다.",
+    cycleHeaders: ["", "Plan 축 — flux", "Execution 축 — generation"],
     cycleRows: [
       ["세션 바인딩", "바인딩되지 않습니다. 세션이 바뀌어도 이어집니다", "세션에 바인딩됩니다 — reap make generation이 .session에 씁니다"],
       ["동시에 열리는 수", "여럿이 나란히 열릴 수 있습니다", "세션마다 하나입니다"],
@@ -1043,13 +1043,13 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
       ["근거", "선택입니다 — 있으면 --from에 적습니다", "exec는 milestone 또는 backlog 항목이 필수입니다. fix는 근거가 없습니다"],
     ],
     meetTitle: "두 축이 만나는 곳",
-    meetDesc: "loop가 plan source에 쓴 계획을 실행 가능한 단위로 자르는 일이 두 축의 접점입니다. 이 지점을 carve-milestone이 맡습니다.",
+    meetDesc: "flux가 plan source에 쓴 계획을 실행 가능한 단위로 자르는 일이 두 축의 접점입니다. 이 지점을 carve-milestone이 맡습니다.",
     meetDiagram: `plan source (등록된 곳, 리포 밖일 수 있다)
       |
-      | loop가 쓴다
+      | flux가 쓴다
       v
-   loop  ------ carve-milestone ------>  milestone
- (life/loops/)                          (vision/milestones/)
+   flux  ------ carve-milestone ------>  milestone
+ (life/flux/)                          (vision/milestones/)
                                               |
                                     +---------+---------+
                                     |                   |
@@ -1061,7 +1061,7 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
 
                                backlog 항목 -- exec generation --> civilization
                                fix generation (근거 없음) --------> civilization`,
-    meetNote: "loop는 exec의 경계 안에 있지 않고, exec generation은 반드시 근거(milestone 또는 backlog 항목)를 갖습니다. fix generation만 예외입니다 — 새 의도를 만들지 않고 이미 있는 의도로 되돌리므로 근거를 요구하지 않습니다.",
+    meetNote: "flux는 exec의 경계 안에 있지 않고, exec generation은 반드시 근거(milestone 또는 backlog 항목)를 갖습니다. fix generation만 예외입니다 — 새 의도를 만들지 않고 이미 있는 의도로 되돌리므로 근거를 요구하지 않습니다.",
   },
 
   storagePage: {
@@ -1091,8 +1091,8 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
       gen-0097-exec-site-concepts-plan.md
     backlog/
       bk-a4d829-migrate-판정을-스크립트로…
-    loops/
-      loop-0004-plan-v018-release.md
+    flux/
+      flux-0004-plan-v018-release.md
   archive/                   닫힌 것
     generations/
       gen-0092-exec-final-recheck.md
@@ -1100,7 +1100,7 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
       ms-021-v018-i18n/
     backlog/
       bk-c3321b-frontmatter-시간-형식.md
-    loops/
+    flux/
   genome/
     application.md
     evolution.md
@@ -1109,12 +1109,12 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
     summary.md
   idea/
     research/
-      idea-c43368-loop-실사용-fitness.md
+      idea-c43368-flux-실사용-fitness.md
     files/
       idea-dc2e56-제품-기획-방법론.md
   sequence/
     generation.md
-    loop.md
+    flux.md
     milestone.md
     source.md
   .session                   현재 세션 바인딩 (gitignored)
@@ -1125,34 +1125,34 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
     tierHeaders: ["단계", "뜻"],
     tiers: [
       ["vision/", "하려는 것 — 쌓인 교훈(memory/)과 잘라낸 실행 단위(milestones/)"],
-      ["life/", "지금 열려 있는 것 — 열린 generation·loop와 소비되지 않은 backlog 항목. 닫히거나 소비되는 순간 archive로 옮겨집니다"],
+      ["life/", "지금 열려 있는 것 — 열린 generation·flux와 소비되지 않은 backlog 항목. 닫히거나 소비되는 순간 archive로 옮겨집니다"],
       ["archive/", "닫힌 것 — mark가 닫거나 소비하는 순간 여기로 옮깁니다. 기록은 id로 언제든 찾습니다"],
     ],
     outsideTitle: "3단 밖에 있는 것들",
-    outsideDesc: "plan/·genome/·environment/·idea/는 vision·life·archive 어디에도 속하지 않고 최상위에 나란히 섭니다. plan source는 리포 밖을 가리키는 등록부라 '하려는 것 / 사는 것 / 끝난 것'이라는 시간축에 얹히지 않습니다 — 등록된 소스는 그냥 거기 있습니다. genome은 규범, environment는 서술, idea는 아직 단단하지 않은 지식이라 같은 이유로 시간축 밖입니다. loop만은 예외로 life/loops/에 있습니다 — loop는 열리고 닫히고 archive로 가므로 시간축에 얹히기 때문입니다.",
+    outsideDesc: "plan/·genome/·environment/·idea/는 vision·life·archive 어디에도 속하지 않고 최상위에 나란히 섭니다. plan source는 리포 밖을 가리키는 등록부라 '하려는 것 / 사는 것 / 끝난 것'이라는 시간축에 얹히지 않습니다 — 등록된 소스는 그냥 거기 있습니다. genome은 규범, environment는 서술, idea는 아직 단단하지 않은 지식이라 같은 이유로 시간축 밖입니다. flux만은 예외로 life/flux/에 있습니다 — flux는 열리고 닫히고 archive로 가므로 시간축에 얹히기 때문입니다.",
     mapTitle: "map.md — 구조가 스스로를 설명합니다",
     mapDesc: "각 디렉토리가 무엇을 담는지 map.md가 안내합니다. init이 없을 때만 놓는 씨앗이라 프로젝트가 자기 사정을 덧붙일 수 있고, REAP가 레이아웃을 바꿔도 저절로 갱신되지 않습니다. 매 세션 주입되지 않습니다 — 상태 줄이 경로만 알리고, 필요한 agent가 엽니다.",
     sessionTitle: ".session과 .index — gitignore됩니다",
     sessionDesc: ".session은 현재 세션에 바인딩된 generation id와 milestone id를 담습니다. worktree마다 별개 사본이므로 커밋하면 세션마다 값이 어긋납니다. .index/는 코드 인덱스입니다 — 크기 때문이 아니라, 커밋하면 그 커밋 자체를 다시 인덱싱해야 해서 gitignore됩니다. 둘 다 지워도 안전하고, 다음 동작이 다시 만듭니다.",
   },
 
-  loopPage: {
-    title: "Loop",
+  fluxPage: {
+    title: "Flux",
     breadcrumb: "Plan 축",
     description: "새 의도를 만드는 Plan 축의 사이클 — 네 가지 유형, 열고 잇고 닫는 흐름.",
-    intro: "새 의도를 만드는 일은 generation이 아니라 loop입니다. 기획, 설계, 화면과 흐름, 아직 자리가 없는 아이디어 — 이 넷을 loop가 다루고, generation과는 다른 사이클로 돕니다.",
+    intro: "새 의도를 만드는 일은 generation이 아니라 flux입니다. 기획, 설계, 화면과 흐름, 아직 자리가 없는 아이디어 — 이 넷을 flux가 다루고, generation과는 다른 사이클로 돕니다.",
     typesTitle: "네 가지 유형",
     typeHeaders: ["유형", "산출물이 찾는 자리"],
     types: [
       ["plan", "plan source의 기획 문서, 그리고 거기서 잘린 milestone"],
       ["design", "plan source의 설계 문서, milestone"],
       ["uiux", "화면·흐름 문서, milestone"],
-      ["idea", "idea/research/, 또는 다른 유형의 loop로 졸업"],
+      ["idea", "idea/research/, 또는 다른 유형의 flux로 졸업"],
     ],
-    openTitle: "loop를 여는 시점",
-    openDesc: "무엇을 만들지가 아직 정해지지 않았을 때 엽니다. 유형은 산출물이 어디로 갈지로 정하고, 출처가 있으면 함께 적습니다 — 계획이 부족해 막힌 generation, 앞선 loop, plan 문서 같은 것입니다. 출처는 근거가 아니라서 있어도 되고 없어도 됩니다. 기록은 비어서 시작하고, 가장 먼저 Question을 적습니다. 이 loop가 무엇을 정하려는 것인지가, 여러 세션에 걸치는 동안 기록을 쓸모 있게 만드는 유일한 것입니다.",
-    continueTitle: "이미 열린 loop가 있다면",
-    continueDesc: "상태 줄이 열린 loop를 한 줄씩 나열합니다. 같은 물음을 다루는 loop가 이미 열려 있으면 새로 열지 않고 거기서 잇습니다 — 새로 열면 논의가 두 기록으로 갈라집니다. 닫힌 loop도 읽을 값이 있습니다 — 지금 물음을 앞선 loop가 이미 다뤘을 수 있고, Dead Ends가 그것을 말해줍니다.",
+    openTitle: "flux를 여는 시점",
+    openDesc: "무엇을 만들지가 아직 정해지지 않았을 때 엽니다. 유형은 산출물이 어디로 갈지로 정하고, 출처가 있으면 함께 적습니다 — 계획이 부족해 막힌 generation, 앞선 flux, plan 문서 같은 것입니다. 출처는 근거가 아니라서 있어도 되고 없어도 됩니다. 기록은 비어서 시작하고, 가장 먼저 Question을 적습니다. 이 flux가 무엇을 정하려는 것인지가, 여러 세션에 걸치는 동안 기록을 쓸모 있게 만드는 유일한 것입니다.",
+    continueTitle: "이미 열린 flux가 있다면",
+    continueDesc: "상태 줄이 열린 flux를 한 줄씩 나열합니다. 같은 물음을 다루는 flux가 이미 열려 있으면 새로 열지 않고 거기서 잇습니다 — 새로 열면 논의가 두 기록으로 갈라집니다. 닫힌 flux도 읽을 값이 있습니다 — 지금 물음을 앞선 flux가 이미 다뤘을 수 있고, Dead Ends가 그것을 말해줍니다.",
     vocabTitle: "기록에 남기는 내용",
     vocabDesc: "어휘이지 템플릿이 아닙니다. 쓸 것만 쓰고, 순서도 정해져 있지 않습니다.",
     vocabHeaders: ["항목", "무엇을 담나"],
@@ -1165,23 +1165,23 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
       ["Open Questions", "결론 없이 남긴 것과 그것이 어디로 갔는가"],
     ],
     closeTitle: "닫히는 조건",
-    closeDesc: "산출물이 자리를 찾으면 닫힙니다. plan·design·uiux는 plan 문서에 쓰고, 실행할 것이 있으면 milestone까지 잘라야 닫힙니다. idea는 idea/research/에 남기거나 다른 유형의 loop로 졸업하면 닫힙니다. 닫을 때 이 loop가 낳은 milestone을 함께 적어 두고, milestone 쪽도 이 loop를 출처로 가리킵니다 — 둘이 서로를 가리켜야 나중에 어느 논의에서 어떤 실행이 나왔는지 따라갈 수 있습니다.",
+    closeDesc: "산출물이 자리를 찾으면 닫힙니다. plan·design·uiux는 plan 문서에 쓰고, 실행할 것이 있으면 milestone까지 잘라야 닫힙니다. idea는 idea/research/에 남기거나 다른 유형의 flux로 졸업하면 닫힙니다. 닫을 때 이 flux가 낳은 milestone을 함께 적어 두고, milestone 쪽도 이 flux를 출처로 가리킵니다 — 둘이 서로를 가리켜야 나중에 어느 논의에서 어떤 실행이 나왔는지 따라갈 수 있습니다.",
     stayOpenTitle: "열어 두어도 됩니다",
-    stayOpenDesc: "아직 자리를 못 찾았으면 다음 세션이 Question과 Dialogue를 읽고 잇습니다. 방향 자체가 죽었을 때만 --aborted로 지우고, 접은 이유는 idea/research/로 보냅니다 — 지워진 기록은 아무도 못 읽습니다. loop는 세션에 바인딩되지 않고 여럿이 나란히 열립니다. 닫힌 loop는 archive/loops/로 가고, 그것이 낳은 milestone의 from이 가리키는 id로 언제든 찾습니다.",
+    stayOpenDesc: "아직 자리를 못 찾았으면 다음 세션이 Question과 Dialogue를 읽고 잇습니다. 방향 자체가 죽었을 때만 --aborted로 지우고, 접은 이유는 idea/research/로 보냅니다 — 지워진 기록은 아무도 못 읽습니다. flux는 세션에 바인딩되지 않고 여럿이 나란히 열립니다. 닫힌 flux는 archive/flux/로 가고, 그것이 낳은 milestone의 from이 가리키는 id로 언제든 찾습니다.",
     exampleTitle: "실제 예시",
-    exampleDesc: "인증을 붙이자는 loop를 열고, 로그인 붙이기 milestone을 잘라 닫은 예입니다.",
-    exampleCode: `$ reap make loop --type plan --title "인증 붙이기"
-loop loop-0001-plan
-  .reap/life/loops/loop-0001-plan-auth.md
+    exampleDesc: "인증을 붙이자는 flux를 열고, 로그인 붙이기 milestone을 잘라 닫은 예입니다.",
+    exampleCode: `$ reap make flux --type plan --title "인증 붙이기"
+flux flux-0001-plan
+  .reap/life/flux/flux-0001-plan-auth.md
 
 (carve-milestone으로 ms-001을 자른 뒤)
 
-$ reap mark loop loop-0001-plan --closed --milestone ms-001
-닫았습니다: loop-0001-plan
-  .reap/archive/loops/loop-0001-plan-auth.md`,
-    cliCode: `reap make loop --type plan|design|uiux|idea --title "<제목>" [--from <id>] [--ref <ps-id>:<경로>]
-reap mark loop <loop-id> --closed [--milestone <ms-id>]...
-reap mark loop <loop-id> --aborted`,
+$ reap mark flux flux-0001-plan --closed --milestone ms-001
+닫았습니다: flux-0001-plan
+  .reap/archive/flux/flux-0001-plan-auth.md`,
+    cliCode: `reap make flux --type plan|design|uiux|idea --title "<제목>" [--from <id>] [--ref <ps-id>:<경로>]
+reap mark flux <flux-id> --closed [--milestone <ms-id>]...
+reap mark flux <flux-id> --aborted`,
   },
 
   planPage: {
@@ -1207,8 +1207,8 @@ reap mark loop <loop-id> --aborted`,
     role: reap v0.18 완성·출시 계획
     convention: conventions/ps-5e948f-reap-v018-release.md`,
     conventionTitle: "읽고 쓰는 규약",
-    conventionDesc: "conventions/<ps-id>-<slug>.md 한 파일에 그 소스를 읽는 법과 쓰는 법을 적습니다. loop가 이 소스에 쓸 때마다 먼저 규약을 읽고, 필요하면 규약 자체를 갱신합니다 — 다음 loop가 같은 판단을 다시 하지 않도록.",
-    conventionRulesTitle: "loop가 쓸 때 내리는 판단",
+    conventionDesc: "conventions/<ps-id>-<slug>.md 한 파일에 그 소스를 읽는 법과 쓰는 법을 적습니다. flux가 이 소스에 쓸 때마다 먼저 규약을 읽고, 필요하면 규약 자체를 갱신합니다 — 다음 flux가 같은 판단을 다시 하지 않도록.",
+    conventionRulesTitle: "flux가 쓸 때 내리는 판단",
     conventionRules: [
       "어느 소스에 쓸 것인가 — 여러 plan source가 등록돼 있으면 이 내용이 어디에 속하는지 먼저 정합니다",
       "쓰기 전에 규약(conventions/)을 먼저 읽습니다",
@@ -1218,11 +1218,11 @@ reap mark loop <loop-id> --aborted`,
       "그 소스가 git이면 커밋 규칙이 적용되고, 아니면 적용되지 않는다고 명시합니다",
     ],
     citeTitle: "plan 인용",
-    citeDesc: "milestone과 loop는 자신이 근거로 삼은 plan 문서를 <ps-id>:<경로> 형식으로 인용합니다. 만들 때 그 경로가 실재하는지 확인하고, doctor가 나중에 다시 확인합니다 — 시점이 다르므로 중복이 아닙니다. 이 문서 사이트를 만든 milestone(ms-022) 자체가 실례입니다.",
+    citeDesc: "milestone과 flux는 자신이 근거로 삼은 plan 문서를 <ps-id>:<경로> 형식으로 인용합니다. 만들 때 그 경로가 실재하는지 확인하고, doctor가 나중에 다시 확인합니다 — 시점이 다르므로 중복이 아닙니다. 이 문서 사이트를 만든 milestone(ms-022) 자체가 실례입니다.",
     citeCode: `refs:
   - ps-5e948f:07-i18n-docs-delegate.md`,
     lifespanTitle: "소비가 끝난 plan",
-    lifespanDesc: "작전 계획처럼 끝이 있는 plan source는 규약 파일의 수명(Lifespan) 절에 소비 완료를 적습니다. 다음 loop가 이 절을 읽고, 여기 더 쓸지 새 소스를 세울지 판단합니다.",
+    lifespanDesc: "작전 계획처럼 끝이 있는 plan source는 규약 파일의 수명(Lifespan) 절에 소비 완료를 적습니다. 다음 flux가 이 절을 읽고, 여기 더 쓸지 새 소스를 세울지 판단합니다.",
     lifespanCode: `## 수명
 
 v0.18 브랜치가 서고 M1~M3가 끝나면 이 세트는 소비 완료다 — 살아남을 규범은
@@ -1273,7 +1273,7 @@ status: open
 
 - (primary/secondary · date verified)`,
     graduationTitle: "졸업 조건",
-    graduationDesc: "research와 files 문서는 언제 결론이 난 것으로 볼지를 미리 적습니다. 적어 두지 않으면 다음에 열어봐도 아직 결론이 안 났는지 판단할 수 없고, 그 문서는 계속 열린 채로 남습니다. 결론이 나면 loop의 Dialogue나 plan source, genome 등 그것이 실제로 규율할 자리로 옮기고 idea 문서는 역할을 마칩니다.",
+    graduationDesc: "research와 files 문서는 언제 결론이 난 것으로 볼지를 미리 적습니다. 적어 두지 않으면 다음에 열어봐도 아직 결론이 안 났는지 판단할 수 없고, 그 문서는 계속 열린 채로 남습니다. 결론이 나면 flux의 Dialogue나 plan source, genome 등 그것이 실제로 규율할 자리로 옮기고 idea 문서는 역할을 마칩니다.",
     doctorTitle: "doctor가 idea에서 보는 것",
     doctorItems: [
       "졸업 조건이 비어 있는 research·files 문서",
@@ -1290,7 +1290,7 @@ reap mark idea <idea-id> --archived`,
     title: "Milestone 자르기",
     breadcrumb: "Plan 축",
     description: "plan을 실행 가능한 단위로 자르는 절차 — 크기, 적는 내용, focus, 닫는 순서.",
-    intro: "loop 안에서, 이미 정해진 계획을 실행 가능한 단위로 자를 때 부릅니다. 무엇을 만들지 아직 정해지지 않았다면 자르는 게 아니라 정하는 것이고, 그건 loop와 interview의 몫입니다. backlog 항목 하나로 충분한 일이면 milestone을 만들지 않습니다 — 경계가 이미 항목에 있는데 milestone을 또 만들면 경계가 두 곳에 적히고, 두 곳에 있으면 어긋납니다.",
+    intro: "flux 안에서, 이미 정해진 계획을 실행 가능한 단위로 자를 때 부릅니다. 무엇을 만들지 아직 정해지지 않았다면 자르는 게 아니라 정하는 것이고, 그건 flux와 interview의 몫입니다. backlog 항목 하나로 충분한 일이면 milestone을 만들지 않습니다 — 경계가 이미 항목에 있는데 milestone을 또 만들면 경계가 두 곳에 적히고, 두 곳에 있으면 어긋납니다.",
     checkTitle: "자르기 전 확인",
     checkDesc: "plan에 적힌 것은 시도해 보기 전의 상상이고, 실제로 해 본 것이 그것을 이깁니다. 자르기 전에 plan이 전제한 것이 지금도 참인지 확인합니다 — 파일 크기를 재보거나, 얼마나 쓰이는지 세보거나, 관련 문서끼리 맞는지 grep 한 번이면 대개 충분합니다. 건너뛰면 아무도 안 쓰는 것을 위한 도구를 만들게 됩니다. 전제가 틀렸으면 자르기를 멈추고 그 칸을 다시 채웁니다.",
     sizeTitle: "적정 크기",
@@ -1310,7 +1310,7 @@ reap mark idea <idea-id> --archived`,
     fitnessQuestionsTitle: "fitness 질문은 자를 때 미리",
     fitnessQuestionsDesc: "끝난 뒤에 쓰면 후회만 물어보게 됩니다. 자르는 시점에 'What to ask when this milestone closes' 절에 서너 개를 적어 두면 무엇을 검증할지 먼저 정해지고, milestone의 목적이 한 번 더 확인됩니다. '잘 됐나'가 아니라 '이번에 달라진 무엇이 실제로 나아졌는가'를 묻는 질문이어야 합니다.",
     carveTitle: "자르기",
-    carveDesc: "제목과 함께 이 milestone을 낳은 loop, 근거가 된 plan 문서를 적어 만듭니다. 그다음 milestone.md 본문과 task 문서를 씁니다 — 인터페이스·함정·완료 판정을 미리 적어 두면 그 task를 실행하는 세대가 다시 탐색하지 않아도 됩니다.",
+    carveDesc: "제목과 함께 이 milestone을 낳은 flux, 근거가 된 plan 문서를 적어 만듭니다. 그다음 milestone.md 본문과 task 문서를 씁니다 — 인터페이스·함정·완료 판정을 미리 적어 두면 그 task를 실행하는 세대가 다시 탐색하지 않아도 됩니다.",
     focusTitle: "focus는 지금 시작할 것에만",
     focusDesc: "focus가 없는 milestone은 상태 줄에 나타나지 않고, 다음 세션은 그것이 있는지도 모릅니다. 자동으로 붙이지 않는 이유는 여러 개를 한 번에 자르면 마지막 것이 focus를 가로채기 때문입니다 — 실제로 넷을 한 번에 자른 적이 있고, 그다음 필요했던 것은 첫 번째였습니다. 여럿을 잘랐다면 지금 시작할 것 하나에만 줍니다.",
     retireTitle: "plan에서의 정리",
@@ -1323,19 +1323,19 @@ reap mark idea <idea-id> --archived`,
     ],
     exampleTitle: "실제 예시",
     exampleDesc: "로그인 붙이기 milestone을 자르고, 세대 둘로 실현한 뒤 닫은 예입니다.",
-    exampleCode: `$ reap make milestone --title "로그인 붙이기" --from loop-0001-plan --focus
+    exampleCode: `$ reap make milestone --title "로그인 붙이기" --from flux-0001-plan --focus
 milestone ms-001
   .reap/vision/milestones/ms-001-login/milestone.md
 
 (gen-0001-exec가 로그인 폼을, gen-0002-exec가 세션 발급을 마치고 각각 닫힌 뒤)
 
-$ reap mark loop loop-0001-plan --closed --milestone ms-001
-닫았습니다: loop-0001-plan
+$ reap mark flux flux-0001-plan --closed --milestone ms-001
+닫았습니다: flux-0001-plan
 
 $ reap mark milestone ms-001 --closed
 닫고 옮겼습니다: ms-001
   .reap/archive/milestones/ms-001-login/milestone.md`,
-    cliCode: `reap make milestone --title "<제목>" [--from <loop-id>] [--ref <ps-id>:<경로>] [--focus]
+    cliCode: `reap make milestone --title "<제목>" [--from <flux-id>] [--ref <ps-id>:<경로>] [--focus]
 reap mark milestone <ms-id> --focus
 reap mark milestone <ms-id> --closed`,
   },
@@ -1344,7 +1344,7 @@ reap mark milestone <ms-id> --closed`,
     title: "Generation",
     breadcrumb: "Execution 축",
     description: "exec와 fix 두 유형, 근거, 세션 바인딩, 커밋 규칙까지 세대 기록의 전부입니다.",
-    intro: "milestone이나 backlog를 근거로 실제 코드를 진화시키는 단위가 generation입니다. evolve가 축을 정하고 나면 이 세대는 exec 아니면 fix입니다 — 새 의도를 만드는 일은 generation이 아니라 loop입니다.",
+    intro: "milestone이나 backlog를 근거로 실제 코드를 진화시키는 단위가 generation입니다. evolve가 축을 정하고 나면 이 세대는 exec 아니면 fix입니다 — 새 의도를 만드는 일은 generation이 아니라 flux입니다.",
     groundsTitle: "두 유형과 근거",
     groundsHeaders: ["유형", "근거"],
     grounds: [
@@ -1360,7 +1360,7 @@ reap mark milestone <ms-id> --closed`,
       "다른 세션이 함께 돌 때 — 상태 줄의 열린 세대 표시가 진행 중임을 알리는 유일한 수단입니다",
     ],
     openTitle: "세대 열기",
-    openDesc: "evolve skill이 근거를 골라 엽니다 — exec는 milestone이나 backlog 항목, fix는 근거 없이 제목만. 유형도 근거도 없는 세대는 열리지 않고, 이미 소비된 backlog 항목은 근거가 되지 못합니다. 새 의도를 만드는 일은 세대가 아니라 loop라서 그쪽 문이 따로 있습니다.",
+    openDesc: "evolve skill이 근거를 골라 엽니다 — exec는 milestone이나 backlog 항목, fix는 근거 없이 제목만. 유형도 근거도 없는 세대는 열리지 않고, 이미 소비된 backlog 항목은 근거가 되지 못합니다. 새 의도를 만드는 일은 세대가 아니라 flux라서 그쪽 문이 따로 있습니다.",
     bindingTitle: ".session — 하나뿐인 바인딩",
     bindingDesc: "세대가 열리면 아이디 발급과 함께 .reap/.session에 이 세션이 묶입니다. 파일 하나라 세션 하나만 담기고, 나중 세션이 열면 앞의 바인딩을 덮습니다 — 같은 디렉토리에서 세션 둘을 나란히 못 여는 이유입니다. abort 뒤나 다른 디렉토리에서 세션을 열었을 때처럼 바인딩을 잃으면 doctor가 '열린 채 바인딩 안 된 generation'으로 보고하고, 내 세대라면 다시 묶을 수 있습니다. 남의 것이거나 버려진 것이면 지웁니다.",
     vocabTitle: "기록 어휘",
@@ -1499,12 +1499,12 @@ reap mark backlog <bk-id> --consumed [--by <gen-id>]`,
     lessonsTitle: "lessons로 올릴 것",
     lessonsDesc: "milestone 하나를 넘어 프로젝트 전체가 반복해서 겪은 것이라면 vision/memory/lessons.md로 올립니다. 한 번 겪은 것은 관찰이고 여러 번 겪은 것은 규칙입니다 — 반복 확인된 교훈은 다시 genome/evolution.md의 규칙으로 졸업하고 lessons에서는 지웁니다.",
     exampleTitle: "실제 예시",
-    exampleDesc: "generation과 loop가 먼저 닫히고, milestone이 마지막으로 archive/milestones/로 옮겨진 예입니다.",
+    exampleDesc: "generation과 flux가 먼저 닫히고, milestone이 마지막으로 archive/milestones/로 옮겨진 예입니다.",
     exampleCode: `$ reap mark generation gen-0001-exec --closed
 닫았습니다: gen-0001-exec
 
-$ reap mark loop loop-0001-plan --closed --milestone ms-001
-닫았습니다: loop-0001-plan
+$ reap mark flux flux-0001-plan --closed --milestone ms-001
+닫았습니다: flux-0001-plan
 
 $ reap mark milestone ms-001 --closed
 닫고 옮겼습니다: ms-001
@@ -1618,7 +1618,7 @@ workspaceId: ba44307f94a6`,
       ["id 형식", "발급된 id가 형식에 맞는지"],
       ["id 중복", "같은 id가 두 곳 이상에 있는지"],
       ["레지스트리에 없는 id", "발급 대장(sequence/)에 없는 id가 파일로 존재하는지"],
-      ["끊긴 참조", "milestone·generation·backlog·loop의 from·milestone·backlog·consumedBy·refs가 실재하는 항목을 가리키는지"],
+      ["끊긴 참조", "milestone·generation·backlog·flux의 from·milestone·backlog·consumedBy·refs가 실재하는 항목을 가리키는지"],
       ["커밋 없이 닫힌 generation", "닫힌 세대의 startCommit과 endCommit이 같은지 — 코드 변경 없이 닫혔다는 뜻"],
       ["focus가 둘", "focus: true인 열린 milestone이 둘 이상인지"],
       ["깨진 상대 링크", ".reap/ 안 마크다운 문서의 상대 링크가 실재 파일을 가리키는지"],
@@ -1669,7 +1669,7 @@ workspaceId: ba44307f94a6`,
     items: [
       {
         title: "정적 스펙 vs 두 축의 순환",
-        desc: "스펙 기반 도구는 코드 전에 명세를 한 번 쓰고 구현으로 넘어간다. REAP는 Plan 축(loop)과 Execution 축(milestone·generation)이 따로 돌고, 실행 중 발견한 것은 backlog로 되먹여져 다음 세대나 다음 loop에 반영된다. 계획도 코드처럼 다시 쓰인다.",
+        desc: "스펙 기반 도구는 코드 전에 명세를 한 번 쓰고 구현으로 넘어간다. REAP는 Plan 축(flux)과 Execution 축(milestone·generation)이 따로 돌고, 실행 중 발견한 것은 backlog로 되먹여져 다음 세대나 다음 flux에 반영된다. 계획도 코드처럼 다시 쓰인다.",
       },
       {
         title: "하드 게이트 vs 보고만 하는 doctor",
@@ -1698,8 +1698,8 @@ workspaceId: ba44307f94a6`,
     tableHeaders: ["skill", "언제", "무엇을"],
     table: [
       ["init", "프로젝트당 한 번, 맨 처음 — 정본 지식을 세운다", "reap init 뒤 plan 문서를 등록하고 environment·genome을 채운 뒤 첫 milestone으로 넘긴다"],
-      ["evolve", "세대를 열 때 — loop·exec·fix 중 무엇인지 정한다", "상태 줄과 handoff를 읽고 loop·exec·fix 중 무엇인지 정해 세대를 연다"],
-      ["loop", "새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것", "loop를 열어 plan에 쓰고, 자를 것이 정해지면 carve-milestone으로 넘긴다"],
+      ["evolve", "세대를 열 때 — flux·exec·fix 중 무엇인지 정한다", "상태 줄과 handoff를 읽고 flux·exec·fix 중 무엇인지 정해 세대를 연다"],
+      ["flux", "새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것", "flux를 열어 plan에 쓰고, 자를 것이 정해지면 carve-milestone으로 넘긴다"],
       ["interview", "의도가 모호해 사람이 결정해야 할 때", "코드·spec으로 답이 나오는 질문을 걸러낸 뒤 사람에게 한 번에 하나씩 묻는다"],
       ["orchestrate", "두 세션 이상이 같은 프로젝트에서 동시에 작업할 때", "worktree로 역할을 가르고 claim·barrier·메시지로 세션들을 조율한다"],
       ["migrate", "v0.17 데이터를 v0.18 구조로 옮길 때", "원본을 .reap-v0_17/로 격리한 뒤 8단계로 옮기고 검증해 기록을 남긴다"],
@@ -1726,18 +1726,18 @@ workspaceId: ba44307f94a6`,
       {
         name: "evolve",
         when: "세대를 열 때, 새 작업을 시작할 때.",
-        what: "상태 줄과 handoff.md·milestone.md·task를 읽고 새 의도를 만드는 일(loop)인지 실현·되돌리는 일(generation)인지 정한 뒤 연다. 열고 나서는 직접 할지 subagent에 위임할지도 판단한다 — 여러 파일·긴 탐색이 예상되거나 병렬로 둘 이상 돌릴 때 위임한다.",
+        what: "상태 줄과 handoff.md·milestone.md·task를 읽고 새 의도를 만드는 일(flux)인지 실현·되돌리는 일(generation)인지 정한 뒤 연다. 열고 나서는 직접 할지 subagent에 위임할지도 판단한다 — 여러 파일·긴 탐색이 예상되거나 병렬로 둘 이상 돌릴 때 위임한다.",
         notCalled: "이미 열린 세대가 있으면(내 것이면 이어가고 남의 것이면 새로 열지 않는다), 한 번의 편집·커밋으로 끝나는 일이면(세대를 열 값이 없다).",
       },
       {
-        name: "loop",
+        name: "flux",
         when: "새 의도를 만들 때 — 기획(plan)·설계(design)·화면·흐름(uiux)·아직 자리 없는 것(idea).",
-        what: "loop를 열거나 이어 plan에 쓰고 Dialogue를 기록하며, 자를 것이 정해지면 carve-milestone으로 넘겨 milestone을 낳고 닫는다.",
-        notCalled: "이미 실현할 의도가 서 있어 실행만 하면 될 때(그건 generation), 같은 물음을 다루는 loop가 이미 열려 있을 때(새로 열지 않고 잇는다).",
+        what: "flux를 열거나 이어 plan에 쓰고 Dialogue를 기록하며, 자를 것이 정해지면 carve-milestone으로 넘겨 milestone을 낳고 닫는다.",
+        notCalled: "이미 실현할 의도가 서 있어 실행만 하면 될 때(그건 generation), 같은 물음을 다루는 flux가 이미 열려 있을 때(새로 열지 않고 잇는다).",
       },
       {
         name: "interview",
-        when: "의도가 모호해 사람이 결정해야 할 때. evolve·loop·carve-milestone·init이 가리킬 때.",
+        when: "의도가 모호해 사람이 결정해야 할 때. evolve·flux·carve-milestone·init이 가리킬 때.",
         what: "코드·spec·기존 대화로 답이 나오는 질문을 걸러낸 뒤, 한 번에 하나·선택지 2~4개+자유입력·대가·근거 있는 추천·끝이 보이는 형식으로 사람에게 묻는다.",
         notCalled: "명령 한 줄로 확정되는 사실, spec이나 handoff.md·Dialogue에 이미 답이 있는 것, 사람 몫이 아닌 판단에는 부르지 않는다.",
       },
@@ -1773,9 +1773,9 @@ workspaceId: ba44307f94a6`,
       },
       {
         name: "carve-milestone",
-        when: "loop 안에서 plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때.",
+        when: "flux 안에서 plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때.",
         what: "자르려는 전제를 실제 흔적에 대조한 뒤 경계·종료 조건·범위 밖과 task를 적어 자르거나, fitness를 받아 적고 mark로 닫는다.",
-        notCalled: "backlog 항목 하나로 충분하면(경계가 두 곳에 적힌다), 무엇을 만들지 아직 안 섰으면(그건 interview·loop의 일), 한 세대로 끝날 일이면 backlog 항목으로 충분하다.",
+        notCalled: "backlog 항목 하나로 충분하면(경계가 두 곳에 적힌다), 무엇을 만들지 아직 안 섰으면(그건 interview·flux의 일), 한 세대로 끝날 일이면 backlog 항목으로 충분하다.",
       },
     ],
   },
@@ -1795,8 +1795,8 @@ workspaceId: ba44307f94a6`,
 
   --version
   init [--force] | init --check     (--check: 씨앗 그대로인 지식 파일을 보고만 한다)
-  make loop       --type plan|design|uiux|idea --title "<제목>" [--slug <s>] [--from <id>] [--ref <ps-id>:<경로>]
-  make milestone  --title "<제목>" [--slug <s>] [--from <loop-id>] [--ref <ps-id>:<경로>] [--focus]
+  make flux       --type plan|design|uiux|idea --title "<제목>" [--slug <s>] [--from <id>] [--ref <ps-id>:<경로>]
+  make milestone  --title "<제목>" [--slug <s>] [--from <flux-id>] [--ref <ps-id>:<경로>] [--focus]
   make generation --milestone <ms-id> --title "<제목>" [--slug <s>]
   make generation --backlog <bk-id> --title "<제목>" [--slug <s>]   (--milestone과 겸용 가능)
   make generation --fix  --title "<제목>" [--slug <s>]
@@ -1804,13 +1804,13 @@ workspaceId: ba44307f94a6`,
   make plan-source --root <path> --role "<역할>" [--slug <s>]
   make idea       --kind research|freememo|file --title "<제목>" [--slug <s>]
   make hook       --event <e> --name <n> [--type md|sh] [--condition <c>] [--order <n>]
-  mark loop       <loop-id> --closed [--milestone <ms-id>]... | --aborted
+  mark flux       <flux-id> --closed [--milestone <ms-id>]... | --aborted
   mark generation <gen-id> --closed | --aborted | --archived
   mark backlog    <bk-id> --consumed [--by <gen-id>] | --archived
   mark milestone <ms-id> --focus | --closed
   mark idea       <idea-id> --archived
   bind <gen-id>                   (열린 세대에 이 세션을 다시 묶는다)
-  seq [generation|milestone|loop|source|<id>]
+  seq [generation|milestone|flux|source|<id>]
   carrier new <slug> | list [--orphans|--check]
   doctor                          (보고만 한다. 결함이 있으면 실패로 끝난다)
   index [update [--full] | status | impact <file>... | search <q> | callers <id> | callees <id>]
@@ -1821,10 +1821,10 @@ workspaceId: ba44307f94a6`,
     commandHeaders: ["명령", "설명"],
     commands: [
       ["init", "'.reap/'와 씨앗 파일을 놓는다. --check는 씨앗이 아직 채워지지 않은 파일만 보고한다. 프로젝트당 한 번, init skill이 이어서 채운다."],
-      ["make", "loop·milestone·generation·backlog·plan-source·idea·hook 일곱 종류를 만들고 id·frontmatter를 스탬프한다. id 발급처럼 확률에 맡길 수 없는 사실을 여기서 못 박는다."],
-      ["mark", "loop·generation·backlog·milestone·idea의 상태를 바꾼다. closed·aborted·archived·consumed·focus 등 종류마다 다른 상태 값을 받는다."],
+      ["make", "flux·milestone·generation·backlog·plan-source·idea·hook 일곱 종류를 만들고 id·frontmatter를 스탬프한다. id 발급처럼 확률에 맡길 수 없는 사실을 여기서 못 박는다."],
+      ["mark", "flux·generation·backlog·milestone·idea의 상태를 바꾼다. closed·aborted·archived·consumed·focus 등 종류마다 다른 상태 값을 받는다."],
       ["bind", "세션이 세대 바인딩을 잃었을 때(abort 뒤, 다른 디렉토리에서 열었을 때) '.reap/.session'을 그 세대에 다시 묶는다. doctor가 바인딩 안 된 열린 generation을 알려줄 때 쓴다."],
-      ["seq", "다음에 발급될 id를 인자 없이 미리 보여준다. 대상(generation·milestone·loop·source)이나 특정 id를 넘기면 그 계열의 현재 번호를 낸다."],
+      ["seq", "다음에 발급될 id를 인자 없이 미리 보여준다. 대상(generation·milestone·flux·source)이나 특정 id를 넘기면 그 계열의 현재 번호를 낸다."],
       ["carrier", "한 사실을 여러 자리가 알 때 붙이는 reap:carrier-<hash6> 표식을 관리한다. new가 발급하고, list가 등록된 표식을 훑어 짝이 없는 것(--orphans)이나 문제를 검사(--check)한다."],
       ["doctor", "'.reap/'의 상태를 확정적으로 검사 가능한 만큼만 검사해 보고한다. 파일을 쓰지 않고, 고치지도 않는다."],
       ["index", "코드 인덱스를 질의한다. update(HEAD와 맞춘다)·status(해석률)·impact(파급 범위)·search(정의 찾기)·callers/callees(호출 관계)로 갈린다."],
@@ -2008,10 +2008,11 @@ reap setup              # 플러그인 마켓플레이스 등록과 설치
     changed: [
       "두 산출물로 나뉜다 — npm CLI @c-d-cc/reap와 Claude Code 플러그인. 플러그인은 reap setup이 마켓플레이스를 통해 설치하고, 갱신은 마켓플레이스가 맡는다",
       "저장소가 3단이다 — vision/(하려는 것) · life/(지금 열려 있는 것) · archive/(닫힌 것)",
-      "작업이 세 단위로 갈린다 — loop(새 의도를 만든다) · milestone(실행 가능한 단위로 자른 계획) · generation(exec/fix — 실제로 코드를 진화시킨다)",
+      "작업이 세 단위로 갈린다 — flux(새 의도를 만든다) · milestone(실행 가능한 단위로 자른 계획) · generation(exec/fix — 실제로 코드를 진화시킨다)",
       "reap doctor가 확정적으로 검사 가능한 것만 검사해 보고한다. 고치지 않는다",
       "코드 인덱스(reap index)는 계속된다 — 15개 언어, 설치할 것 없음, 백그라운드 프로세스 없음",
       "여섯 이벤트 훅(gen.made·gen.closed·milestone.made·milestone.closed·orch.claimed·orch.barrier.released)과 make hook",
+      "plan 축의 단위 이름이 loop에서 flux로 바뀌었습니다. loop은 도는 것을 뜻하는데 이 단위가 하는 일은 계획을 키우는 것이라 이름이 일을 잘못 가리켰습니다. loop이라는 낱말은 다른 개념에 내줍니다. 하위 호환은 없습니다 — make loop·life/loops/·loop-NNNN-<유형> id가 그대로 사라집니다",
       "기록 파일 이름이 리눅스 NAME_MAX 안에 머뭅니다. slug는 UTF-8 80바이트에서 잘리고, 180바이트를 넘는 --slug는 거부되며, doctor가 .reap/ 안의 200바이트 넘는 이름을 결함으로 보고합니다 (#32)",
       "세대를 닫을 때 environment/summary.md와 같은 방식으로 genome 낡음도 점검하고, --type genome backlog를 그 자리에서 소비합니다. milestone을 닫을 때는 세대 하나가 아니라 milestone 전체에 대고 genome을 한 번 더 훑습니다 (#33)",
     ],

@@ -23,7 +23,7 @@ brief로 subagent에게 — **주 트리에서**(worktree 아님; submodule 체�
 표본 위치: `/private/tmp/.../scratchpad/final/`(en 왕복: `proj-en/`·`prefix/`·`pack/`, ko 이주: `migrate-ko/`). 이 경로는 세션마다 바뀌는 scratchpad라 다음 세대가 재현하려면 A·B 절차를 다시 밟아야 한다.
 
 **A — 왕복 1 (en)**
-- `bash scripts/verify-package.sh` 파이프 없이 실행 → 전 단계 PASS, `VERIFY_SCRIPT_EXIT=0`(빌드→pack→전역 설치→bun 제거 PATH→`--version`·`init`·`make loop/milestone/generation`·`mark`·`ctx --hook`(JSON 유효)·`doctor`(결함 0)·`plan sources`·`index update/status`·`orch claim/release` 전부 통과)
+- `bash scripts/verify-package.sh` 파이프 없이 실행 → 전 단계 PASS, `VERIFY_SCRIPT_EXIT=0`(빌드→pack→전역 설치→bun 제거 PATH→`--version`·`init`·`make flux/milestone/generation`·`mark`·`ctx --hook`(JSON 유효)·`doctor`(결함 0)·`plan sources`·`index update/status`·`orch claim/release` 전부 통과)
 - 별도 prefix(`bun run build:node`→`npm pack`→임시 prefix 전역 설치→bun 제거 PATH)를 다시 만들어 `proj-en`(빈 git 리포)에서 `reap init` → `doctor`(결함 0)
 - `claude --plugin-dir plugin -p "Print the injected reap status block verbatim and list every /reap: skill name"` 1회(2회 중 1회) — 답은 "reap 상태" 블록을 **한국어로 번역해** 인용했다(이 세션 자신의 글로벌 응답언어 지시 때문 — Dead Ends 참고). 원문 진위는 `reap ctx --hook`을 `>` 리다이렉트로 직접 캡처해 확인: `Response language: en` · `Memory: .reap/vision/memory/lessons.md` · `Structure: .reap/map.md` — en 라벨 확정. skill 이름은 답에 10종(carve-milestone·cleanup·complete·evolve·init·interview·loop·migrate·orchestrate·report-issue) 정확히 열거됨
 - 같은 리포(`proj-en`, `config.language: en`)에서 `REAP_LANG=ko reap`(인자 없이) → **영어 usage 그대로.** 결함이 아니다 — `src/i18n.ts`의 `resolveLanguage`는 `config.language → REAP_LANG → en` 순이고 README의 "REAP_LANG=ko outside a project" 문구와 일치한다. `.reap/`가 없는 별도 디렉터리에서 같은 명령을 돌려 REAP_LANG 자체는 한국어 usage를 정확히 내는 것도 확인(`사용법: reap <명령>...`)

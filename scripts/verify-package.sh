@@ -59,7 +59,7 @@ PKG_VERSION="$(node -p 'require("./package.json").version')"
 echo "PASS --version: $VERSION_OUT"
 
 (cd "$REPO_DIR" && run_reap init) && echo "PASS init"
-(cd "$REPO_DIR" && run_reap make loop --type plan --title t) && echo "PASS make loop"
+(cd "$REPO_DIR" && run_reap make flux --type plan --title t) && echo "PASS make flux"
 (cd "$REPO_DIR" && run_reap make milestone --title m) && echo "PASS make milestone"
 (cd "$REPO_DIR" && run_reap make generation --milestone ms-001 --title g) && echo "PASS make generation"
 (cd "$REPO_DIR" && run_reap mark generation gen-0001-exec --aborted) && echo "PASS mark generation"

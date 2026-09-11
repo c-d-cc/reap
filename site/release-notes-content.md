@@ -6,7 +6,8 @@ REAP is remade from a pipeline runner into a protocol and tool provider.
 
 - Splits into two artifacts — the npm CLI `@c-d-cc/reap` and a Claude Code plugin. `reap setup` installs the plugin through the marketplace, which keeps it updated from then on
 - Storage is three-tiered — `vision/` (what you intend), `life/` (what's alive now), `archive/` (what's no longer referenced)
-- Work splits into three units — `loop` (creates a new intent), `milestone` (a plan cut into an executable unit), `generation` (exec/fix — actually evolves the code)
+- Work splits into three units — `flux` (creates a new intent), `milestone` (a plan cut into an executable unit), `generation` (exec/fix — actually evolves the code)
+- That first unit is named `flux`, not `loop`. A loop means going round; what the unit does is grow a plan. The word `loop` is left free for a different concept. There is no compatibility shim — `make loop`, `life/loops/` and `loop-NNNN-<type>` ids are simply gone
 - `reap doctor` checks and reports what it can determine deterministically. It doesn't fix anything
 - The code index (`reap index`) continues — 15 languages, nothing to install, no background process
 - Six event hooks (`gen.made`, `gen.closed`, `milestone.made`, `milestone.closed`, `orch.claimed`, `orch.barrier.released`) plus `make hook`

@@ -21,7 +21,7 @@ agent는 판단하고, CLI에게 확정을 요청하고, 사실은 git에게 직
 
 ```
 (처음 한 번) /reap:init --> reap init, 정본 지식을 세운다 (plan source · summary · genome)
-   |                          첫 loop다. .reap/가 없으면 훅이 침묵하므로 사람이 부른다. 묻는 법은 /reap:interview
+   |                          첫 flux다. .reap/가 없으면 훅이 침묵하므로 사람이 부른다. 묻는 법은 /reap:interview
    v
 사람이 세션을 연다
    |
@@ -34,7 +34,7 @@ agent는 판단하고, CLI에게 확정을 요청하고, 사실은 git에게 직
 사람이 무언가를 하자고 한다
    |
    v
-새 의도를 만드는 일인가? --> /reap:loop  (plan 축 — 아래 `두 축이 만나는 지점`)
+새 의도를 만드는 일인가? --> /reap:flux  (plan 축 — 아래 `두 축이 만나는 지점`)
    |
    v
 /reap:evolve
@@ -78,9 +78,9 @@ agent는 판단하고, CLI에게 확정을 요청하고, 사실은 git에게 직
 
 | 지점 | 판단 | 확정 | 남는 것 |
 |---|---|---|---|
-| 정본 지식 세우기 (처음 한 번) | `init` + `interview` | `reap init` · `make loop` · `make plan-source` | 씨앗 대신 채워진 `genome/`·`environment/summary.md`·`plan/`, 첫 loop |
-| loop 열기 | `loop` | `make loop` | `life/loops/`의 기록, 레지스트리 행 |
-| loop 닫기 | `loop` | `mark loop --closed` | plan source에 쓴 것, 낳은 milestone. 닫히면서 `archive/loops/`로 |
+| 정본 지식 세우기 (처음 한 번) | `init` + `interview` | `reap init` · `make flux` · `make plan-source` | 씨앗 대신 채워진 `genome/`·`environment/summary.md`·`plan/`, 첫 flux |
+| flux 열기 | `flux` | `make flux` | `life/flux/`의 기록, 레지스트리 행 |
+| flux 닫기 | `flux` | `mark flux --closed` | plan source에 쓴 것, 낳은 milestone. 닫히면서 `archive/flux/`로 |
 | 세션 시작 | — | `reap ctx` | (없음. 읽기만) |
 | 축 고르기 (exec·fix) | `evolve` | — | 기록의 의도 |
 | 세대 열기 | `evolve` | `make generation` | 기록 파일, 레지스트리 행, 세션 바인딩 |
@@ -105,17 +105,17 @@ agent는 판단하고, CLI에게 확정을 요청하고, 사실은 git에게 직
 ### 두 축이 만나는 지점
 
 ```
-plan source (여러 곳, 리포 밖 가능)  <-- reap make plan-source 로 등록. loop가 쓴다
+plan source (여러 곳, 리포 밖 가능)  <-- reap make plan-source 로 등록. flux가 쓴다
    ^
    |  쓴다 (conventions/ 에 맞춰)
    |
-   +-- loop (plan|design|uiux|idea) --+   life/loops/ 에 산다. 여럿이 나란히 열린다
-   +-- loop --------------------------+   근거는 선택: plan source · generation · 앞 loop
+   +-- flux (plan|design|uiux|idea) --+   life/flux/ 에 산다. 여럿이 나란히 열린다
+   +-- flux --------------------------+   근거는 선택: plan source · generation · 앞 flux
    |
    |  산출물이 자리를 찾으면 닫힌다 — milestone을 자르거나(carve-milestone),
-   |  plan source에 쓰거나, idea/ 에 남기거나. 닫히면서 archive/loops/ 로 간다
+   |  plan source에 쓰거나, idea/ 에 남기거나. 닫히면서 archive/flux/ 로 간다
    v
-milestone  ---- reap make milestone ---> from: loop-NNNN, refs: <ps-id>:<경로>
+milestone  ---- reap make milestone ---> from: flux-NNNN, refs: <ps-id>:<경로>
    |
    +-- exec generation --+
    +-- exec generation --+--> 소스코드
@@ -125,28 +125,31 @@ backlog 항목 -- exec generation --+
    fix generation (근거 없음) ------> 소스코드
 ```
 
-plan 축과 execute 축은 **milestone에서 만난다.** loop는 exec의 경계에 속하지 않고, exec generation은 **반드시 근거를 갖는다.** 이 비대칭이 "기획은 실행 단위에 갇히지 않고, 실행은 경계 없이 떠돌지 않는다"를 만든다.
+plan 축과 execute 축은 **milestone에서 만난다.** flux는 exec의 경계에 속하지 않고, exec generation은 **반드시 근거를 갖는다.** 이 비대칭이 "기획은 실행 단위에 갇히지 않고, 실행은 경계 없이 떠돌지 않는다"를 만든다.
 
-### plan 축의 단위는 loop다
+### plan 축의 단위는 flux다
 
-**"실행 단위에 갇히지 않는다"는 "경계가 없다"가 아니다.** exec 축의 단위는 generation이고 그 경계를 milestone이 준다. **plan 축의 단위는 loop이고, 그 경계는 산출물이다** — 무엇이 자리를 찾으면 끝나는가를 유형이 정한다.
+**이름이 `loop`이었다가 `flux`가 됐다**(사람 판단 2026-09-12). `loop`은 명시적인 순환을 뜻하는데 이 단위가 실제로 하는 일은 **기획을 증진하는 것**이라 이름이 일을 잘못 가리켰다. `flux`는 흐름을 만들어낸다는 뜻이다. 그리고 `loop`이라는 낱말은 비워 뒀다 — 다른 개념이 그것을 진짜 무한 루프의 뜻으로 쓴다. 0.18 공개 전이라 **하위 호환을 두지 않았다.**
+
+
+**"실행 단위에 갇히지 않는다"는 "경계가 없다"가 아니다.** exec 축의 단위는 generation이고 그 경계를 milestone이 준다. **plan 축의 단위는 flux이고, 그 경계는 산출물이다** — 무엇이 자리를 찾으면 끝나는가를 유형이 정한다.
 
 | 유형 | 산출물이 찾는 자리 |
 |---|---|
 | `plan` | plan source의 기획 문서, 그리고 거기서 잘린 milestone |
 | `design` | plan source의 설계 문서, milestone |
 | `uiux` | 화면·흐름 문서, milestone |
-| `idea` | `idea/research/`, 또는 다른 유형의 loop로 졸업 |
+| `idea` | `idea/research/`, 또는 다른 유형의 flux로 졸업 |
 
-**generation과 다른 사이클이다.** generation은 세션에 바인딩되고 대개 한 세션에 닫히며 하나만 열린다. loop는 **여러 세션에 걸치는 것이 정상**이고 **여럿이 나란히 열리며** 세션에 바인딩되지 않는다 — 사람이 말한 *"복합적인 관점, 다양한 탐색, 사고실험과 취소"*가 loop 하나의 안쪽에서 일어난다. milestone을 아직 못 낳은 loop는 **열린 채 둔다**; 방향 자체가 죽었으면 `--aborted`로 지운다.
+**generation과 다른 사이클이다.** generation은 세션에 바인딩되고 대개 한 세션에 닫히며 하나만 열린다. flux는 **여러 세션에 걸치는 것이 정상**이고 **여럿이 나란히 열리며** 세션에 바인딩되지 않는다 — 사람이 말한 *"복합적인 관점, 다양한 탐색, 사고실험과 취소"*가 flux 하나의 안쪽에서 일어난다. milestone을 아직 못 낳은 flux는 **열린 채 둔다**; 방향 자체가 죽었으면 `--aborted`로 지운다.
 
-**닫힌 loop는 `archive/loops/`로 간다** (사람 결정 2026-09-05 — 세 종류 모두 닫는 즉시 archive). 그것이 낳은 milestone을 실행하는 세대는 milestone의 `from:`이 가리키는 id로 loop를 찾아 `Dialogue`와 `Dead Ends`를 읽는다 — 조회는 `life/`와 `archive/`를 함께 보므로 위치는 문제가 아니다. 한때 "방금 닫힌 loop가 가장 자주 읽힌다"는 이유로 닫힌 것 10개를 `life/loops/`에 남겼는데, 찾기 어려웠던 것은 위치가 아니라 id를 모른 탓이었다. `life/loops/`에는 열린 loop만 있고, 상태 줄이 세는 것도 그것뿐이다.
+**닫힌 flux는 `archive/flux/`로 간다** (사람 결정 2026-09-05 — 세 종류 모두 닫는 즉시 archive). 그것이 낳은 milestone을 실행하는 세대는 milestone의 `from:`이 가리키는 id로 flux를 찾아 `Dialogue`와 `Dead Ends`를 읽는다 — 조회는 `life/`와 `archive/`를 함께 보므로 위치는 문제가 아니다. 한때 "방금 닫힌 flux가 가장 자주 읽힌다"는 이유로 닫힌 것 10개를 `life/flux/`에 남겼는데, 찾기 어려웠던 것은 위치가 아니라 id를 모른 탓이었다. `life/flux/`에는 열린 flux만 있고, 상태 줄이 세는 것도 그것뿐이다.
 
-**같은 자리를 세 번 잘못 채웠다.** `gen-0040`은 `track`(milestone을 plan 축에 복사한 *묶음*)으로, `ms-005`는 `author-plan`(generation 안의 skill)으로, `gen-0045`는 `reap-plan`(플러그인 경계 밖으로 내보냄)으로. 셋 다 같은 오독이다 — 빈칸은 *"plan을 누가·어떻게 묶는가"*가 아니라 **"plan을 만드는 일이 어떤 사이클로 도는가"**였고, 답은 generation과 다른 사이클을 하나 더 두는 것이었다. **loop는 묶음이 아니다** — track이 틀린 이유가 여기 걸리지 않는다. loop는 generation과 같은 급의 기록 단위이고, 묶는 것이 아니라 도는 것이다.
+**같은 자리를 세 번 잘못 채웠다.** `gen-0040`은 `track`(milestone을 plan 축에 복사한 *묶음*)으로, `ms-005`는 `author-plan`(generation 안의 skill)으로, `gen-0045`는 `reap-plan`(플러그인 경계 밖으로 내보냄)으로. 셋 다 같은 오독이다 — 빈칸은 *"plan을 누가·어떻게 묶는가"*가 아니라 **"plan을 만드는 일이 어떤 사이클로 도는가"**였고, 답은 generation과 다른 사이클을 하나 더 두는 것이었다. **flux는 묶음이 아니다** — track이 틀린 이유가 여기 걸리지 않는다. flux는 generation과 같은 급의 기록 단위이고, 묶는 것이 아니라 흐르는 것이다.
 
-**loop는 근거를 요구하지 않는다.** `from:`에 plan source 경로·generation(계획 부족으로 막힌 exec)·앞 loop를 적을 수 있고 없어도 된다. exec의 근거가 *권한*인 것과 달리 loop의 근거는 *출처*라 거부 조건이 아니다.
+**flux는 근거를 요구하지 않는다.** `from:`에 plan source 경로·generation(계획 부족으로 막힌 exec)·앞 flux를 적을 수 있고 없어도 된다. exec의 근거가 *권한*인 것과 달리 flux의 근거는 *출처*라 거부 조건이 아니다.
 
-**loop 기록은 논의의 흐름을 담는다.** `Dialogue` — 무엇이 갈렸고 선택지가 무엇이었고 사람이 무엇을 골랐는가. 전사가 아니라 갈린 지점이다. `interview`가 *"추천이 채택됐는지 다른 답을 냈는지를 기록에 남긴다"*고 한 것이 가는 자리가 이것이다.
+**flux 기록은 논의의 흐름을 담는다.** `Dialogue` — 무엇이 갈렸고 선택지가 무엇이었고 사람이 무엇을 골랐는가. 전사가 아니라 갈린 지점이다. `interview`가 *"추천이 채택됐는지 다른 답을 냈는지를 기록에 남긴다"*고 한 것이 가는 자리가 이것이다.
 
 ### exec의 근거는 둘이다 — milestone 또는 backlog 항목
 
@@ -167,7 +170,7 @@ plan 축과 execute 축은 **milestone에서 만난다.** loop는 exec의 경계
 
 **이미 `consumed`인 항목은 근거가 되지 못한다.** 끝났다고 표시된 것 위에 다시 일하면 다음 사람이 왜 다시 했는지 모른다. 소비가 불완전했다면 **무엇이 남았는지를 담은 새 항목**을 만든다. `make generation --backlog`가 이것을 검사한다 — 흐름을 막는 게이트가 아니라 가리키는 것이 근거가 못 되는 경우다.
 
-generation은 `exec`·`fix` 둘뿐이다. 새 의도를 만드는 일은 generation이 아니라 loop다(위 `plan 축의 단위는 loop다`).
+generation은 `exec`·`fix` 둘뿐이다. 새 의도를 만드는 일은 generation이 아니라 flux다(위 `plan 축의 단위는 flux다`).
 
 ### fix는 예외가 아니다
 

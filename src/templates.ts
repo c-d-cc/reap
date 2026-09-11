@@ -14,7 +14,7 @@ import hookShSh from "./templates/hook-sh.sh" with { type: "text" };
 import ideaFile from "./templates/idea-file.md" with { type: "text" };
 import ideaFreememo from "./templates/idea-freememo.md" with { type: "text" };
 import ideaResearch from "./templates/idea-research.md" with { type: "text" };
-import loopMd from "./templates/loop.md" with { type: "text" };
+import fluxMd from "./templates/flux.md" with { type: "text" };
 import mapMd from "./templates/map.md" with { type: "text" };
 import memoryLessons from "./templates/memory-lessons.md" with { type: "text" };
 import milestoneMd from "./templates/milestone.md" with { type: "text" };
@@ -29,7 +29,7 @@ export const BUNDLED: Record<string, string> = {
   "config.yml": configYml,
   "convention.md": conventionMd,
   "generation.md": generationMd,
-  "loop.md": loopMd,
+  "flux.md": fluxMd,
   "milestone.md": milestoneMd,
   "backlog.md": backlogMd,
   "idea-research.md": ideaResearch,

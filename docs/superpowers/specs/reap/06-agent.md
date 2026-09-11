@@ -111,8 +111,8 @@ milestone이 없으면 그 묶음을 내지 않고, 열린 세대가 없으면 �
 |---|---|---|
 | `evolve` | 세대를 열 때 | **plan·exec·fix 중 무엇인지 먼저 판단하고**, 지금 열어도 되는지, exec이면 **어느 근거(milestone 또는 backlog 항목)로** 무엇을 제목으로 여는지 정한다. `reap make generation`을 호출하고, 기록 어휘를 참고해 의도를 적는다. **직접 할지 subagent에게 위임할지도 여기서 판단한다** — 위임하면 `references/delegate-brief.md`를 채워 준다. **그다음은 자율 구간이다** — 맥락을 조립하는 skill로 넘기지 않는다(위의 `왜 milestone 본문은 조립하지 않는가`) |
 | `complete` | 세대를 닫을 때 | **커밋 규칙 확인**(`git status --porcelain`, 시작 커밋 이후 커밋 유무), 커밋을 어떻게 나누는지, 기록 마무리, `handoff.md` 갱신, backlog 이월 판단, abort 여부. 확인이 끝나면 `reap mark generation --closed` |
-| `loop` | 새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것 | **loop를 열고 닫는다**(`make loop` · `mark loop --closed`). 유형을 정하고, 열린 loop 중 이어갈 것이 있는지 보고, plan source에 **쓴다** — 아래 **loop** 절의 여섯 판단. 산출물이 자리를 찾았는지 판단해 `carve-milestone`을 부르고 닫는다. `Dialogue`를 기록에 남긴다 |
-| `carve-milestone` | loop 안에서, 그리고 milestone을 닫을 때 | plan source를 읽고 실행 가능한 milestone으로 자른다. **자르기 전에 그 계획의 전제를 실제 흔적에 대보는 것**이 첫 동작이다. 크기 기준, 경계·종료조건·범위밖을 정하는 법, plan 인용법, fitness 질문을 자를 때 미리 쓰는 것. 그리고 **종료 절차 전체** — fitness → `cleanup` → `mark milestone --closed`. `complete`는 이 절차를 옮겨 적지 않고 가리키기만 한다 |
+| `flux` | 새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것 | **flux를 열고 닫는다**(`make flux` · `mark flux --closed`). 유형을 정하고, 열린 flux 중 이어갈 것이 있는지 보고, plan source에 **쓴다** — 아래 **flux** 절의 여섯 판단. 산출물이 자리를 찾았는지 판단해 `carve-milestone`을 부르고 닫는다. `Dialogue`를 기록에 남긴다 |
+| `carve-milestone` | flux 안에서, 그리고 milestone을 닫을 때 | plan source를 읽고 실행 가능한 milestone으로 자른다. **자르기 전에 그 계획의 전제를 실제 흔적에 대보는 것**이 첫 동작이다. 크기 기준, 경계·종료조건·범위밖을 정하는 법, plan 인용법, fitness 질문을 자를 때 미리 쓰는 것. 그리고 **종료 절차 전체** — fitness → `cleanup` → `mark milestone --closed`. `complete`는 이 절차를 옮겨 적지 않고 가리키기만 한다 |
 | `orchestrate` | 병렬 작업 시 | 역할 명명, 메시지 kind 관례, 언제 claim을 잡는지, barrier 배치, 조율자 패턴 |
 | `interview` | 의도가 모호할 때, 언제든 | 모호한 요구를 질문으로 구체화한다. 아래 **interview** 절 |
 | `init` | **프로젝트당 한 번, 맨 처음** — 새 폴더든 기존 코드베이스든 `.reap/`가 씨앗인 채 남았든 | `reap init`을 부르고 **정본 지식을 세운다** — plan source 등록, `environment/summary.md`, `genome/application.md`·`evolution.md`. 질문지를 갖되 묻는 법은 `interview`를 가리킨다. 아래 **init** 절 |
@@ -158,17 +158,17 @@ milestone이 없으면 그 묶음을 내지 않고, 열린 세대가 없으면 �
 
 **`init`은 질문지를 갖고 묻는 법은 갖지 않는다.** *"한 번에 하나"* 같은 문장이 `init`에 한 줄이라도 들어가면 규율의 소유자가 둘이 된 것이다. `init`은 무엇을 어느 순서로 묻고 답을 어느 파일 어느 자리에 쓰는지만 갖는다.
 
-**`init`은 첫 loop다.** `make loop --type plan`으로 열고, 정본 지식을 세우다 첫 milestone을 자르면 닫힌다. 자를 것이 아직 없으면 열린 채 남고 그것이 정상이다. 어느 답이 사람의 것이고 어느 것이 추천 채택인지는 loop의 `Dialogue`가 담고, 재개는 `loop` skill이 열린 loop를 보는 것으로 된다.
+**`init`은 첫 flux다.** `make flux --type plan`으로 열고, 정본 지식을 세우다 첫 milestone을 자르면 닫힌다. 자를 것이 아직 없으면 열린 채 남고 그것이 정상이다. 어느 답이 사람의 것이고 어느 것이 추천 채택인지는 flux의 `Dialogue`가 담고, 재개는 `flux` skill이 열린 flux를 보는 것으로 된다.
 
-### loop — plan 축의 사이클
+### flux — plan 축의 사이클
 
-REAP는 기획을 쓴다. 쓰는 단위가 loop이고(`02-flow.md`의 `plan 축의 단위는 loop다`) 그것을 다루는 skill이 `loop`다. `carve-milestone`과 **대상이 다르다** — `loop`는 plan source에 쓰는 일이고 산출은 plan 문서(또는 설계·화면·idea)다. `carve-milestone`은 이미 있는 plan을 읽어 milestone으로 자르는 일이다. 한 loop가 둘 다 하는 것이 보통이다.
+REAP는 기획을 쓴다. 쓰는 단위가 flux이고(`02-flow.md`의 `plan 축의 단위는 flux다`) 그것을 다루는 skill이 `flux`다. `carve-milestone`과 **대상이 다르다** — `flux`는 plan source에 쓰는 일이고 산출은 plan 문서(또는 설계·화면·idea)다. `carve-milestone`은 이미 있는 plan을 읽어 milestone으로 자르는 일이다. 한 flux가 둘 다 하는 것이 보통이다.
 
-`loop` skill이 판단하는 것은 여덟이다. 앞의 둘은 여닫기, 나머지 여섯은 한때 `author-plan`이 갖기로 했던 것이다.
+`flux` skill이 판단하는 것은 여덟이다. 앞의 둘은 여닫기, 나머지 여섯은 한때 `author-plan`이 갖기로 했던 것이다.
 
-**0. 새 loop인가 이어갈 loop인가.** 여럿이 열려 있으므로 먼저 `life/loops/`를 본다. 같은 물음을 다루는 loop가 열려 있으면 거기 잇는다 — 새로 열면 논의가 두 기록으로 갈라진다. 유형은 산출물이 갈 자리로 정한다.
+**0. 새 flux인가 이어갈 flux인가.** 여럿이 열려 있으므로 먼저 `life/flux/`를 본다. 같은 물음을 다루는 flux가 열려 있으면 거기 잇는다 — 새로 열면 논의가 두 기록으로 갈라진다. 유형은 산출물이 갈 자리로 정한다.
 
-**0'. 닫을 때가 됐는가.** 산출물이 자리를 찾았는가 — plan source에 썼거나, milestone을 잘랐거나, `idea/`에 남겼거나. 그러면 `mark loop --closed` — 닫히면서 `archive/loops/`로 간다. 그 milestone을 실행하는 세대는 `from:`의 id로 찾아 읽는다. 못 찾았으면 열린 채 두고 `Dialogue`·`Dead Ends`를 적어둔다.
+**0'. 닫을 때가 됐는가.** 산출물이 자리를 찾았는가 — plan source에 썼거나, milestone을 잘랐거나, `idea/`에 남겼거나. 그러면 `mark flux --closed` — 닫히면서 `archive/flux/`로 간다. 그 milestone을 실행하는 세대는 `from:`의 id로 찾아 읽는다. 못 찾았으면 열린 채 두고 `Dialogue`·`Dead Ends`를 적어둔다.
 
 **1. 어느 소스에 쓸 것인가 — 그리고 그 소스가 살아 있는가.** 규약의 `수명` 절이 소비 완료를 말하는 소스에는 쓰지 않는다. 확장이냐 신설이냐가 애매하면 사람에게 묻는다 — 문서 체계는 사업 판단이다. 소스가 소비 완료가 되면 규약의 `수명` 절을 갱신하는 것이 마지막 milestone을 닫는 쪽의 일이다. 여러 소스가 role을 달리해 등록돼 있다. 잘못 고르면 같은 주제의 자료가 두 곳으로 흩어지고, 흩어진 자료는 어느 쪽도 완전하지 않다.
 
@@ -178,13 +178,13 @@ REAP는 기획을 쓴다. 쓰는 단위가 loop이고(`02-flow.md`의 `plan 축�
 
 **4. 규약 자체를 갱신한다.** 소스를 다루며 알게 된 것 — 어디에 무엇이 있는지, 이 소스가 새 문서를 어떻게 받는지, 하지 말아야 할 것 — 을 `conventions/`에 되먹인다. **이것이 "REAP가 plan source를 기억한다"는 말의 실제 내용이다.** 이 되먹임이 없으면 규약 문서는 등록할 때 사람이 쓴 두 줄에서 영원히 멈춘다.
 
-**5. 아직 결론이 안 난 것은 plan에 쓰지 않는다.** `idea/research/`로 보내거나 `idea` loop로 남긴다. 모호한 것을 단단한 자리에 두면 단단해 보이고, 다음 세션이 그것을 결정된 것으로 읽는다.
+**5. 아직 결론이 안 난 것은 plan에 쓰지 않는다.** `idea/research/`로 보내거나 `idea` flux로 남긴다. 모호한 것을 단단한 자리에 두면 단단해 보이고, 다음 세션이 그것을 결정된 것으로 읽는다.
 
-**6. 커밋 규칙이 이 소스에 적용되는가.** plan source는 리포 밖일 수 있고 git이 아닐 수도 있다. git 리포라면 그쪽 커밋도 loop를 닫는 조건이 되고, 아니라면 적용되지 않으며 **적용하지 않았다고 말한다.**
+**6. 커밋 규칙이 이 소스에 적용되는가.** plan source는 리포 밖일 수 있고 git이 아닐 수도 있다. git 리포라면 그쪽 커밋도 flux를 닫는 조건이 되고, 아니라면 적용되지 않으며 **적용하지 않았다고 말한다.**
 
-**`Dialogue`를 남긴다.** loop가 도는 동안 사람과 갈린 지점 — 무엇을 물었고, 선택지가 무엇이었고, 사람이 무엇을 골랐고, 추천 채택인지 다른 답인지. 전사가 아니다. 이것이 없으면 다음 세션이 같은 것을 다시 묻거나, 사람이 고른 것을 agent가 정한 것으로 읽는다.
+**`Dialogue`를 남긴다.** flux가 도는 동안 사람과 갈린 지점 — 무엇을 물었고, 선택지가 무엇이었고, 사람이 무엇을 골랐고, 추천 채택인지 다른 답인지. 전사가 아니다. 이것이 없으면 다음 세션이 같은 것을 다시 묻거나, 사람이 고른 것을 agent가 정한 것으로 읽는다.
 
-**규범을 옮겨 적지 않는다.** 정한 것은 plan source에 쓰고, loop 기록에는 *왜 그렇게 정했는가*와 *접은 길*만 남는다. 기록에만 있는 결정은 안 정해진 것이다.
+**규범을 옮겨 적지 않는다.** 정한 것은 plan source에 쓰고, flux 기록에는 *왜 그렇게 정했는가*와 *접은 길*만 남는다. 기록에만 있는 결정은 안 정해진 것이다.
 
 ### evolve의 첫 판단 — 세대를 열 값이 있는가
 
@@ -200,19 +200,19 @@ REAP는 기획을 쓴다. 쓰는 단위가 loop이고(`02-flow.md`의 `plan 축�
 
 ### evolve의 둘째 판단 — 어느 축인가
 
-열기로 했으면 유형을 정한다. **그 전에 한 갈래가 먼저 빠진다 — 새 의도를 만드는 일이면 generation이 아니라 loop다.** `evolve`는 거기서 `loop` skill로 보내고 자기는 열지 않는다.
+열기로 했으면 유형을 정한다. **그 전에 한 갈래가 먼저 빠진다 — 새 의도를 만드는 일이면 generation이 아니라 flux다.** `evolve`는 거기서 `flux` skill로 보내고 자기는 열지 않는다.
 
 **한 질문으로 갈린다.**
 
 | 이 일은 | 어디로 | 근거 |
 |---|---|---|
-| 새 의도를 **만드는가** | **`loop`** (generation이 아니다) | 선택 — 출처일 뿐 |
+| 새 의도를 **만드는가** | **`flux`** (generation이 아니다) | 선택 — 출처일 뿐 |
 | 새 의도를 **실현하는가** | exec generation | **필수 — milestone 또는 backlog 항목**(`02-flow.md`) |
 | 이미 있는 의도로 **되돌리는가** | fix generation | 없음 |
 
-**loop와 exec 사이의 기본값은 이렇다.** 지금 착수 가능한 근거가 있으면 execute, 없으면 loop. 이것은 기본값이지 규칙이 아니다 — 착수 가능한 항목이 있어도 그것이 지금 필요와 맞지 않으면 loop가 맞다. **fix는 이 기본값과 무관하다** — milestone이 열려 있든 아니든 되돌리는 일은 fix다.
+**flux와 exec 사이의 기본값은 이렇다.** 지금 착수 가능한 근거가 있으면 execute, 없으면 flux. 이것은 기본값이지 규칙이 아니다 — 착수 가능한 항목이 있어도 그것이 지금 필요와 맞지 않으면 flux가 맞다. **fix는 이 기본값과 무관하다** — milestone이 열려 있든 아니든 되돌리는 일은 fix다.
 
-**loop로 보내야 하는 신호**
+**flux로 보내야 하는 신호**
 
 - 무엇을 만들지가 아직 서지 않았다. 요청이 "무엇을 할지"보다 "무엇이 필요한지"에 가깝다
 - 열린 milestone이 없거나, 남은 것이 지금의 필요와 맞지 않는다
@@ -232,9 +232,9 @@ REAP는 기획을 쓴다. 쓰는 단위가 loop이고(`02-flow.md`의 `plan 축�
 
 **세 가지 안티패턴을 이름 붙여 경계한다.**
 
-*계획이 부족한 줄 알면서 밀어붙이기* — execute 축에서 "일단 해보면 알겠지"는 대개 loop를 열어야 한다는 신호다. REAP에서 planning 단계의 잘못된 가정이 구현까지 흘러가 마지막에 발견되던 것이 이것이다.
+*계획이 부족한 줄 알면서 밀어붙이기* — execute 축에서 "일단 해보면 알겠지"는 대개 flux를 열어야 한다는 신호다. REAP에서 planning 단계의 잘못된 가정이 구현까지 흘러가 마지막에 발견되던 것이 이것이다.
 
-*plan을 핑계로 실행을 미루기* — 반대 방향의 실패다. 기획은 무한히 정교해질 수 있다. loop는 열린 채 두는 것이 허용되지만, **어느 loop도 milestone을 못 낳은 채 열린 loop만 쌓이면** 그것이 신호다.
+*plan을 핑계로 실행을 미루기* — 반대 방향의 실패다. 기획은 무한히 정교해질 수 있다. flux는 열린 채 두는 것이 허용되지만, **어느 flux도 milestone을 못 낳은 채 열린 flux만 쌓이면** 그것이 신호다.
 
 *작다는 이유로 새 기능을 fix로 짓기* — fix의 기준은 크기가 아니라 **되돌리는가**다. 작은 새 기능은 fix가 아니라 exec이며, 근거가 필요하다. 근거는 backlog 항목 하나면 되므로 비싸지 않다. 이 구멍을 막지 않으면 세 번째 유형이 milestone 규율을 우회하는 뒷문이 된다.
 

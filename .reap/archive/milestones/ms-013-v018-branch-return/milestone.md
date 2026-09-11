@@ -2,7 +2,7 @@
 id: ms-013
 slug: v018-branch-return
 title: v0.18 브랜치 신설과 귀환
-from: loop-0003-plan
+from: flux-0003-plan
 refs:
   - ps-4b485d:02-branch-return.md
 status: closed

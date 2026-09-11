@@ -23,7 +23,7 @@ import MigrationPage from "@/pages/MigrationPage";
 import ReleaseNotesPage from "@/pages/ReleaseNotesPage";
 import TwoAxesPage from "@/pages/TwoAxesPage";
 import StoragePage from "@/pages/StoragePage";
-import LoopPage from "@/pages/LoopPage";
+import FluxPage from "@/pages/FluxPage";
 import PlanPage from "@/pages/PlanPage";
 import IdeaPage from "@/pages/IdeaPage";
 import CarveMilestonePage from "@/pages/CarveMilestonePage";
@@ -97,9 +97,9 @@ export const ROUTES: RouteDef[] = [
 
   // Plan 축
   {
-    path: "/docs/loop",
-    component: LoopPage,
-    meta: (t) => ({ title: page(t.loopPage.title), description: t.loopPage.description }),
+    path: "/docs/flux",
+    component: FluxPage,
+    meta: (t) => ({ title: page(t.fluxPage.title), description: t.fluxPage.description }),
   },
   {
     path: "/docs/plan-source",

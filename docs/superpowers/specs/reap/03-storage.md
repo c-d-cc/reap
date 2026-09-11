@@ -27,8 +27,8 @@
       <gen-id>-<slug>.md   예: gen-0002-exec-token-rotation.md
     backlog/
       <bk-id>-<slug>.md  이월 항목
-    loops/
-      <loop-id>-<slug>.md  예: loop-0001-plan-plan-loop.md — 열린 것만
+    flux/
+      <flux-id>-<slug>.md  예: flux-0001-plan-plan-flux.md — 열린 것만
   archive/              끝난 것
     generations/
       <gen-id>-<slug>.md
@@ -36,8 +36,8 @@
       <ms-id>-<slug>/
     backlog/
       <bk-id>-<slug>.md
-    loops/
-      <loop-id>-<slug>.md  닫힌 loop 전부
+    flux/
+      <flux-id>-<slug>.md  닫힌 flux 전부
     idea/
       research/ · freememo/ · files/   cleanup이 내린 것
   genome/
@@ -67,9 +67,9 @@
 
 **`plan/`은 이 3단 밖이다.** `genome/`·`environment/`·`idea/`처럼 최상위에 나란히 선다. plan source는 **리포 밖을 가리키는 등록부**라 "하려는 것 / 사는 것 / 끝난 것"이라는 시간축에 얹히지 않기 때문이다 — 등록된 소스는 하려는 것도 사는 것도 끝난 것도 아니고, 그냥 **거기 있다.**
 
-**`life/loops/`가 기획 축의 사이클이 사는 자리다.** 처음엔 `plan/loops/`였는데 `gen-0052`가 옮겼다 — `plan/`을 3단 밖에 둔 논거(리포 밖을 가리키는 등록부라 시간축에 안 얹힌다)는 `sources.yml`·`conventions/`의 것이지 loop의 것이 아니다. **loop는 열리고 닫히고 archive로 가므로 시간축에 얹히고**, `life/`의 정의("아직 참고할 값이 있는 것")에 그대로 맞으며 `archive/loops/`와 짝이 맞는다. generation과는 다른 사이클이므로 `life/generations/`에 섞지 않고 `life/loops/`다. 열린 loop만 여기 있고, 닫히면 `archive/loops/`로 간다.
+**`life/flux/`가 기획 축의 사이클이 사는 자리다.** 처음엔 `plan/flux/`였는데 `gen-0052`가 옮겼다 — `plan/`을 3단 밖에 둔 논거(리포 밖을 가리키는 등록부라 시간축에 안 얹힌다)는 `sources.yml`·`conventions/`의 것이지 flux의 것이 아니다. **flux는 열리고 닫히고 archive로 가므로 시간축에 얹히고**, `life/`의 정의("아직 참고할 값이 있는 것")에 그대로 맞으며 `archive/flux/`와 짝이 맞는다. generation과는 다른 사이클이므로 `life/generations/`에 섞지 않고 `life/flux/`다. 열린 flux만 여기 있고, 닫히면 `archive/flux/`로 간다.
 
-**`life/`는 열려 있는 것이다.** 닫힘·소비는 상태이고 archive는 위치이지만, v0.18에서는 둘이 같은 순간에 일어난다 — `mark generation --closed`·`mark loop --closed`·`mark backlog --consumed`가 표시와 함께 `archive/`로 옮긴다(사람 결정 2026-09-05). `life/`를 보면 지금 열린 것이 전부 보이고, 그 밖의 것은 없다.
+**`life/`는 열려 있는 것이다.** 닫힘·소비는 상태이고 archive는 위치이지만, v0.18에서는 둘이 같은 순간에 일어난다 — `mark generation --closed`·`mark flux --closed`·`mark backlog --consumed`가 표시와 함께 `archive/`로 옮긴다(사람 결정 2026-09-05). `life/`를 보면 지금 열린 것이 전부 보이고, 그 밖의 것은 없다.
 
 **generation을 유형별 폴더로 가르지 않는다.** 유형이 늘 때마다 최상위가 늘고, 세대는 유형과 무관하게 시간순으로 하나의 흐름을 이룬다. 전부 `life/generations/` 하나에 쌓이고 유형은 **id 안에** 있다.
 
@@ -82,7 +82,7 @@
 - **판단이 서지 않았다.** `cleanup` skill 본문 스스로 "근거 없이 남겼다"는 실패를 적었고, 실제로 닫힌 세대를 다시 읽은 경우는 전부 `handoff.md`를 거쳤다. 다음 세션에 필요한 것이 `handoff.md`에 있어야 한다는 규칙과 "세대 기록을 뒤지라"는 작업 세트는 서로를 약하게 만든다
 - **위치 이동은 판단이 아니다.** 결정적으로 할 수 있는 일을 skill의 판단에 맡길 이유가 없다 — 원칙 2의 반대편이다
 
-그래서 세 종류가 같은 규칙이다. `life/generations/`·`life/loops/`·`life/backlog/`에는 열린 것만 있고, 닫히거나 소비되는 순간 CLI가 `archive/`로 옮긴다. 기록은 id로 찾으며 조회는 두 곳을 다 본다 — 필요한 것은 언제든 열린다. `--archived` 플래그는 옛 규칙으로 `life/`에 남은 것을 내리는 용도로만 남는다.
+그래서 세 종류가 같은 규칙이다. `life/generations/`·`life/flux/`·`life/backlog/`에는 열린 것만 있고, 닫히거나 소비되는 순간 CLI가 `archive/`로 옮긴다. 기록은 id로 찾으며 조회는 두 곳을 다 본다 — 필요한 것은 언제든 열린다. `--archived` 플래그는 옛 규칙으로 `life/`에 남은 것을 내리는 용도로만 남는다.
 
 **milestone 종료 순서는 둘이다** — 사람의 fitness → `mark milestone --closed`. milestone 디렉토리(`milestone.md`·`handoff.md`·`tasks/`)가 통째로 `archive/milestones/`로 가고, 세대는 이미 거기 있다.
 
@@ -125,7 +125,7 @@
 | 종류 | 형식 | 레지스트리 |
 |---|---|---|
 | plan source | `ps-a3f8c2` | `sequence/source.md` |
-| loop | `loop-0001-plan` | `sequence/loop.md` |
+| flux | `flux-0001-plan` | `sequence/flux.md` |
 | milestone | `ms-004` | `sequence/milestone.md` |
 | generation | `gen-0002-exec` | `sequence/generation.md` |
 | backlog | `bk-a3f8c2` | 없음 |

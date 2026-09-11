@@ -47,7 +47,7 @@
 | gen-0044-plan | track을 걷어낸다 — plan을 만드는 일은 묶음이 아니다 | 2026-08-23 |
 | gen-0045-plan | 기획을 별도 플러그인으로 내보낸다 | 2026-08-23 |
 | gen-0046-plan | init과 interview — 정본 지식을 세우는 절차 | 2026-08-30 |
-| gen-0047-exec | make loop · mark loop · --plan 거부 | 2026-08-30 |
+| gen-0047-exec | make flux · mark flux · --plan 거부 | 2026-08-30 |
 | gen-0048-exec | loop skill · 어휘 · 기존 skill 정리 | 2026-08-30 |
 | gen-0049-exec | sources.yml 파싱과 plan sources&#124;convention | 2026-08-30 |
 | gen-0050-exec | interview skill과 부르는 지점 | 2026-08-30 |
@@ -116,3 +116,4 @@
 | gen-0112-exec | 개념 페이지 — 명령 블록을 끝의 'CLI 명령' 절로, 절 제목을 자연스러운 한국어로 | 2026-09-05 |
 | gen-0113-fix | resolve #32: slugify에 바이트 상한 — 기록 파일 basename이 NAME_MAX를 넘지 않게 | 2026-09-07 |
 | gen-0114-exec | resolve #33: complete에 genome 갱신 절차 추가 | 2026-09-11 |
+| gen-0115-exec | loop을 flux로 — id·저장·명령·skill·spec·문서·데이터 전부 | 2026-09-11 |

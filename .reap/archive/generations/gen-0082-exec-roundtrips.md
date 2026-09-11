@@ -25,7 +25,7 @@ ms-019 task 1·2 — Bun 없는 PATH에서 tarball 설치본으로 (1) 빈 리�
 
 **왕복 1 — 새 프로젝트** (표본: `scratchpad/roundtrip/proj`, prefix: `scratchpad/roundtrip/prefix`)
 - `bun run build:node` → `npm pack`(19 files, `src/`·`tests/`·`plugin/`·`.reap/` 없음 확인) → `npm install --global --prefix <임시>` → PATH에서 `~/.bun/bin` 제거 + prefix/bin 선두 배치, `command -v bun` 실패로 부재 확인
-- `reap --version` → `reap 0.18.0`. 빈 git 리포에서 `init`→`make loop --type plan`→`make milestone --from ... --focus`→`make generation --milestone`→파일 커밋→`mark generation --closed`→`doctor`(**결함 0**) 전부 통과
+- `reap --version` → `reap 0.18.0`. 빈 git 리포에서 `init`→`make flux --type plan`→`make milestone --from ... --focus`→`make generation --milestone`→파일 커밋→`mark generation --closed`→`doctor`(**결함 0**) 전부 통과
 - `ctx --hook`: `>` 리다이렉트로 받은 원문을 Node·Python `json.loads` 양쪽으로 파싱해 유효한 JSON임을 확인, `additionalContext`에 `응답 언어:`와 `현재 milestone` 상태 줄 포함 확인. (첫 시도에서 zsh `echo`의 백슬래시 이스케이프 때문에 "깨진 JSON"으로 오판했던 것은 스스로 정정 — Dead Ends 참고)
 - `claude --plugin-dir <worktree>/plugin -p "..."` 비대화 1회로 통과: 세션 시작 시 주입된 상태 줄(응답 언어·현재 milestone·열린 loop·기억·구조·안내문)을 원문 그대로 출력했고, `/reap:`로 시작하는 skill 10종(carve-milestone·cleanup·complete·evolve·init·interview·loop·migrate·orchestrate·report-issue)을 정확히 열거했다 — 2회 한도 중 1회만 사용
 

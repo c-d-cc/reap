@@ -2,7 +2,7 @@
 id: ms-022
 slug: v018-site
 title: 문서 사이트 — VitePress, 한국어 먼저
-from: loop-0004-plan
+from: flux-0004-plan
 refs:
   - ps-5e948f:07-i18n-docs-delegate.md
 status: open

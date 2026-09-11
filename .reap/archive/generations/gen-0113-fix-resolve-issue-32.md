@@ -28,7 +28,7 @@ GitHub issue #32를 해소한다. `slugify`가 제목 전체를 슬러그로 써
 
 issue #32의 세 항목 전부. 한글 slug는 그대로다.
 
-- `src/doc.ts` — `SLUG_MAX_BYTES` 80: `slugify`가 `-` 조각 단위로 붙이다 넘기 직전에 멈춘다. 첫 조각만으로 넘으면 grapheme 단위(`Intl.Segmenter`)로 자른다 — 코드포인트 단위로 자르면 NFD 결합 문자 중간이 끊긴다(검증 subagent 발견). `SLUG_LIMIT_BYTES` 180과 `requireSlug()`: 가장 긴 id 접두어 `loop-0000-design`(16)·`-`·`.md`를 더하면 꼭 200이다. `NAME_MAX_BYTES` 200
+- `src/doc.ts` — `SLUG_MAX_BYTES` 80: `slugify`가 `-` 조각 단위로 붙이다 넘기 직전에 멈춘다. 첫 조각만으로 넘으면 grapheme 단위(`Intl.Segmenter`)로 자른다 — 코드포인트 단위로 자르면 NFD 결합 문자 중간이 끊긴다(검증 subagent 발견). `SLUG_LIMIT_BYTES` 180과 `requireSlug()`: 가장 긴 id 접두어 `flux-0000-design`(16)·`-`·`.md`를 더하면 꼭 200이다. `NAME_MAX_BYTES` 200
 - `src/entries.ts` make 5종과 `src/plan.ts` `makePlanSource` — slug를 먼저 만들고 `requireSlug`를 지난 뒤 `issue()`로 id를 발급한다. 발급 뒤 거부하면 레지스트리에 파일 없는 id가 남는다. plan-source는 검증 subagent가 빠진 경로로 잡았다
 - `src/doctor.ts` — 8b `walkNames`로 `.reap/` 전체(디렉토리 포함, dot 제외)를 걷고 basename 200바이트 초과를 결함 `doctor.kind.name_too_long`으로 보고한다
 - 카탈로그 en·ko `entries.slug_too_long`·`doctor.kind/detail.name_too_long`. RELEASE_NOTES 0.18.0 절, `site/release-notes-content.md`(en), `site/src/i18n/translations/ko.ts` 릴리스 노트에 한 줄씩

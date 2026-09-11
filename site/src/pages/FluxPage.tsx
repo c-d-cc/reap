@@ -4,9 +4,9 @@ import { CodeBlock } from "@/components/CodeBlock";
 import { CliSection } from "@/components/CliSection";
 import { useT } from "@/i18n";
 
-export default function LoopPage() {
+export default function FluxPage() {
   const t = useT();
-  const l = t.loopPage;
+  const l = t.fluxPage;
   return (
     <DocLayout>
       <DocPage title={l.title} breadcrumb={l.breadcrumb}>

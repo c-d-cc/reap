@@ -1,6 +1,6 @@
 ---
 name: evolve
-description: Use when starting new work in a REAP project - deciding whether this is a loop (making intent) or a generation (realizing or restoring it), choosing the ground, and opening a generation record. Trigger on "작업 시작", "새 세대", "다음 뭐 하지", or any request to begin substantive work in a repo containing .reap/.
+description: Use when starting new work in a REAP project - deciding whether this is a flux (making intent) or a generation (realizing or restoring it), choosing the ground, and opening a generation record. Trigger on "작업 시작", "새 세대", "다음 뭐 하지", or any request to begin substantive work in a repo containing .reap/.
 ---
 
 # evolve — opens a generation
@@ -48,27 +48,27 @@ Opening one with nothing at stake leaves only cost — one record file, one regi
 
 **When it's ambiguous, don't open one.** A generation can be opened mid-work too — open it once it grows long, and a commit already made just sits ahead of `startCommit`. Conversely, undoing one that was opened means either clearing it with `--aborted` or closing an empty record.
 
-## Next: loop or generation
+## Next: flux or generation
 
-**Decide what the work is trying to do, first.** One branch falls away first — **if it's making new intent, it's a loop, not a generation.** Planning, design, screens, anything with no home yet. Then this skill stops here and hands off to [loop](../loop/SKILL.md). There's no `make generation --plan`.
+**Decide what the work is trying to do, first.** One branch falls away first — **if it's making new intent, it's a flux, not a generation.** Planning, design, screens, anything with no home yet. Then this skill stops here and hands off to [flux](../flux/SKILL.md). There's no `make generation --plan`.
 
 | This work | Goes to | Grounds |
 |---|---|---|
-| **Makes** new intent | **loop** — outside this skill | optional. Just a source |
+| **Makes** new intent | **flux** — outside this skill | optional. Just a source |
 | **Realizes** new intent | exec generation | **required — a milestone or backlog item** |
 | **Restores** an existing intent | fix generation | none |
 
-**exec's grounds are its authority** — it's evidence someone already decided what to build, and without it a generation can't open. loop is **the act of deciding itself**, so it has no grounds to require.
+**exec's grounds are its authority** — it's evidence someone already decided what to build, and without it a generation can't open. flux is **the act of deciding itself**, so it has no grounds to require.
 
-**The default between loop and exec:** if there are grounds to start right now (remaining work in an open milestone, or a backlog item), it's exec; without one, it's loop. That's a default, not a rule — even with grounds, if they don't match what's needed right now, loop is still right. **fix is unrelated to this default.**
+**The default between flux and exec:** if there are grounds to start right now (remaining work in an open milestone, or a backlog item), it's exec; without one, it's flux. That's a default, not a rule — even with grounds, if they don't match what's needed right now, flux is still right. **fix is unrelated to this default.**
 
-**Signals pointing to loop**
+**Signals pointing to flux**
 
 - What to build hasn't been settled yet. The request is closer to "what's needed" than "what to do"
 - There's no open milestone, or what's left doesn't match the current need
-- `idea/research/` has unresolved investigation piling up and blocking direction — that's the `idea` loop's place
-- The prior execute generation got stuck for "lack of planning" — open a loop with that generation as `--from`
-- **A loop is already open and this can push it forward**
+- `idea/research/` has unresolved investigation piling up and blocking direction — that's the `idea` flux's place
+- The prior execute generation got stuck for "lack of planning" — open a flux with that generation as `--from`
+- **A flux is already open and this can push it forward**
 
 **Signals for picking the execute axis**
 
@@ -105,9 +105,9 @@ Opening one with nothing at stake leaves only cost — one record file, one regi
 
 **Watch for three antipatterns.**
 
-*Pushing ahead knowing the plan is thin* — on the execute axis, "we'll figure it out as we go" is usually a sign a loop should have opened instead. A wrong assumption flows all the way to implementation and only surfaces at the end.
+*Pushing ahead knowing the plan is thin* — on the execute axis, "we'll figure it out as we go" is usually a sign a flux should have opened instead. A wrong assumption flows all the way to implementation and only surfaces at the end.
 
-*Using planning as an excuse to defer execution* — planning can be refined indefinitely. A loop can stay open, but **if loops just pile up without ever producing a milestone**, that's the signal.
+*Using planning as an excuse to defer execution* — planning can be refined indefinitely. A flux can stay open, but **if flux just pile up without ever producing a milestone**, that's the signal.
 
 *Building a small new feature as a fix because it's small* — fix's criterion isn't size, it's **whether it restores something.** A small new feature is exec, not fix, and needs grounds. Grounds only cost one backlog item, so **it isn't expensive** — there's no reason to dodge into fix over size. Leave that hole open and fix becomes a back door around the boundary discipline.
 
@@ -185,7 +185,7 @@ reap make generation --backlog  <bk-id> --title "<title>" [--slug <slug>]   # ex
 reap make generation --fix  --title "<title>" [--slug <slug>]                # the fix axis
 ```
 
-`--fix` comes with **no grounds**. exec needs **at least one** of `--milestone`/`--backlog`, and **both together is fine too.** Without a type or grounds, it's refused. **`--plan` is refused** — that's `make loop`.
+`--fix` comes with **no grounds**. exec needs **at least one** of `--milestone`/`--backlog`, and **both together is fine too.** Without a type or grounds, it's refused. **`--plan` is refused** — that's `make flux`.
 
 Without `--slug`, it's built from the title. **The body starts empty; writing the intent comes next.**
 

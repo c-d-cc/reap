@@ -2,7 +2,7 @@
 id: ms-020
 slug: v018-delegate
 title: evolve 위임 모드 — subagent가 세대를 수행하고 주 세션이 검토·닫는다
-from: loop-0004-plan
+from: flux-0004-plan
 refs:
   - ps-5e948f:07-i18n-docs-delegate.md
 status: closed

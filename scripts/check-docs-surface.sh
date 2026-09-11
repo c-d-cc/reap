@@ -39,7 +39,7 @@ for ev in $(awk '/HOOK_EVENTS = \[/{f=1;next} f && /\]/{exit} f' src/hooks.ts | 
 done
 
 if [ -x "$bin" ]; then
-  # usage lines look like "  make loop  --type ..."; the first word is the verb
+  # usage lines look like "  make flux  --type ..."; the first word is the verb
   for verb in $("$bin" 2>/dev/null | awk '/^  [a-z]/{print $1}' | sort -u); do
     check_in "CLI verb" "$verb" site
   done

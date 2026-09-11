@@ -1,6 +1,6 @@
 ---
 name: carve-milestone
-description: Use when turning plan into an executable milestone in a REAP project, or when closing one - deciding the boundary, exit criteria, and out-of-scope, writing tasks, and running the fitness / mark closing sequence. Trigger on "milestone 자르기", "증분을 자른다", "milestone 만들기", "milestone 닫기", or when a loop is about to produce a milestone in a repo containing .reap/.
+description: Use when turning plan into an executable milestone in a REAP project, or when closing one - deciding the boundary, exit criteria, and out-of-scope, writing tasks, and running the fitness / mark closing sequence. Trigger on "milestone 자르기", "증분을 자른다", "milestone 만들기", "milestone 닫기", or when a flux is about to produce a milestone in a repo containing .reap/.
 user-invocable: false
 ---
 
@@ -8,7 +8,7 @@ user-invocable: false
 
 ## When to call it
 
-**Inside a loop**, when reading a plan source (a roadmap or design document) and carving it into an executable milestone. Once carved, that loop can close — closing is [loop](../loop/SKILL.md)'s job. And **when closing a milestone** — the exit procedure belongs to this skill too.
+**Inside a flux**, when reading a plan source (a roadmap or design document) and carving it into an executable milestone. Once carved, that flux can close — closing is [flux](../flux/SKILL.md)'s job. And **when closing a milestone** — the exit procedure belongs to this skill too.
 
 **When not to call it matters more.**
 
@@ -24,7 +24,7 @@ Before carving a square of the roadmap, **check whether what it assumed is still
 
 Skipping this **builds tooling for something nobody uses.** It nearly happened: an increment was writing that a skill should manage some document, and that document had been **0 bytes** for two milestones and 21 generations. Nobody had counted a fact one `wc -l` would have shown.
 
-If the assumption is wrong, **stop carving and refill that square instead.** That's also the loop's job. The new content comes not from imagination but from **friction actually hit.**
+If the assumption is wrong, **stop carving and refill that square instead.** That's also the flux's job. The new content comes not from imagination but from **friction actually hit.**
 
 ## Size — around four tasks, six to ten generations
 
@@ -65,10 +65,10 @@ Put three or four under a `## What to ask when this milestone closes` section. *
 ## Carve it
 
 ```bash
-reap make milestone --title "<title>" [--slug <slug>] [--from <loop-id>] [--ref <ps-id>:<path>] [--focus]
+reap make milestone --title "<title>" [--slug <slug>] [--from <flux-id>] [--ref <ps-id>:<path>] [--focus]
 ```
 
-`--from` is the loop that produced this, `--ref` is the plan document it's grounded on. **Neither is checked** — right now they're notes a human reads, so writing them accurately is on this side.
+`--from` is the flux that produced this, `--ref` is the plan document it's grounded on. **Neither is checked** — right now they're notes a human reads, so writing them accurately is on this side.
 
 **Give `--focus` only to "should this be worked on right now".** Without it, the milestone doesn't show up on the status line right after carving. The tool doesn't attach it automatically because **carving several at once would have the last one steal focus** — four were actually carved at once once, and what came next was the first one.
 

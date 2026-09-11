@@ -17,7 +17,7 @@ endCommit: 218d2fd
 ## Outcome
 
 - **`src/plan.ts`** 신설. `readSources`(`Bun.YAML.parse` — 의존 없음, 형식 안 낮춤), `writeSources`(손 형식 — `Bun.YAML.stringify`는 흐름 형식이라 손으로 쓴 것과 달라진다), `makePlanSource`(root가 디렉토리여야 함, `sequence/source.md`에 행, `conventions/<ps-id>-<slug>.md` 씨앗), `validateRef`(형식 · 소스 실재 · 경로가 root 안 · 파일 실재. 앵커 무시), `formatSources`
-- `make milestone`·`make loop`가 `--ref`를 id 발급 전에 검증한다 → 이 리포에서 `--ref ps-4f2a91:nope.md`가 거부되는 것 확인
+- `make milestone`·`make flux`가 `--ref`를 id 발급 전에 검증한다 → 이 리포에서 `--ref ps-4f2a91:nope.md`가 거부되는 것 확인
 - `plan sources` · `plan convention <ps-id>` — 규약 본문을 그대로 낸다
 - `id.ts` — 해시 계열도 레지스트리 행을 남긴다(`ps-`). 접두사가 번호/해시를, 레지스트리 표가 행 유무를 따로 정한다
 - 템플릿 `convention.md`. 테스트 `tests/plan.test.ts` 9개. 136 통과

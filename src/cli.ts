@@ -9,14 +9,14 @@ import {
   makeHook,
   makeIdea,
   markIdea,
-  makeLoop,
+  makeFlux,
   makeMilestone,
   markBacklog,
   markGeneration,
-  markLoop,
+  markFlux,
   markMilestone,
 } from "./entries.ts";
-import { isLoopType, LOOP_TYPES, isRegistered, isValid, kindOf, readRegistry } from "./id.ts";
+import { isFluxType, FLUX_TYPES, isRegistered, isValid, kindOf, readRegistry } from "./id.ts";
 import type { Kind } from "./id.ts";
 import type { RunHooksResult } from "./hooks.ts";
 import { findSource, formatSources, makePlanSource, readSources } from "./plan.ts";
@@ -232,12 +232,12 @@ function make(cwd: string, argv: string[]): Result {
   if (!title) throw new Error(t(root, "make.title_required"));
 
   switch (kind) {
-    case "loop": {
+    case "flux": {
       const type = flags.value("--type");
-      if (!type || !isLoopType(type)) {
-        throw new Error(t(root, "make.loop_needs_type", { types: LOOP_TYPES.join(" · "), got: type ?? t(root, "cli.none") }));
+      if (!type || !isFluxType(type)) {
+        throw new Error(t(root, "make.flux_needs_type", { types: FLUX_TYPES.join(" · "), got: type ?? t(root, "cli.none") }));
       }
-      const made = makeLoop(root, {
+      const made = makeFlux(root, {
         title,
         slug: flags.value("--slug"),
         type,
@@ -245,7 +245,7 @@ function make(cwd: string, argv: string[]): Result {
         refs: flags.values("--ref"),
         now,
       });
-      return made2result(root, "loop", made);
+      return made2result(root, "flux", made);
     }
     case "milestone": {
       const made = makeMilestone(root, {
@@ -294,14 +294,14 @@ function mark(cwd: string, argv: string[]): Result {
   const root = requireRoot(cwd);
   const flags = parseFlags(rest);
 
-  if (kind === "loop") {
-    if (!needle) throw new Error(t(root, "mark.loop_needs_id"));
+  if (kind === "flux") {
+    if (!needle) throw new Error(t(root, "mark.flux_needs_id"));
     if (flags.has("--aborted")) {
-      const marked = markLoop(root, needle, "aborted", timestamp());
+      const marked = markFlux(root, needle, "aborted", timestamp());
       return { ok: true, message: t(root, "mark.cleared", { id: marked.id }), data: marked };
     }
     if (!flags.has("--closed")) throw new Error(t(root, "mark.need_flag_closed_aborted"));
-    const marked = markLoop(root, needle, "closed", timestamp(), flags.values("--milestone"));
+    const marked = markFlux(root, needle, "closed", timestamp(), flags.values("--milestone"));
     return { ok: true, message: t(root, "mark.closed", { id: marked.id, path: relative(root, marked.path) }), data: marked };
   }
 
@@ -397,7 +397,7 @@ function carrier(cwd: string, argv: string[]): Result {
 function seq(cwd: string, argv: string[]): Result {
   const root = requireRoot(cwd);
   const [needle] = argv;
-  const kinds: Kind[] = ["milestone", "generation", "loop", "source"];
+  const kinds: Kind[] = ["milestone", "generation", "flux", "source"];
   const render = (kind: Kind) => {
     const rows = readRegistry(root, kind);
     return `${kind} (${rows.length})\n${rows.map((r) => `  ${r.id}  ${r.title}  ${r.createdAt}`).join("\n")}`;

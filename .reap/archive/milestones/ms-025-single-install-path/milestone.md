@@ -2,7 +2,7 @@
 id: ms-025
 slug: single-install-path
 title: 설치 경로 단일화 — npm 하나, reap setup이 플러그인을 설치, latest 직접 발행
-from: loop-0004-plan
+from: flux-0004-plan
 refs:
   - ps-5e948f:02-distribution.md
 status: closed

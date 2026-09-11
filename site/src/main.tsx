@@ -13,7 +13,7 @@ document.documentElement.classList.add("dark");
  * `location.replace`, not `assign`: it overwrites the `/` entry in history
  * instead of pushing a new one, so Back from `/ko/` returns to wherever the
  * visitor came from. With `assign`, Back would land on `/` — which would
- * redirect again, and Back would be a loop the visitor cannot escape.
+ * redirect again, and Back would be a flux the visitor cannot escape.
  *
  * The session flag records that this TAB HAS BEEN SERVED A PAGE, and it is
  * written on every load, before anything is decided. Not "we redirected once":
@@ -31,7 +31,7 @@ document.documentElement.classList.add("dark");
  *
  * Storage throwing (Safari private browsing, a locked-down profile) means no
  * redirect at all. That direction is deliberate: the alternative is redirecting
- * without being able to record it, which is the loop again.
+ * without being able to record it, which is the flux again.
  *
  * This is not the locale decision. `parseLocalePath` below reads the URL, as
  * it does on every page — a redirected visitor is simply a visitor at `/ko/`.

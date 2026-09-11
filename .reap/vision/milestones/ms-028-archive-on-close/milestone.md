@@ -2,7 +2,7 @@
 id: ms-028
 slug: archive-on-close
 title: 닫는 즉시 archive — generation·loop·backlog가 완료와 함께 옮겨진다, cleanup 은퇴
-from: loop-0004-plan
+from: flux-0004-plan
 status: open
 openedAt: 2026-09-05T08:32:28Z
 ---
@@ -12,7 +12,7 @@ openedAt: 2026-09-05T08:32:28Z
 
 ## Exit Criteria
 
-- `mark generation --closed`·`mark loop --closed`·`mark backlog --consumed`가 표시와 함께 `archive/`로 옮긴다. `--aborted`는 그대로 삭제. `--archived`는 옛 규칙으로 life에 남은 것을 내리는 용도로 남는다. `CLOSED_LOOPS_KEPT`와 overflow 로직 삭제. 테스트가 세 이동을 검사한다
+- `mark generation --closed`·`mark flux --closed`·`mark backlog --consumed`가 표시와 함께 `archive/`로 옮긴다. `--aborted`는 그대로 삭제. `--archived`는 옛 규칙으로 life에 남은 것을 내리는 용도로 남는다. `CLOSED_LOOPS_KEPT`와 overflow 로직 삭제. 테스트가 세 이동을 검사한다
 - `cleanup` skill 삭제. carve-milestone의 종료 순서는 fitness → `mark milestone --closed` 둘. complete·help·evolve·loop·migrate(매핑 #3)에서 cleanup과 "닫혔지만 남는다" 전제가 사라진다. skill 10종, 메뉴 8종
 - spec(ps-4f2a91) 03-storage "life는 작업 세트다" 절과 02-flow·04-commands·05-knowledge·06-agent·08-delivery의 cleanup 언급이 새 규칙으로. `src/templates/map.md`와 이 리포의 `.reap/map.md` 동기화
 - README en·ko·사이트(storage·closing milestone·generation·backlog·skill 표·v018change)가 새 규칙을 말한다. ClosingMilestonePage의 cleanup 절 삭제

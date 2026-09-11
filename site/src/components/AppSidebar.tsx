@@ -24,7 +24,7 @@ export function useNavGroups() {
     {
       label: t.nav.groups.planAxis,
       items: [
-        { title: t.nav.items.loop, href: "/docs/loop" },
+        { title: t.nav.items.flux, href: "/docs/flux" },
         { title: t.nav.items.planSource, href: "/docs/plan-source" },
         { title: t.nav.items.idea, href: "/docs/idea" },
         { title: t.nav.items.carveMilestone, href: "/docs/carve-milestone" },

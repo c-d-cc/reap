@@ -2,7 +2,7 @@
 id: ms-014
 slug: v018-compat
 title: 호환 — 차단 이중화와 0.17.8 다리
-from: loop-0003-plan
+from: flux-0003-plan
 refs:
   - ps-4b485d:03-compat.md
 status: closed

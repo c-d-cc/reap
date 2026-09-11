@@ -2,7 +2,7 @@
 id: ms-016
 slug: v018-package
 title: 배포 패키지 — npm(node) 번들과 release 워크플로
-from: loop-0004-plan
+from: flux-0004-plan
 refs:
   - ps-5e948f:02-distribution.md
   - ps-5e948f:06-release.md

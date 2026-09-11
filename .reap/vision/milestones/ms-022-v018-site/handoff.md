@@ -94,7 +94,7 @@ Plan 축 4(Loop·Plan·Idea와 Research·Milestone 자르기) 두 커밋. 세대
   출력과 결함/참고 분류가 `04-commands.md`의 doctor 절과 어긋나지 않는지
 - 저장 구조(`/docs/storage`) — 트리가 지금 리포 `.reap/`와 맞는지(세대가
   더 진행되면 gen 번호가 낡는다 — 정상. 구조 자체가 맞는지가 중요)
-- Loop(`/docs/loop`) — 유형 넷 표, 실물 예시(loop-0001-plan-auth)
+- Loop(`/docs/loop`) — 유형 넷 표, 실물 예시(flux-0001-plan-auth)
 - Plan(`/docs/plan-source`, 제목 "Plan") — 등록부·규약·인용·소비 완료
   네 절이 tasks/4의 요구를 다 담는지, `sources.yml` 실물이 최신인지
 - Idea와 Research(`/docs/idea`) — 실물 예시(idea-67a149)와 졸업 조건

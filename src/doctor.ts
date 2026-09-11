@@ -40,7 +40,7 @@ export function diagnose(root: string): Report {
   const all: Record<Kind, Entry[]> = {
     milestone: listEntries(root, "milestone"),
     generation: listEntries(root, "generation"),
-    loop: listEntries(root, "loop"),
+    flux: listEntries(root, "flux"),
     backlog: listEntries(root, "backlog"),
     idea: listEntries(root, "idea"),
     source: listEntries(root, "source"),
@@ -87,7 +87,7 @@ export function diagnose(root: string): Report {
     refField(e, "consumedBy");
     refField(e, "from");
   }
-  for (const e of all.loop) {
+  for (const e of all.flux) {
     refField(e, "milestones");
     refField(e, "from");
   }

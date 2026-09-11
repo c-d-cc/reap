@@ -2,7 +2,7 @@
 id: ms-026
 slug: skill-visibility
 title: skill 노출 — 사람이 부르는 7종만 메뉴에, 나머지 3종은 agent 전용
-from: loop-0004-plan
+from: flux-0004-plan
 status: closed
 openedAt: 2026-09-05T01:49:59Z
 closedAt: 2026-09-05T02:40:12Z

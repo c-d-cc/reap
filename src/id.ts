@@ -3,14 +3,14 @@ import { join } from "node:path";
 import { paths, writeFileAtomic } from "./store.ts";
 import { t } from "./i18n.ts";
 
-export type Kind = "milestone" | "generation" | "loop" | "source" | "backlog" | "idea";
-/** `plan`은 `loop-0001` 이전의 역사다 — 파싱은 하고 발급은 `entries.ts`가 막는다. */
+export type Kind = "milestone" | "generation" | "flux" | "source" | "backlog" | "idea";
+/** `plan`은 `flux-0001` 이전의 역사다 — 파싱은 하고 발급은 `entries.ts`가 막는다. */
 export type GenerationType = "plan" | "exec" | "fix";
-export type LoopType = "plan" | "design" | "uiux" | "idea";
+export type FluxType = "plan" | "design" | "uiux" | "idea";
 export type Row = { id: string; title: string; createdAt: string };
 
 export const GENERATION_TYPES: readonly GenerationType[] = ["plan", "exec", "fix"];
-export const LOOP_TYPES: readonly LoopType[] = ["plan", "design", "uiux", "idea"];
+export const FLUX_TYPES: readonly FluxType[] = ["plan", "design", "uiux", "idea"];
 
 const HASH = /^[0-9a-f]{6}$/;
 
@@ -23,12 +23,12 @@ const HASH = /^[0-9a-f]{6}$/;
  * 유형이 없거나 모르는 것이면 그것은 id가 아니다 — 뒤에 오는 것이 slug인지 유형인지
  * 가르는 유일한 근거가 이 형식이기 때문이다.
  *
- * **loop도 같은 모양이다** (`loop-0001-plan`) — generation과 다른 계열이라 번호가 따로 간다.
+ * **flux도 같은 모양이다** (`flux-0001-plan`) — generation과 다른 계열이라 번호가 따로 간다.
  */
 const PREFIXES: Record<string, { kind: Kind; rest: RegExp; pad?: number }> = {
   ms: { kind: "milestone", rest: /^\d{3,}$/, pad: 3 },
   gen: { kind: "generation", rest: /^\d{4,}-(?:plan|exec|fix)$/, pad: 4 },
-  loop: { kind: "loop", rest: /^\d{4,}-(?:plan|design|uiux|idea)$/, pad: 4 },
+  flux: { kind: "flux", rest: /^\d{4,}-(?:plan|design|uiux|idea)$/, pad: 4 },
   ps: { kind: "source", rest: HASH },
   bk: { kind: "backlog", rest: HASH },
   idea: { kind: "idea", rest: HASH },
@@ -37,7 +37,7 @@ const PREFIXES: Record<string, { kind: Kind; rest: RegExp; pad?: number }> = {
 const REGISTRY: Partial<Record<Kind, string>> = {
   milestone: "milestone.md",
   generation: "generation.md",
-  loop: "loop.md",
+  flux: "flux.md",
   source: "source.md",
 };
 
@@ -55,13 +55,13 @@ export function generationTypeOf(id: string): GenerationType | null {
   return id.slice(id.lastIndexOf("-") + 1) as GenerationType;
 }
 
-export function loopTypeOf(id: string): LoopType | null {
-  if (kindOf(id) !== "loop") return null;
-  return id.slice(id.lastIndexOf("-") + 1) as LoopType;
+export function fluxTypeOf(id: string): FluxType | null {
+  if (kindOf(id) !== "flux") return null;
+  return id.slice(id.lastIndexOf("-") + 1) as FluxType;
 }
 
-export function isLoopType(value: string): value is LoopType {
-  return (LOOP_TYPES as readonly string[]).includes(value);
+export function isFluxType(value: string): value is FluxType {
+  return (FLUX_TYPES as readonly string[]).includes(value);
 }
 
 export function isValid(id: string): boolean {
@@ -94,9 +94,9 @@ export function readRegistry(root: string, kind: Kind): Row[] {
  * **generation은 유형이 달라도 하나의 계열에서 번호를 받는다.** 유형마다 계열을 나누면
  * 한 폴더에 쌓였을 때 이름순 정렬이 시간순을 잃는다.
  */
-export function issue(root: string, kind: Kind, title: string, today: string, type?: GenerationType | LoopType): string {
+export function issue(root: string, kind: Kind, title: string, today: string, type?: GenerationType | FluxType): string {
   const prefix = prefixOf(kind, root);
-  const suffix = kind === "generation" || kind === "loop" ? `-${requireType(kind, type, root)}` : "";
+  const suffix = kind === "generation" || kind === "flux" ? `-${requireType(kind, type, root)}` : "";
   const pad = PREFIXES[prefix]?.pad;
   // 번호냐 해시냐는 접두사가 정하고, 레지스트리 행을 남기느냐는 별개다 — plan source는 해시인데 행을 남긴다
   if (!isRegistered(kind)) return `${prefix}-${randomHash()}`;
@@ -125,9 +125,9 @@ function prefixOf(kind: Kind, root?: string | null): string {
   throw new Error(t(root, "id.unknown_kind", { kind }));
 }
 
-function requireType(kind: Kind, type?: GenerationType | LoopType, root?: string | null): GenerationType | LoopType {
+function requireType(kind: Kind, type?: GenerationType | FluxType, root?: string | null): GenerationType | FluxType {
   if (!type) {
-    const types = kind === "loop" ? LOOP_TYPES : GENERATION_TYPES;
+    const types = kind === "flux" ? FLUX_TYPES : GENERATION_TYPES;
     throw new Error(t(root, "id.type_required", { kind, types: types.join(" | ") }));
   }
   return type;

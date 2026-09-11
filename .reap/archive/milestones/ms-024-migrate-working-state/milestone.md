@@ -2,7 +2,7 @@
 id: ms-024
 slug: migrate-working-state
 title: "migrate 2차 — 작업 상태 복원: milestone·backlog·plan 재구성, genome·CLAUDE.md 갱신"
-from: loop-0004-plan
+from: flux-0004-plan
 status: closed
 openedAt: 2026-09-04T15:59:41Z
 closedAt: 2026-09-05T01:04:47Z

@@ -2,7 +2,7 @@
 id: ms-019
 slug: v018-verify-release
 title: 왕복 검증과 발행 준비 — tarball 설치·이주 실물·0.17.8·마켓플레이스
-from: loop-0004-plan
+from: flux-0004-plan
 refs:
   - ps-5e948f:06-release.md
 status: closed

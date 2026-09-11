@@ -38,7 +38,7 @@ closedAt: 2026-08-30T14:44:16Z
 
 ## Out of Scope
 
-- **기획 작성·`make loop`** — `ms-012`의 것이다
+- **기획 작성·`make flux`** — `ms-012`의 것이다
 - **항목 단위 인용** — `refs`는 파일 경로까지다. 기획의 계층을 REAP가 아는 순간 작업의 모양을 결정하게 된다(`genome/application.md`)
 - **`doctor`의 인용 검사** — `doctor` 자체가 `ms-006`이다. 여기서는 `make`가 받을 때 확정 가능한 것만 본다
 - **plan source 여럿을 실제로 쓰는 것** — 지금 하나뿐이라 여럿일 때의 문제는 상상으로만 설계된다
@@ -51,7 +51,7 @@ closedAt: 2026-08-30T14:44:16Z
 | 11.2 | `make plan-source` · `plan sources\|convention` | 손으로 쓴 `ps-4f2a91`과 도구가 만드는 것이 같은 모양 |
 | 11.3 | `--ref` 검증 | 소스 id 실재 + 경로가 그 소스 안. `make milestone`이 받을 때 |
 
-**11.1이 먼저다** — 나머지 둘이 그 위에 선다. `make loop`(`ms-012`)도 `--ref` 검증을 쓴다.
+**11.1이 먼저다** — 나머지 둘이 그 위에 선다. `make flux`(`ms-012`)도 `--ref` 검증을 쓴다.
 
 ## Constraints
 

@@ -2,7 +2,7 @@
 id: ms-027
 slug: revive-three
 title: v0.17에서 빠진 셋 복원 — help skill, environment 갱신 절, 닫기 전 독립 검증
-from: loop-0004-plan
+from: flux-0004-plan
 status: closed
 openedAt: 2026-09-05T02:04:22Z
 closedAt: 2026-09-05T02:40:12Z

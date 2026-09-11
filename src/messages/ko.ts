@@ -5,8 +5,8 @@ export const ko = {
 
   --version
   init [--force] | init --check     (--check: 씨앗 그대로인 지식 파일을 보고만 한다)
-  make loop       --type plan|design|uiux|idea --title "<제목>" [--slug <s>] [--from <id>] [--ref <ps-id>:<경로>]
-  make milestone  --title "<제목>" [--slug <s>] [--from <loop-id>] [--ref <ps-id>:<경로>] [--focus]
+  make flux       --type plan|design|uiux|idea --title "<제목>" [--slug <s>] [--from <id>] [--ref <ps-id>:<경로>]
+  make milestone  --title "<제목>" [--slug <s>] [--from <flux-id>] [--ref <ps-id>:<경로>] [--focus]
   make generation --milestone <ms-id> --title "<제목>" [--slug <s>]
   make generation --backlog <bk-id> --title "<제목>" [--slug <s>]   (--milestone과 겸용 가능)
   make generation --fix  --title "<제목>" [--slug <s>]
@@ -14,13 +14,13 @@ export const ko = {
   make plan-source --root <path> --role "<역할>" [--slug <s>]
   make idea       --kind research|freememo|file --title "<제목>" [--slug <s>]
   make hook       --event <e> --name <n> [--type md|sh] [--condition <c>] [--order <n>]
-  mark loop       <loop-id> --closed [--milestone <ms-id>]... | --aborted
+  mark flux       <flux-id> --closed [--milestone <ms-id>]... | --aborted
   mark generation <gen-id> --closed | --aborted | --archived
   mark backlog    <bk-id> --consumed [--by <gen-id>] | --archived
   mark milestone <ms-id> --focus | --closed
   mark idea       <idea-id> --archived
   bind <gen-id>                   (열린 세대에 이 세션을 다시 묶는다)
-  seq [generation|milestone|loop|source|<id>]
+  seq [generation|milestone|flux|source|<id>]
   carrier new <slug> | list [--orphans|--check]
   setup                           (claude CLI로 플러그인 마켓플레이스를 등록하고 reap 플러그인을 설치한다. npm i -g 뒤 한 번)
   doctor                          (보고만 한다. 결함이 있으면 실패로 끝난다)
@@ -92,13 +92,13 @@ export const ko = {
   "make.plan_source_needs_role": 'plan-source에는 --role "<역할>"이 필요합니다.',
   "make.plan_source_result": "plan-source {id}\n  {path}\n  {convention}",
   "make.title_required": "--title이 필요합니다.",
-  "make.loop_needs_type": "loop에는 --type이 필요합니다: {types} (받은 값: {got})",
+  "make.flux_needs_type": "flux에는 --type이 필요합니다: {types} (받은 값: {got})",
   "make.backlog_needs_type": "backlog에는 --type이 필요합니다. 열거로 막지 않으므로 관례를 따릅니다(예: design).",
   "make.idea_needs_kind": "idea에는 --kind가 필요합니다: research · freememo · file (받은 값: {got})",
-  "make.unknown_kind": "make는 loop · milestone · generation · backlog · idea · hook · plan-source를 만듭니다: {kind}",
+  "make.unknown_kind": "make는 flux · milestone · generation · backlog · idea · hook · plan-source를 만듭니다: {kind}",
   "make.result": "{label} {id}\n  {path}",
 
-  "mark.loop_needs_id": "표시할 loop의 id가 필요합니다.",
+  "mark.flux_needs_id": "표시할 flux의 id가 필요합니다.",
   "mark.need_flag_closed_aborted": "--closed · --aborted 중 하나가 필요합니다.",
   "mark.cleared": "기록을 지웠습니다: {id}",
   "mark.closed": "닫았습니다: {id}\n  {path}",
@@ -115,7 +115,7 @@ export const ko = {
   "mark.focused": "초점을 맞췄습니다: {id}",
   "mark.closed_moved": "닫고 옮겼습니다: {id}\n  {path}",
   "mark.need_flag_milestone": "--focus 또는 --closed가 필요합니다.",
-  "mark.unknown_kind": "mark는 loop · generation · backlog · milestone · idea를 표시합니다: {kind}",
+  "mark.unknown_kind": "mark는 flux · generation · backlog · milestone · idea를 표시합니다: {kind}",
 
   "carrier.new_usage": "carrier new <slug>",
   "carrier.no_problems": "표식에 문제가 없습니다.",
@@ -145,9 +145,9 @@ export const ko = {
   "plan.ref_file_missing": "소스 안에 그 파일이 없습니다: {path} (소스 root: {root})",
   "plan.no_sources": '등록된 plan source가 없습니다. reap make plan-source --root <path> --role "<r>"',
 
-  "entries.no_plan_type": "generation에는 plan 유형이 없습니다. 새 의도를 만드는 일은 loop입니다: reap make loop --type plan|design|uiux|idea",
+  "entries.no_plan_type": "generation에는 plan 유형이 없습니다. 새 의도를 만드는 일은 flux입니다: reap make flux --type plan|design|uiux|idea",
   "entries.fix_no_grounds": "--fix는 근거(--milestone·--backlog)와 함께 줄 수 없습니다.",
-  "entries.gen_needs_type_or_grounds": "generation을 열려면 유형이나 근거가 필요합니다: exec은 --milestone <ms-id>와 --backlog <bk-id> 중 하나 이상(둘 다 가능), 되돌리는 일은 --fix. 새 의도를 만드는 일이면 make loop.",
+  "entries.gen_needs_type_or_grounds": "generation을 열려면 유형이나 근거가 필요합니다: exec은 --milestone <ms-id>와 --backlog <bk-id> 중 하나 이상(둘 다 가능), 되돌리는 일은 --fix. 새 의도를 만드는 일이면 make flux.",
   "entries.gen_closed_no_bind": "닫힌 세대에는 묶지 않습니다: {id}",
   "entries.backlog_ambiguous": "backlog가 여럿에 걸립니다: {ids}",
   "entries.backlog_not_found": "backlog를 찾지 못했습니다: {needle}",
@@ -219,7 +219,7 @@ export const ko = {
   "ctx.label.milestone": "현재 milestone: {id} {title} ({flags})",
   "ctx.label.generation": "열린 세대: {id} {title} — {path}",
   "ctx.started_join": " 시작, 시작 커밋 ",
-  "ctx.label.loop": "열린 loop: {id} {title} — {path}",
+  "ctx.label.flux": "열린 flux: {id} {title} — {path}",
   "ctx.label.memory": "기억: {list}",
   "ctx.label.idea": "덜 단단한 것: {path}/ ({counts})",
   "ctx.label.map": "구조: {path}",

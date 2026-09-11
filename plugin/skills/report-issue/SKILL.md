@@ -11,7 +11,7 @@ This is the channel that stops a defect hit while using REAP from either sitting
 
 **REAP's** — the `reap` binary behaves differently from its spec, a plugin skill contradicts another or points at something that doesn't exist, `ctx` loads the wrong thing or drops something, a hook blocks session start (violating `invariants.md`), a storage convention doesn't hold in this project, a command/skill/convention that would be nice to have.
 
-**This project's — not an issue.** What to write in genome, a milestone, or backlog is a judgment call, this project's code being broken, the content of a plan source. That's `make backlog` or a loop.
+**This project's — not an issue.** What to write in genome, a milestone, or backlog is a judgment call, this project's code being broken, the content of a plan source. That's `make backlog` or a flux.
 
 **When unsure, write it to this project's backlog first, and file it once it's certain to be REAP's.** A misfiled issue gets closed by the REAP side as "can't reproduce," and that round trip is the most expensive kind.
 
@@ -33,7 +33,7 @@ ls .reap                                        # layout (file names only)
 
 Add to that the repro command, expected vs. actual, related spec document names (like `04-commands.md`), and which skill this happened inside.
 
-**Doesn't go in** — this project's source code, absolute paths outside the repo, the **body** of genome/milestone/backlog/loop, plan source content, a person's name or email. A file *name* is fine, its *content* isn't. REAP issues live in a public repo.
+**Doesn't go in** — this project's source code, absolute paths outside the repo, the **body** of genome/milestone/backlog/flux, plan source content, a person's name or email. A file *name* is fine, its *content* isn't. REAP issues live in a public repo.
 
 ## File it
 
@@ -41,7 +41,7 @@ Add to that the repro command, expected vs. actual, related spec document names 
 gh issue create --repo c-d-cc/reap --title "<one line>" --body-file <temp file> [--label bug|enhancement]
 ```
 
-The title is **the symptom** — "`mark loop --closed` overwrites milestones," not "loop bug." Body format:
+The title is **the symptom** — "`mark flux --closed` overwrites milestones," not "flux bug." Body format:
 
 ```
 ## What (expected / actual)

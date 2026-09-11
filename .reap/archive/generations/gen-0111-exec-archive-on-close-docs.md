@@ -13,7 +13,7 @@ endCommit: fd76b49
 
 ## Intent
 
-ms-028 tasks/3. README en·ko(skill 표에서 cleanup 행 삭제, 10종·agent 둘)와 사이트(소개·storage·closing milestone·generation·backlog·loop·skill 표·상세·v018change·릴리스 노트)가 "life는 열린 것, 닫히면 archive"를 말한다. ClosingMilestonePage의 cleanup 절 삭제. 이 리포의 life에 옛 규칙으로 남은 닫힌 세대 7·소비된 backlog 6·닫힌 loop 2를 archive로 내린다(세대·backlog는 `--archived`, loop는 git mv — `mark loop --archived`는 없다).
+ms-028 tasks/3. README en·ko(skill 표에서 cleanup 행 삭제, 10종·agent 둘)와 사이트(소개·storage·closing milestone·generation·backlog·loop·skill 표·상세·v018change·릴리스 노트)가 "life는 열린 것, 닫히면 archive"를 말한다. ClosingMilestonePage의 cleanup 절 삭제. 이 리포의 life에 옛 규칙으로 남은 닫힌 세대 7·소비된 backlog 6·닫힌 loop 2를 archive로 내린다(세대·backlog는 `--archived`, loop는 git mv — `mark flux --archived`는 없다).
 
 ## References
 
@@ -29,4 +29,4 @@ commit fd76b49. plugin-skills·docs-surface ok, site typecheck, prerender PASSED
 
 ## Dead Ends
 
-- `mark loop --archived` 추가 — 옛 잔여가 이 리포의 loop 둘뿐이라 명령을 늘릴 값이 없다. git mv
+- `mark flux --archived` 추가 — 옛 잔여가 이 리포의 loop 둘뿐이라 명령을 늘릴 값이 없다. git mv

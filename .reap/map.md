@@ -6,24 +6,24 @@ REAP를 처음 보는 사람과 agent를 위한 것이다. 각 디렉토리가 �
 
 ```
 vision/    하려는 것 — 아는 것(memory), 잘라낸 실행 단위(milestones)
-life/      지금 열려 있는 것 — generations, backlog, loops
-archive/   닫힌 것 — generations, milestones, backlog, loops, idea
+life/      지금 열려 있는 것 — generations, backlog, flux
+archive/   닫힌 것 — generations, milestones, backlog, flux, idea
 ```
 
-**`plan/`은 이 3단 밖에서 최상위로 선다** — plan source는 리포 밖을 가리키는 등록부라 "하려는 것 / 사는 것 / 끝난 것"이라는 시간축에 얹히지 않는다. `genome/`·`environment/`·`idea/`와 나란하다. **loop는 여기가 아니라 `life/loops/`다** — loop는 열리고 닫히고 archive로 가므로 시간축에 얹힌다. 등록부가 아니다.
+**`plan/`은 이 3단 밖에서 최상위로 선다** — plan source는 리포 밖을 가리키는 등록부라 "하려는 것 / 사는 것 / 끝난 것"이라는 시간축에 얹히지 않는다. `genome/`·`environment/`·`idea/`와 나란하다. **flux는 여기가 아니라 `life/flux/`다** — flux는 열리고 닫히고 archive로 가므로 시간축에 얹힌다. 등록부가 아니다.
 
-`vision/`은 바뀌지 않는 한 계속 참조된다. `life/`는 **열려 있는 것**이다 — 세대·loop·backlog 항목은 닫히거나 소비되는 순간 `archive/`로 옮겨진다(`mark`가 옮긴다). 기록은 어느 쪽에 있든 id로 찾는다. milestone이 닫히면 그 디렉토리가 통째로 `archive/milestones/`로 가고, 그 세대들은 이미 `archive/generations/`에 있다 — **두 archive 디렉토리는 서로를 담지 않는다.**
+`vision/`은 바뀌지 않는 한 계속 참조된다. `life/`는 **열려 있는 것**이다 — 세대·flux·backlog 항목은 닫히거나 소비되는 순간 `archive/`로 옮겨진다(`mark`가 옮긴다). 기록은 어느 쪽에 있든 id로 찾는다. milestone이 닫히면 그 디렉토리가 통째로 `archive/milestones/`로 가고, 그 세대들은 이미 `archive/generations/`에 있다 — **두 archive 디렉토리는 서로를 담지 않는다.**
 
 ## 세대(generation)는 유형과 무관하게 한 곳에 쌓인다
 
 `life/generations/`(끝나면 `archive/generations/`) 하나뿐이다. 유형별 폴더로 가르지 않는다 — 유형이 늘 때마다 최상위가 늘어나는 것을 피하기 위해서다. 대신:
 
-- **유형은 id 안에 있다** — `gen-<순번>-<exec|fix>`. 순번은 유형과 무관한 하나의 계열이므로 이름순 정렬이 곧 시간순이다. `gen-NNNN-plan`은 `loop-0001` 이전의 역사다 — 더 발급하지 않는다
+- **유형은 id 안에 있다** — `gen-<순번>-<exec|fix>`. 순번은 유형과 무관한 하나의 계열이므로 이름순 정렬이 곧 시간순이다. `gen-NNNN-plan`은 `flux-0001` 이전의 역사다 — 더 발급하지 않는다
 - **milestone 소속은 frontmatter의 `milestone` 필드가 말한다.** exec만 이 필드를 갖는다. fix는 무소속이다
 
 | 단위 | 하는 일 | 근거 |
 |---|---|---|
-| loop (`life/loops/`) | 새 의도를 만든다 — 유형 `plan\|design\|uiux\|idea` | 선택 |
+| flux (`life/flux/`) | 새 의도를 만든다 — 유형 `plan\|design\|uiux\|idea` | 선택 |
 | exec generation | 새 의도를 실현한다 | milestone 또는 backlog 필수 |
 | fix generation | 이미 있는 의도로 되돌린다 | 없음 |
 
@@ -31,7 +31,7 @@ archive/   닫힌 것 — generations, milestones, backlog, loops, idea
 
 - `vision/memory/` — `lessons.md`(프로젝트 전역 교훈) 하나다. **물음은 닫히는 것이고 교훈은 쌓이는 것이라** 한 파일에 섞으면 어느 쪽도 정리되지 않는다. 결론 안 난 물음은 `idea/research/`가 갖는다
 - `plan/` — `sources.yml`(등록된 plan source), `conventions/<ps-id>-<slug>.md`(그 소스를 읽고 쓰는 법)
-- `life/loops/` — 열린 loop(`Question`·`Dialogue`·`Dead Ends`·`Outcome`). `mark loop --closed`가 `archive/loops/`로 옮긴다
+- `life/flux/` — 열린 flux(`Question`·`Dialogue`·`Dead Ends`·`Outcome`). `mark flux --closed`가 `archive/flux/`로 옮긴다
 - `vision/milestones/<ms-id>-<slug>/` — `milestone.md`(경계와 종료 조건), `handoff.md`(다음 세션 인계), `tasks/<n>-<slug>.md`(작업 상세)
 - `life/generations/` — 열린 세대 기록. `mark generation --closed`가 `archive/generations/`로 옮긴다
 - `life/backlog/` — 열린 항목. `mark backlog --consumed`가 `archive/backlog/`로 옮긴다
@@ -49,7 +49,7 @@ id를 갖는 것은 전부 `<id>-<slug>`다 (예외 없음). id 자체의 형식
 | 종류 | 형식 | 예 |
 |---|---|---|
 | milestone | `ms-<순번>` | `ms-004-auth-session/` |
-| loop | `loop-<순번>-<plan\|design\|uiux\|idea>` | `loop-0001-plan-plan-loop.md` |
+| flux | `flux-<순번>-<plan\|design\|uiux\|idea>` | `flux-0001-plan-plan-flux.md` |
 | generation | `gen-<순번>-<exec\|fix>` | `gen-0002-exec-token-rotation.md` |
 | backlog | `bk-<해시>` | `bk-a3f8c2-token-rotation-retry.md` |
 | idea | `idea-<해시>` | `idea-a3f8c2-oauth-device-flow.md` |

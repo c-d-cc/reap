@@ -62,9 +62,9 @@ agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포하는 1
 | skill | 누가 | 언제 |
 |---|---|---|
 | [`init`](plugin/skills/init/SKILL.md) | 사람 | 프로젝트당 한 번, 맨 처음 — 정본 지식을 세운다 |
-| [`evolve`](plugin/skills/evolve/SKILL.md) | 사람 | 세대를 열 때 — loop·exec·fix 중 무엇인지 정한다 |
+| [`evolve`](plugin/skills/evolve/SKILL.md) | 사람 | 세대를 열 때 — flux·exec·fix 중 무엇인지 정한다 |
 | [`complete`](plugin/skills/complete/SKILL.md) | agent | 세대를 닫을 때 |
-| [`loop`](plugin/skills/loop/SKILL.md) | 사람 | 새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것 |
+| [`flux`](plugin/skills/flux/SKILL.md) | 사람 | 새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것 |
 | [`carve-milestone`](plugin/skills/carve-milestone/SKILL.md) | agent | plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때 |
 | [`interview`](plugin/skills/interview/SKILL.md) | 사람 | 의도가 모호해 사람이 결정해야 할 때 |
 | [`orchestrate`](plugin/skills/orchestrate/SKILL.md) | 사람 | 두 세션 이상이 같은 프로젝트에서 동시에 작업할 때 |

@@ -36,7 +36,7 @@ task 3 전부(A 목차 골격·B 홈 복원·C 시작하기 4쪽) 마쳤다. 위
 "부분" 절 이후 team-lead의 후속 브리프가 "구조" 카드를 4장에서 6장으로(Plan·Civilization 추가), "작업 흐름" 표 열을 v0.17과 같은 단계·수행 내용·산출물로 바꾸라고 했다. 반영했다:
 
 - 구조: Knowledge(genome+environment) · Plan(plan source+loop) · Vision(milestone+memory) · Life(generation+backlog) · Archive · Civilization(코드) 6장.
-- 작업 흐름 표: 열을 단위·무엇을 하는가·관련 skill → 단계·수행 내용·산출물로, 세 번째 칸을 skill 이름 대신 실제 저장 경로(`life/loops/<id>.md` 등)로.
+- 작업 흐름 표: 열을 단위·무엇을 하는가·관련 skill → 단계·수행 내용·산출물로, 세 번째 칸을 skill 이름 대신 실제 저장 경로(`life/flux/<id>.md` 등)로.
 - 문서 링크 12개 → 새 목차 대표 10개(introduction·quick-start·autonomous-evolution·v018change·skill-reference·cli-reference·hooks·code-intelligence·orchestrate·migration).
 - 설치 링크를 `/docs/install`(삭제됨)에서 `/docs/quick-start`로.
 - HeroPage.tsx 자체의 JSX는 이미 각 배열을 제네릭하게 순회하므로 손댈 필요가 없었다 — 링크 한 줄만 고쳤다.
@@ -48,7 +48,7 @@ task 3 전부(A 목차 골격·B 홈 복원·C 시작하기 4쪽) 마쳤다. 위
 - **자율 진화 흐름**(신설): SessionStart 훅이 매 세션 싣는 것(genome·environment 요약·상태 줄) → 실물 상태 줄 예시(아래) → evolve의 세 판단(열 값이 있는가/loop인가 generation인가/직접인가 위임인가) → 자율 구간에 REAP가 관여하지 않는다는 것 → complete의 커밋 규칙 → milestone이 끝날 때만 받는 사람의 fitness.
 - **v0.18에서 바뀐 것**: 내용은 그대로 두고 톤만 확인 — `intro`·`sameDesc` 두 문장이 "-다"체였던 것을 "-습니다"체로 고쳤다. 나머지(표·목록)는 명사구라 톤 대상이 아니다.
 
-실물 상태 줄은 스크래치 리포(`/private/tmp/.../scratchpad/site-examples/`)에서 `git init` → `./dist/reap init` → `make loop --type plan` → `make milestone --focus` → `make generation --milestone` → `config.yml`에 `language: ko` → `reap ctx`로 새로 찍었다(첫 사용 쪽의 기존 예시와 같은 형태, 커밋 해시만 다르다).
+실물 상태 줄은 스크래치 리포(`/private/tmp/.../scratchpad/site-examples/`)에서 `git init` → `./dist/reap init` → `make flux --type plan` → `make milestone --focus` → `make generation --milestone` → `config.yml`에 `language: ko` → `reap ctx`로 새로 찍었다(첫 사용 쪽의 기존 예시와 같은 형태, 커밋 해시만 다르다).
 
 ### 검증
 

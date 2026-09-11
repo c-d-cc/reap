@@ -27,14 +27,14 @@ ls .reap 2>/dev/null && reap init --check
 | `.reap/` exists, `--check` reports seeds — **left as seeds** | Fill only what's reported. Don't touch a file a human has typed a single character into |
 | `.reap/` exists, no seeds left | Not this skill's job. Stop |
 
-## 1. Open the first loop
+## 1. Open the first flux
 
 ```bash
 reap init                                   # only if missing
-reap make loop --type plan --title "establish the canonical knowledge" --slug init
+reap make flux --type plan --title "establish the canonical knowledge" --slug init
 ```
 
-**`init` is the first loop.** Establishing the canonical knowledge closes it once the first milestone is carved. If there's nothing to carve yet, it stays open, and that's normal. If it's interrupted, the next session reads this loop's `Question`/`Dialogue` and continues — see [loop](../loop/SKILL.md).
+**`init` is the first flux.** Establishing the canonical knowledge closes it once the first milestone is carved. If there's nothing to carve yet, it stays open, and that's normal. If it's interrupted, the next session reads this flux's `Question`/`Dialogue` and continues — see [flux](../flux/SKILL.md).
 
 ## 2. Explore (for an existing codebase)
 
@@ -103,17 +103,17 @@ Written after already having gone through this project while filling the previou
 
 ## 4. Ask
 
-Take the question list to [interview](../interview/SKILL.md). Write answers into their spot from step 3, and **leave where opinions diverged in this loop's `Dialogue`** — which answer was the human's and which was an adopted recommendation.
+Take the question list to [interview](../interview/SKILL.md). Write answers into their spot from step 3, and **leave where opinions diverged in this flux's `Dialogue`** — which answer was the human's and which was an adopted recommendation.
 
 ## 5. Judge the first milestone
 
-Once the canonical knowledge stands, check **whether there's work to do right now**. If so, carve it with [carve-milestone](../carve-milestone/SKILL.md) — this loop becomes its `--from`. Once carved, close the loop:
+Once the canonical knowledge stands, check **whether there's work to do right now**. If so, carve it with [carve-milestone](../carve-milestone/SKILL.md) — this flux becomes its `--from`. Once carved, close the flux:
 
 ```bash
-reap mark loop <loop-id> --closed --milestone <ms-id>
+reap mark flux <flux-id> --closed --milestone <ms-id>
 ```
 
-If not, leave the loop open. Write what got filled in `Outcome`, and why there's nothing to carve yet in `Open Questions`.
+If not, leave the flux open. Write what got filled in `Outcome`, and why there's nothing to carve yet in `Open Questions`.
 
 ## Confirm at the end
 

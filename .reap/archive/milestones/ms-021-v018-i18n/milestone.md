@@ -2,7 +2,7 @@
 id: ms-021
 slug: v018-i18n
 title: en 전환 — CLI 메시지 카탈로그, skill·템플릿 en, README en/ko
-from: loop-0004-plan
+from: flux-0004-plan
 refs:
   - ps-5e948f:07-i18n-docs-delegate.md
 status: closed

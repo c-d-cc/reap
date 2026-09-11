@@ -15,12 +15,12 @@ Get the state with `reap ctx` if the status line isn't in the session (compactio
 현재 상태
 - milestone: ms-027 v0.17에서 빠진 셋 복원 (focus, open) — tasks 3
 - 열린 세대: 없음
-- 열린 loop: loop-0004-plan v0.18 완성과 출시
+- 열린 flux: flux-0004-plan v0.18 완성과 출시
 - 작업 트리: 깨끗함 · doctor: 결함 0
 ```
 
 Rules for the list:
-- `milestone`, `열린 세대`, `열린 loop` come from the status line. Omit a line whose item doesn't exist, except `열린 세대`, which reads "없음" — that absence is the most useful fact
+- `milestone`, `열린 세대`, `열린 flux` come from the status line. Omit a line whose item doesn't exist, except `열린 세대`, which reads "없음" — that absence is the most useful fact
 - `작업 트리` is `git status --porcelain` (깨끗함 / N개 변경), `doctor` is the `결함 N` line from `reap doctor`. Both are one command each; run them
 - No paths, no markers, no `응답 언어` line. If the person needs a path, they'll ask
 - If there's no `.reap/`, the whole section is one line: "REAP 프로젝트가 아닙니다 — `init`부터"
@@ -30,8 +30,8 @@ Rules for the list:
 | skill | for |
 |---|---|
 | `init` | once per project — sets up the canonical knowledge |
-| `evolve` | to start work — opens a loop, an exec generation, or a fix |
-| `loop` | to make new intent — planning, design, screens, anything with no home yet |
+| `evolve` | to start work — opens a flux, an exec generation, or a fix |
+| `flux` | to make new intent — planning, design, screens, anything with no home yet |
 | `interview` | when something is ambiguous and a person has to decide |
 | `orchestrate` | two or more sessions on the same project |
 | `migrate` | a v0.17 `.reap/` that must move to v0.18 |
@@ -49,8 +49,8 @@ Render it as this table, translated. **Don't list `complete` or `carve-milestone
 | An open generation that isn't this session's | Don't touch it. If this is a second session, `orchestrate` |
 | A focus milestone with tasks left | `evolve` — it reads `handoff.md` and picks the next task |
 | Every open milestone is waiting on the person (fitness, review) | Say which, and what one check would settle them |
-| An open loop and no startable milestone | `loop` — carry the intent forward, then carve |
-| Nothing open | `loop` for new intent, or `evolve` to consume a backlog item |
+| An open flux and no startable milestone | `flux` — carry the intent forward, then carve |
+| Nothing open | `flux` for new intent, or `evolve` to consume a backlog item |
 | `doctor` reports defects | Fix those first — a defect is something deterministically wrong |
 
 Give **one** suggestion with the reason in a sentence. If two fit, say which you'd pick and why.

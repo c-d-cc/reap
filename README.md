@@ -62,9 +62,9 @@ Skills are how an agent works with REAP. The plugin ships 10 — eight you can c
 | skill | who calls it | when |
 |---|---|---|
 | [`init`](plugin/skills/init/SKILL.md) | you | Once per project, at the very start — sets up canonical knowledge |
-| [`evolve`](plugin/skills/evolve/SKILL.md) | you | To open a generation — decides loop, exec, or fix |
+| [`evolve`](plugin/skills/evolve/SKILL.md) | you | To open a generation — decides flux, exec, or fix |
 | [`complete`](plugin/skills/complete/SKILL.md) | agent | To close a generation |
-| [`loop`](plugin/skills/loop/SKILL.md) | you | To create a new intent — planning, design, screens, anything without a place yet |
+| [`flux`](plugin/skills/flux/SKILL.md) | you | To create a new intent — planning, design, screens, anything without a place yet |
 | [`carve-milestone`](plugin/skills/carve-milestone/SKILL.md) | agent | To cut a plan into an executable milestone, and to close one |
 | [`interview`](plugin/skills/interview/SKILL.md) | you | When intent is ambiguous enough that a person has to decide |
 | [`orchestrate`](plugin/skills/orchestrate/SKILL.md) | you | When two or more sessions work on the same project at once |

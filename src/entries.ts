@@ -5,7 +5,7 @@ import type { Entry } from "./doc.ts";
 import { head } from "./git.ts";
 import { HOOK_EVENTS, isHookEvent, runHooks } from "./hooks.ts";
 import type { RunHooksResult } from "./hooks.ts";
-import type { GenerationType, LoopType } from "./id.ts";
+import type { GenerationType, FluxType } from "./id.ts";
 import { issue } from "./id.ts";
 import { requireRefs } from "./plan.ts";
 import { bindSession, ensureDir, paths, readSession, unbindSession, writeFileAtomic } from "./store.ts";
@@ -15,7 +15,7 @@ import { t } from "./i18n.ts";
 export type MakeBacklog = { title: string; slug?: string; type: string; from?: string; now: string };
 export type MakeIdea = { title: string; slug?: string; kind: IdeaKind; now: string };
 
-export type MakeLoop = { title: string; slug?: string; type: LoopType; from?: string; refs?: string[]; now: string };
+export type MakeFlux = { title: string; slug?: string; type: FluxType; from?: string; refs?: string[]; now: string };
 
 /** 닫힌 것은 `archive/`로 간다 — 위치 이동은 판단이 아니라 도구의 일이다 (사람 결정 2026-09-05). */
 function moveToArchive(path: string, archiveDir: string): string {
@@ -71,7 +71,7 @@ export function makeMilestone(root: string, opts: MakeMilestone): Made {
  * 시작 커밋을 못 구한다고 거부하지 않는다 — 그것은 흐름 제어다.
  *
  * **`--milestone`·`--backlog`·`--fix`.** 유형은 짐작할 것이 아니다 — 근거와 유형을 함께 주는 것도,
- * 하나도 없는 것도 거부한다. **`--plan`은 없다** — 새 의도를 만드는 일은 generation이 아니라 loop다.
+ * 하나도 없는 것도 거부한다. **`--plan`은 없다** — 새 의도를 만드는 일은 generation이 아니라 flux다.
  */
 export function makeGeneration(root: string, opts: MakeGeneration): Made {
   // 근거(milestone·backlog)는 함께 올 수 있다 — milestone이 갈래를 주고 backlog 항목이
@@ -114,14 +114,14 @@ export function makeGeneration(root: string, opts: MakeGeneration): Made {
 }
 
 /**
- * loop는 generation과 다른 사이클이다 — **세션에 바인딩하지 않는다.** 여럿이 나란히 열리므로
- * "현재 loop"가 없다. 근거(`from`)는 출처일 뿐 권한이 아니라 검사하지 않는다.
+ * flux는 generation과 다른 사이클이다 — **세션에 바인딩하지 않는다.** 여럿이 나란히 열리므로
+ * "현재 flux"가 없다. 근거(`from`)는 출처일 뿐 권한이 아니라 검사하지 않는다.
  */
-export function makeLoop(root: string, opts: MakeLoop): Made {
+export function makeFlux(root: string, opts: MakeFlux): Made {
   requireRefs(root, opts.refs);
   const slug = opts.slug ?? slugify(opts.title, root);
   requireSlug(root, slug);
-  const id = issue(root, "loop", opts.title, registryDate(opts.now), opts.type);
+  const id = issue(root, "flux", opts.title, registryDate(opts.now), opts.type);
   const data: Record<string, unknown> = { id, slug, type: opts.type, title: opts.title };
   if (opts.from) data.from = opts.from;
   if (opts.refs && opts.refs.length > 0) data.refs = opts.refs;
@@ -130,15 +130,15 @@ export function makeLoop(root: string, opts: MakeLoop): Made {
   if (startCommit) data.startCommit = startCommit;
   data.status = "open";
   data.milestones = [];
-  return writeLoose(root, paths(root).loops, id, slug, data, "loop.md");
+  return writeLoose(root, paths(root).flux, id, slug, data, "flux.md");
 }
 
 /**
- * `--closed`는 상태를 찍고 **`archive/loops/`로 옮긴다.** 닫힌 loop를 읽는 쪽(그 milestone의 세대)은 id로 찾으므로
- * 위치가 바뀌어도 닿는다. 열린 loop만 `life/loops/`에 있고, 그것이 상태 줄이 세는 전부다.
+ * `--closed`는 상태를 찍고 **`archive/flux/`로 옮긴다.** 닫힌 flux를 읽는 쪽(그 milestone의 세대)은 id로 찾으므로
+ * 위치가 바뀌어도 닿는다. 열린 flux만 `life/flux/`에 있고, 그것이 상태 줄이 세는 전부다.
  */
-export function markLoop(root: string, needle: string, flag: "closed" | "aborted", now: string, milestones: string[] = []): Made {
-  const entry = resolveByKind(root, "loop", needle);
+export function markFlux(root: string, needle: string, flag: "closed" | "aborted", now: string, milestones: string[] = []): Made {
+  const entry = resolveByKind(root, "flux", needle);
   if (flag === "aborted") {
     rmSync(entry.path, { force: true });
     return { id: entry.id, path: entry.path };
@@ -146,7 +146,7 @@ export function markLoop(root: string, needle: string, flag: "closed" | "aborted
   const fields: Record<string, unknown> = { status: "closed", closedAt: now };
   if (milestones.length > 0) fields.milestones = milestones;
   patch(entry.path, fields);
-  const dest = entry.path.startsWith(paths(root).archiveLoops) ? entry.path : moveToArchive(entry.path, paths(root).archiveLoops);
+  const dest = entry.path.startsWith(paths(root).archiveFlux) ? entry.path : moveToArchive(entry.path, paths(root).archiveFlux);
   return { id: entry.id, path: dest };
 }
 
@@ -274,7 +274,7 @@ function resolveGeneration(root: string, needle: string): Entry {
   return resolveByKind(root, "generation", needle);
 }
 
-function resolveByKind(root: string, kind: "generation" | "loop", needle: string): Entry {
+function resolveByKind(root: string, kind: "generation" | "flux", needle: string): Entry {
   const candidates = collect(findEntry(root, kind, needle));
   const exact = candidates.find((entry) => entry.id === needle);
   if (exact) return exact;

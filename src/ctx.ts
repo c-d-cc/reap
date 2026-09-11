@@ -60,9 +60,9 @@ function status(root: string, asked?: string): string {
     if (started.length > 0) lines.push(`  ${started.join(t(root, "ctx.started_join"))}`);
   }
 
-  // loop는 여럿이 열리고 세션에 바인딩되지 않는다 — 열린 것 전부를 이름으로 낸다
-  for (const loop of openLoops(root)) {
-    lines.push(t(root, "ctx.label.loop", { id: loop.id, title: title(loop), path: relative(root, loop.path) }));
+  // flux는 여럿이 열리고 세션에 바인딩되지 않는다 — 열린 것 전부를 이름으로 낸다
+  for (const flux of openFlux(root)) {
+    lines.push(t(root, "ctx.label.flux", { id: flux.id, title: title(flux), path: relative(root, flux.path) }));
   }
 
   const memory = nonEmpty(markdown(p.memory));
@@ -105,9 +105,9 @@ function openGeneration(root: string): Entry | null {
   return entry && entry.data.status !== "closed" ? entry : null;
 }
 
-function openLoops(root: string): Entry[] {
-  const dir = paths(root).loops;
-  return listEntries(root, "loop").filter((e) => e.dir === dir && e.data.status !== "closed");
+function openFlux(root: string): Entry[] {
+  const dir = paths(root).flux;
+  return listEntries(root, "flux").filter((e) => e.dir === dir && e.data.status !== "closed");
 }
 
 function ideaCounts(root: string): string {

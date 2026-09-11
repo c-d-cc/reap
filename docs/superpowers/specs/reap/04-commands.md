@@ -9,7 +9,7 @@ REAP의 CLI는 두 종류의 일만 한다: **만들기(`make`)와 표시하기(
 reap --version
 reap init [--force] | reap init --check     # --check: 씨앗 그대로인 지식 파일을 보고만 한다
 
-reap make <kind> [options]        # generation | loop | milestone | backlog | idea | hook | plan-source
+reap make <kind> [options]        # generation | flux | milestone | backlog | idea | hook | plan-source
 reap mark <kind> <id> [flags]     # frontmatter의 확정적 필드 갱신
 
 reap seq [type|id]                # id 레지스트리 조회
@@ -30,17 +30,17 @@ reap orch claim | release | barrier | roster | status
 reap make generation --milestone <ms-id> --title "<t>" [--slug <s>]
 reap make generation --backlog  <bk-id> --title "<t>" [--slug <s>]
 reap make generation --fix  --title "<t>" [--slug <s>]
-reap make loop --type plan|design|uiux|idea --title "<t>" [--slug <s>] [--from <id|ps-id:path>] [--ref <ps-id>:<path>]
-reap make milestone --title "<t>" [--slug <s>] [--from <loop-id>] [--ref <ps-id>:<path>] [--focus]
+reap make flux --type plan|design|uiux|idea --title "<t>" [--slug <s>] [--from <id|ps-id:path>] [--ref <ps-id>:<path>]
+reap make milestone --title "<t>" [--slug <s>] [--from <flux-id>] [--ref <ps-id>:<path>] [--focus]
 reap make backlog --type <t> --title "<t>" [--slug <s>] [--from <id>]
 reap make idea --kind research|freememo|file --title "<t>" [--slug <s>]
 reap make hook --event <e> --name <n> [--type md|sh] [--condition <c>] [--order <n>]
 reap make plan-source --root <path> --role "<r>" [--slug <s>]
 ```
 
-`make generation`이 받는 것은 **유형이거나 근거**다. `--fix`는 유형이고 **홀로 온다**. `--milestone`과 `--backlog`는 exec의 근거이고 **하나 이상이면 되며 둘을 함께 줄 수 있다** — milestone이 갈래를 주고 backlog 항목이 그 안의 구체적 일을 준다. 무엇을 고르는지는 `02-flow.md`의 "exec의 근거는 둘이다"가 정한다. 유형도 근거도 없으면 거부한다 — 짐작할 것이 아니다. **이미 `consumed`인 backlog는 거부한다.** `--plan`은 없다 — 새 의도를 만드는 일은 generation이 아니라 `make loop`다. 기존 `gen-NNNN-plan` 기록은 역사로 남고 형식만 인식한다.
+`make generation`이 받는 것은 **유형이거나 근거**다. `--fix`는 유형이고 **홀로 온다**. `--milestone`과 `--backlog`는 exec의 근거이고 **하나 이상이면 되며 둘을 함께 줄 수 있다** — milestone이 갈래를 주고 backlog 항목이 그 안의 구체적 일을 준다. 무엇을 고르는지는 `02-flow.md`의 "exec의 근거는 둘이다"가 정한다. 유형도 근거도 없으면 거부한다 — 짐작할 것이 아니다. **이미 `consumed`인 backlog는 거부한다.** `--plan`은 없다 — 새 의도를 만드는 일은 generation이 아니라 `make flux`다. 기존 `gen-NNNN-plan` 기록은 역사로 남고 형식만 인식한다.
 
-**`make loop`는 유형이 필수이고 근거는 선택이다.** `--from`은 출처(generation·앞 loop·`<ps-id>:<path>`)이지 권한이 아니라 검사하지 않는다. `.reap/life/loops/<loop-id>-<slug>.md`에 놓고 `sequence/loop.md`에 행을 붙인다. 세션에 바인딩하지 않는다 — loop는 여럿이 나란히 열린다.
+**`make flux`는 유형이 필수이고 근거는 선택이다.** `--from`은 출처(generation·앞 flux·`<ps-id>:<path>`)이지 권한이 아니라 검사하지 않는다. `.reap/life/flux/<flux-id>-<slug>.md`에 놓고 `sequence/flux.md`에 행을 붙인다. 세션에 바인딩하지 않는다 — flux는 여럿이 나란히 열린다.
 
 `--slug`를 주지 않으면 제목에서 만들어낸다. 제목이 없는 `plan-source`는 `--root`의 디렉토리 이름에서 만든다. slug는 이름표일 뿐이므로 나중에 디렉토리를 손으로 바꿔도 참조는 깨지지 않는다.
 
@@ -54,8 +54,8 @@ reap make plan-source --root <path> --role "<r>" [--slug <s>]
 reap mark generation <gen-id> --closed      # closedAt, endCommit(현재 HEAD), status
 reap mark generation <gen-id> --aborted     # 기록 삭제
 reap mark generation <gen-id> --archived    # archive/generations/로 이동 (status는 건드리지 않는다)
-reap mark loop <loop-id> --closed [--milestone <ms-id>]...  # closedAt, milestones, status. 닫으면서 archive/loops/로 옮긴다
-reap mark loop <loop-id> --aborted     # 기록 삭제
+reap mark flux <flux-id> --closed [--milestone <ms-id>]...  # closedAt, milestones, status. 닫으면서 archive/flux/로 옮긴다
+reap mark flux <flux-id> --aborted     # 기록 삭제
 reap mark milestone <ms-id> --focus
 reap mark milestone <ms-id> --closed        # closedAt, status; archive/milestones/로 이동
 reap mark backlog <bk-id> --consumed [--by <gen-id>]  # status와 consumedBy만. 위치는 그대로
