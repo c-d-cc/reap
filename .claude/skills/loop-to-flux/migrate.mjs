@@ -3,13 +3,20 @@
 import { existsSync, readFileSync, readdirSync, renameSync, rmSync, statSync, writeFileSync, mkdirSync, rmdirSync } from "node:fs";
 import { join, dirname } from "node:path";
 
-const root = process.argv.find((a) => a.startsWith("--root="))?.slice(7) ?? process.cwd();
-const apply = process.argv.includes("--apply");
+// --root <경로>와 --root=<경로> 둘 다 받는다. 한쪽만 받으면 다른 쪽이 조용히 cwd를 migrate한다 —
+// 이 스크립트는 reap 리포 안에 살기 때문에 그 cwd가 REAP 자신일 수 있다
+const argv = process.argv.slice(2);
+const at = argv.indexOf("--root");
+const root = at >= 0 ? argv[at + 1] : argv.find((a) => a.startsWith("--root="))?.slice(7) ?? process.cwd();
+if (at >= 0 && (!root || root.startsWith("--"))) { console.error("--root 뒤에 경로가 없다."); process.exit(1); }
+const apply = argv.includes("--apply");
 const reap = join(root, ".reap");
 if (!existsSync(reap)) { console.error(`.reap/ 가 없다: ${root}`); process.exit(1); }
 
 /** id는 참조의 키다. 이것을 안 바꾸면 가리키던 것이 전부 끊긴 참조가 된다. */
-const ID = /\bloop-(\d{4,}-(?:plan|design|uiux|idea))\b/g;
+// 유형이 붙지 않은 `loop-0003` 꼴도 산문에 널려 있다. 좁게 잡으면 그것들이 그대로 남아
+// 끊긴 참조가 되는데, doctor는 그것을 id로 인정하지 않아 잡지도 못한다(아래 주석)
+const ID = /\bloop-(\d{4,}(?:-(?:plan|design|uiux|idea))?)\b/g;
 
 function rewrite(text) {
   return text
@@ -20,6 +27,9 @@ function rewrite(text) {
     .replace(/reap:sequence\(loop\)/g, "reap:sequence(flux)")
     .replace(/\bmake loop\b/g, "make flux")
     .replace(/\bmark loop\b/g, "mark flux")
+    // 조사가 앞 낱말의 받침을 따른다 — loop(받침 있음)에서 flux(받침 없음)로 바뀌면 조사도 바뀐다
+    .replace(/`make flux`으로/g, "`make flux`로")
+    .replace(/`mark flux`으로/g, "`mark flux`로")
     .replace(/\/reap:loop\b/g, "/reap:flux");
 }
 
