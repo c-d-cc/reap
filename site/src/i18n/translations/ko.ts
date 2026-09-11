@@ -1768,7 +1768,7 @@ workspaceId: ba44307f94a6`,
       {
         name: "complete",
         when: "세대를 닫을 때, 작업을 마무리할 때.",
-        what: "위임된 세대면 Outcome·Dead Ends를 먼저 검토하고, 커밋 규칙(작업 트리가 비어 있고 새 커밋이 있는가)을 확인한 뒤 기록과 handoff.md를 정리해 닫는다.",
+        what: "위임된 세대면 Outcome·Dead Ends를 먼저 검토하고, 커밋 규칙(작업 트리가 비어 있고 새 커밋이 있는가)을 확인한다. 매 세션 주입되는 genome과 environment/summary.md가 아직 맞는지 점검한 뒤 기록과 handoff.md를 정리해 닫는다.",
         notCalled: "커밋 규칙이 안 맞으면 여기서 멈춘다. 커밋 없이 닫지 않는다.",
       },
       {

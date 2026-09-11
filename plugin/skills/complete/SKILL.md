@@ -59,6 +59,28 @@ If `tests/` is a submodule, stage its pointer too (`git add tests`) before check
 
 How to write each part is [init §3.2](../init/SKILL.md) — the same table that filled it the first time. Rewrite only the part that went stale; don't retouch the rest. A cosmetic change (formatting, a comment, a test-only edit) isn't a trigger. Put one line in the Outcome either way — "summary.md: 갱신 (structure)" or "summary.md: 해당 없음".
 
+## Before closing: does `genome/` still hold?
+
+`genome/` is injected every session too, and stale genome is worse than a stale `summary.md`. `summary.md` says where things are; `genome/` says **how to behave here**. A session that starts from a wrong premise has no way to notice it's wrong.
+
+The judgment is one question, and `evolution.md` already owns it: **would a fresh agent next session do the work right without knowing this change?** If no, the genome went stale. Same rule as the table above — **any "yes" means rewrite that part now**, in this generation.
+
+| Did this generation… | Where in genome |
+|---|---|
+| change the stack, the runtime, or how the thing ships | `application.md` — what's being made |
+| retire a library, a service, or a layer the genome still names | `application.md` — what's being made |
+| change a working convention (how to test, what commits look like, where user-facing strings live) | `application.md` — working rules |
+| move where a norm lives — into a plan source, out of genome, into `map.md` | `application.md` — who owns the canon |
+| leave a lesson about how the AI should behave on this project | `evolution.md` |
+
+How to write each part is [init §3.3·§3.4](../init/SKILL.md) — the same sections that filled it the first time. Rewrite only the part that went stale. A cosmetic change isn't a trigger.
+
+**`invariants.md` is the human's, always.** Don't edit it, don't propose edits inside the record. If this generation turned up something that should be an invariant, say it to the human and leave it there.
+
+**This is where `--type genome` backlog gets consumed.** A genome finding that comes up mid-generation isn't applied on the spot — it goes to `make backlog --type genome` so genome doesn't shift under running work. Closing is when it lands: reflect the open ones now, then `reap mark backlog <id> --consumed`. **Nothing else consumes that type** — left alone it just accumulates, which is the failure this step exists to stop.
+
+Put one line in the Outcome either way — "genome: 갱신 (application)" or "genome: 해당 없음".
+
 ## Before closing: independent verification
 
 A generation that **changed behavior** — source, plugin skills, scripts, anything the next session will run — gets a second pair of eyes before it closes. The author of a change is the worst judge of what it missed; that's what v0.17's evaluator agent was for, and this is its place in v0.18.

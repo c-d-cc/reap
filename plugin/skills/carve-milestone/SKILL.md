@@ -92,3 +92,5 @@ There's a fixed order.
 That's the whole sequence. The generations aren't part of it — each one went to `archive/generations/` the moment it closed, so there's nothing left in `life/` to sort through. (There used to be a `cleanup` step here that judged which closed generations still had "reference value"; the judgment never held up, and what the next session needs is in `handoff.md`, not in old records.)
 
 Before closing, **check that everything this milestone settled has been reflected.** What isn't reflected goes down to archive along with `handoff.md`, and becomes undecided.
+
+**Sweep `genome/` once here, against the milestone rather than any one generation.** Each generation checked it at its own close, but a structural change spread over several generations goes stale in a way no single generation could see — the API layer moves out one route at a time, and only at the end does `application.md` name a framework nothing uses any more. Read `application.md` and `evolution.md` against **what this milestone actually did**, and fix what reads wrong before the directory goes to archive. `invariants.md` stays the human's.
