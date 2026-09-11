@@ -17,6 +17,7 @@ allow_path() {
     .claude/skills/loop-to-flux/*) return 0 ;;   # 옛 이름을 부르는 것이 그 스킬의 일이다
     *loop-to-flux*)                return 0 ;;   # 개명 자체를 기록한 backlog·세대 기록
     *preflux-layout*)              return 0 ;;   # 내린 항목. 사람의 판정을 그대로 인용한다
+    *ralph*)                       return 0 ;;   # 외부 기법 ralph loop과 harness의 /loop — 그 낱말의 임자는 저쪽이다
     scripts/check-freed-words.sh)  return 0 ;;   # 이 파일
     *) return 1 ;;
   esac
