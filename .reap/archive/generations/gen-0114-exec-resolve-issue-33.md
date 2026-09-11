@@ -6,7 +6,9 @@ backlog: bk-b65f03
 title: "resolve #33: complete에 genome 갱신 절차 추가"
 startedAt: 2026-09-11T01:33:33Z
 startCommit: 761458c
-status: open
+status: closed
+closedAt: 2026-09-11T01:46:36Z
+endCommit: c7e4a4b
 ---
 
 ## Intent
