@@ -6,7 +6,9 @@ backlog: bk-0ec03e
 title: VitePress 캐시 14개를 추적에서 뺀다
 startedAt: 2026-09-11T21:59:21Z
 startCommit: 036c707
-status: open
+status: closed
+closedAt: 2026-09-11T22:00:29Z
+endCommit: ccf384e
 ---
 
 ## Intent

@@ -4,7 +4,8 @@ slug: vitepress-cache-tracked
 type: fix
 title: site/.vitepress/cache 14개가 커밋돼 있다 — VitePress는 기각된 도구다
 createdAt: 2026-09-11T21:42:08Z
-status: open
+status: consumed
+consumedBy: gen-0116-exec
 ---
 
 `git ls-files site/.vitepress` 가 14개를 낸다 — `cache/deps/` 아래 VitePress가 만든 의존성 번들과 소스맵이다.
