@@ -43,9 +43,13 @@ if [ -x "$bin" ]; then
   for verb in $("$bin" 2>/dev/null | awk '/^  [a-z]/{print $1}' | sort -u); do
     check_in "CLI verb" "$verb" site
   done
+  # make and mark carry the surface in their second word, so the verb alone misses a new one
+  for pair in $("$bin" 2>/dev/null | awk '/^  (make|mark) [a-z]/{print $1 "-" $2}' | sort -u); do
+    check_in "CLI command" "${pair/-/ }" site
+  done
 else
   echo "note: $bin not found — CLI verbs not checked (build first, or set REAP_BIN)"
 fi
 
-[ $fail -eq 0 ] && echo "ok: every skill is named in ${#docs[@]} documents; every hook event and CLI verb in ${#site[@]} site locale(s)"
+[ $fail -eq 0 ] && echo "ok: every skill is named in ${#docs[@]} documents; every hook event, CLI verb and make/mark command in ${#site[@]} site locale(s)"
 exit $fail

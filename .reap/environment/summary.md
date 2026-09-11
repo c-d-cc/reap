@@ -7,14 +7,14 @@
   map.md                이 디렉토리가 무엇을 어디에 두는지 (씨앗)
   plan/                 sources.yml · conventions/ · loops/ (기획 축의 사이클, 3단 밖)
   vision/               하려는 것 — memory · milestones
-  life/                 하는 중 — generations · backlog
-  archive/              끝난 것 — generations · milestones · backlog
+  life/                 하는 중 — generations · backlog · loops
+  archive/              끝난 것 — generations · milestones · backlog · loops · idea
 docs/superpowers/specs/reap/   plan source ps-4f2a91 (설계 문서 10개)
-plugin/                 skill 9종(evolve·carve-milestone·complete·cleanup·loop·interview·init·report-issue·orchestrate) + 어휘 문서 + SessionStart 훅
-                        spec의 9종이 전부 있다
+plugin/                 skill 10종(evolve·carve-milestone·complete·loop·interview·init·report-issue·orchestrate·help·migrate) + shared 어휘 문서 + SessionStart 훅
 src/
   cli.ts        엔트리, 인자 파싱, 디스패치, 출력 규약 (--version · init[--check] · make · mark · bind · ctx · plan · seq · carrier · doctor · index · orch)
-  store.ts      .reap/ 레이아웃 — 루트 탐색, 경로, config, 세션, workspace-id
+  store.ts      .reap/ 레이아웃 — 루트 탐색, 경로, config, 세션, workspace-id.
+                `.session`의 sessionId는 세션이 아니라 리포 경로의 sha256 앞 12자리다(lessons)
   git.ts        git 상태 조회 (외부 의존의 유일한 창구)
   id.ts         id 형식과 append-only 레지스트리 — generation은 gen-NNNN-<type> 한 계열
   doc.ts        frontmatter, slug, 항목 목록과 찾기
@@ -37,13 +37,13 @@ tests/          <module>.test.ts · helpers.ts · hook.test.sh (셸) — submodu
 - 저장 레이아웃 3단 · 세대 id 한 계열(`gen-NNNN-<type>`) · `fix` 유형 · `cleanup` skill
 - **milestone 디렉토리에는 `milestone.md`·`handoff.md`·`tasks/`뿐이다.** `context.md`는 21세대 동안 0바이트여서, `decisions.md`는 spec 밖에 규범이 사는 둘째 자리를 만들어서 내렸다. 규범은 `05-knowledge.md`의 "결정 로그를 두지 않는다" 절
 - **frontmatter의 시간은 종류를 가리지 않고 초 단위 ISO다.** 예외는 sequence 레지스트리의 `createdAt` 칸 하나(날짜)
-- 명령은 `init` · `make`(loop·milestone·generation·backlog·idea·plan-source) · `mark`(loop·generation·backlog·milestone·idea) · `ctx` · `plan sources|convention` · `seq` · `carrier new|list` · `doctor`. spec이 약속한 `decide`는 **만들지 않기로 했고**, spec의 명령이 전부 있다. `index`는 이 리포에서 파일 26·심볼 173·해석률 99%
+- 명령은 `init` · `make`(loop·milestone·generation·backlog·idea·plan-source·hook) · `mark`(loop·generation·backlog·milestone·idea) · `ctx` · `plan sources|convention` · `seq` · `carrier new|list` · `doctor`. spec이 약속한 `decide`는 **만들지 않기로 했고**, spec의 명령이 전부 있다. `index`는 이 리포에서 파일 26·심볼 173·해석률 99%
 - **YAML 파서는 들이지 않는다.** `sources.yml`은 `Bun.YAML.parse`로 읽는다(Bun 1.3 내장). 쓰기는 손 형식이다 — `Bun.YAML.stringify`는 흐름 형식으로 내서 손으로 쓴 파일과 모양이 달라진다
 
 ## 빌드와 테스트
 
 ```bash
-bun test         # 177개
+bun test         # 243개
 ./tests/hook.test.sh   # 훅 스크립트 5종 (bun test가 돌리지 않는다)
 bun run typecheck   # tsc --noEmit
 bun run build       # bun build --compile → dist/reap (약 89.5MB — 문법 15개 28MB 포함)
