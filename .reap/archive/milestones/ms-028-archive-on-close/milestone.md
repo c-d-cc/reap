@@ -3,8 +3,9 @@ id: ms-028
 slug: archive-on-close
 title: 닫는 즉시 archive — generation·flux·backlog가 완료와 함께 옮겨진다, cleanup 은퇴
 from: flux-0004-plan
-status: open
+status: closed
 openedAt: 2026-09-05T08:32:28Z
+closedAt: 2026-09-12T03:00:30Z
 ---
 ## Background
 
@@ -28,3 +29,13 @@ openedAt: 2026-09-05T08:32:28Z
 1. CLI 세 이동 + 테스트 (tasks/1)
 2. skill·spec·map.md (tasks/2)
 3. 문서·사이트 + 이 리포 life 정리 (tasks/3)
+
+## Fitness (사람, 2026-09-12)
+
+- **상태 파악** — "더 명확해졌다. life/를 보면 열린 것만 있어서 지금 무엇이 진행 중인지 바로 보인다." 이 milestone이 노린 것이 그것이었다. 위치 이동을 판단에서 떼어낸 대가로 얻으려던 것이 실제로 얻어졌다
+- **cleanup 은퇴** — "닫힌 세대를 다시 찾아야 했던 적이 없다. handoff.md로 충분했다." 폐기의 근거였던 실측(닫힌 세대를 다시 읽은 경우는 전부 handoff를 거쳤다)이 은퇴 뒤에도 그대로 유지됐다. 되살릴 이유 없음
+- 미뤄진 답 없음 — `idea/research/`로 옮길 것이 없다
+
+## 닫으며 정리한 것
+
+세 task 뒤에도 `cleanup`을 부르는 서술이 넷 남아 있었다 — `entries.ts` 주석, spec `06-agent`의 종료 절차 3단, spec `03-storage`의 idea archive 주체, `environment/summary.md`의 증분 목록. 커밋 16cc500과 이 세대 밖 정리로 전부 새 규칙에 맞췄다.
