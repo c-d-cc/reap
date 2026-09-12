@@ -81,8 +81,9 @@ export function queryLatestVersion(): string | null {
 /**
  * Query the version published on the npm dist-tag `next`, if any.
  * Returns null on any failure (network, timeout, tag absent).
- * The 0.17.8 bridge reads this — v0.18 is published on `next`, never as
- * `latest`, so `queryLatestVersion` alone can no longer see an upgrade.
+ * Read by the 0.17.8 bridge, which assumed v0.18 would be published on `next`
+ * rather than as `latest`. That assumption is false and the bridge is retired
+ * (see `core/upgrade-bridge.ts`); no published version calls this.
  */
 export function queryNextVersion(): string | null {
   try {
@@ -477,7 +478,8 @@ export async function execute(): Promise<void> {
     minVersion: () => versions.minVersion,
   });
 
-  // 0.17.8 bridge: v0.18 lives on the `next` tag and never arrives by itself.
+  // 0.17.8 bridge (retired): assumed v0.18 would live on the `next` tag. It does
+  // not — v0.18 ships as `latest`, so this never produces an announcement.
   const announcement = upgradeAnnouncement(versions.next);
   if (announcement) console.error(announcement);
 

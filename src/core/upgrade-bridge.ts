@@ -1,9 +1,14 @@
 /**
- * 0.17.8 upgrade bridge (v018 milestone, "0.17.8 이행 다리").
+ * 0.17.8 upgrade bridge (v018 milestone, "0.17.8 이행 다리"). **RETIRED — never shipped.**
  *
- * v0.18 does not arrive via auto-update — it is published on the npm dist-tag
- * `next` while `latest` stays on the 0.17 line. This module owns the two
- * mechanisms that make that liveable:
+ * The premise below is false. v0.18 is published as `latest`, not on the `next`
+ * dist-tag, so `upgradeAnnouncement` never fires and neither does the agent
+ * install in `update.ts` that depends on it. 0.17.8 itself was retired by human
+ * decision on 2026-09-05 and is not tagged, published, or merged to main. The
+ * module is kept as a record of the attempt; nothing here reaches a user.
+ *
+ * What the module was built for, under the premise that v0.18 would ship on
+ * `next` while `latest` stayed on the 0.17 line:
  *
  * 1. A daily cache for the npm registry queries. `reap check-version` runs on
  *    every SessionStart and used to spend a measured 0.34–1.2s per session on

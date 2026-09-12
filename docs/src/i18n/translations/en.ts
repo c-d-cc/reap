@@ -1035,7 +1035,7 @@ commit:  1a2b3c4`,
     versions: [
       {
         version: "0.17.8",
-        notes: "**v0.18 is out on the npm `next` tag** — it will not arrive via auto-update. `reap update` installs a guided upgrade agent that walks you through installing v0.18 and migrating your project. **v0.18 speaks English by default**; set `language: ko` in `.reap/config.yml` for Korean. Version checks now run at most once a day, so sessions start faster.",
+        notes: "**This version was never published.** 0.17.8 was a bridge to v0.18, built on the assumption that v0.18 would ship on the npm `next` tag. v0.18 ships as `latest` instead, so the bridge reaches no one. Retired by human decision on 2026-09-05.",
       },
       {
         version: "0.17.7",

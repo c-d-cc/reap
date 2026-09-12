@@ -2,9 +2,9 @@
 
 ## v0.17.8
 ### en
-v0.18 is out on the npm `next` tag — it will not reach you through auto-update. Run `reap update` to install a guided upgrade agent, or stay on 0.17 for now. v0.18 speaks English by default; set `language: ko` in `.reap/config.yml` for Korean. Version checks now run at most once a day.
+This version was never published. 0.17.8 was a bridge to v0.18, built on the assumption that v0.18 would ship on the npm `next` tag. v0.18 ships as `latest` instead, so the bridge reaches no one. Retired by human decision on 2026-09-05.
 ### ko
-v0.18 이 npm `next` 태그로 나왔습니다 — 자동 업데이트로는 오지 않습니다. `reap update` 를 실행하면 안내를 도와주는 upgrade agent 가 설치됩니다. 아직 준비되지 않았다면 0.17 에 머무세요. v0.18 은 기본이 영어이며, `.reap/config.yml` 에 `language: ko` 를 두면 한국어로 씁니다. 버전 확인은 이제 하루 한 번만 실행됩니다.
+이 버전은 발행되지 않았습니다. 0.17.8 은 v0.18 이 npm `next` 태그로 나온다는 전제로 만든 이행 다리였습니다. v0.18 은 `latest` 로 나가므로 다리는 아무에게도 닿지 않으며, 2026-09-05 사람 결정으로 은퇴했습니다.
 
 ## v0.17.7
 ### en

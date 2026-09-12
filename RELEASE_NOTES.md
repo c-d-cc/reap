@@ -1,9 +1,8 @@
 ## What's New
 
-- **v0.18 is out — on the npm `next` tag, not `latest`.** It will not reach you through auto-update. Run `reap update` when you're ready: it installs a guided upgrade agent into `~/.claude/agents/` that walks you through installing v0.18 and migrating your project (`/reap:migrate`).
-- **v0.18 speaks English by default; set `language: ko` in `.reap/config.yml` for Korean.** Stay on the 0.17 line until you're ready — auto-update will not move you to 0.18 on its own.
-- **Version checks now run at most once a day** instead of on every session start, so sessions start faster.
-- No other CLI changes in this release.
+- **This version was never published.** 0.17.8 was built as a bridge to v0.18, on the assumption that v0.18 would ship on the npm `next` tag while `latest` stayed on the 0.17 line.
+- **v0.18 ships as `latest` instead**, so every mechanism in the bridge is unreachable. Retired by human decision on 2026-09-05.
+- The code is kept as a record. This version is not tagged, not published, and not merged to main.
 
 ---
 

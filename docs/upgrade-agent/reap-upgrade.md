@@ -3,9 +3,22 @@ name: reap-upgrade
 description: Guided upgrade from REAP v0.17 to v0.18. Installed into ~/.claude/agents/ by `reap update` when v0.18 is available on the npm `next` tag. Verifies preconditions, installs v0.18, then hands the project migration to the v0.18 plugin's migrate skill.
 ---
 
-<!-- This file is fetched by 0.17.8's `reap update` from main
-     (raw.githubusercontent.com/c-d-cc/reap/main/docs/upgrade-agent/reap-upgrade.md).
-     It must be present on main before 0.17.8 is published. -->
+<!-- RETIRED — do not follow these steps.
+
+     This file was fetched by 0.17.8's `reap update` from main. 0.17.8 was
+     retired by human decision on 2026-09-05 and never published, so nothing
+     fetches this and it was never placed on main (the URL 404s).
+
+     Four things below are wrong for v0.18 as it actually ships:
+       1. The frontmatter premise — v0.18 is on `latest`, not the `next` tag
+       2. Step 2 installs `@c-d-cc/reap@next` — that tag does not exist
+       3. Step 3 has the user type the marketplace and plugin commands by hand —
+          v0.18's single install path is `reap setup`, which does both
+       4. Step 3 expects 10 `/reap:*` skills — eight are user-invocable; two
+          (`complete`, `carve-milestone`) are hidden
+
+     The real v0.17 to v0.18 path is: `npm i -g @c-d-cc/reap`, then `reap setup`,
+     then `/reap:migrate` in each project. v0.18 owns it. -->
 
 # REAP v0.17 → v0.18 upgrade agent
 

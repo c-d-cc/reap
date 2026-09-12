@@ -342,8 +342,9 @@ export async function execute(
     updated.push(`.gitignore: .reap/.index/ (${ignoreAction})`);
   }
 
-  // 7. 0.17.8 bridge: when v0.18 sits on the npm `next` tag, install the
-  //    guided upgrade agent and say so. On any failure print the manual path
+  // 7. 0.17.8 bridge (retired): assumed v0.18 would sit on the npm `next` tag,
+  //    in which case install the guided upgrade agent and say so. v0.18 ships as
+  //    `latest`, so the announcement never fires and this block never runs. On any failure print the manual path
   //    and change nothing — no half-upgraded state (design § 9). The registry
   //    is read through the same daily cache the session hook uses.
   try {
