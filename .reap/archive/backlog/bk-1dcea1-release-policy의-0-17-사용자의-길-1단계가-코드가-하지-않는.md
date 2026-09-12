@@ -4,7 +4,8 @@ slug: release-policy의-0-17-사용자의-길-1단계가-코드가-하지-않는
 type: fix
 title: release-policy의 '0.17 사용자의 길' 1단계가 코드가 하지 않는 일을 사실로 적고 있다
 createdAt: 2026-09-12T04:16:14Z
-status: open
+status: consumed
+consumedBy: gen-0120-exec
 ---
 
 `docs/release-policy.md`의 "0.17 사용자의 길" 1번은 "세션 시작 시 위 blocked 메시지를 본다"고 적는다. 사용자는 그것을 보지 못한다.
