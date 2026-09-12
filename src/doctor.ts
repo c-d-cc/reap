@@ -49,6 +49,9 @@ export function diagnose(root: string): Report {
     // 내어 사실을 가린다. 섞인 저장소에는 진짜 v0.18 항목이 있으므로 계속 본다.
     if (layout.layout === "v017") return { defects, notes };
   }
+  if (layout.layout === "unknown") {
+    defects.push({ kind: t(root, "doctor.kind.unknown_layout"), detail: t(root, "doctor.detail.unknown_layout") });
+  }
 
   const all: Record<Kind, Entry[]> = {
     milestone: listEntries(root, "milestone"),

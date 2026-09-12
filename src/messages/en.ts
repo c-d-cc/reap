@@ -181,6 +181,8 @@ export const en = {
   "doctor.kind.mixed_layout": "v0.17 and v0.18 layouts mixed",
   "doctor.kind.plugin_missing": "reap plugin not installed",
   "doctor.detail.plugin_missing": "no reap@… entry in ~/.claude/settings.json enabledPlugins — the skills and the status line need it. Run reap setup",
+  "doctor.kind.unknown_layout": "unrecognizable .reap/",
+  "doctor.detail.unknown_layout": "neither the v0.17 nor the v0.18 markers are present — a v0.15/v0.16 store, or one that lost its seeds. reap init --force restores what is missing; if this came from an older REAP, call /reap:migrate.",
   "doctor.kind.id_format": "invalid id format",
   "doctor.kind.id_duplicate": "duplicate id",
   "doctor.kind.id_unregistered": "id missing from registry",

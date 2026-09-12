@@ -129,7 +129,7 @@ export function paths(root: string): Paths {
   };
 }
 
-export type Layout = "v018" | "v017" | "mixed" | "none";
+export type Layout = "v018" | "v017" | "mixed" | "none" | "unknown";
 export type LayoutReport = { layout: Layout; v017: string[]; v018: string[] };
 
 /**
@@ -143,11 +143,18 @@ export type LayoutReport = { layout: Layout; v017: string[]; v018: string[] };
  * `vision/milestones/`는 v0.17에도 있다. 표식으로 쓰면 멀쩡한 v0.17 저장소가 mixed가 된다.
  *
  * `plugin/skills/migrate/scripts/detect-version.sh`가 같은 판정을 한다 —
- * 기준이 갈리지 않게 두 곳의 표식 목록을 함께 고친다. **한 가지만 다르다**: 스크립트는
+ * 기준이 갈리지 않게 두 곳의 표식 목록을 함께 고친다. `tests/v017-layout.test.ts`가
+ * 두 판정이 어긋나지 않는지 픽스처로 대조한다. **다른 곳은 하나뿐이다**: 스크립트는
  * `hooks/`의 `onXxx` 파일명을 v0.17 표식으로 세고 여기서는 안 센다. 스크립트는 v0.17로
  * 추정되는 저장소를 판정하지만 여기는 v0.18로 추정되는 저장소를 판정하고, 그 자리에서
  * 남은 옛 훅 파일 하나는 이주 사안이 아니라 훅 결함이다 — `doctor.kind.hook_unknown_event`가
  * 이미 맡는다. 표식으로 세면 멀쩡한 v0.18 프로젝트의 쓰기가 파일 하나 때문에 막힌다.
+ * 스크립트 쪽은 그 경우 `mixed`로 가 사람을 부르는데, 보수적인 쪽이라 그대로 둔다.
+ *
+ * **`unknown`은 쓰기를 막지 않는다.** 양쪽 표식이 하나도 없는 `.reap/`에는 섞일 v0.17
+ * 데이터가 없다 — 막을 것이 없고, 막으면 씨앗을 지운 저장소가 복구 불능이 된다.
+ * 대신 `doctor`가 결함으로 보고한다. v0.15·v0.16·v0.17이 전부 `lineage/`를 만들므로
+ * 현실의 `unknown`은 손상되었거나 손으로 잘라낸 저장소다.
  */
 export function detectLayout(root: string): LayoutReport {
   const reap = join(root, ".reap");
@@ -166,7 +173,8 @@ export function detectLayout(root: string): LayoutReport {
   if (namesIn(join(reap, "life", "flux")).length > 0) v018.push("life/flux/");
   if (isFile(join(reap, "plan", "sources.yml"))) v018.push("plan/sources.yml");
 
-  const layout: Layout = v017.length > 0 && v018.length > 0 ? "mixed" : v017.length > 0 ? "v017" : "v018";
+  const layout: Layout =
+    v017.length > 0 && v018.length > 0 ? "mixed" : v017.length > 0 ? "v017" : v018.length > 0 ? "v018" : "unknown";
   return { layout, v017, v018 };
 }
 

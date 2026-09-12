@@ -183,6 +183,8 @@ export const ko = {
   "doctor.kind.mixed_layout": "v0.17·v0.18 구조 섞임",
   "doctor.kind.plugin_missing": "reap 플러그인 미설치",
   "doctor.detail.plugin_missing": "~/.claude/settings.json enabledPlugins에 reap@… 항목이 없다 — skill과 상태 줄이 그것에 기댄다. reap setup을 실행",
+  "doctor.kind.unknown_layout": "알아볼 수 없는 .reap/",
+  "doctor.detail.unknown_layout": "v0.17 표식도 v0.18 표식도 없다 — v0.15·v0.16 저장소이거나 씨앗을 잃은 것이다. reap init --force가 빠진 것을 채우고, 옛 REAP에서 온 것이면 /reap:migrate를 부른다.",
   "doctor.kind.id_format": "id 형식",
   "doctor.kind.id_duplicate": "id 중복",
   "doctor.kind.id_unregistered": "레지스트리에 없는 id",

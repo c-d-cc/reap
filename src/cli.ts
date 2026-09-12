@@ -520,6 +520,16 @@ function timestamp(): string {
 function init(cwd: string, force: boolean): Result {
   const root = resolve(cwd);
   const p = paths(root);
+
+  // v0.17 저장소 위에서는 --force도 열어주지 않는다. 열어주면 DIRS와 씨앗이 그 저장소에
+  // 그대로 쓰여 이 가드가 막으려던 섞임을 init이 손수 만든다. migrate는 5/8에서,
+  // 즉 4/8의 git mv로 .reap/이 비워진 뒤에 init을 부르므로 이주는 이 가드에 걸리지 않는다.
+  const layout = detectLayout(root);
+  if (layout.layout === "v017" || layout.layout === "mixed") {
+    const key = layout.layout === "v017" ? "store.v017_layout" : "store.mixed_layout";
+    return { ok: false, message: t(root, key, { markers: layout.v017.join(" "), v018: layout.v018.join(" ") }) };
+  }
+
   if (existsSync(p.reap) && !force) {
     return {
       ok: false,
