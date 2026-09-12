@@ -216,7 +216,7 @@ export function markBacklog(root: string, needle: string, flag: "consumed" | "ar
 /**
  * `--focus`는 초점을 **옮긴다**(`focusOn`). `--closed`는 상태를 찍고 디렉토리째
  * `archive/milestones/`로 옮긴다 — 파일별로 옮기면 나중에 생긴 파일이 빠진다.
- * **세대는 따라가지 않는다.** 그것은 `cleanup` skill이 `mark generation --archived`로 따로 내린다.
+ * **세대는 따라가지 않는다.** 세대는 각자 닫힐 때 이미 `archive/generations/`로 갔다.
  */
 export function markMilestone(root: string, needle: string, flag: "focus" | "closed", now: string): Made {
   const entry = resolveMilestone(root, needle);

@@ -39,7 +39,7 @@
     flux/
       <flux-id>-<slug>.md  닫힌 flux 전부
     idea/
-      research/ · freememo/ · files/   cleanup이 내린 것
+      research/ · freememo/ · files/   `mark idea --archived`로 내린 것
   genome/
     application.md      제품 정체성, 아키텍처
     evolution.md        AI 행동 규칙
