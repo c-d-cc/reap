@@ -1967,11 +1967,11 @@ reap orch status [--topic <t>]`,
     title: "v0.17에서 Migration",
     breadcrumb: "기타",
     description: "v0.17 프로젝트를 v0.18 구조로 옮깁니다. 원본은 .reap-v0_17/에 그대로 보존됩니다.",
-    intro: "v0.17.7 이하에서는 세션 시작 시 버전 검사가 0.18을 보고 자동 갱신 대신 설치 명령을 안내합니다. 거기서부터 사람이 할 일은 셋입니다.",
-    updateCode: `npm i -g @c-d-cc/reap   # 안내받은 명령 — v0.18 CLI
+    intro: "v0.17은 스스로 v0.18로 올라가지 않고, 세션 안에서 v0.18이 나왔다고 알려주지도 않습니다. v0.17.7 이하를 쓰고 있다면 시작은 사람의 손이고, 할 일은 셋입니다.",
+    updateCode: `npm i -g @c-d-cc/reap   # v0.18 CLI
 reap setup              # 플러그인 마켓플레이스 등록과 설치
 /reap:migrate           # 새 Claude Code 세션에서, 프로젝트마다`,
-    handoffDesc: "옛 세션 훅은 이제 v0.18 CLI를 부르게 되는데, CLI가 같은 세 단계를 안내로 답합니다. 그 뒤는 migrate skill이 진행하고, 사람은 동의를 묻는 지점에서만 답하면 됩니다.",
+    handoffDesc: "이주 전까지 v0.18은 옛 .reap/을 알아보고 거기에 쓰는 대신 그 사실을 말합니다. ctx와 doctor가 이 길을 가리키고 make·mark·init은 멈추므로, 이주를 잊은 채 작업해도 두 구조가 섞이지 않습니다. 옛 세션 훅도 이제 v0.18 CLI를 부르게 되는데 CLI가 같은 단계를 안내로 답합니다. 그 뒤는 migrate skill이 진행하고, 사람은 동의를 묻는 지점에서만 답하면 됩니다.",
     processTitle: "시작하면 일어나는 일",
     processDesc1: "먼저 이 프로젝트가 정말 v0.17 구조인지 표지 파일로 판정하고, 커밋되지 않은 변경이나 열린 generation이 있으면 거기서 멈춥니다. 그다음 옮길 분량(memory·lineage·backlog·설계 문서의 수)과 토큰 사용량이 클 수 있다는 점, 원본을 건드리지 않는다는 약속을 보여 주고 명시적인 동의를 받습니다.",
     processDesc2: "동의하면 원본 .reap/를 .reap-v0_17/로 이름만 바꿔 두고, 새 .reap/를 세운 뒤 subagent가 데이터를 옮깁니다. 언어 설정 같은 config 값은 이어받고, 옛 memory에서 교훈을 골라 lessons에, 진행 중이던 작업은 milestone과 backlog로, 기획 문서는 plan으로 등록합니다. 이 과정에서 agent가 알아서 판단하는 것이 몇 가지 있습니다 — 이미 끝난 backlog 항목은 다시 열지 않고, 서로를 링크하는 설계 문서군은 링크가 깨지지 않게 옮기고, genome에 남은 v0.17 절차 어휘는 v0.18 것으로 바꿉니다.",
@@ -2025,10 +2025,10 @@ reap setup              # 플러그인 마켓플레이스 등록과 설치
       "status/config/check-version/uninstall 명령",
     ],
     comingTitle: "v0.17에서 왔다면",
-    comingDesc: "v0.17.7 이하는 세션 시작 시 버전 검사가 자동 갱신 대신 npm i -g @c-d-cc/reap를 안내한다. 설치 뒤 reap setup으로 플러그인을 넣고 새 세션에서 /reap:migrate를 부른다. 원본 데이터는 .reap-v0_17/에 그대로 보존된다.",
+    comingDesc: "v0.17은 스스로 올라오지 않고 세션 안에서 v0.18을 알리지도 않는다. npm i -g @c-d-cc/reap를 직접 치고, reap setup으로 플러그인을 넣고, 새 세션에서 /reap:migrate를 부른다. 이주 전까지 v0.18은 옛 .reap/을 알아보고 거기에 쓰지 않는다. 원본 데이터는 .reap-v0_17/에 그대로 보존된다.",
     goodToKnowTitle: "알아둘 것",
     goodToKnow: [
-      "설치는 npm i -g @c-d-cc/reap 하나다. 플러그인은 reap setup이 대신 설치한다. 0.17 이하는 자동으로 올라오지 않고 안내만 받는다",
+      "설치는 npm i -g @c-d-cc/reap 하나다. 플러그인은 reap setup이 대신 설치한다. 0.17 이하는 자동으로 올라오지 않고 알림도 받지 않는다 — 올리는 것은 사용자가 시작한다",
       "기본은 en이다. .reap/config.yml에 config.language: ko를 두면 CLI 출력이 한국어가 된다",
     ],
   },

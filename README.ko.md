@@ -39,7 +39,16 @@ reap --version
 
 ## v0.17에서 왔다면
 
-v0.17.7 이하에서는 세션 시작 시 버전 검사가 0.18을 보고 자동 갱신 대신 `Breaking change detected … Run: npm i -g @c-d-cc/reap`를 찍는다. 그 명령을 실행하고 `reap setup`을 친 뒤 새 Claude Code 세션을 열어 프로젝트마다 `/reap:migrate`를 부른다 — 옛 세션 훅은 이제 v0.18 CLI를 부르게 되는데, CLI가 같은 세 단계를 안내로 답한다. `migrate` skill이 8단계로 데이터를 옮기고, 원본은 `.reap-v0_17/`에 그대로 보존한다 — 되돌릴 수 있다.
+v0.17은 스스로 v0.18로 올라가지 않고, 세션 안에서 v0.18이 나왔다고 알려주지도 않는다. v0.17.7 이하를 쓰고 있다면 시작은 사람의 손이다.
+
+```bash
+npm i -g @c-d-cc/reap
+reap setup
+```
+
+그다음 새 Claude Code 세션을 열어 프로젝트마다 `/reap:migrate`를 부른다. 이주 전까지 v0.18은 옛 `.reap/`을 알아보고 거기에 쓰는 대신 그 사실을 말한다 — `ctx`와 `doctor`가 이 길을 가리키고 `make`·`mark`·`init`은 멈춘다. `migrate` skill이 8단계로 데이터를 옮기고, 원본은 `.reap-v0_17/`에 그대로 보존한다 — 되돌릴 수 있다.
+
+v0.17 슬래시 명령은 지울 때까지 그대로 남고, 옛 세션 훅은 이제 v0.18 CLI를 부르게 되는데 CLI가 같은 단계를 안내로 답한다.
 
 ### 언어
 

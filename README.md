@@ -39,7 +39,16 @@ opens a generation. When the work is done, the agent closes it — you don't cal
 
 ## Coming from v0.17
 
-On v0.17.7 and below, the session-start version check sees 0.18 and prints `Breaking change detected … Run: npm i -g @c-d-cc/reap` instead of upgrading by itself. Run that command, then `reap setup`, open a new Claude Code session, and call `/reap:migrate` in each project — the old session hooks now reach the v0.18 CLI, which answers them with those same three steps. The migrate skill moves your data over in eight steps and keeps the original intact under `.reap-v0_17/` — reversible at every point.
+v0.17 doesn't upgrade itself to v0.18, and it won't tell you inside a session that v0.18 exists. If you are on v0.17.7 or below, the move is yours to start:
+
+```bash
+npm i -g @c-d-cc/reap
+reap setup
+```
+
+Then open a new Claude Code session and call `/reap:migrate` in each project. Until you migrate, v0.18 recognizes the old `.reap/` and says so rather than writing into it — `ctx` and `doctor` point you here, and `make`, `mark` and `init` stop. The migrate skill moves your data over in eight steps and keeps the original intact under `.reap-v0_17/` — reversible at every point.
+
+Your v0.17 slash commands keep working until you remove them, and the old session hooks now reach the v0.18 CLI, which answers them with those same steps.
 
 ### Language
 

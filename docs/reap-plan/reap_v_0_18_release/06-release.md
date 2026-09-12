@@ -21,9 +21,9 @@
 - `plugin/.claude-plugin/plugin.json` — version 0.18.0
 - `TEST_DISPATCH_TOKEN` 시크릿 — fine-grained PAT, 대상 리포 `c-d-cc/reap-test`, 권한 contents:write. 이 리포(`c-d-cc/reap`)의 Actions 시크릿으로 등록. **reap-test v0.18 브랜치 push가 이 리포의 v0.18 push보다 먼저 있어야** dispatch가 존재하는 SHA를 가리킨다
 
-## reap_v17
+## 0.17.8
 
-은퇴. 0.17.8 bump 커밋(0f25750·be2664a)은 로컬에 남고 태그·publish·main merge를 하지 않는다.
+은퇴. 태그·publish·main merge를 하지 않는다. 정리한 상태는 원격 `c-d-cc/reap`의 `v0.17.8` 브랜치(c0a2bdd)에 있고, 로컬 워킹 카피 `~/cdws/reap_v17`은 2026-09-12에 삭제됐다.
 
 ## 발행 직전 체크 (사람이 실행)
 

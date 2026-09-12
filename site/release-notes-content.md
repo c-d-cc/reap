@@ -24,9 +24,9 @@ REAP is remade from a pipeline runner into a protocol and tool provider.
 
 ### Coming from v0.17
 
-On v0.17.7 and below, the session-start version check prints `npm i -g @c-d-cc/reap` instead of upgrading by itself. Run it, then `reap setup`, open a new session, and call `/reap:migrate` in each project. Original data stays intact under `.reap-v0_17/`.
+v0.17 doesn't upgrade itself, and it doesn't announce v0.18 inside a session. Start it yourself with `npm i -g @c-d-cc/reap`, then `reap setup`, open a new session, and call `/reap:migrate` in each project. Until you migrate, v0.18 recognizes the old `.reap/` and refuses to write into it. Original data stays intact under `.reap-v0_17/`.
 
 ### Good to know
 
-- One install path: `npm i -g @c-d-cc/reap`, then `reap setup` for the plugin. Users on 0.17 aren't upgraded automatically — the session-start check prints the command instead
+- One install path: `npm i -g @c-d-cc/reap`, then `reap setup` for the plugin. Users on 0.17 aren't upgraded automatically and aren't notified — upgrading is something they start themselves
 - English by default; set `config.language: ko` in `.reap/config.yml` to switch CLI output to Korean
