@@ -7,7 +7,7 @@ import { HOOK_EVENTS, listHooks } from "./hooks.ts";
 import { isValid, kindOf, readRegistry, isRegistered } from "./id.ts";
 import type { Kind } from "./id.ts";
 import { validateRef } from "./plan.ts";
-import { paths, readSession } from "./store.ts";
+import { detectLayout, paths, readSession } from "./store.ts";
 import { template } from "./templates.ts";
 import { allTranslations, t } from "./i18n.ts";
 import { pluginInstalled } from "./setup.ts";
@@ -36,6 +36,19 @@ export function diagnose(root: string): Report {
   const defects: Finding[] = [];
   const notes: Finding[] = [];
   const p = paths(root);
+
+  // 이주가 필요한 저장소를 건강하다고 답하지 않는다.
+  const layout = detectLayout(root);
+  if (layout.layout === "v017" || layout.layout === "mixed") {
+    const key = layout.layout === "v017" ? "v017_layout" : "mixed_layout";
+    defects.push({
+      kind: t(root, `doctor.kind.${key}`),
+      detail: t(root, `store.${key}`, { markers: layout.v017.join(" "), v018: layout.v018.join(" ") }),
+    });
+    // 순수 v0.17이면 여기서 끝낸다 — 아래 검사는 전부 v0.18 구조를 전제하므로 결함 0을
+    // 내어 사실을 가린다. 섞인 저장소에는 진짜 v0.18 항목이 있으므로 계속 본다.
+    if (layout.layout === "v017") return { defects, notes };
+  }
 
   const all: Record<Kind, Entry[]> = {
     milestone: listEntries(root, "milestone"),

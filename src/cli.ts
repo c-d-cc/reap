@@ -27,6 +27,7 @@ import { checkCarriers, formatCarriers, newCarrier, orphans, scanCarriers } from
 import {
   DIRS,
   SEEDS,
+  detectLayout,
   ensureDir,
   findRoot,
   paths,
@@ -198,7 +199,7 @@ function attempt(fn: () => Result): Result {
 
 function make(cwd: string, argv: string[]): Result {
   const [kind, ...rest] = argv;
-  const root = requireRoot(cwd);
+  const root = requireV018Root(cwd);
   const flags = parseFlags(rest);
   const now = timestamp();
 
@@ -291,7 +292,7 @@ function make(cwd: string, argv: string[]): Result {
 
 function mark(cwd: string, argv: string[]): Result {
   const [kind, needle, ...rest] = argv;
-  const root = requireRoot(cwd);
+  const root = requireV018Root(cwd);
   const flags = parseFlags(rest);
 
   if (kind === "flux") {
@@ -461,6 +462,21 @@ function withHooks(root: string, result: Result, hooks?: RunHooksResult): Result
 function requireRoot(cwd: string): string {
   const root = findRoot(cwd);
   if (!root) throw new Error(t(root, "cli.not_a_project"));
+  return root;
+}
+
+/**
+ * 쓰기 전에 저장소가 v0.18인지 확인한다. **섞임은 사후에 잡는 것이 아니라 여기서 막는다** —
+ * 한 번 섞이면 migrate 4/8의 `git mv`가 v0.18 항목을 격리 디렉토리로 함께 끌고 간다.
+ * 읽기 명령(`ctx`·`doctor`)은 막지 않고 말한다. 막으면 무엇이 잘못됐는지도 못 듣는다.
+ */
+function requireV018Root(cwd: string): string {
+  const root = requireRoot(cwd);
+  const layout = detectLayout(root);
+  if (layout.layout === "v017" || layout.layout === "mixed") {
+    const key = layout.layout === "v017" ? "store.v017_layout" : "store.mixed_layout";
+    throw new Error(t(root, key, { markers: layout.v017.join(" "), v018: layout.v018.join(" ") }));
+  }
   return root;
 }
 

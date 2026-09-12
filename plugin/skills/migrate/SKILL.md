@@ -24,12 +24,14 @@ The first line is the verdict, the next lines are the grounds (the list of marke
 | Verdict | Meaning | Next |
 |---|---|---|
 | `v017` | Hits files only present in 0.17 (`lineage/`, `shortterm.md`, `current.yml`, v0.17-convention (onXxx) hook files inside `hooks/`, `sequence/goal.md`) | proceed to 2/8 |
-| `v018` | Hits files new to 0.18 (`map.md`, `sequence/generation.md`) | **nothing to migrate** — stop |
+| `v018` | Hits files new to 0.18 (`map.md`, `sequence/generation.md`, `sequence/flux.md`, a non-empty `life/flux/`, `plan/sources.yml`) | **nothing to migrate** — stop |
 | `none` | No `.reap/` | not this skill's job — `init` |
 | `mixed` | Both sides' markers hit together — half-migrated or contaminated | **stop and go to a human**, with the grounds line for what was hit |
 | `unknown` | `.reap/` exists but neither side's markers are present — v0.15/0.16, or corrupted | **stop and go to a human** |
 
 **Sharing a name doesn't make it a marker** — `sequence/` and `vision/milestones/` exist on both sides (v0.17 has `sequence/goal.md`·`milestone.md`, v0.18 has `sequence/generation.md`). `config.yml`'s `agentClient`·`language` also exist on both. `hooks/` exists on both too — v0.18's `init` also places `hooks/conditions/always.sh`. The script owns that distinction so the skill and agent don't re-judge it by eye.
+
+**The 0.18 side counts flux and the plan-source registry** — `sequence/flux.md`, a non-empty `life/flux/`, and `plan/sources.yml` have no v0.17 counterpart. They are there because a v0.18 CLI running on an un-migrated store used to write into it silently (probe, 2026-09-12), and without them that store still reads as `v017` — 4/8's `git mv` would then carry those v0.18 items into `.reap-v0_17/` along with everything else. An **empty** `life/flux/` is not a marker: v0.18's `init` creates the directory. The CLI judges the same thing in `src/store.ts`'s `detectLayout` — change both marker lists together.
 
 ## 2/8 — Pre-block: don't proceed if either one hits
 

@@ -25,6 +25,12 @@ v18=(); v17=()
 # ── files new to 0.18 ──
 [ -f "$r/map.md" ]                  && v18+=("map.md")
 [ -f "$r/sequence/generation.md" ]  && v18+=("sequence/generation.md")
+# flux 어휘와 plan source 등록부는 v0.18에만 있다. 이 셋이 없으면 v0.17 저장소에
+# v0.18이 만든 flux·backlog가 섞여도 v017로 읽혀, migrate 4/8의 git mv가 그것들을
+# .reap-v0_17/로 함께 끌고 간다 (probe 2026-09-12). src/store.ts detectLayout과 같은 목록이다.
+[ -f "$r/sequence/flux.md" ]        && v18+=("sequence/flux.md")
+[ -n "$(ls -A "$r/life/flux" 2>/dev/null)" ] && v18+=("life/flux/")
+[ -f "$r/plan/sources.yml" ]        && v18+=("plan/sources.yml")
 # ── files present only in 0.17 ──
 [ -d "$r/lineage" ]                     && v17+=("lineage/")
 [ -f "$r/vision/memory/shortterm.md" ]  && v17+=("vision/memory/shortterm.md")

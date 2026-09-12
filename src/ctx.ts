@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, join, relative } from "node:path";
 import { findEntry, listEntries } from "./doc.ts";
 import type { Entry } from "./doc.ts";
-import { paths, readConfig, readSession } from "./store.ts";
+import { detectLayout, paths, readConfig, readSession } from "./store.ts";
 import { t } from "./i18n.ts";
 
 /**
@@ -15,6 +15,14 @@ import { t } from "./i18n.ts";
 export function assemble(root: string, milestone?: string): string {
   const p = paths(root);
   if (!existsSync(p.reap)) return "";
+
+  // v0.17 저장소면 이것 하나만 싣는다. genome도 상태 줄도 v0.17의 것이라
+  // 그대로 실으면 agent가 죽은 5단계 흐름을 지시로 읽고 정상인 줄 알고 시작한다.
+  const layout = detectLayout(root);
+  if (layout.layout === "v017" || layout.layout === "mixed") {
+    const key = layout.layout === "v017" ? "store.v017_layout" : "store.mixed_layout";
+    return t(root, key, { markers: layout.v017.join(" "), v018: layout.v018.join(" ") });
+  }
 
   const parts: string[] = [];
   for (const path of markdown(p.genome)) parts.push(section(root, path));
