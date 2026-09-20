@@ -5,7 +5,9 @@ type: fix
 title: Codex 플러그인 설치 판정과 개발 설치 경로 복구
 startedAt: 2026-09-20T05:31:47Z
 startCommit: bd0c16c
-status: open
+status: closed
+closedAt: 2026-09-20T05:39:50Z
+endCommit: 7ba31e0
 ---
 
 ## Intent
