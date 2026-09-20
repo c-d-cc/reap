@@ -21,8 +21,8 @@ reap --version
 
 Open a new session and the skills and the status line show up. If neither appears, run `reap setup` again and read what it reports.
 
-- **Claude Code** — eight `/reap:` skills in the `/` menu, and a status line at session start.
-- **Codex** — ten skills called by name (`reap:evolve`), listed for the agent to choose rather than shown in a `/` menu. Codex does not run plugin hooks, so `reap setup` puts the status line straight into `~/.codex/hooks.json`. **Quit and reopen the app if it was already running** — a running app keeps the hook list it started with.
+- **Claude Code** — nine `/reap:` skills in the `/` menu, and a status line at session start.
+- **Codex** — eleven skills called by name (`reap:evolve`), listed for the agent to choose rather than shown in a `/` menu. Codex does not run plugin hooks, so `reap setup` puts the status line straight into `~/.codex/hooks.json`. **Quit and reopen the app if it was already running** — a running app keeps the hook list it started with.
 
 For an unpublished development checkout, install the working tree into every available host:
 
@@ -79,13 +79,14 @@ Full comparison: [docs/reap-plan/reap_v_0_18_release/01-gap.md](docs/reap-plan/r
 
 ## Command surface
 
-Skills are how an agent works with REAP. The plugin ships 10 — eight you can call from the `/` menu, two only the agent calls (hidden from the menu with `user-invocable: false`). Codex has no such distinction, so all ten are visible to the agent there:
+Skills are how an agent works with REAP. The plugin ships 11 — nine you can call from the `/` menu, two only the agent calls (hidden from the menu with `user-invocable: false`). Codex has no such distinction, so all eleven are visible to the agent there:
 
 | skill | who calls it | when |
 |---|---|---|
 | [`init`](plugin/skills/init/SKILL.md) | you | Once per project, at the very start — sets up canonical knowledge |
 | [`evolve`](plugin/skills/evolve/SKILL.md) | you | To open a generation — decides flux, exec, or fix |
 | [`complete`](plugin/skills/complete/SKILL.md) | agent | To close a generation |
+| [`handoff`](plugin/skills/handoff/SKILL.md) | you | When a session ends — leaves the next one a place to start, if there is anything to leave |
 | [`flux`](plugin/skills/flux/SKILL.md) | you | To create a new intent — planning, design, screens, anything without a place yet |
 | [`carve-milestone`](plugin/skills/carve-milestone/SKILL.md) | agent | To cut a plan into an executable milestone, and to close one |
 | [`interview`](plugin/skills/interview/SKILL.md) | you | When intent is ambiguous enough that a person has to decide |

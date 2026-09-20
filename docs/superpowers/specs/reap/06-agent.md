@@ -105,20 +105,31 @@ milestone이 없으면 그 묶음을 내지 않고, 열린 세대가 없으면 �
 
 **그래서 경계는 파일이고, 그것을 정하는 것은 쓰는 쪽이다.** agent는 절을 골라 읽을 수 없지만 파일은 골라 열 수 있다.
 
-### 배포하는 skill 9종
+### 배포하는 skill 11종
 
 플러그인의 `skills/<name>/SKILL.md`에 담기고 `/reap:<name>`으로 불린다. **agent가 REAP를 다루는 통로는 skill이며, skill이 확정적인 부분에서만 CLI를 호출한다.** 그 반대가 아니다.
 
 | skill | 언제 | 무엇을 |
 |---|---|---|
 | `evolve` | 세대를 열 때 | **plan·exec·fix 중 무엇인지 먼저 판단하고**, 지금 열어도 되는지, exec이면 **어느 근거(milestone 또는 backlog 항목)로** 무엇을 제목으로 여는지 정한다. `reap make generation`을 호출하고, 기록 어휘를 참고해 의도를 적는다. **직접 할지 subagent에게 위임할지도 여기서 판단한다** — 위임하면 `references/delegate-brief.md`를 채워 준다. **그다음은 자율 구간이다** — 맥락을 조립하는 skill로 넘기지 않는다(위의 `왜 milestone 본문은 조립하지 않는가`) |
-| `complete` | 세대를 닫을 때 | **커밋 규칙 확인**(`git status --porcelain`, 시작 커밋 이후 커밋 유무), 커밋을 어떻게 나누는지, 기록 마무리, `life/handoff.md`의 내 절 교체, backlog 이월 판단, abort 여부. 확인이 끝나면 `reap mark generation --closed` |
+| `complete` | 세대를 닫을 때 | **커밋 규칙 확인**(`git status --porcelain`, 시작 커밋 이후 커밋 유무), 커밋을 어떻게 나누는지, 기록 마무리, backlog 이월 판단, abort 여부. 확인이 끝나면 `reap mark generation --closed`. 닫은 뒤 **멈추기로 했을 때만** `handoff`를 부른다 |
+| `handoff` | 세션이 끝날 때 | `life/handoff.md`의 내 절을 쓰거나 비운다. **인계가 필요한지부터 판단한다** — 아니면 아무것도 안 쓰는 것이 답이다. 절 형식, 세션 키, 이어받은 절을 지우는 것, 열린 세대가 있을 때. 사람이 직접 부르는 것이 이 skill의 기본 경로다 |
 | `flux` | 새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것 | **flux를 열고 닫는다**(`make flux` · `mark flux --closed`). 유형을 정하고, 열린 flux 중 이어갈 것이 있는지 보고, plan source에 **쓴다** — 아래 **flux** 절의 여섯 판단. 산출물이 자리를 찾았는지 판단해 `carve-milestone`을 부르고 닫는다. `Dialogue`를 기록에 남긴다 |
 | `carve-milestone` | flux 안에서, 그리고 milestone을 닫을 때 | plan source를 읽고 실행 가능한 milestone으로 자른다. **자르기 전에 그 계획의 전제를 실제 흔적에 대보는 것**이 첫 동작이다. 크기 기준, 경계·종료조건·범위밖을 정하는 법, plan 인용법, fitness 질문을 자를 때 미리 쓰는 것. 그리고 **종료 절차 전체** — fitness → `mark milestone --closed`. `complete`는 이 절차를 옮겨 적지 않고 가리키기만 한다 |
 | `orchestrate` | 병렬 작업 시 | 역할 명명, 메시지 kind 관례, 언제 claim을 잡는지, barrier 배치, 조율자 패턴 |
 | `interview` | 의도가 모호할 때, 언제든 | 모호한 요구를 질문으로 구체화한다. 아래 **interview** 절 |
 | `init` | **프로젝트당 한 번, 맨 처음** — 새 폴더든 기존 코드베이스든 `.reap/`가 씨앗인 채 남았든 | `reap init`을 부르고 **정본 지식을 세운다** — plan source 등록, `environment/summary.md`, `genome/application.md`·`evolution.md`. 질문지를 갖되 묻는 법은 `interview`를 가리킨다. 아래 **init** 절 |
 | `report-issue` | REAP 자체의 결함이나 빠진 기능을 만났을 때 | 누구의 문제인지 가르고(REAP의 것만), 재현을 확정하고, REAP가 소유하는 사실만 실어(`--version`·플러그인 버전·레이아웃 이름) `c-d-cc/reap`에 issue를 올린다. `gh`가 없으면 본문을 사람에게 낸다. 이 프로젝트의 코드·경로·기록 본문은 싣지 않는다 — 공개 리포다. URL은 이 프로젝트의 backlog에 남긴다 |
+
+### handoff — 세션이 끝나는 순간은 도구가 못 본다
+
+인계를 쓰는 경로가 `complete` 하나뿐이면 **`complete`를 거치지 않는 세션은 아무것도 남기지 못한다** — 세대를 안 연 세션, 창을 닫는 세션, 컨텍스트가 찬 세션. 그때 다음 세션이 갖는 것은 커밋과 상태 줄뿐이다.
+
+훅으로는 못 막는다. 이벤트 여섯은 전부 `make`·`mark`·`orch`가 파일을 쓴 직후이고, **세션 종료는 호스트가 소유해 REAP가 관측할 수 없다.** 걸 수 없는 훅을 목록에 올리지 않는다는 규칙(`07-orchestrate.md`)이 여기에도 걸린다.
+
+**그래서 사람이 부른다.** `init`이 "상태 줄이 안내할 수 없는 skill"이어서 사람이 부르는 것과 같은 모양이다. 경합도 없다 — `evolve`는 여는 것, `complete`는 닫는 것, `handoff`는 **그만두는 것**이고, 세 순간은 겹치지 않는다. `complete`가 멈추기로 했을 때 이것을 부르는 것은 `carve-milestone`을 부르는 것과 같은 위임이다.
+
+**절차는 skill이, 규범은 `03-storage.md`가 갖는다.** 언제 쓰는지·왜 지우는 것이 소비인지는 저장 구조의 것이고 skill이 옮겨 적지 않는다.
 
 ### init — 정본 지식을 세운다
 

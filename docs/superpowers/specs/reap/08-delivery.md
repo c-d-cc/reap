@@ -18,7 +18,7 @@
 ## 클라이언트 통합
 
 
-REAP는 **Claude Code와 Codex 둘을 지원한다.** 그런데 이것은 어댑터로 이룬 것이 아니다 — **codex가 우리 매니페스트를 그대로 읽는다.** `.claude-plugin/marketplace.json`과 `.claude-plugin/plugin.json`을 `codex plugin marketplace add`·`codex plugin add`가 바꿀 것 없이 받고, skill 열 종이 `reap:evolve` 꼴 그대로 모델 앞에 놓인다(flux-0005 실측, codex 0.145.0).
+REAP는 **Claude Code와 Codex 둘을 지원한다.** 그런데 이것은 어댑터로 이룬 것이 아니다 — **codex가 우리 매니페스트를 그대로 읽는다.** `.claude-plugin/marketplace.json`과 `.claude-plugin/plugin.json`을 `codex plugin marketplace add`·`codex plugin add`가 바꿀 것 없이 받고, skill 열한 종이 `reap:evolve` 꼴 그대로 모델 앞에 놓인다(flux-0005에서 열 종으로 실측, codex 0.145.0).
 
 **그러므로 어댑터 계층을 만들지 않는다.** 두 어댑터를 유지하느라 모든 기능을 두 번 만드는 일은 REAP이 이미 겪었고, 여기서는 그 대가를 치를 이유가 없다. 없는 차이를 추상화가 만들어낸다. 호스트 차이는 아래 셋뿐이고, 전부 좁은 자리에 갇혀 있다.
 

@@ -22,7 +22,7 @@ reap --version
 새 세션을 열면 skill과 상태 줄이 보인다. 둘 다 안 보이면 `reap setup`을 다시 치고 그 출력을 읽는다.
 
 - **Claude Code** — `/` 메뉴에 `/reap:` skill 8종이 뜨고, 세션 시작 시 상태 줄이 붙는다.
-- **Codex** — skill 10종을 이름으로 부른다(`reap:evolve`). `/` 메뉴가 아니라 에이전트가 목록에서 고르는 자리다. Codex는 플러그인 훅을 실행하지 않으므로 상태 줄은 `reap setup`이 `~/.codex/hooks.json`에 직접 걸어 준다. **앱을 쓰고 있었다면 한 번 종료했다 열어야 한다** — 떠 있는 앱은 시작할 때 읽은 훅 목록을 그대로 쓴다.
+- **Codex** — skill 11종을 이름으로 부른다(`reap:evolve`). `/` 메뉴가 아니라 에이전트가 목록에서 고르는 자리다. Codex는 플러그인 훅을 실행하지 않으므로 상태 줄은 `reap setup`이 `~/.codex/hooks.json`에 직접 걸어 준다. **앱을 쓰고 있었다면 한 번 종료했다 열어야 한다** — 떠 있는 앱은 시작할 때 읽은 훅 목록을 그대로 쓴다.
 
 아직 릴리스하지 않은 개발 체크아웃은 다음 명령으로 설치한다:
 
@@ -79,13 +79,14 @@ v0.18에서 잃는 것:
 
 ## 명령 표면
 
-agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포하는 10종 — 여덟은 사람이 `/` 메뉴에서 부를 수 있고, 둘은 agent만 부른다(`user-invocable: false`로 메뉴에서 숨김). Codex에는 그 구분이 없어 열 종이 모두 agent에게 보인다:
+agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포하는 11종 — 아홉은 사람이 `/` 메뉴에서 부를 수 있고, 둘은 agent만 부른다(`user-invocable: false`로 메뉴에서 숨김). Codex에는 그 구분이 없어 열한 종이 모두 agent에게 보인다:
 
 | skill | 누가 | 언제 |
 |---|---|---|
 | [`init`](plugin/skills/init/SKILL.md) | 사람 | 프로젝트당 한 번, 맨 처음 — 정본 지식을 세운다 |
 | [`evolve`](plugin/skills/evolve/SKILL.md) | 사람 | 세대를 열 때 — flux·exec·fix 중 무엇인지 정한다 |
 | [`complete`](plugin/skills/complete/SKILL.md) | agent | 세대를 닫을 때 |
+| [`handoff`](plugin/skills/handoff/SKILL.md) | 사람 | 세션을 끝낼 때 — 다음 세션이 이어받을 것이 있으면 남긴다 |
 | [`flux`](plugin/skills/flux/SKILL.md) | 사람 | 새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것 |
 | [`carve-milestone`](plugin/skills/carve-milestone/SKILL.md) | agent | plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때 |
 | [`interview`](plugin/skills/interview/SKILL.md) | 사람 | 의도가 모호해 사람이 결정해야 할 때 |

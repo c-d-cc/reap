@@ -35,6 +35,7 @@ Rules for the list:
 | `interview` | when something is ambiguous and a person has to decide |
 | `orchestrate` | two or more sessions on the same project |
 | `migrate` | a v0.17 `.reap/` that must move to v0.18 |
+| `handoff` | ending a session — leaves the next one a place to start, if there's anything to leave |
 | `report-issue` | a defect or missing feature in REAP itself |
 | `help` | this |
 
@@ -49,6 +50,7 @@ Render it as this table, translated. **Don't list `complete` or `carve-milestone
 | An open generation that isn't this session's | Don't touch it. If this is a second session, `orchestrate` |
 | A focus milestone with tasks left | `evolve` — it reads `life/handoff.md` and picks the next task |
 | Every open milestone is waiting on the person (fitness, review) | Say which, and what one check would settle them |
+| The person is stopping for now | `handoff` — it decides whether one is even warranted |
 | An open flux and no startable milestone | `flux` — carry the intent forward, then carve |
 | Nothing open | `flux` for new intent, or `evolve` to consume a backlog item |
 | `doctor` reports defects | Fix those first — a defect is something deterministically wrong |
@@ -57,5 +59,5 @@ Give **one** suggestion with the reason in a sentence. If two fit, say which you
 
 ## What this skill doesn't do
 
-- It doesn't open or close anything — that's `evolve` and `complete`
+- It doesn't open or close anything — that's `evolve` and `complete`, and it doesn't write the handoff — that's `handoff`
 - It doesn't transcribe the docs. For concepts and reference, point to reap.cc; for CLI usage, `reap` with no arguments

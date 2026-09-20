@@ -153,28 +153,11 @@ So while items remain, don't close with a summary addressed to the person. Open 
 
 ### Only once you're stopping: the handoff
 
-`.reap/life/handoff.md` is **one file for the whole project**, with a section per session. It answers one question — *where does the next session start* — so it gets written at the moment that question becomes real: **when you hand back to the person.** Not when a generation closes. A session can close several, and an autonomous run keeps going past them; anything written mid-run goes stale while that same session works on.
+Having decided to stop, leave the next session a place to start — **or decide it doesn't need one.**
 
-So, having decided to stop, ask once more: **would the next session be stuck without this?**
+**The procedure belongs to [handoff](../handoff/SKILL.md)** — whether one is warranted, the section format, the session key, and which sections to delete. Not copied here. A person can call that skill directly, which is how a session that never reached `complete` still leaves something behind.
 
-- **No → write nothing.** This is the common case. Finished work is in the records and the commits, and the status line already names the open milestone and flux. Copying that into the handoff buries whatever is genuinely unresolved
-- **Yes → replace your own section:**
-
-```markdown
-## <session key> · <the generation you just closed> · <time, ISO seconds>
-
-- How far things have gotten
-- Where to look first next
-- What's pending (unresolved questions, things waiting on a human's answer)
-```
-
-**The session key comes from the status line** (`This session: sess-…`) — don't invent one. If the status line isn't in this session, `reap ctx` prints it.
-
-**Delete a section you picked up from.** If this session continued work another section described, that section is done — remove it. **Deleting is what consuming means**; marking it leaves a judgment for the next reader and turns the file into a log. Delete only what you actually took over, never someone else's open work.
-
-**Delete your own stale section too** when there's nothing left to hand off. An empty file is the correct state, and it's what tells the next session nothing is waiting.
-
-**Don't put in what might be needed.** That belongs to `idea/freememo/`. If this distinction breaks down, handoff becomes a file nobody reads.
+What this skill adds is only the timing: **not while items remain.** A handoff written mid-run answers a question that hasn't been asked yet, and goes stale while the same session works on.
 
 **A project can write this obligation down.** `reap mark generation --closed` runs `.reap/hooks/gen.closed.*.md` and prints it right after the close message, in front of you. A project that wants "if anything is left, keep going" puts that sentence there — `reap make hook --event gen.closed --name <n>` creates the file.
 
