@@ -7,13 +7,13 @@ description: Use when starting new work in a REAP project - deciding whether thi
 
 ## First: follow the map and read
 
-What's injected when a session opens is `genome/`, `environment/summary.md`, and **the status line** — nothing else. Neither `handoff.md` nor `milestone.md` is in the session **yet**. They're just paths the status line points to; reading them happens here.
+What's injected when a session opens is `genome/`, `environment/summary.md`, and **the status line** — nothing else. Neither `life/handoff.md` nor `milestone.md` is in the session **yet**. They're just paths the status line points to; reading them happens here.
 
 If there's no status line (injection didn't happen, or this isn't a REAP project), call `reap ctx` directly.
 
 The usual reading order is below. **It doesn't mean read all of it** — what's actually needed is decided by the work at hand.
 
-1. **`handoff.md`** — what the previous session left behind. Where to start next is here
+1. **`life/handoff.md`** — what earlier sessions left behind, one section each. Read **every** section, not just your own; the work you're picking up may have been left by another session
 2. **`milestone.md`** — the boundary, exit criteria, and the branch of work
 3. **`tasks/<what to work on now>.md`** — **only** the one being touched this time. Don't open a finished task or one not yet started
 4. **The record of an already-open generation, if any** — what it was in the middle of doing

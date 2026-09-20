@@ -47,7 +47,7 @@ Render it as this table, translated. **Don't list `complete` or `carve-milestone
 | No `.reap/`, or `init --check` still reports seeds | `init` |
 | An open generation bound to this session | Continue it. When done, say so — the agent closes it |
 | An open generation that isn't this session's | Don't touch it. If this is a second session, `orchestrate` |
-| A focus milestone with tasks left | `evolve` — it reads `handoff.md` and picks the next task |
+| A focus milestone with tasks left | `evolve` — it reads `life/handoff.md` and picks the next task |
 | Every open milestone is waiting on the person (fitness, review) | Say which, and what one check would settle them |
 | An open flux and no startable milestone | `flux` — carry the intent forward, then carve |
 | Nothing open | `flux` for new intent, or `evolve` to consume a backlog item |

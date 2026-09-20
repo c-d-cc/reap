@@ -5,7 +5,8 @@ type: structure
 title: handoff를 life/handoff.md 하나로 — 세션별 절, 소비되면 삭제
 from: flux-0006-design
 createdAt: 2026-09-20T23:21:22Z
-status: open
+status: consumed
+consumedBy: gen-0124-exec
 ---
 
 규범은 `ps-4f2a91`에 썼다 — `03-storage.md`의 **인계는 milestone이 아니라 세션의 것이다**

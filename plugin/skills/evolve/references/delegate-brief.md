@@ -20,7 +20,7 @@
 
 - Use absolute paths. Directories outside this tree are off-limits
 - Don't call `reap make`/`reap mark` — issuing ids and session binding belong to the main session
-- Inside `.reap/`, touch only this generation's record file and (if it belongs to a milestone) `handoff.md`. Everything else is off-limits
+- Inside `.reap/`, touch only this generation's record file. `life/handoff.md` is the main session's — it closes the generation. Everything else is off-limits
 - Write tests first — a failing test before the implementation
 - Don't pipe verification commands. Take the exit code directly
 - If you changed source, rebuild. Same after reverting

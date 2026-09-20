@@ -87,10 +87,10 @@ Leaving it in the roadmap **puts the same thing in two places.** Delete the carv
 There's a fixed order.
 
 1. **Get the fitness answer and record it in `milestone.md`.** Write not just the answer but **how it was read** — a deferred answer ("still don't know") has to be asked again by the next milestone, so **move it to `idea/research/`** (`make idea --kind research`). That's exactly the place that keeps it from being searched for again without a conclusion — write down what would let it graduate, too
-2. **`reap mark milestone <ms-id> --closed`** — moves the whole directory (`milestone.md`·`handoff.md`·`tasks/`) to `archive/milestones/`
+2. **`reap mark milestone <ms-id> --closed`** — moves the whole directory (`milestone.md`·`tasks/`) to `archive/milestones/`. The handoff isn't in there; it lives in `life/handoff.md` and survives the close
 
-That's the whole sequence. The generations aren't part of it — each one went to `archive/generations/` the moment it closed, so there's nothing left in `life/` to sort through. (There used to be a `cleanup` step here that judged which closed generations still had "reference value"; the judgment never held up, and what the next session needs is in `handoff.md`, not in old records.)
+That's the whole sequence. The generations aren't part of it — each one went to `archive/generations/` the moment it closed, so there's nothing left in `life/` to sort through. (There used to be a `cleanup` step here that judged which closed generations still had "reference value"; the judgment never held up, and what the next session needs is in `life/handoff.md`, not in old records.)
 
-Before closing, **check that everything this milestone settled has been reflected.** What isn't reflected goes down to archive along with `handoff.md`, and becomes undecided.
+Before closing, **check that everything this milestone settled has been reflected.** What isn't reflected goes down to archive with the milestone and becomes undecided.
 
 **Sweep `genome/` once here, against the milestone rather than any one generation.** Each generation checked it at its own close, but a structural change spread over several generations goes stale in a way no single generation could see — the API layer moves out one route at a time, and only at the end does `application.md` name a framework nothing uses any more. Read `application.md` and `evolution.md` against **what this milestone actually did**, and fix what reads wrong before the directory goes to archive. `invariants.md` stays the human's.

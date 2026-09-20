@@ -59,9 +59,6 @@ export function makeMilestone(root: string, opts: MakeMilestone): Made {
   const path = join(dir, "milestone.md");
   writeFileAtomic(path, formatDoc(data, bodyOf(root, "milestone.md")));
   if (opts.focus) focusOn(root, id);
-  // 빈 파일로 둔다. 안내 문구를 넣으면 지워지지 않은 채 남아 진짜 내용과 섞인다.
-  const handoff = join(dir, "handoff.md");
-  if (!existsSync(handoff)) writeFileAtomic(handoff, "");
   const hooks = runHooks(root, "milestone.made", { id });
   return { id, path, hooks };
 }
@@ -184,7 +181,7 @@ export function markGeneration(
   const endCommit = head(root);
   patch(entry.path, { status: "closed", closedAt: now, endCommit: endCommit ?? null });
   const hooks = runHooks(root, "gen.closed", { id: entry.id });
-  // 닫힘과 함께 archive로 — 다음 세션이 읽을 것은 handoff.md에 있어야 하고, 기록은 id로 언제든 찾는다
+  // 닫힘과 함께 archive로 — 다음 세션이 읽을 것은 life/handoff.md에 있어야 하고, 기록은 id로 언제든 찾는다
   const dest = entry.path.startsWith(archiveDir) ? entry.path : moveToArchive(entry.path, archiveDir);
   return { id: entry.id, path: dest, hooks };
 }

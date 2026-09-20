@@ -12,7 +12,7 @@ description: Use whenever intent is ambiguous in a REAP project and a human must
 **Cutting the number of questions that go to a human is half of what this skill does.** Before asking, check three things.
 
 1. **Can code or docs answer it.** Whether a file exists, how many times it's used, whether tests pass — a fact settled by one command doesn't get asked. Once confirmed, present *"checked X, assuming Y"* as a **confirm-shaped** statement. A discovery-shaped one (*"is there an X?"*) offloads the exploration onto the human
-2. **Has it already been answered.** Check three places — the spec (what's decided is reflected wherever it governs), the *pending* section of an open milestone's `handoff.md`, and **the `Dialogue` of an open or recent flux.** Asking the same thing twice tells the human their earlier answer wasn't read
+2. **Has it already been answered.** Check three places — the spec (what's decided is reflected wherever it governs), the *pending* part of the open sections in `life/handoff.md`, and **the `Dialogue` of an open or recent flux.** Asking the same thing twice tells the human their earlier answer wasn't read
 3. **Is it the human's to decide.** The four things `genome/evolution.md` pins down — the moment for deciding what to do, the answer when it's ambiguous, fitness at milestone close, and `invariants.md`. Everything else that goes to a human is only things code can't answer — preference, priority, business judgment
 
 What's left after filtering is the question list. **Finish the list before asking** — asking while still discovering breaks rule 6 below (the end has to be visible).

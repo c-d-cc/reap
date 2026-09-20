@@ -32,7 +32,7 @@ reap orch claim <resource> [--ttl 30m] [--topic <t>]
 reap orch release <resource>
 ```
 
-`resource` is a free-form string — **without a shared convention, two sessions claim the same thing under different names.** Write this project's convention in `handoff.md` or the first message. Two defaults: a milestone branch by id (`ms-004`), a file area by path glob (`src/auth/**`).
+`resource` is a free-form string — **without a shared convention, two sessions claim the same thing under different names.** Write this project's convention in your section of `life/handoff.md` or the first message. Two defaults: a milestone branch by id (`ms-004`), a file area by path glob (`src/auth/**`).
 
 **TTL exists for when a session dies.** Once it expires, someone else can take it, and a takeover shows up in `log.jsonl`. The longer it's held, the longer a dead session blocks it — one generation's length (30m-2h) is enough. Renewing is just re-`claim`ing the same resource.
 

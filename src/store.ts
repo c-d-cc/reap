@@ -22,6 +22,7 @@ export type Paths = {
   milestones: string;
   memory: string;
   life: string;
+  handoff: string;
   generations: string;
   backlog: string;
   archive: string;
@@ -109,6 +110,7 @@ export function paths(root: string): Paths {
     milestones: join(vision, "milestones"),
     memory: join(vision, "memory"),
     life,
+    handoff: join(life, "handoff.md"),
     generations: join(life, "generations"),
     backlog: join(life, "backlog"),
     archive,
@@ -229,11 +231,17 @@ export function writeConfig(root: string, config: Config): void {
   );
 }
 
-/** 세션 식별: REAP_SESSION이 먼저, 없으면 worktree 로컬 .session. */
+/**
+ * 세션 식별 사다리 — `REAP_SESSION` → 호스트가 주는 세션 id → worktree 로컬 `.session`.
+ *
+ * **마지막 칸은 세션이 아니라 워크트리를 가리킨다**(리포 루트의 해시). 한 워크트리의 모든
+ * 세션이 같은 값을 영구히 공유하므로 그 값으로는 절이 갈리지 않는다. 호스트 값이 있을 때만
+ * 갈린다 — Claude Code는 준다, Codex는 주지 않는다(0.155.1 실측).
+ */
 export function readSession(root: string, env: NodeJS.ProcessEnv = process.env): Session {
   const raw = readKV(paths(root).session);
   const session: Session = {
-    sessionId: env.REAP_SESSION?.trim() || raw.sessionId || fallbackSessionId(root),
+    sessionId: hostSessionId(env) || raw.sessionId || fallbackSessionId(root),
   };
   if (raw.generation) session.generation = raw.generation;
   if (raw.milestone) session.milestone = raw.milestone;
@@ -251,7 +259,7 @@ export function bindSession(
   env: NodeJS.ProcessEnv = process.env,
 ): void {
   const raw = readKV(paths(root).session);
-  const sessionId = raw.sessionId || env.REAP_SESSION?.trim() || fallbackSessionId(root);
+  const sessionId = raw.sessionId || fallbackSessionId(root);
   const lines = [`sessionId: ${sessionId}`, `generation: ${generation}`];
   if (milestone) lines.push(`milestone: ${milestone}`);
   writeFileAtomic(paths(root).session, `${lines.join("\n")}\n`);
@@ -260,8 +268,22 @@ export function bindSession(
 /** 세대를 abort하면 바인딩도 함께 사라져야 한다. 지워진 기록을 가리키는 세션은 ctx를 거짓말하게 만든다. */
 export function unbindSession(root: string, env: NodeJS.ProcessEnv = process.env): void {
   const raw = readKV(paths(root).session);
-  const sessionId = raw.sessionId || env.REAP_SESSION?.trim() || fallbackSessionId(root);
+  const sessionId = raw.sessionId || fallbackSessionId(root);
   writeFileAtomic(paths(root).session, `sessionId: ${sessionId}\n`);
+}
+
+/** 사람이 정한 값이 먼저, 그다음 호스트가 내리는 것. 빈 문자열은 칸을 채우지 않는다. */
+function hostSessionId(env: NodeJS.ProcessEnv): string | undefined {
+  for (const key of ["REAP_SESSION", "CLAUDE_CODE_SESSION_ID"]) {
+    const value = env[key]?.trim();
+    if (value) return value;
+  }
+  return undefined;
+}
+
+/** 절 제목에 쓰는 짧은 형태. 전체 UUID는 제목을 한 줄에 못 담게 만든다. */
+export function sessionKey(root: string, env: NodeJS.ProcessEnv = process.env): string {
+  return `sess-${readSession(root, env).sessionId.replace(/-/g, "").slice(0, 8)}`;
 }
 
 export function ensureDir(path: string): void {

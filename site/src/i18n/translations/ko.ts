@@ -829,9 +829,9 @@ export const ko: Translations = {
     │   └── milestones/
     │       └── <ms-id>-<slug>/
     │           ├── milestone.md
-    │           ├── handoff.md
     │           └── tasks/
     ├── life/                      # 지금 열려 있는 것
+    │   ├── handoff.md              # 다음 세션 인계 — 세션마다 절 하나
     │   ├── generations/
     │   ├── backlog/
     │   └── flux/
@@ -889,7 +889,7 @@ export const ko: Translations = {
       },
       {
         title: "milestone이 맥락과 평가의 단위가 됐습니다",
-        body: "plan에서 잘라낸 실행 가능한 단위로, 경계와 종료 조건을 가집니다. 여러 세대가 같은 milestone의 handoff를 읽고 쓰므로 맥락이 세대마다 다시 쌓이지 않습니다. 사람의 fitness 평가도 세대가 아니라 milestone이 끝날 때 한 번입니다 — 세대 안은 자율 구간이고, 사람이 서는 지점은 그 바깥입니다.",
+        body: "plan에서 잘라낸 실행 가능한 단위로, 경계와 종료 조건을 가집니다. 여러 세대가 같은 milestone을 이어받으므로 맥락이 세대마다 다시 쌓이지 않습니다. 사람의 fitness 평가도 세대가 아니라 milestone이 끝날 때 한 번입니다 — 세대 안은 자율 구간이고, 사람이 서는 지점은 그 바깥입니다.",
       },
       {
         title: "새 의도를 만드는 일과 실현하는 일을 갈랐습니다",
@@ -979,7 +979,7 @@ export const ko: Translations = {
 기억: .reap/vision/memory/lessons.md
 구조: .reap/map.md
 작업을 시작하면 /reap:evolve, 마무리하면 /reap:complete`,
-    statusLineNote: "milestone.md도 handoff.md도 본문이 이 안에 실려 있지 않습니다 — 상태 줄은 경로와 이름만 알리고, 그 경로를 열지 말지는 agent가 판단합니다. 세션이 열린 뒤 무슨 일이 일어나는지는",
+    statusLineNote: "milestone.md도 life/handoff.md도 본문이 이 안에 실려 있지 않습니다 — 상태 줄은 경로와 이름만 알리고, 그 경로를 열지 말지는 agent가 판단합니다. 세션이 열린 뒤 무슨 일이 일어나는지는",
     conceptsLinkText: "자율 진화 흐름",
     statusLineNoteAfter: "에서 자세히 다룹니다.",
     nextTitle: "다음 단계",
@@ -999,7 +999,7 @@ export const ko: Translations = {
     injectedItems: [
       { label: "genome/ 본문", desc: "application.md·evolution.md·invariants.md — 제품 정체성, AI 행동 규칙, 절대 제약." },
       { label: "environment/summary.md 본문", desc: "현재 기술 스택, 소스 구조, 빌드·테스트 방법." },
-      { label: "상태 줄", desc: "열린 milestone·generation·flux의 경로와 이름. milestone.md도 handoff.md도 본문은 실리지 않습니다 — 그 경로를 열지 말지는 agent가 그때그때 판단합니다." },
+      { label: "상태 줄", desc: "열린 milestone·generation·flux의 경로와 이름, 인계 파일의 절 개수, 이 세션의 키. 본문은 실리지 않습니다 — 그 경로를 열지 말지는 agent가 그때그때 판단합니다." },
     ],
     statusLineTitle: "실제 예시",
     statusLineDesc: "아래는 빈 프로젝트에서 reap init 뒤 reap make flux·reap make milestone --focus·reap make generation을 차례로 거친 뒤 실제로 찍은 reap ctx의 상태 줄입니다.",
@@ -1028,7 +1028,7 @@ export const ko: Translations = {
     commitRuleCode: `git status --porcelain        # 비어 있어야 한다
 git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
     afterCloseTitle: "닫은 다음 — 남은 것이 있으면 이어서 합니다",
-    afterCloseDesc: "세대가 닫혔다는 것은 한 항목이 끝났다는 뜻이지 작업이 끝났다는 뜻이 아닙니다. 사람이 여러 항목을 맡겼다면 남은 것이 있는 한 같은 세션이 곧바로 다음 evolve로 갑니다. agent의 턴은 사람에게 말해서 끝나지 않습니다 — 도구를 부르지 않고 메시지를 쓰는 순간 끝납니다. 그래서 세대를 닫은 직후가 자율 실행이 가장 멈추기 쉬운 지점입니다. 보고는 이미 세대 기록과 handoff.md에 쓰여 있으므로 산문으로 다시 말할 이유가 없습니다.",
+    afterCloseDesc: "세대가 닫혔다는 것은 한 항목이 끝났다는 뜻이지 작업이 끝났다는 뜻이 아닙니다. 사람이 여러 항목을 맡겼다면 남은 것이 있는 한 같은 세션이 곧바로 다음 evolve로 갑니다. agent의 턴은 사람에게 말해서 끝나지 않습니다 — 도구를 부르지 않고 메시지를 쓰는 순간 끝납니다. 그래서 세대를 닫은 직후가 자율 실행이 가장 멈추기 쉬운 지점입니다. 보고는 이미 세대 기록과 life/handoff.md에 쓰여 있으므로 산문으로 다시 말할 이유가 없습니다.",
     afterCloseHookDesc: "이 의무를 프로젝트에 적어 두고 싶다면 gen.closed 훅이 그 자리입니다. reap mark generation --closed가 훅을 돌리고 본문이 닫힘 메시지 바로 뒤에 붙어 agent 앞에 찍힙니다. 무엇을 남은 것으로 볼지, 어디서 멈출지는 프로젝트마다 다르므로 REAP는 문장을 싣지 않고 자리만 줍니다.",
     afterCloseCode: "reap make hook --event gen.closed --name continue",
     fitnessTitle: "milestone이 끝나면 사람의 fitness",
@@ -1091,10 +1091,10 @@ git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
     milestones/
       ms-022-v018-site/
         milestone.md
-        handoff.md
         tasks/
           4-concepts-plan.md
   life/                      지금 열려 있는 것
+    handoff.md
     generations/
       gen-0097-exec-site-concepts-plan.md
     backlog/
@@ -1327,7 +1327,7 @@ reap mark idea <idea-id> --archived`,
     closeDesc: "스스로 닫지 않습니다. 종료 조건이 충족된 것 같으면 사람에게 알리고, 자르는 시점에 적어 둔 질문으로 fitness를 묻습니다. 정량 지표가 없으므로 사람의 자연어 평가가 유일한 fitness 신호입니다. 순서가 고정돼 있습니다.",
     closeSteps: [
       { title: "1. fitness를 받아 milestone.md에 적습니다", desc: "답만이 아니라 어떻게 읽었는지도 적습니다 — 유보된 답('아직 모른다')은 idea/research/로 보내 다음 milestone이 다시 묻게 합니다" },
-      { title: "2. reap mark milestone <ms-id> --closed", desc: "archive/milestones/로 옮겨지고 milestone.md·handoff.md·tasks/가 함께 보존됩니다. 세대는 따라가지 않습니다 — 각자 닫힐 때 이미 archive/generations/에 가 있습니다" },
+      { title: "2. reap mark milestone <ms-id> --closed", desc: "archive/milestones/로 옮겨지고 milestone.md·tasks/가 함께 보존됩니다. 인계도 세대도 따라가지 않습니다 — 인계는 life/handoff.md에 남고, 세대는 각자 닫힐 때 이미 archive/generations/에 가 있습니다" },
     ],
     exampleTitle: "실제 예시",
     exampleDesc: "로그인 붙이기 milestone을 자르고, 세대 둘로 실현한 뒤 닫은 예입니다.",
@@ -1439,7 +1439,7 @@ reap mark generation <gen-id> --closed | --aborted | --archived`,
     disciplineItems: [
       "절대경로만 씁니다. 작업 트리 밖은 손대지 않습니다",
       "make도 mark도 부르지 않습니다 — 아이디 발급과 세션 바인딩은 주 세션의 것입니다",
-      ".reap/ 안에서는 이 세대의 기록 파일과 (milestone에 속하면) handoff.md만 건드립니다",
+      ".reap/ 안에서는 이 세대의 기록 파일만 건드립니다 — life/handoff.md는 세대를 닫는 주 세션의 것입니다",
       "테스트를 먼저 씁니다 — 구현 전에 실패하는 테스트",
       "검증 명령을 파이프로 감싸지 않고 종료 코드를 그대로 봅니다",
       "소스를 바꾸면 다시 빌드합니다. 되돌렸을 때도 마찬가지입니다",
@@ -1500,10 +1500,10 @@ reap mark backlog <bk-id> --consumed [--by <gen-id>]`,
     orderDesc: "고정돼 있고, 뒤바꾸면 다음 세션이 기록을 잃습니다.",
     orderSteps: [
       { title: "1. fitness를 받아 milestone.md에 적습니다", desc: "답만이 아니라 어떻게 읽었는지도 적습니다. 유보된 답은 idea/research/로 보내 다음 milestone이 다시 묻게 합니다" },
-      { title: "2. reap mark milestone <ms-id> --closed", desc: "milestone 디렉토리 전체(milestone.md·handoff.md·tasks/)를 archive/milestones/로 옮깁니다. 세대는 따라가지 않습니다 — 각자 닫힐 때 이미 archive/generations/에 가 있습니다" },
+      { title: "2. reap mark milestone <ms-id> --closed", desc: "milestone 디렉토리 전체(milestone.md·tasks/)를 archive/milestones/로 옮깁니다. 인계도 세대도 따라가지 않습니다 — 인계는 life/handoff.md에 남습니다" },
     ],
     handoffTitle: "handoff에 남길 것",
-    handoffDesc: "이 milestone이 정한 것 가운데 아직 어디에도 반영되지 않은 것, 그리고 다음 세션이 이어받을 것. handoff.md는 milestone과 함께 archive로 가므로, 반영할 것은 닫기 전에 plan이나 genome에 옮겨 둡니다.",
+    handoffDesc: "이 milestone이 정한 것 가운데 아직 어디에도 반영되지 않은 것은 닫기 전에 plan이나 genome에 옮겨 둡니다 — milestone은 통째로 archive로 가고, 반영되지 않은 것은 미결로 돌아갑니다. 다음 세션이 이어받을 것은 milestone이 아니라 life/handoff.md의 내 절에 남깁니다.",
     lessonsTitle: "lessons로 올릴 것",
     lessonsDesc: "milestone 하나를 넘어 프로젝트 전체가 반복해서 겪은 것이라면 vision/memory/lessons.md로 올립니다. 한 번 겪은 것은 관찰이고 여러 번 겪은 것은 규칙입니다 — 반복 확인된 교훈은 다시 genome/evolution.md의 규칙으로 졸업하고 lessons에서는 지웁니다.",
     exampleTitle: "실제 예시",
@@ -1578,13 +1578,13 @@ $ reap mark milestone ms-001 --closed
     description: "milestone이 쌓이는 자리와 프로젝트 전역 교훈이 쌓이는 자리.",
     intro: "vision/은 하려는 것을 담습니다 — 잘라낸 실행 단위인 milestones/와, 프로젝트를 가로지르는 교훈인 memory/. life나 archive와 달리 vision은 시간이 아니라 무엇을 하려는가로 갈립니다.",
     visionTitle: "vision/milestones/",
-    visionDesc: "열린 milestone과 아직 닫히지 않은 것들이 여기 삽니다. 닫히면 디렉토리 전체가 archive/milestones/로 옮겨지고, milestone.md·handoff.md·tasks/가 함께 보존됩니다.",
+    visionDesc: "열린 milestone과 아직 닫히지 않은 것들이 여기 삽니다. 닫히면 디렉토리 전체가 archive/milestones/로 옮겨지고, milestone.md·tasks/가 함께 보존됩니다.",
     memoryTitle: "memory/lessons.md",
     memoryDesc: "프로젝트가 사는 동안 계속 자라는 단 하나의 파일입니다. 결론 안 난 물음은 여기 두지 않습니다 — 그건 idea/research/의 자리입니다. 물음은 닫히는 것이고 교훈은 쌓이는 것이라, 한 파일에 섞으면 어느 쪽도 정리되지 않습니다.",
     graduationTitle: "나가는 문 — 졸업",
     graduationDesc: "자라기만 하는 문서는 언젠가 아무도 읽지 않습니다. 반복 확인된 교훈은 genome/evolution.md의 규칙으로 졸업하고 lessons에서 지웁니다. 더는 유효하지 않은 것도 지웁니다 — 기술 선택이 바뀌었거나 그 실수를 만들 수 있는 코드가 사라졌으면 그 교훈은 잡음입니다. 제목만 읽고도 무엇에 관한 교훈인지 알 수 있게 씁니다 — 열어봐야 아는 제목은 주입되지 않는 문서에서 안 읽힙니다.",
     handoffVsLessonsTitle: "handoff와 lessons의 구분",
-    handoffVsLessonsDesc: "다음 세션에 필요한 것은 handoff.md, 프로젝트를 가로질러 반복 확인된 것은 lessons.md입니다. 이 구분이 무너지면 lessons가 handoff의 우회로가 되고, 그러면 아무도 안 읽는 파일이 됩니다.",
+    handoffVsLessonsDesc: "다음 세션에 필요한 것은 life/handoff.md, 프로젝트를 가로질러 반복 확인된 것은 lessons.md입니다. 이 구분이 무너지면 lessons가 handoff의 우회로가 되고, 그러면 아무도 안 읽는 파일이 됩니다.",
     notInjectedNote: "memory는 주입되지 않습니다. 상태 줄이 위치만 알리고, 필요한 agent가 직접 엽니다.",
   },
 
@@ -1706,7 +1706,7 @@ workspaceId: ba44307f94a6`,
     tableHeaders: ["skill", "언제", "무엇을"],
     table: [
       ["init", "프로젝트당 한 번, 맨 처음 — 정본 지식을 세운다", "reap init 뒤 plan 문서를 등록하고 environment·genome을 채운 뒤 첫 milestone으로 넘긴다"],
-      ["evolve", "세대를 열 때 — flux·exec·fix 중 무엇인지 정한다", "상태 줄과 handoff를 읽고 flux·exec·fix 중 무엇인지 정해 세대를 연다"],
+      ["evolve", "세대를 열 때 — flux·exec·fix 중 무엇인지 정한다", "상태 줄과 life/handoff.md를 읽고 flux·exec·fix 중 무엇인지 정해 세대를 연다"],
       ["flux", "새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것", "flux를 열어 plan에 쓰고, 자를 것이 정해지면 carve-milestone으로 넘긴다"],
       ["interview", "의도가 모호해 사람이 결정해야 할 때", "코드·spec으로 답이 나오는 질문을 걸러낸 뒤 사람에게 한 번에 하나씩 묻는다"],
       ["orchestrate", "두 세션 이상이 같은 프로젝트에서 동시에 작업할 때", "worktree로 역할을 가르고 claim·barrier·메시지로 세션들을 조율한다"],
@@ -1717,7 +1717,7 @@ workspaceId: ba44307f94a6`,
     agentTitle: "agent만 부르는 skill",
     agentNote: "아래 셋은 / 메뉴에 나오지 않는다(user-invocable: false). 작업 흐름 안에서 agent가 판단해 부르며, 사람은 \"세대 닫아 줘\"·\"이 milestone 닫자\" 같은 말로 촉발할 뿐이다.",
     agentTable: [
-      ["complete", "세대를 닫을 때", "커밋 규칙을 확인하고 기록과 handoff.md를 정리해 세대를 닫는다"],
+      ["complete", "세대를 닫을 때", "커밋 규칙을 확인하고 기록과 life/handoff.md의 내 절을 정리해 세대를 닫는다"],
       ["carve-milestone", "plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때", "plan을 실제 흔적에 대조해 경계·종료 조건·task를 적어 milestone으로 자르거나, fitness 뒤 닫는다"],
     ],
     tableNote: "",
@@ -1734,7 +1734,7 @@ workspaceId: ba44307f94a6`,
       {
         name: "evolve",
         when: "세대를 열 때, 새 작업을 시작할 때.",
-        what: "상태 줄과 handoff.md·milestone.md·task를 읽고 새 의도를 만드는 일(flux)인지 실현·되돌리는 일(generation)인지 정한 뒤 연다. 열고 나서는 직접 할지 subagent에 위임할지도 판단한다 — 여러 파일·긴 탐색이 예상되거나 병렬로 둘 이상 돌릴 때 위임한다.",
+        what: "상태 줄과 life/handoff.md·milestone.md·task를 읽고 새 의도를 만드는 일(flux)인지 실현·되돌리는 일(generation)인지 정한 뒤 연다. 열고 나서는 직접 할지 subagent에 위임할지도 판단한다 — 여러 파일·긴 탐색이 예상되거나 병렬로 둘 이상 돌릴 때 위임한다.",
         notCalled: "이미 열린 세대가 있으면(내 것이면 이어가고 남의 것이면 새로 열지 않는다), 한 번의 편집·커밋으로 끝나는 일이면(세대를 열 값이 없다).",
       },
       {
@@ -1747,7 +1747,7 @@ workspaceId: ba44307f94a6`,
         name: "interview",
         when: "의도가 모호해 사람이 결정해야 할 때. evolve·flux·carve-milestone·init이 가리킬 때.",
         what: "코드·spec·기존 대화로 답이 나오는 질문을 걸러낸 뒤, 한 번에 하나·선택지 2~4개+자유입력·대가·근거 있는 추천·끝이 보이는 형식으로 사람에게 묻는다.",
-        notCalled: "명령 한 줄로 확정되는 사실, spec이나 handoff.md·Dialogue에 이미 답이 있는 것, 사람 몫이 아닌 판단에는 부르지 않는다.",
+        notCalled: "명령 한 줄로 확정되는 사실, spec이나 life/handoff.md·Dialogue에 이미 답이 있는 것, 사람 몫이 아닌 판단에는 부르지 않는다.",
       },
       {
         name: "orchestrate",
@@ -1776,7 +1776,7 @@ workspaceId: ba44307f94a6`,
       {
         name: "complete",
         when: "세대를 닫을 때, 작업을 마무리할 때.",
-        what: "위임된 세대면 Outcome·Dead Ends를 먼저 검토하고, 커밋 규칙(작업 트리가 비어 있고 새 커밋이 있는가)을 확인한다. 매 세션 주입되는 genome과 environment/summary.md가 아직 맞는지 점검한 뒤 기록과 handoff.md를 정리해 닫는다.",
+        what: "위임된 세대면 Outcome·Dead Ends를 먼저 검토하고, 커밋 규칙(작업 트리가 비어 있고 새 커밋이 있는가)을 확인한다. 매 세션 주입되는 genome과 environment/summary.md가 아직 맞는지 점검한 뒤 기록과 life/handoff.md의 내 절을 정리해 닫는다.",
         notCalled: "커밋 규칙이 안 맞으면 여기서 멈춘다. 커밋 없이 닫지 않는다.",
       },
       {
@@ -2023,6 +2023,7 @@ reap setup              # 호스트를 감지해 마켓플레이스 등록과 �
       "plan 축의 단위 이름이 loop에서 flux로 바뀌었습니다. loop은 도는 것을 뜻하는데 이 단위가 하는 일은 계획을 키우는 것이라 이름이 일을 잘못 가리켰습니다. loop이라는 낱말은 다른 개념에 내줍니다. 하위 호환은 없습니다 — make loop·life/loops/·loop-NNNN-<유형> id가 그대로 사라집니다",
       "기록 파일 이름이 리눅스 NAME_MAX 안에 머뭅니다. slug는 UTF-8 80바이트에서 잘리고, 180바이트를 넘는 --slug는 거부되며, doctor가 .reap/ 안의 200바이트 넘는 이름을 결함으로 보고합니다 (#32)",
       "세대를 닫을 때 environment/summary.md와 같은 방식으로 genome 낡음도 점검하고, --type genome backlog를 그 자리에서 소비합니다. milestone을 닫을 때는 세대 하나가 아니라 milestone 전체에 대고 genome을 한 번 더 훑습니다 (#33)",
+      "인계가 milestone 밖으로 나왔습니다. 이제 .reap/life/handoff.md 하나에 세션마다 절 하나씩 쌓이므로, milestone에 속하지 않은 세대도 인계를 남길 수 있고 milestone을 닫아도 인계가 사라지지 않습니다. 이어받은 절은 지웁니다 — 지우는 것이 소비입니다",
       "세대를 닫아도 다음 세션이 이어받는다고 전제하지 않습니다. 남은 항목이 있으면 complete가 보고로 턴을 끝내지 않고 곧바로 evolve로 보내며, 그 의무를 gen.closed 훅에 적어 둘 수 있습니다 — 새로 저장하는 것은 없습니다 (#34)",
     ],
     removedTitle: "제거",

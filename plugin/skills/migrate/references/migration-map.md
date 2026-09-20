@@ -51,13 +51,13 @@ The v0.18 memory paragraph (use the one in the genome's language; if the section
 ```markdown
 ## 기억
 
-세대 사이의 기억은 두 곳에 있다. 교훈은 `vision/memory/lessons.md`에 — 제목만으로 결론이 읽히고 "이것이 없으면 다음 세션이 같은 실수를 반복하는가"를 통과하는 것만 적는다. 진행 중인 작업 상태는 focus milestone의 `handoff.md`에 — 다음 세션이 어디서 시작할지를 `/reap:complete`가 갱신한다. shortterm·midterm·longterm 파일은 없고 승격도 없다. 세대 기록은 `life/generations/`에 열리고, 닫히면 `archive/generations/`로 간다.
+세대 사이의 기억은 두 곳에 있다. 교훈은 `vision/memory/lessons.md`에 — 제목만으로 결론이 읽히고 "이것이 없으면 다음 세션이 같은 실수를 반복하는가"를 통과하는 것만 적는다. 진행 중인 작업 상태는 `life/handoff.md`에 — 세션마다 절 하나이고, 다음 세션이 어디서 시작할지를 `/reap:complete`가 갱신한다. 이어받은 절은 지운다. shortterm·midterm·longterm 파일은 없고 승격도 없다. 세대 기록은 `life/generations/`에 열리고, 닫히면 `archive/generations/`로 간다.
 ```
 
 ```markdown
 ## Memory
 
-Memory between generations lives in two places. Lessons go to `vision/memory/lessons.md` — only what reads as a conclusion from its title alone and passes "would the next session repeat the mistake without this". In-progress state goes to the focus milestone's `handoff.md` — `/reap:complete` updates where the next session starts. There are no shortterm·midterm·longterm files and no promotion between tiers. Generation records open in `life/generations/` and move to `archive/generations/` when closed.
+Memory between generations lives in two places. Lessons go to `vision/memory/lessons.md` — only what reads as a conclusion from its title alone and passes "would the next session repeat the mistake without this". In-progress state goes to `life/handoff.md`, one section per session — `/reap:complete` updates where the next session starts, and a section that was picked up gets deleted. There are no shortterm·midterm·longterm files and no promotion between tiers. Generation records open in `life/generations/` and move to `archive/generations/` when closed.
 ```
 
 **`invariants.md` is the exception — don't edit it.** Only a human edits that file (init skill). Run the same grep on it, and if it hits (real trace: "라이프사이클 단계"·"nonce 토큰" rules), list each hit under the record's `## Needs updating` as `invariants.md — 사람이 지울 것: <line>`. The verify script reports those hits as a note, not a failure.

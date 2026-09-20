@@ -118,6 +118,6 @@ Don't delete by hand and don't edit `settings.json` by hand — the script remov
 reap make backlog --type migrate --title "\`.reap-v0_17/\` 삭제 판단 — 이주 검증 뒤 원본을 지울지 사람이 정한다" --slug delete-v017-original
 ```
 
-and, if mapping #11 created a focus milestone, add to its `handoff.md` a `## 미결` line: "`.reap-v0_17/` 삭제 여부 — 사람 판단 대기 (bk-xxxxxx). 되돌리기: `rm -rf .reap && mv .reap-v0_17 .reap`". The backlog item is consumed by whichever generation carries out the decision (delete, or keep and say so); the handoff line is what the next session actually reads.
+and add to `life/handoff.md`, in this session's section, a `## 미결` line: "`.reap-v0_17/` 삭제 여부 — 사람 판단 대기 (bk-xxxxxx). 되돌리기: `rm -rf .reap && mv .reap-v0_17 .reap`". The backlog item is consumed by whichever generation carries out the decision (delete, or keep and say so); the handoff line is what the next session actually reads.
 
 **Add a `## 다음 세션이 볼 것` section** — the full text of `reap ctx`'s status line block (everything from `<!-- reap 상태 -->` to the end of its output), pasted verbatim. This is the literal answer to "does the next session know how to continue if `.reap-v0_17/` is deleted" — show it to the human alongside the record file.

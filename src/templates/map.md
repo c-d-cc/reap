@@ -6,7 +6,7 @@ For anyone, human or agent, seeing REAP for the first time. This is where you le
 
 ```
 vision/    what we intend — what we know (memory), the units we've carved (milestones)
-life/      what's open right now — generations, backlog, flux
+life/      what's open right now — handoff, generations, backlog, flux
 archive/   what's closed — generations, milestones, backlog, flux, idea
 ```
 
@@ -31,8 +31,9 @@ Just `life/generations/` (and `archive/generations/` once done). Not split into 
 
 - `vision/memory/` — just `lessons.md` (project-wide lessons). **A question closes, a lesson accumulates** — mixing them in one file keeps neither clean. Unresolved questions belong to `idea/research/`
 - `plan/` — `sources.yml` (registered plan sources), `conventions/<ps-id>-<slug>.md` (how to read and write to that source)
+- `life/handoff.md` — handoff to the next session, **one section per session**. `complete` replaces its own; a session that picks one up deletes it. Empty is the correct state
 - `life/flux/` — open flux (`Question`·`Dialogue`·`Dead Ends`·`Outcome`). `mark flux --closed` moves a flux to `archive/flux/`
-- `vision/milestones/<ms-id>-<slug>/` — `milestone.md` (boundary and exit criteria), `handoff.md` (handoff to the next session), `tasks/<n>-<slug>.md` (task detail)
+- `vision/milestones/<ms-id>-<slug>/` — `milestone.md` (boundary and exit criteria), `tasks/<n>-<slug>.md` (task detail)
 - `life/generations/` — open generation records. `mark generation --closed` moves a record to `archive/generations/`
 - `life/backlog/` — open items. `mark backlog --consumed` moves an item to `archive/backlog/`
 - `genome/` — `application.md` (product identity and architecture), `evolution.md` (AI behavior rules), `invariants.md` (absolute constraints, human-edited only)

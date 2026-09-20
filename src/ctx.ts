@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, join, relative } from "node:path";
 import { findEntry, listEntries } from "./doc.ts";
 import type { Entry } from "./doc.ts";
-import { detectLayout, paths, readConfig, readSession } from "./store.ts";
+import { detectLayout, paths, readConfig, readSession, sessionKey } from "./store.ts";
 import { t } from "./i18n.ts";
 
 /**
@@ -12,7 +12,7 @@ import { t } from "./i18n.ts";
  * milestone 본문도 memory도 idea도 싣지 않는다. 대신 **상태 줄이 지도를 준다.**
  * 무엇을 읽을지는 agent가 정한다 — 맥락 구성은 판단이고, 판단은 도구의 것이 아니다.
  */
-export function assemble(root: string, milestone?: string): string {
+export function assemble(root: string, milestone?: string, env: NodeJS.ProcessEnv = process.env): string {
   const p = paths(root);
   if (!existsSync(p.reap)) return "";
 
@@ -27,7 +27,7 @@ export function assemble(root: string, milestone?: string): string {
   const parts: string[] = [];
   for (const path of markdown(p.genome)) parts.push(section(root, path));
   parts.push(section(root, join(p.environment, "summary.md")));
-  parts.push(status(root, milestone));
+  parts.push(status(root, milestone, env));
   return parts.filter((part) => part !== "").join("\n");
 }
 
@@ -44,7 +44,7 @@ export function hookEnvelope(context: string): string {
  * 지도의 값이 절반으로 준다. 다만 `idea/`는 예외다 — 수십 개가 될 수 있고 대부분
  * 지금 하는 일과 무관하며, 목록이 길어지면 지도의 나머지가 안 읽힌다.
  */
-function status(root: string, asked?: string): string {
+function status(root: string, asked?: string, env: NodeJS.ProcessEnv = process.env): string {
   const p = paths(root);
   const lines: string[] = [];
 
@@ -55,7 +55,7 @@ function status(root: string, asked?: string): string {
   if (chosen) {
     lines.push(t(root, "ctx.label.milestone", { id: chosen.id, title: title(chosen), flags: flags(chosen) }));
     lines.push(`  ${relative(root, chosen.dir)}/`);
-    const docs = nonEmpty(["milestone.md", "handoff.md"].map((n) => join(chosen.dir, n)));
+    const docs = nonEmpty([join(chosen.dir, "milestone.md")]);
     if (docs.length > 0) lines.push(`    ${docs.map((d) => basename(d)).join(" · ")}`);
     const tasks = nonEmpty(markdown(join(chosen.dir, "tasks")));
     if (tasks.length > 0) lines.push(`    ${tasks.map((task) => `tasks/${basename(task)}`).join(" · ")}`);
@@ -73,6 +73,18 @@ function status(root: string, asked?: string): string {
     lines.push(t(root, "ctx.label.flux", { id: flux.id, title: title(flux), path: relative(root, flux.path) }));
   }
 
+  const sections = handoffSections(p.handoff);
+  if (sections.length > 0) {
+    const key = sessionKey(root, env);
+    const mine = sections.some((heading) => heading.includes(key));
+    lines.push(t(root, "ctx.label.handoff", {
+      path: relative(root, p.handoff),
+      count: String(sections.length),
+      mine: t(root, mine ? "ctx.handoff.mine" : "ctx.handoff.none"),
+    }));
+  }
+  lines.push(t(root, "ctx.label.session", { key: sessionKey(root, env) }));
+
   const memory = nonEmpty(markdown(p.memory));
   if (memory.length > 0) lines.push(t(root, "ctx.label.memory", { list: memory.map((m) => relative(root, m)).join(" · ") }));
 
@@ -83,6 +95,12 @@ function status(root: string, asked?: string): string {
 
   lines.push(t(root, "ctx.entry"));
   return `${t(root, "ctx.marker")}\n${lines.join("\n")}\n`;
+}
+
+/** 절 제목만 센다. 본문은 상태 줄에 싣지 않는다 — 지도이지 내용이 아니다. */
+function handoffSections(path: string): string[] {
+  if (!existsSync(path)) return [];
+  return readFileSync(path, "utf8").split("\n").filter((line) => line.startsWith("## "));
 }
 
 /**
