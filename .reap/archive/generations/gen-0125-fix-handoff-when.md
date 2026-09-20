@@ -5,7 +5,9 @@ type: fix
 title: 인계는 멈출 때만, 필요할 때만 쓴다 — 세대 닫기가 트리거가 아니다
 startedAt: 2026-09-20T23:43:50Z
 startCommit: 4a39f2ee
-status: open
+status: closed
+closedAt: 2026-09-20T23:46:51Z
+endCommit: 2bf48d00
 ---
 
 ## Intent
