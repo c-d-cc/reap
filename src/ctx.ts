@@ -76,7 +76,7 @@ function status(root: string, asked?: string, env: NodeJS.ProcessEnv = process.e
   const sections = handoffSections(p.handoff);
   if (sections.length > 0) {
     const key = sessionKey(root, env);
-    const mine = sections.some((heading) => heading.includes(key));
+    const mine = sections.some((heading) => headingKey(heading) === key);
     lines.push(t(root, "ctx.label.handoff", {
       path: relative(root, p.handoff),
       count: String(sections.length),
@@ -97,10 +97,27 @@ function status(root: string, asked?: string, env: NodeJS.ProcessEnv = process.e
   return `${t(root, "ctx.marker")}\n${lines.join("\n")}\n`;
 }
 
-/** 절 제목만 센다. 본문은 상태 줄에 싣지 않는다 — 지도이지 내용이 아니다. */
+/**
+ * 절 제목만 센다. 본문은 상태 줄에 싣지 않는다 — 지도이지 내용이 아니다.
+ * **코드 펜스 안은 세지 않는다** — 형식 예시를 적은 절이 둘로 세어진다.
+ */
 function handoffSections(path: string): string[] {
   if (!existsSync(path)) return [];
-  return readFileSync(path, "utf8").split("\n").filter((line) => line.startsWith("## "));
+  const headings: string[] = [];
+  let fenced = false;
+  for (const line of readFileSync(path, "utf8").split("\n")) {
+    if (line.startsWith("```")) fenced = !fenced;
+    else if (!fenced && line.startsWith("## ")) headings.push(line);
+  }
+  return headings;
+}
+
+/**
+ * 제목의 **첫 토큰**이 절의 주인이다. 부분 문자열로 재면 `sess-9bf4`가 `sess-9bf47826`의
+ * 절을 자기 것이라 주장하고, `complete`가 남의 절을 덮는다.
+ */
+function headingKey(heading: string): string {
+  return heading.slice(3).trim().split(/[\s·]/)[0] ?? "";
 }
 
 /**

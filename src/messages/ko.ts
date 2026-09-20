@@ -200,6 +200,8 @@ export const ko = {
   "doctor.kind.gen_closed_no_commit": "커밋 없이 닫힌 generation",
   "doctor.kind.gen_unbound": "열린 채 바인딩 안 된 generation",
   "doctor.kind.duplicate_focus": "focus가 둘",
+  "doctor.kind.milestone_handoff": "milestone에 옛 handoff.md가 남아 있다",
+  "doctor.detail.milestone_handoff": "{ids} — 인계는 이제 life/handoff.md의 것이다. milestone을 닫으면 함께 archive로 쓸려 가므로, 살아 있는 내용은 그전에 옮긴다",
   "doctor.kind.map_diverged": "map.md가 씨앗과 다르다",
   "doctor.kind.size_guideline": "크기 안내선",
   "doctor.kind.accumulation_warning": "누적 경고",

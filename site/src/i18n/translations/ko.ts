@@ -976,6 +976,7 @@ export const ko: Translations = {
 열린 세대: gen-0001-exec 로그인 폼과 세션 발급 — .reap/life/generations/gen-0001-exec-login-form.md
   2026-09-04T00:09:22Z 시작, 시작 커밋 c5c3264
 열린 flux: flux-0001-plan 인증 붙이기 — .reap/life/flux/flux-0001-plan-auth.md
+이 세션: sess-9bf47826
 기억: .reap/vision/memory/lessons.md
 구조: .reap/map.md
 작업을 시작하면 /reap:evolve, 마무리하면 /reap:complete`,
@@ -1011,6 +1012,7 @@ export const ko: Translations = {
 열린 세대: gen-0001-exec 로그인 폼과 세션 발급 — .reap/life/generations/gen-0001-exec-login-form.md
   2026-09-04T14:28:50Z 시작, 시작 커밋 a40f09d
 열린 flux: flux-0001-plan 인증 붙이기 — .reap/life/flux/flux-0001-plan-auth.md
+이 세션: sess-9bf47826
 기억: .reap/vision/memory/lessons.md
 구조: .reap/map.md
 작업을 시작하면 /reap:evolve, 마무리하면 /reap:complete`,

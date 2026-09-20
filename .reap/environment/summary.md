@@ -46,8 +46,8 @@ tests/          <module>.test.ts · helpers.ts · hook.test.sh (셸) — submodu
   `setup`은 Codex JSON의 실제 활성 설치만 인정하며 `init`·`doctor`는 현재 호스트를 확인한다.
 
 - 저장 레이아웃 3단 · 세대 id 한 계열(`gen-NNNN-<type>`) · `fix` 유형
-- **닫는 즉시 archive로 간다.** `mark`의 `--closed`·`--consumed`가 옮기고 `life/`에는 열린 것만 남는다. 참고 가치를 판단하던 `cleanup` skill은 은퇴했다(ms-028) — 다음 세션이 볼 것은 `handoff.md`에 있다
-- **milestone 디렉토리에는 `milestone.md`·`handoff.md`·`tasks/`뿐이다.** `context.md`는 21세대 동안 0바이트여서, `decisions.md`는 spec 밖에 규범이 사는 둘째 자리를 만들어서 내렸다. 규범은 `05-knowledge.md`의 "결정 로그를 두지 않는다" 절
+- **닫는 즉시 archive로 간다.** `mark`의 `--closed`·`--consumed`가 옮기고 `life/`에는 열린 것만 남는다. 참고 가치를 판단하던 `cleanup` skill은 은퇴했다(ms-028) — 다음 세션이 볼 것은 `life/handoff.md`에 있다
+- **milestone 디렉토리에는 `milestone.md`·`tasks/`뿐이다.** `context.md`는 21세대 동안 0바이트여서, `decisions.md`는 spec 밖에 규범이 사는 둘째 자리를 만들어서, `handoff.md`는 인계가 milestone의 것이 아니어서 내렸다. 규범은 `05-knowledge.md`의 "결정 로그를 두지 않는다" 절
 - **frontmatter의 시간은 종류를 가리지 않고 초 단위 ISO다.** 예외는 sequence 레지스트리의 `createdAt` 칸 하나(날짜)
 - 명령은 `init` · `make`(flux·milestone·generation·backlog·idea·plan-source·hook) · `mark`(flux·generation·backlog·milestone·idea) · `ctx` · `plan sources|convention` · `seq` · `carrier new|list` · `doctor`. spec이 약속한 `decide`는 **만들지 않기로 했고**, spec의 명령이 전부 있다. `index`는 이 리포에서 파일 26·심볼 173·해석률 99%
 - **v0.17 저장소 위에서는 쓰지 않는다.** `store.ts`의 `detectLayout`이 표식으로 판을 가르고,

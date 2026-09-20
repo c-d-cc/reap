@@ -136,12 +136,24 @@ export function diagnose(root: string): Report {
   const small = all.milestone.filter((e) => e.data.status === "closed" && (genCount.get(e.id) ?? 0) <= 1).map((e) => `${e.id}(${genCount.get(e.id) ?? 0})`);
   if (small.length > 0) notes.push({ kind: t(root, "doctor.kind.milestone_single_generation"), detail: t(root, "doctor.detail.milestone_single_generation", { count: small.length, ids: small.join(", ") }) });
 
-  // 5. map.md 씨앗
+  // 5. milestone에 남은 인계 — 이제 life/handoff.md의 것이다. 안 알리면 다음 종료에
+  //    milestone과 함께 archive로 쓸려 가고, 그 안의 살아 있는 내용이 조용히 사라진다.
+  const strays = all.milestone
+    .filter((e) => e.data.status !== "closed" && existsSync(join(dirname(e.path), "handoff.md")))
+    .map((e) => e.id);
+  if (strays.length > 0) {
+    notes.push({
+      kind: t(root, "doctor.kind.milestone_handoff"),
+      detail: t(root, "doctor.detail.milestone_handoff", { ids: strays.join(", ") }),
+    });
+  }
+
+  // 6. map.md 씨앗
   if (existsSync(p.map) && readFileSync(p.map, "utf8") !== template(root, "map.md")) {
     notes.push({ kind: t(root, "doctor.kind.map_diverged"), detail: t(root, "doctor.detail.map_diverged") });
   }
 
-  // 6. 크기 안내선 — 주입되는 것
+  // 7. 크기 안내선 — 주입되는 것
   let injected = 0;
   for (const file of markdown(p.genome)) {
     const size = sizeOf(file);

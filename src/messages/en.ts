@@ -198,6 +198,8 @@ export const en = {
   "doctor.kind.gen_closed_no_commit": "generation closed without a commit",
   "doctor.kind.gen_unbound": "generation open but unbound",
   "doctor.kind.duplicate_focus": "duplicate focus",
+  "doctor.kind.milestone_handoff": "An old handoff.md is left in a milestone",
+  "doctor.detail.milestone_handoff": "{ids} — the handoff now lives in life/handoff.md. Closing the milestone sweeps this one into the archive with it, so move anything still live before that",
   "doctor.kind.map_diverged": "map.md differs from the seed",
   "doctor.kind.size_guideline": "size guideline",
   "doctor.kind.accumulation_warning": "accumulation warning",

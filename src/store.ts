@@ -281,9 +281,16 @@ function hostSessionId(env: NodeJS.ProcessEnv): string | undefined {
   return undefined;
 }
 
-/** 절 제목에 쓰는 짧은 형태. 전체 UUID는 제목을 한 줄에 못 담게 만든다. */
+/**
+ * 절 제목에 쓰는 짧은 형태. 전체 UUID는 제목을 한 줄에 못 담게 만든다.
+ *
+ * **8자를 채우지 못하는 값은 워크트리 해시로 내린다.** 짧은 키는 다른 세션의 키를 자기
+ * 접두사로 갖게 되고, 한 글자도 안 남으면 `sess-`가 되어 모든 절과 같아진다.
+ */
 export function sessionKey(root: string, env: NodeJS.ProcessEnv = process.env): string {
-  return `sess-${readSession(root, env).sessionId.replace(/-/g, "").slice(0, 8)}`;
+  const id = readSession(root, env).sessionId.replace(/-/g, "");
+  const usable = id.length >= 8 ? id : fallbackSessionId(root).replace(/-/g, "");
+  return `sess-${usable.slice(0, 8)}`;
 }
 
 export function ensureDir(path: string): void {
