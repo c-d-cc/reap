@@ -62,7 +62,7 @@ if claude plugin marketplace list 2>/dev/null | grep -q 'reap-dev'; then
 else
   claude plugin marketplace add "$D" >/dev/null 2>&1 || { say "claude plugin marketplace add $D failed"; exit 1; }
 fi
-# reinstall, not update — `update` only acts on a version change (see reapdev.localUpdate)
+# reinstall, not update — `update` only acts on a version change (see reapdev.localInstall)
 claude plugin uninstall reap@reap-dev >/dev/null 2>&1 || true
 claude plugin install reap@reap-dev -y >/dev/null 2>&1 || { say "claude plugin install reap@reap-dev failed"; exit 1; }
 V=$(node -p 'require("./plugin/.claude-plugin/plugin.json").version')
