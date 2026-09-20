@@ -26,6 +26,9 @@ src/
   orch.ts       병렬 조율 — claim(O_EXCL·TTL·탈취 로그)·release·barrier·roster(claude agents)·status. 공유 상태는 ~/.reap/orch/
   hooks.ts      hooks — listHooks(파일명 규약 파싱)·runHooks(condition·order·timeout, 절대 throw 안 함). 이벤트 여섯은 HOOK_EVENTS
   plan.ts       plan source — sources.yml 읽기(Bun.YAML)·쓰기(손 형식), make plan-source, --ref 검증
+  setup.ts      호스트 설치 — claude·codex를 감지해 마켓플레이스·플러그인을 걸고,
+                codex에는 `~/.codex/hooks.json`(CODEX_HOME 존중)에 `reap ctx --hook`을 넣는다.
+                `--remove`는 넣은 것만 뺀다 — `reap@ctod-plugins`가 실제로 설치돼 있을 때만 건드린다
   templates.ts  번들 템플릿과 프로젝트 오버라이드
   templates/    번들 템플릿 원본 (텍스트 임포트로 바이너리에 실린다)
   text-modules.d.ts   `*.md`·`*.yml` 텍스트 임포트를 위한 타입 선언
@@ -33,6 +36,11 @@ tests/          <module>.test.ts · helpers.ts · hook.test.sh (셸) — submodu
 ```
 
 증분 2까지 반영됐다.
+
+- **호스트는 둘이다** — Claude Code와 Codex. 어댑터는 없다. codex가 `.claude-plugin/marketplace.json`·
+  `.claude-plugin/plugin.json`을 그대로 읽고 skill 열 종이 `reap:<이름>`으로 모델 앞에 놓인다(gen-0121 실측).
+  갈리는 것은 설치 동사(`install`/`add`)와 훅 등록 자리뿐이다 — **codex는 플러그인 훅을 실행하지 않는다**
+  (`plugin_hooks` 기능이 removed). `orchestrate`만 Claude Code 전용이다(`claude agents`·`SendMessage`)
 
 - 저장 레이아웃 3단 · 세대 id 한 계열(`gen-NNNN-<type>`) · `fix` 유형
 - **닫는 즉시 archive로 간다.** `mark`의 `--closed`·`--consumed`가 옮기고 `life/`에는 열린 것만 남는다. 참고 가치를 판단하던 `cleanup` skill은 은퇴했다(ms-028) — 다음 세션이 볼 것은 `handoff.md`에 있다
@@ -48,7 +56,7 @@ tests/          <module>.test.ts · helpers.ts · hook.test.sh (셸) — submodu
 ## 빌드와 테스트
 
 ```bash
-bun test         # 259개
+bun test         # 276개
 ./tests/hook.test.sh   # 훅 스크립트 5종 (bun test가 돌리지 않는다)
 bun run typecheck   # tsc --noEmit
 bun run build       # bun build --compile → dist/reap (약 89.5MB — 문법 15개 28MB 포함)

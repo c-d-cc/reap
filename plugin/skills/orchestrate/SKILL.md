@@ -5,6 +5,8 @@ description: Use when two or more Claude Code sessions work on the same REAP pro
 
 # orchestrate — several sessions on one project
 
+**This skill needs Claude Code.** It leans on `claude agents` for the roster and on `SendMessage` to coordinate, and Codex has neither. On Codex, say so and stop — `claim` and `barrier` still work from the CLI, but nothing here can address another session.
+
 What REAP provides is only a **meeting place** — claiming resources (`claim`) and waiting for completion (`barrier`). Messaging belongs to the client (`SendMessage`·`ListAgents`), and REAP can't wake a session. The norm is owned by `07-orchestrate.md`.
 
 ## Alone, this skill doesn't exist

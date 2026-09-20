@@ -757,7 +757,7 @@ export const ko: Translations = {
     axesJoin: "두 축이 만나는 곳: 계획을 milestone으로 자르는 일 (/reap:carve-milestone)",
     installation: "설치",
     installStep1: "1. CLI를 전역 설치하고 플러그인을 넣습니다",
-    installStep2: "2. Claude Code를 열어 초기화하고 첫 세대를 엽니다",
+    installStep2: "2. 쓰는 에이전트를 열어 초기화하고 첫 세대를 엽니다",
     installNote: "설치 상세는",
     installLinkText: "설치 가이드",
     keyConcepts: "핵심 개념",
@@ -788,7 +788,7 @@ export const ko: Translations = {
     title: "소개",
     breadcrumb: "시작하기",
     description: "REAP(Recursive Evolutionary Autonomous Pipeline)는 AI와 사람이 협업하여 재귀적인 작업 흐름을 통해 소프트웨어를 진화시키는 규약과 도구입니다. 흐름을 스크립트가 강제하지 않고, agent가 skill을 읽어 그때그때 판단합니다.",
-    whatBuilds: "REAP가 만드는 것은 둘입니다. TypeScript·Bun으로 만든 CLI 바이너리 reap와, skill과 SessionStart 훅을 담은 Claude Code 플러그인입니다. 설치 경로는 npm 하나이고, 플러그인은 reap setup이 대신 설치합니다 — 한쪽만 있는 상태는 세션이 알려 줍니다.",
+    whatBuilds: "REAP가 만드는 것은 둘입니다. TypeScript·Bun으로 만든 CLI 바이너리 reap와, skill과 SessionStart 훅을 담은 플러그인입니다. 플러그인은 Claude Code와 Codex 양쪽에서 돕니다. 설치 경로는 npm 하나이고, 플러그인은 reap setup이 대신 설치합니다 — 한쪽만 있는 상태는 세션이 알려 줍니다.",
     whyReapTitle: "왜 REAP인가?",
     problemHeader: "문제",
     solutionHeader: "REAP 솔루션",
@@ -938,7 +938,7 @@ export const ko: Translations = {
     prerequisiteHeaders: ["항목", "설명"],
     prerequisites: [
       { name: "Node.js", desc: "v20 이상", required: true },
-      { name: "Claude Code", desc: "AI 에이전트 CLI. skill과 SessionStart 훅을 이 위에서 씁니다", required: true },
+      { name: "Claude Code 또는 Codex", desc: "AI 에이전트. skill과 SessionStart 훅을 이 위에서 씁니다. 둘 다 설치돼 있으면 둘 다 걸립니다", required: true },
       { name: "git", desc: "커밋 규칙과 workspace-id 계산에 씁니다", required: true },
     ],
     requiredLabel: "필수",
@@ -948,7 +948,7 @@ export const ko: Translations = {
     installCliCode: "npm i -g @c-d-cc/reap",
     installStep2: "2. 플러그인을 설치합니다 — CLI가 마켓플레이스 등록과 설치를 대신합니다",
     installPluginCode: `reap setup`,
-    installVerifyNote: "설치는 이것이 전부입니다. 새 Claude Code 세션을 열면 / 메뉴에 /reap: skill 8종이 보이고, 세션 시작 시 상태 줄이 뜹니다 — 둘 다 안 보이면 reap setup을 다시 실행하고 그 출력을 읽습니다.",
+    installVerifyNote: "설치는 이것이 전부입니다. reap setup이 PATH의 호스트를 감지해 있는 곳에 전부 겁니다. Claude Code에서는 새 세션의 / 메뉴에 /reap: skill 8종이 보이고 세션 시작 시 상태 줄이 뜹니다. Codex에서는 skill을 이름으로 부르고(reap:evolve), 상태 줄은 reap setup이 사용자 훅 파일에 직접 걸어 줍니다 — Codex 앱을 쓰고 있었다면 한 번 종료했다 열어야 합니다. 아무것도 안 보이면 reap setup을 다시 실행하고 그 출력을 읽습니다.",
     steps: [
       {
         title: "처음 한 번",
@@ -991,7 +991,7 @@ export const ko: Translations = {
     description: "세션이 열리면 무슨 일이 일어나는가 — SessionStart 훅의 주입, evolve의 세 판단, 자율 구간, complete의 커밋 규칙, milestone의 fitness.",
     intro: "REAP는 흐름을 제어하지 않습니다. 세션이 열릴 때 무엇이 자동으로 일어나고, 그다음부터 어디까지가 agent의 판단이고 어디부터가 사람의 몫인지를 순서대로 봅니다.",
     sessionStartTitle: "세션이 열릴 때",
-    sessionStartDesc: "Claude Code에서 REAP 프로젝트를 열면 SessionStart 훅이 reap ctx를 불러 맥락을 주입합니다. 매 세션 실리는 것은 이 셋뿐입니다.",
+    sessionStartDesc: "REAP 프로젝트를 열면 SessionStart 훅이 reap ctx를 불러 맥락을 주입합니다. Claude Code에서는 플러그인이 그 훅을 선언하고, Codex에서는 reap setup이 사용자 훅 파일에 걸어 둡니다. 매 세션 실리는 것은 이 셋뿐입니다.",
     injectedItems: [
       { label: "genome/ 본문", desc: "application.md·evolution.md·invariants.md — 제품 정체성, AI 행동 규칙, 절대 제약." },
       { label: "environment/summary.md 본문", desc: "현재 기술 스택, 소스 구조, 빌드·테스트 방법." },
@@ -1897,7 +1897,7 @@ reap index callees <symbolId> # 이것이 무엇을 부르는가`,
     title: "orchestrate",
     breadcrumb: "협업",
     description: "두 세션 이상이 동시에 작업할 때 — claim과 barrier.",
-    intro: "두 세션 이상이 같은 REAP 프로젝트에서 동시에 작업할 때 씁니다. REAP가 주는 것은 만남의 장소뿐입니다 — 자원 선점(claim)과 합류 대기(barrier). 메시지 전달 자체는 Claude Code의 SendMessage와 ListAgents가 하고, REAP는 그 위에 mailbox를 만들지 않습니다.",
+    intro: "두 세션 이상이 같은 REAP 프로젝트에서 동시에 작업할 때 씁니다. REAP가 주는 것은 만남의 장소뿐입니다 — 자원 선점(claim)과 합류 대기(barrier). 메시지 전달 자체는 Claude Code의 SendMessage와 ListAgents가 하고, REAP는 그 위에 mailbox를 만들지 않습니다. 그래서 이 기능은 Claude Code에서만 씁니다 — Codex에는 세션을 부를 표면이 없습니다.",
     aloneNote: "혼자 일할 때는 이 skill이 없는 것과 같습니다. 상태 줄에도 doctor에도 아무것도 나오지 않습니다.",
     worktreeTitle: "worktree로 나눕니다",
     worktreeDesc: "세션마다 worktree 하나를 두고, 세션 이름을 reap-<topic>-<role> 꼴로 짓습니다. 이름이 곧 주소이고, topic이 공유 상태의 방(~/.reap/orch/<workspace-id>/<topic>/)을 정합니다. workspace-id는 같은 리포의 worktree 사이에 같은 값으로 수렴합니다.",
@@ -1969,8 +1969,8 @@ reap orch status [--topic <t>]`,
     description: "v0.17 프로젝트를 v0.18 구조로 옮깁니다. 원본은 .reap-v0_17/에 그대로 보존됩니다.",
     intro: "v0.17은 스스로 v0.18로 올라가지 않고, 세션 안에서 v0.18이 나왔다고 알려주지도 않습니다. v0.17.7 이하를 쓰고 있다면 시작은 사람의 손이고, 할 일은 셋입니다.",
     updateCode: `npm i -g @c-d-cc/reap   # v0.18 CLI
-reap setup              # 플러그인 마켓플레이스 등록과 설치
-/reap:migrate           # 새 Claude Code 세션에서, 프로젝트마다`,
+reap setup              # 호스트를 감지해 마켓플레이스 등록과 플러그인 설치 (--remove로 되돌림)
+/reap:migrate           # 쓰는 호스트에서 새 세션을 열고, 프로젝트마다`,
     handoffDesc: "이주 전까지 v0.18은 옛 .reap/을 알아보고 거기에 쓰는 대신 그 사실을 말합니다. ctx와 doctor가 이 길을 가리키고 make·mark·init은 멈추므로, 이주를 잊은 채 작업해도 두 구조가 섞이지 않습니다. 옛 세션 훅도 이제 v0.18 CLI를 부르게 되는데 CLI가 같은 단계를 안내로 답합니다. 그 뒤는 migrate skill이 진행하고, 사람은 동의를 묻는 지점에서만 답하면 됩니다.",
     processTitle: "시작하면 일어나는 일",
     processDesc1: "먼저 이 프로젝트가 정말 v0.17 구조인지 표지 파일로 판정하고, 커밋되지 않은 변경이나 열린 generation이 있으면 거기서 멈춥니다. 그다음 옮길 분량(memory·lineage·backlog·설계 문서의 수)과 토큰 사용량이 클 수 있다는 점, 원본을 건드리지 않는다는 약속을 보여 주고 명시적인 동의를 받습니다.",
@@ -2006,7 +2006,7 @@ reap setup              # 플러그인 마켓플레이스 등록과 설치
     summary: "REAP는 파이프라인 실행기에서 규약과 도구 제공자로 다시 만들어졌다.",
     changedTitle: "변경",
     changed: [
-      "두 산출물로 나뉜다 — npm CLI @c-d-cc/reap와 Claude Code 플러그인. 플러그인은 reap setup이 마켓플레이스를 통해 설치하고, 갱신은 마켓플레이스가 맡는다",
+      "두 산출물로 나뉜다 — npm CLI @c-d-cc/reap와 플러그인. 플러그인은 Claude Code와 Codex 양쪽에서 돌고, reap setup이 있는 호스트를 감지해 마켓플레이스를 통해 설치한다",
       "저장소가 3단이다 — vision/(하려는 것) · life/(지금 열려 있는 것) · archive/(닫힌 것)",
       "작업이 세 단위로 갈린다 — flux(새 의도를 만든다) · milestone(실행 가능한 단위로 자른 계획) · generation(exec/fix — 실제로 코드를 진화시킨다)",
       "reap doctor가 확정적으로 검사 가능한 것만 검사해 보고한다. 고치지 않는다",
@@ -2025,7 +2025,7 @@ reap setup              # 플러그인 마켓플레이스 등록과 설치
       "status/config/check-version/uninstall 명령",
     ],
     comingTitle: "v0.17에서 왔다면",
-    comingDesc: "v0.17은 스스로 올라오지 않고 세션 안에서 v0.18을 알리지도 않는다. npm i -g @c-d-cc/reap를 직접 치고, reap setup으로 플러그인을 넣고, 새 세션에서 /reap:migrate를 부른다. 이주 전까지 v0.18은 옛 .reap/을 알아보고 거기에 쓰지 않는다. 원본 데이터는 .reap-v0_17/에 그대로 보존된다.",
+    comingDesc: "v0.17은 스스로 올라오지 않고 세션 안에서 v0.18을 알리지도 않는다. npm i -g @c-d-cc/reap를 직접 치고, reap setup으로 플러그인을 넣고, 쓰는 호스트에서 새 세션을 열어 /reap:migrate를 부른다. 이주 전까지 v0.18은 옛 .reap/을 알아보고 거기에 쓰지 않는다. 원본 데이터는 .reap-v0_17/에 그대로 보존된다.",
     goodToKnowTitle: "알아둘 것",
     goodToKnow: [
       "설치는 npm i -g @c-d-cc/reap 하나다. 플러그인은 reap setup이 대신 설치한다. 0.17 이하는 자동으로 올라오지 않고 알림도 받지 않는다 — 올리는 것은 사용자가 시작한다",

@@ -28,7 +28,13 @@ REAP는 **Claude Code와 Codex 둘을 지원한다.** 그런데 이것은 어댑
 | SessionStart 훅 | 플러그인의 `hooks/hooks.json`이 선언하고 클라이언트가 등록 | **플러그인 훅을 실행하지 않는다** (`plugin_hooks` 기능이 제거됐다). 사용자 훅 `~/.codex/hooks.json`만 돈다 | `setup` |
 | skill 호출 | `/reap:evolve` — 사람이 부른다 | 목록에 올라가고 **모델이 고른다**. 슬래시 표면이 아니다 | skill 본문 |
 
-**훅의 출력 계약은 두 호스트가 같다** — `hookSpecificOutput.additionalContext`. 그래서 `session-start.sh`는 한 벌이면 되고, 갈리는 것은 그 스크립트를 **어디에 등록하는가** 하나다.
+**훅의 출력 계약은 두 호스트가 같다** — `hookSpecificOutput.additionalContext`. 갈리는 것은 **어디에 등록하는가** 하나다. Claude Code에서는 플러그인의 `hooks/hooks.json`이 선언하고, codex에서는 `setup`이 사용자 훅 파일에 `reap ctx --hook`을 직접 건다(codex CLI에서 실제로 주입되는 것을 gen-0121에서 확인했다).
+
+**codex 쪽 훅은 스크립트가 아니라 명령을 건다.** 설치된 `session-start.sh`의 절대경로에는 버전이 박히고(`…/reap/0.18.0/hooks/…`) 다음 릴리스에서 죽은 경로가 된다. `ctx --hook`은 REAP 리포가 아닌 곳에서 빈 출력과 exit 0으로 끝나므로 그대로 걸어도 안전하다.
+
+**codex의 홈은 `CODEX_HOME`이 정한다.** 없을 때만 `~/.codex`다. 이것을 가정하면 남의 설정을 엉뚱한 곳에 쓴다.
+
+**Codex 앱은 `setup` 뒤에 한 번 재시작해야 한다.** CLI는 매 세션이 훅 파일을 새로 읽지만, 떠 있는 앱은 새 대화를 열어도 기존 훅 목록을 쓴다 — 재시작 전 앱에서는 주입이 없고 재시작 뒤에는 CLI와 똑같이 들어온다(gen-0121 실측). `setup`의 끝말이 이것을 알려야 한다.
 
 **orchestrate는 Claude Code에서만 산다.** `claude agents` 로스터와 `SendMessage`에 기대기 때문이다. 이것을 codex에서 흉내 내지 않는다 — 없는 표면을 감싸면 조용히 어긋난다. 그 skill은 자기가 어느 호스트를 요구하는지 본문에서 말한다.
 
@@ -58,13 +64,15 @@ plugin/
 
 ### 마켓플레이스는 이 리포에 없다
 
-**플러그인 레포에 `marketplace.json`을 두지 않는다.** 마켓플레이스는 `c-d-cc/plugins`(`ctod-plugins`) 하나이고, 이 리포는 거기에 **submodule로 물린다**(`plugins/reap`, `source: ./plugins/reap/plugin`). 양쪽에 manifest가 있으면 같은 플러그인이 두 마켓플레이스에서 보이고 사용자가 어느 쪽을 설치했는지 알 수 없다.
+**플러그인 레포에 `marketplace.json`을 두지 않는다.** 마켓플레이스는 `c-d-cc/plugins`(`ctod-plugins`) 하나다. 양쪽에 manifest가 있으면 같은 플러그인이 두 마켓플레이스에서 보이고 사용자가 어느 쪽을 설치했는지 알 수 없다.
+
+**그 리포는 플러그인 파일을 직접 싣는다 — submodule이 아니다.** codex는 Git 마켓플레이스를 `clone --filter=blob:none --no-checkout` + `sparse-checkout`으로 받고 submodule을 가져오지 않는다(gen-0121 실측: `plugins/<name>/`이 빈 디렉토리로 남고, 마켓플레이스 목록에는 플러그인이 멀쩡히 보인다). **실체 없는 설치가 성공으로 보고되는 것**이 submodule의 실제 비용이다. 그래서 릴리스가 이 리포의 `plugin/`을 마켓플레이스 리포로 복사해 넣는다. 복사본이 원본과 어긋나는 것은 릴리스 절차가 막는다 — 사람이 손으로 맞추는 자리가 아니다.
 
 **기획 플러그인은 따로 없다.** 한때 `reap-plan`을 형제로 두려 했으나(`gen-0045`) `flux-0001`이 되돌렸다 — 기획은 REAP의 `flux` skill이 쓴다.
 
 **마켓플레이스도 하나면 된다.** `codex plugin marketplace add`가 `owner/repo`와 `.claude-plugin/marketplace.json`을 그대로 받으므로, 두 호스트가 같은 `c-d-cc/plugins`를 읽는다. codex 전용 사본을 만들면 같은 플러그인이 두 곳에서 보이고 어느 쪽이 최신인지 아무도 모른다.
 
-**submodule은 push된 커밋을 싣는다.** 그래서 개발 루프에는 못 쓰고, 작업 트리를 그대로 싣는 로컬 마켓플레이스가 따로 필요하다. 마켓플레이스 항목의 `source`는 **그 마켓플레이스 디렉토리 안쪽만** 가리킬 수 있으므로(절대경로·`../` 둘 다 거부된다) 로컬 쪽은 심링크를 쓴다.
+**배포된 마켓플레이스는 릴리스된 것만 싣는다.** 그래서 개발 루프에는 못 쓰고, 작업 트리를 그대로 싣는 로컬 마켓플레이스가 따로 필요하다. 마켓플레이스 항목의 `source`는 **그 마켓플레이스 디렉토리 안쪽만** 가리킬 수 있으므로(절대경로·`../` 둘 다 거부된다) 로컬 쪽은 심링크를 쓴다.
 
 **설정 파일을 건드리는 자리는 `setup` 하나뿐이다.** 원칙은 그대로다 — 남의 설정을 기계적으로 고치는 것은 되돌리기 어렵고, 플러그인이 훅을 선언할 수 있는 호스트에서는 REAP가 설정 파일에 손댈 이유가 없다. Claude Code가 그렇다.
 
@@ -99,8 +107,6 @@ skill도 마찬가지다. skill이 지시하는 CLI 호출이 실패하면 그�
 **idle 대화형 세션의 메시지 수신 시점.** 사람의 입력을 기다리며 idle 상태인 세션에 `SendMessage`를 보냈을 때 즉시 처리되는지, 다음 사람 입력까지 대기하는지 확인하지 않았다. 남의 세션을 건드리게 되어 조사 단계에서 확인하지 않았다. 일회용 세션 두 개로 검증한다. 결과에 따라 `orchestrate` skill의 조율 패턴이 달라진다.
 
 **worktree 간 workspace-id 수렴.** 같은 리포의 서로 다른 worktree에서 같은 workspace-id가 나오는지 확인한다. 여기가 틀리면 orchestrate는 에러 없이 조용히 갈라진다.
-
-**codex가 `c-d-cc/plugins`를 Git 마켓플레이스로 받을 때 submodule까지 가져오는가.** 로컬 경로로는 확인했고(flux-0005), Git 경유는 확인하지 않았다. 이 리포가 submodule로 물려 있으므로, 안 가져오면 codex 쪽 설치가 빈 디렉토리를 가리킨다. 안 가져온다면 `--sparse`나 마켓플레이스 구조 쪽에서 답을 찾는다.
 
 **`claude agents --json`의 출력 안정성.** 이 명령은 스크립팅용으로 문서화되어 있지만, 반환 필드가 버전 간에 유지되는지는 확인이 필요하다. `roster`는 필드가 없을 때 실패하지 않고 알 수 없다고 말해야 한다.
 

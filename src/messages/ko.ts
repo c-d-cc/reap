@@ -22,7 +22,7 @@ export const ko = {
   bind <gen-id>                   (열린 세대에 이 세션을 다시 묶는다)
   seq [generation|milestone|flux|source|<id>]
   carrier new <slug> | list [--orphans|--check]
-  setup                           (claude CLI로 플러그인 마켓플레이스를 등록하고 reap 플러그인을 설치한다. npm i -g 뒤 한 번)
+  setup [--remove]                (PATH의 호스트를 감지해 — claude·codex — 마켓플레이스를 등록하고 플러그인을, codex에는 SessionStart 훅까지 건다. --remove는 그것만 되돌린다)
   doctor                          (보고만 한다. 결함이 있으면 실패로 끝난다)
   index [update [--full] | status | impact <file>... | search <q> | callers <id> | callees <id>]
   orch claim <resource> [--ttl 30m] | release <resource> | barrier <name> --expect <N> --timeout <s> | roster | status   [--topic <t>]
@@ -167,16 +167,24 @@ export const ko = {
   "entries.hook_order_invalid": "--order는 정수입니다: {order}",
   "entries.hook_already_exists": "이미 있습니다: {filename}",
 
-  "cli.legacy_command": "`reap {command}`는 v0.17 명령입니다 — 지금 설치된 것은 REAP v{version}이고 동작 방식이 다릅니다. 다음: `reap setup`(v0.18 플러그인 설치) → 새 Claude Code 세션 → v0.17 .reap/이 있는 프로젝트마다 /reap:migrate. 원본 데이터는 보존됩니다.",
-  "cli.setup_hint": "플러그인이 감지되지 않습니다 — `reap setup`(마켓플레이스 등록과 reap 플러그인 설치)을 실행한 뒤 새 Claude Code 세션을 여세요.",
-  "setup.claude_missing": "Claude Code CLI(`claude`)가 PATH에 없습니다. Claude Code를 설치한 뒤 `reap setup`을 다시 실행하세요.",
-  "setup.marketplace_present": "마켓플레이스 ctod-plugins: 이미 등록됨",
-  "setup.marketplace_added": "마켓플레이스 ctod-plugins: 등록함 (c-d-cc/plugins)",
-  "setup.marketplace_failed": "마켓플레이스 ctod-plugins: 실패 — {detail}\n  수동: claude plugin marketplace add c-d-cc/plugins",
-  "setup.plugin_present": "플러그인 {name}: 이미 설치됨",
-  "setup.plugin_installed": "플러그인 reap@ctod-plugins: 설치함",
-  "setup.plugin_failed": "플러그인 reap@ctod-plugins: 실패 — {detail}\n  수동: claude plugin install reap@ctod-plugins",
-  "setup.done": "새 Claude Code 세션을 여세요 — / 메뉴의 /reap: skill 8개와 상태 줄이 거기서 보입니다.",
+  "cli.legacy_command": "`reap {command}`는 v0.17 명령입니다 — 지금 설치된 것은 REAP v{version}이고 동작 방식이 다릅니다. 다음: `reap setup`(v0.18 플러그인 설치) → 쓰는 호스트에서 새 세션 → v0.17 .reap/이 있는 프로젝트마다 /reap:migrate. 원본 데이터는 보존됩니다.",
+  "cli.setup_hint": "플러그인이 감지되지 않습니다 — `reap setup`(마켓플레이스 등록과 reap 플러그인 설치)을 실행한 뒤 쓰는 호스트(Claude Code 또는 Codex)에서 새 세션을 여세요.",
+  "setup.host_missing": "지원하는 호스트 CLI가 PATH에 없습니다 — `claude`(Claude Code)도 `codex`(Codex)도 찾지 못했습니다. 하나를 설치한 뒤 `reap setup`을 다시 실행하세요.",
+  "setup.marketplace_present": "{host}: 마켓플레이스 ctod-plugins 이미 등록됨",
+  "setup.marketplace_added": "{host}: 마켓플레이스 ctod-plugins 등록함 (c-d-cc/plugins)",
+  "setup.marketplace_removed": "{host}: 마켓플레이스 ctod-plugins 제거함",
+  "setup.marketplace_failed": "{host}: 마켓플레이스 ctod-plugins 실패 — {detail}\n  수동: {manual}",
+  "setup.plugin_present": "{host}: 플러그인 {name} 이미 설치됨",
+  "setup.plugin_installed": "{host}: 플러그인 reap@ctod-plugins 설치함",
+  "setup.plugin_removed": "{host}: 플러그인 reap@ctod-plugins 제거함",
+  "setup.plugin_failed": "{host}: 플러그인 reap@ctod-plugins 실패 — {detail}\n  수동: {manual}",
+  "setup.hook_present": "codex: SessionStart 훅이 {path}에 이미 있습니다",
+  "setup.hook_added": "codex: SessionStart 훅을 {path}에 등록했습니다 (codex는 플러그인 훅을 실행하지 않습니다)",
+  "setup.hook_removed": "codex: SessionStart 훅을 {path}에서 뺐습니다",
+  "setup.hook_failed": "codex: {detail}을 JSON으로 읽지 못해 훅을 건드리지 않았습니다. 파일을 고친 뒤 `reap setup`을 다시 실행하세요.",
+  "setup.done": "방금 건 호스트에서 새 세션을 여세요 — /reap: skill과 상태 줄이 거기서 보입니다.",
+  "setup.done_codex": "Codex 앱은 한 번 종료했다 여세요(⌘Q) — 떠 있는 앱은 시작할 때 읽은 훅 목록을 그대로 쓰므로 새 대화만으로는 부족합니다. CLI는 세션마다 파일을 다시 읽습니다.",
+  "setup.remove_done": "제거했습니다. `reap setup`이 넣은 것만 건드렸습니다.",
   "store.v017_layout": "이 .reap/은 v0.17 구조입니다({markers}). REAP v0.18은 저장 방식이 다르고, 여기에 쓰면 두 구조가 섞입니다. 먼저 /reap:migrate를 부르세요 — 원본을 .reap-v0_17/로 격리해 보존합니다.",
   "store.mixed_layout": "이 .reap/에 두 구조가 함께 있습니다(v0.17: {markers} / v0.18: {v018}). 무언가 v0.17 저장소에 v0.18 항목을 썼습니다. 이주 전에 멈추고 사람과 함께 정리하세요 — /reap:migrate는 디렉토리째 옮기므로 그 v0.18 항목도 .reap-v0_17/로 함께 끌려갑니다.",
   "doctor.kind.v017_layout": "v0.17 구조 — 이주 필요",

@@ -20,7 +20,7 @@ export const en = {
   bind <gen-id>                   (rebind this session to an open generation)
   seq [generation|milestone|flux|source|<id>]
   carrier new <slug> | list [--orphans|--check]
-  setup                           (registers the plugin marketplace and installs the reap plugin through the claude CLI. Run once after npm i -g)
+  setup [--remove]                (detects the hosts on PATH — claude, codex — and registers the marketplace, installs the plugin, and on codex the SessionStart hook. --remove undoes exactly that)
   doctor                          (report only. exits nonzero if there are defects)
   index [update [--full] | status | impact <file>... | search <q> | callers <id> | callees <id>]
   orch claim <resource> [--ttl 30m] | release <resource> | barrier <name> --expect <N> --timeout <s> | roster | status   [--topic <t>]
@@ -165,16 +165,24 @@ export const en = {
   "entries.hook_order_invalid": "--order must be an integer: {order}",
   "entries.hook_already_exists": "Already exists: {filename}",
 
-  "cli.legacy_command": "`reap {command}` was a v0.17 command — this is REAP v{version}, which works differently. Next: run `reap setup` (installs the v0.18 plugin), open a new Claude Code session, then call /reap:migrate in each project that has a v0.17 .reap/. The original data is kept.",
-  "cli.setup_hint": "Plugin not detected — run `reap setup` (registers the marketplace and installs the reap plugin), then open a new Claude Code session.",
-  "setup.claude_missing": "Claude Code CLI (`claude`) not found on PATH. Install Claude Code, then run `reap setup` again.",
-  "setup.marketplace_present": "marketplace ctod-plugins: already registered",
-  "setup.marketplace_added": "marketplace ctod-plugins: registered (c-d-cc/plugins)",
-  "setup.marketplace_failed": "marketplace ctod-plugins: failed — {detail}\n  Manual: claude plugin marketplace add c-d-cc/plugins",
-  "setup.plugin_present": "plugin {name}: already installed",
-  "setup.plugin_installed": "plugin reap@ctod-plugins: installed",
-  "setup.plugin_failed": "plugin reap@ctod-plugins: failed — {detail}\n  Manual: claude plugin install reap@ctod-plugins",
-  "setup.done": "Open a new Claude Code session — eight /reap: skills in the / menu and the status line appear there.",
+  "cli.legacy_command": "`reap {command}` was a v0.17 command — this is REAP v{version}, which works differently. Next: run `reap setup` (installs the v0.18 plugin), open a new session in your host, then call /reap:migrate in each project that has a v0.17 .reap/. The original data is kept.",
+  "cli.setup_hint": "Plugin not detected — run `reap setup` (registers the marketplace and installs the reap plugin), then open a new session in your host (Claude Code or Codex).",
+  "setup.host_missing": "No supported host CLI found on PATH — neither `claude` (Claude Code) nor `codex` (Codex). Install one, then run `reap setup` again.",
+  "setup.marketplace_present": "{host}: marketplace ctod-plugins already registered",
+  "setup.marketplace_added": "{host}: marketplace ctod-plugins registered (c-d-cc/plugins)",
+  "setup.marketplace_removed": "{host}: marketplace ctod-plugins removed",
+  "setup.marketplace_failed": "{host}: marketplace ctod-plugins failed — {detail}\n  Manual: {manual}",
+  "setup.plugin_present": "{host}: plugin {name} already installed",
+  "setup.plugin_installed": "{host}: plugin reap@ctod-plugins installed",
+  "setup.plugin_removed": "{host}: plugin reap@ctod-plugins removed",
+  "setup.plugin_failed": "{host}: plugin reap@ctod-plugins failed — {detail}\n  Manual: {manual}",
+  "setup.hook_present": "codex: SessionStart hook already registered in {path}",
+  "setup.hook_added": "codex: SessionStart hook registered in {path} (codex does not run plugin hooks)",
+  "setup.hook_removed": "codex: SessionStart hook removed from {path}",
+  "setup.hook_failed": "codex: could not read {detail} as JSON, so the hook was left alone. Fix the file and run `reap setup` again.",
+  "setup.done": "Open a new session in the host you just set up — the /reap: skills and the status line appear there.",
+  "setup.done_codex": "Codex app: quit it (⌘Q) and reopen once — a running app keeps the hook list it started with, so a new conversation alone is not enough. The CLI reads the file every session.",
+  "setup.remove_done": "Removed. Only what `reap setup` put there was touched.",
   "store.v017_layout": "This .reap/ is the v0.17 layout ({markers}). REAP v0.18 stores things differently, and writing here would mix the two structures. Run /reap:migrate first — it isolates the original as .reap-v0_17/ and keeps it.",
   "store.mixed_layout": "This .reap/ holds both layouts at once (v0.17: {markers}; v0.18: {v018}). Something wrote v0.18 items into a v0.17 store. Stop and sort it out with a person before migrating — /reap:migrate moves the whole directory, so the v0.18 items would be carried into .reap-v0_17/ with it.",
   "doctor.kind.v017_layout": "v0.17 layout — migration needed",

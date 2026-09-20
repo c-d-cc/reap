@@ -4,7 +4,7 @@
 
 REAP는 AI와 사람이 소프트웨어를 함께 진화시키기 위한 **규약과 도구의 집합**이다. 작업의 모양을 결정하지 않고, 작업이 쓸 수 있는 도구와 저장 규약을 제공한다.
 
-만드는 것은 둘이다. TypeScript·Bun으로 만든 CLI 바이너리 `reap`과, skill과 SessionStart 훅을 담은 Claude Code 플러그인 `plugin/`이다. 둘은 따로 설치되고 따로 갱신된다.
+만드는 것은 둘이다. TypeScript·Bun으로 만든 CLI 바이너리 `reap`과, skill과 SessionStart 훅을 담은 플러그인 `plugin/`이다. 둘은 따로 설치되고 따로 갱신된다. 플러그인은 Claude Code와 Codex 양쪽에서 돈다.
 
 ## 설치
 
@@ -13,13 +13,16 @@ npm i -g @c-d-cc/reap
 reap setup
 ```
 
-설치는 이것이 전부다. `reap setup`이 `claude` CLI로 플러그인 마켓플레이스를 등록하고 Claude Code 플러그인을 설치한다 — 몇 번을 다시 쳐도 빠진 것만 한다. 확인:
+설치는 이것이 전부다. `reap setup`이 PATH에 있는 호스트를 감지해 마켓플레이스를 등록하고 플러그인을 설치한다. Claude Code와 Codex 둘 다 있으면 둘 다 건다. 몇 번을 다시 쳐도 빠진 것만 하고, `reap setup --remove`가 그것만 되돌린다. 확인:
 
 ```bash
 reap --version
 ```
 
-새 Claude Code 세션을 열면 `/` 메뉴에 `/reap:` skill 8종이 보이고, 세션 시작 시 상태 줄이 뜬다. 둘 다 안 보이면 `reap setup`을 다시 치고 그 출력을 읽는다.
+새 세션을 열면 skill과 상태 줄이 보인다. 둘 다 안 보이면 `reap setup`을 다시 치고 그 출력을 읽는다.
+
+- **Claude Code** — `/` 메뉴에 `/reap:` skill 8종이 뜨고, 세션 시작 시 상태 줄이 붙는다.
+- **Codex** — skill 10종을 이름으로 부른다(`reap:evolve`). `/` 메뉴가 아니라 에이전트가 목록에서 고르는 자리다. Codex는 플러그인 훅을 실행하지 않으므로 상태 줄은 `reap setup`이 `~/.codex/hooks.json`에 직접 걸어 준다. **앱을 쓰고 있었다면 한 번 종료했다 열어야 한다** — 떠 있는 앱은 시작할 때 읽은 훅 목록을 그대로 쓴다.
 
 ## 첫 사용
 
@@ -46,7 +49,7 @@ npm i -g @c-d-cc/reap
 reap setup
 ```
 
-그다음 새 Claude Code 세션을 열어 프로젝트마다 `/reap:migrate`를 부른다. 이주 전까지 v0.18은 옛 `.reap/`을 알아보고 거기에 쓰는 대신 그 사실을 말한다 — `ctx`와 `doctor`가 이 길을 가리키고 `make`·`mark`·`init`은 멈춘다. `migrate` skill이 8단계로 데이터를 옮기고, 원본은 `.reap-v0_17/`에 그대로 보존한다 — 되돌릴 수 있다.
+그다음 쓰는 호스트에서 새 세션을 열어 프로젝트마다 `/reap:migrate`를 부른다. 이주 전까지 v0.18은 옛 `.reap/`을 알아보고 거기에 쓰는 대신 그 사실을 말한다 — `ctx`와 `doctor`가 이 길을 가리키고 `make`·`mark`·`init`은 멈춘다. `migrate` skill이 8단계로 데이터를 옮기고, 원본은 `.reap-v0_17/`에 그대로 보존한다 — 되돌릴 수 있다.
 
 v0.17 슬래시 명령은 지울 때까지 그대로 남고, 옛 세션 훅은 이제 v0.18 CLI를 부르게 되는데 CLI가 같은 단계를 안내로 답한다.
 
@@ -66,7 +69,7 @@ v0.18에서 잃는 것:
 
 ## 명령 표면
 
-agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포하는 10종 — 여덟은 사람이 `/` 메뉴에서 부를 수 있고, 셋은 agent만 부른다(`user-invocable: false`로 메뉴에서 숨김):
+agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포하는 10종 — 여덟은 사람이 `/` 메뉴에서 부를 수 있고, 둘은 agent만 부른다(`user-invocable: false`로 메뉴에서 숨김). Codex에는 그 구분이 없어 열 종이 모두 agent에게 보인다:
 
 | skill | 누가 | 언제 |
 |---|---|---|

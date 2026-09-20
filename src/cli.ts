@@ -85,7 +85,7 @@ export async function run(argv: string[], cwd: string): Promise<Result> {
       });
     case "setup":
       return attempt(() => {
-        const result = setup();
+        const result = setup(undefined, { remove: rest.includes("--remove") });
         return { ok: result.ok, message: formatSetup(root, result), data: result };
       });
     default:

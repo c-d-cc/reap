@@ -4,7 +4,7 @@
 
 REAP is a **set of protocols and tools** for AI and people to evolve software together. It does not dictate the shape of the work — it provides the tools and storage protocol the work can draw on.
 
-Two things get built: a TypeScript/Bun CLI binary, `reap`, and a Claude Code plugin, `plugin/`, carrying the skills and SessionStart hook. The two install and update separately.
+Two things get built: a TypeScript/Bun CLI binary, `reap`, and a plugin, `plugin/`, carrying the skills and SessionStart hook. The two install and update separately. The plugin runs on both Claude Code and Codex.
 
 ## Install
 
@@ -13,13 +13,16 @@ npm i -g @c-d-cc/reap
 reap setup
 ```
 
-That's the whole install. `reap setup` registers the plugin marketplace and installs the Claude Code plugin through the `claude` CLI — run it again any time; it only does what's missing. Check:
+That's the whole install. `reap setup` detects the hosts on your PATH, registers the marketplace and installs the plugin. If both Claude Code and Codex are there, it sets up both. Run it again any time; it only does what's missing, and `reap setup --remove` undoes exactly that. Check:
 
 ```bash
 reap --version
 ```
 
-Open a new Claude Code session and eight `/reap:` skills show up in the `/` menu, along with a status line at session start. If neither appears, run `reap setup` again and read what it reports.
+Open a new session and the skills and the status line show up. If neither appears, run `reap setup` again and read what it reports.
+
+- **Claude Code** — eight `/reap:` skills in the `/` menu, and a status line at session start.
+- **Codex** — ten skills called by name (`reap:evolve`), listed for the agent to choose rather than shown in a `/` menu. Codex does not run plugin hooks, so `reap setup` puts the status line straight into `~/.codex/hooks.json`. **Quit and reopen the app if it was already running** — a running app keeps the hook list it started with.
 
 ## First use
 
@@ -46,7 +49,7 @@ npm i -g @c-d-cc/reap
 reap setup
 ```
 
-Then open a new Claude Code session and call `/reap:migrate` in each project. Until you migrate, v0.18 recognizes the old `.reap/` and says so rather than writing into it — `ctx` and `doctor` point you here, and `make`, `mark` and `init` stop. The migrate skill moves your data over in eight steps and keeps the original intact under `.reap-v0_17/` — reversible at every point.
+Then open a new session in your host and call `/reap:migrate` in each project. Until you migrate, v0.18 recognizes the old `.reap/` and says so rather than writing into it — `ctx` and `doctor` point you here, and `make`, `mark` and `init` stop. The migrate skill moves your data over in eight steps and keeps the original intact under `.reap-v0_17/` — reversible at every point.
 
 Your v0.17 slash commands keep working until you remove them, and the old session hooks now reach the v0.18 CLI, which answers them with those same steps.
 
@@ -66,7 +69,7 @@ Full comparison: [docs/reap-plan/reap_v_0_18_release/01-gap.md](docs/reap-plan/r
 
 ## Command surface
 
-Skills are how an agent works with REAP. The plugin ships 10 — eight you can call from the `/` menu, two only the agent calls (hidden from the menu with `user-invocable: false`):
+Skills are how an agent works with REAP. The plugin ships 10 — eight you can call from the `/` menu, two only the agent calls (hidden from the menu with `user-invocable: false`). Codex has no such distinction, so all ten are visible to the agent there:
 
 | skill | who calls it | when |
 |---|---|---|
