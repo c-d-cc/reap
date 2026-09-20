@@ -7,8 +7,9 @@ refs:
   - ps-4f2a91:03-storage.md
 startedAt: 2026-09-20T23:17:34Z
 startCommit: c036af2
-status: open
+status: closed
 milestones: []
+closedAt: 2026-09-20T23:21:58Z
 ---
 
 ## Question
