@@ -47,6 +47,11 @@ export default function AutonomousEvolutionPage() {
         <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{a.commitRuleDesc}</p>
         <CodeBlock language="bash">{a.commitRuleCode}</CodeBlock>
 
+        <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{a.afterCloseTitle}</h2>
+        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{a.afterCloseDesc}</p>
+        <p className="text-sm text-muted-foreground mb-3 leading-relaxed">{a.afterCloseHookDesc}</p>
+        <CodeBlock language="bash">{a.afterCloseCode}</CodeBlock>
+
         <h2 className="text-base font-semibold text-foreground mb-2 mt-6">{a.fitnessTitle}</h2>
         <p className="text-sm text-muted-foreground leading-relaxed">{a.fitnessDesc}</p>
       </DocPage>

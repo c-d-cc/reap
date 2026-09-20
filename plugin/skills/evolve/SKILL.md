@@ -30,6 +30,12 @@ Read that record's Intent and judge — if it's a continuation, don't open a new
 
 **Conversely, if a generation is open but the status line doesn't show it**, its binding has been lost (after an abort, or opened from a different directory). `doctor` reports it as "generation open but unbound", and if it's mine, `reap bind <gen-id>` rebinds it.
 
+## If you just closed one
+
+Arriving straight from [complete](../complete/SKILL.md) with items still left is the normal case in an autonomous run, not a reason to check in. The grounds are already settled — they're whatever the person handed over — so **don't re-ask which item is next when the answer is "the next one".**
+
+Everything below still applies. Ask whether this item is worth a generation, pick the axis, and pick the grounds as usual.
+
 ## Next: is it worth opening a generation
 
 **Ask this before picking an axis. Work that finishes in one edit and one commit isn't a generation** — a commit is enough.

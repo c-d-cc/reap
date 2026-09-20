@@ -67,7 +67,7 @@ REAP의 14개 이벤트는 5단계 lifecycle에 묶여 있었다. 고정 단계�
 
 ### 제공한다 — 결정 (사람, 2026-09-01)
 
-**v0.18도 hooks를 제공한다.** `make hook --event <e> --name <n> [--type md|sh] [--condition <c>] [--order <n>]`이 `.reap/hooks/{event}.{name}.{md|sh}`를 놓고, 위 여섯 지점(`make generation`·`mark generation --closed`·`make milestone`·`mark milestone --closed`·`orch claim`(성공)·`orch barrier`(해제))이 발화한다. `init`이 `hooks/conditions/always.sh`를 씨앗으로 놓는다. 검증할 동작과 파일 규약은 [03-hooks.md](03-hooks.md)가 규범이다.
+**v0.18도 hooks를 제공한다.** `make hook --event <e> --name <n> [--type md|sh] [--condition <c>] [--order <n>]`이 `.reap/hooks/{event}.{name}.{md|sh}`를 놓고, 위 여섯 지점(`make generation`·`mark generation --closed`·`make milestone`·`mark milestone --closed`·`orch claim`(성공)·`orch barrier`(해제))이 발화한다. `init`이 `hooks/conditions/always.sh`를 씨앗으로 놓는다. 경로는 [저장 구조](03-storage.md), `make hook`의 인자는 [명령 표면](04-commands.md)이 갖고, 파일 규약과 이벤트 목록은 이 절이 갖는다.
 
 **이벤트를 여섯 밖으로 늘릴 때만** 아래 셋을 판정 기준으로 쓴다 — hooks 자체를 만들지 여부는 더는 열린 질문이 아니다.
 
@@ -76,3 +76,9 @@ REAP의 14개 이벤트는 5단계 lifecycle에 묶여 있었다. 고정 단계�
 3. **프로젝트마다 달라야 한다.** 모든 프로젝트가 같은 것을 원하면 훅이 아니라 **도구가 그것을 하면 된다**
 
 **셋을 다 만족해야 한다.** 실제로 후보가 하나 있었는데 갈렸다 — `make milestone` 직후 `mark milestone --focus`를 매번 손으로 치던 것이 1·2를 만족했지만, **모든 프로젝트가 같은 것을 원하므로 3을 만족하지 않았다.** 그래서 훅이 아니라 `make milestone --focus`로 풀었다. **이것이 이 목록의 첫 시험이고 결과는 "훅이 아니다"였다.**
+
+### `gen.closed` — 첫 실제 용례
+
+`mark generation --closed`가 훅을 돌리고 출력이 닫힘 메시지 바로 뒤에 붙어 **agent 앞에 찍힌다.** 세대를 닫은 직후는 자율 실행이 구조적으로 가장 멈추기 쉬운 지점이므로([닫은 다음](02-flow.md#닫은-다음--이어받는-것이-다음-세션이라고-전제하지-않는다)), *"남은 것이 있으면 계속 간다"*를 적어 두는 자리가 여기다.
+
+판정 기준 셋 중 3을 만족한다 — **프로젝트마다 다르다.** 무엇이 남았다고 볼지, 어디까지 가면 멈추는지는 그 프로젝트의 일이고, 모든 프로젝트에 같은 문장을 박으면 그것은 훅이 아니라 도구가 할 일이 된다. 그래서 REAP는 이 문장을 싣지 않고 **자리만 준다.**

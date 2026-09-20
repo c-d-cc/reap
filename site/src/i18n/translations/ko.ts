@@ -161,6 +161,10 @@ export interface Translations {
     commitRuleTitle: string;
     commitRuleDesc: string;
     commitRuleCode: string;
+    afterCloseTitle: string;
+    afterCloseDesc: string;
+    afterCloseHookDesc: string;
+    afterCloseCode: string;
     fitnessTitle: string;
     fitnessDesc: string;
   };
@@ -1023,6 +1027,10 @@ export const ko: Translations = {
     commitRuleDesc: "일을 마치면 /reap:complete가 세대를 닫기 전에 커밋 규칙을 확인합니다. REAP의 유일한 규칙이고, 도구가 아니라 agent가 git에게 직접 물어 확인합니다.",
     commitRuleCode: `git status --porcelain        # 비어 있어야 한다
 git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
+    afterCloseTitle: "닫은 다음 — 남은 것이 있으면 이어서 합니다",
+    afterCloseDesc: "세대가 닫혔다는 것은 한 항목이 끝났다는 뜻이지 작업이 끝났다는 뜻이 아닙니다. 여러 항목을 맡기셨다면 남은 것이 있는 한 같은 세션이 곧바로 다음 evolve로 갑니다. agent의 턴은 사람에게 말해서 끝나는 것이 아니라 도구를 부르지 않고 메시지를 쓰는 순간 끝나기 때문에, 세대를 닫은 직후가 자율 실행이 가장 멈추기 쉬운 지점입니다. 보고는 이미 세대 기록과 handoff.md에 쓰여 있으므로 산문으로 다시 말할 이유가 없습니다.",
+    afterCloseHookDesc: "이 의무를 프로젝트에 적어 두고 싶다면 gen.closed 훅이 그 자리입니다. reap mark generation --closed가 훅을 돌리고 본문이 닫힘 메시지 바로 뒤에 붙어 agent 앞에 찍힙니다. 무엇을 남은 것으로 볼지, 어디서 멈출지는 프로젝트마다 다르므로 REAP는 문장을 싣지 않고 자리만 줍니다.",
+    afterCloseCode: "reap make hook --event gen.closed --name continue",
     fitnessTitle: "milestone이 끝나면 사람의 fitness",
     fitnessDesc: "generation마다가 아니라 milestone이 끝날 때 사람이 자연어로 fitness를 평가합니다. 정량 지표는 두지 않습니다 — 매 세대 사람이 막아서는 마찰이 자율성과 충돌하기 때문입니다. fitness가 확인되면 milestone 디렉토리가 archive로 옮겨집니다 — 세대들은 각자 닫힐 때 이미 거기 가 있습니다.",
   },

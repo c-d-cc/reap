@@ -142,3 +142,23 @@ After closing the generation, **if the milestone's exit criteria now read as met
 ## Use the tool when there is one
 
 If the `reap` binary is present, `reap mark generation <id> --closed` handles the frontmatter update and the move to `archive/generations/`. **`mark` doesn't check anything** — the commit check was already done above. Without the binary, do both by hand.
+
+## After closing: is anything left
+
+Closing ends **one item**, not the run. If the person handed over several items and any remain, **go straight to [evolve](../evolve/SKILL.md) for the next one.**
+
+Watch what ends a turn. It isn't speaking to the person — it's **writing a message with no tool call in it.** Right after a close is the most natural place to write a summary, which is exactly why an autonomous run dies here.
+
+**The report is already on disk.** The record's `Outcome`, the replaced `handoff.md`, and whatever went to `backlog/` or `idea/` were all written above. Saying it again in prose is a fourth copy, and that copy costs the run.
+
+So while items remain, don't close with a summary addressed to the person. Open the next generation instead. The person can read the archived records; what they can't do is restart a run they didn't know had stopped.
+
+**Stop when stopping is right**, and say why:
+
+- nothing is left, or the milestone's exit criteria now read as met (the section above)
+- the person set a stop condition and it's met
+- the commit rule failed, or something needs a human decision — those stop by design
+
+**A project can write this obligation down.** `reap mark generation --closed` runs `.reap/hooks/gen.closed.*.md` and prints it right after the close message, in front of you. A project that wants "if anything is left, keep going" puts that sentence there — `reap make hook --event gen.closed --name <n>` creates the file.
+
+Nothing here manufactures a turn. REAP gives the obligation a place and makes you read it at the moment you'd otherwise stop; keeping going is still your call.
