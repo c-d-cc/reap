@@ -3,7 +3,7 @@
 # anything is published. Idempotent: run it again after `git pull`.
 #
 #   bun install → bun run build + build:node → npm link
-#   ~/.claude/dev-marketplaces/reap-dev (symlink to ./plugin) → marketplace add → plugin install
+#   shared local reap-dev marketplace → installed in every available host → reap setup
 #
 # Usage: scripts/local-install.sh [--no-plugin]
 set -u
@@ -16,7 +16,10 @@ need() { command -v "$1" >/dev/null 2>&1 || { say "missing: $1 — $2"; fail=1; 
 need bun "https://bun.sh"
 need node "Node 20+ (nvm or https://nodejs.org)"
 need npm "comes with node"
-[ "${1:-}" = "--no-plugin" ] || need claude "Claude Code CLI — the plugin is installed through it"
+if [ "${1:-}" != "--no-plugin" ] && ! command -v claude >/dev/null 2>&1 && ! command -v codex >/dev/null 2>&1; then
+  say "missing: claude or codex — install at least one host CLI"
+  fail=1
+fi
 [ $fail -eq 0 ] || exit 1
 
 say "== bun install =="
@@ -45,12 +48,15 @@ say "== dev marketplace reap-dev → $ROOT/plugin =="
 D="$HOME/.claude/dev-marketplaces/reap-dev"
 mkdir -p "$D/.claude-plugin"
 ln -sfn "$ROOT/plugin" "$D/plugin"
+if [ ! -f "$D/.claude-plugin/marketplace.json" ]; then
 cat > "$D/.claude-plugin/marketplace.json" <<JSON
 { "name": "reap-dev",
   "description": "REAP development marketplace — points at a working tree",
   "owner": { "name": "$(git config user.name 2>/dev/null || echo dev)" },
   "plugins": [{ "name": "reap", "description": "REAP (working tree)", "source": "./plugin" }] }
 JSON
+fi
+if command -v claude >/dev/null 2>&1; then
 if claude plugin marketplace list 2>/dev/null | grep -q 'reap-dev'; then
   claude plugin marketplace update reap-dev >/dev/null 2>&1 || true
 else
@@ -66,5 +72,18 @@ else
   say "warning: plugin cache differs from working tree"; fail=1
 fi
 
-say "== done — open a new Claude Code session: eight /reap: skills in the / menu, status line at start =="
+fi
+
+if command -v codex >/dev/null 2>&1; then
+  say "== Codex: install reap@reap-dev =="
+  # Local marketplaces are copied into Codex's cache. Reinstall to refresh skills
+  # even when the development version number has not changed.
+  codex plugin marketplace add "$D" || exit 1
+  codex plugin remove reap@reap-dev >/dev/null 2>&1 || true
+  codex plugin add reap@reap-dev || exit 1
+fi
+
+# setup owns Codex's SessionStart registration and preserves other hooks.
+reap setup || exit 1
+say "== done — start a new host session; in Codex ask to use reap:init or reap:evolve =="
 exit $fail

@@ -40,7 +40,9 @@ tests/          <module>.test.ts · helpers.ts · hook.test.sh (셸) — submodu
 - **호스트는 둘이다** — Claude Code와 Codex. 어댑터는 없다. codex가 `.claude-plugin/marketplace.json`·
   `.claude-plugin/plugin.json`을 그대로 읽고 skill 열 종이 `reap:<이름>`으로 모델 앞에 놓인다(gen-0121 실측).
   갈리는 것은 설치 동사(`install`/`add`)와 훅 등록 자리뿐이다 — **codex는 플러그인 훅을 실행하지 않는다**
-  (`plugin_hooks` 기능이 removed). `orchestrate`만 Claude Code 전용이다(`claude agents`·`SendMessage`)
+  (`plugin_hooks` 기능이 removed). `orchestrate`만 Claude Code 전용이다(`claude agents`·`SendMessage`).
+  개발 체크아웃은 `scripts/local-install.sh`가 양쪽의 `reap@reap-dev`와 CLI를 함께 갱신한다.
+  `setup`은 Codex JSON의 실제 활성 설치만 인정하며 `init`·`doctor`는 현재 호스트를 확인한다.
 
 - 저장 레이아웃 3단 · 세대 id 한 계열(`gen-NNNN-<type>`) · `fix` 유형
 - **닫는 즉시 archive로 간다.** `mark`의 `--closed`·`--consumed`가 옮기고 `life/`에는 열린 것만 남는다. 참고 가치를 판단하던 `cleanup` skill은 은퇴했다(ms-028) — 다음 세션이 볼 것은 `handoff.md`에 있다
@@ -56,7 +58,7 @@ tests/          <module>.test.ts · helpers.ts · hook.test.sh (셸) — submodu
 ## 빌드와 테스트
 
 ```bash
-bun test         # 276개
+bun test         # 282개
 ./tests/hook.test.sh   # 훅 스크립트 5종 (bun test가 돌리지 않는다)
 bun run typecheck   # tsc --noEmit
 bun run build       # bun build --compile → dist/reap (약 89.5MB — 문법 15개 28MB 포함)

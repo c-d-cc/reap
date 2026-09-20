@@ -10,7 +10,7 @@ import { validateRef } from "./plan.ts";
 import { detectLayout, paths, readSession } from "./store.ts";
 import { template } from "./templates.ts";
 import { allTranslations, t } from "./i18n.ts";
-import { pluginInstalled } from "./setup.ts";
+import { sessionPluginInstalled } from "./setup.ts";
 
 export type Finding = { kind: string; detail: string };
 export type Report = { defects: Finding[]; notes: Finding[] };
@@ -124,7 +124,7 @@ export function diagnose(root: string): Report {
   if (focused.length > 1) defects.push({ kind: t(root, "doctor.kind.duplicate_focus"), detail: focused.map((e) => e.id).join(", ") });
 
   // 4b. 플러그인 — skill과 상태 줄이 그것에 기댄다. settings.json이 없으면(모르면) 말하지 않는다
-  if (pluginInstalled() === false) notes.push({ kind: t(root, "doctor.kind.plugin_missing"), detail: t(root, "doctor.detail.plugin_missing") });
+  if (sessionPluginInstalled() === false) notes.push({ kind: t(root, "doctor.kind.plugin_missing"), detail: t(root, "doctor.detail.plugin_missing") });
 
   // 4c. 닫힌 milestone에 세대가 하나뿐 — backlog 항목이면 충분했을 일. 사후에 보고만 한다(참고)
   const genCount = new Map<string, number>();

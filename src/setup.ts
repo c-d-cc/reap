@@ -74,7 +74,11 @@ function readHookFile(path: string): HookFile | "broken" {
   if (!existsSync(path)) return null;
   const raw = readFileSync(path, "utf8");
   try {
-    return { data: JSON.parse(raw) as Record<string, any>, trailing: raw.endsWith("\n") ? "\n" : "" };
+    const data = JSON.parse(raw);
+    const object = (v: unknown): v is Record<string, any> => v !== null && typeof v === "object" && !Array.isArray(v);
+    if (!object(data) || (data.hooks !== undefined && !object(data.hooks)) ||
+        (data.hooks?.SessionStart !== undefined && !Array.isArray(data.hooks.SessionStart))) return "broken";
+    return { data, trailing: raw.endsWith("\n") ? "\n" : "" };
   } catch {
     return "broken";
   }
@@ -101,9 +105,27 @@ export function setup(runner: Runner = defaultRunner, opts: { home?: string; cod
   return { ok, steps };
 }
 
-function installTo(host: Host, runner: Runner, cx: string, steps: SetupStep[]): boolean {
+/** Codex's text list includes available, uninstalled plugins. Only its JSON installed array is evidence. */
+function installedPlugins(host: Host, runner: Runner): { id: string; enabled: boolean }[] {
+  const result = runner(host, host === "codex" ? ["plugin", "list", "--json"] : ["plugin", "list"]);
+  if (result.status !== 0) return [];
+  if (host === "claude") return [...result.stdout.matchAll(/\breap@[\w.-]+|[\w.-]+@ctod-plugins/g)].map((m) => ({ id: m[0], enabled: true }));
+  try {
+    const data = JSON.parse(result.stdout);
+    if (!Array.isArray(data.installed)) return [];
+    return data.installed.filter((p: any) => p.installed === true && typeof p.pluginId === "string")
+      .map((p: any) => ({ id: p.pluginId, enabled: p.enabled === true }));
+  } catch { return []; }
+}
+
+function installPlugin(host: Host, runner: Runner, steps: SetupStep[]): boolean {
+  const installed = installedPlugins(host, runner).find((p) => p.enabled && p.id.startsWith("reap@"))?.id;
+  if (installed) {
+    steps.push({ host, step: "plugin", state: "present", detail: installed });
+    return true;
+  }
   const markets = runner(host, ["plugin", "marketplace", "list"]);
-  if (markets.stdout.includes(MARKETPLACE_NAME)) {
+  if (markets.status === 0 && markets.stdout.includes(MARKETPLACE_NAME)) {
     steps.push({ host, step: "marketplace", state: "present" });
   } else {
     const add = runner(host, ["plugin", "marketplace", "add", MARKETPLACE_SOURCE]);
@@ -113,20 +135,17 @@ function installTo(host: Host, runner: Runner, cx: string, steps: SetupStep[]): 
     }
     steps.push({ host, step: "marketplace", state: "added" });
   }
-
-  let ok = true;
-  const installed = /reap@[\w.-]+/.exec(runner(host, ["plugin", "list"]).stdout)?.[0];
-  if (installed) {
-    steps.push({ host, step: "plugin", state: "present", detail: installed });
-  } else {
-    const install = runner(host, INSTALL[host]);
-    if (install.status === 0) steps.push({ host, step: "plugin", state: "installed" });
-    else {
-      steps.push({ host, step: "plugin", state: "failed", detail: (install.stderr || install.stdout).trim() });
-      ok = false;
-    }
+  const install = runner(host, INSTALL[host]);
+  if (install.status === 0) {
+    steps.push({ host, step: "plugin", state: "installed" });
+    return true;
   }
+  steps.push({ host, step: "plugin", state: "failed", detail: (install.stderr || install.stdout).trim() });
+  return false;
+}
 
+function installTo(host: Host, runner: Runner, cx: string, steps: SetupStep[]): boolean {
+  const ok = installPlugin(host, runner, steps);
   if (host !== "codex") return ok;
   const path = join(cx, "hooks.json");
   const file = readHookFile(path);
@@ -149,8 +168,8 @@ function installTo(host: Host, runner: Runner, cx: string, steps: SetupStep[]): 
 }
 
 function removeFrom(host: Host, runner: Runner, cx: string, steps: SetupStep[]): boolean {
-  const listed = runner(host, ["plugin", "list"]).stdout;
-  const mine = listed.includes(PLUGIN);
+  const listed = installedPlugins(host, runner);
+  const mine = listed.some((p) => p.id === PLUGIN);
   if (mine) {
     const gone = runner(host, ["plugin", "remove", PLUGIN]);
     if (gone.status !== 0) {
@@ -175,7 +194,7 @@ function removeFrom(host: Host, runner: Runner, cx: string, steps: SetupStep[]):
     }
   }
 
-  const others = [...listed.matchAll(new RegExp(`([\\w.-]+)@${MARKETPLACE_NAME}`, "g"))].some((m) => m[1] !== "reap");
+  const others = listed.some((p) => p.id.endsWith(`@${MARKETPLACE_NAME}`) && p.id !== PLUGIN);
   if (mine && !others && runner(host, ["plugin", "marketplace", "list"]).stdout.includes(MARKETPLACE_NAME)) {
     const gone = runner(host, ["plugin", "marketplace", "remove", MARKETPLACE_NAME]);
     if (gone.status !== 0) {
@@ -225,13 +244,21 @@ export function pluginInstalled(home: string = process.env.HOME || homedir(), co
   return false;
 }
 
+/** A plugin in the other host cannot supply this session's skills. */
+export function sessionPluginInstalled(): boolean | null {
+  const home = process.env.HOME || homedir();
+  if (process.env.CODEX_THREAD_ID) return codexPlugin(codexHome(home)) ?? false;
+  if (process.env.CLAUDECODE) return claudePlugin(home) ?? false;
+  return pluginInstalled(home);
+}
+
 function claudePlugin(home: string): boolean | null {
   const path = join(home, ".claude", "settings.json");
   if (!existsSync(path)) return null;
   try {
     const settings = JSON.parse(readFileSync(path, "utf8")) as { enabledPlugins?: unknown };
     const enabled = settings.enabledPlugins;
-    const names = Array.isArray(enabled) ? enabled.map(String) : enabled && typeof enabled === "object" ? Object.keys(enabled) : [];
+    const names = Array.isArray(enabled) ? enabled.map(String) : enabled && typeof enabled === "object" ? Object.entries(enabled).filter(([, value]) => value === true).map(([name]) => name) : [];
     return names.some((n) => n.startsWith("reap@"));
   } catch {
     return null;
@@ -242,7 +269,8 @@ function codexPlugin(cx: string): boolean | null {
   const path = join(cx, "config.toml");
   if (!existsSync(path)) return null;
   try {
-    return /^\s*\[plugins\."reap@[\w.-]+"\]/m.test(readFileSync(path, "utf8"));
+    const sections = readFileSync(path, "utf8").split(/(?=^\s*\[)/m);
+    return sections.some((section) => /^\s*\[plugins\."reap@[\w.-]+"\]/.test(section) && /^\s*enabled\s*=\s*true\s*(?:#.*)?$/m.test(section));
   } catch {
     return null;
   }

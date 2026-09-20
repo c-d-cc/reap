@@ -24,6 +24,16 @@ reap --version
 - **Claude Code** — `/` 메뉴에 `/reap:` skill 8종이 뜨고, 세션 시작 시 상태 줄이 붙는다.
 - **Codex** — skill 10종을 이름으로 부른다(`reap:evolve`). `/` 메뉴가 아니라 에이전트가 목록에서 고르는 자리다. Codex는 플러그인 훅을 실행하지 않으므로 상태 줄은 `reap setup`이 `~/.codex/hooks.json`에 직접 걸어 준다. **앱을 쓰고 있었다면 한 번 종료했다 열어야 한다** — 떠 있는 앱은 시작할 때 읽은 훅 목록을 그대로 쓴다.
 
+아직 릴리스하지 않은 개발 체크아웃은 다음 명령으로 설치한다:
+
+```bash
+./scripts/local-install.sh
+```
+
+CLI를 빌드·링크하고, 있는 호스트 모두에 `reap@reap-dev`를 갱신한 뒤 Codex SessionStart 훅을 등록한다. 코드를 갱신하면 다시 실행한다. `--no-plugin`은 CLI만 빌드한다. 개발 플러그인이 설치돼 있으면 원격 릴리스 마켓플레이스에 의존하지 않는다.
+
+Codex가 훅 검토를 요구하면 Codex CLI의 `/hooks`에서 `reap ctx --hook` 항목을 검토하고 신뢰한다. 훅 등록과 신뢰는 별개다. 새 Codex 작업에서 “reap:init 스킬로 이 프로젝트를 초기화해줘”, “reap:evolve 스킬로 작업을 시작해줘”라고 요청하면 된다.
+
 ## 첫 사용
 
 프로젝트에서 (신규 폴더든 기존 코드베이스든):
@@ -79,7 +89,7 @@ agent가 REAP를 다루는 통로는 skill이다. 플러그인이 배포하는 1
 | [`flux`](plugin/skills/flux/SKILL.md) | 사람 | 새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것 |
 | [`carve-milestone`](plugin/skills/carve-milestone/SKILL.md) | agent | plan을 실행 가능한 milestone으로 자를 때, 그리고 milestone을 닫을 때 |
 | [`interview`](plugin/skills/interview/SKILL.md) | 사람 | 의도가 모호해 사람이 결정해야 할 때 |
-| [`orchestrate`](plugin/skills/orchestrate/SKILL.md) | 사람 | 두 세션 이상이 같은 프로젝트에서 동시에 작업할 때 |
+| [`orchestrate` (Claude Code 전용)](plugin/skills/orchestrate/SKILL.md) | 사람 | 두 세션 이상이 같은 프로젝트에서 동시에 작업할 때 |
 | [`migrate`](plugin/skills/migrate/SKILL.md) | 사람 | v0.17 데이터를 v0.18 구조로 옮길 때 |
 | [`report-issue`](plugin/skills/report-issue/SKILL.md) | 사람 | REAP 자체의 결함이나 빠진 기능을 만났을 때 |
 | [`help`](plugin/skills/help/SKILL.md) | 사람 | 지금 어디인지, 무엇을 부를 수 있는지, 다음에 뭘 할지 — 상태 줄을 다시 보여 주고 행동 하나를 제안한다 |

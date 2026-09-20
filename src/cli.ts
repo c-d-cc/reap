@@ -36,7 +36,7 @@ import {
 } from "./store.ts";
 import { render, template } from "./templates.ts";
 import { t } from "./i18n.ts";
-import { formatSetup, isLegacyCommand, pluginInstalled, setup } from "./setup.ts";
+import { formatSetup, isLegacyCommand, sessionPluginInstalled, setup } from "./setup.ts";
 import pkg from "../package.json" with { type: "json" };
 
 export type Result = { ok: boolean; message: string; data?: unknown; stderr?: string };
@@ -562,7 +562,7 @@ function init(cwd: string, force: boolean): Result {
   if (ignoreLocal(root)) created.push(".gitignore");
 
   // 설치는 여기서 하지 않는다 — init은 프로젝트의 일이고 플러그인은 홈의 일이다. 없으면 `setup`을 가리킬 뿐이다
-  const hint = pluginInstalled() === false ? `\n${t(root, "cli.setup_hint")}` : "";
+  const hint = sessionPluginInstalled() === false ? `\n${t(root, "cli.setup_hint")}` : "";
   return {
     ok: true,
     message: (created.length > 0

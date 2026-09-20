@@ -24,6 +24,16 @@ Open a new session and the skills and the status line show up. If neither appear
 - **Claude Code** — eight `/reap:` skills in the `/` menu, and a status line at session start.
 - **Codex** — ten skills called by name (`reap:evolve`), listed for the agent to choose rather than shown in a `/` menu. Codex does not run plugin hooks, so `reap setup` puts the status line straight into `~/.codex/hooks.json`. **Quit and reopen the app if it was already running** — a running app keeps the hook list it started with.
 
+For an unpublished development checkout, install the working tree into every available host:
+
+```bash
+./scripts/local-install.sh
+```
+
+This builds and links the CLI, refreshes `reap@reap-dev` in Claude Code and Codex, and registers the Codex SessionStart hook. Re-run it after pulling changes. `--no-plugin` builds only the CLI. It does not require the release marketplace once the development plugin is installed.
+
+If Codex reports that the hook needs review, open `/hooks` in the Codex CLI and review/trust the `reap ctx --hook` entry. Hook registration and hook trust are separate. In a new Codex task, ask “Use reap:init to initialize this project” or “Use reap:evolve to start this work.”
+
 ## First use
 
 In a project — a fresh folder or an existing codebase:
@@ -79,7 +89,7 @@ Skills are how an agent works with REAP. The plugin ships 10 — eight you can c
 | [`flux`](plugin/skills/flux/SKILL.md) | you | To create a new intent — planning, design, screens, anything without a place yet |
 | [`carve-milestone`](plugin/skills/carve-milestone/SKILL.md) | agent | To cut a plan into an executable milestone, and to close one |
 | [`interview`](plugin/skills/interview/SKILL.md) | you | When intent is ambiguous enough that a person has to decide |
-| [`orchestrate`](plugin/skills/orchestrate/SKILL.md) | you | When two or more sessions work on the same project at once |
+| [`orchestrate` (Claude Code only)](plugin/skills/orchestrate/SKILL.md) | you | When two or more sessions work on the same project at once |
 | [`migrate`](plugin/skills/migrate/SKILL.md) | you | To move v0.17 data into the v0.18 structure |
 | [`report-issue`](plugin/skills/report-issue/SKILL.md) | you | When you hit a defect or missing feature in REAP itself |
 | [`help`](plugin/skills/help/SKILL.md) | you | Where are we, what can I call, what next — re-shows the status line and suggests one action |
