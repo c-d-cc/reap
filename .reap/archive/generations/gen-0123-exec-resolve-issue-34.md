@@ -6,7 +6,9 @@ backlog: bk-d46db0
 title: "resolve #34: 한 항목을 닫은 뒤 다음으로 넘어갈 의무를 적어 둘 자리가 없다"
 startedAt: 2026-09-20T22:43:06Z
 startCommit: 72cf374
-status: open
+status: closed
+closedAt: 2026-09-20T22:58:23Z
+endCommit: 053bb49
 ---
 
 ## Intent
