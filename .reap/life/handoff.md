@@ -17,7 +17,7 @@ v0.17 이주 여덟 쪽을 각각 무엇과 대조할지가 거기 있다.
 **검수하려면 사이트를 띄운다** — `npm run dev --prefix site`(5174). 이 세션이 확인했을 때
 이미 떠 있었다(다른 세션의 Vite dev, 같은 리포).
 
-## 미결 — Exit Criteria가 기각된 접근을 이름으로 부른다
+### 미결 — Exit Criteria가 기각된 접근을 이름으로 부른다
 
 ms-022의 **제목과 Exit Criteria가 여전히 "VitePress"**다. 2026-09-04에 사람이 기각했고
 (기존 reap.cc 디자인·톤 유지, 내용만 v0.18), `Background`가 *"아래 Exit Criteria의 VitePress
