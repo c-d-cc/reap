@@ -19,10 +19,10 @@
     milestones/
       <ms-id>-<slug>/   예: ms-004-auth-session
         milestone.md    frontmatter(CLI) + 자유 본문(agent). **가장 먼저 열리므로 작게 유지한다**
-        handoff.md      다음 세션 인계 (agent가 작성)
         tasks/          작업 상세 — 인터페이스, 함정, 완료 판정 (제목 목록만 주입)
           <n>-<slug>.md   예: 1-2-id-and-documents.md
   life/                 하는 중
+    handoff.md          다음 세션 인계 — 세션별 절 하나씩 (agent가 쓰고 지운다)
     generations/
       <gen-id>-<slug>.md   예: gen-0002-exec-token-rotation.md
     backlog/
@@ -84,7 +84,48 @@
 
 그래서 세 종류가 같은 규칙이다. `life/generations/`·`life/flux/`·`life/backlog/`에는 열린 것만 있고, 닫히거나 소비되는 순간 CLI가 `archive/`로 옮긴다. 기록은 id로 찾으며 조회는 두 곳을 다 본다 — 필요한 것은 언제든 열린다. `--archived` 플래그는 옛 규칙으로 `life/`에 남은 것을 내리는 용도로만 남는다.
 
-**milestone 종료 순서는 둘이다** — 사람의 fitness → `mark milestone --closed`. milestone 디렉토리(`milestone.md`·`handoff.md`·`tasks/`)가 통째로 `archive/milestones/`로 가고, 세대는 이미 거기 있다.
+**milestone 종료 순서는 둘이다** — 사람의 fitness → `mark milestone --closed`. milestone 디렉토리(`milestone.md`·`tasks/`)가 통째로 `archive/milestones/`로 가고, 세대는 이미 거기 있다. **인계는 따라가지 않는다** — `life/handoff.md`는 milestone 밖에 있다.
+
+## 인계는 milestone이 아니라 세션의 것이다
+
+`handoff.md`는 milestone 디렉토리에 있었다. 답하는 질문은 *"다음 세션이 어디서 시작하나"* 로 **세션**의 것인데 파일이 **milestone**에 매여 셋이 어긋났다.
+
+- **소속 없는 세대는 적을 자리가 없다.** fix는 milestone을 갖지 않고, backlog만 근거인 exec도 마찬가지다. 실측으로 닫힌 세대의 **3분의 1**이 여기 해당했다
+- **가장 필요한 순간에 사라진다.** milestone을 닫으면 디렉토리째 archive로 가므로, 다음 milestone을 자르기 직전에 인계가 빈 파일이 된다
+- **누적을 막을 수단이 없다.** 한 milestone이 오래 열려 있으면 "교체한다"가 지켜지지 않고 로그가 된다. 실측으로 12.8KB·헤딩 13개까지 자랐고 그중 셋이 `지난 … 이전 handoff (기록)`이었다
+
+그러므로 **`life/handoff.md` 하나다.**
+
+### 절은 세션으로 가른다
+
+```markdown
+## sess-9bf47826 · gen-0123-exec · 2026-09-21T08:12:00Z
+
+어디까지 갔나 / 다음에 무엇을 볼까 / 미결
+```
+
+제목은 셋을 함께 싣는다 — **세션 키**(절의 주인), **그 절을 남긴 세대**, **시각**. 세션 키만으로는 나중에 누구의 것인지 돌이킬 수 없고, 돌이킬 수 없는 절은 지우지도 못한다.
+
+**세션 키는 도구가 준다.** agent가 만들 수 없는 사실이기 때문이다. 해석 사다리는 넷이다.
+
+1. `REAP_SESSION` — 사람이나 상위 도구가 직접 정한 값
+2. `CLAUDE_CODE_SESSION_ID` — Claude Code가 자식 프로세스에 내리는 세션 UUID
+3. 호스트가 주는 다른 세션 식별자
+4. **없으면 워크스페이스 해시** — 오늘 `.session`이 담는 값
+
+**넷째 칸은 세션을 가르지 못한다.** 그것은 리포 루트의 해시라서 한 워크트리의 모든 세션이 같은 값을 영구히 공유한다. 그 호스트에서는 절이 하나로 합쳐지며, **그것은 오늘의 동작과 같다** — 나빠지지 않되 좋아지지도 않는다. 이 사실을 감추면 `life/run/<sessionId>/`를 만들었다 물린 실수가 반복된다.
+
+### 절은 소비되면 지운다
+
+**지우는 것이 소비의 정의다.** 다음 세션이 그 절을 읽고 일을 이어받았으면 절을 지운다. 표시하지 않는다 — 표시는 읽은 사람이 판단할 것을 남기고, 남은 것은 다시 로그가 된다.
+
+지우는 주체는 **이어받은 세션**이지 남긴 세션이 아니다. 남긴 쪽은 자기 절을 교체할 뿐이다.
+
+**절이 하나도 없는 것이 정상이다.** 이어받을 것이 없으면 파일은 비어 있다.
+
+### 왜 동시 쓰기가 아니라 머지인가
+
+병렬 세션은 worktree로 갈리고 worktree마다 `.reap/`가 별개다 — **같은 파일을 동시에 쓰는 일은 일어나지 않는다**(`07-orchestrate.md`). 그러나 `.reap/`는 git에 들어가므로 두 worktree의 `life/handoff.md`는 **머지에서 충돌한다.** 절을 가르는 것이 막는 것은 그 충돌이지 실행 중의 경합이 아니다.
 
 ### `map.md` — 구조가 스스로를 설명한다
 
@@ -105,7 +146,10 @@
 
 **세션 식별** — 다음 순서로 해석한다.
 1. `REAP_SESSION` 환경변수
-2. 없으면 워크트리 로컬 `.reap/.session` 파일
+2. `CLAUDE_CODE_SESSION_ID` — Claude Code가 자식 프로세스에 내리는 세션 UUID. 2026-09-21 probe로 확인했다(값이 `~/.claude/projects/<proj>/<값>.jsonl`과 일치)
+3. 없으면 워크트리 로컬 `.reap/.session` 파일의 값 — 리포 루트의 sha256 앞 12자다
+
+**셋째 칸은 세션이 아니라 워크트리를 가리킨다.** 한 워크트리의 모든 세션이 같은 값을 영구히 공유한다. 세션을 가르는 데 그 값을 쓰는 설계는 성립하지 않으며, `life/run/<sessionId>/`가 그것을 모르고 만들어졌다가 물렸다. 세션마다 갈려야 하는 것은 1·2가 있을 때만 갈린다 — Codex에는 해당 환경변수가 없다(0.155.1 실측).
 
 `.index/`도 gitignored다. **크기 때문이 아니다** — 인덱스를 커밋하면 그 인덱스를 담은 커밋을 다시 인덱싱해야 하고 **그것이 끝나지 않는다.** 지우는 것은 언제나 안전하고 다음 질의가 다시 만든다.
 

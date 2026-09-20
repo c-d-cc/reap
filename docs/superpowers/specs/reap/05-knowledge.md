@@ -86,7 +86,7 @@ genome은 확정된 처방이고, environment는 확인된 사실이고, plan은
 
 - **idea vs plan** — plan은 만들려는 것에 대한 의도다. idea는 아직 어느 자리에도 못 가는 재료다. 조사에서 결론이 서면 plan source로 졸업한다.
 - **idea/files vs environment/resources** — **채택 여부**가 가른다. 지금 이 프로젝트가 쓰고 있는 것의 스펙이면 `environment/resources/`, 쓸지도 모르는 것의 자료면 `idea/files/`. 채택되는 순간 이동한다.
-- **idea/freememo vs milestone handoff** — 다음 세션에 **필요한** 것은 `handoff.md`, 필요할지 **모르는** 것이 `freememo/`. 이 구분이 무너지면 freememo가 handoff의 우회로가 되고, 그러면 handoff는 아무도 안 읽는 파일이 된다.
+- **idea/freememo vs handoff** — 다음 세션에 **필요한** 것은 `life/handoff.md`, 필요할지 **모르는** 것이 `freememo/`. 이 구분이 무너지면 freememo가 handoff의 우회로가 되고, 그러면 handoff는 아무도 안 읽는 파일이 된다.
 - **idea vs 세션 임시 디렉토리** — 임시 디렉토리는 세션 수명의 중간 산출물이고, idea는 프로젝트 수명의 미완결 **지식**이다.
 
 ### 쓰레기통이 되지 않게 하는 장치
@@ -199,7 +199,7 @@ REAP의 구현을 가져오지 않는다. 개념만 참조해 필요에 맞게 �
 
 **environment** — 현상 지식. 지금 무엇이 있는가. `summary.md`가 항상 로드되고, 나머지는 필요할 때 읽는다.
 
-**memory** — milestone을 가로지르는 맥락. `lessons.md`(프로젝트 전역 교훈) 하나다. **결론 안 난 물음은 여기 두지 않는다** — 그것은 `idea/research/`의 자리다. 물음은 닫히는 것이고 교훈은 쌓이는 것이라, 한 파일에 섞으면 어느 쪽도 정리되지 않는다. REAP의 3-tier에서 shortterm의 역할은 milestone의 `handoff.md`가 가져간다. midterm에 해당하는 것은 두지 않는다 — 아래 `결정 로그를 두지 않는다`를 본다. **주입되지 않고 `ctx`의 상태 줄이 위치만 알린다** — 누적되는 문서이기 때문이다. 앞의 `memory — 나가는 문이 있어야 한다`를 본다.
+**memory** — milestone을 가로지르는 맥락. `lessons.md`(프로젝트 전역 교훈) 하나다. **결론 안 난 물음은 여기 두지 않는다** — 그것은 `idea/research/`의 자리다. 물음은 닫히는 것이고 교훈은 쌓이는 것이라, 한 파일에 섞으면 어느 쪽도 정리되지 않는다. REAP의 3-tier에서 shortterm의 역할은 `life/handoff.md`가 가져간다. midterm에 해당하는 것은 두지 않는다 — 아래 `결정 로그를 두지 않는다`를 본다. **주입되지 않고 `ctx`의 상태 줄이 위치만 알린다** — 누적되는 문서이기 때문이다. 앞의 `memory — 나가는 문이 있어야 한다`를 본다.
 
 **carrier marker** — **한 사실을 아는 곳을 전부 찾는 수단.** 위의 `코드를 아는 세 층` 중 셋째다. 값이 여러 곳에 알려질 때 그 자리마다 표식을 남겨두면, 그 사실을 고치기 전에 `grep` 한 번으로 나머지를 찾는다.
 

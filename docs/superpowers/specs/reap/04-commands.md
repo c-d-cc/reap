@@ -197,7 +197,7 @@ generation 기록과 같은 규칙이다. frontmatter는 `make`와 `mark`가, �
 
 `make milestone`은 plan generation의 산출이 일반적인 경로지만 강제되지 않는다. 급한 수정은 milestone을 직접 만들어 시작할 수 있고, 이때 `refs`는 비어 있어도 된다.
 
-**종료에는 사람의 fitness 피드백이 필요하다.** 이것도 게이트가 아니다 — `mark milestone --closed`는 피드백 존재를 검사하지 않는다. `carve-milestone` skill이 사람에게 묻고, 받은 피드백을 milestone 본문에 남긴 뒤 `mark milestone --closed`를 호출한다. 닫은 milestone은 `archive/milestones/<ms-id>-<slug>/`로 옮겨지며 `milestone.md`·`handoff.md`·`tasks/`가 함께 보존된다. **세대는 따라가지 않는다** — 세대는 각자 닫힐 때 이미 `archive/generations/`로 갔다(2026-09-05 이전에는 `cleanup` skill이 이 시점에 참고 가치를 판단해 내렸다. 판단이 서지 않아 폐기).
+**종료에는 사람의 fitness 피드백이 필요하다.** 이것도 게이트가 아니다 — `mark milestone --closed`는 피드백 존재를 검사하지 않는다. `carve-milestone` skill이 사람에게 묻고, 받은 피드백을 milestone 본문에 남긴 뒤 `mark milestone --closed`를 호출한다. 닫은 milestone은 `archive/milestones/<ms-id>-<slug>/`로 옮겨지며 `milestone.md`·`tasks/`가 함께 보존된다. **인계는 따라가지 않는다** — `life/handoff.md`는 milestone 밖이다. **세대는 따라가지 않는다** — 세대는 각자 닫힐 때 이미 `archive/generations/`로 갔다(2026-09-05 이전에는 `cleanup` skill이 이 시점에 참고 가치를 판단해 내렸다. 판단이 서지 않아 폐기).
 
 `focus`는 제한이 아니라 초점이다. 초점이 아닌 열린 milestone에서도 generation을 시작할 수 있다. `.session`에 milestone이 바인딩되어 있으면 그것이 `focus`보다 우선한다 — 병렬 세션이 각자 다른 milestone에서 일할 수 있어야 한다.
 
@@ -245,7 +245,7 @@ CLI가 본문에 아무것도 깔지 않는 대신, REAP는 **적을 만한 항�
 
 ### 기록이 세대가 도는 동안에도 쓸모 있어야 하는 이유
 
-결과만 있는 기록은 닫히기 전까지 비어 있고, 그것은 **세대가 도는 동안 기록이 아무 쓸모가 없다**는 뜻이다. 세션이 중간에 죽거나 다른 세션으로 넘어갈 때 필요한 것이 정확히 "이 세대가 무엇을 하려던 중이었나"인데, `handoff.md`는 milestone 레벨이고 종료 시점에 쓰이므로 그 순간을 메우지 못한다. milestone의 계획 항목은 한 줄이라 접근법을 담지 못한다. Intent와 Working Plan이 어휘에 있는 이유는 계획을 요구하기 위해서가 아니라 이 구멍 때문이다.
+결과만 있는 기록은 닫히기 전까지 비어 있고, 그것은 **세대가 도는 동안 기록이 아무 쓸모가 없다**는 뜻이다. 세션이 중간에 죽거나 다른 세션으로 넘어갈 때 필요한 것이 정확히 "이 세대가 무엇을 하려던 중이었나"인데, `life/handoff.md`는 세대를 **닫을 때** 쓰이므로 도는 동안을 메우지 못한다. milestone의 계획 항목은 한 줄이라 접근법을 담지 못한다. Intent와 Working Plan이 어휘에 있는 이유는 계획을 요구하기 위해서가 아니라 이 구멍 때문이다.
 
 REAP의 planning 스테이지가 부활하지 않도록 세 가지를 다르게 둔다.
 

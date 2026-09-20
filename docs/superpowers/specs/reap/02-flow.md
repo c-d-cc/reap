@@ -64,7 +64,7 @@ agent는 판단하고, CLI에게 확정을 요청하고, 사실은 git에게 직
    |     시작 커밋 이후 새 커밋이 있는가
    |     -> 아니면 여기서 멈추고 사람과 정리한다
    |
-   +-- 기록을 마무리하고 handoff.md를 갱신한다 (agent가 직접)
+   +-- 기록을 마무리하고 life/handoff.md의 내 절을 교체한다 (agent가 직접)
    |
    +-- reap mark generation --closed --> 종료 시각과 현재 HEAD를 찍는다
    |
@@ -80,7 +80,7 @@ agent는 판단하고, CLI에게 확정을 요청하고, 사실은 git에게 직
 
 여기 적는 이유는 이 지점이 **구조적으로 가장 멈추기 쉬운 곳**이기 때문이다. agent의 턴은 사람에게 말해서 끝나는 것이 아니라 **도구 호출 없이 메시지를 내면** 끝난다. 세대를 닫은 직후는 보고하기 가장 자연스러운 지점이고, 그래서 보고가 곧 실행의 끝이 된다.
 
-**보고는 이미 파일에 있다.** 세대 기록의 `Outcome`, 교체된 `handoff.md`, 이월된 backlog·idea까지 `complete`가 전부 쓴다. 산문으로 다시 말하는 것은 넷째 사본이고, 그 사본의 대가가 실행 종료다.
+**보고는 이미 파일에 있다.** 세대 기록의 `Outcome`, 교체된 `life/handoff.md`의 절, 이월된 backlog·idea까지 `complete`가 전부 쓴다. 산문으로 다시 말하는 것은 넷째 사본이고, 그 사본의 대가가 실행 종료다.
 
 **저장을 늘려 풀지 않는다.** 기록해야 하는 것은 턴이 끝난 뒤에도 살아남아야 하는 것뿐이다. 턴을 끝내지 않으면 무엇이 남았는지는 맥락에 그대로 있으므로 적을 것이 없다.
 
@@ -100,7 +100,7 @@ agent는 판단하고, CLI에게 확정을 요청하고, 사실은 git에게 직
 | 세대 열기 | `evolve` | `make generation` | 기록 파일, 레지스트리 행, 세션 바인딩 |
 | 이월 | agent | `make backlog` | backlog 항목 |
 | 미확정 지식 | agent | `make idea` | `idea/` 항목 |
-| 세대 닫기 | `complete` | `mark generation --closed` | 커밋, 마무리된 기록, `handoff.md` |
+| 세대 닫기 | `complete` | `mark generation --closed` | 커밋, 마무리된 기록, `life/handoff.md`의 내 절 |
 | milestone 자르기 | `carve-milestone` | `make milestone` | milestone 디렉토리 |
 | milestone 닫기 | `carve-milestone` + **사람** | `mark milestone --closed` | `archive/milestones/`로 이동, fitness 기록 |
 | 점검 | — | `doctor` | (없음. 보고만) |

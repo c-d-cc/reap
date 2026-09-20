@@ -17,7 +17,7 @@ reap ctx [--milestone <ms-id>] [--hook]
 
 `genome/` 전체, `environment/summary.md`, 그리고 **상태 줄**. 그것이 전부다.
 
-**milestone의 본문도 `memory/`도 `idea/`도 조립하지 않는다.** `milestone.md`도 `handoff.md`도 `tasks/`도 마찬가지다. 상태 줄이 그것들이 어디 있는지 말하고, **무엇을 읽을지는 agent가 정한다.**
+**milestone의 본문도 `memory/`도 `idea/`도 조립하지 않는다.** `milestone.md`도 `life/handoff.md`도 `tasks/`도 마찬가지다. 상태 줄이 그것들이 어디 있는지 말하고, **무엇을 읽을지는 agent가 정한다.**
 
 `--hook`은 같은 본문을 `{"hookSpecificOutput":{"hookEventName":"SessionStart","additionalContext": "..."}}`에 담아 낸다. 이스케이프는 문자열을 만든 쪽이 한다. 실을 것이 없거나 REAP 프로젝트가 아니면 아무것도 내지 않고 성공으로 끝난다.
 
@@ -29,24 +29,26 @@ reap ctx [--milestone <ms-id>] [--hook]
 
 **맥락 구성은 판단이기 때문이다.**
 
-이 세대에 `milestone.md` 전체가 필요한지 종료 조건만 보면 되는지, 어느 task 파일을 열어야 하는지, `handoff.md`까지 봐야 하는지는 매번 다르다. 고정 목록으로 못 박으면 어떤 세대에는 과하고 어떤 세대에는 모자라며, **과한 쪽은 조용하다** — 확정된 지식의 자리를 밀어낸 것을 아무도 세지 않는다.
+이 세대에 `milestone.md` 전체가 필요한지 종료 조건만 보면 되는지, 어느 task 파일을 열어야 하는지, `life/handoff.md`까지 봐야 하는지는 매번 다르다. 고정 목록으로 못 박으면 어떤 세대에는 과하고 어떤 세대에는 모자라며, **과한 쪽은 조용하다** — 확정된 지식의 자리를 밀어낸 것을 아무도 세지 않는다.
 
 원칙 2가 도구에 주는 것은 "확률에 의존하면 **안 되는** 것"이다. 훅 주입이 거기 해당하는 이유는 그것이 **agent가 개입할 수 없는 시점**이기 때문이다 — 첫 토큰 이전이므로 판단할 주체가 아직 없다. 작업 중의 읽기는 그렇지 않다. agent가 있고, 파일을 읽는 도구가 있고, 무엇이 필요한지 아는 상황이 있다.
 
-**그러므로 맥락을 조립하는 별도의 skill도 두지 않는다.** `evolve`가 이미 "무엇을 할 것인가"를 정하며 필요한 것을 읽고, `complete`가 닫으며 `handoff.md`를 다룬다. skill을 하나 더 만들면 "언제 그것을 부르는가"가 하나 더 생기고, skill이 늘수록 각각이 안 불릴 확률이 는다.
+**그러므로 맥락을 조립하는 별도의 skill도 두지 않는다.** `evolve`가 이미 "무엇을 할 것인가"를 정하며 필요한 것을 읽고, `complete`가 닫으며 `life/handoff.md`를 다룬다. skill을 하나 더 만들면 "언제 그것을 부르는가"가 하나 더 생기고, skill이 늘수록 각각이 안 불릴 확률이 는다.
 
 ### 상태 줄 — 자율에 필요한 지도
 
-agent가 `handoff.md`를 읽으려면 그것이 존재한다는 것과 어디 있는지를 알아야 한다. **그것은 판단이 아니라 사실이므로 도구가 준다.**
+agent가 `life/handoff.md`를 읽으려면 그것이 존재한다는 것과 어디 있는지를 알아야 한다. **그것은 판단이 아니라 사실이므로 도구가 준다.** 세션 키도 같은 이유로 여기서 나온다 — agent가 만들어낼 수 없는 사실이다.
 
 ```
 응답 언어: ko
 현재 milestone: ms-004 인증 세션 관리 개편 (focus, open)
   .reap/vision/milestones/ms-004-auth-session/
-    milestone.md · handoff.md
+    milestone.md
     tasks/1-1-storage.md · tasks/1-2-id-and-documents.md · tasks/1-3-ctx.md
 열린 세대: gen-0042-exec 세션 토큰 회전 — .reap/life/generations/gen-0042-exec-token-rotation.md
   2026-08-22T10:00:00Z 시작, 시작 커밋 1a2b3c4
+인계: .reap/life/handoff.md — 절 2개 (내 것 없음)
+이 세션: sess-9bf47826
 기억: .reap/vision/memory/lessons.md
 덜 단단한 것: .reap/idea/ (research 3 · freememo 1)
 구조: .reap/map.md
@@ -110,7 +112,7 @@ milestone이 없으면 그 묶음을 내지 않고, 열린 세대가 없으면 �
 | skill | 언제 | 무엇을 |
 |---|---|---|
 | `evolve` | 세대를 열 때 | **plan·exec·fix 중 무엇인지 먼저 판단하고**, 지금 열어도 되는지, exec이면 **어느 근거(milestone 또는 backlog 항목)로** 무엇을 제목으로 여는지 정한다. `reap make generation`을 호출하고, 기록 어휘를 참고해 의도를 적는다. **직접 할지 subagent에게 위임할지도 여기서 판단한다** — 위임하면 `references/delegate-brief.md`를 채워 준다. **그다음은 자율 구간이다** — 맥락을 조립하는 skill로 넘기지 않는다(위의 `왜 milestone 본문은 조립하지 않는가`) |
-| `complete` | 세대를 닫을 때 | **커밋 규칙 확인**(`git status --porcelain`, 시작 커밋 이후 커밋 유무), 커밋을 어떻게 나누는지, 기록 마무리, `handoff.md` 갱신, backlog 이월 판단, abort 여부. 확인이 끝나면 `reap mark generation --closed` |
+| `complete` | 세대를 닫을 때 | **커밋 규칙 확인**(`git status --porcelain`, 시작 커밋 이후 커밋 유무), 커밋을 어떻게 나누는지, 기록 마무리, `life/handoff.md`의 내 절 교체, backlog 이월 판단, abort 여부. 확인이 끝나면 `reap mark generation --closed` |
 | `flux` | 새 의도를 만들 때 — 기획·설계·화면·아직 자리 없는 것 | **flux를 열고 닫는다**(`make flux` · `mark flux --closed`). 유형을 정하고, 열린 flux 중 이어갈 것이 있는지 보고, plan source에 **쓴다** — 아래 **flux** 절의 여섯 판단. 산출물이 자리를 찾았는지 판단해 `carve-milestone`을 부르고 닫는다. `Dialogue`를 기록에 남긴다 |
 | `carve-milestone` | flux 안에서, 그리고 milestone을 닫을 때 | plan source를 읽고 실행 가능한 milestone으로 자른다. **자르기 전에 그 계획의 전제를 실제 흔적에 대보는 것**이 첫 동작이다. 크기 기준, 경계·종료조건·범위밖을 정하는 법, plan 인용법, fitness 질문을 자를 때 미리 쓰는 것. 그리고 **종료 절차 전체** — fitness → `mark milestone --closed`. `complete`는 이 절차를 옮겨 적지 않고 가리키기만 한다 |
 | `orchestrate` | 병렬 작업 시 | 역할 명명, 메시지 kind 관례, 언제 claim을 잡는지, barrier 배치, 조율자 패턴 |
