@@ -31,7 +31,7 @@ Just `life/generations/` (and `archive/generations/` once done). Not split into 
 
 - `vision/memory/` — just `lessons.md` (project-wide lessons). **A question closes, a lesson accumulates** — mixing them in one file keeps neither clean. Unresolved questions belong to `idea/research/`
 - `plan/` — `sources.yml` (registered plan sources), `conventions/<ps-id>-<slug>.md` (how to read and write to that source)
-- `life/handoff.md` — handoff to the next session, **one section per session**. `complete` replaces its own; a session that picks one up deletes it. Empty is the correct state
+- `life/handoff.md` — handoff to the next session, **one section per session**. Written when a session hands back to a person, and only if the next one would be stuck without it. A section that gets picked up is deleted. Empty is the correct state
 - `life/flux/` — open flux (`Question`·`Dialogue`·`Dead Ends`·`Outcome`). `mark flux --closed` moves a flux to `archive/flux/`
 - `vision/milestones/<ms-id>-<slug>/` — `milestone.md` (boundary and exit criteria), `tasks/<n>-<slug>.md` (task detail)
 - `life/generations/` — open generation records. `mark generation --closed` moves a record to `archive/generations/`

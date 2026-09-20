@@ -31,7 +31,7 @@ archive/   닫힌 것 — generations, milestones, backlog, flux, idea
 
 - `vision/memory/` — `lessons.md`(프로젝트 전역 교훈) 하나다. **물음은 닫히는 것이고 교훈은 쌓이는 것이라** 한 파일에 섞으면 어느 쪽도 정리되지 않는다. 결론 안 난 물음은 `idea/research/`가 갖는다
 - `plan/` — `sources.yml`(등록된 plan source), `conventions/<ps-id>-<slug>.md`(그 소스를 읽고 쓰는 법)
-- `life/handoff.md` — 다음 세션 인계, **세션마다 절 하나**. `complete`가 자기 절을 교체하고, 이어받은 세션이 그 절을 지운다. 비어 있는 것이 정상이다
+- `life/handoff.md` — 다음 세션 인계, **세션마다 절 하나**. 사람에게 돌려줄 때, 다음 세션이 모르면 곤란한 것이 있을 때만 쓴다. 이어받은 세션이 그 절을 지운다. 비어 있는 것이 정상이다
 - `life/flux/` — 열린 flux(`Question`·`Dialogue`·`Dead Ends`·`Outcome`). `mark flux --closed`가 `archive/flux/`로 옮긴다
 - `vision/milestones/<ms-id>-<slug>/` — `milestone.md`(경계와 종료 조건), `tasks/<n>-<slug>.md`(작업 상세)
 - `life/generations/` — 열린 세대 기록. `mark generation --closed`가 `archive/generations/`로 옮긴다

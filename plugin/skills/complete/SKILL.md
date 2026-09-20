@@ -1,6 +1,6 @@
 ---
 name: complete
-description: Use when finishing work in a REAP project - verifying the commit rule, writing the outcome, replacing this session's section in life/handoff.md, and closing the generation record. Trigger on "세대 닫기", "작업 마무리", "완료", or when substantive work in a repo containing .reap/ is done.
+description: Use when finishing work in a REAP project - verifying the commit rule, writing the outcome, closing the generation record, and - only when handing back to the person - leaving a handoff. Trigger on "세대 닫기", "작업 마무리", "완료", or when substantive work in a repo containing .reap/ is done.
 user-invocable: false
 ---
 
@@ -12,7 +12,7 @@ What's injected when a session opens is `genome/`, `environment/summary.md`, and
 
 Read the record of **the open generation** the status line reports. Without knowing what the generation was trying to do, the outcome can't be written. If there's no status line, call `reap ctx` directly.
 
-Your section of `life/handoff.md` is going to be **replaced**, so look at what's currently written first. The status line says whether you have one.
+If this session picked work up from `life/handoff.md`, look at what that section says — you may owe it a deletion at the end.
 
 ## Review first if this was a delegated generation
 
@@ -99,31 +99,11 @@ At minimum, leave **what was done and what's left.** Delete an in-progress plan 
 
 **Write down any folded approach.** The biggest value of this record is keeping the next session from walking the same path again.
 
-## Update the handoff
+## Update the milestone's plan items
 
-`.reap/life/handoff.md` is **one file for the whole project**, with a section per session. It isn't tied to a milestone, so **every generation writes here** — exec, fix, milestone or not. Your section holds **only what the next session needs.**
-
-Replace your own section. The heading carries three things:
-
-```markdown
-## <session key> · <this generation's id> · <closing time, ISO seconds>
-
-- How far things have gotten
-- Where to look first next
-- What's pending (unresolved questions, things waiting on a human's answer)
-```
-
-**The session key comes from the status line** (`This session: sess-…`) — don't invent one. If the status line isn't in this session, `reap ctx` prints it.
-
-**Delete a section you picked up from.** If this generation continued work another section described, that section is done — remove it. **Deleting is what consuming means**; marking it leaves a judgment for the next reader and turns the file into a log. Delete only what you actually took over, never someone else's open work.
-
-**If nothing is left to hand off, write no section** — and delete your old one if it's still there. An empty file is the correct state, and it's what tells the next session there's nothing waiting.
-
-**Don't put in what might be needed.** That belongs to `idea/freememo/`. If this distinction breaks down, handoff becomes a file nobody reads.
+For a generation that belongs to a milestone, update that milestone's plan items to match progress. Items can grow, split, or disappear.
 
 **This skill doesn't close a flux** — [flux](../flux/SKILL.md) closes it with `mark flux --closed` once the output has found its place.
-
-For a generation that belongs to a milestone, also update that milestone's plan items to match progress. Items can grow, split, or disappear.
 
 ## Move over what carries forward
 
@@ -143,7 +123,7 @@ closedAt: 2026-08-23T13:20:00Z
 endCommit: 9f8e7d6        # current HEAD
 ```
 
-**Closing moves the record.** `mark generation --closed` stamps these and moves the file from `life/generations/` to `archive/generations/` in the same step — `life/` holds only what's open. So finish the record **before** closing, and make the closing commit after (it carries the rename). Anything the next session needs is in `life/handoff.md`, never "in the last generation's record" — that record is findable by id, but nobody is pointed at it.
+**Closing moves the record.** `mark generation --closed` stamps these and moves the file from `life/generations/` to `archive/generations/` in the same step — `life/` holds only what's open. So finish the record **before** closing, and make the closing commit after (it carries the rename). Anything the next session needs goes in `life/handoff.md` when you stop, never "in the last generation's record" — that record is findable by id, but nobody is pointed at it.
 
 ## Has the milestone finished
 
@@ -161,7 +141,7 @@ Closing ends **one item**, not the run. If the person handed over several items 
 
 Watch what ends a turn. It isn't speaking to the person — it's **writing a message with no tool call in it.** Right after a close is the most natural place to write a summary, which is exactly why an autonomous run dies here.
 
-**The report is already on disk.** The record's `Outcome`, your replaced section of `life/handoff.md`, and whatever went to `backlog/` or `idea/` were all written above. Saying it again in prose is a fourth copy, and that copy costs the run.
+**The report is already on disk.** The record's `Outcome` and whatever went to `backlog/` or `idea/` were written above. Saying it again in prose is a fourth copy, and that copy costs the run.
 
 So while items remain, don't close with a summary addressed to the person. Open the next generation instead. The person can read the archived records; what they can't do is restart a run they didn't know had stopped.
 
@@ -170,6 +150,31 @@ So while items remain, don't close with a summary addressed to the person. Open 
 - nothing is left, or the milestone's exit criteria now read as met (**Has the milestone finished**, above)
 - the person set a stop condition and it's met
 - the commit rule failed, or something needs a human decision — those stop by design
+
+### Only once you're stopping: the handoff
+
+`.reap/life/handoff.md` is **one file for the whole project**, with a section per session. It answers one question — *where does the next session start* — so it gets written at the moment that question becomes real: **when you hand back to the person.** Not when a generation closes. A session can close several, and an autonomous run keeps going past them; anything written mid-run goes stale while that same session works on.
+
+So, having decided to stop, ask once more: **would the next session be stuck without this?**
+
+- **No → write nothing.** This is the common case. Finished work is in the records and the commits, and the status line already names the open milestone and flux. Copying that into the handoff buries whatever is genuinely unresolved
+- **Yes → replace your own section:**
+
+```markdown
+## <session key> · <the generation you just closed> · <time, ISO seconds>
+
+- How far things have gotten
+- Where to look first next
+- What's pending (unresolved questions, things waiting on a human's answer)
+```
+
+**The session key comes from the status line** (`This session: sess-…`) — don't invent one. If the status line isn't in this session, `reap ctx` prints it.
+
+**Delete a section you picked up from.** If this session continued work another section described, that section is done — remove it. **Deleting is what consuming means**; marking it leaves a judgment for the next reader and turns the file into a log. Delete only what you actually took over, never someone else's open work.
+
+**Delete your own stale section too** when there's nothing left to hand off. An empty file is the correct state, and it's what tells the next session nothing is waiting.
+
+**Don't put in what might be needed.** That belongs to `idea/freememo/`. If this distinction breaks down, handoff becomes a file nobody reads.
 
 **A project can write this obligation down.** `reap mark generation --closed` runs `.reap/hooks/gen.closed.*.md` and prints it right after the close message, in front of you. A project that wants "if anything is left, keep going" puts that sentence there — `reap make hook --event gen.closed --name <n>` creates the file.
 
