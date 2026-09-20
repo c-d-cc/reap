@@ -5,7 +5,8 @@ type: enhancement
 title: setup이 두 호스트를 건다 — codex 감지·설치·훅 등록과 setup --remove
 from: flux-0005-design
 createdAt: 2026-09-20T04:43:29Z
-status: open
+status: consumed
+consumedBy: gen-0121-exec
 ---
 
 `flux-0005-design`이 정한 것을 실행한다. 무엇이 참이어야 하는지는 `ps-4f2a91`의 `08-delivery.md`에 있고 여기 옮겨 적지 않는다 — **이 항목은 할 일의 목록이다.**

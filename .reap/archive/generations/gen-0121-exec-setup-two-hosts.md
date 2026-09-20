@@ -6,7 +6,9 @@ backlog: bk-90be10
 title: setup이 두 호스트를 건다 — codex 감지·설치·훅 등록과 --remove
 startedAt: 2026-09-20T04:45:03Z
 startCommit: c988114
-status: open
+status: closed
+closedAt: 2026-09-20T05:27:32Z
+endCommit: 5d319de
 ---
 ## Intent
 
@@ -68,3 +70,24 @@ $ codex exec -c model="gpt-5.6-luna" "세션 시작에 주입된 컨텍스트에
 - `CODEX_HOME`을 무시하고 `~/.codex`를 가정하고 있었다. codex 본체는 그 변수를 존중한다
 
 **남긴 것** — `setup`이 마켓플레이스를 등록한 뒤 플러그인 설치가 실패하면, `--remove`는 그 마켓플레이스를 지우지 않는다(우리 플러그인이 설치된 적 없으므로). 무엇을 등록했는지 기록하지 않는 한 "내가 넣은 마켓플레이스"와 "원래 있던 것"을 가를 수 없다. 남기는 쪽이 지우는 쪽보다 덜 해롭다고 보고 그렇게 뒀다.
+
+## Outcome
+
+`bk-90be10` 소비. `setup`이 PATH의 호스트를 감지해 있는 것 전부를 건다 — Claude Code와 Codex. 어댑터는 만들지 않았다.
+
+**코드**
+
+- `src/setup.ts` — `Host` 둘, 설치 동사만 갈린다(`install`/`add`). 마켓플레이스 등록·플러그인 설치·codex 훅 등록을 호스트마다 돌고, 이미 있으면 아무것도 실행하지 않는다. `--remove`는 `reap@ctod-plugins`가 **실제로 설치돼 있을 때만** 움직이고, 훅은 우리 항목만 걷어낸다. `CODEX_HOME`을 존중한다
+- `pluginInstalled`가 두 호스트를 본다 — Claude Code의 `enabledPlugins`와 codex `config.toml`의 `[plugins."reap@…"]`. 한쪽에만 있어도 설치된 것이다. codex만 쓰는 사람에게 `doctor`·`init`이 거짓 안내를 하지 않는다
+- `cli.ts`에 `--remove`, 메시지 카탈로그 en·ko 재구성(호스트·수동 명령·훅 경로를 파라미터로)
+- `plugin/skills/orchestrate/SKILL.md` — Claude Code를 요구한다고 본문에서 말한다
+
+**문서** — README 둘과 사이트 ko를 호스트 둘에 맞췄다. `README.ko.md`의 "셋은 agent만"(=11종)도 바로잡았다.
+
+**검증** — `bun test` 276 · `hook.test.sh` 5 · `typecheck` 통과. 격리 `CODEX_HOME`으로 실제 실행해 훅 파일과 출력을 확인했고, codex CLI 세션에서 상태 줄이 주입되는 것을 모델 응답으로 확인했다(Verified 절).
+
+**검증 생략** — 사람 지시(2026-09-20). 독립 검증 subagent를 띄웠으나 사람이 패스를 결정했다. 대신 격리 `CODEX_HOME`으로 실제 실행하고 codex CLI 세션에서 주입을 확인한 것이 Verified 절에 있다.
+
+**summary.md: 갱신** (structure — `setup.ts` 행 추가, 호스트 둘, 테스트 수). **genome: 갱신** (`application.md` — 호스트 둘. `invariants.md`는 사람 결정으로 `setup` 예외가 들어갔다).
+
+**남긴 것** — `bk-b53de4`(마켓플레이스가 플러그인 파일을 직접 싣는다). codex에서 skill이 아직 안 보이는 원인이 여기다. 막는 것은 이 리포가 아니라 `c-d-cc/plugins`의 구조와 push다.
