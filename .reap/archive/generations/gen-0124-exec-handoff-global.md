@@ -6,7 +6,9 @@ backlog: bk-d7ecf3
 title: 인계를 life/handoff.md 하나로 — 도구·skill·씨앗·문서
 startedAt: 2026-09-20T23:22:03Z
 startCommit: cf3c267
-status: open
+status: closed
+closedAt: 2026-09-20T23:37:24Z
+endCommit: 088a01db
 ---
 
 ## Intent
