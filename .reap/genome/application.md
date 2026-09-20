@@ -11,9 +11,11 @@ REAP는 AI와 사람이 소프트웨어를 함께 진화시키기 위한 **규�
 ## 만드는 것 둘
 
 - **바이너리** `reap` — TypeScript, Bun, `bun build --compile`. brew/curl로 배포
-- **플러그인** `plugin/` — skill과 SessionStart 훅. 클라이언트가 설치
+- **플러그인** `plugin/` — skill과 SessionStart 훅. 호스트가 설치한다
 
-설치 경로는 npm 하나다 — `npm i -g @c-d-cc/reap` 뒤 `reap setup`이 플러그인을 `claude` CLI로 설치한다(사람 결정 2026-09-05). 갱신은 따로다(npm·마켓플레이스). **한쪽만 있는 상태는 정상으로 전제하되 알린다** — 훅은 CLI 부재를, doctor·init은 플러그인 부재를.
+설치 경로는 npm 하나다 — `npm i -g @c-d-cc/reap` 뒤 `reap setup`이 플러그인 쪽을 대신한다(사람 결정 2026-09-05). 갱신은 따로다(npm·마켓플레이스). **한쪽만 있는 상태는 정상으로 전제하되 알린다** — 훅은 CLI 부재를, doctor·init은 플러그인 부재를.
+
+**호스트는 Claude Code와 Codex 둘이다**(사람 결정 2026-09-20). `setup`이 있는 것을 감지해 전부 건다. 어댑터는 없다 — codex가 `.claude-plugin/*`을 그대로 읽기 때문이다. 왜 그런지와 무엇이 갈리는지는 `ps-4f2a91`의 `08-delivery.md`에 있다.
 
 ## 작업 규약
 
