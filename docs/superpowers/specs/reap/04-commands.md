@@ -59,7 +59,7 @@ reap mark flux <flux-id> --aborted     # 기록 삭제
 reap mark milestone <ms-id> --focus
 reap mark milestone <ms-id> --closed        # closedAt, status; archive/milestones/로 이동
 reap mark backlog <bk-id> --consumed [--by <gen-id>]  # status와 consumedBy를 찍고 archive/backlog/로 옮긴다
-reap mark backlog <bk-id> --archived        # archive/backlog/로 이동 (status는 건드리지 않는다)
+reap mark backlog <bk-id> --archived        # archive/backlog/로 이동 (status는 건드리지 않는다. 이미 archive면 거부 — --consumed는 그 자리에서 멱등이다)
 reap mark idea <idea-id> --archived         # archive/idea/<kind>/로 이동 (status는 건드리지 않는다)
 ```
 

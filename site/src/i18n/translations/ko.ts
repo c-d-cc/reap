@@ -992,7 +992,7 @@ export const ko: Translations = {
   autonomousEvolution: {
     title: "자율 진화 흐름",
     breadcrumb: "시작하기",
-    description: "세션이 열리면 무슨 일이 일어나는가 — SessionStart 훅의 주입, evolve의 세 판단, 자율 구간, complete의 커밋 규칙, milestone의 fitness.",
+    description: "세션이 열리면 무슨 일이 일어나는가 — SessionStart 훅의 주입, evolve의 세 판단, 자율 구간, complete의 커밋 규칙, 닫은 다음, milestone의 fitness.",
     intro: "REAP는 흐름을 제어하지 않습니다. 세션이 열릴 때 무엇이 자동으로 일어나고, 그다음부터 어디까지가 agent의 판단이고 어디부터가 사람의 몫인지를 순서대로 봅니다.",
     sessionStartTitle: "세션이 열릴 때",
     sessionStartDesc: "REAP 프로젝트를 열면 SessionStart 훅이 reap ctx를 불러 맥락을 주입합니다. Claude Code에서는 플러그인이 그 훅을 선언하고, Codex에서는 reap setup이 사용자 훅 파일에 걸어 둡니다. 매 세션 실리는 것은 이 셋뿐입니다.",
@@ -1028,7 +1028,7 @@ export const ko: Translations = {
     commitRuleCode: `git status --porcelain        # 비어 있어야 한다
 git log <startCommit>..HEAD   # 새 커밋이 하나 이상 있어야 한다`,
     afterCloseTitle: "닫은 다음 — 남은 것이 있으면 이어서 합니다",
-    afterCloseDesc: "세대가 닫혔다는 것은 한 항목이 끝났다는 뜻이지 작업이 끝났다는 뜻이 아닙니다. 여러 항목을 맡기셨다면 남은 것이 있는 한 같은 세션이 곧바로 다음 evolve로 갑니다. agent의 턴은 사람에게 말해서 끝나는 것이 아니라 도구를 부르지 않고 메시지를 쓰는 순간 끝나기 때문에, 세대를 닫은 직후가 자율 실행이 가장 멈추기 쉬운 지점입니다. 보고는 이미 세대 기록과 handoff.md에 쓰여 있으므로 산문으로 다시 말할 이유가 없습니다.",
+    afterCloseDesc: "세대가 닫혔다는 것은 한 항목이 끝났다는 뜻이지 작업이 끝났다는 뜻이 아닙니다. 사람이 여러 항목을 맡겼다면 남은 것이 있는 한 같은 세션이 곧바로 다음 evolve로 갑니다. agent의 턴은 사람에게 말해서 끝나지 않습니다 — 도구를 부르지 않고 메시지를 쓰는 순간 끝납니다. 그래서 세대를 닫은 직후가 자율 실행이 가장 멈추기 쉬운 지점입니다. 보고는 이미 세대 기록과 handoff.md에 쓰여 있으므로 산문으로 다시 말할 이유가 없습니다.",
     afterCloseHookDesc: "이 의무를 프로젝트에 적어 두고 싶다면 gen.closed 훅이 그 자리입니다. reap mark generation --closed가 훅을 돌리고 본문이 닫힘 메시지 바로 뒤에 붙어 agent 앞에 찍힙니다. 무엇을 남은 것으로 볼지, 어디서 멈출지는 프로젝트마다 다르므로 REAP는 문장을 싣지 않고 자리만 줍니다.",
     afterCloseCode: "reap make hook --event gen.closed --name continue",
     fitnessTitle: "milestone이 끝나면 사람의 fitness",
@@ -2023,6 +2023,7 @@ reap setup              # 호스트를 감지해 마켓플레이스 등록과 �
       "plan 축의 단위 이름이 loop에서 flux로 바뀌었습니다. loop은 도는 것을 뜻하는데 이 단위가 하는 일은 계획을 키우는 것이라 이름이 일을 잘못 가리켰습니다. loop이라는 낱말은 다른 개념에 내줍니다. 하위 호환은 없습니다 — make loop·life/loops/·loop-NNNN-<유형> id가 그대로 사라집니다",
       "기록 파일 이름이 리눅스 NAME_MAX 안에 머뭅니다. slug는 UTF-8 80바이트에서 잘리고, 180바이트를 넘는 --slug는 거부되며, doctor가 .reap/ 안의 200바이트 넘는 이름을 결함으로 보고합니다 (#32)",
       "세대를 닫을 때 environment/summary.md와 같은 방식으로 genome 낡음도 점검하고, --type genome backlog를 그 자리에서 소비합니다. milestone을 닫을 때는 세대 하나가 아니라 milestone 전체에 대고 genome을 한 번 더 훑습니다 (#33)",
+      "세대를 닫아도 다음 세션이 이어받는다고 전제하지 않습니다. 남은 항목이 있으면 complete가 보고로 턴을 끝내지 않고 곧바로 evolve로 보내며, 그 의무를 gen.closed 훅에 적어 둘 수 있습니다 — 새로 저장하는 것은 없습니다 (#34)",
     ],
     removedTitle: "제거",
     removed: [

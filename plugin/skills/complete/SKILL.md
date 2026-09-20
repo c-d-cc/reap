@@ -155,7 +155,7 @@ So while items remain, don't close with a summary addressed to the person. Open 
 
 **Stop when stopping is right**, and say why:
 
-- nothing is left, or the milestone's exit criteria now read as met (the section above)
+- nothing is left, or the milestone's exit criteria now read as met (**Has the milestone finished**, above)
 - the person set a stop condition and it's met
 - the commit rule failed, or something needs a human decision — those stop by design
 

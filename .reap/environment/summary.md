@@ -9,6 +9,7 @@
   vision/               하려는 것 — memory · milestones
   life/                 하는 중 — generations · backlog · flux
   archive/              끝난 것 — generations · milestones · backlog · flux · idea
+  hooks/                gen.closed.continue.md — 닫은 뒤 남은 것이 있으면 이어서 간다
 docs/superpowers/specs/reap/   plan source ps-4f2a91 (설계 문서 10개)
 plugin/                 skill 10종(evolve·carve-milestone·complete·flux·interview·init·report-issue·orchestrate·help·migrate) + shared 어휘 문서 + SessionStart 훅
 src/

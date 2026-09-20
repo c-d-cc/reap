@@ -13,6 +13,7 @@ REAP is remade from a pipeline runner into a protocol and tool provider.
 - Six event hooks (`gen.made`, `gen.closed`, `milestone.made`, `milestone.closed`, `orch.claimed`, `orch.barrier.released`) plus `make hook`
 - Record file names stay within Linux NAME_MAX — slugs are capped at 80 UTF-8 bytes, a `--slug` over 180 bytes is refused, and `doctor` reports any name in `.reap/` over 200 bytes (#32)
 - Closing a generation checks `genome/` for staleness the same way it checks `environment/summary.md`, and it is where `--type genome` backlog gets consumed. Closing a milestone sweeps the genome once more, against the milestone rather than any one generation (#33)
+- Closing a generation no longer assumes the next session picks up. While items remain, `complete` sends you straight on to `evolve` instead of ending the turn with a summary, and a project can write that obligation into a `gen.closed` hook — nothing new is stored (#34)
 
 **Removed**
 
