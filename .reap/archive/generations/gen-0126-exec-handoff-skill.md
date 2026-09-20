@@ -6,7 +6,9 @@ backlog: bk-f6f1cb
 title: handoff skill 신설 — 사람이 세션을 끝낼 때 부른다
 startedAt: 2026-09-20T23:50:10Z
 startCommit: 1bfd9f4d
-status: open
+status: closed
+closedAt: 2026-09-20T23:54:32Z
+endCommit: d16a780c
 ---
 
 ## Intent
