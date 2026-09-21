@@ -5,7 +5,9 @@ type: fix
 title: 인계 절 수를 세션 키로 센다 — 본문의 ##를 절로 세지 않는다
 startedAt: 2026-09-21T00:05:41Z
 startCommit: 350d7167
-status: open
+status: closed
+closedAt: 2026-09-21T00:06:52Z
+endCommit: b02d417e
 ---
 
 ## Intent
