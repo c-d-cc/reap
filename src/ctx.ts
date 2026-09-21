@@ -2,7 +2,7 @@ import { existsSync, readFileSync, readdirSync, statSync } from "node:fs";
 import { basename, join, relative } from "node:path";
 import { findEntry, listEntries } from "./doc.ts";
 import type { Entry } from "./doc.ts";
-import { detectLayout, paths, readConfig, readSession, sessionKey } from "./store.ts";
+import { SESSION_KEY_PREFIX, detectLayout, paths, readConfig, readSession, sessionKey } from "./store.ts";
 import { t } from "./i18n.ts";
 
 /**
@@ -99,7 +99,10 @@ function status(root: string, asked?: string, env: NodeJS.ProcessEnv = process.e
 
 /**
  * 절 제목만 센다. 본문은 상태 줄에 싣지 않는다 — 지도이지 내용이 아니다.
- * **코드 펜스 안은 세지 않는다** — 형식 예시를 적은 절이 둘로 세어진다.
+ *
+ * 절 제목은 **세션 키로 시작하는 `## `**뿐이다. `## `면 전부 세면 본문에 소제목 하나만
+ * 써도 절이 하나 더 있는 것으로 집계된다. **코드 펜스 안도 세지 않는다** — 형식 예시를
+ * 적은 절이 둘로 세어진다.
  */
 function handoffSections(path: string): string[] {
   if (!existsSync(path)) return [];
@@ -107,7 +110,7 @@ function handoffSections(path: string): string[] {
   let fenced = false;
   for (const line of readFileSync(path, "utf8").split("\n")) {
     if (line.startsWith("```")) fenced = !fenced;
-    else if (!fenced && line.startsWith("## ")) headings.push(line);
+    else if (!fenced && line.startsWith("## ") && headingKey(line).startsWith(SESSION_KEY_PREFIX)) headings.push(line);
   }
   return headings;
 }

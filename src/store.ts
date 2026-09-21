@@ -290,8 +290,11 @@ function hostSessionId(env: NodeJS.ProcessEnv): string | undefined {
 export function sessionKey(root: string, env: NodeJS.ProcessEnv = process.env): string {
   const id = readSession(root, env).sessionId.replace(/-/g, "");
   const usable = id.length >= 8 ? id : fallbackSessionId(root).replace(/-/g, "");
-  return `sess-${usable.slice(0, 8)}`;
+  return `${SESSION_KEY_PREFIX}${usable.slice(0, 8)}`;
 }
+
+/** 인계 절 제목이 이것으로 시작한다. 세는 쪽과 쓰는 쪽이 같은 상수를 본다. */
+export const SESSION_KEY_PREFIX = "sess-";
 
 export function ensureDir(path: string): void {
   mkdirSync(path, { recursive: true });
