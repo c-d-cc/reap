@@ -21,10 +21,24 @@ Either way the procedure is the same, and it starts with a question that is allo
 
 ## First: is a handoff warranted
 
-**Ask: would the next session be stuck without this?**
+**Ask: is there something this session did that the next one has to know in order to carry the work on?**
 
-- **No → write nothing.** This is the common case, and it is a real answer, not a skipped step. Finished work is in the commits and the generation records; the status line already names the open milestone, the open generation and any open flux. Copying those into the handoff buries whatever is genuinely unresolved
+- **No → write nothing.** This is the common case, and it is a real answer, not a skipped step
 - **Yes → write your section**, below
+
+**Don't widen it to "would they be stuck".** Asked that way, everything qualifies — an answer you're waiting on, a decision not yet made, work still to do. Two things have to hold at once: it is **what this session did**, and it is needed **to carry on**.
+
+So these are not handoffs, however unresolved they feel:
+
+| Not a handoff | Where it already lives |
+|---|---|
+| An open milestone waiting on a review or fitness | The milestone being open says it; the status line names it |
+| An open flux, an open backlog item | Their own files, and the status line |
+| A question with no conclusion | `idea/research/` |
+| A lesson worth keeping | `vision/memory/lessons.md` |
+| A summary of what this session finished | The generation record's `Outcome`, and the commits |
+
+Put those here and the reader can no longer tell what is genuinely waiting to be picked up.
 
 Say which one you chose. A person who asked for a handoff and got silence can't tell whether it was judged unnecessary or forgotten.
 
@@ -54,7 +68,7 @@ Replace your own; never append a second one.
 
 **Don't put in what might be needed.** That belongs to `idea/freememo/`. Once that distinction breaks down the handoff becomes a file nobody reads.
 
-**Don't restate what the status line already says.** "ms-022 is the focus milestone" is not a handoff; "ms-022's last 10 pages are waiting on a human's review, and the reviewer should start from /docs/claim-barrier" is.
+**Don't restate what the status line already says.** "ms-022 is the focus milestone" is not a handoff. Neither is "ms-022 is waiting on a review" — the milestone being open already says that. What belongs here is what *this session* left mid-air: "the token refactor is half-applied — `src/auth/` is converted, `src/api/` still calls the old helper, and the tests for it are written but skipped.".
 
 ## If a generation is still open
 
